@@ -1,0 +1,10 @@
+name: sandbox-bot
+version: '1.0.0'
+main: it.coralmc.sandbox.SandboxBot
+api-version: '1.21'
+authors: [ MonkeyMoon104 ]
+description: Sanbox bot plugin
+
+commands:
+  bot:
+    description: Open bot settings GUI

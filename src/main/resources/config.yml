@@ -1,0 +1,23 @@
+default-armor:
+  helmet: NETHERITE
+  chestplate: NETHERITE
+  leggings: NETHERITE
+  boots: NETHERITE
+
+messages:
+  set-type: "Set type = %type%"
+  set-follow: "Set follow = %type%"
+  spawn-bot: "&aBot spawned with selected armor!"
+  follow-toggle-name: "&bToggle Follow"
+  dead-bot-msg: "&aYou have killed the bot!"
+
+bot:
+  name: "CrystalBot"
+
+gui:
+  follow-button:
+    name: "&bToggle Follow"
+    material: "LEAD"
+  spawn-button:
+    name: "&aSpawn Bot"
+    material: "SPAWNER"
