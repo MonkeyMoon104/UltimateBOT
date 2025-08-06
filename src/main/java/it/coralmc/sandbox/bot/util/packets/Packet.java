@@ -1,6 +1,7 @@
-package it.coralmc.sandbox.bot.util;
+package it.coralmc.sandbox.bot.util.packets;
 
 import com.mojang.authlib.GameProfile;
+import it.coralmc.sandbox.bot.util.TrainingBot;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;

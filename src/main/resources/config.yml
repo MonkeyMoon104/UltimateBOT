@@ -10,6 +10,7 @@ messages:
   spawn-bot: "&aBot spawned with selected armor!"
   follow-toggle-name: "&bToggle Follow"
   dead-bot-msg: "&aYou have killed the bot!"
+  despawn-bot: "&cBot despawned!"
 
 bot:
   name: "CrystalBot"
@@ -22,3 +23,9 @@ gui:
   spawn-button:
     name: "&aSpawn Bot"
     material: "SPAWNER"
+  despawn-button:
+    name: "&cDespawn Bot"
+    material: "BARRIER"
+  save-button:
+    name: "&aSave Changes"
+    material: "GREEN_WOOL"

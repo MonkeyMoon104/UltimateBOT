@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.utils;
+package it.coralmc.sandbox.utils.armor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

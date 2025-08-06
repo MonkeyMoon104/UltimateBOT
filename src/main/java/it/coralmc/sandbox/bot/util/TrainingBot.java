@@ -2,8 +2,9 @@ package it.coralmc.sandbox.bot.util;
 
 import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxBot;
+import it.coralmc.sandbox.bot.BotSpawner;
 import it.coralmc.sandbox.bot.ai.BotAI;
-import it.coralmc.sandbox.utils.ChatColorUtils;
+import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -53,6 +54,7 @@ public class TrainingBot extends Player {
         }
 
         this.discard();
+        BotSpawner.removeBot(this.getUUID());
     }
 
     @Override

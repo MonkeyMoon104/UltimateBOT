@@ -1,12 +1,13 @@
 package it.coralmc.sandbox.bot;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.datafixers.util.Pair;
 import it.coralmc.sandbox.SandboxBot;
-import it.coralmc.sandbox.bot.util.Packet;
-import it.coralmc.sandbox.bot.util.TrainingBot;
+import it.coralmc.sandbox.bot.util.*;
+import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
+import it.coralmc.sandbox.bot.util.equipment.manager.BotEquipmentManager;
+import it.coralmc.sandbox.bot.util.packets.Packet;
+import it.coralmc.sandbox.bot.util.registry.BotRegistry;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
@@ -29,8 +30,6 @@ import java.util.*;
 
 public class BotSpawner {
 
-    private static final Map<UUID, UUID> spawnedBots = new HashMap<>();
-
     public static void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap, boolean follow) {
         MinecraftServer minecraftServer = ((CraftServer) Bukkit.getServer()).getServer();
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
@@ -41,73 +40,78 @@ public class BotSpawner {
         String botName = config.getString("bot.name");
 
         GameProfile profile = new GameProfile(botUUID, botName);
-        ClientInformation clientInfo = new ClientInformation(
+        ClientInformation clientInfo = createClientInformation();
+
+        Location loc = viewer.getLocation();
+        TrainingBot bot = new TrainingBot(
+                world,
+                BlockPos.containing(loc.getX(), loc.getY(), loc.getZ()),
+                0,
+                profile,
+                viewer,
+                follow
+        );
+
+        world.addFreshEntity(bot);
+        setupBotInventory(bot);
+        BotEquipmentManager.applyEquipment(bot, armorMap);
+
+        broadcastBotToPlayers(bot, armorMap);
+        BotRegistry.registerBot(viewer.getUniqueId(), botUUID);
+    }
+
+    public static boolean isBotSpawned(UUID playerUUID) {
+        return BotRegistry.isBotSpawned(playerUUID);
+    }
+
+    public static void despawnBot(Player owner) {
+        UUID ownerUUID = owner.getUniqueId();
+        UUID botUUID = BotRegistry.getBotUUID(ownerUUID);
+        if (botUUID == null) return;
+
+        ServerPlayer handle = ((CraftPlayer) owner).getHandle();
+        ServerLevel world = handle.serverLevel();
+
+        if (BotEntityFinder.removeEntity(world, botUUID)) {
+            BotRegistry.removeBot(ownerUUID);
+        }
+    }
+
+    public static Map<org.bukkit.inventory.EquipmentSlot, Material> getBotArmor(UUID playerUUID) {
+        return BotEquipmentManager.getBotArmor(playerUUID);
+    }
+
+    public static void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap) {
+        BotEquipmentManager.updateBotArmor(ownerUUID, armorMap);
+    }
+
+    public static void removeBot(UUID botUUID) {
+        BotRegistry.removeBotByUUID(botUUID);
+    }
+
+
+    private static ClientInformation createClientInformation() {
+        return new ClientInformation(
                 "it_IT", 10, ChatVisiblity.FULL, true,
                 0, HumanoidArm.RIGHT, false, true, ParticleStatus.ALL
         );
+    }
 
-        Location loc = viewer.getLocation();
-
-        TrainingBot bot = new TrainingBot(world, BlockPos.containing(loc.getX(), loc.getY(), loc.getZ()), 0, profile, viewer, follow);
-        world.addFreshEntity(bot);
-
-        ItemStack totem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING));
+    private static void setupBotInventory(TrainingBot bot) {
+        ItemStack totem = CraftItemStack.asNMSCopy(
+                new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING)
+        );
 
         bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
+        BotEquipmentManager.fillInventory(bot, totem);
+    }
 
-        int filled = 0;
-        for (int i = 0; i < bot.getInventory().items.size(); i++) {
-            ItemStack current = bot.getInventory().items.get(i);
-            if (current == null || current.isEmpty()) {
-                bot.getInventory().items.set(i, totem.copy());
-                filled++;
-            }
-        }
-
-        for (var entry : armorMap.entrySet()) {
-            EquipmentSlot slot = switch (entry.getKey()) {
-                case HEAD -> EquipmentSlot.HEAD;
-                case CHEST -> EquipmentSlot.CHEST;
-                case LEGS -> EquipmentSlot.LEGS;
-                case FEET -> EquipmentSlot.FEET;
-                default -> null;
-            };
-            if (slot != null) {
-                ItemStack nmsItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(entry.getValue()));
-                bot.setItemSlot(slot, nmsItem);
-                bot.inventoryMenu.broadcastChanges();
-            }
-        }
-
+    private static void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap) {
         for (Player online : Bukkit.getOnlinePlayers()) {
-            ServerPlayer handleb = ((CraftPlayer) online).getHandle();
-
             Packet.sendAddPlayerPacket(online, bot);
             Packet.sendSpawnPlayerPacket(online, bot);
-
-            List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
-            for (var entry : armorMap.entrySet()) {
-                EquipmentSlot slot = switch (entry.getKey()) {
-                    case HEAD -> EquipmentSlot.HEAD;
-                    case CHEST -> EquipmentSlot.CHEST;
-                    case LEGS -> EquipmentSlot.LEGS;
-                    case FEET -> EquipmentSlot.FEET;
-                    default -> null;
-                };
-                if (slot != null) {
-                    ItemStack nmsItem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(entry.getValue()));
-                    equipmentList.add(Pair.of(slot, nmsItem));
-                }
-            }
-
-            if (!equipmentList.isEmpty()) {
-                ClientboundSetEquipmentPacket equipmentPacket = new ClientboundSetEquipmentPacket(
-                        bot.getId(), equipmentList
-                );
-                handleb.connection.send(equipmentPacket);
-            }
         }
 
-        spawnedBots.put(viewer.getUniqueId(), botUUID);
+        BotEquipmentManager.broadcastEquipment(bot, armorMap);
     }
 }

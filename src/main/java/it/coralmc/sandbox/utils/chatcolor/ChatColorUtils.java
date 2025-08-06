@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.utils;
+package it.coralmc.sandbox.utils.chatcolor;
 
 import org.bukkit.ChatColor;
 

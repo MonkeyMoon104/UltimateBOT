@@ -2,7 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxBot;
 import it.coralmc.sandbox.bot.util.TrainingBot;
-import it.coralmc.sandbox.utils.ChatColorUtils;
+import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;

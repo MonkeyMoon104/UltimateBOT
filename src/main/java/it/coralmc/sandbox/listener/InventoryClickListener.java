@@ -3,27 +3,22 @@ package it.coralmc.sandbox.listener;
 import it.coralmc.sandbox.SandboxBot;
 import it.coralmc.sandbox.bot.BotSpawner;
 import it.coralmc.sandbox.gui.BotSettingsGUI;
-import it.coralmc.sandbox.utils.ArmorCycle;
-import it.coralmc.sandbox.utils.ChatColorUtils;
-import org.bukkit.Bukkit;
+import it.coralmc.sandbox.utils.armor.ArmorCycle;
+import it.coralmc.sandbox.utils.armor.InventoryArmorExtractor;
+import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
+import it.coralmc.sandbox.utils.builder.ItemBuilder;
+import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
+import it.coralmc.sandbox.utils.gui.GUISlotHandler;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class InventoryClickListener implements Listener {
-
-    private final Map<UUID, Map<EquipmentSlot, Material>> playerArmorSelections = new HashMap<>();
-    private final Map<UUID, Boolean> playerFollowSetting = new HashMap<>();
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
@@ -37,66 +32,86 @@ public class InventoryClickListener implements Listener {
 
         var config = SandboxBot.getInstance().getConfig();
 
-        playerArmorSelections.putIfAbsent(player.getUniqueId(), ArmorCycle.getDefaultArmorFromConfig(config));
-        playerFollowSetting.putIfAbsent(player.getUniqueId(), false);
+        PlayerArmorManager.initializePlayerDefaults(
+                player.getUniqueId(),
+                ArmorCycle.getDefaultArmorFromConfig(config)
+        );
 
-        Map<EquipmentSlot, Material> selected = playerArmorSelections.get(player.getUniqueId());
-        boolean follow = playerFollowSetting.get(player.getUniqueId());
+        Map<EquipmentSlot, Material> selected = PlayerArmorManager.getPlayerArmorSelection(player.getUniqueId());
+        boolean follow = PlayerArmorManager.getPlayerFollowSetting(player.getUniqueId());
 
-        if (slot >= 0 && slot <= 3) {
-            EquipmentSlot armorSlot = switch (slot) {
-                case 0 -> EquipmentSlot.HEAD;
-                case 1 -> EquipmentSlot.CHEST;
-                case 2 -> EquipmentSlot.LEGS;
-                case 3 -> EquipmentSlot.FEET;
-                default -> null;
-            };
-            if (armorSlot == null) return;
-
-            Material old = selected.getOrDefault(armorSlot, Material.AIR);
-            Material next = ArmorCycle.getNextArmor(old, armorSlot);
-
-            selected.put(armorSlot, next);
-
-            ItemStack newItem = new ItemStack(next);
-            ItemMeta meta = newItem.getItemMeta();
-
-            String loreTemplate = config.getString("messages.set-type");
-            String lore = loreTemplate.replace("%type%", next.name().replace("_" + armorSlot.name(), ""));
-            meta.setLore(Collections.singletonList(ChatColorUtils.translate(lore)));
-
-            newItem.setItemMeta(meta);
-            e.getInventory().setItem(slot, newItem);
+        if (GUISlotHandler.isArmorSlot(slot)) {
+            handleArmorSlotClick(e, player, slot, selected, config);
         }
-
-        else if (slot == 7) {
-            follow = !follow;
-            playerFollowSetting.put(player.getUniqueId(), follow);
-
-            ItemStack followBtn = new ItemStack(Material.LEAD);
-            ItemMeta meta = followBtn.getItemMeta();
-
-            String displayName = config.getString("messages.follow-toggle-name");
-            String loreTemplate = config.getString("messages.set-follow");
-            String lore = loreTemplate.replace("%type%", String.valueOf(follow));
-
-            meta.setDisplayName(ChatColorUtils.translate(displayName));
-            meta.setLore(Collections.singletonList(ChatColorUtils.translate(lore)));
-            followBtn.setItemMeta(meta);
-
-            e.getInventory().setItem(7, followBtn);
+        else if (GUISlotHandler.isFollowButton(slot)) {
+            handleFollowButtonClick(e, player, config);
         }
+        else if (GUISlotHandler.isSpawnButton(slot)) {
+            handleSpawnButtonClick(e, player, follow, config);
+        }
+        else if (GUISlotHandler.isSaveButton(slot)) {
+            handleSaveButtonClick(player, selected, config);
+        }
+    }
 
-        else if (slot == 8) {
+    private void handleArmorSlotClick(InventoryClickEvent e, Player player, int slot,
+                                      Map<EquipmentSlot, Material> selected,
+                                      org.bukkit.configuration.file.FileConfiguration config) {
+
+        EquipmentSlot armorSlot = GUISlotHandler.getEquipmentSlotFromGUISlot(slot);
+        if (armorSlot == null) return;
+
+        Material old = selected.getOrDefault(armorSlot, Material.AIR);
+        Material next = ArmorCycle.getNextArmor(old, armorSlot);
+
+        PlayerArmorManager.updateArmorPiece(player.getUniqueId(), armorSlot, next);
+        e.getInventory().setItem(slot, ItemBuilder.createArmorItem(next, armorSlot, config));
+    }
+
+    private void handleFollowButtonClick(InventoryClickEvent e, Player player,
+                                         org.bukkit.configuration.file.FileConfiguration config) {
+
+        boolean currentFollow = PlayerArmorManager.getPlayerFollowSetting(player.getUniqueId());
+        boolean newFollow = !currentFollow;
+
+        PlayerArmorManager.setPlayerFollowSetting(player.getUniqueId(), newFollow);
+        e.getInventory().setItem(7, ItemBuilder.createFollowButton(newFollow, config));
+    }
+
+    private void handleSpawnButtonClick(InventoryClickEvent e, Player player, boolean follow,
+                                        org.bukkit.configuration.file.FileConfiguration config) {
+
+        if (BotSpawner.isBotSpawned(player.getUniqueId())) {
+            BotSpawner.despawnBot(player);
             player.closeInventory();
 
-            BotSpawner.spawnFakeBot(player, selected, follow);
+            String despawnMsg = config.getString("messages.despawn-bot", "&cBot despawned!");
+            player.sendMessage(ChatColorUtils.translate(despawnMsg));
+        } else {
+            Map<EquipmentSlot, Material> selectedFromGUI =
+                    InventoryArmorExtractor.extractArmorFromGUI(e.getInventory());
 
-            String spawnMsg = config.getString("messages.spawn-bot");
+            PlayerArmorManager.setPlayerArmorSelection(player.getUniqueId(), selectedFromGUI);
+
+            player.closeInventory();
+            BotSpawner.spawnFakeBot(player, selectedFromGUI, follow);
+
+            String spawnMsg = config.getString("messages.spawn-bot", "&aBot spawned!");
             player.sendMessage(ChatColorUtils.translate(spawnMsg));
 
-            playerArmorSelections.remove(player.getUniqueId());
-            playerFollowSetting.remove(player.getUniqueId());
+            PlayerArmorManager.removePlayerSettings(player.getUniqueId());
+        }
+    }
+
+    private void handleSaveButtonClick(Player player, Map<EquipmentSlot, Material> selected,
+                                       org.bukkit.configuration.file.FileConfiguration config) {
+
+        if (BotSpawner.isBotSpawned(player.getUniqueId())) {
+            BotSpawner.updateBotArmor(player.getUniqueId(), selected);
+            player.closeInventory();
+
+            String saveMsg = config.getString("messages.save-changes", "&aChanges saved!");
+            player.sendMessage(ChatColorUtils.translate(saveMsg));
         }
     }
 }
