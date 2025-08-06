@@ -1,7 +1,13 @@
 package it.coralmc.sandbox.bot.ai;
 
+import it.coralmc.sandbox.SandboxBot;
+import it.coralmc.sandbox.bot.util.TrainingBot;
+import it.coralmc.sandbox.utils.ChatColorUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
@@ -12,6 +18,8 @@ public class BotAI {
     private int knockbackCooldown = 0;
     private double[] diversionDirection = null;
     private int diversionTicks = 0;
+    private boolean warnedOutOfTotems = false;
+
 
     public BotAI(Player bot) {
         this.bot = bot;
@@ -128,4 +136,35 @@ public class BotAI {
 
         return null;
     }
+
+    public void manageTotem() {
+        ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
+
+        if (offhand == null || offhand.isEmpty() || !offhand.is(Items.TOTEM_OF_UNDYING)) {
+            for (int i = 0; i < bot.getInventory().items.size(); i++) {
+                ItemStack stack = bot.getInventory().items.get(i);
+                if (stack != null && !stack.isEmpty() && stack.is(Items.TOTEM_OF_UNDYING)) {
+                    bot.getInventory().items.set(i, ItemStack.EMPTY);
+                    bot.setItemSlot(EquipmentSlot.OFFHAND, stack);
+                    warnedOutOfTotems = false;
+                    return;
+                }
+            }
+
+            if (!warnedOutOfTotems && bot instanceof TrainingBot trainingBot) {
+                var player = trainingBot.getTargetPlayer();
+                if (player != null && player.isOnline()) {
+                    String msg = SandboxBot.getInstance().getConfig()
+                            .getString("bot.totem-finish", "[%botname%] Running out of totems");
+
+                    String botName = SandboxBot.getInstance().getConfig().getString("bot.name", "CrystalBot");
+                    msg = msg.replace("%botname%", botName);
+
+                    player.sendMessage(ChatColorUtils.translate(msg));
+                }
+                warnedOutOfTotems = true;
+            }
+        }
+    }
+
 }

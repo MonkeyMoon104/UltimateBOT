@@ -13,6 +13,7 @@ messages:
 
 bot:
   name: "CrystalBot"
+  totem-finish: "[%botname%] Running out of totems"
 
 gui:
   follow-button:

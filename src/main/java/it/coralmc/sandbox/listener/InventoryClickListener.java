@@ -90,7 +90,6 @@ public class InventoryClickListener implements Listener {
         else if (slot == 8) {
             player.closeInventory();
 
-            Bukkit.getLogger().info("Player " + player.getName() + " is spawning bot with armor: " + selected + " and follow=" + follow);
             BotSpawner.spawnFakeBot(player, selected, follow);
 
             String spawnMsg = config.getString("messages.spawn-bot");

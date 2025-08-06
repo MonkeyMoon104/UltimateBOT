@@ -51,8 +51,20 @@ public class BotSpawner {
         TrainingBot bot = new TrainingBot(world, BlockPos.containing(loc.getX(), loc.getY(), loc.getZ()), 0, profile, viewer, follow);
         world.addFreshEntity(bot);
 
+        ItemStack totem = CraftItemStack.asNMSCopy(new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING));
+
+        bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
+
+        int filled = 0;
+        for (int i = 0; i < bot.getInventory().items.size(); i++) {
+            ItemStack current = bot.getInventory().items.get(i);
+            if (current == null || current.isEmpty()) {
+                bot.getInventory().items.set(i, totem.copy());
+                filled++;
+            }
+        }
+
         for (var entry : armorMap.entrySet()) {
-            Bukkit.getLogger().info("Armor map size: " + (armorMap == null ? "null" : armorMap.size()));
             EquipmentSlot slot = switch (entry.getKey()) {
                 case HEAD -> EquipmentSlot.HEAD;
                 case CHEST -> EquipmentSlot.CHEST;
