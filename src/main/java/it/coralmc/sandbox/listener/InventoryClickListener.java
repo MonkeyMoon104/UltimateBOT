@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class InventoryClickListener implements Listener {
 
@@ -50,8 +51,12 @@ public class InventoryClickListener implements Listener {
             handleSpawnButtonClick(e, player, follow, config);
         }
         else if (GUISlotHandler.isSaveButton(slot)) {
-            handleSaveButtonClick(player, selected, config);
+            handleSaveButtonClick(player, config);
         }
+        else if (GUISlotHandler.isTotemButton(slot)) {
+            handleTotemButtonClick(e, player);
+        }
+
     }
 
     private void handleArmorSlotClick(InventoryClickEvent e, Player player, int slot,
@@ -94,8 +99,9 @@ public class InventoryClickListener implements Listener {
             PlayerArmorManager.setPlayerArmorSelection(player.getUniqueId(), selectedFromGUI);
 
             player.closeInventory();
-            BotSpawner.spawnFakeBot(player, selectedFromGUI, follow);
+            int totemCount = PlayerArmorManager.getPlayerTotemCount(player.getUniqueId());
 
+            BotSpawner.spawnFakeBot(player, selectedFromGUI, follow, totemCount);
             String spawnMsg = config.getString("messages.spawn-bot", "&aBot spawned!");
             player.sendMessage(ChatColorUtils.translate(spawnMsg));
 
@@ -103,15 +109,46 @@ public class InventoryClickListener implements Listener {
         }
     }
 
-    private void handleSaveButtonClick(Player player, Map<EquipmentSlot, Material> selected,
+    private void handleSaveButtonClick(Player player,
                                        org.bukkit.configuration.file.FileConfiguration config) {
+        UUID playerUUID = player.getUniqueId();
 
-        if (BotSpawner.isBotSpawned(player.getUniqueId())) {
-            BotSpawner.updateBotArmor(player.getUniqueId(), selected);
+        if (BotSpawner.isBotSpawned(playerUUID)) {
+
+            Map<EquipmentSlot, Material> selectedFromGUI =
+                    InventoryArmorExtractor.extractArmorFromGUI(player.getOpenInventory().getTopInventory());
+
+            boolean follow = PlayerArmorManager.getPlayerFollowSetting(playerUUID);
+            int totemCount = PlayerArmorManager.getPlayerTotemCount(playerUUID);
+
+            BotSpawner.updateBotArmor(playerUUID, selectedFromGUI);
+            BotSpawner.updateBotFollow(playerUUID, follow);
+            BotSpawner.updateBotTotemCount(playerUUID, totemCount);
             player.closeInventory();
 
             String saveMsg = config.getString("messages.save-changes", "&aChanges saved!");
             player.sendMessage(ChatColorUtils.translate(saveMsg));
         }
     }
+
+    private void handleTotemButtonClick(InventoryClickEvent e, Player player) {
+        UUID uuid = player.getUniqueId();
+        int current = PlayerArmorManager.getPlayerTotemCount(uuid);
+
+        boolean leftClick = e.isLeftClick();
+        boolean rightClick = e.isRightClick();
+
+        if (leftClick && current < 37) {
+            current++;
+        } else if (rightClick && current > -1) {
+            current--;
+        }
+
+        if (current < -1) current = -1;
+        if (current > 37) current = 37;
+
+        PlayerArmorManager.setPlayerTotemCount(uuid, current);
+        e.getInventory().setItem(11, ItemBuilder.createTotemButton(current));
+    }
+
 }

@@ -43,6 +43,21 @@ public class ItemBuilder {
         return followBtn;
     }
 
+    public static ItemStack createTotemButton(int totemCount) {
+        Material material = Material.TOTEM_OF_UNDYING;
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+
+        meta.setDisplayName(ChatColorUtils.translate("&eTotem Count"));
+
+        String lore = totemCount == -1 ? "&7Unlimited Totems"
+                : "&7Totems: &a" + totemCount;
+        meta.setLore(Collections.singletonList(ChatColorUtils.translate(lore)));
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
     public static ItemStack createItem(Material material) {
         return new ItemStack(material);
     }

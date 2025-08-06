@@ -22,6 +22,9 @@ public class TrainingBot extends Player {
     private boolean follow;
     private final BotAI botAI;
 
+    private int totemCount = -1;
+    private boolean hadTotemLastTick = false;
+
     public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile, org.bukkit.entity.Player targetPlayer, boolean follow) {
         super(level, pos, yRot, gameProfile);
         this.targetPlayer = targetPlayer;
@@ -33,6 +36,15 @@ public class TrainingBot extends Player {
     @Override
     public void tick() {
         super.tick();
+
+        ItemStack offhand = this.getItemBySlot(EquipmentSlot.OFFHAND);
+        boolean hasTotemNow = offhand != null && !offhand.isEmpty() && offhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+
+        if (hadTotemLastTick && !hasTotemNow) {
+            this.botAI.onTotemUsed();
+        }
+
+        hadTotemLastTick = hasTotemNow;
 
         botAI.manageTotem();
 
@@ -74,10 +86,32 @@ public class TrainingBot extends Player {
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
+        ItemStack totemBefore = this.getItemBySlot(EquipmentSlot.OFFHAND);
+        boolean hadTotem = totemBefore != null && !totemBefore.isEmpty() && totemBefore.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+
         boolean result = super.actuallyHurt(level, source, amount, event);
 
         if (result) {
             this.botAI.setKnockbackCooldown(20);
+
+            if (hadTotem) {
+                ItemStack totemAfter = this.getItemBySlot(EquipmentSlot.OFFHAND);
+                boolean hasTotemNow = totemAfter != null && !totemAfter.isEmpty() && totemAfter.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+
+                if (!hasTotemNow) {
+                    this.botAI.onTotemUsed();
+                }
+            }
+
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                    ItemStack armorPiece = this.getItemBySlot(slot);
+                    if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
+                        armorPiece.setDamageValue(0);
+                        this.setItemSlot(slot, armorPiece);
+                    }
+                }
+            }
         }
 
         return result;
@@ -136,5 +170,21 @@ public class TrainingBot extends Player {
 
     public BotAI getBotAI() {
         return this.botAI;
+    }
+
+    public boolean isFollow() {
+        return follow;
+    }
+
+    public void setFollow(boolean follow) {
+        this.follow = follow;
+    }
+
+    public void setTotemCount(int count) {
+        this.totemCount = count;
+    }
+
+    public int getTotemCount() {
+        return this.totemCount;
     }
 }

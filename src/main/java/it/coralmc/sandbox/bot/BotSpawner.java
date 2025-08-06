@@ -30,7 +30,7 @@ import java.util.*;
 
 public class BotSpawner {
 
-    public static void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap, boolean follow) {
+    public static void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap, boolean follow, int totem) {
         MinecraftServer minecraftServer = ((CraftServer) Bukkit.getServer()).getServer();
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
         ServerLevel world = handle.serverLevel().getLevel();
@@ -52,8 +52,10 @@ public class BotSpawner {
                 follow
         );
 
+        bot.setTotemCount(totem);
+
         world.addFreshEntity(bot);
-        setupBotInventory(bot);
+        setupBotInventory(bot, totem);
         BotEquipmentManager.applyEquipment(bot, armorMap);
 
         broadcastBotToPlayers(bot, armorMap);
@@ -97,14 +99,35 @@ public class BotSpawner {
         );
     }
 
-    private static void setupBotInventory(TrainingBot bot) {
-        ItemStack totem = CraftItemStack.asNMSCopy(
-                new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING)
-        );
-
-        bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
-        BotEquipmentManager.fillInventory(bot, totem);
+    private static void setupBotInventory(TrainingBot bot, int totemCount) {
+        if (totemCount == -1) {
+            org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
+            ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
+            bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
+        } else if (totemCount > 0) {
+            org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
+            ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
+            bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
+        } else {
+            bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+        }
     }
+
+    public static void updateBotTotemCount(UUID ownerUUID, int totemCount) {
+        TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(ownerUUID);
+        if (bot != null) {
+            bot.setTotemCount(totemCount);
+
+            if (totemCount == -1 || totemCount > 0) {
+                org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
+                ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
+                bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
+            } else {
+                bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+            }
+        }
+    }
+
 
     private static void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, Material> armorMap) {
         for (Player online : Bukkit.getOnlinePlayers()) {
@@ -114,4 +137,12 @@ public class BotSpawner {
 
         BotEquipmentManager.broadcastEquipment(bot, armorMap);
     }
+
+    public static void updateBotFollow(UUID ownerUUID, boolean follow) {
+        TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(ownerUUID);
+        if (bot != null) {
+            bot.setFollow(follow);
+        }
+    }
+
 }

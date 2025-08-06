@@ -43,6 +43,11 @@ public class GUISlotHandler {
         return guiSlot == 9;
     }
 
+    public static boolean isTotemButton(int guiSlot) {
+        return guiSlot == 11;
+    }
+
+
     public static Map<EquipmentSlot, Integer> createArmorSlotMapping() {
         Map<EquipmentSlot, Integer> mapping = new EnumMap<>(EquipmentSlot.class);
         mapping.put(EquipmentSlot.HEAD, 0);

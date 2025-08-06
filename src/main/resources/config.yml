@@ -1,9 +1,3 @@
-default-armor:
-  helmet: NETHERITE
-  chestplate: NETHERITE
-  leggings: NETHERITE
-  boots: NETHERITE
-
 messages:
   set-type: "Set type = %type%"
   set-follow: "Set follow = %type%"
@@ -15,8 +9,15 @@ messages:
 bot:
   name: "CrystalBot"
   totem-finish: "[%botname%] Running out of totems"
+  default-totem-count: -1
 
 gui:
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
   follow-button:
     name: "&bToggle Follow"
     material: "LEAD"

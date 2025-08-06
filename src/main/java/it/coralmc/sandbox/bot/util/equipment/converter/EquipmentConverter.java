@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.util.equipment;
+package it.coralmc.sandbox.bot.util.equipment.converter;
 
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.EquipmentSlot;

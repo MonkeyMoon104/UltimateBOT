@@ -2,7 +2,6 @@ package it.coralmc.sandbox.gui.builder.armor;
 
 import it.coralmc.sandbox.SandboxBot;
 import it.coralmc.sandbox.bot.BotSpawner;
-import it.coralmc.sandbox.listener.InventoryClickListener;
 import it.coralmc.sandbox.utils.armor.ArmorCycle;
 import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
 import org.bukkit.Bukkit;
@@ -46,9 +45,19 @@ public class ArmorUtils {
             if (configKey == null) continue;
 
             Material material = initialArmor.get(slot);
-            if (material == null) {
-                String materialName = config.getString("default-armor." + configKey, "NETHERITE");
-                material = getArmorMaterial(materialName, slot);
+            if (material == null || material == Material.AIR) {
+                String fallbackType = config.getString("gui.default-armor." + configKey, "NETHERITE");
+                material = getArmorMaterial(fallbackType, slot);
+
+                if (material == null || material == Material.AIR) {
+                    String noArmor = config.getString("gui.default-armor.no-armor", "BARRIER");
+                    try {
+                        material = Material.valueOf(noArmor.toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        Bukkit.getLogger().warning("Materiale fallback no-armor non valido: " + noArmor + ", imposto BARRIER");
+                        material = Material.BARRIER;
+                    }
+                }
             }
 
             processedArmor.put(slot, material);

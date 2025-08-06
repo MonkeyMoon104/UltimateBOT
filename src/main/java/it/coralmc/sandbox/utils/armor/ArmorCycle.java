@@ -40,7 +40,7 @@ public class ArmorCycle {
     }
 
     public static Material getMaterialFromConfig(FileConfiguration config, String key) {
-        String matName = config.getString("default-armor." + key, "NETHERITE");
+        String matName = config.getString("gui.default-armor." + key, "NETHERITE");
         String suffix = switch (key) {
             case "helmet" -> "_HELMET";
             case "chestplate" -> "_CHESTPLATE";

@@ -1,5 +1,7 @@
 package it.coralmc.sandbox.bot.util.entity;
 
+import it.coralmc.sandbox.bot.util.TrainingBot;
+import it.coralmc.sandbox.bot.util.registry.BotRegistry;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -55,6 +57,21 @@ public class BotEntityFinder {
         }
         return false;
     }
+
+    public static TrainingBot getBotByOwnerUUID(UUID ownerUUID) {
+        ServerLevel world = getPlayerWorld(ownerUUID);
+        if (world == null) return null;
+
+        UUID botUUID = BotRegistry.getBotUUID(ownerUUID);
+        Entity entity = findBotByUUID(world, botUUID);
+
+        if (entity instanceof TrainingBot trainingBot) {
+            return trainingBot;
+        }
+
+        return null;
+    }
+
 
     public static boolean entityExists(ServerLevel world, UUID entityUUID) {
         return findBotByUUID(world, entityUUID) != null;

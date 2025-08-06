@@ -9,6 +9,7 @@ public class PlayerArmorManager {
 
     public static final Map<UUID, Map<EquipmentSlot, Material>> playerArmorSelections = new HashMap<>();
     private static final Map<UUID, Boolean> playerFollowSetting = new HashMap<>();
+    private static final Map<UUID, Integer> playerTotemCount = new HashMap<>();
 
     public static void initializePlayerDefaults(UUID playerUUID, Map<EquipmentSlot, Material> defaultArmor) {
         playerArmorSelections.putIfAbsent(playerUUID, defaultArmor);
@@ -37,9 +38,18 @@ public class PlayerArmorManager {
     public static void removePlayerSettings(UUID playerUUID) {
         playerArmorSelections.remove(playerUUID);
         playerFollowSetting.remove(playerUUID);
+        playerTotemCount.remove(playerUUID);
     }
 
     public static void setPlayerArmorSelection(UUID playerUUID, Map<EquipmentSlot, Material> armorSelection) {
         playerArmorSelections.put(playerUUID, armorSelection);
+    }
+
+    public static void setPlayerTotemCount(UUID uuid, int count) {
+        playerTotemCount.put(uuid, count);
+    }
+
+    public static int getPlayerTotemCount(UUID uuid) {
+        return playerTotemCount.getOrDefault(uuid, 37);
     }
 }

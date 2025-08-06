@@ -1,9 +1,13 @@
 package it.coralmc.sandbox.gui;
 
 import it.coralmc.sandbox.bot.BotSpawner;
+import it.coralmc.sandbox.bot.util.TrainingBot;
+import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
 import it.coralmc.sandbox.gui.builder.armor.ArmorUtils;
 import it.coralmc.sandbox.gui.builder.GUIItemBuilder;
 import it.coralmc.sandbox.gui.validator.GUIValidator;
+import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
+import it.coralmc.sandbox.utils.builder.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +24,7 @@ public class BotSettingsGUI {
     private final Inventory gui;
     private final Map<EquipmentSlot, Material> selectedArmor = new EnumMap<>(EquipmentSlot.class);
     private final GUIItemBuilder itemBuilder;
-    private boolean follow = false;
+    private boolean follow;
 
     public BotSettingsGUI(Player player) {
         this.player = player;
@@ -46,7 +50,17 @@ public class BotSettingsGUI {
     }
 
     private void setupGUIItems() {
+        if (BotSpawner.isBotSpawned(player.getUniqueId())) {
+            TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(player.getUniqueId());
+            if (bot != null) {
+                this.follow = bot.isFollow();
+            }
+        }
+
         gui.setItem(7, itemBuilder.createFollowButton(follow));
+
+        int totemCount = PlayerArmorManager.getPlayerTotemCount(player.getUniqueId());
+        gui.setItem(11, ItemBuilder.createTotemButton(totemCount));
 
         if (BotSpawner.isBotSpawned(player.getUniqueId())) {
             gui.setItem(8, itemBuilder.createDespawnButton());

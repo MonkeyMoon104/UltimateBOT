@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
 import it.coralmc.sandbox.bot.util.registry.BotRegistry;
 import it.coralmc.sandbox.bot.util.TrainingBot;
-import it.coralmc.sandbox.bot.util.equipment.EquipmentConverter;
+import it.coralmc.sandbox.bot.util.equipment.converter.EquipmentConverter;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,6 +62,11 @@ public class BotEquipmentManager {
             if (nmsSlot != null) {
                 ItemStack nmsItem = botEntity.getItemBySlot(nmsSlot);
                 Material material = EquipmentConverter.toMaterial(nmsItem);
+
+                if (material == null) {
+                    material = Material.AIR;
+                }
+
                 armor.put(slot, material);
             }
         }

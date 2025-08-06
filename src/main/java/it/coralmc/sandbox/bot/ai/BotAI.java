@@ -141,30 +141,48 @@ public class BotAI {
         ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
 
         if (offhand == null || offhand.isEmpty() || !offhand.is(Items.TOTEM_OF_UNDYING)) {
-            for (int i = 0; i < bot.getInventory().items.size(); i++) {
-                ItemStack stack = bot.getInventory().items.get(i);
-                if (stack != null && !stack.isEmpty() && stack.is(Items.TOTEM_OF_UNDYING)) {
-                    bot.getInventory().items.set(i, ItemStack.EMPTY);
-                    bot.setItemSlot(EquipmentSlot.OFFHAND, stack);
+            if (bot instanceof TrainingBot trainingBot) {
+                int totemCount = trainingBot.getTotemCount();
+
+                if (totemCount == -1) {
+                    ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
+                    bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
+                    warnedOutOfTotems = false;
+                    return;
+                } else if (totemCount > 0) {
+                    ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
+                    bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
                     warnedOutOfTotems = false;
                     return;
                 }
-            }
 
-            if (!warnedOutOfTotems && bot instanceof TrainingBot trainingBot) {
-                var player = trainingBot.getTargetPlayer();
-                if (player != null && player.isOnline()) {
-                    String msg = SandboxBot.getInstance().getConfig()
-                            .getString("bot.totem-finish", "[%botname%] Running out of totems");
+                if (!warnedOutOfTotems) {
+                    var player = trainingBot.getTargetPlayer();
+                    if (player != null && player.isOnline()) {
+                        String msg = SandboxBot.getInstance().getConfig()
+                                .getString("bot.totem-finish", "[%botname%] Running out of totems");
 
-                    String botName = SandboxBot.getInstance().getConfig().getString("bot.name", "CrystalBot");
-                    msg = msg.replace("%botname%", botName);
+                        String botName = SandboxBot.getInstance().getConfig().getString("bot.name", "CrystalBot");
+                        msg = msg.replace("%botname%", botName);
 
-                    player.sendMessage(ChatColorUtils.translate(msg));
+                        player.sendMessage(ChatColorUtils.translate(msg));
+                    }
+
+                    warnedOutOfTotems = true;
                 }
-                warnedOutOfTotems = true;
             }
         }
     }
 
+    public void onTotemUsed() {
+        if (bot instanceof TrainingBot trainingBot) {
+            int totemCount = trainingBot.getTotemCount();
+
+            if (totemCount > 0) {
+                trainingBot.setTotemCount(totemCount - 1);
+            }
+
+            manageTotem();
+        }
+    }
 }
