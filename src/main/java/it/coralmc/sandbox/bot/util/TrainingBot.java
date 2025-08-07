@@ -97,7 +97,7 @@ public class TrainingBot extends Player {
         boolean result = super.actuallyHurt(level, source, amount, event);
 
         if (result) {
-            this.botAI.setKnockbackCooldown(20);
+            this.botAI.setKnockbackCooldown(10);
 
             if (hadTotem) {
                 ItemStack totemAfter = this.getItemBySlot(EquipmentSlot.OFFHAND);
