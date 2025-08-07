@@ -1,10 +1,8 @@
 messages:
-  set-type: "Set type = %type%"
-  set-follow: "Set follow = %type%"
   spawn-bot: "&aBot spawned with selected armor!"
-  follow-toggle-name: "&bToggle Follow"
   dead-bot-msg: "&aYou have killed the bot!"
   despawn-bot: "&cBot despawned!"
+  save-changes: "&aChanges saved!"
 
 bot:
   name: "CrystalBot"
@@ -18,15 +16,53 @@ gui:
     leggings: NETHERITE
     boots: NETHERITE
     no-armor: BARRIER
+    lore:
+      set-type:
+        - "&7Set type: &e%type%"
+        - "&8Click to change armor piece"
+
   follow-button:
     name: "&bToggle Follow"
     material: "LEAD"
+    lore:
+      - "&7Follow Status: &e%type%"
+      - ""
+      - "&eClick to toggle follow mode"
+
   spawn-button:
     name: "&aSpawn Bot"
     material: "SPAWNER"
+    lore:
+      - "&7Spawn your training bot"
+      - "&7with selected configuration"
+      - ""
+      - "&eClick to spawn!"
+
   despawn-button:
     name: "&cDespawn Bot"
     material: "BARRIER"
+    lore:
+      - "&7Remove your training bot"
+      - "&7from the world"
+      - ""
+      - "&cClick to despawn!"
+
   save-button:
     name: "&aSave Changes"
     material: "GREEN_WOOL"
+    lore:
+      - "&7Save current settings"
+      - "&7to the active bot"
+      - ""
+      - "&aClick to save!"
+
+  totem-button:
+    name: "&eTotem Count"
+    material: "TOTEM_OF_UNDYING"
+    unlimited-text: "Unlimited"
+    lore:
+      - "&7Current count: &a%count%"
+      - ""
+      - "&eLeft click: &a+1"
+      - "&eRight click: &c-1"
+      - "&7(-1 = Unlimited totems)"

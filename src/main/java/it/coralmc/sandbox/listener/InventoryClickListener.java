@@ -3,10 +3,10 @@ package it.coralmc.sandbox.listener;
 import it.coralmc.sandbox.SandboxBot;
 import it.coralmc.sandbox.bot.BotSpawner;
 import it.coralmc.sandbox.gui.BotSettingsGUI;
+import it.coralmc.sandbox.gui.builder.GUIItemBuilder;
 import it.coralmc.sandbox.utils.armor.ArmorCycle;
 import it.coralmc.sandbox.utils.armor.InventoryArmorExtractor;
 import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
-import it.coralmc.sandbox.utils.builder.ItemBuilder;
 import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import it.coralmc.sandbox.utils.gui.GUISlotHandler;
 import org.bukkit.Material;
@@ -20,6 +20,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class InventoryClickListener implements Listener {
+
+    private final GUIItemBuilder guiItemBuilder;
+
+    public InventoryClickListener() {
+        this.guiItemBuilder = new GUIItemBuilder();
+    }
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent e) {
@@ -52,7 +58,6 @@ public class InventoryClickListener implements Listener {
         } else if (GUISlotHandler.isTotemButton(slot)) {
             handleTotemButtonClick(e, player);
         }
-
     }
 
     private void handleArmorSlotClick(InventoryClickEvent e, Player player, int slot,
@@ -66,7 +71,8 @@ public class InventoryClickListener implements Listener {
         Material next = ArmorCycle.getNextArmor(old, armorSlot);
 
         PlayerArmorManager.updateArmorPiece(player.getUniqueId(), armorSlot, next);
-        e.getInventory().setItem(slot, ItemBuilder.createArmorItem(next, armorSlot, config));
+
+        e.getInventory().setItem(slot, guiItemBuilder.createArmorItem(next));
     }
 
     private void handleFollowButtonClick(InventoryClickEvent e, Player player,
@@ -76,7 +82,8 @@ public class InventoryClickListener implements Listener {
         boolean newFollow = !currentFollow;
 
         PlayerArmorManager.setPlayerFollowSetting(player.getUniqueId(), newFollow);
-        e.getInventory().setItem(7, ItemBuilder.createFollowButton(newFollow, config));
+
+        e.getInventory().setItem(7, guiItemBuilder.createFollowButton(newFollow));
     }
 
     private void handleSpawnButtonClick(InventoryClickEvent e, Player player,
@@ -88,6 +95,8 @@ public class InventoryClickListener implements Listener {
 
             String despawnMsg = config.getString("messages.despawn-bot", "&cBot despawned!");
             player.sendMessage(ChatColorUtils.translate(despawnMsg));
+
+            PlayerArmorManager.removePlayerSettings(player.getUniqueId());
         } else {
 
             Map<EquipmentSlot, Material> selectedFromGUI =
@@ -155,12 +164,12 @@ public class InventoryClickListener implements Listener {
         if (current < -1) current = -1;
         if (current > 37) current = 37;
 
-        e.getInventory().setItem(11, ItemBuilder.createTotemButton(current));
+        e.getInventory().setItem(11, guiItemBuilder.createTotemButton(current));
     }
 
     private int extractTotemCountFromGUI(org.bukkit.inventory.Inventory gui) {
         var item = gui.getItem(11);
-        if (item == null || item.getType() != Material.TOTEM_OF_UNDYING) {
+        if (item == null) {
             return 37;
         }
 
@@ -169,18 +178,35 @@ public class InventoryClickListener implements Listener {
             return 37;
         }
 
-        String lore = meta.getLore().get(0);
-        if (lore.contains("Unlimited")) {
-            return -1;
-        }
+        var config = SandboxBot.getInstance().getConfig();
+        String unlimitedText = config.getString("gui.totem-button.unlimited-text", "Unlimited");
 
-        String[] parts = lore.split(":");
-        if (parts.length > 1) {
-            String numberPart = parts[1].trim().replaceAll("§[0-9a-fk-or]", "");
-            try {
-                return Integer.parseInt(numberPart);
-            } catch (NumberFormatException e) {
-                return 37;
+        for (String loreLine : meta.getLore()) {
+            String cleanLine = loreLine.replaceAll("§[0-9a-fk-or]", "");
+
+            if (cleanLine.contains(unlimitedText)) {
+                return -1;
+            }
+
+            if (cleanLine.matches(".*\\d+.*")) {
+                String[] parts = cleanLine.split(":");
+                if (parts.length > 1) {
+                    String numberPart = parts[1].trim().replaceAll("[^0-9]", "");
+                    if (!numberPart.isEmpty()) {
+                        try {
+                            return Integer.parseInt(numberPart);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                } else {
+                    String numberPart = cleanLine.replaceAll("[^0-9]", "");
+                    if (!numberPart.isEmpty()) {
+                        try {
+                            return Integer.parseInt(numberPart);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
             }
         }
 

@@ -6,7 +6,6 @@ import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
 import it.coralmc.sandbox.gui.builder.armor.ArmorUtils;
 import it.coralmc.sandbox.gui.builder.GUIItemBuilder;
 import it.coralmc.sandbox.gui.validator.GUIValidator;
-import it.coralmc.sandbox.utils.builder.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -59,7 +58,7 @@ public class BotSettingsGUI {
         gui.setItem(7, itemBuilder.createFollowButton(follow));
 
         int totemCount = getCorrectTotemCount();
-        gui.setItem(11, ItemBuilder.createTotemButton(totemCount));
+        gui.setItem(11, itemBuilder.createTotemButton(totemCount));
 
         if (BotSpawner.isBotSpawned(player.getUniqueId())) {
             gui.setItem(8, itemBuilder.createDespawnButton());
