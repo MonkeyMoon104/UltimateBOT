@@ -6,7 +6,6 @@ import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
 import it.coralmc.sandbox.gui.builder.armor.ArmorUtils;
 import it.coralmc.sandbox.gui.builder.GUIItemBuilder;
 import it.coralmc.sandbox.gui.validator.GUIValidator;
-import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
 import it.coralmc.sandbox.utils.builder.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -59,7 +58,7 @@ public class BotSettingsGUI {
 
         gui.setItem(7, itemBuilder.createFollowButton(follow));
 
-        int totemCount = PlayerArmorManager.getPlayerTotemCount(player.getUniqueId());
+        int totemCount = getCorrectTotemCount();
         gui.setItem(11, ItemBuilder.createTotemButton(totemCount));
 
         if (BotSpawner.isBotSpawned(player.getUniqueId())) {
@@ -96,5 +95,16 @@ public class BotSettingsGUI {
             selectedArmor.put(slot, material);
             gui.setItem(ArmorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
         }
+    }
+
+    private int getCorrectTotemCount() {
+        if (BotSpawner.isBotSpawned(player.getUniqueId())) {
+            TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(player.getUniqueId());
+            if (bot != null) {
+                return bot.getTotemCount();
+            }
+        }
+
+        return 37;
     }
 }

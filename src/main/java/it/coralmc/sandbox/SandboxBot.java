@@ -1,12 +1,9 @@
 package it.coralmc.sandbox;
 
-import it.coralmc.sandbox.bot.util.TrainingBot;
 import it.coralmc.sandbox.commands.BotCommand;
 import it.coralmc.sandbox.listener.InventoryClickListener;
 import it.coralmc.sandbox.listener.PlayerQuitListener;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.UUID;
 
 public final class SandboxBot extends JavaPlugin {
 

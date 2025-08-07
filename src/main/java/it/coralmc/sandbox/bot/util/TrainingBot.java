@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxBot;
 import it.coralmc.sandbox.bot.BotSpawner;
 import it.coralmc.sandbox.bot.ai.BotAI;
+import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
 import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -63,6 +64,10 @@ public class TrainingBot extends Player {
             String msg = SandboxBot.getInstance().getConfig()
                     .getString("messages.dead-bot-msg", "You have killed the bot!");
             targetPlayer.sendMessage(ChatColorUtils.translate(msg));
+        }
+
+        if (targetPlayer != null) {
+            PlayerArmorManager.removePlayerSettings(targetPlayer.getUniqueId());
         }
 
         this.discard();
