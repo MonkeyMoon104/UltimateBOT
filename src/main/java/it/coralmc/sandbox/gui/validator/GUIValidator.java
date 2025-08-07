@@ -4,7 +4,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class GUIValidator {
 
-    private static final String BOT_SETTINGS_GUI_TITLE = "§6Bot Settings";
+    private static final String BOT_SETTINGS_GUI_TITLE = "ᴋɪᴛ ʀᴏᴏᴍ";
 
     public static boolean isBotSettingsGUI(InventoryClickEvent event) {
         return event.getView().getTitle().equals(BOT_SETTINGS_GUI_TITLE);

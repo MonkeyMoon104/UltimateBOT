@@ -104,6 +104,6 @@ public class BotSettingsGUI {
             }
         }
 
-        return 37;
+        return -1;
     }
 }
