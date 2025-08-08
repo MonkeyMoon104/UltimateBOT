@@ -3,7 +3,7 @@ package it.coralmc.sandbox.commands.reload;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.commands.reload.options.ReloadPermission;
 import it.coralmc.sandbox.commands.reload.options.ReloadService;
-import org.bukkit.ChatColor;
+import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,22 +12,24 @@ public class ReloadCommand implements CommandExecutor {
 
     private final SandboxTraining plugin;
     private final ReloadService reloadService;
+    private final ChatColorUtils chatColorUtils;
 
     public ReloadCommand(SandboxTraining plugin) {
         this.plugin = plugin;
         this.reloadService = new ReloadService(plugin);
+        this.chatColorUtils = plugin.getChatColorUtils();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (!sender.hasPermission(ReloadPermission.ADMIN_USE)) {
-            sender.sendRichMessage("<red>Non hai il permesso di usare questo comando");
+            sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-no-permission")));
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendRichMessage("<yellow>Utilizzo: /reload <config|bot|maps|all>");
+            sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-usage")));
             return true;
         }
 
@@ -36,21 +38,21 @@ public class ReloadCommand implements CommandExecutor {
         switch (option) {
             case "config" -> {
                 reloadService.reloadConfig();
-                sender.sendRichMessage("<green>Config ricaricata con successo");
+                sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-config")));
             }
             case "bot" -> {
                 reloadService.reloadBot();
-                sender.sendRichMessage("<green>Tutti i bot attivi sono stati rimossi");
+                sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-bot")));
             }
             case "maps" -> {
                 reloadService.reloadMaps();
-                sender.sendRichMessage("<green>Tutte le mappe dei player sono state pulite");
+                sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-maps")));
             }
             case "all" -> {
                 reloadService.reloadAll();
-                sender.sendRichMessage("<green>Configurazione, bot e mappe sono state ricaricate/pulite");
+                sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-all")));
             }
-            default -> sender.sendRichMessage("<green>Opzione non valida. Usa: config, bot, maps, all");
+            default -> sender.sendMessage(chatColorUtils.translate(plugin.getConfig().getString("messages.reload-invalid-option")));
         }
 
         return true;

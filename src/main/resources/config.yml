@@ -3,6 +3,13 @@ messages:
   dead-bot-msg: "&aHai ucciso il bot!"
   despawn-bot: "&cBot rimosso!"
   save-changes: "&aModifiche salvate!"
+  reload-no-permission: "&cNon hai il permesso di usare questo comando"
+  reload-usage: "&eUtilizzo: /reload <config|bot|maps|all>"
+  reload-config: "&aConfig ricaricata con successo"
+  reload-bot: "&aTutti i bot attivi sono stati rimossi"
+  reload-maps: "&aTutte le mappe dei player sono state pulite"
+  reload-all: "&aConfigurazione, bot e mappe sono state ricaricate/pulite"
+  reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
 
 bot:
   name: "CrystalBot"
