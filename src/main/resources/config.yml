@@ -1,12 +1,12 @@
 messages:
-  spawn-bot: "&aBot generato con l'armatura selezionata!"
+  spawn-bot: "&aBot generato con le impostazioni selezionate!"
   dead-bot-msg: "&aHai ucciso il bot!"
   despawn-bot: "&cBot rimosso!"
   save-changes: "&aModifiche salvate!"
 
 bot:
   name: "CrystalBot"
-  totem-finish: "[%botname%] Sta finendo i totem"
+  totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
 
 gui:
@@ -18,14 +18,14 @@ gui:
     no-armor: BARRIER
     lore:
       set-type:
-        - "&7Tipo set: &e%type%"
+        - "&7Tipo: &e%type%"
         - "&8Clicca per cambiare il pezzo d'armatura"
 
   follow-button:
     name: "&bAttiva/Disattiva Segui"
     material: "LEAD"
     lore:
-      - "&7Stato Segui: &e%type%"
+      - "&7Stato: &e%type%"
       - ""
       - "&eClicca per attivare/disattivare il follow"
 
