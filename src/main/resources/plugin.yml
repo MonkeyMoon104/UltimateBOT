@@ -8,9 +8,9 @@ description: Sandbox bot plugin
 commands:
   bot:
     description: Open bot settings GUI
-  reload:
+  sbreload:
     description: Ricarica la configurazione o rimuovi bot/mappe
-    usage: /reload <config|bot|maps|all>
+    usage: /sbreload <config|bot|maps|all>
     permission: sb.admin.use
 
   permissions:

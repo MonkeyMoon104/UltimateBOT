@@ -4,7 +4,7 @@ messages:
   despawn-bot: "&cBot rimosso!"
   save-changes: "&aModifiche salvate!"
   reload-no-permission: "&cNon hai il permesso di usare questo comando"
-  reload-usage: "&eUtilizzo: /reload <config|bot|maps|all>"
+  reload-usage: "&eUtilizzo: /sbreload <config|bot|maps|all>"
   reload-config: "&aConfig ricaricata con successo"
   reload-bot: "&aTutti i bot attivi sono stati rimossi"
   reload-maps: "&aTutte le mappe dei player sono state pulite"

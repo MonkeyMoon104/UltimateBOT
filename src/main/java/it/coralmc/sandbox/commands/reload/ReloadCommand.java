@@ -7,12 +7,18 @@ import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
-public class ReloadCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class ReloadCommand implements CommandExecutor, TabCompleter {
 
     private final SandboxTraining plugin;
     private final ReloadService reloadService;
     private final ChatColorUtils chatColorUtils;
+    private static final List<String> OPTIONS = Arrays.asList("config", "bot", "maps", "all");
 
     public ReloadCommand(SandboxTraining plugin) {
         this.plugin = plugin;
@@ -56,5 +62,20 @@ public class ReloadCommand implements CommandExecutor {
         }
 
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (args.length == 1) {
+            List<String> completions = new ArrayList<>();
+            String toComplete = args[0].toLowerCase();
+            for (String option : OPTIONS) {
+                if (option.startsWith(toComplete)) {
+                    completions.add(option);
+                }
+            }
+            return completions;
+        }
+        return List.of();
     }
 }

@@ -47,7 +47,7 @@ public final class SandboxTraining extends JavaPlugin {
 		this.guiItemBuilder = new GUIItemBuilder(this);
 
 		getCommand("bot").setExecutor(new BotCommand(this, botEntityFinder));
-		getCommand("reload").setExecutor(new ReloadCommand(this));
+		getCommand("sbreload").setExecutor(new ReloadCommand(this));
 		getServer().getPluginManager().registerEvents(new InventoryClickListener(this, botRegistry), this);
 		getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
 	}
