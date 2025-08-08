@@ -55,4 +55,10 @@ public class PlayerArmorManager {
 	public int getPlayerTotemCount(UUID uuid) {
 		return playerTotemCount.getOrDefault(uuid, 37);
 	}
+
+	public void clearAll() {
+		playerArmorSelections.clear();
+		playerFollowSetting.clear();
+		playerTotemCount.clear();
+	}
 }

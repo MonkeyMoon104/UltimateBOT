@@ -13,6 +13,7 @@ import it.coralmc.sandbox.listener.PlayerQuitListener;
 import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
 import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
 import it.coralmc.sandbox.utils.gui.GUISlotHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SandboxTraining extends JavaPlugin {
@@ -48,6 +49,13 @@ public final class SandboxTraining extends JavaPlugin {
 		getCommand("bot").setExecutor(new BotCommand(this, botEntityFinder));
 		getServer().getPluginManager().registerEvents(new InventoryClickListener(this, botRegistry), this);
 		getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
+	}
+
+	@Override
+	public void onDisable() {
+		super.onDisable();
+
+		playerArmorManager.clearAll();
 	}
 
 	public BotSpawner getBotSpawner() {
