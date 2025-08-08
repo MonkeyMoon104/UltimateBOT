@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
+    id 'com.gradleup.shadow' version '8.3.6'
 }
 
 group = 'it.coralmc'
@@ -38,6 +39,10 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         options.release.set(targetJavaVersion)
     }
+}
+
+tasks.shadowJar {
+    archiveFileName.set("sandbox-training-1.0.0.jar")
 }
 
 processResources {
