@@ -84,7 +84,8 @@ public class BotSpawner {
 		bot.setTotemCount(totem);
 
 		world.addFreshEntity(bot);
-		setupBotInventory(bot, totem);
+		//setupBotInventory(bot, totem);
+		bot.getBotAI().manageTotem();
 		botEquipmentManager.applyEquipment(bot, armorMap);
 
 		broadcastBotToPlayers(bot, armorMap);
@@ -146,14 +147,7 @@ public class BotSpawner {
 		TrainingBot bot = botEntityFinder.getBotByOwnerUUID(ownerUUID);
 		if (bot != null) {
 			bot.setTotemCount(totemCount);
-
-			if (totemCount == -1 || totemCount > 0) {
-				org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
-				ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
-				bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
-			} else {
-				bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-			}
+			bot.getBotAI().manageTotem();
 		}
 	}
 

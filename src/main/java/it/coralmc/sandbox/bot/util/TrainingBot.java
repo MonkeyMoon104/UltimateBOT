@@ -24,7 +24,9 @@ public class TrainingBot extends Player {
 	private org.bukkit.entity.Player targetPlayer;
 	private boolean follow;
 	private int totemCount = -1;
-	private boolean hadTotemLastTick = false;
+
+	private int previousEquippedTotems = 0;
+	private boolean skipNextTotemTracking = false;
 
 	private final BotSpawner botSpawner;
 	private final PlayerArmorManager playerArmorManager;
@@ -54,13 +56,23 @@ public class TrainingBot extends Player {
 		super.tick();
 
 		ItemStack offhand = this.getItemBySlot(EquipmentSlot.OFFHAND);
-		boolean hasTotemNow = offhand != null && !offhand.isEmpty() && offhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+		ItemStack mainhand = this.getItemBySlot(EquipmentSlot.MAINHAND);
 
-		if (hadTotemLastTick && !hasTotemNow) {
-			this.botAI.onTotemUsed();
+		boolean hasOffhandTotem = offhand != null && !offhand.isEmpty() && offhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+		boolean hasMainhandTotem = mainhand != null && !mainhand.isEmpty() && mainhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+
+		int currentEquippedTotems = (hasOffhandTotem ? 1 : 0) + (hasMainhandTotem ? 1 : 0);
+
+		if (!skipNextTotemTracking && previousEquippedTotems > currentEquippedTotems && totemCount > 0) {
+			int consumedTotems = previousEquippedTotems - currentEquippedTotems;
+			if (totemCount != -1) {
+				setTotemCount(Math.max(0, totemCount - consumedTotems));
+			}
 		}
 
-		hadTotemLastTick = hasTotemNow;
+		skipNextTotemTracking = false;
+
+		previousEquippedTotems = currentEquippedTotems;
 
 		botAI.manageTotem();
 
@@ -104,22 +116,10 @@ public class TrainingBot extends Player {
 
 	@Override
 	protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-		ItemStack totemBefore = this.getItemBySlot(EquipmentSlot.OFFHAND);
-		boolean hadTotem = totemBefore != null && !totemBefore.isEmpty() && totemBefore.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
-
 		boolean result = super.actuallyHurt(level, source, amount, event);
 
 		if (result) {
 			this.botAI.setKnockbackCooldown(20);
-
-			if (hadTotem) {
-				ItemStack totemAfter = this.getItemBySlot(EquipmentSlot.OFFHAND);
-				boolean hasTotemNow = totemAfter != null && !totemAfter.isEmpty() && totemAfter.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
-
-				if (!hasTotemNow) {
-					this.botAI.onTotemUsed();
-				}
-			}
 
 			for (EquipmentSlot slot : EquipmentSlot.values()) {
 				if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
@@ -198,6 +198,7 @@ public class TrainingBot extends Player {
 
 	public void setTotemCount(int count) {
 		this.totemCount = count;
+		this.skipNextTotemTracking = true;
 	}
 
 	private static class BotCraftPlayer extends CraftHumanEntity {

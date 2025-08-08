@@ -32,6 +32,8 @@ public class PlayerQuitListener implements Listener {
 		if (botSpawner.isBotSpawned(player.getUniqueId())) {
 			botSpawner.despawnBot(player);
 		}
+
+		playerArmorManager.removePlayerSettings(player.getUniqueId());
 	}
 
 	@EventHandler

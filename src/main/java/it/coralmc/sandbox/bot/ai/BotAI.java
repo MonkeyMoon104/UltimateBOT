@@ -26,9 +26,9 @@ public class BotAI {
 	public BotAI(Player bot, SandboxTraining plugin) {
 		this.bot = bot;
 		this.level = bot.level();
-        this.plugin = plugin;
-        this.chatColorUtils = plugin.getChatColorUtils();
-    }
+		this.plugin = plugin;
+		this.chatColorUtils = plugin.getChatColorUtils();
+	}
 
 	public void setKnockbackCooldown(int ticks) {
 		this.knockbackCooldown = ticks;
@@ -142,39 +142,72 @@ public class BotAI {
 	}
 
 	public void manageTotem() {
+		if (!(bot instanceof TrainingBot trainingBot)) return;
+
 		ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
+		ItemStack mainhand = bot.getItemBySlot(EquipmentSlot.MAINHAND);
 
-		if (offhand == null || offhand.isEmpty() || !offhand.is(Items.TOTEM_OF_UNDYING)) {
-			if (bot instanceof TrainingBot trainingBot) {
-				int totemCount = trainingBot.getTotemCount();
+		int totemCount = trainingBot.getTotemCount();
 
-				if (totemCount == -1) {
-					ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
-					bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
-					warnedOutOfTotems = false;
-					return;
-				} else if (totemCount > 0) {
-					ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
-					bot.setItemSlot(EquipmentSlot.OFFHAND, totem);
-					warnedOutOfTotems = false;
-					return;
-				}
+		boolean hasOffhandTotem = offhand != null && !offhand.isEmpty() && offhand.is(Items.TOTEM_OF_UNDYING);
+		boolean hasMainhandTotem = mainhand != null && !mainhand.isEmpty() && mainhand.is(Items.TOTEM_OF_UNDYING);
 
-				if (!warnedOutOfTotems) {
-					var player = trainingBot.getTargetPlayer();
-					if (player != null && player.isOnline()) {
-						String msg = plugin.getConfig()
-							.getString("bot.totem-finish", "[%botname%] Running out of totems");
+		int equippedTotems = (hasOffhandTotem ? 1 : 0) + (hasMainhandTotem ? 1 : 0);
 
-						String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
-						msg = msg.replace("%botname%", botName);
-
-						player.sendMessage(chatColorUtils.translate(msg));
-					}
-
-					warnedOutOfTotems = true;
+		if (totemCount == -1) {
+			if (equippedTotems < 2) {
+				if (!hasOffhandTotem) {
+					bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
+				} else if (!hasMainhandTotem) {
+					bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
 				}
 			}
+			warnedOutOfTotems = false;
+
+		} else if (totemCount == 0) {
+			if (hasOffhandTotem) {
+				bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+			}
+			if (hasMainhandTotem) {
+				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			}
+
+			if (!warnedOutOfTotems) {
+				var player = trainingBot.getTargetPlayer();
+				if (player != null && player.isOnline()) {
+					String msg = plugin.getConfig()
+							.getString("bot.totem-finish", "[%botname%] Running out of totems");
+					String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
+					msg = msg.replace("%botname%", botName);
+					player.sendMessage(chatColorUtils.translate(msg));
+				}
+				warnedOutOfTotems = true;
+			}
+
+		} else if (totemCount == 1) {
+			if (equippedTotems == 0) {
+				bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
+			} else if (equippedTotems == 2) {
+				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			} else if (equippedTotems == 1 && !hasOffhandTotem && hasMainhandTotem) {
+				bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
+				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+			}
+			warnedOutOfTotems = false;
+
+		} else if (totemCount >= 2) {
+			int neededTotems = Math.min(2, totemCount) - equippedTotems;
+
+			if (neededTotems > 0) {
+				if (!hasOffhandTotem) {
+					bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
+					neededTotems--;
+				}
+				if (neededTotems > 0 && !hasMainhandTotem) {
+					bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
+				}
+			}
+			warnedOutOfTotems = false;
 		}
 	}
 
@@ -185,8 +218,6 @@ public class BotAI {
 			if (totemCount > 0) {
 				trainingBot.setTotemCount(totemCount - 1);
 			}
-
-			manageTotem();
 		}
 	}
 }
