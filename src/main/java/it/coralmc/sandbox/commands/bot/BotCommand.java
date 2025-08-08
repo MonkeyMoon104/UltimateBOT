@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.commands;
+package it.coralmc.sandbox.commands.bot;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
