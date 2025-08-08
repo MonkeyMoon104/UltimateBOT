@@ -3,7 +3,7 @@ version: '1.0.0'
 main: it.coralmc.sandbox.SandboxTraining
 api-version: '1.21'
 authors: [ MonkeyMoon104 ]
-description: Sanbox bot plugin
+description: Sandbox bot plugin
 
 commands:
   bot:
