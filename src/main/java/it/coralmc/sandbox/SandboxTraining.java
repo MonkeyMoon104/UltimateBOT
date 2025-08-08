@@ -55,6 +55,7 @@ public final class SandboxTraining extends JavaPlugin {
 	public void onDisable() {
 		super.onDisable();
 
+		botSpawner.despawnAllBots();
 		playerArmorManager.clearAll();
 	}
 

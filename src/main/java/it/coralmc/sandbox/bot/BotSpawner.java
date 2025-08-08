@@ -27,6 +27,7 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -109,6 +110,17 @@ public class BotSpawner {
 		}
 	}
 
+	public void despawnAllBots() {
+		Map<UUID, TrainingBot> allBots = botRegistry.getAllBots();
+		for (UUID ownerUUID : new HashMap<>(allBots).keySet()) {
+			Player owner = Bukkit.getPlayer(ownerUUID);
+			if (owner != null && owner.isOnline()) {
+				despawnBot(owner);
+			} else {
+				botRegistry.removeBot(ownerUUID);
+			}
+		}
+	}
 	public Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID) {
 		return botEquipmentManager.getBotArmor(playerUUID, botRegistry);
 	}
