@@ -20,17 +20,33 @@ import org.bukkit.event.entity.EntityDamageEvent;
 public class TrainingBot extends Player {
 
 	private final BotAI botAI;
+	private final SandboxTraining plugin;
 	private org.bukkit.entity.Player targetPlayer;
 	private boolean follow;
 	private int totemCount = -1;
 	private boolean hadTotemLastTick = false;
 
-	public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile, org.bukkit.entity.Player targetPlayer, boolean follow) {
+	private final BotSpawner botSpawner;
+	private final PlayerArmorManager playerArmorManager;
+	private final ChatColorUtils chatColorUtils;
+	private final String deadBotMessage;
+
+	public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile,
+					   org.bukkit.entity.Player targetPlayer,
+					   boolean follow,
+					   BotSpawner botSpawner,
+					   SandboxTraining plugin,
+					   String deadBotMessage) {
 		super(level, pos, yRot, gameProfile);
 		this.targetPlayer = targetPlayer;
 		this.follow = follow;
-		this.botAI = new BotAI(this);
+		this.plugin = plugin;
+		this.botAI = new BotAI(this, plugin);
 
+		this.botSpawner = botSpawner;
+		this.playerArmorManager = plugin.getPlayerArmorManager();
+		this.chatColorUtils = plugin.getChatColorUtils();
+		this.deadBotMessage = deadBotMessage;
 	}
 
 	@Override
@@ -60,17 +76,15 @@ public class TrainingBot extends Player {
 		super.die(cause);
 
 		if (targetPlayer != null && targetPlayer.isOnline()) {
-			String msg = SandboxTraining.getInstance().getConfig()
-				.getString("messages.dead-bot-msg", "You have killed the bot!");
-			targetPlayer.sendMessage(ChatColorUtils.translate(msg));
+			targetPlayer.sendMessage(chatColorUtils.translate(deadBotMessage));
 		}
 
 		if (targetPlayer != null) {
-			PlayerArmorManager.removePlayerSettings(targetPlayer.getUniqueId());
+			playerArmorManager.removePlayerSettings(targetPlayer.getUniqueId());
 		}
 
 		this.discard();
-		BotSpawner.removeBot(this.getUUID());
+		botSpawner.removeBot(this.getUUID());
 	}
 
 	@Override

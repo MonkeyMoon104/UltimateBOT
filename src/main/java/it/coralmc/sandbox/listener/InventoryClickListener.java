@@ -26,10 +26,24 @@ import java.util.UUID;
 
 public class InventoryClickListener implements Listener {
 
+	private final SandboxTraining plugin;
+	private final BotSpawner bot;
+	private final GUISlotHandler guiSlotHandler;
+	private final InventoryArmorExtractor armorExtractor;
+	private final ChatColorUtils chatColorUtils;
 	private final GUIItemBuilder guiItemBuilder;
+	private final PlayerArmorManager playerArmorManager;
+	private final BotRegistry botRegistry;
 
-	public InventoryClickListener() {
-		this.guiItemBuilder = new GUIItemBuilder();
+	public InventoryClickListener(SandboxTraining plugin, BotRegistry botRegistry) {
+		this.plugin = plugin;
+		this.bot = plugin.getBotSpawner();
+		this.guiSlotHandler = plugin.getGuiSlotHandler();
+		this.chatColorUtils = plugin.getChatColorUtils();
+		this.guiItemBuilder = plugin.getGuiItemBuilder();
+        this.playerArmorManager = plugin.getPlayerArmorManager();
+        this.botRegistry = botRegistry;
+        this.armorExtractor = new InventoryArmorExtractor(guiSlotHandler);
 	}
 
 	@EventHandler
@@ -42,26 +56,26 @@ public class InventoryClickListener implements Listener {
 		int slot = e.getRawSlot();
 		if (slot >= e.getInventory().getSize()) return;
 
-		var config = SandboxTraining.getInstance().getConfig();
+		var config =plugin.getConfig();
 
-		PlayerArmorManager.initializePlayerDefaults(
+		playerArmorManager.initializePlayerDefaults(
 			player.getUniqueId(),
-			ArmorCycle.getDefaultArmorFromConfig(config, SandboxTraining.getInstance())
+			ArmorCycle.getDefaultArmorFromConfig(config, plugin)
 		);
 
-		Map<EquipmentSlot, ItemStack> selected = PlayerArmorManager.getPlayerArmorSelection(player.getUniqueId());
-		boolean follow = PlayerArmorManager.getPlayerFollowSetting(player.getUniqueId());
+		Map<EquipmentSlot, ItemStack> selected = playerArmorManager.getPlayerArmorSelection(player.getUniqueId());
+		boolean follow = playerArmorManager.getPlayerFollowSetting(player.getUniqueId());
 
-		if (GUISlotHandler.isArmorSlot(slot)) {
+		if (guiSlotHandler.isArmorSlot(slot)) {
 			handleArmorSlotClick(e, player, slot, selected, config);
-		} else if (GUISlotHandler.isFollowButton(slot)) {
+		} else if (guiSlotHandler.isFollowButton(slot)) {
 			handleFollowButtonClick(e, player, config);
-		} else if (GUISlotHandler.isSpawnButton(slot)) {
+		} else if (guiSlotHandler.isSpawnButton(slot)) {
 			handleSpawnButtonClick(e, player, config);
-		} else if (GUISlotHandler.isTotemButton(slot)) {
+		} else if (guiSlotHandler.isTotemButton(slot)) {
 			handleTotemButtonClick(e, player);
 		} else if (slot == 40) {
-			TrainingBot bot = BotRegistry.getAllBots().get(player.getUniqueId());
+			TrainingBot bot = botRegistry.getAllBots().get(player.getUniqueId());
 			if (bot == null) return;
 			
 			bot.teleportTo(player.getX(), player.getY(), player.getZ());
@@ -73,20 +87,20 @@ public class InventoryClickListener implements Listener {
 	public void onInventoryClose(InventoryCloseEvent event) {
 		if (!event.getView().getTitle().equalsIgnoreCase(GUIValidator.getBotSettingsGUITitle())) return;
 
-		handleSaveButtonClick((Player) event.getPlayer(), SandboxTraining.getInstance().getConfig());
+		handleSaveButtonClick((Player) event.getPlayer(), plugin.getConfig());
 	}
 
 	private void handleArmorSlotClick(InventoryClickEvent e, Player player, int slot,
 									  Map<EquipmentSlot, ItemStack> selected,
 									  org.bukkit.configuration.file.FileConfiguration config) {
 
-		EquipmentSlot armorSlot = GUISlotHandler.getEquipmentSlotFromGUISlot(slot);
+		EquipmentSlot armorSlot = guiSlotHandler.getEquipmentSlotFromGUISlot(slot);
 		if (armorSlot == null) return;
 
 		ItemStack old = selected.getOrDefault(armorSlot, null);
 		Material next = ArmorCycle.getNextArmor(old.getType(), armorSlot);
 
-		PlayerArmorManager.updateArmorPiece(player.getUniqueId(), armorSlot, old, next);
+		playerArmorManager.updateArmorPiece(player.getUniqueId(), armorSlot, old, next);
 
 		e.getInventory().setItem(slot, guiItemBuilder.createArmorItem(next));
 	}
@@ -94,10 +108,10 @@ public class InventoryClickListener implements Listener {
 	private void handleFollowButtonClick(InventoryClickEvent e, Player player,
 										 org.bukkit.configuration.file.FileConfiguration config) {
 
-		boolean currentFollow = PlayerArmorManager.getPlayerFollowSetting(player.getUniqueId());
+		boolean currentFollow = playerArmorManager.getPlayerFollowSetting(player.getUniqueId());
 		boolean newFollow = !currentFollow;
 
-		PlayerArmorManager.setPlayerFollowSetting(player.getUniqueId(), newFollow);
+		playerArmorManager.setPlayerFollowSetting(player.getUniqueId(), newFollow);
 
 		e.getInventory().setItem(41, guiItemBuilder.createFollowButton(newFollow));
 	}
@@ -105,33 +119,33 @@ public class InventoryClickListener implements Listener {
 	private void handleSpawnButtonClick(InventoryClickEvent e, Player player,
 										org.bukkit.configuration.file.FileConfiguration config) {
 
-		if (BotSpawner.isBotSpawned(player.getUniqueId())) {
-			BotSpawner.despawnBot(player);
+		if (bot.isBotSpawned(player.getUniqueId())) {
+			bot.despawnBot(player);
 			player.closeInventory();
 
 			String despawnMsg = config.getString("messages.despawn-bot", "&cBot despawned!");
-			player.sendMessage(ChatColorUtils.translate(despawnMsg));
+			player.sendMessage(chatColorUtils.translate(despawnMsg));
 
-			PlayerArmorManager.removePlayerSettings(player.getUniqueId());
+			playerArmorManager.removePlayerSettings(player.getUniqueId());
 		} else {
 
 			Map<EquipmentSlot, ItemStack> selectedFromGUI =
-				InventoryArmorExtractor.extractArmorFromGUI(e.getInventory());
+				armorExtractor.extractArmorFromGUI(e.getInventory());
 
-			PlayerArmorManager.setPlayerArmorSelection(player.getUniqueId(), selectedFromGUI);
+			playerArmorManager.setPlayerArmorSelection(player.getUniqueId(), selectedFromGUI);
 
 			int totemCountFromGUI = extractTotemCountFromGUI(e.getInventory());
-			PlayerArmorManager.setPlayerTotemCount(player.getUniqueId(), totemCountFromGUI);
+			playerArmorManager.setPlayerTotemCount(player.getUniqueId(), totemCountFromGUI);
 
 			player.closeInventory();
-			int totemCount = PlayerArmorManager.getPlayerTotemCount(player.getUniqueId());
-			boolean follow = PlayerArmorManager.getPlayerFollowSetting(player.getUniqueId());
+			int totemCount = playerArmorManager.getPlayerTotemCount(player.getUniqueId());
+			boolean follow = playerArmorManager.getPlayerFollowSetting(player.getUniqueId());
 
-			BotSpawner.spawnFakeBot(player, selectedFromGUI, follow, totemCount);
+			bot.spawnFakeBot(player, selectedFromGUI, follow, totemCount);
 			String spawnMsg = config.getString("messages.spawn-bot", "&aBot spawned!");
-			player.sendMessage(ChatColorUtils.translate(spawnMsg));
+			player.sendMessage(chatColorUtils.translate(spawnMsg));
 
-			PlayerArmorManager.removePlayerSettings(player.getUniqueId());
+			playerArmorManager.removePlayerSettings(player.getUniqueId());
 		}
 	}
 
@@ -139,25 +153,25 @@ public class InventoryClickListener implements Listener {
 									   org.bukkit.configuration.file.FileConfiguration config) {
 		UUID playerUUID = player.getUniqueId();
 
-		if (BotSpawner.isBotSpawned(playerUUID)) {
+		if (bot.isBotSpawned(playerUUID)) {
 
 			Map<EquipmentSlot, ItemStack> selectedFromGUI =
-				InventoryArmorExtractor.extractArmorFromGUI(player.getOpenInventory().getTopInventory());
+				armorExtractor.extractArmorFromGUI(player.getOpenInventory().getTopInventory());
 
 			int totemCountFromGUI = extractTotemCountFromGUI(player.getOpenInventory().getTopInventory());
 
-			boolean follow = PlayerArmorManager.getPlayerFollowSetting(playerUUID);
+			boolean follow = playerArmorManager.getPlayerFollowSetting(playerUUID);
 
-			BotSpawner.updateBotArmor(playerUUID, selectedFromGUI);
-			BotSpawner.updateBotFollow(playerUUID, follow);
-			BotSpawner.updateBotTotemCount(playerUUID, totemCountFromGUI);
+			bot.updateBotArmor(playerUUID, selectedFromGUI);
+			bot.updateBotFollow(playerUUID, follow);
+			bot.updateBotTotemCount(playerUUID, totemCountFromGUI);
 
-			PlayerArmorManager.setPlayerFollowSetting(playerUUID, follow);
-			PlayerArmorManager.setPlayerTotemCount(playerUUID, totemCountFromGUI);
-			PlayerArmorManager.setPlayerArmorSelection(playerUUID, selectedFromGUI);
+			playerArmorManager.setPlayerFollowSetting(playerUUID, follow);
+			playerArmorManager.setPlayerTotemCount(playerUUID, totemCountFromGUI);
+			playerArmorManager.setPlayerArmorSelection(playerUUID, selectedFromGUI);
 
 			String saveMsg = config.getString("messages.save-changes", "&aChanges saved!");
-			player.sendMessage(ChatColorUtils.translate(saveMsg));
+			player.sendMessage(chatColorUtils.translate(saveMsg));
 		}
 	}
 
@@ -192,7 +206,7 @@ public class InventoryClickListener implements Listener {
 			return 37;
 		}
 
-		var config = SandboxTraining.getInstance().getConfig();
+		var config = plugin.getConfig();
 		String unlimitedText = config.getString("gui.totem-button.unlimited-text", "Unlimited");
 
 		for (String loreLine : meta.getLore()) {

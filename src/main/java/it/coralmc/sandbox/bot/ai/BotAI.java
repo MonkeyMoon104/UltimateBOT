@@ -19,12 +19,16 @@ public class BotAI {
 	private double[] diversionDirection = null;
 	private int diversionTicks = 0;
 	private boolean warnedOutOfTotems = false;
+	private final SandboxTraining plugin;
+	private final ChatColorUtils chatColorUtils;
 
 
-	public BotAI(Player bot) {
+	public BotAI(Player bot, SandboxTraining plugin) {
 		this.bot = bot;
 		this.level = bot.level();
-	}
+        this.plugin = plugin;
+        this.chatColorUtils = plugin.getChatColorUtils();
+    }
 
 	public void setKnockbackCooldown(int ticks) {
 		this.knockbackCooldown = ticks;
@@ -159,13 +163,13 @@ public class BotAI {
 				if (!warnedOutOfTotems) {
 					var player = trainingBot.getTargetPlayer();
 					if (player != null && player.isOnline()) {
-						String msg = SandboxTraining.getInstance().getConfig()
+						String msg = plugin.getConfig()
 							.getString("bot.totem-finish", "[%botname%] Running out of totems");
 
-						String botName = SandboxTraining.getInstance().getConfig().getString("bot.name", "CrystalBot");
+						String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
 						msg = msg.replace("%botname%", botName);
 
-						player.sendMessage(ChatColorUtils.translate(msg));
+						player.sendMessage(chatColorUtils.translate(msg));
 					}
 
 					warnedOutOfTotems = true;

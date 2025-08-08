@@ -24,12 +24,20 @@ public class BotSettingsGUI {
 	private final Inventory gui;
 	private final Map<EquipmentSlot, Material> selectedArmor = new EnumMap<>(EquipmentSlot.class);
 	private final GUIItemBuilder itemBuilder;
+	private final ArmorUtils armorUtils;
+	private final BotSpawner botSpawner;
+	private final BotEntityFinder botEntityFinder;
+	private final SandboxTraining plugin;
 	private boolean follow;
 
-	public BotSettingsGUI(Player player) {
+	public BotSettingsGUI(Player player, SandboxTraining plugin, BotEntityFinder botEntityFinder) {
 		this.player = player;
-		this.itemBuilder = new GUIItemBuilder();
-		this.gui = Bukkit.createInventory(null, 54, GUIValidator.getBotSettingsGUITitle());
+		this.plugin = plugin;
+		this.armorUtils = plugin.getArmorUtils();
+		this.botSpawner = plugin.getBotSpawner();
+		this.itemBuilder = plugin.getGuiItemBuilder();
+        this.botEntityFinder = botEntityFinder;
+        this.gui = Bukkit.createInventory(null, 54, GUIValidator.getBotSettingsGUITitle());
 
 		initializeArmor();
 		setupGUIItems();
@@ -40,20 +48,20 @@ public class BotSettingsGUI {
 	}
 
 	private void initializeArmor() {
-		Map<EquipmentSlot, ItemStack> initialArmor = ArmorUtils.initializePlayerArmor(player.getUniqueId(), SandboxTraining.getInstance());
+		Map<EquipmentSlot, ItemStack> initialArmor = armorUtils.initializePlayerArmor(player.getUniqueId());
 		
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
-			if (!ArmorUtils.isValidArmorSlot(slot)) continue;
+			if (!armorUtils.isValidArmorSlot(slot)) continue;
 
 			Material material = initialArmor.get(slot).getType();
 			selectedArmor.put(slot, material);
-			gui.setItem(ArmorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
+			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
 		}
 	}
 
 	private void setupGUIItems() {
-		if (BotSpawner.isBotSpawned(player.getUniqueId())) {
-			TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(player.getUniqueId());
+		if (botSpawner.isBotSpawned(player.getUniqueId())) {
+			TrainingBot bot = botEntityFinder.getBotByOwnerUUID(player.getUniqueId());
 			if (bot != null) {
 				this.follow = bot.isFollow();
 			}
@@ -64,7 +72,7 @@ public class BotSettingsGUI {
 		int totemCount = getCorrectTotemCount();
 		gui.setItem(22, itemBuilder.createTotemButton(totemCount));
 
-		if (BotSpawner.isBotSpawned(player.getUniqueId())) {
+		if (botSpawner.isBotSpawned(player.getUniqueId())) {
 			gui.setItem(39, itemBuilder.createDespawnButton());
 			gui.setItem(40, itemBuilder.createTeleportItem());
 		} else {
@@ -90,15 +98,15 @@ public class BotSettingsGUI {
 	}
 
 	public void updateArmorPiece(EquipmentSlot slot, Material material) {
-		if (ArmorUtils.isValidArmorSlot(slot)) {
+		if (armorUtils.isValidArmorSlot(slot)) {
 			selectedArmor.put(slot, material);
-			gui.setItem(ArmorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
+			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
 		}
 	}
 
 	private int getCorrectTotemCount() {
-		if (BotSpawner.isBotSpawned(player.getUniqueId())) {
-			TrainingBot bot = BotEntityFinder.getBotByOwnerUUID(player.getUniqueId());
+		if (botSpawner.isBotSpawned(player.getUniqueId())) {
+			TrainingBot bot = botEntityFinder.getBotByOwnerUUID(player.getUniqueId());
 			if (bot != null) {
 				return bot.getTotemCount();
 			}

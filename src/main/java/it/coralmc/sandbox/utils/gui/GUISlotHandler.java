@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class GUISlotHandler {
 
-	public static EquipmentSlot getEquipmentSlotFromGUISlot(int guiSlot) {
+	public EquipmentSlot getEquipmentSlotFromGUISlot(int guiSlot) {
 		return switch (guiSlot) {
 			case 20 -> EquipmentSlot.HEAD;
 			case 21 -> EquipmentSlot.CHEST;
@@ -17,7 +17,7 @@ public class GUISlotHandler {
 		};
 	}
 
-	public static int getGUISlotFromEquipmentSlot(EquipmentSlot equipmentSlot) {
+	public int getGUISlotFromEquipmentSlot(EquipmentSlot equipmentSlot) {
 		return switch (equipmentSlot) {
 			case HEAD -> 20;
 			case CHEST -> 21;
@@ -27,24 +27,23 @@ public class GUISlotHandler {
 		};
 	}
 
-	public static boolean isArmorSlot(int guiSlot) {
+	public boolean isArmorSlot(int guiSlot) {
 		return guiSlot == 20 || guiSlot == 21 || guiSlot == 23 || guiSlot == 24;
 	}
 
-	public static boolean isFollowButton(int guiSlot) {
+	public boolean isFollowButton(int guiSlot) {
 		return guiSlot == 41;
 	}
 
-	public static boolean isSpawnButton(int guiSlot) {
+	public boolean isSpawnButton(int guiSlot) {
 		return guiSlot == 39;
 	}
 
-	public static boolean isTotemButton(int guiSlot) {
+	public boolean isTotemButton(int guiSlot) {
 		return guiSlot == 22;
 	}
 
-
-	public static Map<EquipmentSlot, Integer> createArmorSlotMapping() {
+	public Map<EquipmentSlot, Integer> createArmorSlotMapping() {
 		Map<EquipmentSlot, Integer> mapping = new EnumMap<>(EquipmentSlot.class);
 		mapping.put(EquipmentSlot.HEAD, 20);
 		mapping.put(EquipmentSlot.CHEST, 21);

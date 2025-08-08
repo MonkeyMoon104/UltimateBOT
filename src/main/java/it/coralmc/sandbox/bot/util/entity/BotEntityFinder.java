@@ -16,21 +16,27 @@ import java.util.UUID;
 
 public class BotEntityFinder {
 
-	public static Entity findBotByUUID(ServerLevel world, UUID botUUID) {
+	private final BotRegistry botRegistry;
+
+	public BotEntityFinder(BotRegistry botRegistry) {
+		this.botRegistry = botRegistry;
+	}
+
+	public Entity findBotByUUID(ServerLevel world, UUID botUUID) {
 		List<? extends Entity> entities = world.getEntities(
-			EntityTypeTest.forClass(Entity.class),
-			entity -> entity.getUUID().equals(botUUID)
+				EntityTypeTest.forClass(Entity.class),
+				entity -> entity.getUUID().equals(botUUID)
 		);
 
 		return entities.isEmpty() ? null : entities.get(0);
 	}
 
-	public static LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
+	public LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
 		Entity entity = findBotByUUID(world, botUUID);
 		return entity instanceof LivingEntity ? (LivingEntity) entity : null;
 	}
 
-	public static ServerLevel getPlayerWorld(UUID playerUUID) {
+	public ServerLevel getPlayerWorld(UUID playerUUID) {
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			if (online.getUniqueId().equals(playerUUID)) {
 				ServerPlayer handle = ((CraftPlayer) online).getHandle();
@@ -40,7 +46,7 @@ public class BotEntityFinder {
 		return null;
 	}
 
-	public static ServerPlayer getPlayerHandle(UUID playerUUID) {
+	public ServerPlayer getPlayerHandle(UUID playerUUID) {
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			if (online.getUniqueId().equals(playerUUID)) {
 				return ((CraftPlayer) online).getHandle();
@@ -49,7 +55,7 @@ public class BotEntityFinder {
 		return null;
 	}
 
-	public static boolean removeEntity(ServerLevel world, UUID entityUUID) {
+	public boolean removeEntity(ServerLevel world, UUID entityUUID) {
 		Entity entity = findBotByUUID(world, entityUUID);
 		if (entity != null) {
 			entity.remove(Entity.RemovalReason.DISCARDED);
@@ -58,11 +64,11 @@ public class BotEntityFinder {
 		return false;
 	}
 
-	public static TrainingBot getBotByOwnerUUID(UUID ownerUUID) {
+	public TrainingBot getBotByOwnerUUID(UUID ownerUUID) {
 		ServerLevel world = getPlayerWorld(ownerUUID);
 		if (world == null) return null;
 
-		UUID botUUID = BotRegistry.getBotUUID(ownerUUID);
+		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
 		Entity entity = findBotByUUID(world, botUUID);
 
 		if (entity instanceof TrainingBot trainingBot) {
@@ -72,8 +78,7 @@ public class BotEntityFinder {
 		return null;
 	}
 
-
-	public static boolean entityExists(ServerLevel world, UUID entityUUID) {
+	public boolean entityExists(ServerLevel world, UUID entityUUID) {
 		return findBotByUUID(world, entityUUID) != null;
 	}
 }

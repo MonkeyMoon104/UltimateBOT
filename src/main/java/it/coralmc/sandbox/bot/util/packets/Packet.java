@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class Packet {
 
-	public static void sendAddPlayerPacket(Player viewer, TrainingBot bot) {
+	public void sendAddPlayerPacket(Player viewer, TrainingBot bot) {
 		GameProfile profile = bot.getGameProfile();
 		Component displayName = Component.literal(profile.getName());
 
@@ -43,7 +43,7 @@ public class Packet {
 		handle.connection.send(packet);
 	}
 
-	public static void sendSpawnPlayerPacket(Player viewer, TrainingBot fakePlayer) {
+	public void sendSpawnPlayerPacket(Player viewer, TrainingBot fakePlayer) {
 		int entityId = fakePlayer.getId();
 		UUID uuid = fakePlayer.getUUID();
 		double x = fakePlayer.getX();

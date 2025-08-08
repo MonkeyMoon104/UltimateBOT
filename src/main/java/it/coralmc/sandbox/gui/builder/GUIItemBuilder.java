@@ -8,7 +8,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,11 +16,14 @@ import java.util.Locale;
 
 public class GUIItemBuilder {
 
+	private final ChatColorUtils chatColorUtils;
 	private final FileConfiguration config;
 
-	public GUIItemBuilder() {
-		this.config = SandboxTraining.getInstance().getConfig();
+	public GUIItemBuilder(SandboxTraining plugin) {
+		this.config = plugin.getConfig();
+		this.chatColorUtils = plugin.getChatColorUtils();
 	}
+
 
 	public ItemStack createSpawnButton() {
 		String materialName = config.getString("gui.spawn-button.material", "SPAWNER");
@@ -31,7 +33,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String name = config.getString("gui.spawn-button.name", "&aSpawn Bot");
-		meta.setDisplayName(ChatColorUtils.translate(name));
+		meta.setDisplayName(chatColorUtils.translate(name));
 
 		List<String> lore = getLoreFromConfig("gui.spawn-button.lore");
 		if (!lore.isEmpty()) {
@@ -50,7 +52,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String name = config.getString("gui.despawn-button.name", "&cDespawn Bot");
-		meta.setDisplayName(ChatColorUtils.translate(name));
+		meta.setDisplayName(chatColorUtils.translate(name));
 
 		List<String> lore = getLoreFromConfig("gui.despawn-button.lore");
 		if (!lore.isEmpty()) {
@@ -69,7 +71,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String name = config.getString("gui.save-button.name", "&aSave Changes");
-		meta.setDisplayName(ChatColorUtils.translate(name));
+		meta.setDisplayName(chatColorUtils.translate(name));
 
 		List<String> lore = getLoreFromConfig("gui.save-button.lore");
 		if (!lore.isEmpty()) {
@@ -88,7 +90,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String displayName = config.getString("gui.follow-button.name", "&bToggle Follow");
-		meta.setDisplayName(ChatColorUtils.translate(displayName));
+		meta.setDisplayName(chatColorUtils.translate(displayName));
 
 		List<String> lore = getLoreFromConfigWithPlaceholder("gui.follow-button.lore", "%type%",
 			followStatus ? "true" : "false");
@@ -108,7 +110,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String name = config.getString("gui.totem-button.name", "&eTotem Count");
-		meta.setDisplayName(ChatColorUtils.translate(name));
+		meta.setDisplayName(chatColorUtils.translate(name));
 
 		String countValue = totemCount == -1 ?
 			config.getString("gui.totem-button.unlimited-text", "Unlimited") :
@@ -137,7 +139,7 @@ public class GUIItemBuilder {
 			if (lore.isEmpty()) {
 				String loreTemplate = config.getString("gui.default-armor.lore.set-type", "Set type = %type%");
 				String loreText = loreTemplate.replace("%type%", getCleanArmorTypeName(material));
-				lore = Collections.singletonList(ChatColorUtils.translate(loreText));
+				lore = Collections.singletonList(chatColorUtils.translate(loreText));
 			}
 
 			meta.setLore(lore);
@@ -177,7 +179,7 @@ public class GUIItemBuilder {
 
 		List<String> translatedLore = new ArrayList<>();
 		for (String line : configLore) {
-			translatedLore.add(ChatColorUtils.translate(line));
+			translatedLore.add(chatColorUtils.translate(line));
 		}
 		return translatedLore;
 	}
@@ -188,7 +190,7 @@ public class GUIItemBuilder {
 			String singleLore = config.getString(path);
 			if (singleLore != null && !singleLore.isEmpty()) {
 				String processedLine = singleLore.replace(placeholder, replacement);
-				return Collections.singletonList(ChatColorUtils.translate(processedLine));
+				return Collections.singletonList(chatColorUtils.translate(processedLine));
 			}
 			return new ArrayList<>();
 		}
@@ -196,7 +198,7 @@ public class GUIItemBuilder {
 		List<String> translatedLore = new ArrayList<>();
 		for (String line : configLore) {
 			String processedLine = line.replace(placeholder, replacement);
-			translatedLore.add(ChatColorUtils.translate(processedLine));
+			translatedLore.add(chatColorUtils.translate(processedLine));
 		}
 		return translatedLore;
 	}
@@ -209,7 +211,7 @@ public class GUIItemBuilder {
 		ItemMeta meta = item.getItemMeta();
 
 		String name = config.getString("gui.teleport-button.name", "&cTeleport Bot");
-		meta.setDisplayName(ChatColorUtils.translate(name));
+		meta.setDisplayName(chatColorUtils.translate(name));
 
 		List<String> lore = getLoreFromConfig("gui.teleport-button.lore");
 		if (!lore.isEmpty()) {

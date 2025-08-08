@@ -1,12 +1,12 @@
 messages:
-  spawn-bot: "&aBot spawned with selected armor!"
-  dead-bot-msg: "&aYou have killed the bot!"
-  despawn-bot: "&cBot despawned!"
-  save-changes: "&aChanges saved!"
+  spawn-bot: "&aBot generato con l'armatura selezionata!"
+  dead-bot-msg: "&aHai ucciso il bot!"
+  despawn-bot: "&cBot rimosso!"
+  save-changes: "&aModifiche salvate!"
 
 bot:
   name: "CrystalBot"
-  totem-finish: "[%botname%] Running out of totems"
+  totem-finish: "[%botname%] Sta finendo i totem"
   default-totem-count: -1
 
 gui:
@@ -18,51 +18,51 @@ gui:
     no-armor: BARRIER
     lore:
       set-type:
-        - "&7Set type: &e%type%"
-        - "&8Click to change armor piece"
+        - "&7Tipo set: &e%type%"
+        - "&8Clicca per cambiare il pezzo d'armatura"
 
   follow-button:
-    name: "&bToggle Follow"
+    name: "&bAttiva/Disattiva Segui"
     material: "LEAD"
     lore:
-      - "&7Follow Status: &e%type%"
+      - "&7Stato Segui: &e%type%"
       - ""
-      - "&eClick to toggle follow mode"
+      - "&eClicca per attivare/disattivare il follow"
 
   spawn-button:
-    name: "&aSpawn Bot"
+    name: "&aGenera Bot"
     material: "SPAWNER"
     lore:
-      - "&7Spawn your training bot"
-      - "&7with selected configuration"
+      - "&7Genera il tuo bot di allenamento"
+      - "&7con la configurazione selezionata"
       - ""
-      - "&eClick to spawn!"
+      - "&eClicca per generare!"
 
   despawn-button:
-    name: "&cDespawn Bot"
+    name: "&cRimuovi Bot"
     material: "BARRIER"
     lore:
-      - "&7Remove your training bot"
-      - "&7from the world"
+      - "&7Rimuovi il tuo bot di allenamento"
+      - "&7dal mondo"
       - ""
-      - "&cClick to despawn!"
+      - "&cClicca per rimuovere!"
 
   save-button:
-    name: "&aSave Changes"
+    name: "&aSalva Modifiche"
     material: "GREEN_WOOL"
     lore:
-      - "&7Save current settings"
-      - "&7to the active bot"
+      - "&7Salva le impostazioni attuali"
+      - "&7sul bot attivo"
       - ""
-      - "&aClick to save!"
+      - "&aClicca per salvare!"
 
   totem-button:
-    name: "&eTotem Count"
+    name: "&eConteggio Totem"
     material: "TOTEM_OF_UNDYING"
-    unlimited-text: "Unlimited"
+    unlimited-text: "Illimitati"
     lore:
-      - "&7Current count: &a%count%"
+      - "&7Conteggio attuale: &a%count%"
       - ""
-      - "&eLeft click: &a+1"
-      - "&eRight click: &c-1"
-      - "&7(-1 = Unlimited totems)"
+      - "&eClick sinistro: &a+1"
+      - "&eClick destro: &c-1"
+      - "&7(-1 = Totem illimitati)"

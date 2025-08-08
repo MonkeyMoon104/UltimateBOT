@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -17,16 +16,25 @@ import java.util.UUID;
 
 public class ArmorUtils {
 
-	private static final FileConfiguration config = SandboxTraining.getInstance().getConfig();
+	private final SandboxTraining plugin;
+	private final FileConfiguration config;
 
-	public static Map<EquipmentSlot, ItemStack> initializePlayerArmor(UUID playerUUID, Plugin plugin) {
+	public ArmorUtils(SandboxTraining plugin) {
+		this.plugin = plugin;
+		this.config = plugin.getConfig();
+	}
+
+	public  Map<EquipmentSlot, ItemStack> initializePlayerArmor(UUID playerUUID) {
 		Map<EquipmentSlot, ItemStack> initialArmor;
-		
-		if (BotSpawner.isBotSpawned(playerUUID)) {
-			Map<EquipmentSlot, ItemStack> botArmor = BotSpawner.getBotArmor(playerUUID);
+
+		BotSpawner botSpawner = plugin.getBotSpawner();
+		PlayerArmorManager playerArmorManager = plugin.getPlayerArmorManager();
+
+		if (botSpawner.isBotSpawned(playerUUID)) {
+			Map<EquipmentSlot, ItemStack> botArmor = botSpawner.getBotArmor(playerUUID);
 			if (botArmor != null) {
 				initialArmor = new EnumMap<>(botArmor);
-				PlayerArmorManager.playerArmorSelections.put(playerUUID, new EnumMap<>(botArmor));
+				playerArmorManager.playerArmorSelections.put(playerUUID, new EnumMap<>(botArmor));
 			} else {
 				initialArmor = ArmorCycle.getDefaultArmorFromConfig(config, plugin);
 			}
@@ -37,7 +45,7 @@ public class ArmorUtils {
 		return processArmorSlots(initialArmor);
 	}
 
-	private static Map<EquipmentSlot, ItemStack> processArmorSlots(Map<EquipmentSlot, ItemStack> initialArmor) {
+	private Map<EquipmentSlot, ItemStack> processArmorSlots(Map<EquipmentSlot, ItemStack> initialArmor) {
 		Map<EquipmentSlot, ItemStack> processedArmor = new EnumMap<>(EquipmentSlot.class);
 
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -69,7 +77,7 @@ public class ArmorUtils {
 		return processedArmor;
 	}
 
-	public static String getConfigKeyForSlot(EquipmentSlot slot) {
+	public String getConfigKeyForSlot(EquipmentSlot slot) {
 		return switch (slot) {
 			case HEAD -> "helmet";
 			case CHEST -> "chestplate";
@@ -79,7 +87,7 @@ public class ArmorUtils {
 		};
 	}
 
-	public static int getSlotIndex(EquipmentSlot slot) {
+	public int getSlotIndex(EquipmentSlot slot) {
 		return switch (slot) {
 			case HEAD -> 20;
 			case CHEST -> 21;
@@ -89,7 +97,7 @@ public class ArmorUtils {
 		};
 	}
 
-	public static Material getArmorMaterial(String type, EquipmentSlot slot) {
+	public Material getArmorMaterial(String type, EquipmentSlot slot) {
 		String suffix = switch (slot) {
 			case HEAD -> "_HELMET";
 			case CHEST -> "_CHESTPLATE";
@@ -106,7 +114,7 @@ public class ArmorUtils {
 		}
 	}
 
-	public static boolean isValidArmorSlot(EquipmentSlot slot) {
+	public boolean isValidArmorSlot(EquipmentSlot slot) {
 		return slot != EquipmentSlot.HAND && slot != EquipmentSlot.OFF_HAND && slot != EquipmentSlot.BODY;
 	}
 }

@@ -8,33 +8,35 @@ import java.util.UUID;
 
 public class BotRegistry {
 
-	private static final Map<UUID, TrainingBot> spawnedBots = new HashMap<>();
+	private final Map<UUID, TrainingBot> spawnedBots = new HashMap<>();
 
-	public static void registerBot(UUID playerUUID, TrainingBot bot) {
+	public void registerBot(UUID playerUUID, TrainingBot bot) {
 		spawnedBots.put(playerUUID, bot);
 	}
 
-	public static boolean isBotSpawned(UUID playerUUID) {
+	public boolean isBotSpawned(UUID playerUUID) {
 		return spawnedBots.containsKey(playerUUID);
 	}
 
-	public static UUID getBotUUID(UUID playerUUID) {
-		return spawnedBots.get(playerUUID).getUUID();
+	public UUID getBotUUID(UUID playerUUID) {
+		TrainingBot bot = spawnedBots.get(playerUUID);
+		if (bot == null) return null;
+		return bot.getUUID();
 	}
 
-	public static void removeBot(UUID playerUUID) {
+	public void removeBot(UUID playerUUID) {
 		spawnedBots.remove(playerUUID);
 	}
 
-	public static void removeBotByUUID(UUID botUUID) {
+	public void removeBotByUUID(UUID botUUID) {
 		spawnedBots.entrySet().removeIf(entry -> entry.getValue().getUUID().equals(botUUID));
 	}
 
-	public static Map<UUID, TrainingBot> getAllBots() {
+	public Map<UUID, TrainingBot> getAllBots() {
 		return spawnedBots;
 	}
 
-	public static void clear() {
+	public void clear() {
 		spawnedBots.clear();
 	}
 }

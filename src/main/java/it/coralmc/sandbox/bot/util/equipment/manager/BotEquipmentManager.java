@@ -22,7 +22,15 @@ import java.util.*;
 
 public class BotEquipmentManager {
 
-	public static void applyEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+	private final BotEntityFinder botEntityFinder;
+	private final BotRegistry botRegistry;
+
+	public BotEquipmentManager(BotRegistry botRegistry) {
+		this.botRegistry = botRegistry;
+		this.botEntityFinder = new BotEntityFinder(botRegistry);
+	}
+
+	public void applyEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
 		for (var entry : armorMap.entrySet()) {
 			EquipmentSlot slot = EquipmentConverter.toNMSSlot(entry.getKey());
 			if (slot != null) {
@@ -31,7 +39,7 @@ public class BotEquipmentManager {
 		}
 	}
 
-	public static void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+	public void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
 		List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
 		for (var entry : armorMap.entrySet()) {
 			equipmentList.add(Pair.of(EquipmentConverter.toNMSSlot(entry.getKey()), ((CraftItemStack) entry.getValue()).handle));
@@ -39,7 +47,7 @@ public class BotEquipmentManager {
 
 		if (!equipmentList.isEmpty()) {
 			ClientboundSetEquipmentPacket equipmentPacket = new ClientboundSetEquipmentPacket(
-				bot.getId(), equipmentList
+					bot.getId(), equipmentList
 			);
 
 			for (Player online : Bukkit.getOnlinePlayers()) {
@@ -49,14 +57,14 @@ public class BotEquipmentManager {
 		}
 	}
 
-	public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID) {
-		UUID botUUID = BotRegistry.getBotUUID(playerUUID);
+	public Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID, BotRegistry botRegistry) {
+		UUID botUUID = botRegistry.getBotUUID(playerUUID);
 		if (botUUID == null) return null;
 
-		ServerLevel world = BotEntityFinder.getPlayerWorld(playerUUID);
+		ServerLevel world = botEntityFinder.getPlayerWorld(playerUUID);
 		if (world == null) return null;
 
-		LivingEntity botEntity = BotEntityFinder.findBotAsLivingEntity(world, botUUID);
+		LivingEntity botEntity = botEntityFinder.findBotAsLivingEntity(world, botUUID);
 		if (botEntity == null) return null;
 
 		Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor = new EnumMap<>(org.bukkit.inventory.EquipmentSlot.class);
@@ -81,14 +89,14 @@ public class BotEquipmentManager {
 		return armor;
 	}
 
-	public static boolean updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
-		UUID botUUID = BotRegistry.getBotUUID(ownerUUID);
+	public boolean updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap, BotRegistry botRegistry) {
+		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
 		if (botUUID == null) return false;
 
-		ServerLevel world = BotEntityFinder.getPlayerWorld(ownerUUID);
+		ServerLevel world = botEntityFinder.getPlayerWorld(ownerUUID);
 		if (world == null) return false;
 
-		LivingEntity botEntity = BotEntityFinder.findBotAsLivingEntity(world, botUUID);
+		LivingEntity botEntity = botEntityFinder.findBotAsLivingEntity(world, botUUID);
 		if (botEntity == null) return false;
 
 		applyEquipment(botEntity, armorMap);
@@ -97,7 +105,7 @@ public class BotEquipmentManager {
 		return true;
 	}
 
-	public static void fillInventory(TrainingBot bot, ItemStack itemStack) {
+	public void fillInventory(TrainingBot bot, ItemStack itemStack) {
 		for (int i = 0; i < bot.getInventory().items.size(); i++) {
 			ItemStack current = bot.getInventory().items.get(i);
 			if (current == null || current.isEmpty()) {
