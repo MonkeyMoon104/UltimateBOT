@@ -8,3 +8,12 @@ description: Sandbox bot plugin
 commands:
   bot:
     description: Open bot settings GUI
+  reload:
+    description: Ricarica la configurazione o rimuovi bot/mappe
+    usage: /reload <config|bot|maps|all>
+    permission: sb.admin.use
+
+  permissions:
+    sb.admin.use:
+      description: Permette di usare il comando reload
+      default: op
