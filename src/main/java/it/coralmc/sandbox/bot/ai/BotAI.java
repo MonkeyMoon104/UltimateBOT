@@ -22,12 +22,15 @@ public class BotAI {
 	private final SandboxTraining plugin;
 	private final ChatColorUtils chatColorUtils;
 
+	private float targetYaw = 0f;
+	private float rotationSpeed = 8.0f;
 
 	public BotAI(Player bot, SandboxTraining plugin) {
 		this.bot = bot;
 		this.level = bot.level();
 		this.plugin = plugin;
 		this.chatColorUtils = plugin.getChatColorUtils();
+		this.targetYaw = bot.getYRot();
 	}
 
 	public void setKnockbackCooldown(int ticks) {
@@ -57,12 +60,12 @@ public class BotAI {
 		double dz = targetZ - botZ;
 
 		double dist = bot.distanceTo(target);
-		if (dist <= 1.5) return;
+		if (dist <= 1.5) {
+			updateSmoothRotation(dx, dz);
+			return;
+		}
 
-		float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-		bot.setYRot(yaw);
-		bot.yHeadRot = yaw;
-		bot.yBodyRot = yaw;
+		updateSmoothRotation(dx, dz);
 
 		double length = Math.sqrt(dx * dx + dz * dz);
 		if (length == 0) return;
@@ -104,12 +107,49 @@ public class BotAI {
 			return;
 		}
 
-
 		if (canStepUp && bot.onGround()) {
 			bot.setDeltaMovement(bot.getDeltaMovement().x, 0.42, bot.getDeltaMovement().z);
 		}
 
 		bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
+	}
+
+	private void updateSmoothRotation(double dx, double dz) {
+		float newTargetYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
+
+		float currentYaw = bot.getYRot();
+		float angleDiff = normalizeAngle(newTargetYaw - currentYaw);
+
+		if (Math.abs(angleDiff) < 1.0f) {
+			bot.setYRot(newTargetYaw);
+			bot.yHeadRot = newTargetYaw;
+			bot.yBodyRot = newTargetYaw;
+			targetYaw = newTargetYaw;
+			return;
+		}
+
+		float rotationStep = Math.signum(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed);
+		float newYaw = normalizeAngle(currentYaw + rotationStep);
+
+		bot.setYRot(newYaw);
+		bot.yHeadRot = newYaw;
+		bot.yBodyRot = newYaw;
+
+		targetYaw = newTargetYaw;
+	}
+
+	private float normalizeAngle(float angle) {
+		angle = angle % 360;
+		if (angle > 180) {
+			angle -= 360;
+		} else if (angle < -180) {
+			angle += 360;
+		}
+		return angle;
+	}
+
+	public void setRotationSpeed(float speed) {
+		this.rotationSpeed = Math.max(0.1f, Math.min(30f, speed));
 	}
 
 	private double[] findAlternativeDirection(double dx, double dz, int maxTries) {
