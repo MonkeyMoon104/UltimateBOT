@@ -68,7 +68,7 @@ public class TrainingBot extends Player {
 	public void tick() {
 		super.tick();
 
-		if (follow && targetPlayer != null && !targetPlayer.isDead()) {
+		if (targetPlayer != null && !targetPlayer.isDead()) {
 			Player target = ((org.bukkit.craftbukkit.entity.CraftPlayer) targetPlayer).getHandle();
 			botAI.getRotationController().updateRotation(target);
 		}
