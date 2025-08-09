@@ -27,8 +27,32 @@ public class GUISlotHandler {
 		};
 	}
 
+	public EquipmentSlot getEquipmentSlotFromGlassSlot(int guiSlot) {
+		return switch (guiSlot) {
+			case 11 -> EquipmentSlot.HEAD;
+			case 12 -> EquipmentSlot.CHEST;
+			case 14 -> EquipmentSlot.LEGS;
+			case 15 -> EquipmentSlot.FEET;
+			default -> null;
+		};
+	}
+
+	public int getGlassSlotFromEquipmentSlot(EquipmentSlot equipmentSlot) {
+		return switch (equipmentSlot) {
+			case HEAD -> 11;
+			case CHEST -> 12;
+			case LEGS -> 14;
+			case FEET -> 15;
+			default -> -1;
+		};
+	}
+
 	public boolean isArmorSlot(int guiSlot) {
 		return guiSlot == 20 || guiSlot == 21 || guiSlot == 23 || guiSlot == 24;
+	}
+
+	public boolean isGlassSlot(int guiSlot) {
+		return guiSlot == 11 || guiSlot == 12 || guiSlot == 14 || guiSlot == 15;
 	}
 
 	public boolean isFollowButton(int guiSlot) {
@@ -48,6 +72,16 @@ public class GUISlotHandler {
 		mapping.put(EquipmentSlot.HEAD, 20);
 		mapping.put(EquipmentSlot.CHEST, 21);
 		mapping.put(EquipmentSlot.LEGS, 23);
+		mapping.put(EquipmentSlot.FEET, 24);
+		return mapping;
+	}
+
+	public Map<EquipmentSlot, Integer> createGlassSlotMapping() {
+		Map<EquipmentSlot, Integer> mapping = new EnumMap<>(EquipmentSlot.class);
+		mapping.put(EquipmentSlot.HEAD, 11);
+		mapping.put(EquipmentSlot.CHEST, 12);
+		mapping.put(EquipmentSlot.LEGS, 14);
+		mapping.put(EquipmentSlot.FEET, 15);
 		return mapping;
 	}
 }

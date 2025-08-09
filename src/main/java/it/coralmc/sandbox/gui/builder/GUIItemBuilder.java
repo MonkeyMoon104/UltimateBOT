@@ -125,15 +125,45 @@ public class GUIItemBuilder {
 		return item;
 	}
 
-	public ItemStack createArmorItem(Material material) {
+	public ItemStack createEnchantButton(boolean blastProtectionEnabled) {
+		Material material = blastProtectionEnabled ? Material.LIME_STAINED_GLASS_PANE : Material.GLASS_PANE;
+
+		ItemStack item = new ItemStack(material);
+		ItemMeta meta = item.getItemMeta();
+
+		if (meta != null) {
+			String name = blastProtectionEnabled ?
+					config.getString("gui.glass-panel.enabled-name", "&aBlast Protection: ON") :
+					config.getString("gui.glass-panel.disabled-name", "&cBlast Protection: OFF");
+
+			meta.setDisplayName(chatColorUtils.translate(name));
+
+			List<String> lore = blastProtectionEnabled ?
+					getLoreFromConfig("gui.glass-panel.enabled-lore") :
+					getLoreFromConfig("gui.glass-panel.disabled-lore");
+
+			if (lore.isEmpty()) {
+				lore = Collections.singletonList(chatColorUtils.translate(
+						blastProtectionEnabled ? "&aClick to disable" : "&cClick to enable"
+				));
+			}
+
+			meta.setLore(lore);
+			item.setItemMeta(meta);
+		}
+
+		return item;
+	}
+
+	public ItemStack createArmorItem(Material material, boolean hasBlastProtection) {
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 
 		if (meta != null) {
 			List<String> lore = getLoreFromConfigWithPlaceholder(
-				"gui.default-armor.lore.set-type",
-				"%type%",
-				getCleanArmorTypeName(material)
+					"gui.default-armor.lore.set-type",
+					"%type%",
+					getCleanArmorTypeName(material)
 			);
 
 			if (lore.isEmpty()) {
@@ -143,7 +173,11 @@ public class GUIItemBuilder {
 			}
 
 			meta.setLore(lore);
-			meta.addEnchant(Enchantment.PROTECTION, 4, false);
+
+			if (hasBlastProtection) {
+				meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
+			}
+
 			item.setItemMeta(meta);
 		}
 

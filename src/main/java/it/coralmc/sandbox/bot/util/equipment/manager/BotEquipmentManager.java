@@ -11,12 +11,15 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -31,18 +34,56 @@ public class BotEquipmentManager {
 	}
 
 	public void applyEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+		applyEquipment(bot, armorMap, emptyBlastProtection);
+	}
+
+	public void applyEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+							   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
 		for (var entry : armorMap.entrySet()) {
 			EquipmentSlot slot = EquipmentConverter.toNMSSlot(entry.getKey());
 			if (slot != null) {
-				bot.setItemSlot(slot, ((CraftItemStack) entry.getValue()).handle);
+				org.bukkit.inventory.ItemStack bukkitItem = entry.getValue().clone();
+
+				boolean hasBlastProtection = blastProtectionMap.getOrDefault(entry.getKey(), false);
+				applyArmorEnchants(bukkitItem, hasBlastProtection);
+
+				ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+				bot.setItemSlot(slot, nmsItem);
 			}
 		}
 	}
 
-	public void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+	private void applyArmorEnchants(org.bukkit.inventory.ItemStack item, boolean hasBlastProtection) {
+		if (item == null || item.getType() == Material.AIR) return;
+
+		ItemMeta meta = item.getItemMeta();
+		if (meta != null) {
+			meta.removeEnchant(Enchantment.BLAST_PROTECTION);
+
+			if (hasBlastProtection) {
+				meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
+			}
+
+			item.setItemMeta(meta);
+		}
+	}
+
+	public void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+								   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
 		List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+
 		for (var entry : armorMap.entrySet()) {
-			equipmentList.add(Pair.of(EquipmentConverter.toNMSSlot(entry.getKey()), ((CraftItemStack) entry.getValue()).handle));
+			EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(entry.getKey());
+			if (nmsSlot != null) {
+				org.bukkit.inventory.ItemStack bukkitItem = entry.getValue().clone();
+
+				boolean hasBlastProtection = blastProtectionMap.getOrDefault(entry.getKey(), false);
+				applyArmorEnchants(bukkitItem, hasBlastProtection);
+
+				ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+				equipmentList.add(Pair.of(nmsSlot, nmsItem));
+			}
 		}
 
 		if (!equipmentList.isEmpty()) {
@@ -90,6 +131,12 @@ public class BotEquipmentManager {
 	}
 
 	public boolean updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap, BotRegistry botRegistry) {
+		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+		return updateBotArmor(ownerUUID, armorMap, emptyBlastProtection, botRegistry);
+	}
+
+	public boolean updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+								  Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap, BotRegistry botRegistry) {
 		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
 		if (botUUID == null) return false;
 
@@ -99,8 +146,8 @@ public class BotEquipmentManager {
 		LivingEntity botEntity = botEntityFinder.findBotAsLivingEntity(world, botUUID);
 		if (botEntity == null) return false;
 
-		applyEquipment(botEntity, armorMap);
-		broadcastEquipment(botEntity, armorMap);
+		applyEquipment(botEntity, armorMap, blastProtectionMap);
+		broadcastEquipment(botEntity, armorMap, blastProtectionMap);
 
 		return true;
 	}

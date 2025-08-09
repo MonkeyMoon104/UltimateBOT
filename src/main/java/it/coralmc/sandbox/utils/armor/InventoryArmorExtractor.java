@@ -16,6 +16,7 @@ public class InventoryArmorExtractor {
 	public InventoryArmorExtractor(GUISlotHandler guiSlotHandler) {
 		this.guiSlotHandler = guiSlotHandler;
 	}
+
 	public Map<EquipmentSlot, ItemStack> extractArmorFromGUI(Inventory inventory) {
 		Map<EquipmentSlot, ItemStack> selectedArmor = new EnumMap<>(EquipmentSlot.class);
 
@@ -36,6 +37,27 @@ public class InventoryArmorExtractor {
 		return selectedArmor;
 	}
 
+	public Map<EquipmentSlot, Boolean> extractBlastProtectionFromGUI(Inventory inventory) {
+		Map<EquipmentSlot, Boolean> blastProtectionSettings = new EnumMap<>(EquipmentSlot.class);
+
+		for (EquipmentSlot armorSlot : EquipmentSlot.values()) {
+			if (armorSlot == EquipmentSlot.HAND || armorSlot == EquipmentSlot.OFF_HAND || armorSlot == EquipmentSlot.BODY) {
+				continue;
+			}
+
+			int glassSlot = guiSlotHandler.getGlassSlotFromEquipmentSlot(armorSlot);
+			if (glassSlot == -1) continue;
+
+			ItemStack glassItem = inventory.getItem(glassSlot);
+			boolean hasBlastProtection = glassItem != null &&
+					glassItem.getType() == Material.LIME_STAINED_GLASS_PANE;
+
+			blastProtectionSettings.put(armorSlot, hasBlastProtection);
+		}
+
+		return blastProtectionSettings;
+	}
+
 	public boolean isValidArmorItem(ItemStack item) {
 		return item != null && item.getType() != Material.AIR;
 	}
@@ -46,6 +68,14 @@ public class InventoryArmorExtractor {
 			return item.getType();
 		}
 		return Material.AIR;
+	}
+
+	public boolean extractBlastProtectionForSlot(Inventory inventory, EquipmentSlot slot) {
+		int glassSlot = guiSlotHandler.getGlassSlotFromEquipmentSlot(slot);
+		if (glassSlot == -1) return false;
+
+		ItemStack glassItem = inventory.getItem(glassSlot);
+		return glassItem != null && glassItem.getType() == Material.LIME_STAINED_GLASS_PANE;
 	}
 
 	public boolean hasCompleteArmor(Inventory inventory) {

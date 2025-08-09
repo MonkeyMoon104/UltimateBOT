@@ -53,6 +53,12 @@ public class BotSpawner {
     }
 
 	public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap, boolean follow, int totem) {
+		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+		spawnFakeBot(viewer, armorMap, emptyBlastProtection, follow, totem);
+	}
+
+	public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+							 Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap, boolean follow, int totem) {
 		ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
 		ServerLevel world = handle.serverLevel().getLevel();
 
@@ -92,9 +98,9 @@ public class BotSpawner {
 		world.addFreshEntity(bot);
 		//setupBotInventory(bot, totem);
 		bot.getBotAI().manageTotem();
-		botEquipmentManager.applyEquipment(bot, armorMap);
+		botEquipmentManager.applyEquipment(bot, armorMap, blastProtectionMap);
 
-		broadcastBotToPlayers(bot, armorMap);
+		broadcastBotToPlayers(bot, armorMap, blastProtectionMap);
 		botRegistry.registerBot(viewer.getUniqueId(), bot);
 	}
 
@@ -131,7 +137,13 @@ public class BotSpawner {
 	}
 
 	public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
-		botEquipmentManager.updateBotArmor(ownerUUID, armorMap, botRegistry);
+		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+		updateBotArmor(ownerUUID, armorMap, emptyBlastProtection);
+	}
+
+	public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+							   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+		botEquipmentManager.updateBotArmor(ownerUUID, armorMap, blastProtectionMap, botRegistry);
 	}
 
 	public void removeBot(UUID botUUID) {
@@ -170,12 +182,18 @@ public class BotSpawner {
 
 
 	private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+		broadcastBotToPlayers(bot, armorMap, emptyBlastProtection);
+	}
+
+	private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+									   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			packet.sendAddPlayerPacket(online, bot);
 			packet.sendSpawnPlayerPacket(online, bot);
 		}
 
-		botEquipmentManager.broadcastEquipment(bot, armorMap);
+		botEquipmentManager.broadcastEquipment(bot, armorMap, blastProtectionMap);
 	}
 
 	public void updateBotFollow(UUID ownerUUID, boolean follow) {

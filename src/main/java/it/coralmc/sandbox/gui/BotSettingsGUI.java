@@ -7,6 +7,8 @@ import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
 import it.coralmc.sandbox.gui.builder.GUIItemBuilder;
 import it.coralmc.sandbox.gui.builder.armor.ArmorUtils;
 import it.coralmc.sandbox.gui.validator.GUIValidator;
+import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
+import it.coralmc.sandbox.utils.gui.GUISlotHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -28,6 +30,8 @@ public class BotSettingsGUI {
 	private final BotSpawner botSpawner;
 	private final BotEntityFinder botEntityFinder;
 	private final SandboxTraining plugin;
+	private final PlayerArmorManager playerArmorManager;
+	private final GUISlotHandler guiSlotHandler;
 	private boolean follow;
 
 	public BotSettingsGUI(Player player, SandboxTraining plugin, BotEntityFinder botEntityFinder) {
@@ -36,11 +40,14 @@ public class BotSettingsGUI {
 		this.armorUtils = plugin.getArmorUtils();
 		this.botSpawner = plugin.getBotSpawner();
 		this.itemBuilder = plugin.getGuiItemBuilder();
-        this.botEntityFinder = botEntityFinder;
-        this.gui = Bukkit.createInventory(null, 54, GUIValidator.getBotSettingsGUITitle());
+		this.botEntityFinder = botEntityFinder;
+		this.playerArmorManager = plugin.getPlayerArmorManager();
+		this.guiSlotHandler = plugin.getGuiSlotHandler();
+		this.gui = Bukkit.createInventory(null, 54, GUIValidator.getBotSettingsGUITitle());
 
 		initializeArmor();
 		setupGUIItems();
+		setupGlassPanels();
 	}
 
 	public static boolean isBotSettingsGUI(InventoryClickEvent event) {
@@ -49,13 +56,33 @@ public class BotSettingsGUI {
 
 	private void initializeArmor() {
 		Map<EquipmentSlot, ItemStack> initialArmor = armorUtils.initializePlayerArmor(player.getUniqueId());
-		
+
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (!armorUtils.isValidArmorSlot(slot)) continue;
 
 			Material material = initialArmor.get(slot).getType();
 			selectedArmor.put(slot, material);
-			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
+
+			boolean hasBlastProtection = playerArmorManager.getBlastProtectionSetting(player.getUniqueId(), slot);
+			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material, hasBlastProtection));
+		}
+	}
+
+	private void setupGlassPanels() {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (!armorUtils.isValidArmorSlot(slot)) continue;
+
+			int glassSlot = guiSlotHandler.getGlassSlotFromEquipmentSlot(slot);
+			if (glassSlot != -1) {
+				boolean hasBlastProtection;
+				if (botSpawner.isBotSpawned(player.getUniqueId())) {
+					hasBlastProtection = playerArmorManager.getBlastProtectionSetting(player.getUniqueId(), slot);
+				} else {
+					hasBlastProtection = playerArmorManager.getBlastProtectionSetting(player.getUniqueId(), slot);
+				}
+
+				gui.setItem(glassSlot, itemBuilder.createEnchantButton(hasBlastProtection));
+			}
 		}
 	}
 
@@ -100,7 +127,15 @@ public class BotSettingsGUI {
 	public void updateArmorPiece(EquipmentSlot slot, Material material) {
 		if (armorUtils.isValidArmorSlot(slot)) {
 			selectedArmor.put(slot, material);
-			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material));
+			boolean hasBlastProtection = playerArmorManager.getBlastProtectionSetting(player.getUniqueId(), slot);
+			gui.setItem(armorUtils.getSlotIndex(slot), itemBuilder.createArmorItem(material, hasBlastProtection));
+		}
+	}
+
+	public void updateGlassPanel(EquipmentSlot slot, boolean blastProtection) {
+		int glassSlot = guiSlotHandler.getGlassSlotFromEquipmentSlot(slot);
+		if (glassSlot != -1) {
+			gui.setItem(glassSlot, itemBuilder.createEnchantButton(blastProtection));
 		}
 	}
 

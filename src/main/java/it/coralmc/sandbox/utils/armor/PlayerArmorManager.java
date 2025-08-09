@@ -14,9 +14,21 @@ public class PlayerArmorManager {
 	private final Map<UUID, Boolean> playerFollowSetting = new HashMap<>();
 	private final Map<UUID, Integer> playerTotemCount = new HashMap<>();
 
+	private final Map<UUID, Map<EquipmentSlot, Boolean>> playerBlastProtectionSettings = new HashMap<>();
+
 	public void initializePlayerDefaults(UUID playerUUID, Map<EquipmentSlot, ItemStack> defaultArmor) {
 		playerArmorSelections.putIfAbsent(playerUUID, defaultArmor);
 		playerFollowSetting.putIfAbsent(playerUUID, false);
+
+		if (!playerBlastProtectionSettings.containsKey(playerUUID)) {
+			Map<EquipmentSlot, Boolean> defaultBlastProtection = new HashMap<>();
+			for (EquipmentSlot slot : EquipmentSlot.values()) {
+				if (slot != EquipmentSlot.HAND && slot != EquipmentSlot.OFF_HAND && slot != EquipmentSlot.BODY) {
+					defaultBlastProtection.put(slot, false);
+				}
+			}
+			playerBlastProtectionSettings.put(playerUUID, defaultBlastProtection);
+		}
 	}
 
 	public Map<EquipmentSlot, ItemStack> getPlayerArmorSelection(UUID playerUUID) {
@@ -42,6 +54,7 @@ public class PlayerArmorManager {
 		playerArmorSelections.remove(playerUUID);
 		playerFollowSetting.remove(playerUUID);
 		playerTotemCount.remove(playerUUID);
+		playerBlastProtectionSettings.remove(playerUUID);
 	}
 
 	public void setPlayerArmorSelection(UUID playerUUID, Map<EquipmentSlot, ItemStack> armorSelection) {
@@ -56,9 +69,32 @@ public class PlayerArmorManager {
 		return playerTotemCount.getOrDefault(uuid, 37);
 	}
 
+	public boolean getBlastProtectionSetting(UUID playerUUID, EquipmentSlot slot) {
+		Map<EquipmentSlot, Boolean> settings = playerBlastProtectionSettings.get(playerUUID);
+		return settings != null && settings.getOrDefault(slot, false);
+	}
+
+	public void setBlastProtectionSetting(UUID playerUUID, EquipmentSlot slot, boolean enabled) {
+		playerBlastProtectionSettings.computeIfAbsent(playerUUID, k -> new HashMap<>()).put(slot, enabled);
+	}
+
+	public void toggleBlastProtectionSetting(UUID playerUUID, EquipmentSlot slot) {
+		boolean current = getBlastProtectionSetting(playerUUID, slot);
+		setBlastProtectionSetting(playerUUID, slot, !current);
+	}
+
+	public Map<EquipmentSlot, Boolean> getPlayerBlastProtectionSettings(UUID playerUUID) {
+		return playerBlastProtectionSettings.getOrDefault(playerUUID, new HashMap<>());
+	}
+
+	public void setPlayerBlastProtectionSettings(UUID playerUUID, Map<EquipmentSlot, Boolean> settings) {
+		playerBlastProtectionSettings.put(playerUUID, settings);
+	}
+
 	public void clearAll() {
 		playerArmorSelections.clear();
 		playerFollowSetting.clear();
 		playerTotemCount.clear();
+		playerBlastProtectionSettings.clear();
 	}
 }

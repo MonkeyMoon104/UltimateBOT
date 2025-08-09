@@ -73,3 +73,18 @@ gui:
       - "&eClick sinistro: &a+1"
       - "&eClick destro: &c-1"
       - "&7(-1 = Totem illimitati)"
+
+  enchant-button:
+    on:
+      name: "&aEnchant: Attivo"
+      material: "LIME_STAINED_GLASS_PANE"
+      lore:
+        - "&7L'incantesimo è abilitato."
+        - "&aClicca per disattivare"
+    off:
+      name: "&cEnchant: Disattivo"
+      material: "GLASS_PANE"
+      lore:
+        - "&7L'incantesimo è disabilitato."
+        - "&cClicca per attivare"
+
