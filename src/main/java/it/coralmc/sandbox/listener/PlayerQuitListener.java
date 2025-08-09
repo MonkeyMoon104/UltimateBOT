@@ -41,7 +41,7 @@ public class PlayerQuitListener implements Listener {
 		Player player = event.getPlayer();
 
 		if (botSpawner.isBotSpawned(player.getUniqueId())) {
-			botSpawner.despawnBot(player);
+			botSpawner.despawnBotInWorld(player, event.getFrom());
 			player.closeInventory();
 
 			String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");

@@ -21,7 +21,9 @@ import net.minecraft.world.item.ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -180,4 +182,14 @@ public class BotSpawner {
 		}
 	}
 
+	public void despawnBotInWorld(Player owner, World fromWorld) {
+		UUID ownerUUID = owner.getUniqueId();
+		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
+		if (botUUID == null) return;
+
+		ServerLevel world = ((CraftWorld) fromWorld).getHandle();
+		if (botEntityFinder.removeEntity(world, botUUID)) {
+			botRegistry.removeBot(ownerUUID);
+		}
+	}
 }
