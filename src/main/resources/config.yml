@@ -74,3 +74,19 @@ gui:
       - "&eClick destro: &c-1"
       - "&7(-1 = Totem illimitati)"
 
+  enchant-button:
+    enabled-name: "&aBlast Protection: ON"
+    disabled-name: "&cBlast Protection: OFF"
+    enabled-material: "LIME_STAINED_GLASS_PANE"
+    disabled-material: "GLASS_PANE"
+    enabled-lore:
+      - "&7Protezione esplosioni: &aAttiva"
+      - ""
+      - "&cClicca per disabilitare"
+    disabled-lore:
+      - "&7Protezione esplosioni: &cInattiva"
+      - ""
+      - "&aClicca per abilitare"
+    fallback-enabled-lore: "&aClicca per disabilitare"
+    fallback-disabled-lore: "&cClicca per abilitare"
+

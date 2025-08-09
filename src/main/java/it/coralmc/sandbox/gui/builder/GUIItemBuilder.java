@@ -126,26 +126,33 @@ public class GUIItemBuilder {
 	}
 
 	public ItemStack createEnchantButton(boolean blastProtectionEnabled) {
-		Material material = blastProtectionEnabled ? Material.LIME_STAINED_GLASS_PANE : Material.GLASS_PANE;
+		String enabledMaterialName = config.getString("gui.enchant-button.enabled-material", "LIME_STAINED_GLASS_PANE");
+		String disabledMaterialName = config.getString("gui.enchant-button.disabled-material", "GLASS_PANE");
+
+		Material enabledMaterial = getMaterialSafely(enabledMaterialName, Material.LIME_STAINED_GLASS_PANE, "enchant-button-enabled");
+		Material disabledMaterial = getMaterialSafely(disabledMaterialName, Material.GLASS_PANE, "enchant-button-disabled");
+
+		Material material = blastProtectionEnabled ? enabledMaterial : disabledMaterial;
 
 		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 
 		if (meta != null) {
 			String name = blastProtectionEnabled ?
-					config.getString("gui.glass-panel.enabled-name", "&aBlast Protection: ON") :
-					config.getString("gui.glass-panel.disabled-name", "&cBlast Protection: OFF");
+					config.getString("gui.enchant-button.enabled-name", "&aBlast Protection: ON") :
+					config.getString("gui.enchant-button.disabled-name", "&cBlast Protection: OFF");
 
 			meta.setDisplayName(chatColorUtils.translate(name));
 
 			List<String> lore = blastProtectionEnabled ?
-					getLoreFromConfig("gui.glass-panel.enabled-lore") :
-					getLoreFromConfig("gui.glass-panel.disabled-lore");
+					getLoreFromConfig("gui.enchant-button.enabled-lore") :
+					getLoreFromConfig("gui.enchant-button.disabled-lore");
 
 			if (lore.isEmpty()) {
-				lore = Collections.singletonList(chatColorUtils.translate(
-						blastProtectionEnabled ? "&aClick to disable" : "&cClick to enable"
-				));
+				String fallbackLore = blastProtectionEnabled ?
+						config.getString("gui.enchant-button.fallback-enabled-lore", "&aClicca per disabilitare") :
+						config.getString("gui.enchant-button.fallback-disabled-lore", "&cClicca per abilitare");
+				lore = Collections.singletonList(chatColorUtils.translate(fallbackLore));
 			}
 
 			meta.setLore(lore);
