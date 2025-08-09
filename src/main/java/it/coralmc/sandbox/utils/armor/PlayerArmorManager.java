@@ -66,7 +66,7 @@ public class PlayerArmorManager {
 	}
 
 	public int getPlayerTotemCount(UUID uuid) {
-		return playerTotemCount.getOrDefault(uuid, 37);
+		return playerTotemCount.getOrDefault(uuid, -1);
 	}
 
 	public boolean getBlastProtectionSetting(UUID playerUUID, EquipmentSlot slot) {
