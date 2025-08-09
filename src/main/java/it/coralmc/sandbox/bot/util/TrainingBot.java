@@ -33,6 +33,8 @@ public class TrainingBot extends Player {
 	private final ChatColorUtils chatColorUtils;
 	private final String deadBotMessage;
 
+	private double targetDistance = 1.0;
+
 	public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile,
 					   org.bukkit.entity.Player targetPlayer,
 					   boolean follow,
@@ -51,11 +53,25 @@ public class TrainingBot extends Player {
 		this.playerArmorManager = plugin.getPlayerArmorManager();
 		this.chatColorUtils = plugin.getChatColorUtils();
 		this.deadBotMessage = deadBotMessage;
+
+		configureBotAI();
+	}
+
+	private void configureBotAI() {
+		if (targetPlayer != null && follow) {
+			Player target = ((org.bukkit.craftbukkit.entity.CraftPlayer) targetPlayer).getHandle();
+			botAI.getRotationController().setInstantRotation(target);
+		}
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
+
+		if (follow && targetPlayer != null && !targetPlayer.isDead()) {
+			Player target = ((org.bukkit.craftbukkit.entity.CraftPlayer) targetPlayer).getHandle();
+			botAI.getRotationController().updateRotation(target);
+		}
 
 		ItemStack offhand = this.getItemBySlot(EquipmentSlot.OFFHAND);
 		ItemStack mainhand = this.getItemBySlot(EquipmentSlot.MAINHAND);

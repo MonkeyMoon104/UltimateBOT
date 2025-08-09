@@ -1,13 +1,10 @@
 package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.util.TrainingBot;
-import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EquipmentSlot;
+import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.totem.BotTotemController;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
@@ -16,21 +13,18 @@ public class BotAI {
 	private final Player bot;
 	private final Level level;
 	private int knockbackCooldown = 0;
-	private double[] diversionDirection = null;
-	private int diversionTicks = 0;
-	private boolean warnedOutOfTotems = false;
-	private final SandboxTraining plugin;
-	private final ChatColorUtils chatColorUtils;
 
-	private float targetYaw = 0f;
-	private float rotationSpeed = 8.0f;
+	private final BotMovementController movementController;
+	private final BotRotationController rotationController;
+	private final BotTotemController totemController;
 
 	public BotAI(Player bot, SandboxTraining plugin) {
 		this.bot = bot;
 		this.level = bot.level();
-		this.plugin = plugin;
-		this.chatColorUtils = plugin.getChatColorUtils();
-		this.targetYaw = bot.getYRot();
+
+		this.movementController = new BotMovementController(bot, level);
+		this.rotationController = new BotRotationController(bot);
+		this.totemController = new BotTotemController(bot, plugin);
 	}
 
 	public void setKnockbackCooldown(int ticks) {
@@ -38,6 +32,10 @@ public class BotAI {
 	}
 
 	public void tick(org.bukkit.entity.Player targetBukkitPlayer) {
+		tick(targetBukkitPlayer, 1.5);
+	}
+
+	public void tick(org.bukkit.entity.Player targetBukkitPlayer, double targetDistance) {
 		if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
 
 		if (knockbackCooldown > 0) {
@@ -47,217 +45,39 @@ public class BotAI {
 
 		Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
 
-		double targetX = target.getX();
-		double targetY = target.getY();
-		double targetZ = target.getZ();
-
-		double botX = bot.getX();
-		double botY = bot.getY();
-		double botZ = bot.getZ();
-
-		double dx = targetX - botX;
-		double dy = targetY - botY;
-		double dz = targetZ - botZ;
+		rotationController.updateRotation(target);
 
 		double dist = bot.distanceTo(target);
-		if (dist <= 1.5) {
-			updateSmoothRotation(dx, dz);
+		if (Math.abs(dist - targetDistance) <= 0.3) {
+			movementController.stopMovement();
 			return;
 		}
 
-		updateSmoothRotation(dx, dz);
-
-		double length = Math.sqrt(dx * dx + dz * dz);
-		if (length == 0) return;
-
-		dx = dx / length;
-		dz = dz / length;
-
-		double speed = 0.25;
-		double moveX = dx * speed;
-		double moveZ = dz * speed;
-
-		BlockPos front = BlockPos.containing(botX + dx, botY, botZ + dz);
-		BlockPos above = front.above();
-		BlockPos above2 = above.above();
-
-		boolean frontBlocked = !level.getBlockState(front).getCollisionShape(level, front).isEmpty();
-		boolean aboveClear = level.getBlockState(above).getCollisionShape(level, above).isEmpty();
-		boolean above2Clear = level.getBlockState(above2).getCollisionShape(level, above2).isEmpty();
-
-		boolean canStepUp = frontBlocked && aboveClear;
-		boolean tooHigh = frontBlocked && !aboveClear && !above2Clear;
-
-		if (tooHigh) {
-			if (diversionTicks <= 0 || diversionDirection == null) {
-				diversionDirection = findAlternativeDirection(dx, dz, 6);
-				diversionTicks = 10;
-			}
-
-			if (diversionDirection != null) {
-				diversionTicks--;
-				double altDx = diversionDirection[0];
-				double altDz = diversionDirection[1];
-				bot.setDeltaMovement(altDx * speed, bot.getDeltaMovement().y, altDz * speed);
-			} else {
-				bot.setDeltaMovement(0, bot.getDeltaMovement().y, 0);
-			}
-			diversionDirection = null;
-			diversionTicks = 0;
-			return;
+		if (dist < targetDistance) {
+			movementController.moveAwayFrom(target, targetDistance);
 		}
-
-		if (canStepUp && bot.onGround()) {
-			bot.setDeltaMovement(bot.getDeltaMovement().x, 0.42, bot.getDeltaMovement().z);
+		else if (dist > targetDistance) {
+			movementController.moveTowards(target, targetDistance);
 		}
-
-		bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
-	}
-
-	private void updateSmoothRotation(double dx, double dz) {
-		float newTargetYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-
-		float currentYaw = bot.getYRot();
-		float angleDiff = normalizeAngle(newTargetYaw - currentYaw);
-
-		if (Math.abs(angleDiff) < 1.0f) {
-			bot.setYRot(newTargetYaw);
-			bot.yHeadRot = newTargetYaw;
-			bot.yBodyRot = newTargetYaw;
-			targetYaw = newTargetYaw;
-			return;
-		}
-
-		float rotationStep = Math.signum(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed);
-		float newYaw = normalizeAngle(currentYaw + rotationStep);
-
-		bot.setYRot(newYaw);
-		bot.yHeadRot = newYaw;
-		bot.yBodyRot = newYaw;
-
-		targetYaw = newTargetYaw;
-	}
-
-	private float normalizeAngle(float angle) {
-		angle = angle % 360;
-		if (angle > 180) {
-			angle -= 360;
-		} else if (angle < -180) {
-			angle += 360;
-		}
-		return angle;
-	}
-
-	public void setRotationSpeed(float speed) {
-		this.rotationSpeed = Math.max(0.1f, Math.min(30f, speed));
-	}
-
-	private double[] findAlternativeDirection(double dx, double dz, int maxTries) {
-		double angle = Math.atan2(dz, dx);
-
-		for (int i = 1; i <= maxTries; i++) {
-			double offset = Math.toRadians(15 * i);
-
-			for (int sign : new int[]{1, -1}) {
-				double newAngle = angle + offset * sign;
-
-				double newDx = Math.cos(newAngle);
-				double newDz = Math.sin(newAngle);
-
-				BlockPos checkPos = BlockPos.containing(bot.getX() + newDx, bot.getY(), bot.getZ() + newDz);
-				BlockPos checkAbove = checkPos.above();
-				BlockPos checkAbove2 = checkAbove.above();
-
-				boolean frontClear = level.getBlockState(checkPos).getCollisionShape(level, checkPos).isEmpty();
-				boolean aboveClear = level.getBlockState(checkAbove).getCollisionShape(level, checkAbove).isEmpty();
-				boolean above2Clear = level.getBlockState(checkAbove2).getCollisionShape(level, checkAbove2).isEmpty();
-
-				if (frontClear && aboveClear && above2Clear) {
-					return new double[]{newDx, newDz};
-				}
-			}
-		}
-
-		return null;
 	}
 
 	public void manageTotem() {
-		if (!(bot instanceof TrainingBot trainingBot)) return;
-
-		ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
-		ItemStack mainhand = bot.getItemBySlot(EquipmentSlot.MAINHAND);
-
-		int totemCount = trainingBot.getTotemCount();
-
-		boolean hasOffhandTotem = offhand != null && !offhand.isEmpty() && offhand.is(Items.TOTEM_OF_UNDYING);
-		boolean hasMainhandTotem = mainhand != null && !mainhand.isEmpty() && mainhand.is(Items.TOTEM_OF_UNDYING);
-
-		int equippedTotems = (hasOffhandTotem ? 1 : 0) + (hasMainhandTotem ? 1 : 0);
-
-		if (totemCount == -1) {
-			if (equippedTotems < 2) {
-				if (!hasOffhandTotem) {
-					bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-				} else if (!hasMainhandTotem) {
-					bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-				}
-			}
-			warnedOutOfTotems = false;
-
-		} else if (totemCount == 0) {
-			if (hasOffhandTotem) {
-				bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-			}
-			if (hasMainhandTotem) {
-				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-			}
-
-			if (!warnedOutOfTotems) {
-				var player = trainingBot.getTargetPlayer();
-				if (player != null && player.isOnline()) {
-					String msg = plugin.getConfig()
-							.getString("bot.totem-finish", "[%botname%] Running out of totems");
-					String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
-					msg = msg.replace("%botname%", botName);
-					player.sendMessage(chatColorUtils.translate(msg));
-				}
-				warnedOutOfTotems = true;
-			}
-
-		} else if (totemCount == 1) {
-			if (equippedTotems == 0) {
-				bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-			} else if (equippedTotems == 2) {
-				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-			} else if (equippedTotems == 1 && !hasOffhandTotem && hasMainhandTotem) {
-				bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-				bot.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-			}
-			warnedOutOfTotems = false;
-
-		} else if (totemCount >= 2) {
-			int neededTotems = Math.min(2, totemCount) - equippedTotems;
-
-			if (neededTotems > 0) {
-				if (!hasOffhandTotem) {
-					bot.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-					neededTotems--;
-				}
-				if (neededTotems > 0 && !hasMainhandTotem) {
-					bot.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.TOTEM_OF_UNDYING));
-				}
-			}
-			warnedOutOfTotems = false;
-		}
+		totemController.manageTotem();
 	}
 
 	public void onTotemUsed() {
-		if (bot instanceof TrainingBot trainingBot) {
-			int totemCount = trainingBot.getTotemCount();
+		totemController.onTotemUsed();
+	}
 
-			if (totemCount > 0) {
-				trainingBot.setTotemCount(totemCount - 1);
-			}
-		}
+	public BotMovementController getMovementController() {
+		return movementController;
+	}
+
+	public BotRotationController getRotationController() {
+		return rotationController;
+	}
+
+	public BotTotemController getTotemController() {
+		return totemController;
 	}
 }
