@@ -40,6 +40,8 @@ public class TrainingBot extends Player {
 					   SandboxTraining plugin,
 					   String deadBotMessage) {
 		super(level, pos, yRot, gameProfile);
+		this.setNoGravity(false);
+		this.setOnGround(false);
 		this.targetPlayer = targetPlayer;
 		this.follow = follow;
 		this.plugin = plugin;
