@@ -212,6 +212,8 @@ public class InventoryClickListener implements Listener {
 		if (current < -1) current = -1;
 		if (current > 37) current = 37;
 
+		playerArmorManager.setPlayerTotemCount(uuid, current);
+
 		e.getInventory().setItem(22, guiItemBuilder.createTotemButton(current));
 	}
 
