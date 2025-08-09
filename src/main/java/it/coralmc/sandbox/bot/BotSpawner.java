@@ -22,6 +22,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -72,9 +73,11 @@ public class BotSpawner {
 		ClientInformation clientInfo = createClientInformation();
 
 		Location loc = viewer.getLocation();
+		Block block = loc.getWorld().getHighestBlockAt(loc);
+
 		TrainingBot bot = new TrainingBot(
 				world,
-				BlockPos.containing(loc.getX(), loc.getY(), loc.getZ()),
+				BlockPos.containing(block.getX(), block.getY(), block.getZ()),
 				0,
 				profile,
 				viewer,
