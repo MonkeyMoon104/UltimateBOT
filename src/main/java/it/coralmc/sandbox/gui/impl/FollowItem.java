@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.inventoryaccess.component.ComponentWrapper;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -42,9 +41,7 @@ public class FollowItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         boolean status = options.isFollow();
-        System.out.println("Follow status prima: " + status);
         options.setFollow(!status);
-        System.out.println("Follow status dopo: " + options.isFollow());
         training.getBotSpawner().updateBotFollow(player.getUniqueId(), options.isFollow());
 
         notifyWindows();
