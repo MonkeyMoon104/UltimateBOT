@@ -17,10 +17,16 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+
+    maven {
+        url 'https://repo.xenondevs.xyz/releases'
+    }
 }
 
 dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    implementation "xyz.xenondevs.invui:invui-core:1.43"
+    implementation "xyz.xenondevs.invui:inventory-access-r22:1.43"
 }
 
 def targetJavaVersion = 21

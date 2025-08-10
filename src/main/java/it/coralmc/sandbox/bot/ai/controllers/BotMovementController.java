@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement;
+package it.coralmc.sandbox.bot.ai.controllers;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

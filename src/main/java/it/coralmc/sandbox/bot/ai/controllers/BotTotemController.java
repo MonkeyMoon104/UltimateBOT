@@ -1,8 +1,8 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem;
+package it.coralmc.sandbox.bot.ai.controllers;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.util.TrainingBot;
-import it.coralmc.sandbox.utils.chatcolor.ChatColorUtils;
+import it.coralmc.sandbox.bot.ai.TrainingBot;
+import it.coralmc.sandbox.utils.ChatColorUtils;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -12,14 +12,11 @@ public class BotTotemController {
 
     private final Player bot;
     private final SandboxTraining plugin;
-    private final ChatColorUtils chatColorUtils;
-
     private boolean warnedOutOfTotems = false;
 
     public BotTotemController(Player bot, SandboxTraining plugin) {
         this.bot = bot;
         this.plugin = plugin;
-        this.chatColorUtils = plugin.getChatColorUtils();
     }
 
     public void manageTotem() {
@@ -100,6 +97,7 @@ public class BotTotemController {
         }
         warnedOutOfTotems = false;
     }
+
     private void handleMultipleTotems(int totemCount, int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
         int neededTotems = Math.min(2, totemCount) - equippedTotems;
 
@@ -130,15 +128,8 @@ public class BotTotemController {
                     .getString("bot.totem-finish", "[%botname%] Running out of totems");
             String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
             msg = msg.replace("%botname%", botName);
-            player.sendMessage(chatColorUtils.translate(msg));
+            player.sendMessage(ChatColorUtils.translate(msg));
         }
-    }
-
-    private enum TotemState {
-        UNLIMITED,
-        NONE,
-        ONE,
-        MULTIPLE
     }
 
     public int getEquippedTotemCount() {
@@ -160,5 +151,12 @@ public class BotTotemController {
         if (count >= 2) {
             equipTotem(EquipmentSlot.MAINHAND);
         }
+    }
+
+    private enum TotemState {
+        UNLIMITED,
+        NONE,
+        ONE,
+        MULTIPLE
     }
 }

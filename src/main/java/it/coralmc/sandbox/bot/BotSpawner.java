@@ -3,17 +3,16 @@ package it.coralmc.sandbox.bot;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.util.TrainingBot;
-import it.coralmc.sandbox.bot.util.entity.BotEntityFinder;
-import it.coralmc.sandbox.bot.util.equipment.manager.BotEquipmentManager;
-import it.coralmc.sandbox.bot.util.packets.Packet;
-import it.coralmc.sandbox.bot.util.registry.BotRegistry;
-import it.coralmc.sandbox.utils.armor.PlayerArmorManager;
+import it.coralmc.sandbox.bot.ai.TrainingBot;
+import it.coralmc.sandbox.utils.EntityUtils;
+import it.coralmc.sandbox.utils.Packet;
+import it.coralmc.sandbox.utils.equipment.BotEquipmentUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
@@ -36,181 +35,186 @@ import java.util.UUID;
 
 public class BotSpawner {
 
-	private final SandboxTraining plugin;
-	private final BotRegistry botRegistry;
-	private final BotEquipmentManager botEquipmentManager;
-	private final Packet packet;
-	private final PlayerArmorManager playerArmorManager;
-	private final BotEntityFinder botEntityFinder;
+    private final SandboxTraining plugin;
 
-	public BotSpawner(SandboxTraining plugin, BotRegistry botRegistry, BotEquipmentManager botEquipmentManager, Packet packet, BotEntityFinder botEntityFinder) {
-		this.plugin = plugin;
-		this.botRegistry = botRegistry;
-		this.botEquipmentManager = botEquipmentManager;
-        this.packet = packet;
-        this.playerArmorManager = plugin.getPlayerArmorManager();
-        this.botEntityFinder = botEntityFinder;
+    public BotSpawner(SandboxTraining plugin) {
+        this.plugin = plugin;
     }
 
-	public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap, boolean follow, int totem) {
-		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
-		spawnFakeBot(viewer, armorMap, emptyBlastProtection, follow, totem);
-	}
+    public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap, boolean follow, int totem) {
+        Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+        spawnFakeBot(viewer, armorMap, emptyBlastProtection, follow, totem);
+    }
 
-	public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-							 Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap, boolean follow, int totem) {
-		ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
-		ServerLevel world = handle.serverLevel().getLevel();
+    public void spawnFakeBot(Player viewer, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+                             Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap, boolean follow, int totem) {
+        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+        ServerLevel world = handle.serverLevel().getLevel();
 
-		UUID botUUID = UUID.randomUUID();
-		FileConfiguration config = plugin.getConfig();
-		String botName = config.getString("bot.name", "CrystalBot");
-		GameProfile playerProfile = ((CraftPlayer) viewer).getProfile();
-		Collection<Property> properties = playerProfile.getProperties().get("textures");
+        UUID botUUID = UUID.randomUUID();
+        FileConfiguration config = plugin.getConfig();
+        String botName = config.getString("bot.name", "CrystalBot");
+        GameProfile playerProfile = ((CraftPlayer) viewer).getProfile();
+        Collection<Property> properties = playerProfile.getProperties().get("textures");
 
-		Property property = null;
+        Property property = null;
 
-		if (!properties.isEmpty()) {
-			property = properties.iterator().next();
-		}
+        if (!properties.isEmpty()) {
+            property = properties.iterator().next();
+        }
 
-		GameProfile profile = new GameProfile(botUUID, botName);
-		if (property != null) profile.getProperties().put("textures", property);
-		ClientInformation clientInfo = createClientInformation();
+        GameProfile profile = new GameProfile(botUUID, botName);
+        if (property != null) profile.getProperties().put("textures", property);
+        ClientInformation clientInfo = createClientInformation();
 
-		Location loc = viewer.getLocation();
-		Block block = loc.getWorld().getHighestBlockAt(loc);
+        Location loc = viewer.getLocation();
+        Block block = loc.getWorld().getHighestBlockAt(loc);
 
-		TrainingBot bot = new TrainingBot(
-				world,
-				BlockPos.containing(block.getX(), block.getY(), block.getZ()),
-				0,
-				profile,
-				viewer,
-				follow,
-				this,
-				plugin,
-				plugin.getConfig().getString("messages.dead-bot-msg", "You have killed the bot!")
-		);
+        TrainingBot bot = new TrainingBot(
+                world,
+                BlockPos.containing(block.getX(), block.getY(), block.getZ()),
+                0,
+                profile,
+                viewer,
+                follow,
+                this,
+                plugin,
+                plugin.getConfig().getString("messages.dead-bot-msg", "You have killed the bot!")
+        );
 
-		bot.setTotemCount(totem);
+        bot.setTotemCount(totem);
 
-		world.addFreshEntity(bot);
-		//setupBotInventory(bot, totem);
-		bot.getBotAI().manageTotem();
-		botEquipmentManager.applyEquipment(bot, armorMap, blastProtectionMap);
+        world.addFreshEntity(bot);
+        //setupBotInventory(bot, totem);
+        bot.getBotAI().manageTotem();
+        BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
 
-		broadcastBotToPlayers(bot, armorMap, blastProtectionMap);
-		botRegistry.registerBot(viewer.getUniqueId(), bot);
-	}
+        broadcastBotToPlayers(bot, armorMap, blastProtectionMap);
+        plugin.getBotRegistry().registerBot(viewer.getUniqueId(), bot);
+    }
 
-	public boolean isBotSpawned(UUID playerUUID) {
-		return botRegistry.isBotSpawned(playerUUID);
-	}
+    public boolean isBotSpawned(UUID playerUUID) {
+        return plugin.getBotRegistry().isBotSpawned(playerUUID);
+    }
 
-	public void despawnBot(Player owner) {
-		UUID ownerUUID = owner.getUniqueId();
-		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
-		if (botUUID == null) return;
+    public void despawnBot(Player owner) {
+        UUID ownerUUID = owner.getUniqueId();
+        UUID botUUID = plugin.getBotRegistry().getBotUUID(ownerUUID);
+        if (botUUID == null) return;
 
-		ServerPlayer handle = ((CraftPlayer) owner).getHandle();
-		ServerLevel world = handle.serverLevel();
+        ServerPlayer handle = ((CraftPlayer) owner).getHandle();
+        ServerLevel world = handle.serverLevel();
 
-		if (botEntityFinder.removeEntity(world, botUUID)) {
-			botRegistry.removeBot(ownerUUID);
-		}
-	}
+        if (EntityUtils.removeEntity(world, botUUID)) {
+            plugin.getBotRegistry().removeBot(ownerUUID);
+        }
+    }
 
-	public void despawnAllBots() {
-		Map<UUID, TrainingBot> allBots = botRegistry.getAllBots();
-		for (UUID ownerUUID : new HashMap<>(allBots).keySet()) {
-			Player owner = Bukkit.getPlayer(ownerUUID);
-			if (owner != null && owner.isOnline()) {
-				despawnBot(owner);
-			} else {
-				botRegistry.removeBot(ownerUUID);
-			}
-		}
-	}
-	public Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID) {
-		return botEquipmentManager.getBotArmor(playerUUID, botRegistry);
-	}
+    public void despawnAllBots() {
+        Map<UUID, TrainingBot> allBots = plugin.getBotRegistry().getAllBots();
+        for (UUID ownerUUID : new HashMap<>(allBots).keySet()) {
+            Player owner = Bukkit.getPlayer(ownerUUID);
+            if (owner != null && owner.isOnline()) {
+                despawnBot(owner);
+            } else {
+                plugin.getBotRegistry().removeBot(ownerUUID);
+            }
+        }
+    }
 
-	public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
-		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
-		updateBotArmor(ownerUUID, armorMap, emptyBlastProtection);
-	}
+    public Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID) {
+        return BotEquipmentUtils.getBotArmor(playerUUID, plugin.getBotRegistry());
+    }
 
-	public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-							   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
-		botEquipmentManager.updateBotArmor(ownerUUID, armorMap, blastProtectionMap, botRegistry);
-	}
+    public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+        Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+        updateBotArmor(ownerUUID, armorMap, emptyBlastProtection);
+    }
 
-	public void removeBot(UUID botUUID) {
-		botRegistry.removeBotByUUID(botUUID);
-	}
+    public void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+                               Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+        BotEquipmentUtils.updateBotArmor(ownerUUID, armorMap, blastProtectionMap, plugin.getBotRegistry());
+    }
 
-
-	private ClientInformation createClientInformation() {
-		return new ClientInformation(
-			"it_IT", 10, ChatVisiblity.FULL, true,
-			0, HumanoidArm.RIGHT, false, true, ParticleStatus.ALL
-		);
-	}
-
-	private void setupBotInventory(TrainingBot bot, int totemCount) {
-		if (totemCount == -1) {
-			org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
-			ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
-			bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
-		} else if (totemCount > 0) {
-			org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
-			ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
-			bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
-		} else {
-			bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
-		}
-	}
-
-	public void updateBotTotemCount(UUID ownerUUID, int totemCount) {
-		TrainingBot bot = botEntityFinder.getBotByOwnerUUID(ownerUUID);
-		if (bot != null) {
-			bot.setTotemCount(totemCount);
-			bot.getBotAI().manageTotem();
-		}
-	}
+    public void removeBot(UUID botUUID) {
+        plugin.getBotRegistry().removeBotByUUID(botUUID);
+    }
 
 
-	private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
-		Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
-		broadcastBotToPlayers(bot, armorMap, emptyBlastProtection);
-	}
+    private ClientInformation createClientInformation() {
+        return new ClientInformation(
+                "it_IT", 10, ChatVisiblity.FULL, true,
+                0, HumanoidArm.RIGHT, false, true, ParticleStatus.ALL
+        );
+    }
 
-	private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-									   Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
-		for (Player online : Bukkit.getOnlinePlayers()) {
-			packet.sendAddPlayerPacket(online, bot);
-			packet.sendSpawnPlayerPacket(online, bot);
-		}
+    private void setupBotInventory(TrainingBot bot, int totemCount) {
+        if (totemCount == -1) {
+            org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
+            ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
+            bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
+        } else if (totemCount > 0) {
+            org.bukkit.inventory.ItemStack bukkitTotem = new org.bukkit.inventory.ItemStack(Material.TOTEM_OF_UNDYING);
+            ItemStack nmsTotem = CraftItemStack.asNMSCopy(bukkitTotem);
+            bot.setItemSlot(EquipmentSlot.OFFHAND, nmsTotem);
+        } else {
+            bot.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY);
+        }
+    }
 
-		botEquipmentManager.broadcastEquipment(bot, armorMap, blastProtectionMap);
-	}
+    public TrainingBot getBotByOwnerUUID(UUID ownerUUID) {
+        ServerLevel world = EntityUtils.getPlayerWorld(ownerUUID);
+        if (world == null) return null;
 
-	public void updateBotFollow(UUID ownerUUID, boolean follow) {
-		TrainingBot bot = botEntityFinder.getBotByOwnerUUID(ownerUUID);
-		if (bot != null) {
-			bot.setFollow(follow);
-		}
-	}
+        UUID botUUID = plugin.getBotRegistry().getBotUUID(ownerUUID);
+        Entity entity = EntityUtils.findBotByUUID(world, botUUID);
 
-	public void despawnBotInWorld(Player owner, World fromWorld) {
-		UUID ownerUUID = owner.getUniqueId();
-		UUID botUUID = botRegistry.getBotUUID(ownerUUID);
-		if (botUUID == null) return;
+        if (entity instanceof TrainingBot trainingBot) {
+            return trainingBot;
+        }
 
-		ServerLevel world = ((CraftWorld) fromWorld).getHandle();
-		if (botEntityFinder.removeEntity(world, botUUID)) {
-			botRegistry.removeBot(ownerUUID);
-		}
-	}
+        return null;
+    }
+
+    public void updateBotTotemCount(UUID ownerUUID, int totemCount) {
+        TrainingBot bot = getBotByOwnerUUID(ownerUUID);
+        if (bot != null) {
+            bot.setTotemCount(totemCount);
+            bot.getBotAI().manageTotem();
+        }
+    }
+
+
+    private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+        Map<org.bukkit.inventory.EquipmentSlot, Boolean> emptyBlastProtection = new HashMap<>();
+        broadcastBotToPlayers(bot, armorMap, emptyBlastProtection);
+    }
+
+    private void broadcastBotToPlayers(TrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+                                       Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            Packet.sendAddPlayerPacket(online, bot);
+            Packet.sendSpawnPlayerPacket(online, bot);
+        }
+
+        BotEquipmentUtils.broadcastEquipment(bot, armorMap, blastProtectionMap);
+    }
+
+    public void updateBotFollow(UUID ownerUUID, boolean follow) {
+        TrainingBot bot = getBotByOwnerUUID(ownerUUID);
+        if (bot != null) {
+            bot.setFollow(follow);
+        }
+    }
+
+    public void despawnBotInWorld(Player owner, World fromWorld) {
+        UUID ownerUUID = owner.getUniqueId();
+        UUID botUUID = plugin.getBotRegistry().getBotUUID(ownerUUID);
+        if (botUUID == null) return;
+
+        ServerLevel world = ((CraftWorld) fromWorld).getHandle();
+        if (EntityUtils.removeEntity(world, botUUID)) {
+            plugin.getBotRegistry().removeBot(ownerUUID);
+        }
+    }
 }

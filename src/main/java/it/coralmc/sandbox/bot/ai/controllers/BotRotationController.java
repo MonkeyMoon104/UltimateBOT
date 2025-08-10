@@ -1,13 +1,12 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation;
+package it.coralmc.sandbox.bot.ai.controllers;
 
 import net.minecraft.world.entity.player.Player;
 
 public class BotRotationController {
 
-    private final Player bot;
-
     private static final float MAX_PITCH = 90f;
     private static final float MIN_PITCH = -90f;
+    private final Player bot;
 
     public BotRotationController(Player bot) {
         this.bot = bot;
