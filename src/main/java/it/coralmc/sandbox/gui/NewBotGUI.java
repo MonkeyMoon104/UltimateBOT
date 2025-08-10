@@ -38,13 +38,15 @@ public class NewBotGUI {
                         ". . b b . b b . .",
                         ". . a a t a a . .",
                         ". . . . . . . . .",
-                        ". . . s . f . . .",
+                        ". . . s g f . . .",
                         ". . . . . . . . ."
                 )
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('t', new TotemItem(options, training))
                 .addIngredient('f', new FollowItem(training, options))
                 .addIngredient('s', new SpawnItem(training, player, options))
+                .addIngredient('g', training.getBotSpawner().isBotSpawned(player.getUniqueId()) 
+                    ? new TeleportItem(training) : new SimpleItem(new ItemStack(Material.AIR)))            
                 .build();
 
         Map<EquipmentSlot, ArmorItem> armors = new HashMap<>();
