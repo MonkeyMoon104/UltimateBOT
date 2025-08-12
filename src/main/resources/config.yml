@@ -74,6 +74,12 @@ gui:
       - "&eClick destro: &c-1"
       - "&7(-1 = Totem illimitati)"
 
+  teleport-button:
+    name: "&5Teleport Boy"
+    material: "ENDER_PEARL"
+    lore:
+      - "&dTippa il bot alla tua posizione"
+
   enchant-button:
     enabled-name: "&aBlast Protection: ON"
     disabled-name: "&cBlast Protection: OFF"
