@@ -75,7 +75,7 @@ gui:
       - "&7(-1 = Totem illimitati)"
 
   teleport-button:
-    name: "&5Teleport Boy"
+    name: "&5Tippa bot"
     material: "ENDER_PEARL"
     lore:
       - "&dTippa il bot alla tua posizione"
