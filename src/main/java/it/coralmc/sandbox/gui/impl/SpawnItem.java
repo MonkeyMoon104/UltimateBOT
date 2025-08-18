@@ -33,7 +33,7 @@ public class SpawnItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        boolean status = training.getBotSpawner().isBotSpawned(player.getUniqueId());
+        boolean status = training.getBotManager().isBotSpawned(player.getUniqueId());
 
         Material mat = status
                 ? Material.valueOf(training.getConfig().getString("gui.despawn-button.material"))
@@ -58,10 +58,10 @@ public class SpawnItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        boolean status = training.getBotSpawner().isBotSpawned(player.getUniqueId());
+        boolean status = training.getBotManager().isBotSpawned(player.getUniqueId());
 
         if (status) {
-            training.getBotSpawner().despawnBot(player);
+            training.getBotManager().despawnBot(player);
             playerOptions.remove(player.getUniqueId());
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
@@ -72,6 +72,6 @@ public class SpawnItem extends AbstractItem {
         if (window != null) window.close();
 
         boolean follow = options.isFollow();
-        training.getBotSpawner().spawnFakeBot(player, options.getArmor(), options.getBlast(), follow, options.getTotems());
+        training.getBotManager().spawnBot(player, options.getArmor(), options.getBlast(), follow, options.getTotems());
     }
 }

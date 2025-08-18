@@ -45,7 +45,7 @@ public class NewBotGUI {
                 .addIngredient('t', new TotemItem(options, training))
                 .addIngredient('f', new FollowItem(training, options))
                 .addIngredient('s', new SpawnItem(training, player, options))
-                .addIngredient('g', training.getBotSpawner().isBotSpawned(player.getUniqueId()) 
+                .addIngredient('g', training.getBotManager().isBotSpawned(player.getUniqueId())
                     ? new TeleportItem(training) : new SimpleItem(new ItemStack(Material.AIR)))            
                 .build();
 

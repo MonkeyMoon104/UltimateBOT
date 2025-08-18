@@ -36,9 +36,9 @@ public class TeleportItem extends AbstractItem {
 
 	@Override
 	public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-		if (!training.getBotSpawner().isBotSpawned(player.getUniqueId())) return;
+		if (!training.getBotManager().isBotSpawned(player.getUniqueId())) return;
 
-		TrainingBot bot = training.getBotSpawner().getBotByOwnerUUID(player.getUniqueId());
+		TrainingBot bot = training.getBotManager().getBot(player.getUniqueId());
 		if (bot == null) return;
 
 		bot.moveTo(player.getX(), player.getY(), player.getZ());

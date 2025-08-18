@@ -78,7 +78,7 @@ public class ToggleBlastItem extends AbstractItem {
 
         piece.setItemMeta(meta);
 
-        training.getBotSpawner().updateBotArmor(player.getUniqueId(), options.getArmor(), options.getBlast());
+        training.getBotManager().updateArmor(player.getUniqueId(), options.getArmor(), options.getBlast());
 
         display.setPiece(piece);
         display.notifyWindows();

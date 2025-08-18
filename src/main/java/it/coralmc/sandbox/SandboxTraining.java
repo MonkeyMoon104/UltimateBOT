@@ -1,10 +1,10 @@
 package it.coralmc.sandbox;
 
+import it.coralmc.sandbox.bot.BotManager;
 import it.coralmc.sandbox.bot.BotRegistry;
-import it.coralmc.sandbox.bot.BotSpawner;
 import it.coralmc.sandbox.commands.BotCommand;
 import it.coralmc.sandbox.commands.ReloadCommand;
-import it.coralmc.sandbox.listener.PlayerQuitListener;
+import it.coralmc.sandbox.listener.PlayerCheckListener;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,7 +12,7 @@ public final class SandboxTraining extends JavaPlugin {
 
     private PlayerOptions playerOptions;
     private BotRegistry botRegistry;
-    private BotSpawner botSpawner;
+    private BotManager botManager;
 
     @Override
     public void onEnable() {
@@ -20,16 +20,16 @@ public final class SandboxTraining extends JavaPlugin {
 
         this.playerOptions = new PlayerOptions();
         this.botRegistry = new BotRegistry();
-        this.botSpawner = new BotSpawner(this);
+        this.botManager = new BotManager(this);
 
         getCommand("bot").setExecutor(new BotCommand(this));
         getCommand("sbreload").setExecutor(new ReloadCommand(this));
-        getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerCheckListener(this), this);
     }
 
     @Override
     public void onDisable() {
-        botSpawner.despawnAllBots();
+        botManager.despawnAllBots();
         playerOptions.clear();
     }
 
@@ -37,8 +37,8 @@ public final class SandboxTraining extends JavaPlugin {
         return botRegistry;
     }
 
-    public BotSpawner getBotSpawner() {
-        return botSpawner;
+    public BotManager getBotManager() {
+        return botManager;
     }
 
     public PlayerOptions getPlayerOptions() {

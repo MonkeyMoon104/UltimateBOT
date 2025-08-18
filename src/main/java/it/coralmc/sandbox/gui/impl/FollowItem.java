@@ -42,7 +42,7 @@ public class FollowItem extends AbstractItem {
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         boolean status = options.isFollow();
         options.setFollow(!status);
-        training.getBotSpawner().updateBotFollow(player.getUniqueId(), options.isFollow());
+        training.getBotManager().updateFollow(player.getUniqueId(), options.isFollow());
 
         notifyWindows();
     }

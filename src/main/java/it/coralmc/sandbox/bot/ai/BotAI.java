@@ -63,10 +63,6 @@ public class BotAI {
         totemController.manageTotem();
     }
 
-    public void onTotemUsed() {
-        totemController.onTotemUsed();
-    }
-
     public BotMovementController getMovementController() {
         return movementController;
     }

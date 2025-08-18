@@ -55,7 +55,7 @@ public class ArmorItem extends AbstractItem {
         ItemStack updated = piece.withType(next);
 
         options.getArmor().put(slot, updated);
-        training.getBotSpawner().updateBotArmor(player.getUniqueId(), options.getArmor());
+        training.getBotManager().updateArmor(player.getUniqueId(), options.getArmor());
         piece = updated;
 
         notifyWindows();

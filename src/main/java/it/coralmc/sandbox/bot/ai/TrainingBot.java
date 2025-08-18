@@ -2,7 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.BotSpawner;
+import it.coralmc.sandbox.bot.BotSpawn;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import net.minecraft.core.BlockPos;
@@ -20,7 +20,7 @@ public class TrainingBot extends Player {
 
     private final BotAI botAI;
     private final SandboxTraining plugin;
-    private final BotSpawner botSpawner;
+    private final BotSpawn botSpawn;
     private final PlayerOptions playerOptions;
     private final String deadBotMessage;
     private org.bukkit.entity.Player targetPlayer;
@@ -33,7 +33,7 @@ public class TrainingBot extends Player {
     public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile,
                        org.bukkit.entity.Player targetPlayer,
                        boolean follow,
-                       BotSpawner botSpawner,
+                       BotSpawn botSpawn,
                        SandboxTraining plugin,
                        String deadBotMessage) {
         super(level, pos, yRot, gameProfile);
@@ -44,7 +44,7 @@ public class TrainingBot extends Player {
         this.plugin = plugin;
         this.botAI = new BotAI(this, plugin);
 
-        this.botSpawner = botSpawner;
+        this.botSpawn = botSpawn;
         this.playerOptions = plugin.getPlayerOptions();
         this.deadBotMessage = deadBotMessage;
 
@@ -108,7 +108,7 @@ public class TrainingBot extends Player {
         }
 
         this.discard();
-        botSpawner.removeBot(this.getUUID());
+        botSpawn.removeBot(this.getUUID());
     }
 
     @Override

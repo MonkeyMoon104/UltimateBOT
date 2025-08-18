@@ -52,7 +52,7 @@ public class TotemItem extends AbstractItem {
             options.setTotems(options.getTotems() - 1);
         }
 
-        training.getBotSpawner().updateBotTotemCount(player.getUniqueId(), options.getTotems());
+        training.getBotManager().updateTotem(player.getUniqueId(), options.getTotems());
 
         notifyWindows();
     }
