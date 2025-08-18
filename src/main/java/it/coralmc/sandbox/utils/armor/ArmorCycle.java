@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.utils.armor;
 
+import it.coralmc.sandbox.utils.equipment.BotEquipmentUtils;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.EquipmentSlot;
@@ -32,13 +33,25 @@ public class ArmorCycle {
     public static Map<EquipmentSlot, ItemStack> getDefaultArmorFromConfig(FileConfiguration config, Plugin plugin) {
         Map<EquipmentSlot, ItemStack> defaultArmor = new EnumMap<>(EquipmentSlot.class);
 
-        defaultArmor.put(EquipmentSlot.HEAD, new ItemStack(getMaterialFromConfig(config, "helmet", plugin)));
-        defaultArmor.put(EquipmentSlot.CHEST, new ItemStack(getMaterialFromConfig(config, "chestplate", plugin)));
-        defaultArmor.put(EquipmentSlot.LEGS, new ItemStack(getMaterialFromConfig(config, "leggings", plugin)));
-        defaultArmor.put(EquipmentSlot.FEET, new ItemStack(getMaterialFromConfig(config, "boots", plugin)));
+        ItemStack helmet = new ItemStack(getMaterialFromConfig(config, "helmet", plugin));
+        BotEquipmentUtils.applyArmorEnchants(helmet, false);
+        defaultArmor.put(EquipmentSlot.HEAD, helmet);
+
+        ItemStack chestplate = new ItemStack(getMaterialFromConfig(config, "chestplate", plugin));
+        BotEquipmentUtils.applyArmorEnchants(chestplate, false);
+        defaultArmor.put(EquipmentSlot.CHEST, chestplate);
+
+        ItemStack leggings = new ItemStack(getMaterialFromConfig(config, "leggings", plugin));
+        BotEquipmentUtils.applyArmorEnchants(leggings, false);
+        defaultArmor.put(EquipmentSlot.LEGS, leggings);
+
+        ItemStack boots = new ItemStack(getMaterialFromConfig(config, "boots", plugin));
+        BotEquipmentUtils.applyArmorEnchants(boots, false);
+        defaultArmor.put(EquipmentSlot.FEET, boots);
 
         return defaultArmor;
     }
+
 
     public static Material getMaterialFromConfig(FileConfiguration config, String key, Plugin plugin) {
         String matName = config.getString("gui.default-armor." + key, "NETHERITE");

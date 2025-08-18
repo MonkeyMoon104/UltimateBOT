@@ -68,17 +68,14 @@ public class ToggleBlastItem extends AbstractItem {
 
         if (status) {
             meta.removeEnchant(Enchantment.BLAST_PROTECTION);
-            piece.setItemMeta(meta);
-
-            training.getBotSpawner().updateBotArmor(player.getUniqueId(), options.getArmor());
-
-            display.setPiece(piece);
-            display.notifyWindows();
-            notifyWindows();
-            return;
+            meta.removeEnchant(Enchantment.PROTECTION);
+            meta.addEnchant(Enchantment.PROTECTION, 4, false);
+        } else {
+            meta.removeEnchant(Enchantment.PROTECTION);
+            meta.removeEnchant(Enchantment.BLAST_PROTECTION);
+            meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
         }
 
-        meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
         piece.setItemMeta(meta);
 
         training.getBotSpawner().updateBotArmor(player.getUniqueId(), options.getArmor(), options.getBlast());

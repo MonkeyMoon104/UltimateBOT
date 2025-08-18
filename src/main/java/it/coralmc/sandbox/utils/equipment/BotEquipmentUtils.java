@@ -37,15 +37,18 @@ public class BotEquipmentUtils {
         }
     }
 
-    private static void applyArmorEnchants(org.bukkit.inventory.ItemStack item, boolean hasBlastProtection) {
+    public static void applyArmorEnchants(org.bukkit.inventory.ItemStack item, boolean hasBlastProtection) {
         if (item == null || item.getType() == Material.AIR) return;
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.removeEnchant(Enchantment.BLAST_PROTECTION);
+            meta.removeEnchant(Enchantment.PROTECTION);
 
             if (hasBlastProtection) {
                 meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
+            } else {
+                meta.addEnchant(Enchantment.PROTECTION, 4, false);
             }
 
             item.setItemMeta(meta);
