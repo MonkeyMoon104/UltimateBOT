@@ -1,24 +1,26 @@
 package it.coralmc.sandbox.listener;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.BotSpawner;
+import it.coralmc.sandbox.bot.BotManager;
+import it.coralmc.sandbox.bot.BotSpawn;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class PlayerQuitListener implements Listener {
+public class PlayerCheckListener implements Listener {
 
     private final SandboxTraining plugin;
-    private final BotSpawner botSpawner;
+    private final BotManager botManager;
     private final PlayerOptions playerOptions;
 
-    public PlayerQuitListener(SandboxTraining plugin) {
+    public PlayerCheckListener(SandboxTraining plugin) {
         this.plugin = plugin;
-        this.botSpawner = plugin.getBotSpawner();
+        this.botManager = plugin.getBotManager();
         this.playerOptions = plugin.getPlayerOptions();
     }
 
@@ -26,8 +28,8 @@ public class PlayerQuitListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
 
-        if (botSpawner.isBotSpawned(player.getUniqueId())) {
-            botSpawner.despawnBot(player);
+        if (botManager.isBotSpawned(player.getUniqueId())) {
+            botManager.despawnBot(player);
         }
 
         playerOptions.remove(player.getUniqueId());
@@ -37,9 +39,23 @@ public class PlayerQuitListener implements Listener {
     public void onWorldChange(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
 
-        if (botSpawner.isBotSpawned(player.getUniqueId())) {
-            botSpawner.despawnBotInWorld(player, event.getFrom());
+        if (botManager.isBotSpawned(player.getUniqueId())) {
+            botManager.despawnBotInWorld(player, event.getFrom());
             player.closeInventory();
+
+            String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
+            player.sendMessage(ChatColorUtils.translate(despawnMsg));
+
+            playerOptions.remove(player.getUniqueId());
+        }
+    }
+
+    @EventHandler
+    public void onDead(PlayerDeathEvent event) {
+        Player player = event.getPlayer();
+
+        if (botManager.isBotSpawned(player.getUniqueId())) {
+            botManager.despawnBot(player);
 
             String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
             player.sendMessage(ChatColorUtils.translate(despawnMsg));
