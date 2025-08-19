@@ -128,23 +128,43 @@ public class TrainingBot extends Player {
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        boolean result = super.actuallyHurt(level, source, amount, event);
+        try {
+            boolean result = super.actuallyHurt(level, source, amount, event);
 
-        if (result) {
-            this.botAI.setKnockbackCooldown(20);
+            if (result) {
+                this.botAI.setKnockbackCooldown(20);
 
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
-                if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                    ItemStack armorPiece = this.getItemBySlot(slot);
-                    if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
-                        armorPiece.setDamageValue(0);
-                        this.setItemSlot(slot, armorPiece);
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                        ItemStack armorPiece = this.getItemBySlot(slot);
+                        if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
+                            armorPiece.setDamageValue(0);
+                            this.setItemSlot(slot, armorPiece);
+                        }
                     }
                 }
             }
-        }
 
-        return result;
+            return result;
+        } catch (ClassCastException | NullPointerException e) {
+            if (event != null && !event.isCancelled()) {
+                this.botAI.setKnockbackCooldown(20);
+
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                        ItemStack armorPiece = this.getItemBySlot(slot);
+                        if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
+                            armorPiece.setDamageValue(0);
+                            this.setItemSlot(slot, armorPiece);
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
