@@ -13,9 +13,11 @@ public final class SandboxTraining extends JavaPlugin {
     private PlayerOptions playerOptions;
     private BotRegistry botRegistry;
     private BotManager botManager;
+    private static SandboxTraining instance;
 
     @Override
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
 
         this.playerOptions = new PlayerOptions();
@@ -43,5 +45,9 @@ public final class SandboxTraining extends JavaPlugin {
 
     public PlayerOptions getPlayerOptions() {
         return playerOptions;
+    }
+
+    public static SandboxTraining getInstance() {
+        return instance;
     }
 }

@@ -3,6 +3,7 @@ package it.coralmc.sandbox.bot.ai;
 import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotSpawn;
+import it.coralmc.sandbox.bot.ai.crazy.BotCraftPlayer;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -29,6 +29,7 @@ public class TrainingBot extends Player {
     private int previousEquippedTotems = 0;
     private boolean skipNextTotemTracking = false;
     private double targetDistance = 1.0;
+    private final BotCraftPlayer craftEntity;
 
     public TrainingBot(Level level, BlockPos pos, float yRot, GameProfile gameProfile,
                        org.bukkit.entity.Player targetPlayer,
@@ -48,6 +49,8 @@ public class TrainingBot extends Player {
         this.playerOptions = plugin.getPlayerOptions();
         this.deadBotMessage = deadBotMessage;
 
+        this.craftEntity = new BotCraftPlayer(this);
+
         configureBotAI();
     }
 
@@ -61,6 +64,7 @@ public class TrainingBot extends Player {
     @Override
     public void tick() {
         super.tick();
+        craftEntity.setHandle(this);
 
         if (targetPlayer != null && !targetPlayer.isDead()) {
             Player target = ((org.bukkit.craftbukkit.entity.CraftPlayer) targetPlayer).getHandle();
@@ -193,11 +197,10 @@ public class TrainingBot extends Player {
 
     @Override
     public CraftHumanEntity getBukkitEntity() {
-        if (super.getBukkitEntity() == null) {
-            return new BotCraftPlayer(this);
-        }
-        return super.getBukkitEntity();
+        craftEntity.setHandle(this);
+        return craftEntity;
     }
+
 
     @Override
     public void aiStep() {
@@ -231,16 +234,5 @@ public class TrainingBot extends Player {
     public void setTotemCount(int count) {
         this.totemCount = count;
         this.skipNextTotemTracking = true;
-    }
-
-    private static class BotCraftPlayer extends CraftHumanEntity {
-        public BotCraftPlayer(TrainingBot entity) {
-            super((org.bukkit.craftbukkit.CraftServer) Bukkit.getServer(), entity);
-        }
-
-        @Override
-        public String toString() {
-            return "BotCraftPlayer{name=" + getName() + "}";
-        }
     }
 }

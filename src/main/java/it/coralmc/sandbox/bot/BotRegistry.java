@@ -1,7 +1,9 @@
 package it.coralmc.sandbox.bot;
 
+import it.coralmc.sandbox.bot.ai.crazy.FakeOfflinePlayer;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -38,5 +40,11 @@ public class BotRegistry {
 
     public void clear() {
         spawnedBots.clear();
+    }
+
+    public @Nullable FakeOfflinePlayer getFakeOfflinePlayer(UUID uuid) {
+        TrainingBot bot = spawnedBots.get(uuid);
+        if (bot == null) return null;
+        return new FakeOfflinePlayer(bot);
     }
 }
