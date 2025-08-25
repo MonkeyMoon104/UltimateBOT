@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.handlers;
 
+import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,15 @@ public class TotemTracker {
             int consumedTotems = previousEquippedTotems - currentEquippedTotems;
             if (totemCount != -1) {
                 totemCount = Math.max(0, totemCount - consumedTotems);
+                BotOptions options = bot.getAiController().getBotOptions();
+                if (options != null) {
+                    options.setTotems(totemCount);
+
+                    if (bot.getTargetPlayer() != null) {
+                        bot.getPlugin().getBotManager()
+                                .updateTotem(bot.getTargetPlayer().getUniqueId(), totemCount);
+                    }
+                }
             }
         }
 

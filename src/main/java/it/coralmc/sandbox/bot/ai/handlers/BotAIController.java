@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai.handlers;
 
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.BotAI;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.world.entity.player.Player;
@@ -10,14 +11,16 @@ public class BotAIController {
     private final TrainingBot bot;
     private final BotAI botAI;
     private org.bukkit.entity.Player targetPlayer;
+    private final BotOptions botOptions;
     private boolean follow;
 
     public BotAIController(TrainingBot bot, SandboxTraining plugin,
-                           org.bukkit.entity.Player targetPlayer, boolean follow) {
+                           org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
         this.bot = bot;
         this.targetPlayer = targetPlayer;
         this.follow = follow;
         this.botAI = new BotAI(bot, plugin);
+        this.botOptions = botOptions;
         configureBotAI();
     }
 
@@ -42,4 +45,7 @@ public class BotAIController {
     public org.bukkit.entity.Player getTargetPlayer() { return targetPlayer; }
     public void setFollow(boolean follow) { this.follow = follow; }
     public boolean isFollow() { return follow; }
+    public BotOptions getBotOptions() {
+        return botOptions;
+    }
 }

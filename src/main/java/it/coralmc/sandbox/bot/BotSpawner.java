@@ -33,7 +33,8 @@ public class BotSpawner {
                       Map<EquipmentSlot, ItemStack> armorMap,
                       Map<EquipmentSlot, Boolean> blastProtectionMap,
                       boolean follow,
-                      int totem) {
+                      int totem,
+                      BotOptions botOptions) {
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
         ServerLevel world = handle.serverLevel();
@@ -53,7 +54,8 @@ public class BotSpawner {
                 viewer,
                 follow,
                 plugin,
-                config.getString("messages.dead-bot-msg", "You have killed the bot!")
+                config.getString("messages.dead-bot-msg", "You have killed the bot!"),
+                botOptions
         );
 
         bot.setTotemCount(totem);

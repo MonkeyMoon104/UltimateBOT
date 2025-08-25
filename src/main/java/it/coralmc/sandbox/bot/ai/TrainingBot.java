@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.crazy.BotCraftPlayer;
 import it.coralmc.sandbox.bot.ai.handlers.BotAIController;
 import it.coralmc.sandbox.bot.ai.handlers.BotDeathHandler;
@@ -34,7 +35,8 @@ public class TrainingBot extends Player {
                        org.bukkit.entity.Player targetPlayer,
                        boolean follow,
                        SandboxTraining plugin,
-                       String deadBotMessage) {
+                       String deadBotMessage,
+                       BotOptions botOptions) {
 
         super(level, pos, yRot, gameProfile);
 
@@ -45,7 +47,7 @@ public class TrainingBot extends Player {
         this.playerOptions = plugin.getPlayerOptions();
         this.craftEntity = new BotCraftPlayer(this);
 
-        this.aiController = new BotAIController(this, plugin, targetPlayer, follow);
+        this.aiController = new BotAIController(this, plugin, targetPlayer, follow, botOptions);
         this.totemTracker = new TotemTracker(this);
         this.deathHandler = new BotDeathHandler(this, plugin, playerOptions, deadBotMessage);
         this.equipmentHandler = new BotEquipmentHandler(this);
@@ -117,5 +119,8 @@ public class TrainingBot extends Player {
     }
     public boolean callSuperActuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
         return super.actuallyHurt(level, source, amount, event);
+    }
+    public SandboxTraining getPlugin() {
+        return this.plugin;
     }
 }

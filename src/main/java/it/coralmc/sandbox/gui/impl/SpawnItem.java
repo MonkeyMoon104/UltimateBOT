@@ -72,6 +72,6 @@ public class SpawnItem extends AbstractItem {
         if (window != null) window.close();
 
         boolean follow = options.isFollow();
-        training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems());
+        training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
     }
 }

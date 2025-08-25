@@ -62,15 +62,72 @@ public class BotTotemController {
     }
 
     private void handleUnlimitedTotems(int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
-        if (equippedTotems < 2) {
-            if (!hasOffhandTotem) {
-                equipTotem(EquipmentSlot.OFFHAND);
-            } else if (!hasMainhandTotem) {
-                equipTotem(EquipmentSlot.MAINHAND);
-            }
+    /*
+    if (equippedTotems < 2) {
+        if (!hasOffhandTotem) {
+            equipTotem(EquipmentSlot.OFFHAND);
+        } else if (!hasMainhandTotem) {
+            equipTotem(EquipmentSlot.MAINHAND);
         }
+    }
+    */
+
+        if (!hasOffhandTotem) {
+            equipTotem(EquipmentSlot.OFFHAND);
+        }
+        if (hasMainhandTotem) {
+            removeTotem(EquipmentSlot.MAINHAND);
+        }
+
         warnedOutOfTotems = false;
     }
+
+    private void handleOneTotem(int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
+    /*
+    if (equippedTotems == 0) {
+        equipTotem(EquipmentSlot.OFFHAND);
+    } else if (equippedTotems == 2) {
+        removeTotem(EquipmentSlot.MAINHAND);
+    } else if (equippedTotems == 1 && !hasOffhandTotem && hasMainhandTotem) {
+        equipTotem(EquipmentSlot.OFFHAND);
+        removeTotem(EquipmentSlot.MAINHAND);
+    }
+    */
+
+        if (!hasOffhandTotem) {
+            equipTotem(EquipmentSlot.OFFHAND);
+        }
+        if (hasMainhandTotem) {
+            removeTotem(EquipmentSlot.MAINHAND);
+        }
+
+        warnedOutOfTotems = false;
+    }
+
+    private void handleMultipleTotems(int totemCount, int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
+    /*
+    int neededTotems = Math.min(2, totemCount) - equippedTotems;
+
+    if (neededTotems > 0) {
+        if (!hasOffhandTotem) {
+            equipTotem(EquipmentSlot.OFFHAND);
+            neededTotems--;
+        }
+        if (neededTotems > 0 && !hasMainhandTotem) {
+            equipTotem(EquipmentSlot.MAINHAND);
+        }
+    }
+    */
+        if (!hasOffhandTotem) {
+            equipTotem(EquipmentSlot.OFFHAND);
+        }
+        if (hasMainhandTotem) {
+            removeTotem(EquipmentSlot.MAINHAND);
+        }
+
+        warnedOutOfTotems = false;
+    }
+
 
     private void handleNoTotems(boolean hasOffhandTotem, boolean hasMainhandTotem, TrainingBot trainingBot) {
         if (hasOffhandTotem) {
@@ -84,33 +141,6 @@ public class BotTotemController {
             sendTotemWarning(trainingBot);
             warnedOutOfTotems = true;
         }
-    }
-
-    private void handleOneTotem(int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
-        if (equippedTotems == 0) {
-            equipTotem(EquipmentSlot.OFFHAND);
-        } else if (equippedTotems == 2) {
-            removeTotem(EquipmentSlot.MAINHAND);
-        } else if (equippedTotems == 1 && !hasOffhandTotem && hasMainhandTotem) {
-            equipTotem(EquipmentSlot.OFFHAND);
-            removeTotem(EquipmentSlot.MAINHAND);
-        }
-        warnedOutOfTotems = false;
-    }
-
-    private void handleMultipleTotems(int totemCount, int equippedTotems, boolean hasOffhandTotem, boolean hasMainhandTotem) {
-        int neededTotems = Math.min(2, totemCount) - equippedTotems;
-
-        if (neededTotems > 0) {
-            if (!hasOffhandTotem) {
-                equipTotem(EquipmentSlot.OFFHAND);
-                neededTotems--;
-            }
-            if (neededTotems > 0 && !hasMainhandTotem) {
-                equipTotem(EquipmentSlot.MAINHAND);
-            }
-        }
-        warnedOutOfTotems = false;
     }
 
     private void equipTotem(EquipmentSlot slot) {
