@@ -61,7 +61,7 @@ public class SpawnItem extends AbstractItem {
         boolean status = training.getBotManager().isBotSpawned(player.getUniqueId());
 
         if (status) {
-            training.getBotManager().despawnBot(player);
+            training.getBotManager().despawn(player);
             playerOptions.remove(player.getUniqueId());
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
@@ -72,6 +72,6 @@ public class SpawnItem extends AbstractItem {
         if (window != null) window.close();
 
         boolean follow = options.isFollow();
-        training.getBotManager().spawnBot(player, options.getArmor(), options.getBlast(), follow, options.getTotems());
+        training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems());
     }
 }

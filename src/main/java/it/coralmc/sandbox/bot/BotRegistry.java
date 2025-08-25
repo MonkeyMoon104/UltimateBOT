@@ -35,7 +35,7 @@ public class BotRegistry {
     }
 
     public Map<UUID, TrainingBot> getAllBots() {
-        return spawnedBots;
+        return new HashMap<>(spawnedBots);
     }
 
     public void clear() {

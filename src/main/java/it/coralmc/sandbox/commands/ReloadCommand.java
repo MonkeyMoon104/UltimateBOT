@@ -64,7 +64,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
     }
 
     public void reloadBot() {
-        plugin.getBotManager().despawnAllBots();
+        plugin.getBotManager().despawnAll();
     }
 
     public void reloadMaps() {

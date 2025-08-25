@@ -2,7 +2,6 @@ package it.coralmc.sandbox.listener;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotManager;
-import it.coralmc.sandbox.bot.BotSpawn;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import org.bukkit.entity.Player;
@@ -29,7 +28,7 @@ public class PlayerCheckListener implements Listener {
         Player player = event.getPlayer();
 
         if (botManager.isBotSpawned(player.getUniqueId())) {
-            botManager.despawnBot(player);
+            botManager.despawn(player);
         }
 
         playerOptions.remove(player.getUniqueId());
@@ -55,7 +54,7 @@ public class PlayerCheckListener implements Listener {
         Player player = event.getPlayer();
 
         if (botManager.isBotSpawned(player.getUniqueId())) {
-            botManager.despawnBot(player);
+            botManager.despawn(player);
 
             String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
             player.sendMessage(ChatColorUtils.translate(despawnMsg));

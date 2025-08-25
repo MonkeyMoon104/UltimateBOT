@@ -31,7 +31,7 @@ public final class SandboxTraining extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        botManager.despawnAllBots();
+        botManager.despawnAll();
         playerOptions.clear();
     }
 
