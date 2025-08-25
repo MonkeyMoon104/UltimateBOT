@@ -7,6 +7,7 @@ import it.coralmc.sandbox.utils.equipment.BotEquipmentUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Items;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -62,6 +63,8 @@ public class BotSpawner {
         world.addFreshEntity(bot);
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
+
+        bot.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Items.NETHERITE_SWORD));
 
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
         registry.registerBot(viewer.getUniqueId(), bot);
