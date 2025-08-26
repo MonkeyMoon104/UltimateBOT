@@ -64,11 +64,10 @@ public class BotSpawner {
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
 
-        bot.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, new net.minecraft.world.item.ItemStack(Items.NETHERITE_SWORD));
-
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
         registry.registerBot(viewer.getUniqueId(), bot);
 
+        bot.getBotAI().getInventoryController().addEnderpearls(16);
     }
 
     public void despawn(Player owner) {

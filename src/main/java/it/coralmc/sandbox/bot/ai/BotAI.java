@@ -1,10 +1,7 @@
 package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.ai.controllers.BotMovementController;
-import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
-import it.coralmc.sandbox.bot.ai.controllers.BotTotemController;
-import net.minecraft.world.InteractionHand;
+import it.coralmc.sandbox.bot.ai.controllers.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -18,6 +15,9 @@ public class BotAI {
     private final BotMovementController movementController;
     private final BotRotationController rotationController;
     private final BotTotemController totemController;
+    private final BotAttackController attackController;
+    private final BotInventoryController inventoryController;
+    private final BotEnderpearlController enderpearlController;
 
     private int knockbackCooldown = 0;
     private int attackCooldown = 0;
@@ -34,6 +34,9 @@ public class BotAI {
         this.movementController = new BotMovementController(bot, level);
         this.rotationController = new BotRotationController(bot);
         this.totemController = new BotTotemController(bot, plugin);
+        this.attackController = new BotAttackController(bot);
+        this.inventoryController = new BotInventoryController(bot);
+        this.enderpearlController = new BotEnderpearlController(bot, inventoryController);
     }
 
     public void setKnockbackCooldown(int ticks) {
@@ -55,7 +58,20 @@ public class BotAI {
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
         rotationController.updateRotation(target);
 
+        enderpearlController.tick();
+
         double dist = bot.distanceTo(target);
+
+        if (enderpearlController.shouldUseEnderpearl(target) && enderpearlController.canUseEnderpearl()) {
+            if (enderpearlController.tryUseEnderpearl(target)) {
+                return;
+            }
+        }
+
+        if (!inventoryController.isHoldingSword() && dist <= 4.0) {
+            inventoryController.switchToSword();
+        }
+
         if (Math.abs(dist - targetDistance) <= 0.3) {
             movementController.stopMovement();
         } else if (dist < targetDistance) {
@@ -65,49 +81,10 @@ public class BotAI {
         }
 
         if (dist <= 3.0 && ((TrainingBot) bot).isFollow()) {
-            handleAttack(target);
-        }
-    }
-
-    private void handleAttack(Player target) {
-        if (attackCooldown > 0) {
-            attackCooldown--;
-            return;
-        }
-
-        if (isJumping) {
-            jumpTicks++;
-
-            if (jumpTicks >= JUMP_ATTACK_DELAY && !bot.onGround()) {
-                bot.swing(InteractionHand.MAIN_HAND);
-                bot.attack(target);
-
-                isJumping = false;
-                jumpTicks = 0;
-                bot.setSprinting(true);
-                attackCooldown = 20 + random.nextInt(11);
+            if (!inventoryController.isHoldingSword()) {
+                inventoryController.switchToSword();
             }
-
-            if (bot.onGround() && jumpTicks > 10) {
-                isJumping = false;
-                jumpTicks = 0;
-                bot.setSprinting(true);
-                attackCooldown = 10;
-            }
-
-            return;
-        }
-
-        if (bot.onGround()) {
-            bot.setSprinting(true);
-            bot.setDeltaMovement(bot.getDeltaMovement().x, 0.42, bot.getDeltaMovement().z);
-            isJumping = true;
-            jumpTicks = 0;
-        }
-        else if (!bot.onGround()) {
-            bot.swing(InteractionHand.MAIN_HAND);
-            bot.attack(target);
-            attackCooldown = 20 + random.nextInt(11);
+            attackController.handleAttack(target);
         }
     }
 
@@ -125,5 +102,13 @@ public class BotAI {
 
     public BotTotemController getTotemController() {
         return totemController;
+    }
+
+    public BotInventoryController getInventoryController() {
+        return inventoryController;
+    }
+
+    public BotEnderpearlController getEnderpearlController() {
+        return enderpearlController;
     }
 }

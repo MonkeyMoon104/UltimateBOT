@@ -73,4 +73,34 @@ public class BotManager {
     public void updateFollow(UUID ownerUUID, boolean follow) {
         updater.updateFollow(ownerUUID, follow);
     }
+
+    public void updateBotInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
+        updater.updateInventorySlot(ownerUUID, slot, item);
+    }
+
+    public void switchBotSlot(UUID ownerUUID, int slot) {
+        updater.switchBotSlot(ownerUUID, slot);
+    }
+
+    public void addBotEnderpearls(UUID ownerUUID, int count) {
+        updater.addEnderpearls(ownerUUID, count);
+    }
+
+    public int getBotEnderpearlCount(UUID ownerUUID) {
+        return updater.getBotEnderpearlCount(ownerUUID);
+    }
+
+    public void switchBotToSword(UUID ownerUUID) {
+        TrainingBot bot = getBot(ownerUUID);
+        if (bot != null) {
+            bot.getBotAI().getInventoryController().switchToSword();
+        }
+    }
+
+    public void switchBotToEnderpearl(UUID ownerUUID) {
+        TrainingBot bot = getBot(ownerUUID);
+        if (bot != null) {
+            bot.getBotAI().getInventoryController().switchToEnderpearl();
+        }
+    }
 }
