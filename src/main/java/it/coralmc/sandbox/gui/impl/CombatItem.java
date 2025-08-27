@@ -27,7 +27,7 @@ public class CombatItem extends AbstractItem {
         boolean status = options.isCombat();
 
         ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getConfig().getString("gui.combat-button.material")));
-        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.follow-button.name")));
+        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.combat-button.name")));
 
         var loreLines = training.getConfig().getStringList("gui.combat-button.lore");
 
