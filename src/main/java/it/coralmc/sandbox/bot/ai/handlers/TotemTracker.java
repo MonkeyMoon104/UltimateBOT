@@ -11,9 +11,11 @@ public class TotemTracker {
     private int totemCount = -1;
     private int previousEquippedTotems = 0;
     private boolean skipNextTotemTracking = false;
+    private boolean previousCombatState = false;
 
     public TotemTracker(TrainingBot bot) {
         this.bot = bot;
+        this.previousCombatState = bot.isCombat();
     }
 
     public void onTick() {
@@ -26,8 +28,19 @@ public class TotemTracker {
                 mainhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
 
         int currentEquippedTotems = (hasOffhandTotem ? 1 : 0) + (hasMainhandTotem ? 1 : 0);
+        boolean currentCombatState = bot.isCombat();
 
-        if (!skipNextTotemTracking && previousEquippedTotems > currentEquippedTotems && totemCount > 0) {
+        boolean combatStateChanged = previousCombatState != currentCombatState;
+
+        if (combatStateChanged) {
+            skipNextTotemTracking = true;
+        }
+
+        if (!skipNextTotemTracking &&
+                !combatStateChanged &&
+                previousEquippedTotems > currentEquippedTotems &&
+                totemCount > 0) {
+
             int consumedTotems = previousEquippedTotems - currentEquippedTotems;
             if (totemCount != -1) {
                 totemCount = Math.max(0, totemCount - consumedTotems);
@@ -45,6 +58,7 @@ public class TotemTracker {
 
         skipNextTotemTracking = false;
         previousEquippedTotems = currentEquippedTotems;
+        previousCombatState = currentCombatState;
 
         bot.getAiController().getBotAI().manageTotem();
     }
@@ -52,6 +66,10 @@ public class TotemTracker {
     public int getTotemCount() { return totemCount; }
     public void setTotemCount(int count) {
         this.totemCount = count;
+        this.skipNextTotemTracking = true;
+    }
+
+    public void onCombatStateChanged() {
         this.skipNextTotemTracking = true;
     }
 }
