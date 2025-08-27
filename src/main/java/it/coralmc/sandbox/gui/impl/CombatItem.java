@@ -60,10 +60,16 @@ public class CombatItem extends AbstractItem {
             }, 1L);
         } else {
             if (training.getBotManager().getSwordSlot(player.getUniqueId())) {
-                training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+
+                int totemcount = options.getTotems();
+
+                if (totemcount > 1) {
+                    training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+                } else {
+                    training.getBotManager().switchBotToEmpty(player.getUniqueId());
+                }
             }
         }
-
         notifyWindows();
     }
 }
