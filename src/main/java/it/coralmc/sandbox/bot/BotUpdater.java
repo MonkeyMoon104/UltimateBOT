@@ -77,4 +77,21 @@ public class BotUpdater {
         }
         return 0;
     }
+
+    public boolean getSwordSlot(UUID ownerUUID) {
+        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        if (bot != null) {
+            return bot.getBotAI().getInventoryController().isHoldingSword();
+        }
+        return false;
+    }
+
+    public boolean getEpearlSlot(UUID ownerUUID) {
+        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        if (bot != null) {
+            return bot.getBotAI().getInventoryController().isHoldingEnderpearl();
+        }
+        return false;
+    }
+
 }

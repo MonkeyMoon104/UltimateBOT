@@ -107,4 +107,12 @@ public class BotManager {
             bot.getBotAI().getInventoryController().switchToEnderpearl();
         }
     }
+
+    public boolean getSwordSlot(UUID ownerUUID) {
+        return updater.getSwordSlot(ownerUUID);
+    }
+
+    public boolean getEpearlSlot(UUID ownerUUID) {
+        return updater.getEpearlSlot(ownerUUID);
+    }
 }

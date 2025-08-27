@@ -43,6 +43,13 @@ public class CombatItem extends AbstractItem {
         boolean status = options.isCombat();
         options.setCombat(!status);
         training.getBotManager().updateCombat(player.getUniqueId(), options.isCombat());
+        if (status) {
+            if (training.getBotManager().getSwordSlot(player.getUniqueId())) {
+                training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+            } else {
+                training.getBotManager().switchBotToSword(player.getUniqueId());
+            }
+        }
 
         notifyWindows();
     }
