@@ -21,6 +21,7 @@ public class BotInventoryController {
     public static final int SWORD_SLOT = 0;
     public static final int ENDERPEARL_SLOT = 1;
     public static final int TOTEM_SLOT = 2;
+    public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
         this.bot = bot;
@@ -33,6 +34,8 @@ public class BotInventoryController {
         hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, 16));
 
         hotbarSlots.put(TOTEM_SLOT, new ItemStack(Items.TOTEM_OF_UNDYING));
+
+        hotbarSlots.put(EMPTY_SLOT, ItemStack.EMPTY);
 
         switchToSlot(SWORD_SLOT);
     }
@@ -60,6 +63,10 @@ public class BotInventoryController {
 
     public void switchToTotem() {
         switchToSlot(TOTEM_SLOT);
+    }
+
+    public void switchToEmptySlot() {
+        switchToSlot(EMPTY_SLOT);
     }
 
     public int getCurrentSlot() {

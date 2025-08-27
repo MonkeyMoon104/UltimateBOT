@@ -108,6 +108,13 @@ public class BotManager {
         }
     }
 
+    public void switchBotToEmpty(UUID ownerUUID) {
+        TrainingBot bot = getBot(ownerUUID);
+        if (bot != null) {
+            bot.getBotAI().getInventoryController().switchToEmptySlot();
+        }
+    }
+
     public boolean getSwordSlot(UUID ownerUUID) {
         return updater.getSwordSlot(ownerUUID);
     }
