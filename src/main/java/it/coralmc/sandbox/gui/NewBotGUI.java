@@ -32,6 +32,9 @@ public class NewBotGUI {
             options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getConfig(), training));
         }
 
+        CombatItem combatItem = new CombatItem(training, options);
+        FollowItem followItem = new FollowItem(training, options, combatItem);
+
         Gui gui = Gui.normal()
                 .setStructure(
                         ". . . . . . . . .",
@@ -43,11 +46,11 @@ public class NewBotGUI {
                 )
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('t', new TotemItem(options, training))
-                .addIngredient('f', new FollowItem(training, options))
+                .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(training, player, options))
                 .addIngredient('g', training.getBotManager().isBotSpawned(player.getUniqueId())
                     ? new TeleportItem(training) : new SimpleItem(new ItemStack(Material.AIR)))
-                .addIngredient('c', new CombatItem(training, options))
+                .addIngredient('c', combatItem)
                 .build();
 
         Map<EquipmentSlot, ArmorItem> armors = new HashMap<>();

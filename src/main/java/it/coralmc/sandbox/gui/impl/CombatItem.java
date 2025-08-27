@@ -40,14 +40,27 @@ public class CombatItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        boolean status = options.isCombat();
-        options.setCombat(!status);
-        training.getBotManager().updateCombat(player.getUniqueId(), options.isCombat());
-        if (status) {
+        boolean oldStatus = options.isCombat();
+        boolean followStatus = options.isFollow();
+
+        if (!followStatus) {
+            String msg = training.getConfig().getString("combat-need-follow", "&cFollow deve essere ON per abilitare il combat del bot");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
+        boolean newStatus = !oldStatus;
+        options.setCombat(newStatus);
+        training.getBotManager().updateCombat(player.getUniqueId(), newStatus);
+
+        if (newStatus) {
+            training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+            training.getServer().getScheduler().runTaskLater(training, () -> {
+                training.getBotManager().switchBotToSword(player.getUniqueId());
+            }, 1L);
+        } else {
             if (training.getBotManager().getSwordSlot(player.getUniqueId())) {
                 training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
-            } else {
-                training.getBotManager().switchBotToSword(player.getUniqueId());
             }
         }
 

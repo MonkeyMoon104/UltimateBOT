@@ -10,6 +10,7 @@ messages:
   reload-maps: "&aTutte le mappe dei player sono state pulite"
   reload-all: "&aConfigurazione, bot e mappe sono state ricaricate/pulite"
   reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
+  combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
 
 bot:
   name: "CrystalBot"

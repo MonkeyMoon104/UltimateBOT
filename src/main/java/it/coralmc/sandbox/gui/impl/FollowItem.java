@@ -16,10 +16,18 @@ public class FollowItem extends AbstractItem {
 
     private final SandboxTraining training;
     private final BotOptions options;
+    private final CombatItem combatItem;
+
+    public FollowItem(SandboxTraining training, BotOptions options, CombatItem combatItem) {
+        this.training = training;
+        this.options = options;
+        this.combatItem = combatItem;
+    }
 
     public FollowItem(SandboxTraining training, BotOptions options) {
         this.training = training;
         this.options = options;
+        this.combatItem = null;
     }
 
     @Override
@@ -40,9 +48,21 @@ public class FollowItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        boolean status = options.isFollow();
-        options.setFollow(!status);
-        training.getBotManager().updateFollow(player.getUniqueId(), options.isFollow());
+        boolean oldFollowStatus = options.isFollow();
+        boolean combatStatus = options.isCombat();
+
+        boolean newFollowStatus = !oldFollowStatus;
+        options.setFollow(newFollowStatus);
+        training.getBotManager().updateFollow(player.getUniqueId(), newFollowStatus);
+
+        if (!newFollowStatus && combatStatus) {
+            options.setCombat(false);
+            training.getBotManager().updateCombat(player.getUniqueId(), false);
+
+            if (combatItem != null) {
+                combatItem.notifyWindows();
+            }
+        }
 
         notifyWindows();
     }
