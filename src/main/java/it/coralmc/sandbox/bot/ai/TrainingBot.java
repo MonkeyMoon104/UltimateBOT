@@ -114,6 +114,13 @@ public class TrainingBot extends Player {
     public boolean isFollow() {
         return this.aiController.isFollow();
     }
+
+    public void setCombat(boolean combat) {
+        this.aiController.setCombat(combat);
+    }
+    public boolean isCombat() {
+        return this.aiController.isCombat();
+    }
     public it.coralmc.sandbox.bot.ai.BotAI getBotAI() {
         return this.aiController.getBotAI();
     }

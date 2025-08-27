@@ -41,6 +41,13 @@ public class BotUpdater {
         }
     }
 
+    public void updateCombat(UUID ownerUUID, boolean combat) {
+        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        if (bot != null) {
+            bot.setCombat(combat);
+        }
+    }
+
     public void updateInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
         TrainingBot bot = registry.getAllBots().get(ownerUUID);
         if (bot != null) {

@@ -96,3 +96,12 @@ gui:
     fallback-enabled-lore: "&aClicca per disabilitare"
     fallback-disabled-lore: "&cClicca per abilitare"
 
+  combat-button:
+    name: "&bAttiva/Disattiva Combat"
+    material: "NETHERITE_SWORD"
+    lore:
+      - "&7Stato: &e%type%"
+      - ""
+      - "&eClicca per attivare/disattivare il combat"
+
+

@@ -74,6 +74,10 @@ public class BotManager {
         updater.updateFollow(ownerUUID, follow);
     }
 
+    public void updateCombat(UUID ownerUUID, boolean combat) {
+        updater.updateCombat(ownerUUID, combat);
+    }
+
     public void updateBotInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
         updater.updateInventorySlot(ownerUUID, slot, item);
     }

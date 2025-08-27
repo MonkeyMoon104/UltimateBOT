@@ -58,19 +58,7 @@ public class BotAI {
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
         rotationController.updateRotation(target);
 
-        enderpearlController.tick();
-
         double dist = bot.distanceTo(target);
-
-        if (enderpearlController.shouldUseEnderpearl(target) && enderpearlController.canUseEnderpearl()) {
-            if (enderpearlController.tryUseEnderpearl(target)) {
-                return;
-            }
-        }
-
-        if (!inventoryController.isHoldingSword() && dist <= 4.0) {
-            inventoryController.switchToSword();
-        }
 
         if (Math.abs(dist - targetDistance) <= 0.3) {
             movementController.stopMovement();
@@ -80,11 +68,25 @@ public class BotAI {
             movementController.moveTowards(target, targetDistance);
         }
 
-        if (dist <= 3.0 && ((TrainingBot) bot).isFollow()) {
-            if (!inventoryController.isHoldingSword()) {
+        if (((TrainingBot) bot).isCombat()) {
+            enderpearlController.tick();
+
+            if (enderpearlController.shouldUseEnderpearl(target) && enderpearlController.canUseEnderpearl()) {
+                if (enderpearlController.tryUseEnderpearl(target)) {
+                    return;
+                }
+            }
+
+            if (!inventoryController.isHoldingSword() && dist <= 4.0) {
                 inventoryController.switchToSword();
             }
-            attackController.handleAttack(target);
+
+            if (dist <= 3.0 && ((TrainingBot) bot).isFollow()) {
+                if (!inventoryController.isHoldingSword()) {
+                    inventoryController.switchToSword();
+                }
+                attackController.handleAttack(target);
+            }
         }
     }
 

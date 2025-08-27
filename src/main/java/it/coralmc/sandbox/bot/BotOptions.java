@@ -14,6 +14,7 @@ public class BotOptions {
     private final Map<EquipmentSlot, Boolean> blast = new HashMap<>();
     private int totems;
     private boolean follow = false;
+    private boolean combat = false;
 
     public BotOptions(SandboxTraining training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
@@ -36,6 +37,9 @@ public class BotOptions {
     public void setFollow(boolean follow) {
         this.follow = follow;
     }
+
+    public boolean isCombat() {return combat; }
+    public void setCombat(boolean combat) {this.combat = combat; }
 
     public Map<EquipmentSlot, ItemStack> getArmor() {
         return armor;

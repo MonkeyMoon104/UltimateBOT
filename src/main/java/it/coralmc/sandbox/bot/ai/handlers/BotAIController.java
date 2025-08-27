@@ -13,6 +13,7 @@ public class BotAIController {
     private org.bukkit.entity.Player targetPlayer;
     private final BotOptions botOptions;
     private boolean follow;
+    private boolean combat;
 
     public BotAIController(TrainingBot bot, SandboxTraining plugin,
                            org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
@@ -45,6 +46,9 @@ public class BotAIController {
     public org.bukkit.entity.Player getTargetPlayer() { return targetPlayer; }
     public void setFollow(boolean follow) { this.follow = follow; }
     public boolean isFollow() { return follow; }
+
+    public void setCombat(boolean combat) { this.combat = combat; }
+    public boolean isCombat() { return combat; }
     public BotOptions getBotOptions() {
         return botOptions;
     }

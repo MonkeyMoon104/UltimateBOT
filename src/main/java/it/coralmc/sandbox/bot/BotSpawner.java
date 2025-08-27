@@ -68,6 +68,7 @@ public class BotSpawner {
         registry.registerBot(viewer.getUniqueId(), bot);
 
         bot.getBotAI().getInventoryController().addEnderpearls(16);
+        bot.getBotAI().getInventoryController().switchToEnderpearl();
     }
 
     public void despawn(Player owner) {
