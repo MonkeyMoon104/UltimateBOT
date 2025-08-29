@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
 import com.mojang.datafixers.util.Pair;
+import com.sun.jna.platform.win32.GL;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -24,6 +25,8 @@ public class BotInventoryController {
     public static final int TOTEM_SLOT = 2;
     public static final int OBSIDIAN_SLOT = 3;
     public static final int CRYSTAL_SLOT = 4;
+    public static final int ANCHOR_SLOT = 5;
+    public static final int GLOW_SLOT = 6;
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
@@ -41,6 +44,10 @@ public class BotInventoryController {
         hotbarSlots.put(OBSIDIAN_SLOT, new ItemStack(Items.OBSIDIAN, 64));
 
         hotbarSlots.put(CRYSTAL_SLOT, new ItemStack(Items.END_CRYSTAL, 64));
+
+        hotbarSlots.put(ANCHOR_SLOT, new ItemStack(Items.RESPAWN_ANCHOR, 64));
+
+        hotbarSlots.put(GLOW_SLOT, new ItemStack(Items.GLOWSTONE, 64));
 
         hotbarSlots.put(EMPTY_SLOT, ItemStack.EMPTY);
 
@@ -84,6 +91,16 @@ public class BotInventoryController {
                     currentStack.setCount(16);
                 }
                 break;
+            case ANCHOR_SLOT:
+                if (currentStack.getItem() == Items.RESPAWN_ANCHOR && currentStack.getCount() < 64) {
+                    currentStack.setCount(64);
+                }
+                break;
+            case GLOW_SLOT:
+                if (currentStack.getItem() == Items.GLOWSTONE && currentStack.getCount() < 64) {
+                    currentStack.setCount(64);
+                }
+                break;
         }
     }
 
@@ -107,6 +124,16 @@ public class BotInventoryController {
             case ENDERPEARL_SLOT:
                 if (stack.getItem() == Items.ENDER_PEARL) {
                     stack.setCount(16);
+                }
+                break;
+            case ANCHOR_SLOT:
+                if (stack.getItem() == Items.RESPAWN_ANCHOR) {
+                    stack.setCount(64);
+                }
+                break;
+            case GLOW_SLOT:
+                if (stack.getItem() == Items.GLOWSTONE) {
+                    stack.setCount(64);
                 }
                 break;
         }
@@ -135,6 +162,14 @@ public class BotInventoryController {
 
     public void switchToObs() {
         switchToSlot(OBSIDIAN_SLOT);
+    }
+
+    public void switchToAnchor() {
+        switchToSlot(ANCHOR_SLOT);
+    }
+
+    public void switchToGlow() {
+        switchToSlot(GLOW_SLOT);
     }
 
     public void switchToEmptySlot() {
@@ -201,6 +236,14 @@ public class BotInventoryController {
 
     public boolean isHoldingCrystal() {
         return currentSlot == CRYSTAL_SLOT && getCurrentItem().getItem() == Items.END_CRYSTAL;
+    }
+
+    public boolean isHoldingAnchor() {
+        return currentSlot == ANCHOR_SLOT && getCurrentItem().getItem() == Items.RESPAWN_ANCHOR;
+    }
+
+    public boolean isHoldingGlow() {
+        return currentSlot == GLOW_SLOT && getCurrentItem().getItem() == Items.GLOWSTONE;
     }
 
     public void updateTotemSlot(ItemStack totemStack) {
