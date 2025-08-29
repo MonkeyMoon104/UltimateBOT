@@ -54,7 +54,6 @@ public class BotAI {
 
         if (knockbackCooldown > 0) {
             knockbackCooldown--;
-            return;
         }
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
@@ -74,7 +73,7 @@ public class BotAI {
             enderpearlController.tick();
             crystalController.tick(target);
 
-            if (enderpearlController.shouldUseEnderpearl(target) && enderpearlController.canUseEnderpearl()) {
+            if (enderpearlController.canUseEnderpearl()) {
                 if (enderpearlController.tryUseEnderpearl(target)) {
                     return;
                 }

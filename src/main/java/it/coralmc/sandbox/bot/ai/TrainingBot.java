@@ -70,6 +70,7 @@ public class TrainingBot extends Player {
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
+        getBotAI().getEnderpearlController().onDamageReceived();
         return equipmentHandler.handleDamage(level, source, amount, event);
     }
 
