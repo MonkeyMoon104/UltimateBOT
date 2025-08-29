@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.AABB;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BotCrystalController {
 
@@ -28,20 +29,30 @@ public class BotCrystalController {
     private int crystalPlaceCooldown = 0;
     private int attackCooldown = 0;
 
-    private static final int OBSIDIAN_PLACE_COOLDOWN_TICKS = 6;
-    private static final int CRYSTAL_PLACE_COOLDOWN_TICKS = 8;
-    private static final int ATTACK_COOLDOWN_TICKS = 5;
-    private static final double MAX_CRYSTAL_DISTANCE = 6.0;
-    private static final double MIN_CRYSTAL_DISTANCE = 3.0;
-    private static final double CRYSTAL_ATTACK_RANGE = 6.0;
+    private static final int OBSIDIAN_PLACE_COOLDOWN_TICKS = 4;
+    private static final int CRYSTAL_PLACE_COOLDOWN_TICKS = 5;
+    private static final int ATTACK_COOLDOWN_TICKS = 3;
 
-    private final Map<BlockPos, Long> recentPlacements = new HashMap<>();
-    private static final long POSITION_COOLDOWN_MS = 2000;
+    private static final double MAX_CRYSTAL_DISTANCE = 8.0;
+    private static final double MIN_CRYSTAL_DISTANCE = 2.5;
+    private static final double CRYSTAL_ATTACK_RANGE = 8.0;
+    private static final double OPTIMAL_DAMAGE_RANGE = 6.0;
 
-    private final Set<EndCrystal> myPlacedCrystals = new HashSet<>();
+    private final Map<BlockPos, Long> recentPlacements = new ConcurrentHashMap<>();
+    private static final long POSITION_COOLDOWN_MS = 1500;
 
-    private final Map<BlockPos, Long> obsidianCache = new HashMap<>();
-    private static final long OBSIDIAN_CACHE_MS = 5000;
+    private final Set<EndCrystal> myPlacedCrystals = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Map<BlockPos, Long> obsidianCache = new ConcurrentHashMap<>();
+    private static final long OBSIDIAN_CACHE_MS = 7000;
+
+    private final Map<BlockPos, Integer> crystalCountAtPosition = new ConcurrentHashMap<>();
+    private static final int MAX_CRYSTALS_PER_POSITION = 3;
+
+    private long lastFullScan = 0;
+    private static final long FULL_SCAN_INTERVAL_MS = 500;
+    private final List<BlockPos> cachedValidPositions = new ArrayList<>();
+    private long lastPositionCache = 0;
+    private static final long POSITION_CACHE_MS = 1000;
 
     public BotCrystalController(Player bot, BotInventoryController inventoryController) {
         this.bot = bot;
@@ -55,14 +66,27 @@ public class BotCrystalController {
         if (attackCooldown > 0) attackCooldown--;
 
         myPlacedCrystals.removeIf(crystal -> !crystal.isAlive());
+        cleanupCrystalCounts();
 
         cleanupObsidianCache();
 
-        scanForExistingObsidian(target);
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastFullScan > FULL_SCAN_INTERVAL_MS) {
+            scanForExistingObsidian(target);
+            lastFullScan = currentTime;
+        }
 
         tryPlaceObsidianForCrystal(target);
-        tryPlaceOptimalCrystal(target);
+        tryPlaceOptimalCrystals(target);
         tryAttackOptimalCrystal(target);
+    }
+
+    private void cleanupCrystalCounts() {
+        crystalCountAtPosition.entrySet().removeIf(entry -> {
+            BlockPos pos = entry.getKey();
+            return findCrystalAt(pos.above()) == null;
+        });
     }
 
     private void cleanupObsidianCache() {
@@ -78,42 +102,58 @@ public class BotCrystalController {
         if (distance < MIN_CRYSTAL_DISTANCE || distance > MAX_CRYSTAL_DISTANCE) return false;
         if (!hasObsidian()) return false;
 
-        BlockPos bestObsidianPos = findBestObsidianPosition(target);
-        if (bestObsidianPos == null) return false;
+        List<BlockPos> bestPositions = findBestObsidianPositions(target, 3);
+        if (bestPositions.isEmpty()) return false;
 
         if (!inventoryController.isHoldingObsidian()) {
             inventoryController.switchToObs();
             return false;
         }
 
-        if (placeObsidianAt(bestObsidianPos)) {
-            obsidianPlaceCooldown = OBSIDIAN_PLACE_COOLDOWN_TICKS;
-            recentPlacements.put(bestObsidianPos, System.currentTimeMillis());
-            obsidianCache.put(bestObsidianPos, System.currentTimeMillis());
-            return true;
+        for (BlockPos pos : bestPositions) {
+            if (placeObsidianAt(pos)) {
+                obsidianPlaceCooldown = OBSIDIAN_PLACE_COOLDOWN_TICKS;
+                recentPlacements.put(pos, System.currentTimeMillis());
+                obsidianCache.put(pos, System.currentTimeMillis());
+                return true;
+            }
         }
 
         return false;
     }
 
-    private BlockPos findBestObsidianPosition(Player target) {
+    private List<BlockPos> findBestObsidianPositions(Player target, int maxPositions) {
         cleanupRecentPlacements();
 
-        List<BlockPos> potentialPositions = new ArrayList<>();
-        BlockPos targetBlockPos = target.blockPosition();
+        long currentTime = System.currentTimeMillis();
 
-        for (int y = -3; y <= 2; y++) {
-            for (int x = -5; x <= 5; x++) {
-                for (int z = -5; z <= 5; z++) {
-                    BlockPos checkPos = targetBlockPos.offset(x, y, z);
-                    if (recentPlacements.containsKey(checkPos)) continue;
-                    if (isValidObsidianPosition(checkPos, target)) potentialPositions.add(checkPos);
+        if (currentTime - lastPositionCache > POSITION_CACHE_MS) {
+            cachedValidPositions.clear();
+            BlockPos targetBlockPos = target.blockPosition();
+
+            for (int y = -4; y <= 3; y++) {
+                for (int x = -7; x <= 7; x++) {
+                    for (int z = -7; z <= 7; z++) {
+                        BlockPos checkPos = targetBlockPos.offset(x, y, z);
+                        if (recentPlacements.containsKey(checkPos)) continue;
+                        if (isValidObsidianPosition(checkPos, target)) {
+                            cachedValidPositions.add(checkPos);
+                        }
+                    }
                 }
             }
+            lastPositionCache = currentTime;
         }
 
-        if (potentialPositions.isEmpty()) return null;
-        return getBestObsidianPosition(potentialPositions, target);
+        if (cachedValidPositions.isEmpty()) return new ArrayList<>();
+
+        return cachedValidPositions.stream()
+                .sorted((pos1, pos2) -> Double.compare(
+                        calculatePositionScore(pos2, target),
+                        calculatePositionScore(pos1, target)
+                ))
+                .limit(maxPositions)
+                .toList();
     }
 
     private void cleanupRecentPlacements() {
@@ -135,50 +175,41 @@ public class BotCrystalController {
         double distanceToBot = bot.position().distanceTo(Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(Vec3.atCenterOf(pos.above()));
 
-        return distanceToBot <= 5.5 && distanceToTarget <= 6.0;
+        return distanceToBot <= 6.5 && distanceToTarget <= MAX_CRYSTAL_DISTANCE;
     }
 
-    private BlockPos getBestObsidianPosition(List<BlockPos> positions, Player target) {
-        BlockPos bestPos = null;
-        double bestScore = -Double.MAX_VALUE;
-
+    private double calculatePositionScore(BlockPos pos, Player target) {
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
         int targetY = target.blockPosition().getY();
 
-        for (BlockPos pos : positions) {
-            double score = calculatePositionScore(pos, target, targetPos, botPos, targetY);
-            if (score > bestScore) {
-                bestScore = score;
-                bestPos = pos;
-            }
-        }
-
-        return bestPos;
-    }
-
-    private double calculatePositionScore(BlockPos pos, Player target, Vec3 targetPos, Vec3 botPos, int targetY) {
         double score = 0;
 
         Vec3 crystalPos = Vec3.atCenterOf(pos.above());
         double distanceToTarget = targetPos.distanceTo(crystalPos);
         double distanceToBot = botPos.distanceTo(crystalPos);
 
-        if (distanceToTarget <= 4.0) score += (4.0 - distanceToTarget) * 25;
+        if (distanceToTarget <= OPTIMAL_DAMAGE_RANGE) {
+            score += (OPTIMAL_DAMAGE_RANGE - distanceToTarget) * 30;
+        }
 
-        if (distanceToBot > 5.0) score -= (distanceToBot - 5.0) * 30;
+        if (distanceToBot > MIN_CRYSTAL_DISTANCE) {
+            if (distanceToBot > 6.0) score -= (distanceToBot - 6.0) * 20;
+        } else {
+            score -= 100;
+        }
 
         int yDiff = pos.getY() - targetY;
+        if (yDiff < -1) score += Math.abs(yDiff) * 40;
+        else if (yDiff == -1) score += 80;
+        else if (yDiff == 0) score += 60;
+        else if (yDiff == 1) score += 20;
+        else score -= Math.abs(yDiff) * 25;
 
-        if (yDiff < -1) score += Math.abs(yDiff) * 50;
-        else if (yDiff == -1) score += 60;
-        else if (yDiff == 0) score += 40;
-        else if (yDiff == 1) score -= 5;
-        else score -= Math.abs(yDiff) * 30;
+        if (hasNearbySupport(pos)) score += 25;
 
-        if (hasNearbySupport(pos)) score += 15;
-        if (!target.onGround() && yDiff >= 0) score -= 20;
-        if (target.onGround() && yDiff < 0) score += 20;
+        if (!target.onGround() && yDiff >= 0) score += 30;
+        if (target.onGround() && yDiff < 0) score += 40;
 
         return score;
     }
@@ -195,9 +226,9 @@ public class BotCrystalController {
         BlockPos targetPos = target.blockPosition();
         long currentTime = System.currentTimeMillis();
 
-        for (int y = -4; y <= 3; y++) {
-            for (int x = -7; x <= 7; x++) {
-                for (int z = -7; z <= 7; z++) {
+        for (int y = -5; y <= 4; y++) {
+            for (int x = -9; x <= 9; x++) {
+                for (int z = -9; z <= 9; z++) {
                     BlockPos checkPos = targetPos.offset(x, y, z);
 
                     if (obsidianCache.containsKey(checkPos) &&
@@ -219,12 +250,10 @@ public class BotCrystalController {
         if (!(state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK))) return false;
         if (!level.getBlockState(pos.above()).isAir() || !level.getBlockState(pos.above(2)).isAir()) return false;
 
-        if (findCrystalAt(pos.above()) != null) return false;
-
         double distanceToBot = bot.position().distanceTo(Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(Vec3.atCenterOf(pos.above()));
 
-        return distanceToBot <= 5.5 && distanceToTarget <= MAX_CRYSTAL_DISTANCE;
+        return distanceToBot <= 6.5 && distanceToTarget <= MAX_CRYSTAL_DISTANCE;
     }
 
     private double calculateCrystalScore(BlockPos crystalPos, Player target) {
@@ -244,21 +273,26 @@ public class BotCrystalController {
         double targetDamage = calculatePredictedDamage(distanceToTarget);
         double botDamage = calculatePredictedDamage(distanceToBot);
 
-        score += targetDamage * 30;
-        score -= botDamage * 50;
+        score += targetDamage * 40;
+        score -= botDamage * 60;
 
-        if (distanceToTarget <= 4.0) {
-            score += (4.0 - distanceToTarget) * 15;
+        if (distanceToTarget <= OPTIMAL_DAMAGE_RANGE) {
+            score += (OPTIMAL_DAMAGE_RANGE - distanceToTarget) * 20;
         }
 
         if (distanceToBot < 4.0) {
-            score -= (4.0 - distanceToBot) * 25;
+            score -= (4.0 - distanceToBot) * 40;
         }
 
         int yDiff = crystalPos.getY() - target.blockPosition().getY();
-        if (yDiff == -1) score += 20;
-        else if (yDiff == 0) score += 15;
-        else if (yDiff < -1) score += Math.abs(yDiff) * 8;
+        if (yDiff == -1) score += 35;
+        else if (yDiff == 0) score += 25;
+        else if (yDiff < -1) score += Math.abs(yDiff) * 12;
+
+        int existingCount = crystalCountAtPosition.getOrDefault(crystalPos, 0);
+        if (existingCount > 0 && distanceToBot > 4.0) {
+            score += existingCount * 15;
+        }
 
         return score;
     }
@@ -266,7 +300,7 @@ public class BotCrystalController {
     private double calculatePredictedDamage(double distance) {
         if (distance > 12.0) return 0.0;
 
-        double maxDamage = 12.0;
+        double maxDamage = 14.0;
         double falloff = Math.max(0.0, 1.0 - (distance / 12.0));
 
         return maxDamage * falloff * falloff;
@@ -302,6 +336,7 @@ public class BotCrystalController {
                 EndCrystal placedCrystal = findCrystalAt(pos.above());
                 if (placedCrystal != null) {
                     myPlacedCrystals.add(placedCrystal);
+                    crystalCountAtPosition.put(pos, crystalCountAtPosition.getOrDefault(pos, 0) + 1);
                 }
                 return true;
             }
@@ -345,7 +380,7 @@ public class BotCrystalController {
         if (attackCooldown > 0) return;
 
         EndCrystal bestCrystal = null;
-        double bestScore = -1;
+        double bestScore = 0.3;
 
         for (EndCrystal crystal : myPlacedCrystals) {
             if (!crystal.isAlive()) continue;
@@ -373,7 +408,7 @@ public class BotCrystalController {
             }
         }
 
-        if (bestCrystal != null && bestScore > 0.5) {
+        if (bestCrystal != null) {
             attackCrystal(bestCrystal);
         }
     }
@@ -384,49 +419,51 @@ public class BotCrystalController {
         double distanceToBot = bot.position().distanceTo(crystalPos);
 
         if (distanceToBot > CRYSTAL_ATTACK_RANGE) return -1;
-
         if (distanceToBot < MIN_CRYSTAL_DISTANCE) return -1;
 
         double score = 0;
 
-        if (distanceToTarget <= 6.0) {
-            score = (6.0 - distanceToTarget) / 6.0;
+        if (distanceToTarget <= OPTIMAL_DAMAGE_RANGE) {
+            score = (OPTIMAL_DAMAGE_RANGE - distanceToTarget) / OPTIMAL_DAMAGE_RANGE;
         }
 
         if (myPlacedCrystals.contains(crystal)) {
+            score += 0.4;
+        }
+
+        if (distanceToTarget <= 3.0) {
             score += 0.3;
         }
 
         return score;
     }
 
-    private void tryPlaceOptimalCrystal(Player target) {
+    private void tryPlaceOptimalCrystals(Player target) {
         if (!canPlaceCrystal()) return;
 
         List<BlockPos> validObsidianPositions = new ArrayList<>();
 
         for (BlockPos obsidianPos : obsidianCache.keySet()) {
             if (isValidCrystalPos(obsidianPos, target)) {
-                validObsidianPositions.add(obsidianPos);
+                int currentCount = crystalCountAtPosition.getOrDefault(obsidianPos, 0);
+                if (currentCount < MAX_CRYSTALS_PER_POSITION) {
+                    validObsidianPositions.add(obsidianPos);
+                }
             }
         }
 
         if (validObsidianPositions.isEmpty()) return;
 
-        BlockPos bestPos = null;
-        double bestScore = 10.0;
+        validObsidianPositions.sort((pos1, pos2) -> Double.compare(
+                calculateCrystalScore(pos2, target),
+                calculateCrystalScore(pos1, target)
+        ));
 
-        for (BlockPos pos : validObsidianPositions) {
-            double score = calculateCrystalScore(pos, target);
-            if (score > bestScore) {
-                bestScore = score;
-                bestPos = pos;
-            }
-        }
+        BlockPos bestPos = validObsidianPositions.get(0);
+        double bestScore = calculateCrystalScore(bestPos, target);
 
-        if (bestPos != null) {
-            System.out.println("Tentativo di piazzare crystal su obsidian esistente a: " + bestPos + " con score: " + bestScore);
-            placeCrystal(bestPos);
+        if (bestScore > 15.0) {
+            if (placeCrystal(bestPos)) {            }
         }
     }
 
@@ -439,7 +476,7 @@ public class BotCrystalController {
 
             if (adjacentState.isSolid() && !adjacentState.isAir()) {
                 double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
-                if (distance <= 5.5) return direction;
+                if (distance <= 6.5) return direction;
             }
         }
 
@@ -494,7 +531,7 @@ public class BotCrystalController {
     public boolean shouldPlaceObsidian(Player target) {
         double distance = bot.distanceTo(target);
         return distance >= MIN_CRYSTAL_DISTANCE && distance <= MAX_CRYSTAL_DISTANCE
-                && findBestObsidianPosition(target) != null;
+                && !findBestObsidianPositions(target, 1).isEmpty();
     }
 
     public int getPlacedCrystalsCount() {
@@ -503,5 +540,9 @@ public class BotCrystalController {
 
     public int getCachedObsidianCount() {
         return obsidianCache.size();
+    }
+
+    public int getTotalCrystalPlacements() {
+        return crystalCountAtPosition.values().stream().mapToInt(Integer::intValue).sum();
     }
 }
