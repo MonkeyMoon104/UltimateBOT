@@ -19,11 +19,12 @@ import net.minecraft.world.phys.AABB;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BotCrystalController {
+public class BotCPVPController {
 
     private final Player bot;
     private final Level level;
     private final BotInventoryController inventoryController;
+    private final BotRotationController rotationController;
 
     private int obsidianPlaceCooldown = 0;
     private int crystalPlaceCooldown = 0;
@@ -54,10 +55,26 @@ public class BotCrystalController {
     private long lastPositionCache = 0;
     private static final long POSITION_CACHE_MS = 1000;
 
-    public BotCrystalController(Player bot, BotInventoryController inventoryController) {
+    private boolean isPreparingObsidian = false;
+    private BlockPos pendingObsidianPos = null;
+    private int obsidianPreparationTicks = 0;
+    private static final int OBSIDIAN_PREPARATION_TIME = 2;
+
+    private boolean isPreparingCrystal = false;
+    private BlockPos pendingCrystalPos = null;
+    private int crystalPreparationTicks = 0;
+    private static final int CRYSTAL_PREPARATION_TIME = 2;
+
+    private boolean isPreparingAttack = false;
+    private EndCrystal pendingAttackCrystal = null;
+    private int attackPreparationTicks = 0;
+    private static final int ATTACK_PREPARATION_TIME = 1;
+
+    public BotCPVPController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
         this.level = bot.level();
         this.inventoryController = inventoryController;
+        this.rotationController = rotationController;
     }
 
     public void tick(Player target) {
@@ -67,7 +84,6 @@ public class BotCrystalController {
 
         myPlacedCrystals.removeIf(crystal -> !crystal.isAlive());
         cleanupCrystalCounts();
-
         cleanupObsidianCache();
 
         long currentTime = System.currentTimeMillis();
@@ -77,9 +93,15 @@ public class BotCrystalController {
             lastFullScan = currentTime;
         }
 
-        tryPlaceObsidianForCrystal(target);
-        tryPlaceOptimalCrystals(target);
-        tryAttackOptimalCrystal(target);
+        handleObsidianPreparation();
+        handleCrystalPreparation();
+        handleAttackPreparation();
+
+        if (!isPreparingObsidian && !isPreparingCrystal && !isPreparingAttack) {
+            tryPlaceObsidianForCrystal(target);
+            tryPlaceOptimalCrystals(target);
+            tryAttackOptimalCrystal(target);
+        }
     }
 
     private void cleanupCrystalCounts() {
@@ -111,15 +133,39 @@ public class BotCrystalController {
         }
 
         for (BlockPos pos : bestPositions) {
-            if (placeObsidianAt(pos)) {
-                obsidianPlaceCooldown = OBSIDIAN_PLACE_COOLDOWN_TICKS;
-                recentPlacements.put(pos, System.currentTimeMillis());
-                obsidianCache.put(pos, System.currentTimeMillis());
-                return true;
-            }
+            startObsidianPreparation(pos);
+            return true;
         }
 
         return false;
+    }
+
+    private void startObsidianPreparation(BlockPos pos) {
+        isPreparingObsidian = true;
+        pendingObsidianPos = pos;
+        obsidianPreparationTicks = 0;
+
+        rotationController.lookAt(Vec3.atCenterOf(pos));
+    }
+
+    private void handleObsidianPreparation() {
+        if (!isPreparingObsidian || pendingObsidianPos == null) return;
+
+        obsidianPreparationTicks++;
+
+        rotationController.lookAt(Vec3.atCenterOf(pendingObsidianPos));
+
+        if (obsidianPreparationTicks >= OBSIDIAN_PREPARATION_TIME) {
+            if (placeObsidianAt(pendingObsidianPos)) {
+                obsidianPlaceCooldown = OBSIDIAN_PLACE_COOLDOWN_TICKS;
+                recentPlacements.put(pendingObsidianPos, System.currentTimeMillis());
+                obsidianCache.put(pendingObsidianPos, System.currentTimeMillis());
+            }
+
+            isPreparingObsidian = false;
+            pendingObsidianPos = null;
+            obsidianPreparationTicks = 0;
+        }
     }
 
     private List<BlockPos> findBestObsidianPositions(Player target, int maxPositions) {
@@ -411,7 +457,36 @@ public class BotCrystalController {
         }
 
         if (bestCrystal != null) {
-            attackCrystal(bestCrystal);
+            startAttackPreparation(bestCrystal);
+        }
+    }
+
+    private void startAttackPreparation(EndCrystal crystal) {
+        isPreparingAttack = true;
+        pendingAttackCrystal = crystal;
+        attackPreparationTicks = 0;
+
+        rotationController.lookAt(crystal.position());
+    }
+
+    private void handleAttackPreparation() {
+        if (!isPreparingAttack || pendingAttackCrystal == null || !pendingAttackCrystal.isAlive()) {
+            isPreparingAttack = false;
+            pendingAttackCrystal = null;
+            attackPreparationTicks = 0;
+            return;
+        }
+
+        attackPreparationTicks++;
+
+        rotationController.lookAt(pendingAttackCrystal.position());
+
+        if (attackPreparationTicks >= ATTACK_PREPARATION_TIME) {
+            attackCrystal(pendingAttackCrystal);
+
+            isPreparingAttack = false;
+            pendingAttackCrystal = null;
+            attackPreparationTicks = 0;
         }
     }
 
@@ -465,7 +540,33 @@ public class BotCrystalController {
         double bestScore = calculateCrystalScore(bestPos, target);
 
         if (bestScore > 15.0) {
-            if (placeCrystal(bestPos)) {            }
+            startCrystalPreparation(bestPos);
+        }
+    }
+
+    private void startCrystalPreparation(BlockPos pos) {
+        isPreparingCrystal = true;
+        pendingCrystalPos = pos;
+        crystalPreparationTicks = 0;
+
+        Vec3 crystalPlacementPos = Vec3.atCenterOf(pos.above());
+        rotationController.lookAt(crystalPlacementPos);
+    }
+
+    private void handleCrystalPreparation() {
+        if (!isPreparingCrystal || pendingCrystalPos == null) return;
+
+        crystalPreparationTicks++;
+
+        Vec3 crystalPlacementPos = Vec3.atCenterOf(pendingCrystalPos.above());
+        rotationController.lookAt(crystalPlacementPos);
+
+        if (crystalPreparationTicks >= CRYSTAL_PREPARATION_TIME) {
+            placeCrystal(pendingCrystalPos);
+
+            isPreparingCrystal = false;
+            pendingCrystalPos = null;
+            crystalPreparationTicks = 0;
         }
     }
 
@@ -549,5 +650,21 @@ public class BotCrystalController {
 
     public int getTotalCrystalPlacements() {
         return crystalCountAtPosition.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public boolean isDoingCrystalAction() {
+        return isPreparingObsidian || isPreparingCrystal || isPreparingAttack;
+    }
+
+    public boolean isPreparingObsidianPlacement() {
+        return isPreparingObsidian;
+    }
+
+    public boolean isPreparingCrystalPlacement() {
+        return isPreparingCrystal;
+    }
+
+    public boolean isPreparingCrystalAttack() {
+        return isPreparingAttack;
     }
 }
