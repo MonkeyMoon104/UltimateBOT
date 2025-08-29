@@ -290,24 +290,43 @@ public class BotEnderpearlController {
         if (!canUseEnderpearl() || isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
 
+        Vec3 targetPos = target.position();
+        Vec3 velocity = target.getDeltaMovement();
+
+        double distance = bot.distanceTo(target);
+        int ticksAhead = Math.min(PREDICT_TICKS + (int)(distance / 3), 15);
+
+        Vec3 predictedTargetPos = targetPos.add(velocity.scale(ticksAhead));
+
+        BlockPos bestSide = null;
+        double bestDist = Double.MAX_VALUE;
+
         for (Direction dir : Direction.Plane.HORIZONTAL) {
             BlockPos sidePos = obsidianPos.relative(dir);
-            if (isSafeLandingSpot(sidePos)) {
-                Vec3 pearlTarget = Vec3.atCenterOf(sidePos);
 
-                if (!inventoryController.isHoldingEnderpearl()) {
-                    inventoryController.switchToEnderpearl();
-                }
+            if (!isSafeLandingSpot(sidePos)) continue;
 
-                this.currentTarget = target;
-                startPearlPreparation(pearlTarget);
-                return true;
+            Vec3 sideCenter = Vec3.atCenterOf(sidePos);
+            double dist = sideCenter.distanceTo(predictedTargetPos);
+
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestSide = sidePos;
             }
         }
 
-        return false;
-    }
+        if (bestSide == null) return false;
 
+        Vec3 pearlTarget = Vec3.atCenterOf(bestSide);
+
+        if (!inventoryController.isHoldingEnderpearl()) {
+            inventoryController.switchToEnderpearl();
+        }
+
+        this.currentTarget = target;
+        startPearlPreparation(pearlTarget);
+        return true;
+    }
 
     public boolean canUseEnderpearl() {
         return enderpearlCooldown <= 0 && inventoryController.hasEnderpearls() && bot.isAlive() && !isPreparingPearl;
