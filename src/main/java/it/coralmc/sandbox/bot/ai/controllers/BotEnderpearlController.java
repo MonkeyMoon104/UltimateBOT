@@ -14,11 +14,11 @@ public class BotEnderpearlController {
     private final BotRotationController rotationController;
 
     private int enderpearlCooldown = 0;
-    private static final int ENDERPEARL_COOLDOWN_TICKS = 30;
+    private static final int ENDERPEARL_COOLDOWN_TICKS = 35;
     private static final double MIN_ENDERPEARL_DISTANCE = 4.0;
     private static final double MAX_ENDERPEARL_DISTANCE = 50.0;
     private static final int PREDICT_TICKS = 10;
-    private static final double ESCAPE_DISTANCE = 3.5;
+    private static final double ESCAPE_DISTANCE = 5;
     private static final double CLOSE_TARGET_DISTANCE = 5.0;
 
     private float lastHealth;
@@ -69,7 +69,7 @@ public class BotEnderpearlController {
             targetPos = calculateEscapeTarget(target);
         } else if (distance < 6.0 && wasRecentlyDamaged) {
             targetPos = calculateStrafeTarget(target);
-        } else if (distance > 8.0) {
+        } else if (distance > 6.0) {
             targetPos = calculateApproachTarget(target);
         } else if (distance >= MIN_ENDERPEARL_DISTANCE && distance <= MAX_ENDERPEARL_DISTANCE) {
             targetPos = calculateThrowTarget(target);
