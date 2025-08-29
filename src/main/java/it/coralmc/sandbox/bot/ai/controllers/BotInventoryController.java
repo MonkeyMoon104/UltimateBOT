@@ -21,6 +21,8 @@ public class BotInventoryController {
     public static final int SWORD_SLOT = 0;
     public static final int ENDERPEARL_SLOT = 1;
     public static final int TOTEM_SLOT = 2;
+    public static final int OBSIDIAN_SLOT = 3;
+    public static final int CRYSTAL_SLOT = 4;
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
@@ -34,6 +36,10 @@ public class BotInventoryController {
         hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, 16));
 
         hotbarSlots.put(TOTEM_SLOT, new ItemStack(Items.TOTEM_OF_UNDYING));
+
+        hotbarSlots.put(OBSIDIAN_SLOT, new ItemStack(Items.OBSIDIAN, 64));
+
+        hotbarSlots.put(CRYSTAL_SLOT, new ItemStack(Items.END_CRYSTAL, 64));
 
         hotbarSlots.put(EMPTY_SLOT, ItemStack.EMPTY);
 
@@ -63,6 +69,14 @@ public class BotInventoryController {
 
     public void switchToTotem() {
         switchToSlot(TOTEM_SLOT);
+    }
+
+    public void switchToCrystal() {
+        switchToSlot(CRYSTAL_SLOT);
+    }
+
+    public void switchToObs() {
+        switchToSlot(OBSIDIAN_SLOT);
     }
 
     public void switchToEmptySlot() {
@@ -122,6 +136,14 @@ public class BotInventoryController {
 
     public boolean isHoldingEnderpearl() {
         return currentSlot == ENDERPEARL_SLOT && getCurrentItem().getItem() == Items.ENDER_PEARL;
+    }
+
+    public boolean isHoldingObsidian() {
+        return currentSlot == OBSIDIAN_SLOT && getCurrentItem().getItem() == Items.OBSIDIAN;
+    }
+
+    public boolean isHoldingCrystal() {
+        return currentSlot == CRYSTAL_SLOT && getCurrentItem().getItem() == Items.END_CRYSTAL;
     }
 
     public void updateTotemSlot(ItemStack totemStack) {
