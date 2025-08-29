@@ -18,7 +18,7 @@ public class BotAI {
     private final BotAttackController attackController;
     private final BotInventoryController inventoryController;
     private final BotEnderpearlController enderpearlController;
-    private final BotCrystalController crystalController;
+    private final BotCPVPController cpvpController;
 
     private int knockbackCooldown = 0;
     private int attackCooldown = 0;
@@ -38,7 +38,7 @@ public class BotAI {
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
         this.enderpearlController = new BotEnderpearlController(bot, inventoryController, rotationController);
-        this.crystalController = new BotCrystalController(bot, inventoryController);
+        this.cpvpController = new BotCPVPController(bot, inventoryController, rotationController);
     }
 
     public void setKnockbackCooldown(int ticks) {
@@ -58,7 +58,7 @@ public class BotAI {
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
         inventoryController.tick();
-        if (!enderpearlController.isThrowingPearl()) {
+        if (!enderpearlController.isThrowingPearl() || !cpvpController.isDoingCrystalAction()) {
             rotationController.updateRotation(target);
         }
 
@@ -74,7 +74,7 @@ public class BotAI {
 
         if (((TrainingBot) bot).isCombat()) {
             enderpearlController.tick();
-            crystalController.tick(target);
+            cpvpController.tick(target);
 
             if (enderpearlController.canUseEnderpearl()) {
                 if (enderpearlController.tryUseEnderpearl(target)) {
@@ -119,7 +119,7 @@ public class BotAI {
         return enderpearlController;
     }
 
-    public BotCrystalController getCrystalController() {
-        return crystalController;
+    public BotCPVPController getCPVPController() {
+        return cpvpController;
     }
 }
