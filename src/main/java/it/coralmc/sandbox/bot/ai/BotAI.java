@@ -18,6 +18,7 @@ public class BotAI {
     private final BotAttackController attackController;
     private final BotInventoryController inventoryController;
     private final BotEnderpearlController enderpearlController;
+    private final BotCrystalController crystalController;
 
     private int knockbackCooldown = 0;
     private int attackCooldown = 0;
@@ -37,6 +38,7 @@ public class BotAI {
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
         this.enderpearlController = new BotEnderpearlController(bot, inventoryController);
+        this.crystalController = new BotCrystalController(bot, inventoryController);
     }
 
     public void setKnockbackCooldown(int ticks) {
@@ -70,6 +72,7 @@ public class BotAI {
 
         if (((TrainingBot) bot).isCombat()) {
             enderpearlController.tick();
+            crystalController.tick(target);
 
             if (enderpearlController.shouldUseEnderpearl(target) && enderpearlController.canUseEnderpearl()) {
                 if (enderpearlController.tryUseEnderpearl(target)) {
@@ -112,5 +115,9 @@ public class BotAI {
 
     public BotEnderpearlController getEnderpearlController() {
         return enderpearlController;
+    }
+
+    public BotCrystalController getCrystalController() {
+        return crystalController;
     }
 }
