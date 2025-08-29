@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 public class BotRotationController {
 
@@ -83,6 +84,11 @@ public class BotRotationController {
 
         setInstantRotation(yaw, pitch);
     }
+
+    public void lookAt(Vec3 targetPos) {
+        lookAt(targetPos.x, targetPos.y, targetPos.z);
+    }
+
 
     public void resetRotation() {
         setInstantRotation(0f, 0f);
