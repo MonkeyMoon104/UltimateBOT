@@ -667,4 +667,10 @@ public class BotCPVPController {
     public boolean isPreparingCrystalAttack() {
         return isPreparingAttack;
     }
+
+    public Optional<BlockPos> getBestObsidianForPearl(Player target) {
+        List<BlockPos> bestPositions = findBestObsidianPositions(target, 1);
+        if (bestPositions.isEmpty()) return Optional.empty();
+        return Optional.of(bestPositions.get(0));
+    }
 }

@@ -76,10 +76,13 @@ public class BotAI {
             enderpearlController.tick();
             cpvpController.tick(target);
 
-            if (enderpearlController.canUseEnderpearl()) {
-                if (enderpearlController.tryUseEnderpearl(target)) {
-                    return;
-                }
+            boolean pearlThrown = enderpearlController.tryUseEnderpearl(target);
+            if (!pearlThrown && enderpearlController.canUseEnderpearl()) {
+                cpvpController.getBestObsidianForPearl(target).ifPresent(obsidianPos -> {
+                    if (enderpearlController.tryPearlToObsidianSide(obsidianPos, target)) {
+                        return;
+                    }
+                });
             }
 
             if (!inventoryController.isHoldingSword() && dist <= 4.0) {

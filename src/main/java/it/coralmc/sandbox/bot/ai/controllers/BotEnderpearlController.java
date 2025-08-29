@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
@@ -284,6 +285,29 @@ public class BotEnderpearlController {
 
         inventoryController.switchToSword();
     }
+
+    public boolean tryPearlToObsidianSide(BlockPos obsidianPos, Player target) {
+        if (!canUseEnderpearl() || isPreparingPearl) return false;
+        if (!inventoryController.hasEnderpearls()) return false;
+
+        for (Direction dir : Direction.Plane.HORIZONTAL) {
+            BlockPos sidePos = obsidianPos.relative(dir);
+            if (isSafeLandingSpot(sidePos)) {
+                Vec3 pearlTarget = Vec3.atCenterOf(sidePos);
+
+                if (!inventoryController.isHoldingEnderpearl()) {
+                    inventoryController.switchToEnderpearl();
+                }
+
+                this.currentTarget = target;
+                startPearlPreparation(pearlTarget);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 
     public boolean canUseEnderpearl() {
         return enderpearlCooldown <= 0 && inventoryController.hasEnderpearls() && bot.isAlive() && !isPreparingPearl;
