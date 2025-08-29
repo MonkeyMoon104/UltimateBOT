@@ -18,6 +18,7 @@ public class BotInventoryController {
     private final Map<Integer, ItemStack> hotbarSlots = new HashMap<>();
     private int currentSlot = 0;
 
+    private boolean infiniteResources = true;
     public static final int SWORD_SLOT = 0;
     public static final int ENDERPEARL_SLOT = 1;
     public static final int TOTEM_SLOT = 2;
@@ -51,12 +52,69 @@ public class BotInventoryController {
         if (!hotbarSlots.containsKey(slot)) return;
         if (currentSlot == slot) return;
 
+        if (infiniteResources) {
+            replenishItem(slot);
+        }
+
         currentSlot = slot;
         ItemStack item = hotbarSlots.get(slot);
 
         bot.setItemSlot(EquipmentSlot.MAINHAND, item);
 
         broadcastEquipmentChange();
+    }
+
+    private void replenishItem(int slot) {
+        ItemStack currentStack = hotbarSlots.get(slot);
+        if (currentStack == null || currentStack.isEmpty()) return;
+
+        switch (slot) {
+            case OBSIDIAN_SLOT:
+                if (currentStack.getItem() == Items.OBSIDIAN && currentStack.getCount() < 64) {
+                    currentStack.setCount(64);
+                }
+                break;
+            case CRYSTAL_SLOT:
+                if (currentStack.getItem() == Items.END_CRYSTAL && currentStack.getCount() < 64) {
+                    currentStack.setCount(64);
+                }
+                break;
+            case ENDERPEARL_SLOT:
+                if (currentStack.getItem() == Items.ENDER_PEARL && currentStack.getCount() < 16) {
+                    currentStack.setCount(16);
+                }
+                break;
+        }
+    }
+
+    public void onItemUsed(int slot) {
+        if (!infiniteResources) return;
+
+        ItemStack stack = hotbarSlots.get(slot);
+        if (stack == null || stack.isEmpty()) return;
+
+        switch (slot) {
+            case OBSIDIAN_SLOT:
+                if (stack.getItem() == Items.OBSIDIAN) {
+                    stack.setCount(64);
+                }
+                break;
+            case CRYSTAL_SLOT:
+                if (stack.getItem() == Items.END_CRYSTAL) {
+                    stack.setCount(64);
+                }
+                break;
+            case ENDERPEARL_SLOT:
+                if (stack.getItem() == Items.ENDER_PEARL) {
+                    stack.setCount(16);
+                }
+                break;
+        }
+
+        if (currentSlot == slot) {
+            bot.setItemSlot(EquipmentSlot.MAINHAND, stack);
+            broadcastEquipmentChange();
+        }
     }
 
     public void switchToSword() {
@@ -88,11 +146,20 @@ public class BotInventoryController {
     }
 
     public ItemStack getCurrentItem() {
-        return hotbarSlots.get(currentSlot);
+        ItemStack current = hotbarSlots.get(currentSlot);
+
+        if (infiniteResources && current != null && !current.isEmpty()) {
+            replenishItem(currentSlot);
+        }
+
+        return current;
     }
 
     public boolean hasEnderpearls() {
         ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
+        if (infiniteResources) {
+            return true;
+        }
         return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getCount() > 0;
     }
 
@@ -155,6 +222,14 @@ public class BotInventoryController {
     }
 
     public int getItemCount(net.minecraft.world.item.Item item) {
+        if (infiniteResources) {
+            if (item == Items.OBSIDIAN || item == Items.END_CRYSTAL) {
+                return 64;
+            } else if (item == Items.ENDER_PEARL) {
+                return 16;
+            }
+        }
+
         for (ItemStack stack : hotbarSlots.values()) {
             if (stack.getItem() == item) {
                 return stack.getCount();
@@ -165,5 +240,28 @@ public class BotInventoryController {
 
     public boolean hasItem(net.minecraft.world.item.Item item) {
         return getItemCount(item) > 0;
+    }
+
+    public void setInfiniteResources(boolean infinite) {
+        this.infiniteResources = infinite;
+        if (infinite) {
+            replenishAllItems();
+        }
+    }
+
+    public boolean hasInfiniteResources() {
+        return infiniteResources;
+    }
+
+    private void replenishAllItems() {
+        for (int slot : hotbarSlots.keySet()) {
+            replenishItem(slot);
+        }
+    }
+
+    public void tick() {
+        if (infiniteResources) {
+            replenishAllItems();
+        }
     }
 }

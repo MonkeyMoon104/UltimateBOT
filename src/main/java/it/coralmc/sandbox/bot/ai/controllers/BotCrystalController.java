@@ -333,6 +333,8 @@ public class BotCrystalController {
                 bot.swing(InteractionHand.MAIN_HAND);
                 crystalPlaceCooldown = CRYSTAL_PLACE_COOLDOWN_TICKS;
 
+                inventoryController.onItemUsed(BotInventoryController.CRYSTAL_SLOT);
+
                 EndCrystal placedCrystal = findCrystalAt(pos.above());
                 if (placedCrystal != null) {
                     myPlacedCrystals.add(placedCrystal);
@@ -505,6 +507,9 @@ public class BotCrystalController {
 
             if (result.consumesAction()) {
                 bot.swing(InteractionHand.MAIN_HAND);
+
+                inventoryController.onItemUsed(BotInventoryController.OBSIDIAN_SLOT);
+
                 return true;
             }
 

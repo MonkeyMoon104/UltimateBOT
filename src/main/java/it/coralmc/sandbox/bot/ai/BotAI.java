@@ -57,6 +57,7 @@ public class BotAI {
         }
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
+        inventoryController.tick();
         if (!enderpearlController.isThrowingPearl()) {
             rotationController.updateRotation(target);
         }
