@@ -8,10 +8,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class BotEnderpearlController {
-
     private final Player bot;
     private final Level level;
     private final BotInventoryController inventoryController;
+    private final BotRotationController rotationController;
 
     private int enderpearlCooldown = 0;
     private static final int ENDERPEARL_COOLDOWN_TICKS = 30;
@@ -25,19 +25,28 @@ public class BotEnderpearlController {
     private long lastDamageTime = 0;
     private static final long DAMAGE_REACTION_WINDOW = 1000;
     private static final float HEALTH_THRESHOLD = 4.0f;
+
     private int lowHealthPearlCooldown = 0;
     private static final int LOW_HEALTH_PEARL_COOLDOWN = 100;
-    private boolean wasRecentlyDamaged = false;
 
-    public BotEnderpearlController(Player bot, BotInventoryController inventoryController) {
+    private boolean wasRecentlyDamaged = false;
+    private Player currentTarget;
+
+    private boolean isPreparingPearl = false;
+    private Vec3 pendingThrowTarget = null;
+    private int preparationTicks = 0;
+    private static final int PREPARATION_TIME = 3;
+
+    public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
         this.level = bot.level();
         this.inventoryController = inventoryController;
         this.lastHealth = bot.getHealth();
+        this.rotationController = rotationController;
     }
 
     public boolean tryUseEnderpearl(Player target) {
-        if (!canUseEnderpearl()) {
+        if (!canUseEnderpearl() || isPreparingPearl) {
             return false;
         }
 
@@ -56,7 +65,6 @@ public class BotEnderpearlController {
         }
 
         Vec3 targetPos;
-
         if (distance < 2.5 || (bot.getHealth() <= HEALTH_THRESHOLD && distance < 5.0)) {
             targetPos = calculateEscapeTarget(target);
         } else if (distance < 6.0 && wasRecentlyDamaged) {
@@ -69,17 +77,24 @@ public class BotEnderpearlController {
             return false;
         }
 
-
         if (targetPos == null) {
             return false;
         }
 
-        throwEnderpearl(targetPos);
-        inventoryController.switchToSword();
+        this.currentTarget = target;
+
+        startPearlPreparation(targetPos);
 
         wasRecentlyDamaged = false;
-
         return true;
+    }
+
+    private void startPearlPreparation(Vec3 targetPos) {
+        isPreparingPearl = true;
+        pendingThrowTarget = targetPos;
+        preparationTicks = 0;
+
+        rotationController.lookAt(targetPos.x, targetPos.y, targetPos.z);
     }
 
     private boolean shouldUseEnderpearlIntelligent(Player target, double distance) {
@@ -96,7 +111,6 @@ public class BotEnderpearlController {
         }
 
         lastHealth = currentHealth;
-
 
         if (currentHealth <= HEALTH_THRESHOLD) {
             if (lowHealthPearlCooldown <= 0) {
@@ -124,8 +138,8 @@ public class BotEnderpearlController {
     private Vec3 calculateEscapeTarget(Player target) {
         Vec3 botPos = bot.position();
         Vec3 targetPos = target.position();
-
         Vec3 baseDir;
+
         int choice = (int)(Math.random() * 4);
         baseDir = switch (choice) {
             case 0 -> botPos.subtract(targetPos).normalize();
@@ -147,9 +161,10 @@ public class BotEnderpearlController {
         ).normalize();
 
         double randomY = (Math.random() - 0.5) * 2.5;
-        Vec3 escapePos = botPos.add(dir.scale(ESCAPE_DISTANCE * escapeMultiplier)).add(0, randomY, 0);
 
+        Vec3 escapePos = botPos.add(dir.scale(ESCAPE_DISTANCE * escapeMultiplier)).add(0, randomY, 0);
         BlockPos escapeBlock = BlockPos.containing(escapePos);
+
         if (isSafeLandingSpot(escapeBlock)) {
             return escapePos;
         }
@@ -159,7 +174,6 @@ public class BotEnderpearlController {
 
     private Vec3 calculateStrafeTarget(Player target) {
         Vec3 targetPos = target.position();
-
         double angle = Math.random() * 2 * Math.PI;
         double radius = ESCAPE_DISTANCE + (Math.random() * 3.0);
 
@@ -168,8 +182,8 @@ public class BotEnderpearlController {
         double offsetY = (Math.random() - 0.5) * 3.0;
 
         Vec3 strafePos = targetPos.add(offsetX, offsetY, offsetZ);
-
         BlockPos strafeBlock = BlockPos.containing(strafePos);
+
         if (isSafeLandingSpot(strafeBlock)) {
             return strafePos;
         }
@@ -179,7 +193,6 @@ public class BotEnderpearlController {
 
     private Vec3 calculateThrowTarget(Player target) {
         Vec3 botPos = bot.position();
-
         double angle = Math.random() * 2 * Math.PI;
         double distance = 5 + Math.random() * 10;
 
@@ -188,7 +201,6 @@ public class BotEnderpearlController {
         double offsetY = (Math.random() - 0.5) * 5.0;
 
         Vec3 throwTarget = botPos.add(offsetX, offsetY, offsetZ);
-
         BlockPos targetBlock = BlockPos.containing(throwTarget);
 
         if (isSafeLandingSpot(targetBlock)) {
@@ -207,7 +219,6 @@ public class BotEnderpearlController {
         int ticksAhead = Math.min(PREDICT_TICKS + (int)(distance / 3), 20);
 
         Vec3 predictedPos = targetPos.add(velocity.scale(ticksAhead));
-
         Vec3 directionToTarget = predictedPos.subtract(botPos).normalize();
         Vec3 approachPos = predictedPos.subtract(directionToTarget.scale(1.5));
 
@@ -215,13 +226,13 @@ public class BotEnderpearlController {
         approachPos = approachPos.add(0, offsetY, 0);
 
         BlockPos blockPos = BlockPos.containing(approachPos);
+
         if (isSafeLandingSpot(blockPos)) {
             return approachPos;
         }
 
         return findSafeLandingSpot(blockPos);
     }
-
 
     private boolean isSafeLandingSpot(BlockPos pos) {
         if (level.getBlockState(pos.below()).isAir()) {
@@ -244,7 +255,6 @@ public class BotEnderpearlController {
                 }
             }
         }
-
         return null;
     }
 
@@ -257,34 +267,49 @@ public class BotEnderpearlController {
         double distance = direction.length();
 
         Vec3 velocity = direction.normalize().scale(Math.min(distance * 0.1, 1.5));
-
         velocity = velocity.add(0, 0.2, 0);
 
         enderpearl.setPos(botPos.x, botPos.y, botPos.z);
         enderpearl.setDeltaMovement(velocity);
-
         level.addFreshEntity(enderpearl);
 
         bot.swing(InteractionHand.MAIN_HAND);
         bot.playSound(net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
 
-        inventoryController.consumeEnderpearl();
-
         enderpearlCooldown = ENDERPEARL_COOLDOWN_TICKS;
+
+        if (currentTarget != null && currentTarget.isAlive()) {
+            rotationController.updateRotation(currentTarget);
+        }
+
+        inventoryController.switchToSword();
     }
 
     public boolean canUseEnderpearl() {
-        return enderpearlCooldown <= 0 &&
-                inventoryController.hasEnderpearls() &&
-                bot.isAlive();
+        return enderpearlCooldown <= 0 && inventoryController.hasEnderpearls() && bot.isAlive() && !isPreparingPearl;
     }
 
     public void tick() {
         if (enderpearlCooldown > 0) {
             enderpearlCooldown--;
         }
+
         if (lowHealthPearlCooldown > 0) {
             lowHealthPearlCooldown--;
+        }
+
+        if (isPreparingPearl && pendingThrowTarget != null) {
+            preparationTicks++;
+
+            rotationController.lookAt(pendingThrowTarget.x, pendingThrowTarget.y, pendingThrowTarget.z);
+
+            if (preparationTicks >= PREPARATION_TIME) {
+                throwEnderpearl(pendingThrowTarget);
+
+                isPreparingPearl = false;
+                pendingThrowTarget = null;
+                preparationTicks = 0;
+            }
         }
     }
 
@@ -308,5 +333,9 @@ public class BotEnderpearlController {
 
     public boolean wasRecentlyDamaged() {
         return wasRecentlyDamaged;
+    }
+
+    public boolean isThrowingPearl() {
+        return isPreparingPearl;
     }
 }

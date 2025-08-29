@@ -96,16 +96,6 @@ public class BotInventoryController {
         return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getCount() > 0;
     }
 
-    public void consumeEnderpearl() {
-        ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
-        if (enderpearlStack != null && enderpearlStack.getCount() > 0) {
-            enderpearlStack.shrink(1);
-            if (enderpearlStack.isEmpty()) {
-                hotbarSlots.put(ENDERPEARL_SLOT, ItemStack.EMPTY);
-            }
-        }
-    }
-
     public void addEnderpearls(int count) {
         ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
         if (enderpearlStack == null || enderpearlStack.isEmpty()) {

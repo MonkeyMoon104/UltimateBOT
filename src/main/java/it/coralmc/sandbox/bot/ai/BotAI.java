@@ -37,7 +37,7 @@ public class BotAI {
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
-        this.enderpearlController = new BotEnderpearlController(bot, inventoryController);
+        this.enderpearlController = new BotEnderpearlController(bot, inventoryController, rotationController);
         this.crystalController = new BotCrystalController(bot, inventoryController);
     }
 
@@ -57,7 +57,9 @@ public class BotAI {
         }
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
-        rotationController.updateRotation(target);
+        if (!enderpearlController.isThrowingPearl()) {
+            rotationController.updateRotation(target);
+        }
 
         double dist = bot.distanceTo(target);
 
