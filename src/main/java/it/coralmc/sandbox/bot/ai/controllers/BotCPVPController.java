@@ -339,6 +339,9 @@ public class BotCPVPController {
         if (existingCount > 0 && distanceToBot > 4.0) {
             score += existingCount * 15;
         }
+        if (yDiff < 0) {
+            score += Math.abs(yDiff) * 50;
+        }
 
         return score;
     }
@@ -515,34 +518,30 @@ public class BotCPVPController {
         return score;
     }
 
-    private void tryPlaceOptimalCrystals(Player target) {
+    public void tryPlaceOptimalCrystals(Player target) {
         if (!canPlaceCrystal()) return;
 
+        // More aggressive crystal placement with lower score threshold
         List<BlockPos> validObsidianPositions = new ArrayList<>();
-
         for (BlockPos obsidianPos : obsidianCache.keySet()) {
             if (isValidCrystalPos(obsidianPos, target)) {
-                int currentCount = crystalCountAtPosition.getOrDefault(obsidianPos, 0);
-                if (currentCount < MAX_CRYSTALS_PER_POSITION) {
-                    validObsidianPositions.add(obsidianPos);
-                }
+                validObsidianPositions.add(obsidianPos);
             }
         }
 
         if (validObsidianPositions.isEmpty()) return;
 
-        validObsidianPositions.sort((pos1, pos2) -> Double.compare(
-                calculateCrystalScore(pos2, target),
-                calculateCrystalScore(pos1, target)
-        ));
-
-        BlockPos bestPos = validObsidianPositions.get(0);
-        double bestScore = calculateCrystalScore(bestPos, target);
-
-        if (bestScore > 15.0) {
-            startCrystalPreparation(bestPos);
+        // Place multiple crystals rapidly
+        int crystalsToPlace = Math.min(2, validObsidianPositions.size());
+        for (int i = 0; i < crystalsToPlace; i++) {
+            BlockPos pos = validObsidianPositions.get(i);
+            if (calculateCrystalScore(pos, target) > 5.0) { // Lower threshold
+                startCrystalPreparation(pos);
+                break;
+            }
         }
     }
+
 
     private void startCrystalPreparation(BlockPos pos) {
         isPreparingCrystal = true;

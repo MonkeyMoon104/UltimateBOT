@@ -32,7 +32,6 @@ public class BotEquipmentHandler {
     }
 
     private void applyArmorFix() {
-        bot.getAiController().getBotAI().setKnockbackCooldown(20);
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                 ItemStack armorPiece = bot.getItemBySlot(slot);
