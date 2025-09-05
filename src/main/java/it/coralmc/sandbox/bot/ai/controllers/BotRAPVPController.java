@@ -176,7 +176,6 @@ public class BotRAPVPController {
 
             return true;
         } catch (Exception e) {
-            System.err.println("Errore nel piazzamento anchor: " + e.getMessage());
             return false;
         }
     }
@@ -203,8 +202,7 @@ public class BotRAPVPController {
                 return false;
             }
 
-            int newCharges = Math.min(4, currentCharges + 1);
-            BlockState newState = anchorState.setValue(RespawnAnchorBlock.CHARGE, newCharges);
+            BlockState newState = anchorState.setValue(RespawnAnchorBlock.CHARGE, 4);
 
             bot.level().setBlock(anchorPos, newState, 3);
 
@@ -221,7 +219,6 @@ public class BotRAPVPController {
             return true;
 
         } catch (Exception e) {
-            System.err.println("Errore nel caricamento anchor: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
