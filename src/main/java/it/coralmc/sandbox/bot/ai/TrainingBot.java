@@ -75,7 +75,9 @@ public class TrainingBot extends Player {
 
         if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
             if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
-                getBotAI().getEnderpearlController().onDamageReceived();
+                if (source.isCritical()) {
+                    getBotAI().getEnderpearlController().onDamageReceived();
+                }
             }
         }
 
