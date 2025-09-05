@@ -102,10 +102,6 @@ public class BotRAPVPController {
             if (chargeAnchor(anchorPos)) {
                 isChargingAnchor = false;
                 isWaitingExplosion = true;
-            } else {
-                System.out.println("Fallimento caricamento anchor in: " + anchorPos);
-                System.out.println("Stato anchor: " + state);
-                System.out.println("Cariche attuali: " + state.getValue(RespawnAnchorBlock.CHARGE));
             }
             return;
         }
@@ -260,7 +256,6 @@ public class BotRAPVPController {
                     return;
                 }
             } catch (Exception e) {
-                System.out.println("Errore interazione anchor: " + e.getMessage());
             }
 
             bot.level().removeBlock(anchorPos, false);
@@ -275,7 +270,6 @@ public class BotRAPVPController {
             );
 
         } catch (Exception e) {
-            System.err.println("Errore generale nell'esplosione anchor: " + e.getMessage());
             e.printStackTrace();
         }
     }
