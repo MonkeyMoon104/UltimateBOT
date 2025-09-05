@@ -18,6 +18,7 @@ import java.util.Optional;
 public class BotRAPVPController {
 
     private final Player bot;
+    private final Level level;
     private final BotInventoryController inventory;
     private final BotRotationController rotation;
     private final BotCPVPController cpvp;
