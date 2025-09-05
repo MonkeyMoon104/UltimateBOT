@@ -70,9 +70,17 @@ public class TrainingBot extends Player {
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        getBotAI().getEnderpearlController().onDamageReceived();
+        net.minecraft.world.entity.Entity attacker = source.getEntity();
+
+        if (attacker instanceof Player nmsPlayer) {
+            if (nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
+                getBotAI().getEnderpearlController().onDamageReceived();
+            }
+        }
+
         return equipmentHandler.handleDamage(level, source, amount, event);
     }
+
 
     @Override public boolean isSpectator() { return false; }
     @Override public boolean isCreative() { return false; }
