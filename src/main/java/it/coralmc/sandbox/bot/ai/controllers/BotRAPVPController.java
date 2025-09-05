@@ -135,14 +135,13 @@ public class BotRAPVPController {
                 for (int dy = -1; dy <= 1; dy++) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
 
-                    if (check.equals(botPos) || check.equals(botPos.below())) {
-                        continue;
-                    }
+                    if (check.equals(botPos) || check.equals(botPos.below())) continue;
 
-                    if (level.getBlockState(check).canBeReplaced()
-                            && level.getBlockState(check.below()).isSolid()) {
+                    BlockState state = level.getBlockState(check);
+                    BlockState below = level.getBlockState(check.below());
 
-                        double distToTarget = target.position().distanceTo(Vec3.atCenterOf(check));
+                    if (state.canBeReplaced() && below.isSolid() && isReachable(check)) {
+                        double distToTarget = bot.position().distanceTo(Vec3.atCenterOf(check));
                         if (distToTarget < bestDistance) {
                             best = check;
                             bestDistance = distToTarget;
@@ -151,11 +150,13 @@ public class BotRAPVPController {
                 }
             }
         }
+
         return Optional.ofNullable(best);
     }
 
     private boolean placeAnchor(BlockPos pos) {
         try {
+            if (!isReachable(pos)) return false;
             if (!hasLineOfSight(pos)) {
                 return false;
             }
@@ -332,6 +333,27 @@ public class BotRAPVPController {
         );
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
+                result.getBlockPos().equals(pos);
+    }
+
+    private boolean isReachable(BlockPos pos) {
+        Vec3 botEyes = bot.getEyePosition(1.0F);
+        Vec3 targetPos = Vec3.atCenterOf(pos);
+
+        double distance = botEyes.distanceTo(targetPos);
+        if (distance > 12.0) return false;
+
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                botEyes,
+                targetPos,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+
+        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
+
         return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
                 result.getBlockPos().equals(pos);
     }
