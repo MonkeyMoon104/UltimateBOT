@@ -12,6 +12,7 @@ import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
@@ -72,15 +73,14 @@ public class TrainingBot extends Player {
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
         net.minecraft.world.entity.Entity attacker = source.getEntity();
 
-        if (attacker instanceof Player nmsPlayer) {
-            if (nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
+        if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
+            if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
                 getBotAI().getEnderpearlController().onDamageReceived();
             }
         }
 
         return equipmentHandler.handleDamage(level, source, amount, event);
     }
-
 
     @Override public boolean isSpectator() { return false; }
     @Override public boolean isCreative() { return false; }
