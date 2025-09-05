@@ -121,7 +121,10 @@ public class BotMovementController {
             BlockState above = level.getBlockState(pos.above());
             BlockState below = level.getBlockState(pos.below());
 
-            return current.isAir() && above.isAir() && !below.isAir();
+            boolean canStandOn = !below.isAir();
+            boolean canPassThrough = current.isAir() && above.isAir();
+
+            return canPassThrough && canStandOn;
         } catch (Exception e) {
             return false;
         }
@@ -150,7 +153,8 @@ public class BotMovementController {
         Vec3 targetPoint = currentPath.get(pathIndex);
         double distanceToPoint = bot.position().distanceTo(targetPoint);
 
-        if (distanceToPoint < 1.0) {
+        if (distanceToPoint < 2.0 ||
+                (distanceToPoint < 3.0 && Math.abs(bot.getY() - targetPoint.y) < 1.5)) {
             pathIndex++;
             if (pathIndex >= currentPath.size()) {
                 return false;
@@ -173,6 +177,15 @@ public class BotMovementController {
 
     public boolean shouldRecalculatePath() {
         return System.currentTimeMillis() - lastPathRecalculation > PATH_RECALCULATION_COOLDOWN;
+    }
+
+    public void ensureMovement() {
+        if (bot.getDeltaMovement().horizontalDistance() < 0.05 && bot.onGround()) {
+            double randomAngle = Math.random() * 2 * Math.PI;
+            double smallMoveX = Math.cos(randomAngle) * movementSpeed * 0.3;
+            double smallMoveZ = Math.sin(randomAngle) * movementSpeed * 0.3;
+            bot.setDeltaMovement(smallMoveX, bot.getDeltaMovement().y, smallMoveZ);
+        }
     }
 
     private boolean calculateJpsPath(Vec3 startPos, Vec3 targetPos, long startTime) {
@@ -210,7 +223,7 @@ public class BotMovementController {
             iterations++;
             JpsNode currentNode = openSet.poll();
 
-            if (currentNode.position.distSqr(targetBlock) < 9) {
+            if (currentNode.position.distSqr(targetBlock) < 4) {
                 reconstructPath(currentNode);
                 foundPath = true;
                 break;
@@ -218,24 +231,44 @@ public class BotMovementController {
 
             closedSet.add(currentNode.position);
 
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
-                BlockPos jumpPoint = findJumpPoint(currentNode.position, direction, targetBlock, closedSet);
+            for (Direction direction : Direction.values()) {
+                if (direction == Direction.UP || direction == Direction.DOWN) {
+                    BlockPos nextPos = currentNode.position.relative(direction);
+                    if (isPositionPassableCached(nextPos) && !closedSet.contains(nextPos)) {
+                        double cost = currentNode.gScore + 1;
+                        JpsNode neighborNode = allNodes.get(nextPos);
 
-                if (jumpPoint != null && !closedSet.contains(jumpPoint)) {
-                    double cost = currentNode.gScore + currentNode.position.distSqr(jumpPoint);
-                    JpsNode neighborNode = allNodes.get(jumpPoint);
+                        if (neighborNode == null) {
+                            neighborNode = new JpsNode(nextPos, currentNode, cost,
+                                    estimateDistance(nextPos, targetBlock));
+                            allNodes.put(nextPos, neighborNode);
+                            openSet.add(neighborNode);
+                        } else if (cost < neighborNode.gScore) {
+                            neighborNode.cameFrom = currentNode;
+                            neighborNode.gScore = cost;
+                            neighborNode.fScore = cost + estimateDistance(nextPos, targetBlock);
+                            openSet.remove(neighborNode);
+                            openSet.add(neighborNode);
+                        }
+                    }
+                } else {
+                    BlockPos jumpPoint = findJumpPoint(currentNode.position, direction, targetBlock, closedSet);
+                    if (jumpPoint != null && !closedSet.contains(jumpPoint)) {
+                        double cost = currentNode.gScore + currentNode.position.distSqr(jumpPoint);
+                        JpsNode neighborNode = allNodes.get(jumpPoint);
 
-                    if (neighborNode == null) {
-                        neighborNode = new JpsNode(jumpPoint, currentNode, cost,
-                                estimateDistance(jumpPoint, targetBlock));
-                        allNodes.put(jumpPoint, neighborNode);
-                        openSet.add(neighborNode);
-                    } else if (cost < neighborNode.gScore) {
-                        neighborNode.cameFrom = currentNode;
-                        neighborNode.gScore = cost;
-                        neighborNode.fScore = cost + estimateDistance(jumpPoint, targetBlock);
-                        openSet.remove(neighborNode);
-                        openSet.add(neighborNode);
+                        if (neighborNode == null) {
+                            neighborNode = new JpsNode(jumpPoint, currentNode, cost,
+                                    estimateDistance(jumpPoint, targetBlock));
+                            allNodes.put(jumpPoint, neighborNode);
+                            openSet.add(neighborNode);
+                        } else if (cost < neighborNode.gScore) {
+                            neighborNode.cameFrom = currentNode;
+                            neighborNode.gScore = cost;
+                            neighborNode.fScore = cost + estimateDistance(jumpPoint, targetBlock);
+                            openSet.remove(neighborNode);
+                            openSet.add(neighborNode);
+                        }
                     }
                 }
             }
@@ -734,39 +767,53 @@ public class BotMovementController {
     }
 
     private BlockPos findNearestReachablePosition(BlockPos target, BlockPos start) {
-        int radius = 1;
+        int minRadius = 3;
         int maxRadius = 5;
 
-        while (radius <= maxRadius) {
-            for (int x = -radius; x <= radius; x++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (Math.abs(x) == radius || Math.abs(z) == radius) {
-                        BlockPos checkPos = target.offset(x, 0, z);
-                        if (isPositionPassableCached(checkPos)) {
-                            if (isDirectPathClear(Vec3.atCenterOf(start), Vec3.atCenterOf(checkPos))) {
-                                return checkPos;
-                            }
-                        }
-                    }
-                }
+        for (int radius = minRadius; radius <= maxRadius; radius++) {
+            BlockPos foundPos = findValidPositionInRing(target, start, radius);
+            if (foundPos != null) {
+                return foundPos;
             }
-            radius++;
         }
+        return null;
+    }
 
+    private BlockPos findValidPositionInRing(BlockPos target, BlockPos start, int radius) {
+        int x = -radius;
+        int z = -radius;
+
+        for (int i = 0; i < 8 * radius; i++) {
+            BlockPos checkPos = target.offset(x, 0, z);
+            if (isPositionPassableCached(checkPos) &&
+                    isDirectPathClear(Vec3.atCenterOf(start), Vec3.atCenterOf(checkPos))) {
+                return checkPos;
+            }
+
+            if (x == radius && z > -radius) {
+                z--;
+            } else if (z == -radius && x < radius) {
+                x++;
+            } else if (x == -radius && z < radius) {
+                z++;
+            } else if (z == radius && x > -radius) {
+                x--;
+            }
+        }
         return null;
     }
 
     private boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
-        BlockPos front = BlockPos.containing(botX + dx, botY, botZ + dz);
+        BlockPos front = BlockPos.containing(botX + dx * 2, botY, botZ + dz * 2);
         BlockPos above = front.above();
-        BlockPos above2 = above.above();
+        BlockPos below = front.below();
 
         boolean frontBlocked = !isPositionPassableCached(front);
         boolean aboveClear = isPositionPassableCached(above);
-        boolean above2Clear = isPositionPassableCached(above2);
+        boolean belowSolid = !level.getBlockState(below).isAir();
 
-        boolean canStepUp = frontBlocked && aboveClear;
-        boolean tooHigh = frontBlocked && !aboveClear && !above2Clear;
+        boolean canStepUp = frontBlocked && aboveClear && belowSolid;
+        boolean tooHigh = frontBlocked && !aboveClear;
 
         if (tooHigh) {
             handleHighObstacle(dx, dz);
@@ -774,7 +821,8 @@ public class BotMovementController {
         }
 
         if (canStepUp && bot.onGround()) {
-            bot.setDeltaMovement(bot.getDeltaMovement().x, jumpVelocity, bot.getDeltaMovement().z);
+            bot.setDeltaMovement(moveX * 1.2, jumpVelocity, moveZ * 1.2);
+            return true;
         }
 
         return false;
@@ -952,6 +1000,10 @@ public class BotMovementController {
         }
 
         bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
+
+        if (bot.onGround() && bot.getDeltaMovement().horizontalDistance() < 0.1) {
+            ensureMovement();
+        }
     }
 
     public void maintainDistance(Player target, double targetDistance) {
