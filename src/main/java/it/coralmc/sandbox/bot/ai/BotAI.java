@@ -269,24 +269,24 @@ public class BotAI {
         float healthPercent = bot.getHealth() / bot.getMaxHealth();
 
         long minDuration = (currentTime - lastDamageTime < 1000) ? 250 : MIN_STATE_DURATION;
-
         if (currentTime - lastStateChange < minDuration) return;
 
         CombatState newState = currentState;
 
-        if (inventoryController.hasItem(Items.END_CRYSTAL) &&
-                distance > 3.0 && distance < 12.0 &&
-                bot.getHealth() > 6.0f) {
-            newState = CombatState.CRYSTAL_SETUP;
-        }
+        double yDiff = bot.position().y - target.position().y;
 
         if (healthPercent < 0.25f) {
             newState = CombatState.RETREATING;
         } else if (consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
             newState = CombatState.DEFENSIVE;
-        } else if (shouldAttemptAnchor(target, currentTime)) {
+        }
+        else if (Math.abs(yDiff) <= 1.0 && shouldAttemptAnchor(target, currentTime)) {
             newState = CombatState.ANCHOR_SETUP;
-        } else if (shouldReposition(target, distance)) {
+        }
+        else if (yDiff < -1.0 && cpvpController.canPlaceCrystal()) {
+            newState = CombatState.CRYSTAL_SETUP;
+        }
+        else if (shouldReposition(target, distance)) {
             newState = CombatState.REPOSITIONING;
         } else if (distance > 4.0 && distance < 12.0 && healthPercent > 0.4f) {
             newState = CombatState.CRYSTAL_SETUP;
@@ -503,13 +503,12 @@ public class BotAI {
 
     private boolean shouldAttemptAnchor(Player target, long currentTime) {
         if (currentTime - lastAnchorAttempt < ANCHOR_ATTEMPT_COOLDOWN) return false;
-        if (!inventoryController.hasItem(net.minecraft.world.item.Items.RESPAWN_ANCHOR)) return false;
-        if (!inventoryController.hasItem(net.minecraft.world.item.Items.GLOWSTONE)) return false;
+        if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
+        if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
 
         double distance = bot.distanceTo(target);
-        double yDiff = bot.position().y - target.position().y;
 
-        return distance > 3.0 && distance < 8.0 && yDiff > 0 && target.onGround();
+        return distance > 3.0 && distance < 8.0 && target.onGround();
     }
 
     private boolean shouldReposition(Player target, double distance) {
