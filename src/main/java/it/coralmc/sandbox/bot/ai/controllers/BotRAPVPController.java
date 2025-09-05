@@ -126,6 +126,7 @@ public class BotRAPVPController {
 
     private Optional<BlockPos> findBestAnchorPos(Player target) {
         BlockPos targetPos = target.blockPosition();
+        BlockPos botPos = bot.blockPosition();
         BlockPos best = null;
         double bestDistance = Double.MAX_VALUE;
 
@@ -134,12 +135,17 @@ public class BotRAPVPController {
                 for (int dy = -1; dy <= 1; dy++) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
 
+                    if (check.equals(botPos) || check.equals(botPos.below())) {
+                        continue;
+                    }
+
                     if (level.getBlockState(check).canBeReplaced()
                             && level.getBlockState(check.below()).isSolid()) {
-                        double dist = bot.position().distanceTo(Vec3.atCenterOf(check));
-                        if (dist < bestDistance) {
+
+                        double distToTarget = target.position().distanceTo(Vec3.atCenterOf(check));
+                        if (distToTarget < bestDistance) {
                             best = check;
-                            bestDistance = dist;
+                            bestDistance = distToTarget;
                         }
                     }
                 }
