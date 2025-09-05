@@ -71,8 +71,9 @@ public class TrainingBot extends Player {
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        net.minecraft.world.entity.Entity attacker = source.getEntity();
+        boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
+        net.minecraft.world.entity.Entity attacker = source.getEntity();
         if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
             if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
                 if (source.isCritical()) {
@@ -81,8 +82,9 @@ public class TrainingBot extends Player {
             }
         }
 
-        return equipmentHandler.handleDamage(level, source, amount, event);
+        return result;
     }
+
 
     @Override public boolean isSpectator() { return false; }
     @Override public boolean isCreative() { return false; }
