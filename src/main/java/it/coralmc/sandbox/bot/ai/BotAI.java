@@ -280,7 +280,7 @@ public class BotAI {
         } else if (consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
             newState = CombatState.DEFENSIVE;
         }
-        else if (Math.abs(yDiff) <= 1.0 && shouldAttemptAnchor(target, currentTime)) {
+        else if (Math.abs(yDiff) <= 3.0 && shouldAttemptAnchor(target, currentTime)) {
             newState = CombatState.ANCHOR_SETUP;
         }
         else if (yDiff < -1.0 && cpvpController.canPlaceCrystal()) {
@@ -508,7 +508,7 @@ public class BotAI {
 
         double distance = bot.distanceTo(target);
 
-        return distance > 3.0 && distance < 8.0 && target.onGround();
+        return distance > 1.0 && distance < 8.0 && target.onGround();
     }
 
     private boolean shouldReposition(Player target, double distance) {
