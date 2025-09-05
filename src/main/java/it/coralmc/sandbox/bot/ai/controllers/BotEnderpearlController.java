@@ -55,6 +55,11 @@ public class BotEnderpearlController {
     private long lastEmergencyPearl = 0;
     private static final long EMERGENCY_PEARL_COOLDOWN = 3000;
 
+    private long lastPearlUseTime = 0;
+    private static final long MIN_TIME_BETWEEN_PEARLS_MS = 700;
+    private static final double MIN_USE_DISTANCE = 3.5;
+    private static final double MAX_USE_DISTANCE = 16.0;
+
     public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
         this.level = bot.level();
@@ -68,11 +73,21 @@ public class BotEnderpearlController {
     }
 
     public boolean tryUseEnderpearl(Player target, PearlStrategy forcedStrategy) {
-        if (!canUseEnderpearl() || isPreparingPearl) return false;
+        if (isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
 
         this.currentTarget = target;
         updateTargetTracking(target);
+
+        double dist = bot.distanceTo(target);
+        if (dist < MIN_USE_DISTANCE && forcedStrategy != PearlStrategy.COMBO_ESCAPE) return false;
+        if (dist > MAX_USE_DISTANCE && forcedStrategy != PearlStrategy.AGGRESSIVE_CLOSE) return false;
+
+        try {
+            if (!bot.onGround() && forcedStrategy == null) return false;
+        } catch (Exception ignored) {}
+
+        if (!canUseEnderpearl()) return false;
 
         PearlStrategy strategy = forcedStrategy != null ? forcedStrategy : determineOptimalStrategy(target);
 
@@ -351,12 +366,15 @@ public class BotEnderpearlController {
 
         rotationController.lookAt(targetPos.x, targetPos.y, targetPos.z);
 
+        lastPearlUseTime = System.currentTimeMillis();
+
         switch (strategy) {
             case COMBO_ESCAPE -> lastEmergencyPearl = System.currentTimeMillis();
-            case REPOSITION_LOW -> repositionPearlCooldown = 80;
-            case AGGRESSIVE_CLOSE -> aggressivePearlCooldown = 60;
+            case REPOSITION_LOW -> repositionPearlCooldown = 100;
+            case AGGRESSIVE_CLOSE -> aggressivePearlCooldown = 80;
         }
     }
+
 
     private boolean isSafeLandingSpot(BlockPos pos) {
         if (level.getBlockState(pos.below()).isAir()) {
@@ -418,7 +436,9 @@ public class BotEnderpearlController {
         bot.swing(InteractionHand.MAIN_HAND);
         bot.playSound(net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
 
-        enderpearlCooldown = ENDERPEARL_COOLDOWN_TICKS;
+        enderpearlCooldown = ENDERPEARL_COOLDOWN_TICKS * 2;
+
+        lastPearlUseTime = System.currentTimeMillis();
 
         handlePostPearlStrategy();
 
@@ -545,8 +565,19 @@ public class BotEnderpearlController {
     }
 
     public boolean canUseEnderpearl() {
-        return enderpearlCooldown <= 0 && inventoryController.hasEnderpearls() && bot.isAlive() && !isPreparingPearl;
+        if (isPreparingPearl) return false;
+        if (enderpearlCooldown > 0) return false;
+        if (!inventoryController.hasEnderpearls()) return false;
+        if (!bot.isAlive()) return false;
+
+        if (System.currentTimeMillis() - lastPearlUseTime < MIN_TIME_BETWEEN_PEARLS_MS) return false;
+
+        Vec3 vel = bot.getDeltaMovement();
+        if (vel.lengthSqr() > 1.2 * 1.2) return false;
+
+        return true;
     }
+
 
     public int getCooldown() {
         return enderpearlCooldown;

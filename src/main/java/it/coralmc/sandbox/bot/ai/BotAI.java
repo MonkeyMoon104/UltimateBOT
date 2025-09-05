@@ -112,9 +112,6 @@ public class BotAI {
         lastBotPosition = bot.position();
         lastActionTime = System.currentTimeMillis();
 
-        inventoryController.tick();
-        enderpearlController.tick();
-
         if (((TrainingBot) bot).isCombat()) {
             updateCombatState(target);
             executeCombatStrategy(target);
@@ -375,7 +372,7 @@ public class BotAI {
         }
 
         if (distance > 6.0 && enderpearlController.canUseEnderpearl()) {
-            if (random.nextDouble() < 0.4) {
+            if (enderpearlController.wasRecentlyDamaged() || distance > 9.0) {
                 enderpearlController.tryUseEnderpearl(target);
                 return true;
             }
@@ -426,17 +423,18 @@ public class BotAI {
         boolean actionTaken = false;
 
         if (yDiff > 2.0) {
-            if (enderpearlController.canUseEnderpearl() && random.nextDouble() < 0.6) {
-                enderpearlController.tryUseEnderpearl(target);
+            if (enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
+                enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.REPOSITION_LOW);
+                repositionTimer = 100;
                 return true;
             }
         }
 
-        if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
+        if (distance > 10.0 && enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
             enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.AGGRESSIVE_CLOSE);
+            repositionTimer = 100;
             return true;
         }
-
 
         if (distance < 3.0) {
             movementController.moveAwayFrom(target, optimalDistance);
