@@ -6,6 +6,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -377,16 +379,31 @@ public class BotEnderpearlController {
 
 
     private boolean isSafeLandingSpot(BlockPos pos) {
-        if (level.getBlockState(pos.below()).isAir()) {
+        BlockState stateAt = level.getBlockState(pos);
+        BlockState stateAbove = level.getBlockState(pos.above());
+        BlockState stateBelow = level.getBlockState(pos.below());
+
+        if (!stateAt.isAir() || !stateAbove.isAir()) {
             return false;
         }
 
-        if (!level.getBlockState(pos).isAir() || !level.getBlockState(pos.above()).isAir()) {
+        if (stateBelow.isAir()) {
             return false;
         }
 
-        if (level.getBlockState(pos.below()).getBlock().toString().contains("lava") ||
-                level.getBlockState(pos.below()).getBlock().toString().contains("cactus")) {
+        if (stateBelow.getCollisionShape(level, pos.below()).isEmpty()) {
+            return false;
+        }
+
+        if (!level.getFluidState(pos.below()).isEmpty()) return false;
+        if (!level.getFluidState(pos).isEmpty()) return false;
+        if (!level.getFluidState(pos.above()).isEmpty()) return false;
+
+        if (stateBelow.is(Blocks.CACTUS) || stateBelow.is(Blocks.MAGMA_BLOCK) || stateBelow.is(Blocks.LAVA) || stateBelow.is(Blocks.WATER)) {
+            return false;
+        }
+
+        if (!stateBelow.isFaceSturdy(level, pos.below(), Direction.UP)) {
             return false;
         }
 
