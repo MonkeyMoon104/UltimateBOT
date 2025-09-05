@@ -273,8 +273,8 @@ public class BotAI {
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
 
-        cpvpController.tick(target);
         rapvpController.tick();
+        cpvpController.tick(target);
     }
 
     private void updateCombatState(Player target) {
