@@ -31,8 +31,6 @@ public class BotRAPVPController {
 
     private BlockPos anchorPos = null;
     private Player currentTarget = null;
-    private long anchorCooldownEnd = 0;
-    private static final long ANCHOR_COOLDOWN_MS = 5000;
 
     public BotRAPVPController(Player bot,
                               BotInventoryController inventory,
@@ -48,7 +46,6 @@ public class BotRAPVPController {
     }
 
     public void enable(Player target) {
-        if (System.currentTimeMillis() < anchorCooldownEnd) return;
 
         this.enabled = true;
         this.anchorPlaced = false;
@@ -61,7 +58,6 @@ public class BotRAPVPController {
     public void tick() {
         if (!bot.isAlive() || currentTarget == null || !currentTarget.isAlive()) return;
 
-        if (!enabled && System.currentTimeMillis() < anchorCooldownEnd) return;
         if (!enabled) return;
 
         if (!anchorPlaced) {
@@ -120,8 +116,10 @@ public class BotRAPVPController {
                 pearlController.tryPearlToObsidianSide(anchorPos, currentTarget);
                 cpvp.tick(currentTarget);
 
-                anchorCooldownEnd = System.currentTimeMillis() + ANCHOR_COOLDOWN_MS;
-                disable();
+                isWaitingExplosion = false;
+                anchorPlaced = false;
+                isChargingAnchor = false;
+                anchorPos = null;
             }
         }
     }
@@ -129,15 +127,21 @@ public class BotRAPVPController {
     private Optional<BlockPos> findBestAnchorPos(Player target) {
         BlockPos targetPos = target.blockPosition();
         BlockPos best = null;
-        int bestY = Integer.MAX_VALUE;
+        double bestDistance = Double.MAX_VALUE;
 
-        for (int dy = -3; dy <= 0; dy++) {
-            BlockPos check = targetPos.offset(0, dy, 0);
-            if (bot.level().getBlockState(check).canBeReplaced()
-                    && bot.level().getBlockState(check.below()).isSolid()) {
-                if (check.getY() < bestY) {
-                    best = check;
-                    bestY = check.getY();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    BlockPos check = targetPos.offset(dx, dy, dz);
+
+                    if (level.getBlockState(check).canBeReplaced()
+                            && level.getBlockState(check.below()).isSolid()) {
+                        double dist = bot.position().distanceTo(Vec3.atCenterOf(check));
+                        if (dist < bestDistance) {
+                            best = check;
+                            bestDistance = dist;
+                        }
+                    }
                 }
             }
         }
