@@ -132,6 +132,18 @@ public class BotEnderpearlController {
         return PearlStrategy.ESCAPE;
     }
 
+    public boolean tryUseEnderpearlToPosition(Vec3 targetPos) {
+        if (!canUseEnderpearl() || isPreparingPearl) return false;
+        if (!inventoryController.hasEnderpearls()) return false;
+
+        if (!inventoryController.isHoldingEnderpearl()) {
+            inventoryController.switchToEnderpearl();
+        }
+
+        startPearlPreparation(targetPos, PearlStrategy.ESCAPE);
+        return true;
+    }
+
     private boolean shouldUsePearlForStrategy(PearlStrategy strategy, Player target) {
         double distance = bot.distanceTo(target);
         long currentTime = System.currentTimeMillis();
@@ -231,11 +243,10 @@ public class BotEnderpearlController {
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
 
-        // Always aim for 2-3 blocks below target
         int targetY = target.blockPosition().getY();
         int desiredY = targetY - 2 - (int)(Math.random() * 2);
 
-        double radius = 4.0 + Math.random() * 2.0; // Closer radius
+        double radius = 4.0 + Math.random() * 2.0;
         double angle = Math.random() * 2 * Math.PI;
 
         Vec3 lowGroundPos = targetPos.add(

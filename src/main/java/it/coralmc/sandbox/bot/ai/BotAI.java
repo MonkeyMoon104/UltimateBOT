@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.*;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -56,6 +57,10 @@ public class BotAI {
     private static final long MAX_STUCK_TIME = 1500;
     private static final double MIN_MOVEMENT_THRESHOLD = 0.1;
 
+    private long lastPathfindingAttempt = 0;
+    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 3000;
+    private boolean usingPathfinding = false;
+
     private final Random random = new Random();
 
     public BotAI(Player bot, SandboxTraining plugin) {
@@ -80,7 +85,32 @@ public class BotAI {
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
 
         updateCombatData(target);
-        checkForStuck(target);
+        if (usingPathfinding && movementController.hasActivePath()) {
+            if (movementController.followPath()) {
+                rotationController.lookAt(
+                        movementController.getCurrentPathPoint().x,
+                        movementController.getCurrentPathPoint().y,
+                        movementController.getCurrentPathPoint().z
+                );
+            } else {
+                usingPathfinding = false;
+            }
+        } else {
+            checkForStuck(target);
+
+            inventoryController.tick();
+            enderpearlController.tick();
+
+            if (((TrainingBot) bot).isCombat()) {
+                updateCombatState(target);
+                executeCombatStrategy(target);
+            } else {
+                basicFollowBehavior(target);
+            }
+        }
+
+        lastBotPosition = bot.position();
+        lastActionTime = System.currentTimeMillis();
 
         inventoryController.tick();
         enderpearlController.tick();
@@ -106,14 +136,99 @@ public class BotAI {
             stuckCounter++;
         } else {
             stuckCounter = 0;
+            usingPathfinding = false;
+            movementController.clearPath();
         }
 
         if (stuckCounter > 30 || (currentTime - lastActionTime > MAX_STUCK_TIME)) {
-            forceUnstuck(target);
+            if (!usingPathfinding || movementController.shouldRecalculatePath()) {
+                attemptPathfindingOrPearl(target);
+            } else {
+                movementController.followPath();
+            }
+
             stuckCounter = 0;
             lastActionTime = currentTime;
         }
     }
+
+    private void attemptPathfindingOrPearl(Player target) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastPathfindingAttempt < PATHFINDING_ATTEMPT_COOLDOWN) {
+            return;
+        }
+
+        lastPathfindingAttempt = currentTime;
+
+        if (movementController.calculatePathTo(target.position())) {
+            usingPathfinding = true;
+            movementController.followPath();
+            return;
+        }
+
+        if (enderpearlController.canUseEnderpearl() &&
+                bot.distanceTo(target) > 4.0 &&
+                hasObstacleBetween(bot.position(), target.position())) {
+
+            Vec3 pearlTarget = calculatePearlTargetAroundPlayer(target);
+            if (pearlTarget != null) {
+                enderpearlController.tryUseEnderpearlToPosition(pearlTarget);
+                usingPathfinding = false;
+                return;
+            }
+        }
+
+        forceUnstuck(target);
+    }
+
+    private boolean hasObstacleBetween(Vec3 start, Vec3 end) {
+        Vec3 direction = end.subtract(start).normalize();
+        double distance = start.distanceTo(end);
+        int steps = (int) (distance * 2);
+
+        for (int i = 1; i < steps; i++) {
+            Vec3 checkPos = start.add(direction.scale(i * 0.5));
+            BlockPos blockPos = BlockPos.containing(checkPos);
+
+            if (!level.getBlockState(blockPos).isAir() ||
+                    !level.getBlockState(blockPos.above()).isAir()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Vec3 calculatePearlTargetAroundPlayer(Player target) {
+        Vec3 targetPos = target.position();
+        Random rand = new Random();
+
+        for (int i = 0; i < 8; i++) {
+            double angle = rand.nextDouble() * 2 * Math.PI;
+            double radius = 3 + rand.nextDouble() * 4;
+
+            double x = targetPos.x + Math.cos(angle) * radius;
+            double z = targetPos.z + Math.sin(angle) * radius;
+            double y = targetPos.y;
+
+            Vec3 potentialTarget = new Vec3(x, y, z);
+            BlockPos blockPos = BlockPos.containing(potentialTarget);
+
+            if (isSafeLandingSpot(blockPos) &&
+                    !hasObstacleBetween(bot.position(), potentialTarget)) {
+                return potentialTarget;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isSafeLandingSpot(BlockPos pos) {
+        return !level.getBlockState(pos.below()).isAir() &&
+                level.getBlockState(pos).isAir() &&
+                level.getBlockState(pos.above()).isAir();
+    }
+
 
     private void forceUnstuck(Player target) {
         double distance = bot.distanceTo(target);

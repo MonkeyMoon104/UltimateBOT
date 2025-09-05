@@ -7,6 +7,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -42,6 +43,7 @@ public class BotRAPVPController {
         this.rotation = rotation;
         this.cpvp = cpvp;
         this.pearlController = pearlController;
+        this.level = bot.level();
     }
 
     public void enable(Player target) {
@@ -147,6 +149,10 @@ public class BotRAPVPController {
 
     private boolean placeAnchor(BlockPos pos) {
         try {
+            if (!hasLineOfSight(pos)) {
+                return false;
+            }
+
             ItemStack stack = inventory.getCurrentItem();
             if (stack == null || stack.getItem() != Items.RESPAWN_ANCHOR) return false;
 
@@ -176,6 +182,11 @@ public class BotRAPVPController {
 
     private boolean chargeAnchor(BlockPos anchorPos) {
         try {
+
+            if (!hasLineOfSight(anchorPos)) {
+                return false;
+            }
+
             ItemStack stack = inventory.getCurrentItem();
             if (stack == null || stack.getItem() != Items.GLOWSTONE) {
                 return false;
@@ -217,6 +228,10 @@ public class BotRAPVPController {
 
     private void explodeAnchor(BlockPos anchorPos) {
         try {
+            if (!hasLineOfSight(anchorPos)) {
+                return;
+            }
+
             BlockState anchorState = bot.level().getBlockState(anchorPos);
             if (!(anchorState.getBlock() instanceof RespawnAnchorBlock)) {
                 return;
@@ -227,7 +242,6 @@ public class BotRAPVPController {
                 return;
             }
 
-            System.out.println("Tentativo esplosione anchor con " + currentCharges + " cariche");
 
             inventory.switchToEmptySlot();
 
@@ -243,25 +257,13 @@ public class BotRAPVPController {
 
                 bot.swing(InteractionHand.MAIN_HAND);
 
-                System.out.println("Interazione anchor result: " + result);
 
                 if (result.consumesAction()) {
-                    System.out.println("Anchor esploso tramite interazione!");
                     return;
                 }
             } catch (Exception e) {
                 System.out.println("Errore interazione anchor: " + e.getMessage());
             }
-
-            System.out.println("Forzando esplosione anchor............................................" +
-                    "............................................................" +
-                    "..............................................................." +
-                    "....................................................................." +
-                    "............................................................................" +
-                    ".........................................................................." +
-                    "..............................................................................." +
-                    "........................" +
-                    "gg");
 
             bot.level().removeBlock(anchorPos, false);
 
@@ -273,8 +275,6 @@ public class BotRAPVPController {
                     5.0F,
                     net.minecraft.world.level.Level.ExplosionInteraction.BLOCK
             );
-
-            System.out.println("Anchor esploso forzatamente!");
 
         } catch (Exception e) {
             System.err.println("Errore generale nell'esplosione anchor: " + e.getMessage());
@@ -315,6 +315,23 @@ public class BotRAPVPController {
         this.isWaitingExplosion = false;
         this.anchorPos = null;
         this.currentTarget = null;
+    }
+
+    private boolean hasLineOfSight(BlockPos pos) {
+        Vec3 botEyes = bot.getEyePosition(1.0F);
+        Vec3 targetPos = Vec3.atCenterOf(pos);
+
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                botEyes,
+                targetPos,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+
+        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
+                result.getBlockPos().equals(pos);
     }
 
     public boolean isActive() {

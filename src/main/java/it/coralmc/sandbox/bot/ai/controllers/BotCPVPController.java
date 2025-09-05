@@ -156,6 +156,13 @@ public class BotCPVPController {
         rotationController.lookAt(Vec3.atCenterOf(pendingObsidianPos));
 
         if (obsidianPreparationTicks >= OBSIDIAN_PREPARATION_TIME) {
+            if (!hasLineOfSight(pendingObsidianPos)) {
+                isPreparingObsidian = false;
+                pendingObsidianPos = null;
+                obsidianPreparationTicks = 0;
+                return;
+            }
+
             if (placeObsidianAt(pendingObsidianPos)) {
                 obsidianPlaceCooldown = OBSIDIAN_PLACE_COOLDOWN_TICKS;
                 recentPlacements.put(pendingObsidianPos, System.currentTimeMillis());
@@ -521,7 +528,6 @@ public class BotCPVPController {
     public void tryPlaceOptimalCrystals(Player target) {
         if (!canPlaceCrystal()) return;
 
-        // More aggressive crystal placement with lower score threshold
         List<BlockPos> validObsidianPositions = new ArrayList<>();
         for (BlockPos obsidianPos : obsidianCache.keySet()) {
             if (isValidCrystalPos(obsidianPos, target)) {
@@ -531,11 +537,10 @@ public class BotCPVPController {
 
         if (validObsidianPositions.isEmpty()) return;
 
-        // Place multiple crystals rapidly
         int crystalsToPlace = Math.min(2, validObsidianPositions.size());
         for (int i = 0; i < crystalsToPlace; i++) {
             BlockPos pos = validObsidianPositions.get(i);
-            if (calculateCrystalScore(pos, target) > 5.0) { // Lower threshold
+            if (calculateCrystalScore(pos, target) > 5.0) {
                 startCrystalPreparation(pos);
                 break;
             }
@@ -561,6 +566,13 @@ public class BotCPVPController {
         rotationController.lookAt(crystalPlacementPos);
 
         if (crystalPreparationTicks >= CRYSTAL_PREPARATION_TIME) {
+            if (!hasLineOfSight(pendingCrystalPos)) {
+                isPreparingCrystal = false;
+                pendingCrystalPos = null;
+                crystalPreparationTicks = 0;
+                return;
+            }
+
             placeCrystal(pendingCrystalPos);
 
             isPreparingCrystal = false;
@@ -618,6 +630,23 @@ public class BotCPVPController {
         }
 
         return false;
+    }
+
+    private boolean hasLineOfSight(BlockPos pos) {
+        Vec3 botEyes = bot.getEyePosition(1.0F);
+        Vec3 targetPos = Vec3.atCenterOf(pos);
+
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                botEyes,
+                targetPos,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+
+        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
+                result.getBlockPos().equals(pos);
     }
 
     public boolean canPlaceObsidian() {

@@ -1,9 +1,12 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.*;
 
 public class BotMovementController {
 
@@ -47,10 +50,123 @@ public class BotMovementController {
     private boolean avoidCorners = true;
     private Vec3 lastSafePosition = null;
 
+    private List<Vec3> currentPath = new ArrayList<>();
+    private int pathIndex = 0;
+    private long lastPathRecalculation = 0;
+    private static final long PATH_RECALCULATION_COOLDOWN = 2000;
+
     public BotMovementController(Player bot, Level level) {
         this.bot = bot;
         this.level = level;
         this.lastBotPosition = bot.position();
+    }
+
+    public boolean calculatePathTo(Vec3 targetPos) {
+        Vec3 startPos = bot.position();
+        currentPath.clear();
+        pathIndex = 0;
+
+        Set<BlockPos> closedSet = new HashSet<>();
+        PriorityQueue<PathNode> openSet = new PriorityQueue<>();
+        Map<BlockPos, PathNode> allNodes = new HashMap<>();
+
+        BlockPos startBlock = BlockPos.containing(startPos);
+        BlockPos targetBlock = BlockPos.containing(targetPos);
+
+        PathNode startNode = new PathNode(startBlock, null, 0, estimateDistance(startBlock, targetBlock));
+        openSet.add(startNode);
+        allNodes.put(startBlock, startNode);
+
+        while (!openSet.isEmpty()) {
+            PathNode currentNode = openSet.poll();
+
+            if (currentNode.position.distSqr(targetBlock) < 4) {
+                reconstructPath(currentNode);
+                lastPathRecalculation = System.currentTimeMillis();
+                return true;
+            }
+
+            closedSet.add(currentNode.position);
+
+            for (Direction direction : Direction.values()) {
+                BlockPos neighborPos = currentNode.position.relative(direction);
+
+                if (!isPositionPassable(neighborPos)) continue;
+
+                if (closedSet.contains(neighborPos)) continue;
+
+                double tentativeGScore = currentNode.gScore + 1;
+                PathNode neighborNode = allNodes.get(neighborPos);
+
+                if (neighborNode == null) {
+                    neighborNode = new PathNode(neighborPos, currentNode,
+                            tentativeGScore,
+                            estimateDistance(neighborPos, targetBlock));
+                    allNodes.put(neighborPos, neighborNode);
+                    openSet.add(neighborNode);
+                } else if (tentativeGScore < neighborNode.gScore) {
+                    neighborNode.cameFrom = currentNode;
+                    neighborNode.gScore = tentativeGScore;
+                    neighborNode.fScore = tentativeGScore + estimateDistance(neighborPos, targetBlock);
+
+                    openSet.remove(neighborNode);
+                    openSet.add(neighborNode);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isPositionPassable(BlockPos pos) {
+        return level.getBlockState(pos).isAir() &&
+                level.getBlockState(pos.above()).isAir() &&
+                !level.getBlockState(pos.below()).isAir();
+    }
+
+    private double estimateDistance(BlockPos a, BlockPos b) {
+        return Math.sqrt(a.distSqr(b));
+    }
+
+    private void reconstructPath(PathNode endNode) {
+        PathNode current = endNode;
+        while (current != null) {
+            currentPath.add(0, Vec3.atCenterOf(current.position));
+            current = current.cameFrom;
+        }
+    }
+
+    public boolean followPath() {
+        if (currentPath.isEmpty() || pathIndex >= currentPath.size()) {
+            return false;
+        }
+
+        Vec3 targetPoint = currentPath.get(pathIndex);
+        double distanceToPoint = bot.position().distanceTo(targetPoint);
+
+        if (distanceToPoint < 1.0) {
+            pathIndex++;
+            if (pathIndex >= currentPath.size()) {
+                return false;
+            }
+            targetPoint = currentPath.get(pathIndex);
+        }
+
+        moveToPosition(targetPoint);
+        return true;
+    }
+
+    public boolean hasActivePath() {
+        return !currentPath.isEmpty() && pathIndex < currentPath.size();
+    }
+
+    public void clearPath() {
+        currentPath.clear();
+        pathIndex = 0;
+    }
+
+    public boolean shouldRecalculatePath() {
+        return System.currentTimeMillis() - lastPathRecalculation > PATH_RECALCULATION_COOLDOWN;
     }
 
     private void executeCrystalSpamMovement(Player target, double targetDistance) {
@@ -705,4 +821,31 @@ public class BotMovementController {
             moveTowards(target, targetDistance);
         }
     }
+
+    private static class PathNode implements Comparable<PathNode> {
+        public BlockPos position;
+        public PathNode cameFrom;
+        public double gScore;
+        public double fScore;
+
+        public PathNode(BlockPos position, PathNode cameFrom, double gScore, double hScore) {
+            this.position = position;
+            this.cameFrom = cameFrom;
+            this.gScore = gScore;
+            this.fScore = gScore + hScore;
+        }
+
+        @Override
+        public int compareTo(PathNode other) {
+            return Double.compare(this.fScore, other.fScore);
+        }
+    }
+
+    public Vec3 getCurrentPathPoint() {
+        if (currentPath.isEmpty() || pathIndex >= currentPath.size()) {
+            return null;
+        }
+        return currentPath.get(pathIndex);
+    }
+
 }
