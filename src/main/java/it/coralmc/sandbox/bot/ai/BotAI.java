@@ -369,6 +369,11 @@ public class BotAI {
         double targetDistance = 2.5;
         boolean actionTaken = false;
 
+        if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
+            enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.AGGRESSIVE_CLOSE);
+            return true;
+        }
+
         if (distance > 6.0 && enderpearlController.canUseEnderpearl()) {
             if (random.nextDouble() < 0.4) {
                 enderpearlController.tryUseEnderpearl(target);
@@ -426,6 +431,12 @@ public class BotAI {
                 return true;
             }
         }
+
+        if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
+            enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.AGGRESSIVE_CLOSE);
+            return true;
+        }
+
 
         if (distance < 3.0) {
             movementController.moveAwayFrom(target, optimalDistance);

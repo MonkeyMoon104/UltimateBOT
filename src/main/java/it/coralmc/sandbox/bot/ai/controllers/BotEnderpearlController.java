@@ -28,7 +28,7 @@ public class BotEnderpearlController {
     private int enderpearlCooldown = 0;
     private static final int ENDERPEARL_COOLDOWN_TICKS = 30;
     private static final double MIN_ENDERPEARL_DISTANCE = 4.0;
-    private static final double MAX_ENDERPEARL_DISTANCE = 50.0;
+    private static final double MAX_ENDERPEARL_DISTANCE = 10.0;
     private static final int PREDICT_TICKS = 8;
 
     private float lastHealth;
@@ -202,24 +202,21 @@ public class BotEnderpearlController {
     private Vec3 calculateEmergencyEscape(Player target) {
         Vec3 botPos = bot.position();
         Vec3 targetPos = target.position();
-
         Vec3 awayDirection = botPos.subtract(targetPos).normalize();
 
-        for (double angle : new double[]{0, Math.PI/4, -Math.PI/4, Math.PI/2, -Math.PI/2}) {
-            Vec3 escapeDir = rotateVector(awayDirection, angle);
-            double distance = Math.random() * 8 + 10;
-            double yOffset = Math.random() * 4 - 2;
+        double distance = 6.0 + Math.random() * 3.0;
+        double yOffset = Math.random() * 2.0;
 
-            Vec3 escapePos = botPos.add(escapeDir.scale(distance)).add(0, yOffset, 0);
-            BlockPos escapeBlock = BlockPos.containing(escapePos);
+        Vec3 escapePos = botPos.add(awayDirection.scale(distance)).add(0, yOffset, 0);
+        BlockPos escapeBlock = BlockPos.containing(escapePos);
 
-            if (isSafeLandingSpot(escapeBlock)) {
-                return escapePos;
-            }
+        if (isSafeLandingSpot(escapeBlock)) {
+            return escapePos;
         }
 
-        return findSafeLandingSpot(BlockPos.containing(botPos.add(awayDirection.scale(12))));
+        return findSafeLandingSpot(BlockPos.containing(botPos.add(awayDirection.scale(7))));
     }
+
 
     private Vec3 calculateMeleeDisengage(Player target) {
         Vec3 botPos = bot.position();
@@ -290,20 +287,21 @@ public class BotEnderpearlController {
 
         Vec3 botPos = bot.position();
         Vec3 toTarget = predictedPos.subtract(botPos).normalize();
-        double approachDistance = 3.5 + Math.random() * 1.5;
+
+        double approachDistance = 2.5 + Math.random() * 1.5;
 
         Vec3 approachPos = predictedPos.subtract(toTarget.scale(approachDistance));
-
-        approachPos = approachPos.add(0, Math.random() * 2.0, 0);
+        approachPos = approachPos.add(0, Math.random(), 0);
 
         BlockPos checkPos = BlockPos.containing(approachPos);
         if (isSafeLandingSpot(checkPos)) {
-            aggressivePearlCooldown = 60;
+            aggressivePearlCooldown = 40;
             return approachPos;
         }
 
         return findSafeLandingSpot(checkPos);
     }
+
 
     private Vec3 calculateStandardEscape(Player target) {
         Vec3 botPos = bot.position();
