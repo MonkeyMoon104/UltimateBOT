@@ -111,18 +111,7 @@ public class BotAI {
 
         lastBotPosition = bot.position();
         lastActionTime = System.currentTimeMillis();
-
-        if (((TrainingBot) bot).isCombat()) {
-            updateCombatState(target);
-            executeCombatStrategy(target);
-        } else {
-            basicFollowBehavior(target);
-        }
-
-        lastBotPosition = bot.position();
-        lastActionTime = System.currentTimeMillis();
     }
-
     private void checkForStuck(Player target) {
         long currentTime = System.currentTimeMillis();
         Vec3 currentPos = bot.position();
