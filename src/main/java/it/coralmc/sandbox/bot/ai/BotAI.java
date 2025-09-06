@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.*;
+import it.coralmc.sandbox.bot.ai.controllers.BotAttackController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
