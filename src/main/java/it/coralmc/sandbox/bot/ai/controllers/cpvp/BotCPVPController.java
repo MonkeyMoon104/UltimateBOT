@@ -237,9 +237,11 @@ public class BotCPVPController {
         rotationController.lookAt(pendingAttackCrystal.position());
 
         if (attackPreparationTicks >= ATTACK_PREPARATION_TIME) {
-            if (crystalAttacker.attackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
-                attackCooldown = ATTACK_COOLDOWN_TICKS;
-                myPlacedCrystals.remove(pendingAttackCrystal);
+            if (crystalAttacker.canAttackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
+                if (crystalAttacker.attackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
+                    attackCooldown = ATTACK_COOLDOWN_TICKS;
+                    myPlacedCrystals.remove(pendingAttackCrystal);
+                }
             }
 
             isPreparingAttack = false;
