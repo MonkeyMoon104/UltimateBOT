@@ -1,6 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
 
-import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.*;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.*;

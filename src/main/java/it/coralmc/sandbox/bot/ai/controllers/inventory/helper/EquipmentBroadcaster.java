@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.inventory;
+package it.coralmc.sandbox.bot.ai.controllers.inventory.helper;
 
 import com.mojang.datafixers.util.Pair;
-import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.IEquipmentBroadcaster;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;

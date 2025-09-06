@@ -5,7 +5,7 @@ import it.coralmc.sandbox.bot.ai.controllers.*;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
-import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.helper.MovementPattern;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;

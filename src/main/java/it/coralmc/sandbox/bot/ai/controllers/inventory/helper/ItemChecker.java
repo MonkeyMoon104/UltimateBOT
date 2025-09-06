@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.inventory;
+package it.coralmc.sandbox.bot.ai.controllers.inventory.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.IItemChecker;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.helper.inter.IItemChecker;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;

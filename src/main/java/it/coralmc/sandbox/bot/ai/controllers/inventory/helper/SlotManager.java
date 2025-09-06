@@ -1,8 +1,8 @@
-package it.coralmc.sandbox.bot.ai.controllers.inventory;
+package it.coralmc.sandbox.bot.ai.controllers.inventory.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.IEquipmentBroadcaster;
-import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.IResourceReplenisher;
-import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.ISlotManager;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.helper.inter.ISlotManager;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

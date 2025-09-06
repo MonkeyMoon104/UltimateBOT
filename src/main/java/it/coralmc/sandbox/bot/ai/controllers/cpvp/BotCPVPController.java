@@ -1,6 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp;
 
-import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalAttacker;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalManager;
