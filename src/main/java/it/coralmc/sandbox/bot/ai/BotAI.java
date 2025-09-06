@@ -1,11 +1,11 @@
 package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.ai.central.*;
-import it.coralmc.sandbox.bot.ai.central.inter.ICombatDataManager;
-import it.coralmc.sandbox.bot.ai.central.inter.ICombatStateManager;
-import it.coralmc.sandbox.bot.ai.central.inter.ICombatStrategyExecutor;
-import it.coralmc.sandbox.bot.ai.central.inter.IPathfindingManager;
+import it.coralmc.sandbox.bot.ai.botai.*;
+import it.coralmc.sandbox.bot.ai.botai.inter.ICombatDataManager;
+import it.coralmc.sandbox.bot.ai.botai.inter.ICombatStateManager;
+import it.coralmc.sandbox.bot.ai.botai.inter.ICombatStrategyExecutor;
+import it.coralmc.sandbox.bot.ai.botai.inter.IPathfindingManager;
 import it.coralmc.sandbox.bot.ai.controllers.attack.BotAttackController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;

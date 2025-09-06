@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.central.inter;
+package it.coralmc.sandbox.bot.ai.botai.inter;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
