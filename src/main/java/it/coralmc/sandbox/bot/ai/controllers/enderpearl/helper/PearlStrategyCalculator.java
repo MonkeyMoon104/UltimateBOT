@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IPearlStrategyCalculator;
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IPositionCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 

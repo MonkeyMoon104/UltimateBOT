@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.ITargetTracker;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.ITargetTracker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 

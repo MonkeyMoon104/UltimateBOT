@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 

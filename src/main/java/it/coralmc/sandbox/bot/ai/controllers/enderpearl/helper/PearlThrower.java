@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IPearlThrower;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPearlThrower;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;

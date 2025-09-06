@@ -1,7 +1,9 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.*;
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.*;
+import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.*;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;

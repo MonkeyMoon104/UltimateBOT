@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.ISafetyValidator;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;

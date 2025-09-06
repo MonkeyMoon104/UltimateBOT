@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IPositionCalculator;
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.ISafetyValidator;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;

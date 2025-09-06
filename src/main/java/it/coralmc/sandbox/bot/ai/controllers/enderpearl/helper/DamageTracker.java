@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IDamageTracker;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.IDamageTracker;
 import net.minecraft.world.entity.player.Player;
 
 public class DamageTracker implements IDamageTracker {

@@ -1,6 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.rapvp;
 
-import it.coralmc.sandbox.bot.ai.controllers.BotEnderpearlController;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
