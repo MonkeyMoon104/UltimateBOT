@@ -1,10 +1,13 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.rapvp;
 
+import it.coralmc.sandbox.bot.ai.controllers.BotEnderpearlController;
+import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorPlacer;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorCharger;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorExploder;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorPositionFinder;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorCharger;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorExploder;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorPlacer;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorPositionFinder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;

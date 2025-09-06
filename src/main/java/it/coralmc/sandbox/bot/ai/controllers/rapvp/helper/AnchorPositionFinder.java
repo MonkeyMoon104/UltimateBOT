@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.rapvp;
+package it.coralmc.sandbox.bot.ai.controllers.rapvp.helper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

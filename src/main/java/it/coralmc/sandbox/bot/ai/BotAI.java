@@ -5,6 +5,7 @@ import it.coralmc.sandbox.bot.ai.controllers.*;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.helper.MovementPattern;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
