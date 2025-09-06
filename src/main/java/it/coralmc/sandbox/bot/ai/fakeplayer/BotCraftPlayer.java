@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.crazy;
+package it.coralmc.sandbox.bot.ai.fakeplayer;
 
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.Title;

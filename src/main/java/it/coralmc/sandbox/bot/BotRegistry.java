@@ -1,6 +1,6 @@
 package it.coralmc.sandbox.bot;
 
-import it.coralmc.sandbox.bot.ai.crazy.FakeOfflinePlayer;
+import it.coralmc.sandbox.bot.ai.fakeplayer.FakeOfflinePlayer;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 
 import javax.annotation.Nullable;

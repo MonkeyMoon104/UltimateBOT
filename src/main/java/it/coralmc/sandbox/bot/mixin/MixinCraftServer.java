@@ -1,7 +1,7 @@
 package it.coralmc.sandbox.bot.mixin;
 
 import it.coralmc.sandbox.SandboxTraining;
-import it.coralmc.sandbox.bot.ai.crazy.FakeOfflinePlayer;
+import it.coralmc.sandbox.bot.ai.fakeplayer.FakeOfflinePlayer;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.craftbukkit.CraftServer;
 import org.spongepowered.asm.mixin.Mixin;

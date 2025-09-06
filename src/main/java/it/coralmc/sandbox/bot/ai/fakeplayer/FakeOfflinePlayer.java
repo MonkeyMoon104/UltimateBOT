@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.crazy;
+package it.coralmc.sandbox.bot.ai.fakeplayer;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import io.papermc.paper.persistence.PersistentDataContainerView;
