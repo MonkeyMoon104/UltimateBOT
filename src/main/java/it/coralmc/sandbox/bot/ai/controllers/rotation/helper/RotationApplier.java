@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation;
+package it.coralmc.sandbox.bot.ai.controllers.rotation.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IAngleNormalizer;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationApplier;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IAngleNormalizer;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationApplier;
 import net.minecraft.world.entity.player.Player;
 
 public class RotationApplier implements IRotationApplier {

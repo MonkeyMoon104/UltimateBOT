@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation;
+package it.coralmc.sandbox.bot.ai.controllers.rotation.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IAngleNormalizer;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IAngleNormalizer;
 
 public class AngleNormalizer implements IAngleNormalizer {
 

@@ -9,7 +9,7 @@ import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.helper.MovementPattern;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
-import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.totem.BotTotemController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

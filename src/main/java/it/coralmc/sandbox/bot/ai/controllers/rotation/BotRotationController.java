@@ -1,10 +1,13 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.rotation;
 
-import it.coralmc.sandbox.bot.ai.controllers.rotation.*;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IAngleNormalizer;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationApplier;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationCalculator;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationGetter;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.AngleNormalizer;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.RotationApplier;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.RotationCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.RotationGetter;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IAngleNormalizer;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationApplier;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 

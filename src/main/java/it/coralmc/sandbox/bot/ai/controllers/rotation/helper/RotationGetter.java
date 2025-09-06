@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation;
+package it.coralmc.sandbox.bot.ai.controllers.rotation.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationGetter;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
 import net.minecraft.world.entity.player.Player;
 
 public class RotationGetter implements IRotationGetter {

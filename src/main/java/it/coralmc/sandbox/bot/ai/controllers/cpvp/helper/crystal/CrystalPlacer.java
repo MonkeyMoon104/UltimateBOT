@@ -1,7 +1,7 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal;
 
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
-import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;

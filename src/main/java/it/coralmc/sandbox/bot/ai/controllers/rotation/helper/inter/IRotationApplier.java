@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation.inter;
+package it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 

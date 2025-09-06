@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.rotation;
+package it.coralmc.sandbox.bot.ai.controllers.rotation.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
