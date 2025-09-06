@@ -1,25 +1,20 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
-import com.mojang.datafixers.util.Pair;
-import com.sun.jna.platform.win32.GL;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.*;
+import it.coralmc.sandbox.bot.ai.controllers.inventory.inter.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-
-import java.util.*;
 
 public class BotInventoryController {
 
     private final Player bot;
-    private final Map<Integer, ItemStack> hotbarSlots = new HashMap<>();
-    private int currentSlot = 0;
+    private final ISlotManager slotManager;
+    private final IResourceReplenisher resourceReplenisher;
+    private final IEquipmentBroadcaster equipmentBroadcaster;
+    private final IItemChecker itemChecker;
+    private final IItemManager itemManager;
 
-    private boolean infiniteResources = true;
     public static final int SWORD_SLOT = 0;
     public static final int ENDERPEARL_SLOT = 1;
     public static final int TOTEM_SLOT = 2;
@@ -31,280 +26,127 @@ public class BotInventoryController {
 
     public BotInventoryController(Player bot) {
         this.bot = bot;
-        initializeDefaultItems();
-    }
-
-    private void initializeDefaultItems() {
-        hotbarSlots.put(SWORD_SLOT, new ItemStack(Items.NETHERITE_SWORD));
-
-        hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, 16));
-
-        hotbarSlots.put(TOTEM_SLOT, new ItemStack(Items.TOTEM_OF_UNDYING));
-
-        hotbarSlots.put(OBSIDIAN_SLOT, new ItemStack(Items.OBSIDIAN, 64));
-
-        hotbarSlots.put(CRYSTAL_SLOT, new ItemStack(Items.END_CRYSTAL, 64));
-
-        hotbarSlots.put(ANCHOR_SLOT, new ItemStack(Items.RESPAWN_ANCHOR, 64));
-
-        hotbarSlots.put(GLOW_SLOT, new ItemStack(Items.GLOWSTONE, 64));
-
-        hotbarSlots.put(EMPTY_SLOT, ItemStack.EMPTY);
-
-        switchToSlot(SWORD_SLOT);
+        this.resourceReplenisher = new ResourceReplenisher();
+        this.equipmentBroadcaster = new EquipmentBroadcaster();
+        this.slotManager = new SlotManager(bot, resourceReplenisher, equipmentBroadcaster);
+        this.itemChecker = new ItemChecker();
+        this.itemManager = new ItemManager(bot, ((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher, equipmentBroadcaster, slotManager.getCurrentSlot());
     }
 
     public void switchToSlot(int slot) {
-        if (slot < 0 || slot > 8) return;
-        if (!hotbarSlots.containsKey(slot)) return;
-        if (currentSlot == slot) return;
-
-        if (infiniteResources) {
-            replenishItem(slot);
-        }
-
-        currentSlot = slot;
-        ItemStack item = hotbarSlots.get(slot);
-
-        bot.setItemSlot(EquipmentSlot.MAINHAND, item);
-
-        broadcastEquipmentChange();
-    }
-
-    private void replenishItem(int slot) {
-        ItemStack currentStack = hotbarSlots.get(slot);
-        if (currentStack == null || currentStack.isEmpty()) return;
-
-        switch (slot) {
-            case OBSIDIAN_SLOT:
-                if (currentStack.getItem() == Items.OBSIDIAN && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case CRYSTAL_SLOT:
-                if (currentStack.getItem() == Items.END_CRYSTAL && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case ENDERPEARL_SLOT:
-                if (currentStack.getItem() == Items.ENDER_PEARL && currentStack.getCount() < 16) {
-                    currentStack.setCount(16);
-                }
-                break;
-            case ANCHOR_SLOT:
-                if (currentStack.getItem() == Items.RESPAWN_ANCHOR && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case GLOW_SLOT:
-                if (currentStack.getItem() == Items.GLOWSTONE && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-        }
-    }
-
-    public void onItemUsed(int slot) {
-        if (!infiniteResources) return;
-
-        ItemStack stack = hotbarSlots.get(slot);
-        if (stack == null || stack.isEmpty()) return;
-
-        switch (slot) {
-            case OBSIDIAN_SLOT:
-                if (stack.getItem() == Items.OBSIDIAN) {
-                    stack.setCount(64);
-                }
-                break;
-            case CRYSTAL_SLOT:
-                if (stack.getItem() == Items.END_CRYSTAL) {
-                    stack.setCount(64);
-                }
-                break;
-            case ENDERPEARL_SLOT:
-                if (stack.getItem() == Items.ENDER_PEARL) {
-                    stack.setCount(16);
-                }
-                break;
-            case ANCHOR_SLOT:
-                if (stack.getItem() == Items.RESPAWN_ANCHOR) {
-                    stack.setCount(64);
-                }
-                break;
-            case GLOW_SLOT:
-                if (stack.getItem() == Items.GLOWSTONE) {
-                    stack.setCount(64);
-                }
-                break;
-        }
-
-        if (currentSlot == slot) {
-            bot.setItemSlot(EquipmentSlot.MAINHAND, stack);
-            broadcastEquipmentChange();
-        }
+        slotManager.switchToSlot(slot);
     }
 
     public void switchToSword() {
-        switchToSlot(SWORD_SLOT);
+        slotManager.switchToSword();
     }
 
     public void switchToEnderpearl() {
-        switchToSlot(ENDERPEARL_SLOT);
+        slotManager.switchToEnderpearl();
     }
 
     public void switchToTotem() {
-        switchToSlot(TOTEM_SLOT);
+        slotManager.switchToTotem();
     }
 
     public void switchToCrystal() {
-        switchToSlot(CRYSTAL_SLOT);
+        slotManager.switchToCrystal();
     }
 
     public void switchToObs() {
-        switchToSlot(OBSIDIAN_SLOT);
+        slotManager.switchToObs();
     }
 
     public void switchToAnchor() {
-        switchToSlot(ANCHOR_SLOT);
+        slotManager.switchToAnchor();
     }
 
     public void switchToGlow() {
-        switchToSlot(GLOW_SLOT);
+        slotManager.switchToGlow();
     }
 
     public void switchToEmptySlot() {
-        switchToSlot(EMPTY_SLOT);
+        slotManager.switchToEmptySlot();
     }
 
     public int getCurrentSlot() {
-        return currentSlot;
+        return slotManager.getCurrentSlot();
     }
 
     public ItemStack getCurrentItem() {
-        ItemStack current = hotbarSlots.get(currentSlot);
-
-        if (infiniteResources && current != null && !current.isEmpty()) {
-            replenishItem(currentSlot);
-        }
-
-        return current;
+        return slotManager.getCurrentItem();
     }
 
     public boolean hasEnderpearls() {
-        ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
-        if (infiniteResources) {
-            return true;
-        }
-        return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getCount() > 0;
+        return itemChecker.hasEnderpearls(((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher.hasInfiniteResources());
     }
 
     public void addEnderpearls(int count) {
-        ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
-        if (enderpearlStack == null || enderpearlStack.isEmpty()) {
-            hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, count));
-        } else {
-            enderpearlStack.grow(count);
-        }
+        itemManager.addEnderpearls(count);
     }
 
     public void setItem(int slot, ItemStack item) {
-        if (slot >= 0 && slot <= 8) {
-            hotbarSlots.put(slot, item.copy());
-
-            if (slot == currentSlot) {
-                bot.setItemSlot(EquipmentSlot.MAINHAND, item);
-                broadcastEquipmentChange();
-            }
-        }
+        slotManager.setItem(slot, item);
     }
 
     public ItemStack getItem(int slot) {
-        return hotbarSlots.getOrDefault(slot, ItemStack.EMPTY);
+        return slotManager.getItem(slot);
     }
 
     public boolean isHoldingSword() {
-        return currentSlot == SWORD_SLOT && getCurrentItem().getItem() == Items.NETHERITE_SWORD;
+        return itemChecker.isHoldingSword(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public boolean isHoldingEnderpearl() {
-        return currentSlot == ENDERPEARL_SLOT && getCurrentItem().getItem() == Items.ENDER_PEARL;
+        return itemChecker.isHoldingEnderpearl(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public boolean isHoldingObsidian() {
-        return currentSlot == OBSIDIAN_SLOT && getCurrentItem().getItem() == Items.OBSIDIAN;
+        return itemChecker.isHoldingObsidian(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public boolean isHoldingCrystal() {
-        return currentSlot == CRYSTAL_SLOT && getCurrentItem().getItem() == Items.END_CRYSTAL;
+        return itemChecker.isHoldingCrystal(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public boolean isHoldingAnchor() {
-        return currentSlot == ANCHOR_SLOT && getCurrentItem().getItem() == Items.RESPAWN_ANCHOR;
+        return itemChecker.isHoldingAnchor(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public boolean isHoldingGlow() {
-        return currentSlot == GLOW_SLOT && getCurrentItem().getItem() == Items.GLOWSTONE;
+        return itemChecker.isHoldingGlow(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
     }
 
     public void updateTotemSlot(ItemStack totemStack) {
-        hotbarSlots.put(TOTEM_SLOT, totemStack);
+        itemManager.updateTotemSlot(totemStack);
     }
 
-    private void broadcastEquipmentChange() {
-        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
-        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
-
-        ClientboundSetEquipmentPacket equipmentPacket = new ClientboundSetEquipmentPacket(
-                bot.getId(), equipmentList
-        );
-
-        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
-            ServerPlayer handle = ((CraftPlayer) online).getHandle();
-            handle.connection.send(equipmentPacket);
-        }
+    public void onItemUsed(int slot) {
+        itemManager.onItemUsed(slot);
     }
 
-    public int getItemCount(net.minecraft.world.item.Item item) {
-        if (infiniteResources) {
-            if (item == Items.OBSIDIAN || item == Items.END_CRYSTAL) {
-                return 64;
-            } else if (item == Items.ENDER_PEARL) {
-                return 16;
-            }
-        }
-
-        for (ItemStack stack : hotbarSlots.values()) {
-            if (stack.getItem() == item) {
-                return stack.getCount();
-            }
-        }
-        return 0;
+    public int getItemCount(Item item) {
+        return itemChecker.getItemCount(((SlotManager) slotManager).getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
     }
 
-    public boolean hasItem(net.minecraft.world.item.Item item) {
-        return getItemCount(item) > 0;
+    public boolean hasItem(Item item) {
+        return itemChecker.hasItem(((SlotManager) slotManager).getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
     }
 
     public void setInfiniteResources(boolean infinite) {
-        this.infiniteResources = infinite;
+        resourceReplenisher.setInfiniteResources(infinite);
         if (infinite) {
-            replenishAllItems();
+            resourceReplenisher.replenishAllItems(((SlotManager) slotManager).getHotbarSlots());
         }
     }
 
     public boolean hasInfiniteResources() {
-        return infiniteResources;
-    }
-
-    private void replenishAllItems() {
-        for (int slot : hotbarSlots.keySet()) {
-            replenishItem(slot);
-        }
+        return resourceReplenisher.hasInfiniteResources();
     }
 
     public void tick() {
-        if (infiniteResources) {
-            replenishAllItems();
+        if (resourceReplenisher.hasInfiniteResources()) {
+            resourceReplenisher.replenishAllItems(((SlotManager) slotManager).getHotbarSlots());
         }
     }
 }
