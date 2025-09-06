@@ -100,6 +100,7 @@ public class BotCPVPController {
         myPlacedCrystals.removeIf(crystal -> !crystal.isAlive());
         crystalManager.cleanupCrystalCounts(crystalCountAtPosition, level);
         crystalManager.cleanupObsidianCache(obsidianCache);
+        crystalAttacker.updateBotPosition();
 
         long currentTime = System.currentTimeMillis();
 
@@ -238,7 +239,7 @@ public class BotCPVPController {
 
         if (attackPreparationTicks >= ATTACK_PREPARATION_TIME) {
             if (crystalAttacker.canAttackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
-                if (crystalAttacker.attackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
+                if (crystalAttacker.attackCrystal(pendingAttackCrystal)) {
                     attackCooldown = ATTACK_COOLDOWN_TICKS;
                     myPlacedCrystals.remove(pendingAttackCrystal);
                 }

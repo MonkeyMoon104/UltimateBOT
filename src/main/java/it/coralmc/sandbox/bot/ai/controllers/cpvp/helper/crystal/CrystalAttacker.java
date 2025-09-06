@@ -7,28 +7,32 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class CrystalAttacker {
-
     private final Player bot;
     private final Level level;
     private Vec3 cachedBotPosition;
-    private long lastBotPositionUpdate = 0;
-    private static final long POSITION_CACHE_MS = 50;
+    private boolean positionUpdatedThisTick = false;
 
     public CrystalAttacker(Player bot, Level level) {
         this.bot = bot;
         this.level = level;
     }
 
-    public boolean attackCrystal(EndCrystal crystal, double crystalAttackRange) {
+    public void updateBotPosition() {
+        cachedBotPosition = bot.position();
+        positionUpdatedThisTick = true;
+    }
+
+    public boolean attackCrystal(EndCrystal crystal) {
         if (crystal == null || !crystal.isAlive()) return false;
 
-        Vec3 botPos = getCachedBotPosition();
-        Vec3 crystalPos = crystal.position();
+        if (!positionUpdatedThisTick) {
+            cachedBotPosition = bot.position();
+        }
+        positionUpdatedThisTick = false;
 
-        double distanceSquared = botPos.distanceToSqr(crystalPos);
-        double rangeSquared = crystalAttackRange * crystalAttackRange;
-
-        if (distanceSquared > rangeSquared) return false;
+        if (!bot.hasLineOfSight(crystal)) {
+            return false;
+        }
 
         try {
             bot.attack(crystal);
@@ -40,15 +44,6 @@ public class CrystalAttacker {
         }
     }
 
-    private Vec3 getCachedBotPosition() {
-        long currentTime = System.currentTimeMillis();
-        if (cachedBotPosition == null || currentTime - lastBotPositionUpdate > POSITION_CACHE_MS) {
-            cachedBotPosition = bot.position();
-            lastBotPositionUpdate = currentTime;
-        }
-        return cachedBotPosition;
-    }
-
     public boolean canAttackCrystal(EndCrystal crystal, double crystalAttackRange) {
         if (crystal == null || !crystal.isAlive()) return false;
 
@@ -56,6 +51,13 @@ public class CrystalAttacker {
         double distanceSquared = botPos.distanceToSqr(crystal.position());
         double rangeSquared = crystalAttackRange * crystalAttackRange;
 
-        return distanceSquared <= rangeSquared;
+        return distanceSquared <= rangeSquared && bot.hasLineOfSight(crystal);
+    }
+
+    private Vec3 getCachedBotPosition() {
+        if (cachedBotPosition == null) {
+            cachedBotPosition = bot.position();
+        }
+        return cachedBotPosition;
     }
 }
