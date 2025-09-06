@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.attack.inter;
+package it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter;
 
 public interface ICooldownManager {
 

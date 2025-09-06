@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.attack;
+package it.coralmc.sandbox.bot.ai.controllers.attack.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.IAttackExecutor;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 

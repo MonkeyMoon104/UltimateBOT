@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.attack;
+package it.coralmc.sandbox.bot.ai.controllers.attack.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.ICooldownManager;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 
 import java.util.Random;
 

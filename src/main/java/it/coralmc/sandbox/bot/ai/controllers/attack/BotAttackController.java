@@ -1,10 +1,13 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.attack;
 
-import it.coralmc.sandbox.bot.ai.controllers.attack.*;
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.IAttackExecutor;
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.IAttackStrategy;
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.ICooldownManager;
-import it.coralmc.sandbox.bot.ai.controllers.attack.inter.IJumpAttackManager;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.AttackExecutor;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.AttackStrategy;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.CooldownManager;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.JumpAttackManager;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.ICooldownManager;
+import it.coralmc.sandbox.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.entity.player.Player;
 
 public class BotAttackController {
