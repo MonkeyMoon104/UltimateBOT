@@ -1,17 +1,14 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorPlacer;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorCharger;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorExploder;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorPositionFinder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
 
@@ -23,6 +20,11 @@ public class BotRAPVPController {
     private final BotRotationController rotation;
     private final BotCPVPController cpvp;
     private final BotEnderpearlController pearlController;
+
+    private final AnchorPlacer anchorPlacer;
+    private final AnchorCharger anchorCharger;
+    private final AnchorExploder anchorExploder;
+    private final AnchorPositionFinder positionFinder;
 
     private boolean enabled = false;
     private boolean anchorPlaced = false;
@@ -43,10 +45,14 @@ public class BotRAPVPController {
         this.cpvp = cpvp;
         this.pearlController = pearlController;
         this.level = bot.level();
+
+        this.anchorPlacer = new AnchorPlacer(bot, inventory, rotation, level);
+        this.anchorCharger = new AnchorCharger(bot, inventory, rotation, level);
+        this.anchorExploder = new AnchorExploder(bot, inventory, rotation, level);
+        this.positionFinder = new AnchorPositionFinder(bot, level);
     }
 
     public void enable(Player target) {
-
         this.enabled = true;
         this.anchorPlaced = false;
         this.isChargingAnchor = false;
@@ -61,7 +67,7 @@ public class BotRAPVPController {
         if (!enabled) return;
 
         if (!anchorPlaced) {
-            Optional<BlockPos> posOpt = findBestAnchorPos(currentTarget);
+            Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(currentTarget);
             if (posOpt.isEmpty()) return;
 
             anchorPos = posOpt.get();
@@ -71,9 +77,9 @@ public class BotRAPVPController {
                 return;
             }
 
-            rotation.lookAt(Vec3.atCenterOf(anchorPos));
+            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
 
-            if (placeAnchor(anchorPos)) {
+            if (anchorPlacer.placeAnchor(anchorPos)) {
                 anchorPlaced = true;
                 isChargingAnchor = true;
             }
@@ -93,9 +99,9 @@ public class BotRAPVPController {
                 return;
             }
 
-            rotation.lookAt(Vec3.atCenterOf(anchorPos));
+            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
 
-            if (chargeAnchor(anchorPos)) {
+            if (anchorCharger.chargeAnchor(anchorPos)) {
                 isChargingAnchor = false;
                 isWaitingExplosion = true;
             }
@@ -107,9 +113,9 @@ public class BotRAPVPController {
             if (state.getBlock() instanceof RespawnAnchorBlock) {
                 inventory.switchToEmptySlot();
 
-                rotation.lookAt(Vec3.atCenterOf(anchorPos));
+                rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
 
-                explodeAnchor(anchorPos);
+                anchorExploder.explodeAnchor(anchorPos);
             } else {
                 isWaitingExplosion = false;
 
@@ -124,193 +130,6 @@ public class BotRAPVPController {
         }
     }
 
-    private Optional<BlockPos> findBestAnchorPos(Player target) {
-        BlockPos targetPos = target.blockPosition();
-        BlockPos botPos = bot.blockPosition();
-        BlockPos best = null;
-        double bestDistance = Double.MAX_VALUE;
-
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    BlockPos check = targetPos.offset(dx, dy, dz);
-
-                    if (check.equals(botPos) || check.equals(botPos.below())) continue;
-
-                    BlockState state = level.getBlockState(check);
-                    BlockState below = level.getBlockState(check.below());
-
-                    if (state.canBeReplaced() && below.isSolid() && isReachable(check)) {
-                        double distToTarget = bot.position().distanceTo(Vec3.atCenterOf(check));
-                        if (distToTarget < bestDistance) {
-                            best = check;
-                            bestDistance = distToTarget;
-                        }
-                    }
-                }
-            }
-        }
-
-        return Optional.ofNullable(best);
-    }
-
-    private boolean placeAnchor(BlockPos pos) {
-        try {
-            if (!isReachable(pos)) return false;
-            if (!hasLineOfSight(pos)) {
-                return false;
-            }
-
-            ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || stack.getItem() != Items.RESPAWN_ANCHOR) return false;
-
-            Direction bestFace = findBestPlacementFace(pos);
-            if (bestFace == null) bestFace = Direction.UP;
-
-            BlockPos adjacentPos = pos.relative(bestFace.getOpposite());
-
-            BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5),
-                    bestFace,
-                    adjacentPos,
-                    false
-            );
-
-            stack.useOn(new net.minecraft.world.item.context.UseOnContext(bot, InteractionHand.MAIN_HAND, hitResult));
-            bot.swing(InteractionHand.MAIN_HAND);
-
-            inventory.onItemUsed(BotInventoryController.ANCHOR_SLOT);
-
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private boolean chargeAnchor(BlockPos anchorPos) {
-        try {
-
-            if (!hasLineOfSight(anchorPos)) {
-                return false;
-            }
-
-            ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || stack.getItem() != Items.GLOWSTONE) {
-                return false;
-            }
-
-            BlockState anchorState = bot.level().getBlockState(anchorPos);
-            if (!(anchorState.getBlock() instanceof RespawnAnchorBlock)) {
-                return false;
-            }
-
-            int currentCharges = anchorState.getValue(RespawnAnchorBlock.CHARGE);
-            if (currentCharges >= 4) {
-                return false;
-            }
-
-            BlockState newState = anchorState.setValue(RespawnAnchorBlock.CHARGE, 4);
-
-            bot.level().setBlock(anchorPos, newState, 3);
-
-            stack.shrink(1);
-
-            bot.level().playSound(null, anchorPos,
-                    net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
-                    net.minecraft.sounds.SoundSource.BLOCKS,
-                    1.0F, 1.0F);
-
-            bot.swing(InteractionHand.MAIN_HAND);
-
-            inventory.onItemUsed(BotInventoryController.GLOW_SLOT);
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    private void explodeAnchor(BlockPos anchorPos) {
-        try {
-            if (!hasLineOfSight(anchorPos)) {
-                return;
-            }
-
-            BlockState anchorState = bot.level().getBlockState(anchorPos);
-            if (!(anchorState.getBlock() instanceof RespawnAnchorBlock)) {
-                return;
-            }
-
-            int currentCharges = anchorState.getValue(RespawnAnchorBlock.CHARGE);
-            if (currentCharges == 0) {
-                return;
-            }
-
-
-            inventory.switchToEmptySlot();
-
-            BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(anchorPos),
-                    Direction.UP,
-                    anchorPos,
-                    false
-            );
-
-            try {
-                InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
-
-                bot.swing(InteractionHand.MAIN_HAND);
-
-
-                if (result.consumesAction()) {
-                    return;
-                }
-            } catch (Exception e) {
-            }
-
-            bot.level().removeBlock(anchorPos, false);
-
-            bot.level().explode(
-                    null,
-                    anchorPos.getX() + 0.5,
-                    anchorPos.getY() + 0.5,
-                    anchorPos.getZ() + 0.5,
-                    5.0F,
-                    net.minecraft.world.level.Level.ExplosionInteraction.BLOCK
-            );
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private Direction findBestPlacementFace(BlockPos targetPos) {
-        Vec3 botPos = bot.position();
-
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
-            BlockState adjacentState = bot.level().getBlockState(adjacentPos);
-
-            if (adjacentState.isSolid() && !adjacentState.isAir()) {
-                double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
-                if (distance <= 6.5) return direction;
-            }
-        }
-
-        for (Direction direction : new Direction[]{Direction.UP, Direction.DOWN}) {
-            BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
-            BlockState adjacentState = bot.level().getBlockState(adjacentPos);
-
-            if (adjacentState.isSolid() && !adjacentState.isAir()) {
-                double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
-                if (distance <= 6.5) return direction;
-            }
-        }
-
-        return null;
-    }
-
     public void disable() {
         this.enabled = false;
         this.anchorPlaced = false;
@@ -318,44 +137,6 @@ public class BotRAPVPController {
         this.isWaitingExplosion = false;
         this.anchorPos = null;
         this.currentTarget = null;
-    }
-
-    private boolean hasLineOfSight(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
-
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
-
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
-    }
-
-    private boolean isReachable(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
-
-        double distance = botEyes.distanceTo(targetPos);
-        if (distance > 12.0) return false;
-
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
-
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
     }
 
     public boolean isActive() {
