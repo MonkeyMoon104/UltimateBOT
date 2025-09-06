@@ -3,6 +3,7 @@ package it.coralmc.sandbox.bot.ai;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.*;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
+import it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter.IPearlStrategyCalculator;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.helper.MovementPattern;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
@@ -361,7 +362,7 @@ public class BotAI {
         boolean actionTaken = false;
 
         if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
-            enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.AGGRESSIVE_CLOSE);
+            enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.AGGRESSIVE_CLOSE);
             return true;
         }
 
@@ -418,14 +419,14 @@ public class BotAI {
 
         if (yDiff > 2.0) {
             if (enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
-                enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.REPOSITION_LOW);
+                enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.REPOSITION_LOW);
                 repositionTimer = 100;
                 return true;
             }
         }
 
         if (distance > 10.0 && enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
-            enderpearlController.tryUseEnderpearl(target, BotEnderpearlController.PearlStrategy.AGGRESSIVE_CLOSE);
+            enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.AGGRESSIVE_CLOSE);
             repositionTimer = 100;
             return true;
         }

@@ -1,0 +1,13 @@
+package it.coralmc.sandbox.bot.ai.controllers.enderpearl.inter;
+
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+
+public interface ITargetTracker {
+
+    void updateTargetTracking(Player target);
+
+    Vec3 getPredictedTargetMovement();
+
+    Vec3 getLastTargetPosition();
+}
