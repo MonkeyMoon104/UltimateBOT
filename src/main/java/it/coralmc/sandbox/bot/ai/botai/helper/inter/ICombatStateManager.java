@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.botai.inter;
+package it.coralmc.sandbox.bot.ai.botai.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 

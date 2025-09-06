@@ -3,6 +3,7 @@ package it.coralmc.sandbox.bot.ai;
 import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;
+import it.coralmc.sandbox.bot.ai.botai.BotAI;
 import it.coralmc.sandbox.bot.ai.fakeplayer.BotCraftPlayer;
 import it.coralmc.sandbox.bot.ai.handlers.BotAIController;
 import it.coralmc.sandbox.bot.ai.handlers.BotDeathHandler;
@@ -134,7 +135,7 @@ public class TrainingBot extends Player {
     public boolean isCombat() {
         return this.aiController.isCombat();
     }
-    public it.coralmc.sandbox.bot.ai.BotAI getBotAI() {
+    public BotAI getBotAI() {
         return this.aiController.getBotAI();
     }
     public boolean callSuperActuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
