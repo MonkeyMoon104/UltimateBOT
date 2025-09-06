@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.cpvp.obsidian;
+package it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

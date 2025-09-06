@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.*;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.MovementPattern;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

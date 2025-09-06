@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorPlacer;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorCharger;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.AnchorExploder;

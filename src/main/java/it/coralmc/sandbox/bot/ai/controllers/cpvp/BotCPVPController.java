@@ -1,12 +1,14 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.cpvp;
 
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.crystal.CrystalAttacker;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.crystal.CrystalManager;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.crystal.CrystalPlacer;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.crystal.CrystalPositionEvaluator;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.obsidian.ObsidianPlacer;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.obsidian.ObsidianPositionFinder;
-import it.coralmc.sandbox.bot.ai.controllers.cpvp.obsidian.ObsidianScanner;
+import it.coralmc.sandbox.bot.ai.controllers.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalAttacker;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalManager;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalPlacer;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalPositionEvaluator;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPlacer;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPositionFinder;
+import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
