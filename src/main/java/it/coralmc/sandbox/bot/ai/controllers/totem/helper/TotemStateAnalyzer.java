@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem;
+package it.coralmc.sandbox.bot.ai.controllers.totem.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemInventoryManager;
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemStateAnalyzer;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemStateAnalyzer;
 import net.minecraft.world.item.ItemStack;
 
 public class TotemStateAnalyzer implements ITotemStateAnalyzer {

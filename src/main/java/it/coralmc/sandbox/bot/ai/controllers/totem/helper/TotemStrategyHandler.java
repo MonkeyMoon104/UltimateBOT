@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem;
+package it.coralmc.sandbox.bot.ai.controllers.totem.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemInventoryManager;
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemStrategyHandler;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemStrategyHandler;
 import net.minecraft.world.entity.EquipmentSlot;
 
 public class TotemStrategyHandler implements ITotemStrategyHandler {

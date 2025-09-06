@@ -1,9 +1,9 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.totem;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
-import it.coralmc.sandbox.bot.ai.controllers.totem.*;
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.*;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.*;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.*;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem;
+package it.coralmc.sandbox.bot.ai.controllers.totem.helper;
 
 import it.coralmc.sandbox.bot.ai.TrainingBot;
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemUsageTracker;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
 
 public class TotemUsageTracker implements ITotemUsageTracker {
 

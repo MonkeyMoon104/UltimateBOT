@@ -1,8 +1,8 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem;
+package it.coralmc.sandbox.bot.ai.controllers.totem.helper;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
-import it.coralmc.sandbox.bot.ai.controllers.totem.interf.ITotemNotificationManager;
+import it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf.ITotemNotificationManager;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 
 public class TotemNotificationManager implements ITotemNotificationManager {

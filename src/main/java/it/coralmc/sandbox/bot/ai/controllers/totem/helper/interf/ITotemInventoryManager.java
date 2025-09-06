@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.totem.interf;
+package it.coralmc.sandbox.bot.ai.controllers.totem.helper.interf;
 
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
