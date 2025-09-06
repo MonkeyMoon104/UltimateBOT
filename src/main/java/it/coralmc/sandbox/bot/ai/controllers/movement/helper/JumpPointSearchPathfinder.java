@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.movement.interf.IBlockStateValidator;
-import it.coralmc.sandbox.bot.ai.controllers.movement.interf.IPathfinder;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf.IPathfinder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;

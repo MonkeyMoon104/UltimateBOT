@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper;
 
 public enum MovementPattern {
     DIRECT,

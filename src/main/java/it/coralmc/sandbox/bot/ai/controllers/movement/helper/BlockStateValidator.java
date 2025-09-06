@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.movement.interf.IBlockStateValidator;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;

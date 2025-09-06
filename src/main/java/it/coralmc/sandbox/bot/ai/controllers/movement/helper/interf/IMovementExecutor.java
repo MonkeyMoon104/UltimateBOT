@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement.interf;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;

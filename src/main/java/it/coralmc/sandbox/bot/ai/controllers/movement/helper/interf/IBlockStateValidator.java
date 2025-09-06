@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement.interf;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf;
 
 import net.minecraft.core.BlockPos;
 

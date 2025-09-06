@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper;
 
-import it.coralmc.sandbox.bot.ai.controllers.movement.interf.ICombatStateManager;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf.ICombatStateManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 

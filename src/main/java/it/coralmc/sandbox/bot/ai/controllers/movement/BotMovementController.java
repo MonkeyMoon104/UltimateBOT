@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.controllers;
+package it.coralmc.sandbox.bot.ai.controllers.movement;
 
-import it.coralmc.sandbox.bot.ai.controllers.movement.*;
-import it.coralmc.sandbox.bot.ai.controllers.movement.interf.*;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.*;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;

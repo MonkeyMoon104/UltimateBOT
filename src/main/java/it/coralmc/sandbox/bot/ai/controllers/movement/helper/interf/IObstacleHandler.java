@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.movement.interf;
+package it.coralmc.sandbox.bot.ai.controllers.movement.helper.interf;
 
 public interface IObstacleHandler {
     boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ);
