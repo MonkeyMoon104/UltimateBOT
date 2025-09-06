@@ -1,0 +1,12 @@
+package it.coralmc.sandbox.bot.ai.controllers.movement.interf;
+
+import net.minecraft.world.phys.Vec3;
+
+public interface IPathfinder {
+    boolean calculatePathTo(Vec3 targetPos);
+    boolean followPath();
+    boolean hasActivePath();
+    void clearPath();
+    boolean shouldRecalculatePath();
+    Vec3 getCurrentPathPoint();
+}

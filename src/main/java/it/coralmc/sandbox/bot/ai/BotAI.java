@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.*;
+import it.coralmc.sandbox.bot.ai.controllers.movement.MovementPattern;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -463,7 +464,7 @@ public class BotAI {
     }
 
     private boolean executeCrystalSetup(Player target, double distance) {
-        movementController.forceMovementPattern(BotMovementController.MovementPattern.CRYSTAL_SPAM);
+        movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
         movementController.moveToTarget(target, 5.0);
 
         if (cpvpController.canPlaceCrystal()) {
