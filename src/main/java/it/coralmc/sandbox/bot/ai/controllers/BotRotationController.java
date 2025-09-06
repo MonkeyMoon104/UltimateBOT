@@ -1,55 +1,34 @@
 package it.coralmc.sandbox.bot.ai.controllers;
 
+import it.coralmc.sandbox.bot.ai.controllers.rotation.*;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IAngleNormalizer;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationApplier;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationCalculator;
+import it.coralmc.sandbox.bot.ai.controllers.rotation.inter.IRotationGetter;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public class BotRotationController {
 
-    private static final float MAX_PITCH = 90f;
-    private static final float MIN_PITCH = -90f;
     private final Player bot;
+
+    private final IRotationCalculator rotationCalculator;
+    private final IAngleNormalizer angleNormalizer;
+    private final IRotationApplier rotationApplier;
+    private final IRotationGetter rotationGetter;
 
     public BotRotationController(Player bot) {
         this.bot = bot;
+
+        this.rotationCalculator = new RotationCalculator();
+        this.angleNormalizer = new AngleNormalizer();
+        this.rotationApplier = new RotationApplier(angleNormalizer);
+        this.rotationGetter = new RotationGetter();
     }
 
     public void updateRotation(Player target) {
-        double dx = target.getX() - bot.getX();
-        double dy = target.getEyeY() - bot.getEyeY();
-        double dz = target.getZ() - bot.getZ();
-
-        double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
-
-        float targetYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-        float targetPitch = 0f;
-
-        if (horizontalDistance > 0) {
-            targetPitch = (float) -Math.toDegrees(Math.atan2(dy, horizontalDistance));
-            targetPitch = Math.max(MIN_PITCH, Math.min(MAX_PITCH, targetPitch));
-        }
-
-        setInstantRotation(targetYaw, targetPitch);
-    }
-
-    private void setInstantRotation(float yaw, float pitch) {
-        yaw = normalizeAngle(yaw);
-
-        pitch = Math.max(MIN_PITCH, Math.min(MAX_PITCH, pitch));
-
-        bot.setYRot(yaw);
-        bot.yHeadRot = yaw;
-        bot.yBodyRot = yaw;
-        bot.setXRot(pitch);
-    }
-
-    private float normalizeAngle(float angle) {
-        angle = angle % 360;
-        if (angle > 180) {
-            angle -= 360;
-        } else if (angle < -180) {
-            angle += 360;
-        }
-        return angle;
+        float[] rotation = rotationCalculator.calculateRotationToTarget(bot, target);
+        rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }
 
     public void setInstantRotation(Player target) {
@@ -57,40 +36,28 @@ public class BotRotationController {
     }
 
     public float getCurrentYaw() {
-        return bot.getYRot();
+        return rotationGetter.getCurrentYaw(bot);
     }
 
     public float getCurrentPitch() {
-        return bot.getXRot();
+        return rotationGetter.getCurrentPitch(bot);
     }
 
     public void setRotation(float yaw, float pitch) {
-        setInstantRotation(yaw, pitch);
+        rotationApplier.applyRotation(bot, yaw, pitch);
     }
 
     public void lookAt(double x, double y, double z) {
-        double dx = x - bot.getX();
-        double dy = y - bot.getEyeY();
-        double dz = z - bot.getZ();
-
-        double horizontalDistance = Math.sqrt(dx * dx + dz * dz);
-
-        float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-        float pitch = 0f;
-
-        if (horizontalDistance > 0) {
-            pitch = (float) -Math.toDegrees(Math.atan2(dy, horizontalDistance));
-        }
-
-        setInstantRotation(yaw, pitch);
+        float[] rotation = rotationCalculator.calculateRotationToPosition(bot, x, y, z);
+        rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }
 
     public void lookAt(Vec3 targetPos) {
-        lookAt(targetPos.x, targetPos.y, targetPos.z);
+        float[] rotation = rotationCalculator.calculateRotationToPosition(bot, targetPos);
+        rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }
 
-
     public void resetRotation() {
-        setInstantRotation(0f, 0f);
+        rotationApplier.resetRotation(bot);
     }
 }
