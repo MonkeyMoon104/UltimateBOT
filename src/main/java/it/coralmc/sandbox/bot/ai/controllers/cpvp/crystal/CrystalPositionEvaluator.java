@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.cpvp;
+package it.coralmc.sandbox.bot.ai.controllers.cpvp.crystal;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
