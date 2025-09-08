@@ -11,7 +11,7 @@ import java.util.Map;
 public class ObsidianScanner {
 
     private final Level level;
-    private static final long OBSIDIAN_CACHE_MS = 7000;
+    private static final long OBSIDIAN_CACHE_MS = 6000;
 
     public ObsidianScanner(Level level) {
         this.level = level;

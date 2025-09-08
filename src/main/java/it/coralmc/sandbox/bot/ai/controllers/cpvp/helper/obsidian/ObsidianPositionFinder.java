@@ -86,7 +86,7 @@ public class ObsidianPositionFinder {
         double distanceToTarget = target.position().distanceTo(Vec3.atCenterOf(pos.above()));
 
         double maxCrystalDistance = 8.0;
-        return distanceToBot <= 6.5 && distanceToTarget <= maxCrystalDistance;
+        return distanceToBot <= 8.5 && distanceToTarget <= maxCrystalDistance;
     }
 
     private double calculatePositionScore(BlockPos pos, Player target) {
@@ -100,8 +100,8 @@ public class ObsidianPositionFinder {
         int targetY = target.blockPosition().getY();
 
         double score = 0;
-        double optimalDamageRange = 6.0;
-        double minCrystalDistance = 2.5;
+        double optimalDamageRange = 5.0;
+        double minCrystalDistance = 2.0;
 
         Vec3 crystalPos = Vec3.atCenterOf(pos.above());
         double distanceToTarget = targetPos.distanceTo(crystalPos);
@@ -112,9 +112,9 @@ public class ObsidianPositionFinder {
         }
 
         if (distanceToBot > minCrystalDistance) {
-            if (distanceToBot > 6.0) score -= (distanceToBot - 6.0) * 20;
+            if (distanceToBot > 8.0) score -= (distanceToBot - 8.0) * 10;
         } else {
-            score -= 150;
+            score -= 60;
         }
 
         int yDiff = pos.getY() - targetY;
