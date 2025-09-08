@@ -37,7 +37,7 @@ public class CrystalPositionEvaluator {
         double distanceToBot = crystalCenter.distanceTo(botPos);
 
         if (distanceToBot < minCrystalDistance) {
-            return -1000.0;
+            return -200;
         }
 
         double score = 0;
@@ -45,15 +45,15 @@ public class CrystalPositionEvaluator {
         double targetDamage = getCachedDamage(distanceToTarget);
         double botDamage = getCachedDamage(distanceToBot);
 
-        score += targetDamage * 45;
-        score -= botDamage * 70;
+        score += targetDamage * 55;
+        score -= botDamage * 40;
 
         if (distanceToTarget <= optimalDamageRange) {
             score += (optimalDamageRange - distanceToTarget) * 25;
         }
 
-        if (distanceToBot < 4.0) {
-            score -= (4.0 - distanceToBot) * 50;
+        if (distanceToBot < 3.5) {
+            score -= (3.5 - distanceToBot) * 25;
         }
 
         int yDiff = crystalPos.getY() - target.blockPosition().getY();
@@ -98,7 +98,7 @@ public class CrystalPositionEvaluator {
         double distanceToBot = bot.position().distanceTo(crystalPos);
 
         if (distanceToBot > crystalAttackRange) return -1;
-        if (distanceToBot < minCrystalDistance) return -1;
+        if (distanceToBot < minCrystalDistance - 0.5) return -0.5;
 
         double score = 0;
 
