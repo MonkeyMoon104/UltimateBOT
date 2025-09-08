@@ -51,7 +51,7 @@ public class BotCPVPController {
 
     private final Set<EndCrystal> myPlacedCrystals = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Map<BlockPos, Long> obsidianCache = new ConcurrentHashMap<>();
-    private static final long OBSIDIAN_CACHE_MS = 7000;
+    private static final long OBSIDIAN_CACHE_MS = 6000;
 
     private final Map<BlockPos, Integer> crystalCountAtPosition = new ConcurrentHashMap<>();
     private static final int MAX_CRYSTALS_PER_POSITION = 3;
