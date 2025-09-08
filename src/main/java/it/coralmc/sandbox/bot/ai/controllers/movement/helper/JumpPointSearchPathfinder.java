@@ -235,21 +235,41 @@ public class JumpPointSearchPathfinder implements IPathfinder {
     }
 
     private BlockPos findJumpPoint(BlockPos current, Direction direction, BlockPos target, Set<BlockPos> closedSet) {
-        BlockPos next = current.relative(direction);
+        BlockPos searchPos = current;
+        int iterations = 0;
+        final int MAX_ITERATIONS = 50;
 
-        if (!blockValidator.isPositionPassableCached(next)) {
-            return null;
+        while (iterations < MAX_ITERATIONS) {
+            searchPos = searchPos.relative(direction);
+            iterations++;
+
+            if (Math.abs(searchPos.getX()) > 30000000 || Math.abs(searchPos.getZ()) > 30000000 ||
+                    searchPos.getY() < -64 || searchPos.getY() > 320) {
+                return null;
+            }
+
+            if (!blockValidator.isPositionPassableCached(searchPos)) {
+                return null;
+            }
+
+            if (closedSet.contains(searchPos)) {
+                return null;
+            }
+
+            if (searchPos.distSqr(target) < 9) {
+                return searchPos;
+            }
+
+            if (hasForcedNeighbor(searchPos, direction, closedSet)) {
+                return searchPos;
+            }
+
+            if (current.distSqr(searchPos) > 100 * 100) {
+                return null;
+            }
         }
 
-        if (next.distSqr(target) < 9) {
-            return next;
-        }
-
-        if (hasForcedNeighbor(next, direction, closedSet)) {
-            return next;
-        }
-
-        return findJumpPoint(next, direction, target, closedSet);
+        return null;
     }
 
     private boolean isDirectPathClear(Vec3 start, Vec3 end) {
