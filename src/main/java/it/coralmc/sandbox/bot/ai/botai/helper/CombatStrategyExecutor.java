@@ -54,6 +54,10 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public void executeCombatStrategy(Player target) {
+        if (!((TrainingBot) bot).isCombat()) {
+            basicFollowBehavior(target);
+            return;
+        }
         double distance = bot.distanceTo(target);
 
         boolean actionExecuted = false;
@@ -84,8 +88,13 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeAggressive(Player target, double distance) {
-        double targetDistance = 2.5;
         boolean actionTaken = false;
+
+        if (distance <= 3.5 && ((TrainingBot) bot).isCombat() && ((TrainingBot) bot).isFollow()) {
+            attackController.handleAttack(target);
+            actionTaken = true;
+        }
+        double targetDistance = 2.5;
 
         if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
             enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.AGGRESSIVE_CLOSE);
@@ -116,6 +125,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeDefensive(Player target, double distance) {
+        if (!((TrainingBot) bot).isCombat()) return false;
         boolean actionTaken = false;
 
         if (enderpearlController.wasRecentlyDamaged() || combatDataManager.getConsecutiveDamageCount() >= 2) {
@@ -138,6 +148,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeRepositioning(Player target, double distance) {
+        if (!((TrainingBot) bot).isCombat()) return false;
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
 
@@ -179,6 +190,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeAnchorSetup(Player target, double distance) {
+        if (!((TrainingBot) bot).isCombat()) return false;
         if (!rapvpController.isActive()) {
             rapvpController.enable(target);
         }
@@ -195,6 +207,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeCrystalSetup(Player target, double distance) {
+        if (!((TrainingBot) bot).isCombat()) return false;
         movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
         movementController.moveToTarget(target, 5.0);
 
@@ -213,6 +226,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeRetreating(Player target, double distance) {
+        if (!((TrainingBot) bot).isCombat()) return false;
         boolean actionTaken = false;
 
         if (enderpearlController.canUseEnderpearl()) {
@@ -253,18 +267,10 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public void basicFollowBehavior(Player target) {
-        double distance = bot.distanceTo(target);
         double targetDistance = 2.0;
 
         moveToTarget(target, targetDistance);
         rotationController.updateRotation(target);
-
-        if (distance <= 3.0 && ((TrainingBot) bot).isFollow()) {
-            if (!inventoryController.isHoldingSword()) {
-                inventoryController.switchToSword();
-            }
-            attackController.handleAttack(target);
-        }
     }
 
     public void updateAggressionCooldown(int value) {

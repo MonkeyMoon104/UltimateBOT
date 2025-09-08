@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.botai.helper;
 
+import it.coralmc.sandbox.bot.ai.TrainingBot;
 import it.coralmc.sandbox.bot.ai.botai.helper.inter.ICombatDataManager;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
@@ -54,8 +55,10 @@ public class CombatDataManager implements ICombatDataManager {
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
 
-        rapvpController.tick();
-        cpvpController.tick(target);
+        if (((TrainingBot) bot).isCombat()) {
+            rapvpController.tick();
+            cpvpController.tick(target);
+        }
     }
 
     @Override
