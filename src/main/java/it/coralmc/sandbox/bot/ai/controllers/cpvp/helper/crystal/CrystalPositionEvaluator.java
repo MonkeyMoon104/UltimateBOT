@@ -12,6 +12,15 @@ public class CrystalPositionEvaluator {
 
     private final Player bot;
 
+    private static final double[] DAMAGE_CACHE = new double[200];
+
+    static {
+        for (int i = 0; i < DAMAGE_CACHE.length; i++) {
+            double distance = i * 0.1;
+            DAMAGE_CACHE[i] = calculateDamageForDistance(distance);
+        }
+    }
+
     public CrystalPositionEvaluator(Player bot) {
         this.bot = bot;
     }
@@ -33,31 +42,47 @@ public class CrystalPositionEvaluator {
 
         double score = 0;
 
-        double targetDamage = calculatePredictedDamage(distanceToTarget);
-        double botDamage = calculatePredictedDamage(distanceToBot);
+        double targetDamage = getCachedDamage(distanceToTarget);
+        double botDamage = getCachedDamage(distanceToBot);
 
-        score += targetDamage * 40;
-        score -= botDamage * 60;
+        score += targetDamage * 45;
+        score -= botDamage * 70;
 
         if (distanceToTarget <= optimalDamageRange) {
-            score += (optimalDamageRange - distanceToTarget) * 20;
+            score += (optimalDamageRange - distanceToTarget) * 25;
         }
 
         if (distanceToBot < 4.0) {
-            score -= (4.0 - distanceToBot) * 40;
+            score -= (4.0 - distanceToBot) * 50;
         }
 
         int yDiff = crystalPos.getY() - target.blockPosition().getY();
-        if (yDiff == -1) score += 35;
-        else if (yDiff == 0) score += 25;
-        else if (yDiff < -1) score += Math.abs(yDiff) * 12;
+
+        if (yDiff == -2) score += 80;
+        else if (yDiff == -1) score += 100;
+        else if (yDiff == 0) score += 50;
+        else if (yDiff == 1) score += 15;
+        else if (yDiff < -2) {
+            score += 70 + Math.min(Math.abs(yDiff) * 15, 60);
+        } else {
+            score -= Math.abs(yDiff) * 40;
+        }
 
         int existingCount = crystalCountAtPosition.getOrDefault(crystalPos, 0);
         if (existingCount > 0 && distanceToBot > 4.0) {
-            score += existingCount * 15;
+            score += existingCount * 20;
         }
+
         if (yDiff < 0) {
-            score += Math.abs(yDiff) * 50;
+            double heightBonus = Math.abs(yDiff) * 30;
+            if (yDiff >= -3 && yDiff <= -1) {
+                heightBonus *= 1.5;
+            }
+            score += heightBonus;
+        }
+
+        if (!target.onGround() && yDiff < 0) {
+            score += 40;
         }
 
         return score;
@@ -82,22 +107,40 @@ public class CrystalPositionEvaluator {
         }
 
         if (myPlacedCrystals.contains(crystal)) {
-            score += 0.4;
+            score += 0.5;
         }
 
         if (distanceToTarget <= 3.0) {
+            score += 0.4;
+        }
+
+        double targetY = target.position().y;
+        double crystalY = crystalPos.y;
+        double yDiff = crystalY - targetY;
+
+        if (yDiff < -0.5) {
             score += 0.3;
+        }
+        if (yDiff < -1.5) {
+            score += 0.2;
         }
 
         return score;
     }
 
-    private double calculatePredictedDamage(double distance) {
+    private double getCachedDamage(double distance) {
+        if (distance > 20.0) return 0.0;
+
+        int index = (int) Math.min(distance * 10, DAMAGE_CACHE.length - 1);
+        return DAMAGE_CACHE[index];
+    }
+
+    private static double calculateDamageForDistance(double distance) {
         if (distance > 12.0) return 0.0;
 
         double maxDamage = 14.0;
         double falloff = Math.max(0.0, 1.0 - (distance / 12.0));
 
-        return maxDamage * falloff * falloff;
+        return maxDamage * falloff * falloff * falloff;
     }
 }

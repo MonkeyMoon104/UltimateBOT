@@ -14,6 +14,10 @@ public class ObsidianPositionFinder {
     private final Player bot;
     private final Level level;
 
+    private final Map<BlockPos, Double> scoreCache = new HashMap<>();
+    private long lastCacheReset = 0;
+    private static final long CACHE_RESET_INTERVAL_MS = 2000;
+
     public ObsidianPositionFinder(Player bot, Level level) {
         this.bot = bot;
         this.level = level;
@@ -28,11 +32,16 @@ public class ObsidianPositionFinder {
 
         long currentTime = System.currentTimeMillis();
 
+        if (currentTime - lastCacheReset > CACHE_RESET_INTERVAL_MS) {
+            scoreCache.clear();
+            lastCacheReset = currentTime;
+        }
+
         if (currentTime - lastPositionCache > positionCacheMs) {
             cachedValidPositions.clear();
             BlockPos targetBlockPos = target.blockPosition();
 
-            for (int y = -4; y <= 3; y++) {
+            for (int y = -5; y <= 3; y++) {
                 for (int x = -7; x <= 7; x++) {
                     for (int z = -7; z <= 7; z++) {
                         BlockPos checkPos = targetBlockPos.offset(x, y, z);
@@ -81,6 +90,11 @@ public class ObsidianPositionFinder {
     }
 
     private double calculatePositionScore(BlockPos pos, Player target) {
+        Double cachedScore = scoreCache.get(pos);
+        if (cachedScore != null) {
+            return cachedScore;
+        }
+
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
         int targetY = target.blockPosition().getY();
@@ -94,27 +108,37 @@ public class ObsidianPositionFinder {
         double distanceToBot = botPos.distanceTo(crystalPos);
 
         if (distanceToTarget <= optimalDamageRange) {
-            score += (optimalDamageRange - distanceToTarget) * 30;
+            score += (optimalDamageRange - distanceToTarget) * 35;
         }
 
         if (distanceToBot > minCrystalDistance) {
             if (distanceToBot > 6.0) score -= (distanceToBot - 6.0) * 20;
         } else {
-            score -= 100;
+            score -= 150;
         }
 
         int yDiff = pos.getY() - targetY;
-        if (yDiff < -1) score += Math.abs(yDiff) * 40;
-        else if (yDiff == -1) score += 80;
-        else if (yDiff == 0) score += 60;
-        else if (yDiff == 1) score += 20;
-        else score -= Math.abs(yDiff) * 25;
+
+        if (yDiff == -2) score += 120;
+        else if (yDiff == -1) score += 100;
+        else if (yDiff == 0) score += 70;
+        else if (yDiff == 1) score += 30;
+        else if (yDiff < -2) score += 90 + Math.abs(yDiff) * 10;
+        else score -= Math.abs(yDiff) * 35;
 
         if (hasNearbySupport(pos)) score += 25;
 
-        if (!target.onGround() && yDiff >= 0) score += 30;
-        if (target.onGround() && yDiff < 0) score += 40;
+        if (!target.onGround()) {
+            if (yDiff < 0) score += 50;
+        } else {
+            if (yDiff == -1) score += 60;
+        }
 
+        if (distanceToTarget >= 2.0 && distanceToTarget <= 4.0) {
+            score += 40;
+        }
+
+        scoreCache.put(pos, score);
         return score;
     }
 
