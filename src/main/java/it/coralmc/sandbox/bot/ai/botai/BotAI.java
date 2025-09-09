@@ -51,20 +51,59 @@ public class BotAI {
         this.bot = bot;
         this.level = bot.level();
 
-        this.movementController = new BotMovementController(bot, level);
+        this.movementController = new BotMovementController(
+                bot,
+                level
+        );
         this.rotationController = new BotRotationController(bot);
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
-        this.enderpearlController = new BotEnderpearlController(bot, inventoryController, rotationController);
-        this.cpvpController = new BotCPVPController(bot, inventoryController, rotationController);
-        this.rapvpController = new BotRAPVPController(bot, inventoryController, rotationController, cpvpController, enderpearlController);
+        this.enderpearlController = new BotEnderpearlController(
+                bot,
+                inventoryController,
+                rotationController
+        );
+        this.cpvpController = new BotCPVPController(
+                bot,
+                inventoryController,
+                rotationController
+        );
+        this.rapvpController = new BotRAPVPController(
+                bot,
+                inventoryController,
+                rotationController,
+                cpvpController,
+                enderpearlController
+        );
 
-        this.combatControllerManager = new CombatControllerManager(bot, rapvpController, cpvpController);
-        this.combatStateManager = new CombatStateManager(bot, inventoryController, cpvpController, rapvpController, combatControllerManager);
-        this.combatDataManager = new CombatDataManager(bot, enderpearlController, rapvpController, cpvpController);
-        this.pathfindingManager = new PathfindingManager(bot, level, movementController, enderpearlController, combatStateManager);
-        this.combatStrategyExecutor = new CombatStrategyExecutor(bot,
+        this.combatControllerManager = new CombatControllerManager(
+                bot,
+                rapvpController,
+                cpvpController
+        );
+        this.combatStateManager = new CombatStateManager(
+                bot,
+                inventoryController,
+                cpvpController,
+                rapvpController,
+                combatControllerManager
+        );
+        this.combatDataManager = new CombatDataManager(
+                bot,
+                enderpearlController,
+                rapvpController,
+                cpvpController
+        );
+        this.pathfindingManager = new PathfindingManager(
+                bot,
+                level,
+                movementController,
+                enderpearlController,
+                combatStateManager
+        );
+        this.combatStrategyExecutor = new CombatStrategyExecutor(
+                bot,
                 movementController,
                 rotationController,
                 attackController,
