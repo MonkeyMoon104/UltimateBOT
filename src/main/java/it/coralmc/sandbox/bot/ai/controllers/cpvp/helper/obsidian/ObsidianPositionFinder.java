@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
@@ -68,16 +67,11 @@ public class ObsidianPositionFinder {
     private void cleanupRecentPlacements(Map<BlockPos, Long> recentPlacements) {
         long currentTime = System.currentTimeMillis();
         long positionCooldownMs = 1500;
-        recentPlacements.entrySet().removeIf(entry ->
-                currentTime - entry.getValue() > positionCooldownMs);
+        recentPlacements.entrySet().removeIf(entry -> currentTime - entry.getValue() > positionCooldownMs);
     }
 
     private boolean isValidObsidianPosition(BlockPos pos, Player target) {
-        BlockState currentState = level.getBlockState(pos);
-        if (!currentState.canBeReplaced()) return false;
-
-        BlockState below = level.getBlockState(pos.below());
-        if (!below.isSolid()) return false;
+        if (!level.getBlockState(pos.below()).isSolid()) return false;
 
         if (!level.getBlockState(pos.above()).isAir() || !level.getBlockState(pos.above(2)).isAir())
             return false;
@@ -85,68 +79,12 @@ public class ObsidianPositionFinder {
         double distanceToBot = bot.position().distanceTo(Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(Vec3.atCenterOf(pos.above()));
 
-        double maxCrystalDistance = 8.0;
-        return distanceToBot <= 8.5 && distanceToTarget <= maxCrystalDistance;
+        return distanceToBot <= 10.0 && distanceToTarget <= 10.0;
     }
 
     private double calculatePositionScore(BlockPos pos, Player target) {
-        Double cachedScore = scoreCache.get(pos);
-        if (cachedScore != null) {
-            return cachedScore;
-        }
-
-        Vec3 targetPos = target.position();
-        Vec3 botPos = bot.position();
-        int targetY = target.blockPosition().getY();
-
-        double score = 0;
-        double optimalDamageRange = 5.0;
-        double minCrystalDistance = 2.0;
-
         Vec3 crystalPos = Vec3.atCenterOf(pos.above());
-        double distanceToTarget = targetPos.distanceTo(crystalPos);
-        double distanceToBot = botPos.distanceTo(crystalPos);
-
-        if (distanceToTarget <= optimalDamageRange) {
-            score += (optimalDamageRange - distanceToTarget) * 35;
-        }
-
-        if (distanceToBot > minCrystalDistance) {
-            if (distanceToBot > 8.0) score -= (distanceToBot - 8.0) * 10;
-        } else {
-            score -= 60;
-        }
-
-        int yDiff = pos.getY() - targetY;
-
-        if (yDiff == -2) score += 120;
-        else if (yDiff == -1) score += 100;
-        else if (yDiff == 0) score += 70;
-        else if (yDiff == 1) score += 30;
-        else if (yDiff < -2) score += 90 + Math.abs(yDiff) * 10;
-        else score -= Math.abs(yDiff) * 35;
-
-        if (hasNearbySupport(pos)) score += 25;
-
-        if (!target.onGround()) {
-            if (yDiff < 0) score += 50;
-        } else {
-            if (yDiff == -1) score += 60;
-        }
-
-        if (distanceToTarget >= 2.0 && distanceToTarget <= 4.0) {
-            score += 40;
-        }
-
-        scoreCache.put(pos, score);
-        return score;
-    }
-
-    private boolean hasNearbySupport(BlockPos pos) {
-        for (Direction dir : Direction.Plane.HORIZONTAL) {
-            BlockPos checkPos = pos.relative(dir);
-            if (level.getBlockState(checkPos).isSolid()) return true;
-        }
-        return false;
+        double distanceToTarget = target.position().distanceTo(crystalPos);
+        return Math.max(0, 15 - distanceToTarget);
     }
 }
