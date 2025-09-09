@@ -49,7 +49,11 @@ public class CombatStateManager implements ICombatStateManager {
             newState = CombatState.DEFENSIVE;
         }
         else if (Math.abs(yDiff) <= 3.0 && shouldAttemptAnchor(target, currentTime)) {
-            newState = CombatState.ANCHOR_SETUP;
+            if (isNearBedrock(bot)) {
+                newState = CombatState.CRYSTAL_SETUP;
+            } else {
+                newState = CombatState.ANCHOR_SETUP;
+            }
         }
         else if (yDiff < -1.0 && cpvpController.canPlaceCrystal()) {
             newState = CombatState.CRYSTAL_SETUP;
@@ -118,4 +122,26 @@ public class CombatStateManager implements ICombatStateManager {
         this.consecutiveDamageCount = consecutiveDamageCount;
         this.lastDamageTime = lastDamageTime;
     }
+
+    private boolean isNearBedrock(Player bot) {
+        net.minecraft.core.BlockPos botPos = bot.blockPosition();
+        int y = botPos.getY();
+
+        net.minecraft.core.BlockPos[] positionsToCheck = new net.minecraft.core.BlockPos[]{
+                botPos.below(),
+                botPos.north(),
+                botPos.south(),
+                botPos.east(),
+                botPos.west()
+        };
+
+        for (net.minecraft.core.BlockPos pos : positionsToCheck) {
+            if (bot.level().getBlockState(pos).getBlock() == net.minecraft.world.level.block.Blocks.BEDROCK) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

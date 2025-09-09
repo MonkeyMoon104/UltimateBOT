@@ -97,7 +97,6 @@ public class BotAI {
         } else {
             pathfindingManager.checkForStuck(target);
 
-            inventoryController.tick();
             enderpearlController.tick();
 
             if (((TrainingBot) bot).isCombat()) {

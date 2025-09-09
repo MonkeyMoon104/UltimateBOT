@@ -14,6 +14,7 @@ import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -114,9 +115,14 @@ public class BotCPVPController {
         handleAttackPreparation();
 
         if (!isPreparingObsidian && !isPreparingCrystal && !isPreparingAttack) {
-            tryPlaceObsidianForCrystal(target);
-            tryPlaceOptimalCrystals(target);
-            tryAttackOptimalCrystal(target);
+            if (isNearBedrockForCrystalPriority(target)) {
+                tryPlaceOptimalCrystals(target);
+                tryAttackOptimalCrystal(target);
+            } else {
+                tryPlaceObsidianForCrystal(target);
+                tryPlaceOptimalCrystals(target);
+                tryAttackOptimalCrystal(target);
+            }
         }
     }
 
@@ -360,5 +366,20 @@ public class BotCPVPController {
         List<BlockPos> bestPositions = obsidianPositionFinder.findBestObsidianPositions(target, 1, recentPlacements, cachedValidPositions, lastPositionCache, POSITION_CACHE_MS);
         if (bestPositions.isEmpty()) return Optional.empty();
         return Optional.of(bestPositions.get(0));
+    }
+
+    private boolean isNearBedrockForCrystalPriority(Player target) {
+        BlockPos botPos = bot.blockPosition();
+        int y = botPos.getY();
+
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                BlockPos checkPos = new BlockPos(botPos.getX() + x, y, botPos.getZ() + z);
+                if (bot.level().getBlockState(checkPos).getBlock() == Blocks.BEDROCK) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
