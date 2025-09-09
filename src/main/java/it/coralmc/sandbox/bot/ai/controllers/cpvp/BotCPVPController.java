@@ -42,7 +42,7 @@ public class BotCPVPController {
     private static final int CRYSTAL_PLACE_COOLDOWN_TICKS = 5;
     private static final int ATTACK_COOLDOWN_TICKS = 3;
 
-    private static final double MAX_CRYSTAL_DISTANCE = 8.0;
+    private static final double MAX_CRYSTAL_DISTANCE = 10.0;
     private static final double MIN_CRYSTAL_DISTANCE = 2.5;
     private static final double CRYSTAL_ATTACK_RANGE = 8.0;
     private static final double OPTIMAL_DAMAGE_RANGE = 6.0;
@@ -55,7 +55,7 @@ public class BotCPVPController {
     private static final long OBSIDIAN_CACHE_MS = 6000;
 
     private final Map<BlockPos, Integer> crystalCountAtPosition = new ConcurrentHashMap<>();
-    private static final int MAX_CRYSTALS_PER_POSITION = 3;
+    private static final int MAX_CRYSTALS_PER_POSITION = 7;
 
     private long lastFullScan = 0;
     private static final long FULL_SCAN_INTERVAL_MS = 500;
