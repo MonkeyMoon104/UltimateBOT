@@ -15,6 +15,7 @@ import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.teleport.BotTeleportController;
 import it.coralmc.sandbox.bot.ai.controllers.totem.BotTotemController;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -42,6 +43,7 @@ public class BotAI {
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
     private final BotHealController healController;
+    private final BotTeleportController teleportController;
     private final ICombatStateManager combatStateManager;
     private final ICombatDataManager combatDataManager;
     private final IPathfindingManager pathfindingManager;
@@ -63,6 +65,7 @@ public class BotAI {
                 bot,
                 inventoryController
         );
+        this.teleportController = new BotTeleportController(bot);
         this.enderpearlController = new BotEnderpearlController(
                 bot,
                 inventoryController,
@@ -167,6 +170,9 @@ public class BotAI {
     public BotEnderpearlController getEnderpearlController() { return enderpearlController; }
     public BotCPVPController getCPVPController() { return cpvpController; }
     public BotHealController getHealController() { return healController; }
+    public BotTeleportController getTeleportController() {
+        return teleportController;
+    }
     public CombatState getCurrentState() {
         return CombatState.valueOf(combatStateManager.getCurrentState().name());
     }

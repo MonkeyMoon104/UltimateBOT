@@ -1,0 +1,40 @@
+package it.coralmc.sandbox.bot.ai.controllers.teleport.helper;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+
+public class SafeTeleportStrategy implements ITeleportStrategy {
+
+    private final ITeleportValidator validator;
+
+    public SafeTeleportStrategy(ITeleportValidator validator) {
+        this.validator = validator;
+    }
+
+    @Override
+    public Vec3 findTeleportPosition(Player bot, Player target) {
+        if (target == null) return null;
+        Level level = bot.level();
+
+        Vec3 base = target.position();
+        Vec3[] offsets = {
+                base.add(2, 0, 0),
+                base.add(-2, 0, 0),
+                base.add(0, 0, 2),
+                base.add(0, 0, -2),
+                base.add(2, 0, 2),
+                base.add(-2, 0, -2)
+        };
+
+        for (Vec3 candidate : offsets) {
+            BlockPos pos = BlockPos.containing(candidate);
+            if (validator.isSafePosition(bot, pos)) {
+                return Vec3.atCenterOf(pos);
+            }
+        }
+
+        return null;
+    }
+}

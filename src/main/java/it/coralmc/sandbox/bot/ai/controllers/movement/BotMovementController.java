@@ -272,24 +272,4 @@ public class BotMovementController {
     private void executeRetreatMovement(Player target, double targetDistance) {
         movementExecutor.executeRetreatSpiral(target, targetDistance);
     }
-
-    public boolean isSuffocationDamage(DamageSource source, Player bot) {
-        if (source.is(DamageTypes.IN_WALL)) return true;
-
-        if (isStuckInWall(bot)) return true;
-
-        return false;
-    }
-
-    private boolean isStuckInWall(Player bot) {
-        BlockPos botPos = bot.blockPosition();
-        Level level = bot.level();
-
-        if (level.getBlockState(botPos).isSolidRender()) return true;
-
-        BlockPos headPos = botPos.above();
-        if (level.getBlockState(headPos).isSolidRender()) return true;
-
-        return false;
-    }
 }

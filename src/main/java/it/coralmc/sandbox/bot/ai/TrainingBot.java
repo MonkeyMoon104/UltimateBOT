@@ -53,6 +53,7 @@ public class TrainingBot extends Player {
         this.totemTracker = new TotemTracker(this);
         this.deathHandler = new BotDeathHandler(this, plugin, playerOptions, deadBotMessage);
         this.equipmentHandler = new BotEquipmentHandler(this);
+        getBotAI().getTeleportController().setTarget(targetPlayer);
     }
 
     @Override
@@ -98,8 +99,8 @@ public class TrainingBot extends Player {
             }
         }
 
-        if (getBotAI().getMovementController().isSuffocationDamage(source, this)) {
-            getBotAI().getEnderpearlController().handleSuffocationDamage();
+        if (getBotAI().getTeleportController().isSuffocating()) {
+            getBotAI().getTeleportController().handleSuffocationDamage();
         }
 
         if (!getBotAI().getHealController().isHealing()) {
