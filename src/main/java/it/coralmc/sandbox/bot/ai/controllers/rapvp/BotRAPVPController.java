@@ -82,8 +82,6 @@ public class BotRAPVPController {
             return;
         }
 
-        rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
-
         if (anchorPlacer.placeAnchor(anchorPos)) {
             state = RAPVPState.CHARGING_ANCHOR;
         }
@@ -101,8 +99,6 @@ public class BotRAPVPController {
             return;
         }
 
-        rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
-
         if (anchorCharger.chargeAnchor(anchorPos)) {
             state = RAPVPState.WAITING_EXPLOSION;
         }
@@ -112,7 +108,6 @@ public class BotRAPVPController {
         BlockState stateBlock = bot.level().getBlockState(anchorPos);
         if (stateBlock.getBlock() instanceof RespawnAnchorBlock) {
             inventory.switchToEmptySlot();
-            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
             anchorExploder.explodeAnchor(anchorPos);
         } else {
             pearlController.tryPearlToObsidianSide(anchorPos, currentTarget);

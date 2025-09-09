@@ -50,6 +50,7 @@ public class AnchorPlacer {
             );
 
             stack.useOn(new net.minecraft.world.item.context.UseOnContext(bot, InteractionHand.MAIN_HAND, hitResult));
+            rotation.lookAt(Vec3.atLowerCornerOf(pos));
             bot.swing(InteractionHand.MAIN_HAND);
 
             inventory.onItemUsed(BotInventoryController.ANCHOR_SLOT);

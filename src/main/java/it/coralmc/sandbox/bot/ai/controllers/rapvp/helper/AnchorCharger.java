@@ -52,12 +52,12 @@ public class AnchorCharger {
 
             bot.level().setBlock(anchorPos, newState, 3);
 
-            stack.shrink(1);
-
             bot.level().playSound(null, anchorPos,
                     net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
                     net.minecraft.sounds.SoundSource.BLOCKS,
                     1.0F, 1.0F);
+
+            rotation.lookAt(Vec3.atLowerCornerOf(anchorPos));
 
             bot.swing(InteractionHand.MAIN_HAND);
 

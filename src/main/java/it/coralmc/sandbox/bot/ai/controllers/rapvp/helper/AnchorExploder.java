@@ -57,8 +57,9 @@ public class AnchorExploder {
             try {
                 InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
 
-                bot.swing(InteractionHand.MAIN_HAND);
+                rotation.lookAt(Vec3.atLowerCornerOf(anchorPos));
 
+                bot.swing(InteractionHand.MAIN_HAND);
 
                 if (result.consumesAction()) {
                     return;
