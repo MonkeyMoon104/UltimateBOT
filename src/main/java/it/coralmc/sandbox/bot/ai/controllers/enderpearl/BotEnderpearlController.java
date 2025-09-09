@@ -44,6 +44,10 @@ public class BotEnderpearlController {
     private static final long MIN_TIME_BETWEEN_PEARLS_MS = 700;
     private static final double MIN_USE_DISTANCE = 3.5;
     private static final double MAX_USE_DISTANCE = 16.0;
+    private long lastSuffocationTime = 0;
+    private int suffocationCount = 0;
+    private static final long SUFFOCATION_RESET_TIME = 5000;
+    private static final int MAX_SUFFOCATION_BEFORE_TELEPORT = 2;
 
     public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
@@ -220,6 +224,11 @@ public class BotEnderpearlController {
 
         damageTracker.tick();
 
+        long currentTime = System.currentTimeMillis();
+        if (suffocationCount > 0 && currentTime - lastSuffocationTime > SUFFOCATION_RESET_TIME) {
+            suffocationCount = 0;
+        }
+
         if (isPreparingPearl && pendingThrowTarget != null) {
             preparationTicks++;
 
@@ -247,6 +256,133 @@ public class BotEnderpearlController {
         if (vel.lengthSqr() > 1.2 * 1.2) return false;
 
         return true;
+    }
+
+    public void handleSuffocationDamage() {
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastSuffocationTime > SUFFOCATION_RESET_TIME) {
+            suffocationCount = 0;
+        }
+
+        suffocationCount++;
+        lastSuffocationTime = currentTime;
+
+        if (suffocationCount >= MAX_SUFFOCATION_BEFORE_TELEPORT) {
+            teleportNearTarget();
+            suffocationCount = 0;
+        }
+    }
+
+    public boolean teleportNearTarget() {
+        if (currentTarget == null || !currentTarget.isAlive()) return false;
+        if (!canUseEnderpearl()) return false;
+        if (!inventoryController.hasEnderpearls()) return false;
+
+        Vec3 teleportPosition = findOptimalTeleportPosition(currentTarget);
+        if (teleportPosition == null) return false;
+
+        if (!inventoryController.isHoldingEnderpearl()) {
+            inventoryController.switchToEnderpearl();
+        }
+
+        startPearlPreparation(teleportPosition, IPearlStrategyCalculator.PearlStrategy.ESCAPE);
+
+        System.out.println("Bot si teletrasporta per uscire dal soffocamento!");
+        return true;
+    }
+
+    private Vec3 findOptimalTeleportPosition(Player target) {
+        Vec3 targetPos = target.position();
+        BlockPos targetBlockPos = target.blockPosition();
+
+        Vec3[] candidatePositions = {
+                targetPos.add(3.5, 0, 0),
+                targetPos.add(-3.5, 0, 0),
+                targetPos.add(0, 0, 3.5),
+                targetPos.add(0, 0, -3.5),
+
+                targetPos.add(2.5, 0, 2.5),
+                targetPos.add(-2.5, 0, 2.5),
+                targetPos.add(-2.5, 0, -2.5),
+
+                targetPos.add(2, 0, 0),
+                targetPos.add(-2, 0, 0),
+                targetPos.add(0, 0, 2),
+                targetPos.add(0, 0, -2)
+        };
+
+        for (Vec3 candidatePos : candidatePositions) {
+            BlockPos blockPos = BlockPos.containing(candidatePos);
+
+            if (isSafeTeleportPosition(blockPos)) {
+                Vec3 adjustedPos = findGroundLevel(candidatePos);
+                if (adjustedPos != null && isSafeTeleportPosition(BlockPos.containing(adjustedPos))) {
+                    return adjustedPos;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isSafeTeleportPosition(BlockPos pos) {
+        if (safetyValidator != null) {
+            return safetyValidator.isSafeLandingSpot(pos);
+        }
+
+        Level level = bot.level();
+
+        if (level.getBlockState(pos).isSolidRender()) return false;
+        if (level.getBlockState(pos.above()).isSolidRender()) return false;
+
+        for (int i = 0; i < 4; i++) {
+            BlockPos checkPos = pos.below(i);
+            if (level.getBlockState(checkPos).isSolidRender()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Vec3 findGroundLevel(Vec3 pos) {
+        Level level = bot.level();
+        BlockPos startPos = BlockPos.containing(pos);
+
+        for (int i = 0; i < 6; i++) {
+            BlockPos checkPos = startPos.below(i);
+            if (level.getBlockState(checkPos).isSolidRender()) {
+                return Vec3.atBottomCenterOf(checkPos.above());
+            }
+        }
+
+        for (int i = 1; i < 4; i++) {
+            BlockPos checkPos = startPos.above(i);
+            if (level.getBlockState(checkPos.below()).isSolidRender()) {
+                return Vec3.atBottomCenterOf(checkPos);
+            }
+        }
+
+        return null;
+    }
+
+    public boolean forceTeleportNearTarget(Player target) {
+        this.currentTarget = target;
+        return teleportNearTarget();
+    }
+
+    public int getSuffocationCount() {
+        return suffocationCount;
+    }
+
+    public long getLastSuffocationTime() {
+        return lastSuffocationTime;
+    }
+
+    public void resetSuffocationCounter() {
+        suffocationCount = 0;
+        lastSuffocationTime = 0;
     }
 
     public int getCooldown() {
