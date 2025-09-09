@@ -10,6 +10,7 @@ import it.coralmc.sandbox.bot.ai.botai.helper.inter.IPathfindingManager;
 import it.coralmc.sandbox.bot.ai.controllers.attack.BotAttackController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
+import it.coralmc.sandbox.bot.ai.controllers.heal.BotHealController;
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
@@ -40,6 +41,7 @@ public class BotAI {
     private final BotEnderpearlController enderpearlController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
+    private final BotHealController healController;
     private final ICombatStateManager combatStateManager;
     private final ICombatDataManager combatDataManager;
     private final IPathfindingManager pathfindingManager;
@@ -57,6 +59,10 @@ public class BotAI {
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
+        this.healController = new BotHealController(
+                bot,
+                inventoryController
+        );
         this.enderpearlController = new BotEnderpearlController(
                 bot,
                 inventoryController,
@@ -160,6 +166,7 @@ public class BotAI {
     public BotInventoryController getInventoryController() { return inventoryController; }
     public BotEnderpearlController getEnderpearlController() { return enderpearlController; }
     public BotCPVPController getCPVPController() { return cpvpController; }
+    public BotHealController getHealController() { return healController; }
     public CombatState getCurrentState() {
         return CombatState.valueOf(combatStateManager.getCurrentState().name());
     }
