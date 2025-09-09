@@ -28,6 +28,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     private final BotEnderpearlController enderpearlController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
+    private final CombatControllerManager combatControllerManager;
     private final ICombatStateManager combatStateManager;
     private final ICombatDataManager combatDataManager;
 
@@ -39,7 +40,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
                                   BotRotationController rotationController, BotAttackController attackController,
                                   BotInventoryController inventoryController, BotEnderpearlController enderpearlController,
                                   BotCPVPController cpvpController, BotRAPVPController rapvpController,
-                                  ICombatStateManager combatStateManager, ICombatDataManager combatDataManager) {
+                                  ICombatStateManager combatStateManager, ICombatDataManager combatDataManager, CombatControllerManager combatControllerManager) {
         this.bot = bot;
         this.movementController = movementController;
         this.rotationController = rotationController;
@@ -50,6 +51,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         this.rapvpController = rapvpController;
         this.combatStateManager = combatStateManager;
         this.combatDataManager = combatDataManager;
+        this.combatControllerManager = combatControllerManager;
     }
 
     @Override
@@ -58,6 +60,9 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             basicFollowBehavior(target);
             return;
         }
+
+        combatControllerManager.tick(target);
+
         double distance = bot.distanceTo(target);
 
         boolean actionExecuted = false;

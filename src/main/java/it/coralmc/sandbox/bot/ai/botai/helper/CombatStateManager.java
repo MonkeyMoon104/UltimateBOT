@@ -13,6 +13,7 @@ public class CombatStateManager implements ICombatStateManager {
     private final BotInventoryController inventoryController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
+    private final CombatControllerManager combatControllerManager;
 
     private CombatState currentState = CombatState.AGGRESSIVE;
     private long lastStateChange = 0;
@@ -23,11 +24,12 @@ public class CombatStateManager implements ICombatStateManager {
     private int consecutiveDamageCount = 0;
 
     public CombatStateManager(Player bot, BotInventoryController inventoryController,
-                              BotCPVPController cpvpController, BotRAPVPController rapvpController) {
+                              BotCPVPController cpvpController, BotRAPVPController rapvpController, CombatControllerManager combatControllerManager) {
         this.bot = bot;
         this.inventoryController = inventoryController;
         this.cpvpController = cpvpController;
         this.rapvpController = rapvpController;
+        this.combatControllerManager = combatControllerManager;
     }
 
     @Override
@@ -101,6 +103,10 @@ public class CombatStateManager implements ICombatStateManager {
         if (currentTime - lastAnchorAttempt < ANCHOR_ATTEMPT_COOLDOWN) return false;
         if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
         if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
+
+        if (combatControllerManager != null && !combatControllerManager.isPrimaryRAPVP()) {
+            return false;
+        }
 
         double distance = bot.distanceTo(target);
 
