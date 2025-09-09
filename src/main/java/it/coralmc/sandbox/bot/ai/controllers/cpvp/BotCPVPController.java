@@ -1,7 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp;
 
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
-import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalAttacker;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalManager;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal.CrystalPlacer;
@@ -24,8 +23,6 @@ public class BotCPVPController {
     private final Player bot;
     private final Level level;
     private final BotInventoryController inventoryController;
-    private final BotRotationController rotationController;
-
     private final ObsidianPlacer obsidianPlacer;
     private final CrystalPlacer crystalPlacer;
     private final CrystalAttacker crystalAttacker;
@@ -78,14 +75,13 @@ public class BotCPVPController {
     private int attackPreparationTicks = 0;
     private static final int ATTACK_PREPARATION_TIME = 1;
 
-    public BotCPVPController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
+    public BotCPVPController(Player bot, BotInventoryController inventoryController) {
         this.bot = bot;
         this.level = bot.level();
         this.inventoryController = inventoryController;
-        this.rotationController = rotationController;
 
-        this.obsidianPlacer = new ObsidianPlacer(bot, inventoryController, rotationController, level);
-        this.crystalPlacer = new CrystalPlacer(bot, inventoryController, rotationController, level);
+        this.obsidianPlacer = new ObsidianPlacer(bot, inventoryController, level);
+        this.crystalPlacer = new CrystalPlacer(bot, inventoryController, level);
         this.crystalAttacker = new CrystalAttacker(bot, level);
         this.obsidianPositionFinder = new ObsidianPositionFinder(bot, level);
         this.crystalPositionEvaluator = new CrystalPositionEvaluator(bot);
@@ -157,7 +153,6 @@ public class BotCPVPController {
         pendingObsidianPos = pos;
         obsidianPreparationTicks = 0;
 
-        rotationController.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(pos));
     }
 
     private void handleObsidianPreparation() {
@@ -165,7 +160,6 @@ public class BotCPVPController {
 
         obsidianPreparationTicks++;
 
-        rotationController.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(pendingObsidianPos));
 
         if (obsidianPreparationTicks >= OBSIDIAN_PREPARATION_TIME) {
             if (!obsidianPlacer.hasLineOfSight(pendingObsidianPos)) {
@@ -228,7 +222,6 @@ public class BotCPVPController {
         pendingAttackCrystal = crystal;
         attackPreparationTicks = 0;
 
-        rotationController.lookAt(crystal.position());
     }
 
     private void handleAttackPreparation() {
@@ -241,7 +234,6 @@ public class BotCPVPController {
 
         attackPreparationTicks++;
 
-        rotationController.lookAt(pendingAttackCrystal.position());
 
         if (attackPreparationTicks >= ATTACK_PREPARATION_TIME) {
             if (crystalAttacker.canAttackCrystal(pendingAttackCrystal, CRYSTAL_ATTACK_RANGE)) {
@@ -280,7 +272,6 @@ public class BotCPVPController {
         crystalPreparationTicks = 0;
 
         net.minecraft.world.phys.Vec3 crystalPlacementPos = net.minecraft.world.phys.Vec3.atCenterOf(pos.above());
-        rotationController.lookAt(crystalPlacementPos);
     }
 
     private void handleCrystalPreparation() {
@@ -289,7 +280,6 @@ public class BotCPVPController {
         crystalPreparationTicks++;
 
         net.minecraft.world.phys.Vec3 crystalPlacementPos = net.minecraft.world.phys.Vec3.atCenterOf(pendingCrystalPos.above());
-        rotationController.lookAt(crystalPlacementPos);
 
         if (crystalPreparationTicks >= CRYSTAL_PREPARATION_TIME) {
             if (!crystalPlacer.hasLineOfSight(pendingCrystalPos)) {

@@ -19,13 +19,11 @@ public class ObsidianPlacer {
 
     private final Player bot;
     private final BotInventoryController inventoryController;
-    private final BotRotationController rotationController;
     private final Level level;
 
-    public ObsidianPlacer(Player bot, BotInventoryController inventoryController, BotRotationController rotationController, Level level) {
+    public ObsidianPlacer(Player bot, BotInventoryController inventoryController, Level level) {
         this.bot = bot;
         this.inventoryController = inventoryController;
-        this.rotationController = rotationController;
         this.level = level;
     }
 

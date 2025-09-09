@@ -64,8 +64,7 @@ public class BotAI {
         );
         this.cpvpController = new BotCPVPController(
                 bot,
-                inventoryController,
-                rotationController
+                inventoryController
         );
         this.rapvpController = new BotRAPVPController(
                 bot,
