@@ -62,6 +62,6 @@ public class CrystalManager {
         double distanceToBot = bot.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos.above()));
 
-        return distanceToBot <= 6.5 && distanceToTarget <= maxCrystalDistance;
+        return distanceToBot <= 10 && distanceToTarget <= maxCrystalDistance;
     }
 }
