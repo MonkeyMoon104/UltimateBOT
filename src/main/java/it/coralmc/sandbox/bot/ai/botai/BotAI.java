@@ -40,8 +40,6 @@ public class BotAI {
     private final BotEnderpearlController enderpearlController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
-    private final CombatControllerManager combatControllerManager;
-
     private final ICombatStateManager combatStateManager;
     private final ICombatDataManager combatDataManager;
     private final IPathfindingManager pathfindingManager;
@@ -77,17 +75,11 @@ public class BotAI {
                 enderpearlController
         );
 
-        this.combatControllerManager = new CombatControllerManager(
-                bot,
-                rapvpController,
-                cpvpController
-        );
         this.combatStateManager = new CombatStateManager(
                 bot,
                 inventoryController,
                 cpvpController,
-                rapvpController,
-                combatControllerManager
+                rapvpController
         );
         this.combatDataManager = new CombatDataManager(
                 bot,
@@ -112,8 +104,7 @@ public class BotAI {
                 cpvpController,
                 rapvpController,
                 combatStateManager,
-                combatDataManager,
-                combatControllerManager
+                combatDataManager
         );
     }
 

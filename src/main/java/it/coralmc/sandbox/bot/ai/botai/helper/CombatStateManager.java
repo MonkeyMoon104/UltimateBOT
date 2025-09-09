@@ -13,7 +13,6 @@ public class CombatStateManager implements ICombatStateManager {
     private final BotInventoryController inventoryController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
-    private final CombatControllerManager combatControllerManager;
 
     private CombatState currentState = CombatState.AGGRESSIVE;
     private long lastStateChange = 0;
@@ -24,12 +23,11 @@ public class CombatStateManager implements ICombatStateManager {
     private int consecutiveDamageCount = 0;
 
     public CombatStateManager(Player bot, BotInventoryController inventoryController,
-                              BotCPVPController cpvpController, BotRAPVPController rapvpController, CombatControllerManager combatControllerManager) {
+                              BotCPVPController cpvpController, BotRAPVPController rapvpController) {
         this.bot = bot;
         this.inventoryController = inventoryController;
         this.cpvpController = cpvpController;
         this.rapvpController = rapvpController;
-        this.combatControllerManager = combatControllerManager;
     }
 
     @Override
@@ -51,11 +49,7 @@ public class CombatStateManager implements ICombatStateManager {
             newState = CombatState.DEFENSIVE;
         }
         else if (Math.abs(yDiff) <= 3.0 && shouldAttemptAnchor(target, currentTime)) {
-            if (isNearBedrock(bot)) {
-                newState = CombatState.CRYSTAL_SETUP;
-            } else {
-                newState = CombatState.ANCHOR_SETUP;
-            }
+            newState = CombatState.ANCHOR_SETUP;
         }
         else if (yDiff < -1.0 && cpvpController.canPlaceCrystal()) {
             newState = CombatState.CRYSTAL_SETUP;
@@ -104,10 +98,6 @@ public class CombatStateManager implements ICombatStateManager {
         if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
         if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
 
-        if (combatControllerManager != null && !combatControllerManager.isPrimaryRAPVP()) {
-            return false;
-        }
-
         double distance = bot.distanceTo(target);
 
         return distance > 1.0 && distance < 8.0 && target.onGround();
@@ -128,26 +118,4 @@ public class CombatStateManager implements ICombatStateManager {
         this.consecutiveDamageCount = consecutiveDamageCount;
         this.lastDamageTime = lastDamageTime;
     }
-
-    private boolean isNearBedrock(Player bot) {
-        net.minecraft.core.BlockPos botPos = bot.blockPosition();
-        int y = botPos.getY();
-
-        net.minecraft.core.BlockPos[] positionsToCheck = new net.minecraft.core.BlockPos[]{
-                botPos.below(),
-                botPos.north(),
-                botPos.south(),
-                botPos.east(),
-                botPos.west()
-        };
-
-        for (net.minecraft.core.BlockPos pos : positionsToCheck) {
-            if (bot.level().getBlockState(pos).getBlock() == net.minecraft.world.level.block.Blocks.BEDROCK) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
 }
