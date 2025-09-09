@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class HealthChecker implements IHealthChecker {
 
-    private float healthThreshold = 10.0f;
+    private float healthThreshold = 5.0f;
 
     @Override
     public boolean needsHealing(Player bot) {

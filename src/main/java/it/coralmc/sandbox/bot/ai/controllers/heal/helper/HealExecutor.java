@@ -4,7 +4,6 @@ import it.coralmc.sandbox.bot.ai.controllers.heal.helper.inter.IHealExecutor;
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
 
 public class HealExecutor implements IHealExecutor {
 
