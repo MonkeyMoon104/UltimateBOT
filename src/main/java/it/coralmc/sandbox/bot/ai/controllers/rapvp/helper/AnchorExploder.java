@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.rapvp.helper;
 
+import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import net.minecraft.core.BlockPos;
@@ -63,6 +64,7 @@ public class AnchorExploder {
                     return;
                 }
             } catch (Exception e) {
+                SandboxTraining.getInstance().getLogger().warning("Uso esplosione anchor forzata, try catch fallito, errore: " + e);
             }
 
             bot.level().removeBlock(anchorPos, false);

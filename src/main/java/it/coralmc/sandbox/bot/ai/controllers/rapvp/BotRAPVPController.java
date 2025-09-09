@@ -2,12 +2,9 @@ package it.coralmc.sandbox.bot.ai.controllers.rapvp;
 
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
+import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.*;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorCharger;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorExploder;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorPlacer;
-import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.AnchorPositionFinder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -31,9 +28,7 @@ public class BotRAPVPController {
     private final AnchorPositionFinder positionFinder;
 
     private boolean enabled = false;
-    private boolean anchorPlaced = false;
-    private boolean isChargingAnchor = false;
-    private boolean isWaitingExplosion = false;
+    private RAPVPState state = RAPVPState.IDLE;
 
     private BlockPos anchorPos = null;
     private Player currentTarget = null;
@@ -58,87 +53,79 @@ public class BotRAPVPController {
 
     public void enable(Player target) {
         this.enabled = true;
-        this.anchorPlaced = false;
-        this.isChargingAnchor = false;
-        this.isWaitingExplosion = false;
+        this.state = RAPVPState.PLACING_ANCHOR;
         this.anchorPos = null;
         this.currentTarget = target;
     }
 
     public void tick() {
-        if (!bot.isAlive() || currentTarget == null || !currentTarget.isAlive()) return;
-
-        if (!enabled) return;
-
-        if (!anchorPlaced) {
-            Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(currentTarget);
-            if (posOpt.isEmpty()) return;
-
-            anchorPos = posOpt.get();
-
-            if (!inventory.isHoldingAnchor()) {
-                inventory.switchToAnchor();
-                return;
-            }
-
-            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
-
-            if (anchorPlacer.placeAnchor(anchorPos)) {
-                anchorPlaced = true;
-                isChargingAnchor = true;
-            }
+        if (!bot.isAlive() || currentTarget == null || !currentTarget.isAlive() || !enabled) {
             return;
         }
 
-        if (isChargingAnchor) {
-            BlockState state = bot.level().getBlockState(anchorPos);
-            if (!(state.getBlock() instanceof RespawnAnchorBlock)) {
-                anchorPlaced = false;
-                isChargingAnchor = false;
-                return;
-            }
+        switch (state) {
+            case PLACING_ANCHOR -> handlePlacingAnchor();
+            case CHARGING_ANCHOR -> handleChargingAnchor();
+            case WAITING_EXPLOSION -> handleWaitingExplosion();
+            case IDLE -> {  }
+        }
+    }
 
-            if (!inventory.isHoldingGlow()) {
-                inventory.switchToGlow();
-                return;
-            }
+    private void handlePlacingAnchor() {
+        Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(currentTarget);
+        if (posOpt.isEmpty()) return;
 
-            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
+        anchorPos = posOpt.get();
 
-            if (anchorCharger.chargeAnchor(anchorPos)) {
-                isChargingAnchor = false;
-                isWaitingExplosion = true;
-            }
+        if (!inventory.isHoldingAnchor()) {
+            inventory.switchToAnchor();
             return;
         }
 
-        if (isWaitingExplosion) {
-            BlockState state = bot.level().getBlockState(anchorPos);
-            if (state.getBlock() instanceof RespawnAnchorBlock) {
-                inventory.switchToEmptySlot();
+        rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
 
-                rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
+        if (anchorPlacer.placeAnchor(anchorPos)) {
+            state = RAPVPState.CHARGING_ANCHOR;
+        }
+    }
 
-                anchorExploder.explodeAnchor(anchorPos);
-            } else {
-                isWaitingExplosion = false;
+    private void handleChargingAnchor() {
+        BlockState stateBlock = bot.level().getBlockState(anchorPos);
+        if (!(stateBlock.getBlock() instanceof RespawnAnchorBlock)) {
+            state = RAPVPState.PLACING_ANCHOR;
+            return;
+        }
 
-                pearlController.tryPearlToObsidianSide(anchorPos, currentTarget);
-                cpvp.tick(currentTarget);
+        if (!inventory.isHoldingGlow()) {
+            inventory.switchToGlow();
+            return;
+        }
 
-                isWaitingExplosion = false;
-                anchorPlaced = false;
-                isChargingAnchor = false;
-                anchorPos = null;
-            }
+        rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
+
+        if (anchorCharger.chargeAnchor(anchorPos)) {
+            state = RAPVPState.WAITING_EXPLOSION;
+        }
+    }
+
+    private void handleWaitingExplosion() {
+        BlockState stateBlock = bot.level().getBlockState(anchorPos);
+        if (stateBlock.getBlock() instanceof RespawnAnchorBlock) {
+            inventory.switchToEmptySlot();
+            rotation.lookAt(net.minecraft.world.phys.Vec3.atCenterOf(anchorPos));
+            anchorExploder.explodeAnchor(anchorPos);
+        } else {
+            pearlController.tryPearlToObsidianSide(anchorPos, currentTarget);
+            cpvp.tick(currentTarget);
+
+            state = RAPVPState.PLACING_ANCHOR;
+            anchorPos = null;
         }
     }
 
     public void disable() {
         this.enabled = false;
-        this.anchorPlaced = false;
-        this.isChargingAnchor = false;
-        this.isWaitingExplosion = false;
+        this.state = RAPVPState.IDLE;
         this.anchorPos = null;
         this.currentTarget = null;
     }
@@ -147,16 +134,8 @@ public class BotRAPVPController {
         return enabled;
     }
 
-    public boolean isAnchorPlaced() {
-        return anchorPlaced;
-    }
-
-    public boolean isChargingAnchor() {
-        return isChargingAnchor;
-    }
-
-    public boolean isWaitingExplosion() {
-        return isWaitingExplosion;
+    public RAPVPState getState() {
+        return state;
     }
 
     public BlockPos getCurrentAnchorPos() {
