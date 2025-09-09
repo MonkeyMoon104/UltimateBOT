@@ -67,4 +67,12 @@ public class BotHealController {
     public void resetHealState() {
         actionManager.resetHealAction();
     }
+
+    public void applyEffect() {
+        actionManager.applyGoldenAppleEffectsManually(bot);
+    }
+
+    public void updateHealAction() {
+        actionManager.updateHealAction(bot);
+    }
 }
