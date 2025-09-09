@@ -15,6 +15,7 @@ public class ItemChecker implements IItemChecker {
     public static final int CRYSTAL_SLOT = 4;
     public static final int ANCHOR_SLOT = 5;
     public static final int GLOW_SLOT = 6;
+    public static final int GOLDEN_APPLE_SLOT = 7;
     public static final int EMPTY_SLOT = 8;
 
     @Override
@@ -45,6 +46,11 @@ public class ItemChecker implements IItemChecker {
     @Override
     public boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
         return currentSlot == GLOW_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.GLOWSTONE;
+    }
+
+    @Override
+    public boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
+        return currentSlot == GOLDEN_APPLE_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.GOLDEN_APPLE;
     }
 
     @Override

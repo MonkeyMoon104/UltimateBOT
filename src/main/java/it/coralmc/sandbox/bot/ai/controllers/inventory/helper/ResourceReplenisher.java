@@ -16,6 +16,7 @@ public class ResourceReplenisher implements IResourceReplenisher {
     public static final int CRYSTAL_SLOT = 4;
     public static final int ANCHOR_SLOT = 5;
     public static final int GLOW_SLOT = 6;
+    public static final int GOLDEN_APPLE_SLOT = 7;
     public static final int EMPTY_SLOT = 8;
 
     @Override
@@ -48,6 +49,10 @@ public class ResourceReplenisher implements IResourceReplenisher {
                 break;
             case GLOW_SLOT:
                 if (currentStack.getItem() == Items.GLOWSTONE && currentStack.getCount() < 64) {
+                    currentStack.setCount(64);
+                }
+            case GOLDEN_APPLE_SLOT:
+                if (currentStack.getItem() == Items.GOLDEN_APPLE && currentStack.getCount() < 64) {
                     currentStack.setCount(64);
                 }
                 break;
@@ -84,6 +89,10 @@ public class ResourceReplenisher implements IResourceReplenisher {
                 break;
             case GLOW_SLOT:
                 if (stack.getItem() == Items.GLOWSTONE) {
+                    stack.setCount(64);
+                }
+            case GOLDEN_APPLE_SLOT:
+                if (stack.getItem() == Items.GOLDEN_APPLE) {
                     stack.setCount(64);
                 }
                 break;

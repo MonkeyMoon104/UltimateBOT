@@ -17,6 +17,7 @@ public interface IItemChecker {
     boolean isHoldingAnchor(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
 
     boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
+    boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
 
     boolean hasEnderpearls(Map<Integer, ItemStack> hotbarSlots, boolean infiniteResources);
 

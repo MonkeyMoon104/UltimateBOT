@@ -24,6 +24,7 @@ public class SlotManager implements ISlotManager {
     public static final int CRYSTAL_SLOT = 4;
     public static final int ANCHOR_SLOT = 5;
     public static final int GLOW_SLOT = 6;
+    public static final int GOLDEN_APPLE_SLOT = 7;
     public static final int EMPTY_SLOT = 8;
 
     private final IResourceReplenisher resourceReplenisher;
@@ -44,6 +45,7 @@ public class SlotManager implements ISlotManager {
         hotbarSlots.put(CRYSTAL_SLOT, new ItemStack(Items.END_CRYSTAL, 64));
         hotbarSlots.put(ANCHOR_SLOT, new ItemStack(Items.RESPAWN_ANCHOR, 64));
         hotbarSlots.put(GLOW_SLOT, new ItemStack(Items.GLOWSTONE, 64));
+        hotbarSlots.put(GOLDEN_APPLE_SLOT, new ItemStack(Items.GOLDEN_APPLE, 64));
         hotbarSlots.put(EMPTY_SLOT, ItemStack.EMPTY);
         switchToSlot(SWORD_SLOT);
     }
@@ -130,6 +132,11 @@ public class SlotManager implements ISlotManager {
     @Override
     public void switchToGlow() {
         switchToSlot(GLOW_SLOT);
+    }
+
+    @Override
+    public void switchToGoldenApple() {
+        switchToSlot(GOLDEN_APPLE_SLOT);
     }
 
     @Override
