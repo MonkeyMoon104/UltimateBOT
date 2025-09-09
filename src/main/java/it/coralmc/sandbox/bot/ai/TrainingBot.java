@@ -87,6 +87,8 @@ public class TrainingBot extends Player {
             getBotAI().getEnderpearlController().handleSuffocationDamage();
         }
 
+        getBotAI().getHealController().handleDamageReceived();
+
         return result;
     }
 
