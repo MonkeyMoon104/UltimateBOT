@@ -22,6 +22,7 @@ public class BotInventoryController {
     public static final int CRYSTAL_SLOT = 4;
     public static final int ANCHOR_SLOT = 5;
     public static final int GLOW_SLOT = 6;
+    public static final int GOLDEN_APPLE_SLOT = 7;
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
@@ -63,6 +64,10 @@ public class BotInventoryController {
 
     public void switchToGlow() {
         slotManager.switchToGlow();
+    }
+
+    public void switchToGoldenApple() {
+        slotManager.switchToGoldenApple();
     }
 
     public void switchToEmptySlot() {
