@@ -83,6 +83,10 @@ public class TrainingBot extends Player {
             }
         }
 
+        if (isSuffocationDamage(source)) {
+            getBotAI().getEnderpearlController().handleSuffocationDamage();
+        }
+
         return result;
     }
 
@@ -111,6 +115,26 @@ public class TrainingBot extends Player {
         try {
             super.aiStep();
         } catch (ClassCastException ignored) {}
+    }
+
+    private boolean isSuffocationDamage(DamageSource source) {
+        if (source.is(DamageTypes.IN_WALL)) return true;
+
+        if (isStuckInWall()) return true;
+
+        return false;
+    }
+
+    private boolean isStuckInWall() {
+        BlockPos botPos = this.blockPosition();
+        Level level = this.level();
+
+        if (level.getBlockState(botPos).isSolidRender()) return true;
+
+        BlockPos headPos = botPos.above();
+        if (level.getBlockState(headPos).isSolidRender()) return true;
+
+        return false;
     }
 
     public BotAIController getAiController() { return aiController; }
