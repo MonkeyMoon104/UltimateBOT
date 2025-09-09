@@ -1,4 +1,61 @@
 package it.coralmc.sandbox.bot.ai.controllers.heal.helper;
 
-public class HealActionManager {
+import it.coralmc.sandbox.bot.ai.controllers.heal.helper.inter.IHealActionManager;
+import it.coralmc.sandbox.bot.ai.controllers.heal.helper.inter.IHealExecutor;
+import net.minecraft.world.entity.player.Player;
+
+public class HealActionManager implements IHealActionManager {
+
+    private final IHealExecutor healExecutor;
+
+    private boolean isHealing = false;
+    private int healingTicks = 0;
+    private long lastHealTime = 0;
+
+    private static final int HEAL_DURATION_TICKS = 32;
+    private static final long MIN_HEAL_COOLDOWN = 3000;
+
+    public HealActionManager(IHealExecutor healExecutor) {
+        this.healExecutor = healExecutor;
+    }
+
+    @Override
+    public void startHealAction(Player bot) {
+        if (!canStartNewHeal()) return;
+
+        healExecutor.consumeGoldenApple(bot);
+        isHealing = true;
+        healingTicks = 0;
+        lastHealTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void updateHealAction(Player bot) {
+        if (!isHealing) return;
+
+        healingTicks++;
+
+        if (healingTicks >= HEAL_DURATION_TICKS || !bot.isUsingItem()) {
+            resetHealAction();
+        }
+    }
+
+    @Override
+    public boolean isHealing() {
+        return isHealing;
+    }
+
+    @Override
+    public void resetHealAction() {
+        isHealing = false;
+        healingTicks = 0;
+    }
+
+    @Override
+    public boolean canStartNewHeal() {
+        if (isHealing) return false;
+
+        long currentTime = System.currentTimeMillis();
+        return (currentTime - lastHealTime) >= MIN_HEAL_COOLDOWN;
+    }
 }

@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.controllers.heal.helper;
+package it.coralmc.sandbox.bot.ai.controllers.heal.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 
