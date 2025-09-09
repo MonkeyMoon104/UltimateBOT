@@ -2,10 +2,7 @@ package it.coralmc.sandbox.bot.ai.botai;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
-import it.coralmc.sandbox.bot.ai.botai.helper.CombatDataManager;
-import it.coralmc.sandbox.bot.ai.botai.helper.CombatStateManager;
-import it.coralmc.sandbox.bot.ai.botai.helper.CombatStrategyExecutor;
-import it.coralmc.sandbox.bot.ai.botai.helper.PathfindingManager;
+import it.coralmc.sandbox.bot.ai.botai.helper.*;
 import it.coralmc.sandbox.bot.ai.botai.helper.inter.ICombatDataManager;
 import it.coralmc.sandbox.bot.ai.botai.helper.inter.ICombatStateManager;
 import it.coralmc.sandbox.bot.ai.botai.helper.inter.ICombatStrategyExecutor;
@@ -43,6 +40,7 @@ public class BotAI {
     private final BotEnderpearlController enderpearlController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
+    private final CombatControllerManager combatControllerManager;
 
     private final ICombatStateManager combatStateManager;
     private final ICombatDataManager combatDataManager;
@@ -62,12 +60,22 @@ public class BotAI {
         this.cpvpController = new BotCPVPController(bot, inventoryController, rotationController);
         this.rapvpController = new BotRAPVPController(bot, inventoryController, rotationController, cpvpController, enderpearlController);
 
-        this.combatStateManager = new CombatStateManager(bot, inventoryController, cpvpController, rapvpController);
+        this.combatControllerManager = new CombatControllerManager(bot, rapvpController, cpvpController);
+        this.combatStateManager = new CombatStateManager(bot, inventoryController, cpvpController, rapvpController, combatControllerManager);
         this.combatDataManager = new CombatDataManager(bot, enderpearlController, rapvpController, cpvpController);
         this.pathfindingManager = new PathfindingManager(bot, level, movementController, enderpearlController, combatStateManager);
-        this.combatStrategyExecutor = new CombatStrategyExecutor(bot, movementController, rotationController,
-                attackController, inventoryController, enderpearlController,
-                cpvpController, rapvpController, combatStateManager, combatDataManager);
+        this.combatStrategyExecutor = new CombatStrategyExecutor(bot,
+                movementController,
+                rotationController,
+                attackController,
+                inventoryController,
+                enderpearlController,
+                cpvpController,
+                rapvpController,
+                combatStateManager,
+                combatDataManager,
+                combatControllerManager
+        );
     }
 
     public void tick(org.bukkit.entity.Player targetBukkitPlayer) {
