@@ -57,8 +57,23 @@ public class TrainingBot extends Player {
 
     @Override
     public void tick() {
-        super.tick();
+        try {
+            super.tick();
+        } catch (ClassCastException ignored) {
+
+        }
         craftEntity.setHandle(this);
+
+        if (getBotAI().getHealController().isHealing()) {
+            getBotAI().getHealController().updateHealAction();
+            totemTracker.onTick();
+            return;
+        }
+
+        if (getBotAI().getHealController().shouldHeal()) {
+            totemTracker.onTick();
+            return;
+        }
 
         aiController.onTick();
         totemTracker.onTick();
@@ -83,11 +98,13 @@ public class TrainingBot extends Player {
             }
         }
 
-        if (isSuffocationDamage(source)) {
+        if (getBotAI().getMovementController().isSuffocationDamage(source, this)) {
             getBotAI().getEnderpearlController().handleSuffocationDamage();
         }
 
-        getBotAI().getHealController().handleDamageReceived();
+        if (!getBotAI().getHealController().isHealing()) {
+            getBotAI().getHealController().handleDamageReceived();
+        }
 
         return result;
     }
@@ -119,24 +136,16 @@ public class TrainingBot extends Player {
         } catch (ClassCastException ignored) {}
     }
 
-    private boolean isSuffocationDamage(DamageSource source) {
-        if (source.is(DamageTypes.IN_WALL)) return true;
-
-        if (isStuckInWall()) return true;
-
-        return false;
-    }
-
-    private boolean isStuckInWall() {
-        BlockPos botPos = this.blockPosition();
-        Level level = this.level();
-
-        if (level.getBlockState(botPos).isSolidRender()) return true;
-
-        BlockPos headPos = botPos.above();
-        if (level.getBlockState(headPos).isSolidRender()) return true;
-
-        return false;
+    @Override
+    public void completeUsingItem() {
+        try {
+            super.completeUsingItem();
+        } catch (ClassCastException e) {
+            if (this.getUseItem().getItem() == net.minecraft.world.item.Items.GOLDEN_APPLE) {
+                getBotAI().getHealController().applyEffect();
+            }
+            this.releaseUsingItem();
+        }
     }
 
     public BotAIController getAiController() { return aiController; }
