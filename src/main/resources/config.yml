@@ -11,6 +11,7 @@ messages:
   reload-all: "&aConfigurazione, bot e mappe sono state ricaricate/pulite"
   reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
   combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
+  dead-bot-message: "{player} was killed by his Bot"
 
 bot:
   name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot

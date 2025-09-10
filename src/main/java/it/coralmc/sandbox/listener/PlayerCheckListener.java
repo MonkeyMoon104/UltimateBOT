@@ -2,8 +2,10 @@ package it.coralmc.sandbox.listener;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotManager;
+import it.coralmc.sandbox.bot.ai.TrainingBot;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,14 +54,42 @@ public class PlayerCheckListener implements Listener {
     @EventHandler
     public void onDead(PlayerDeathEvent event) {
         Player player = event.getPlayer();
+        boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
 
-        if (botManager.isBotSpawned(player.getUniqueId())) {
+        if (wasBotSpawned) {
             botManager.despawn(player);
-
             String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
             player.sendMessage(ChatColorUtils.translate(despawnMsg));
-
             playerOptions.remove(player.getUniqueId());
+        }
+
+        Entity killer = event.getEntity().getKiller();
+
+        if (killer instanceof org.bukkit.entity.Player && killer.getClass().getSimpleName().equals("BotCraftPlayer")) {
+            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            return;
+        }
+
+        if (killer instanceof TrainingBot) {
+            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            return;
+        }
+
+        if (wasBotSpawned && (killer == null ||
+                (event.getDeathMessage() != null && event.getDeathMessage().contains("[Intentional Game Design]")))) {
+            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            return;
+        }
+
+        if (wasBotSpawned && event.getDeathMessage() != null) {
+            TrainingBot bot = botManager.getBot(player.getUniqueId());
+            if (bot != null && event.getDeathMessage().contains(bot.getName().getString())) {
+                String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+                event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            }
         }
     }
 }
