@@ -26,6 +26,11 @@ public class BotLookup {
         return (entity instanceof TrainingBot trainingBot) ? trainingBot : null;
     }
 
+    public TrainingBot getBotSafe(UUID ownerUUID) {
+        return registry.getBot(ownerUUID);
+    }
+
+
     public boolean isBotSpawned(UUID ownerUUID) {
         return registry.isBotSpawned(ownerUUID);
     }

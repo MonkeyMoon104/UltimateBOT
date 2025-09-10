@@ -38,6 +38,10 @@ public class BotRegistry {
         return new HashMap<>(spawnedBots);
     }
 
+    public TrainingBot getBot(UUID ownerUUID) {
+        return spawnedBots.get(ownerUUID);
+    }
+
     public void clear() {
         spawnedBots.clear();
     }

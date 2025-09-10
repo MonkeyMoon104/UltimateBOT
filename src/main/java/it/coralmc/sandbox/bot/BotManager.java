@@ -47,6 +47,11 @@ public class BotManager {
         return lookup.getBotByOwnerUUID(ownerUUID);
     }
 
+    public TrainingBot getBotSafe(UUID ownerUUID) {
+        return lookup.getBotSafe(ownerUUID);
+    }
+
+
     public boolean isBotSpawned(UUID ownerUUID) {
         return lookup.isBotSpawned(ownerUUID);
     }
