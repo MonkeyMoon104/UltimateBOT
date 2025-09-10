@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.botai.helper.inter;
+package it.coralmc.sandbox.bot.ai.handlers.helper.inter;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

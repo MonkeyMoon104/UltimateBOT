@@ -2,7 +2,7 @@ package it.coralmc.sandbox.bot.ai.handlers;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;
-import it.coralmc.sandbox.bot.ai.botai.BotAI;
+import it.coralmc.sandbox.bot.ai.BotAI;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.world.entity.player.Player;
 
