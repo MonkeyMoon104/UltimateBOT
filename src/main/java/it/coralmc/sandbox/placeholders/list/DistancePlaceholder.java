@@ -23,8 +23,8 @@ public class DistancePlaceholder implements IBotPlaceholder {
         TrainingBot bot = plugin.getBot(player);
         if (bot != null && bot.getBukkitEntity() != null) {
             double distance = player.getLocation().distance(bot.getBukkitEntity().getLocation());
-            return String.format("%.1fm", distance);
+            return String.format("◈ %.1fm", distance);
         }
-        return "∞";
+        return "◈ ∞";
     }
 }

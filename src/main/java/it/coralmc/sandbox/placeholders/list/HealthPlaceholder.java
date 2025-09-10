@@ -24,8 +24,8 @@ public class HealthPlaceholder implements IBotPlaceholder {
         if (bot != null && bot.getBukkitEntity() != null) {
             double health = bot.getBukkitEntity().getHealth();
             double maxHealth = bot.getBukkitEntity().getMaxHealth();
-            return String.format("%.1f/%.1f", health, maxHealth);
+            return String.format("♥ %.1f/%.1f", health, maxHealth);
         }
-        return "0.0/20.0";
+        return "♥ 0.0/20.0";
     }
 }

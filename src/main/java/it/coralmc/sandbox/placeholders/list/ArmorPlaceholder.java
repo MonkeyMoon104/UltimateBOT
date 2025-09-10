@@ -30,8 +30,8 @@ public class ArmorPlaceholder implements IBotPlaceholder {
                     armorPieces++;
                 }
             }
-            return armorPieces + "/4";
+            return "◆ " + armorPieces + "/4";
         }
-        return "0/4";
+        return "◆ 0/4";
     }
 }

@@ -23,9 +23,9 @@ public class LocationPlaceholder implements IBotPlaceholder {
         TrainingBot bot = plugin.getBot(player);
         if (bot != null && bot.getBukkitEntity() != null) {
             var loc = bot.getBukkitEntity().getLocation();
-            return String.format("X:%d Y:%d Z:%d",
+            return String.format("⚬ X:%d Y:%d Z:%d",
                     loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         }
-        return "X:0 Y:0 Z:0";
+        return "⚬ X:0 Y:0 Z:0";
     }
 }

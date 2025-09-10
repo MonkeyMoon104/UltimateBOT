@@ -21,6 +21,6 @@ public class FollowPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         TrainingBot bot = plugin.getBot(player);
-        return bot != null ? (bot.isFollow() ? "✅" : "❌") : "❌";
+        return bot != null ? (bot.isFollow() ? "✓" : "✗") : "✗";
     }
 }

@@ -21,6 +21,6 @@ public class CombatPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         TrainingBot bot = plugin.getBot(player);
-        return bot != null ? (bot.isCombat() ? "⚔️" : "🕊️") : "🕊️";
+        return bot != null ? (bot.isCombat() ? "⚔" : "●") : "○";
     }
 }
