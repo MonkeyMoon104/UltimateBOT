@@ -14,7 +14,7 @@ public class HealActionManager implements IHealActionManager {
     private long lastHealTime = 0;
 
     private static final int HEAL_DURATION_TICKS = 32;
-    private static final long MIN_HEAL_COOLDOWN = 60000;
+    private static final long MIN_HEAL_COOLDOWN = 45000;
 
     public HealActionManager(IHealExecutor healExecutor) {
         this.healExecutor = healExecutor;
