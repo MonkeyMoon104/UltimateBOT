@@ -42,7 +42,8 @@ public class BotSpawner {
 
         UUID botUUID = UUID.randomUUID();
         FileConfiguration config = plugin.getConfig();
-        String botName = config.getString("bot.name", "CrystalBot");
+        String rawName = config.getString("bot.name", "CrystalBot");
+        String botName = rawName.replace("%player%", viewer.getName());
 
         Location loc = viewer.getLocation();
         Block block = loc.getWorld().getHighestBlockAt(loc);

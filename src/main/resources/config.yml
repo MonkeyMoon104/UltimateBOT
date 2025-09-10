@@ -13,7 +13,7 @@ messages:
   combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
 
 bot:
-  name: "CrystalBot"
+  name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
 

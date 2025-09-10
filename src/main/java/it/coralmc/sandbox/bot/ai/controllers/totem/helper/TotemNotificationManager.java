@@ -19,7 +19,8 @@ public class TotemNotificationManager implements ITotemNotificationManager {
         if (player != null && player.isOnline()) {
             String msg = plugin.getConfig()
                     .getString("bot.totem-finish", "[%botname%] Running out of totems");
-            String botName = plugin.getConfig().getString("bot.name", "CrystalBot");
+            String rawName = plugin.getConfig().getString("bot.name", "CrystalBot");
+            String botName = rawName.replace("%player%", player.getName());
             msg = msg.replace("%botname%", botName);
             player.sendMessage(ChatColorUtils.translate(msg));
         }
