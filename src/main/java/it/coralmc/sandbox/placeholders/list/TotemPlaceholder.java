@@ -21,6 +21,10 @@ public class TotemPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         TrainingBot bot = plugin.getBot(player);
-        return bot != null ? "✚ " + bot.getTotemCount() : "✚ 0";
+        if (bot != null) {
+            int count = bot.getTotemCount();
+            return "✚ " + (count == -1 ? "Illimitati" : count);
+        }
+        return "✚ 0";
     }
 }

@@ -64,15 +64,19 @@ public class TrainingBot extends Player {
         }
         craftEntity.setHandle(this);
 
-        if (getBotAI().getHealController().isHealing()) {
-            getBotAI().getHealController().updateHealAction();
-            totemTracker.onTick();
-            return;
+        if (isCombat()) {
+            if (getBotAI().getHealController().isHealing()) {
+                getBotAI().getHealController().updateHealAction();
+                totemTracker.onTick();
+                return;
+            }
         }
 
-        if (getBotAI().getHealController().shouldHeal()) {
-            totemTracker.onTick();
-            return;
+        if (isCombat()) {
+            if (getBotAI().getHealController().shouldHeal()) {
+                totemTracker.onTick();
+                return;
+            }
         }
 
         aiController.onTick();
@@ -89,21 +93,23 @@ public class TrainingBot extends Player {
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
-        net.minecraft.world.entity.Entity attacker = source.getEntity();
-        if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
-            if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
-                if (source.isCritical()) {
-                    getBotAI().getEnderpearlController().onDamageReceived();
+        if (isCombat()) {
+            net.minecraft.world.entity.Entity attacker = source.getEntity();
+            if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
+                if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
+                    if (source.isCritical()) {
+                        getBotAI().getEnderpearlController().onDamageReceived();
+                    }
                 }
             }
-        }
 
-        if (getBotAI().getTeleportController().isSuffocating()) {
-            getBotAI().getTeleportController().handleSuffocationDamage();
-        }
+            if (getBotAI().getTeleportController().isSuffocating()) {
+                getBotAI().getTeleportController().handleSuffocationDamage();
+            }
 
-        if (!getBotAI().getHealController().isHealing()) {
-            getBotAI().getHealController().handleDamageReceived();
+            if (!getBotAI().getHealController().isHealing()) {
+                getBotAI().getHealController().handleDamageReceived();
+            }
         }
 
         return result;
