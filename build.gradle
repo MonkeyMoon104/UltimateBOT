@@ -25,6 +25,9 @@ repositories {
     }
 
     maven { url = 'https://repo.spongepowered.org/maven' }
+    maven {
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
 }
 
 paperweight {
@@ -35,6 +38,7 @@ dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     implementation "xyz.xenondevs.invui:invui:1.43"
     implementation 'org.spongepowered:mixin:0.8.5'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
 }
 
 def targetJavaVersion = 21

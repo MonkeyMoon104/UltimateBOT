@@ -4,6 +4,8 @@ main: it.coralmc.sandbox.SandboxTraining
 api-version: '1.21'
 authors: [ MonkeyMoon104 ]
 description: Sandbox bot plugin
+depend:
+  - PlaceholderAPI
 
 commands:
   bot:
