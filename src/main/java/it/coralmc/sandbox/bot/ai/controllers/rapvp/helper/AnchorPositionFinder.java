@@ -7,6 +7,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 public class AnchorPositionFinder {
 
@@ -21,12 +23,16 @@ public class AnchorPositionFinder {
     public Optional<BlockPos> findBestAnchorPos(Player target) {
         BlockPos targetPos = target.blockPosition();
         BlockPos botPos = bot.blockPosition();
-        BlockPos best = null;
-        double bestDistance = Double.MAX_VALUE;
+        AtomicReference<BlockPos> bestPos = new AtomicReference<>(null);
+        double maxDistanceSq = 12 * 12;
 
-        for (int dx = -2; dx <= 2; dx++) {
-            for (int dz = -2; dz <= 2; dz++) {
-                for (int dy = -1; dy <= 1; dy++) {
+        int[] offsets = {-2, -1, 0, 1, 2};
+        int[] yOffsets = {-1, 0, 1};
+
+        IntStream.range(0, offsets.length).parallel().forEach(i -> {
+            int dx = offsets[i];
+            for (int dz : offsets) {
+                for (int dy : yOffsets) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
 
                     if (check.equals(botPos) || check.equals(botPos.below())) continue;
@@ -34,26 +40,30 @@ public class AnchorPositionFinder {
                     BlockState state = level.getBlockState(check);
                     BlockState below = level.getBlockState(check.below());
 
-                    if (state.canBeReplaced() && below.isSolid() && isReachable(check)) {
-                        double distToTarget = bot.position().distanceTo(Vec3.atCenterOf(check));
-                        if (distToTarget < bestDistance) {
-                            best = check;
-                            bestDistance = distToTarget;
+                    if (!state.canBeReplaced() || !below.isSolid()) continue;
+
+                    double distSq = bot.position().distanceToSqr(Vec3.atCenterOf(check));
+                    if (distSq > maxDistanceSq) continue;
+
+                    if (!isReachable(check)) continue;
+
+                    synchronized (bestPos) {
+                        if (bestPos.get() == null || distSq < bot.position().distanceToSqr(Vec3.atCenterOf(bestPos.get()))) {
+                            bestPos.set(check);
                         }
                     }
                 }
             }
-        }
+        });
 
-        return Optional.ofNullable(best);
+        return Optional.ofNullable(bestPos.get());
     }
 
     private boolean isReachable(BlockPos pos) {
         Vec3 botEyes = bot.getEyePosition(1.0F);
         Vec3 targetPos = Vec3.atCenterOf(pos);
 
-        double distance = botEyes.distanceTo(targetPos);
-        if (distance > 12.0) return false;
+        if (botEyes.distanceToSqr(targetPos) > 12 * 12) return false;
 
         net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
                 botEyes,
@@ -63,9 +73,6 @@ public class AnchorPositionFinder {
                 bot
         );
 
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return level.clip(context).getType() != net.minecraft.world.phys.HitResult.Type.BLOCK;
     }
 }
