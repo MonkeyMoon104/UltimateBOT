@@ -15,6 +15,8 @@ public class AnchorPositionFinder {
     private final Player bot;
     private final Level level;
 
+    private static final double MIN_SAFE_DISTANCE = 4.0;
+
     public AnchorPositionFinder(Player bot, Level level) {
         this.bot = bot;
         this.level = level;
@@ -23,7 +25,12 @@ public class AnchorPositionFinder {
     public Optional<BlockPos> findBestAnchorPos(Player target) {
         BlockPos targetPos = target.blockPosition();
         BlockPos botPos = bot.blockPosition();
-        AtomicReference<BlockPos> bestPos = new AtomicReference<>(null);
+        Vec3 botPosition = bot.position();
+        Vec3 targetPosition = target.position();
+
+        AtomicReference<BlockPos> smartPos = new AtomicReference<>(null);
+        AtomicReference<BlockPos> safePos = new AtomicReference<>(null);
+        AtomicReference<BlockPos> fallbackPos = new AtomicReference<>(null);
         double maxDistanceSq = 12 * 12;
 
         int[] offsets = {-2, -1, 0, 1, 2};
@@ -42,21 +49,47 @@ public class AnchorPositionFinder {
 
                     if (!state.canBeReplaced() || !below.isSolid()) continue;
 
-                    double distSq = bot.position().distanceToSqr(Vec3.atCenterOf(check));
+                    Vec3 anchorPos = Vec3.atCenterOf(check);
+                    double distSq = botPosition.distanceToSqr(anchorPos);
                     if (distSq > maxDistanceSq) continue;
 
                     if (!isReachable(check)) continue;
 
-                    synchronized (bestPos) {
-                        if (bestPos.get() == null || distSq < bot.position().distanceToSqr(Vec3.atCenterOf(bestPos.get()))) {
-                            bestPos.set(check);
+                    double distanceToBot = Math.sqrt(distSq);
+                    boolean isOnOppositeSide = isOnOppositeSideOfTarget(botPosition, targetPosition, anchorPos);
+
+                    synchronized (this) {
+                        if (isOnOppositeSide && distanceToBot >= MIN_SAFE_DISTANCE) {
+                            if (smartPos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(smartPos.get()))) {
+                                smartPos.set(check);
+                            }
+                        }
+                        else if (distanceToBot >= MIN_SAFE_DISTANCE) {
+                            if (safePos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(safePos.get()))) {
+                                safePos.set(check);
+                            }
+                        }
+                        else if (fallbackPos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(fallbackPos.get()))) {
+                            fallbackPos.set(check);
                         }
                     }
                 }
             }
         });
 
-        return Optional.ofNullable(bestPos.get());
+        if (smartPos.get() != null) return Optional.of(smartPos.get());
+        if (safePos.get() != null) return Optional.of(safePos.get());
+        return Optional.ofNullable(fallbackPos.get());
+    }
+
+    private boolean isOnOppositeSideOfTarget(Vec3 botPos, Vec3 targetPos, Vec3 anchorPos) {
+        Vec3 botToTarget = targetPos.subtract(botPos).normalize();
+
+        Vec3 targetToAnchor = anchorPos.subtract(targetPos).normalize();
+
+        double dotProduct = botToTarget.dot(targetToAnchor);
+
+        return dotProduct > 0.3;
     }
 
     private boolean isReachable(BlockPos pos) {
