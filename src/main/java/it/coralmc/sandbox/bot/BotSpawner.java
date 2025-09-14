@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -61,6 +62,7 @@ public class BotSpawner {
         );
 
         bot.setTotemCount(totem);
+        ((CraftServer) plugin.getServer()).getHandle().getServer().getProfileCache().add(bot.getGameProfile());
         world.addFreshEntity(bot);
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
