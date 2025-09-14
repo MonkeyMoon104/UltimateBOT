@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
 import it.coralmc.sandbox.bot.ai.handlers.helper.*;
 import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatDataManager;
 import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatStateManager;
@@ -33,6 +34,7 @@ public class BotAI {
 
     private final Player bot;
     private final Level level;
+    private final BotNoobMovementController noobMovementController;
     private final BotMovementController movementController;
     private final BotRotationController rotationController;
     private final BotTotemController totemController;
@@ -51,6 +53,11 @@ public class BotAI {
     public BotAI(Player bot, SandboxTraining plugin) {
         this.bot = bot;
         this.level = bot.level();
+
+        this.noobMovementController = new BotNoobMovementController(
+                bot,
+                level
+        );
 
         this.movementController = new BotMovementController(
                 bot,
@@ -129,27 +136,31 @@ public class BotAI {
             );
         }
 
-        if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
-            if (movementController.followPath()) {
-                rotationController.lookAt(
-                        movementController.getCurrentPathPoint().x,
-                        movementController.getCurrentPathPoint().y,
-                        movementController.getCurrentPathPoint().z
-                );
+        if (((TrainingBot) bot).isCombat()) {
+            if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
+                if (movementController.followPath()) {
+                    rotationController.lookAt(
+                            movementController.getCurrentPathPoint().x,
+                            movementController.getCurrentPathPoint().y,
+                            movementController.getCurrentPathPoint().z
+                    );
+                } else {
+                    pathfindingManager.setUsingPathfinding(false);
+                }
             } else {
-                pathfindingManager.setUsingPathfinding(false);
+                pathfindingManager.checkForStuck(target);
+
+                enderpearlController.tick();
+
+                if (((TrainingBot) bot).isCombat()) {
+                    combatStateManager.updateCombatState(target);
+                    combatStrategyExecutor.executeCombatStrategy(target);
+                } else {
+                    combatStrategyExecutor.basicFollowBehavior(target);
+                }
             }
         } else {
-            pathfindingManager.checkForStuck(target);
-
-            enderpearlController.tick();
-
-            if (((TrainingBot) bot).isCombat()) {
-                combatStateManager.updateCombatState(target);
-                combatStrategyExecutor.executeCombatStrategy(target);
-            } else {
-                combatStrategyExecutor.basicFollowBehavior(target);
-            }
+            noobMovementController.moveTowards(target, 2.5);
         }
 
         if (pathfindingManager instanceof PathfindingManager) {
