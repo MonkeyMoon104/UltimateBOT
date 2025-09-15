@@ -1,0 +1,38 @@
+package it.coralmc.sandbox.placeholders.list;
+
+import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.ai.TrainingBot;
+import it.coralmc.sandbox.bot.ai.rank.BotRank;
+import it.coralmc.sandbox.placeholders.IBotPlaceholder;
+import org.bukkit.entity.Player;
+
+public class RankPlaceholder implements IBotPlaceholder {
+
+    private final SandboxTraining plugin;
+
+    public RankPlaceholder(SandboxTraining plugin) {
+        this.plugin = plugin;
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "rank";
+    }
+
+    @Override
+    public String getValue(Player player) {
+        TrainingBot bot = plugin.getBot(player);
+        if (bot == null) return "● Offline";
+
+        BotRank rank = bot.getBotAI().getRank();
+        if (rank == null) return "○ Unknown Rank";
+
+        return switch (rank) {
+            case EASY -> "● Easy";
+            case NORMAL -> "◈ Normal";
+            case MEDIUM -> "⚔ Medium";
+            case HARD -> "▲ Hard";
+            case GOD -> "☠ God";
+        };
+    }
+}

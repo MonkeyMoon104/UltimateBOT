@@ -34,6 +34,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion {
             addPlaceholder(new HealthBarPlaceholder(plugin));
             addPlaceholder(new OnlineTimePlaceholder(plugin));
             addPlaceholder(new PercentageHealthPlaceholder(plugin));
+            addPlaceholder(new RankPlaceholder(plugin));
 
             plugin.getLogger().info("Registrati " + placeholders.size() + " placeholder");
         } catch (Exception e) {
