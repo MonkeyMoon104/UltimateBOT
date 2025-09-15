@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.crystal;
 
+import it.coralmc.sandbox.bot.ai.rank.CPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 public class CrystalManager {
 
-    private static final long OBSIDIAN_CACHE_MS = 7000;
+    private CPVPConfig config;
 
     public void cleanupCrystalCounts(Map<BlockPos, Integer> crystalCountAtPosition, Level level) {
         crystalCountAtPosition.entrySet().removeIf(entry -> {
@@ -26,7 +27,7 @@ public class CrystalManager {
     public void cleanupObsidianCache(Map<BlockPos, Long> obsidianCache) {
         long currentTime = System.currentTimeMillis();
         obsidianCache.entrySet().removeIf(entry ->
-                currentTime - entry.getValue() > OBSIDIAN_CACHE_MS);
+                currentTime - entry.getValue() > config.getObsidianCacheMs());
     }
 
     public EndCrystal findCrystalAt(BlockPos pos, Level level) {
@@ -63,5 +64,9 @@ public class CrystalManager {
         double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos.above()));
 
         return distanceToBot <= 10 && distanceToTarget <= maxCrystalDistance;
+    }
+
+    public void setConfig(CPVPConfig config) {
+        this.config = config;
     }
 }

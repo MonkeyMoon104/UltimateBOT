@@ -85,6 +85,7 @@ public class BotAI {
                 bot,
                 inventoryController
         );
+        this.cpvpController.setRank(options.getRank());
         this.rapvpController = new BotRAPVPController(
                 bot,
                 inventoryController,
@@ -181,6 +182,7 @@ public class BotAI {
     public void setRank(BotRank rank) {
         options.setRank(rank);
         this.rapvpController.setRank(rank);
+        this.cpvpController.setRank(rank);
     }
 
     public BotRank getRank() {

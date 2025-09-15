@@ -1,5 +1,7 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian;
 
+import it.coralmc.sandbox.bot.ai.rank.CPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -11,8 +13,7 @@ import java.util.Map;
 public class ObsidianScanner {
 
     private final Level level;
-    private static final long OBSIDIAN_CACHE_MS = 6000;
-
+    private CPVPConfig config;
     public ObsidianScanner(Level level) {
         this.level = level;
     }
@@ -27,7 +28,7 @@ public class ObsidianScanner {
                     BlockPos checkPos = targetPos.offset(x, y, z);
 
                     if (obsidianCache.containsKey(checkPos) &&
-                            currentTime - obsidianCache.get(checkPos) < OBSIDIAN_CACHE_MS) {
+                            currentTime - obsidianCache.get(checkPos) < config.getObsidianCacheMs()) {
                         continue;
                     }
 
@@ -38,5 +39,9 @@ public class ObsidianScanner {
                 }
             }
         }
+    }
+
+    public void setConfig(CPVPConfig config) {
+        this.config = config;
     }
 }
