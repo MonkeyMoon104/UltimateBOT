@@ -1,5 +1,8 @@
 package it.coralmc.sandbox.bot.ai.rank;
 
+import it.coralmc.sandbox.bot.ai.rank.configs.CPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.configs.RAPVPConfig;
+
 public class RankCoordinator {
 
     public static RAPVPConfig buildRAPVPConfig(BotRank rank) {

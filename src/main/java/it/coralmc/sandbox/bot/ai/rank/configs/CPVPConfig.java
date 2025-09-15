@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.rank;
+package it.coralmc.sandbox.bot.ai.rank.configs;
 
 public class CPVPConfig {
     private final double maxCrystalDistance;

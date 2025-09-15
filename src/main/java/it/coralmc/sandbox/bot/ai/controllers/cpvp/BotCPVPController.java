@@ -9,8 +9,7 @@ import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPlacer
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPositionFinder;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian.ObsidianScanner;
 import it.coralmc.sandbox.bot.ai.rank.BotRank;
-import it.coralmc.sandbox.bot.ai.rank.CPVPConfig;
-import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.configs.CPVPConfig;
 import it.coralmc.sandbox.bot.ai.rank.RankCoordinator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;

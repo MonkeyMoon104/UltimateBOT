@@ -1,7 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.cpvp.helper.obsidian;
 
-import it.coralmc.sandbox.bot.ai.rank.CPVPConfig;
-import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.configs.CPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;

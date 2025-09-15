@@ -6,7 +6,7 @@ import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.*;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.rank.BotRank;
-import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.configs.RAPVPConfig;
 import it.coralmc.sandbox.bot.ai.rank.RankCoordinator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
