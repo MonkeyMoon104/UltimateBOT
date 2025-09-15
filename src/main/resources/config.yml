@@ -103,8 +103,16 @@ gui:
     material: "NETHERITE_SWORD"
     lore:
       - "&7Stato: &e%type%"
-      - "&7Rank: %rank%"
       - ""
-      - "&eClicca per aumentare/disattivare il combat"
+      - "&eClicca per attivare/disattivare il combat"
+
+  rank-button:
+    name: "&bRank"
+    material: "DIAMOND_SWORD"
+    lore:
+      - ""
+      - "%ranks%"
+      - ""
+      - "&eClicca per aumentare/diminuire il rank"
 
 

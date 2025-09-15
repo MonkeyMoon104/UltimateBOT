@@ -35,6 +35,8 @@ public class NewBotGUI {
         CombatItem combatItem = new CombatItem(training, options);
         FollowItem followItem = new FollowItem(training, options, combatItem);
 
+        RankItem rankItem = new RankItem(training, options);
+
         Gui gui = Gui.normal()
                 .setStructure(
                         ". . . . . . . . .",
@@ -42,7 +44,7 @@ public class NewBotGUI {
                         ". . a a t a a . .",
                         ". . . . . . . . .",
                         ". . . s g f . . .",
-                        ". . . . . . . . c"
+                        "r . . . . . . . c"
                 )
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('t', new TotemItem(options, training))
@@ -51,6 +53,7 @@ public class NewBotGUI {
                 .addIngredient('g', training.getBotManager().isBotSpawned(player.getUniqueId())
                     ? new TeleportItem(training) : new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
+                .addIngredient('r', rankItem)
                 .build();
 
         Map<EquipmentSlot, ArmorItem> armors = new HashMap<>();
