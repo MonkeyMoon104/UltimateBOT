@@ -9,12 +9,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.inventoryaccess.component.ComponentWrapper;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
+
+import java.util.List;
 
 public class ArmorItem extends AbstractItem {
 
@@ -33,6 +36,7 @@ public class ArmorItem extends AbstractItem {
     @Override
     public ItemProvider getItemProvider() {
         ItemBuilder builder = new ItemBuilder(piece);
+        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
 
         var loreLines = training.getConfig().getStringList("gui.default-armor.lore.set-type");
 

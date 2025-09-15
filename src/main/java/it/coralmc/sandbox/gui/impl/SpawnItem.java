@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.inventoryaccess.component.ComponentWrapper;
 import xyz.xenondevs.invui.item.ItemProvider;
@@ -15,6 +16,8 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.window.Window;
 import xyz.xenondevs.invui.window.WindowManager;
+
+import java.util.List;
 
 public class SpawnItem extends AbstractItem {
 
@@ -48,6 +51,7 @@ public class SpawnItem extends AbstractItem {
                 : training.getConfig().getStringList("gui.spawn-button.lore");
 
         ItemBuilder builder = new ItemBuilder(mat);
+        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
         builder.setDisplayName(ChatColorUtils.translate(name));
         for (String line : lore) {
             builder.addLoreLines(ChatColorUtils.translate(line));
