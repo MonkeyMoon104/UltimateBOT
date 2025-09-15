@@ -1,5 +1,6 @@
 package it.coralmc.sandbox.bot.ai.controllers.rapvp.helper;
 
+import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -14,10 +15,8 @@ public class AnchorPositionFinder {
 
     private final Player bot;
     private final Level level;
-
-    private static final double MIN_SAFE_DISTANCE = 4.0;
-    private static final double PREDICTION_TICKS = 10.0;
-    private static final double MIN_MOVEMENT_SPEED = 0.1;
+    private long lastSearchTime = 0;
+    private RAPVPConfig config;
 
     public AnchorPositionFinder(Player bot, Level level) {
         this.bot = bot;
@@ -25,6 +24,14 @@ public class AnchorPositionFinder {
     }
 
     public Optional<BlockPos> findBestAnchorPos(Player target) {
+        if (config == null) return Optional.empty();
+
+        long now = System.currentTimeMillis();
+        if (now - lastSearchTime < config.getAnchorSearchCooldownMillis()) {
+            return Optional.empty();
+        }
+        lastSearchTime = now;
+
         Vec3 botPosition = bot.position();
         Vec3 currentTargetPos = target.position();
 
@@ -68,20 +75,20 @@ public class AnchorPositionFinder {
                     boolean isTrappingPosition = isTrappingPosition(anchorPos, predictedTargetPos, currentTargetPos);
 
                     synchronized (this) {
-                        if (isLethalPosition && distanceToBot >= MIN_SAFE_DISTANCE) {
+                        if (isLethalPosition && distanceToBot >= config.getMinSafeDistance()) {
                             if (lethaltPos.get() == null ||
                                     distanceToPredictedTarget < Vec3.atCenterOf(lethaltPos.get()).distanceTo(predictedTargetPos)) {
                                 lethaltPos.set(check);
                             }
                         }
-                        else if (isOnOppositeSide && distanceToBot >= MIN_SAFE_DISTANCE &&
+                        else if (isOnOppositeSide && distanceToBot >= config.getMinSafeDistance() &&
                                 (isTrappingPosition || distanceToPredictedTarget <= 3.0)) {
                             if (smartPos.get() == null ||
                                     distanceToPredictedTarget < Vec3.atCenterOf(smartPos.get()).distanceTo(predictedTargetPos)) {
                                 smartPos.set(check);
                             }
                         }
-                        else if (distanceToBot >= MIN_SAFE_DISTANCE) {
+                        else if (distanceToBot >= config.getMinSafeDistance()) {
                             if (safePos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(safePos.get()))) {
                                 safePos.set(check);
                             }
@@ -104,8 +111,8 @@ public class AnchorPositionFinder {
         Vec3 currentPos = target.position();
         Vec3 velocity = target.getDeltaMovement();
 
-        if (velocity.horizontalDistance() > MIN_MOVEMENT_SPEED) {
-            return currentPos.add(velocity.scale(PREDICTION_TICKS));
+        if (velocity.horizontalDistance() > config.getMinMovement()) {
+            return currentPos.add(velocity.scale(config.getPredictionTicks()));
         }
 
         return currentPos;
@@ -137,7 +144,7 @@ public class AnchorPositionFinder {
         Vec3 targetMovement = predictedTargetPos.subtract(currentTargetPos);
         Vec3 anchorDirection = anchorPos.subtract(currentTargetPos).normalize();
 
-        if (targetMovement.length() > MIN_MOVEMENT_SPEED) {
+        if (targetMovement.length() > config.getMinMovement()) {
             Vec3 movementDirection = targetMovement.normalize();
             double alignment = movementDirection.dot(anchorDirection);
             return alignment > 0.7;
@@ -169,5 +176,9 @@ public class AnchorPositionFinder {
         );
 
         return level.clip(context).getType() != net.minecraft.world.phys.HitResult.Type.BLOCK;
+    }
+
+    public void setConfig(RAPVPConfig config) {
+        this.config = config;
     }
 }

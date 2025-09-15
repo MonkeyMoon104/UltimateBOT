@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
+import it.coralmc.sandbox.bot.ai.rank.BotRank;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -126,5 +127,12 @@ public class BotManager {
 
     public boolean getEpearlSlot(UUID ownerUUID) {
         return updater.getEpearlSlot(ownerUUID);
+    }
+
+    public void setBotRank(UUID uuid, BotRank rank) {
+        var bot = getBot(uuid);
+        if (bot == null) return;
+
+        bot.getBotAI().setRank(rank);
     }
 }

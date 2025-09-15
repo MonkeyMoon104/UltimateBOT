@@ -5,6 +5,9 @@ import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.helper.*;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
+import it.coralmc.sandbox.bot.ai.rank.BotRank;
+import it.coralmc.sandbox.bot.ai.rank.RAPVPConfig;
+import it.coralmc.sandbox.bot.ai.rank.RankCoordinator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -32,6 +35,8 @@ public class BotRAPVPController {
 
     private BlockPos anchorPos = null;
     private Player currentTarget = null;
+    private BotRank rank;
+    private RAPVPConfig config;
 
     public BotRAPVPController(Player bot,
                               BotInventoryController inventory,
@@ -135,5 +140,20 @@ public class BotRAPVPController {
 
     public BlockPos getCurrentAnchorPos() {
         return anchorPos;
+    }
+
+    public void setRank(BotRank rank) {
+        this.rank = rank;
+        this.config = RankCoordinator.buildRAPVPConfig(rank);
+
+        this.positionFinder.setConfig(config);
+    }
+
+    public BotRank getRank() {
+        return rank;
+    }
+
+    public RAPVPConfig getConfig() {
+        return config;
     }
 }

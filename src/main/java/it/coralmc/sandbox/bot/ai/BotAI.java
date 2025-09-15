@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot.ai;
 
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
 import it.coralmc.sandbox.bot.ai.handlers.helper.*;
 import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatDataManager;
@@ -17,6 +18,7 @@ import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
 import it.coralmc.sandbox.bot.ai.controllers.teleport.BotTeleportController;
 import it.coralmc.sandbox.bot.ai.controllers.totem.BotTotemController;
+import it.coralmc.sandbox.bot.ai.rank.BotRank;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -49,10 +51,12 @@ public class BotAI {
     private final ICombatDataManager combatDataManager;
     private final IPathfindingManager pathfindingManager;
     private final ICombatStrategyExecutor combatStrategyExecutor;
+    private final BotOptions options;
 
-    public BotAI(Player bot, SandboxTraining plugin) {
+    public BotAI(Player bot, SandboxTraining plugin, BotOptions options) {
         this.bot = bot;
         this.level = bot.level();
+        this.options = options;
 
         this.noobMovementController = new BotNoobMovementController(
                 bot,
@@ -88,6 +92,7 @@ public class BotAI {
                 cpvpController,
                 enderpearlController
         );
+        this.rapvpController.setRank(options.getRank());
 
         this.combatStateManager = new CombatStateManager(
                 bot,
@@ -171,6 +176,15 @@ public class BotAI {
 
     public void manageTotem() {
         totemController.manageTotem();
+    }
+
+    public void setRank(BotRank rank) {
+        options.setRank(rank);
+        this.rapvpController.setRank(rank);
+    }
+
+    public BotRank getRank() {
+        return options.getRank();
     }
 
     public BotMovementController getMovementController() { return movementController; }

@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.bot;
 
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.ai.rank.BotRank;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,12 +16,22 @@ public class BotOptions {
     private int totems;
     private boolean follow = false;
     private boolean combat = false;
+    private BotRank rank = BotRank.EASY;
 
     public BotOptions(SandboxTraining training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
         this.armor = armor;
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
     }
+
+    public BotRank getRank() {
+        return rank;
+    }
+
+    public void setRank(BotRank rank) {
+        this.rank = rank;
+    }
+
 
     public int getTotems() {
         return totems;

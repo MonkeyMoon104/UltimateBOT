@@ -20,7 +20,7 @@ public class BotAIController {
         this.bot = bot;
         this.targetPlayer = targetPlayer;
         this.follow = follow;
-        this.botAI = new BotAI(bot, plugin);
+        this.botAI = new BotAI(bot, plugin, botOptions);
         this.botOptions = botOptions;
         this.combat = botOptions.isCombat();
         configureBotAI();

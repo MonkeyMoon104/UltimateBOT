@@ -103,7 +103,8 @@ gui:
     material: "NETHERITE_SWORD"
     lore:
       - "&7Stato: &e%type%"
+      - "&7Rank: %rank%"
       - ""
-      - "&eClicca per attivare/disattivare il combat"
+      - "&eClicca per aumentare/disattivare il combat"
 
 
