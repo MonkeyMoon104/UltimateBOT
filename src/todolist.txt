@@ -1,1 +1,1 @@
-1) fixare che il bot non si piazzi in culo le anchor (dietro di se), return istantaneo se è una posizione di merda
+1) move all teleport control from movement to enderpearl

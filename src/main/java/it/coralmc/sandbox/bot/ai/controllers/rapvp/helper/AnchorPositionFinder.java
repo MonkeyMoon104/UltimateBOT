@@ -35,6 +35,8 @@ public class AnchorPositionFinder {
         Vec3 botPosition = bot.position();
         Vec3 currentTargetPos = target.position();
 
+        Vec3 botForwardDirection = getBotForwardDirection();
+
         Vec3 predictedTargetPos = predictTargetPosition(target);
         BlockPos targetPos = BlockPos.containing(predictedTargetPos);
 
@@ -65,6 +67,10 @@ public class AnchorPositionFinder {
                     if (distSq > maxDistanceSq) continue;
 
                     if (!isReachable(check)) continue;
+
+                    if (isAnchorBehindBot(botPosition, anchorPos, botForwardDirection)) {
+                        continue;
+                    }
 
                     double distanceToBot = Math.sqrt(distSq);
                     double distanceToPredictedTarget = anchorPos.distanceTo(predictedTargetPos);
@@ -105,6 +111,24 @@ public class AnchorPositionFinder {
         if (smartPos.get() != null) return Optional.of(smartPos.get());
         if (safePos.get() != null) return Optional.of(safePos.get());
         return Optional.ofNullable(fallbackPos.get());
+    }
+
+    private Vec3 getBotForwardDirection() {
+        float yaw = bot.getYRot();
+        double yawRad = Math.toRadians(yaw);
+
+        double x = -Math.sin(yawRad);
+        double z = Math.cos(yawRad);
+
+        return new Vec3(x, 0, z).normalize();
+    }
+
+    private boolean isAnchorBehindBot(Vec3 botPos, Vec3 anchorPos, Vec3 botForwardDirection) {
+        Vec3 botToAnchor = anchorPos.subtract(botPos).normalize();
+
+        double dotProduct = botForwardDirection.dot(botToAnchor);
+
+        return dotProduct < -0.3;
     }
 
     private Vec3 predictTargetPosition(Player target) {
