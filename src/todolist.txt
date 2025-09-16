@@ -1,0 +1,2 @@
+1) mettere teleport tramite teleport controller in movement controller quando il node di teleport risulta inacessibile dopo vari tentavi per diminuire carico e aumentare performance e gameplay
+2) fixare in actuallyhurt quando il bot è sotto combo che scappa o attacchi e quando brucia pure, quindi fixare bot fermo immobile che prende danni (mannaggia a dio ci ho provato 40 volte e nessuna funziona in 2 branch diversi)
