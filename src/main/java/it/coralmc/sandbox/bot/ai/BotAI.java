@@ -144,6 +144,13 @@ public class BotAI {
         boolean isCurrentlyHealing = healController.isHealing();
 
         if (((TrainingBot) bot).isCombat()) {
+            if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
+                if (pathfindingManager.isUsingPathfinding()) {
+                    pathfindingManager.setUsingPathfinding(false);
+                    movementController.clearPath();
+                }
+                rotationController.updateRotation(target);
+            }
             if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
                 if (movementController.followPath()) {
                     rotationController.lookAt(

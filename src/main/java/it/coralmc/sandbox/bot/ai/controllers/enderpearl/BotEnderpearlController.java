@@ -2,6 +2,7 @@ package it.coralmc.sandbox.bot.ai.controllers.enderpearl;
 
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.rotation.BotRotationController;
+import it.coralmc.sandbox.bot.ai.controllers.teleport.BotTeleportController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.*;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.helper.inter.*;
 import net.minecraft.core.BlockPos;
@@ -9,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class BotEnderpearlController {
 
@@ -16,6 +18,7 @@ public class BotEnderpearlController {
     private final Level level;
     private final BotInventoryController inventoryController;
     private final BotRotationController rotationController;
+    private final BotTeleportController teleportController;
 
     private final IPearlStrategyCalculator strategyCalculator;
     private final IPearlThrower pearlThrower;
@@ -44,11 +47,19 @@ public class BotEnderpearlController {
     private static final long MIN_TIME_BETWEEN_PEARLS_MS = 700;
     private static final double MIN_USE_DISTANCE = 3.5;
     private static final double MAX_USE_DISTANCE = 16.0;
+
+    private long lastAutoTeleportTime = 0;
+    private static final long AUTO_TELEPORT_COOLDOWN_MS = 10000;
+    private static final double AUTO_TELEPORT_HORIZONTAL_DISTANCE = 25.0;
+    private static final double AUTO_TELEPORT_VERTICAL_DISTANCE = 15.0;
+    private static final double EMERGENCY_TELEPORT_DISTANCE = 25.0;
+
     public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
         this.level = bot.level();
         this.inventoryController = inventoryController;
         this.rotationController = rotationController;
+        this.teleportController = new BotTeleportController(bot);
 
         this.safetyValidator = new SafetyValidator(level);
         this.pearlThrower = new PearlThrower(level);
@@ -178,6 +189,90 @@ public class BotEnderpearlController {
         this.currentTarget = target;
         startPearlPreparation(pearlTarget, IPearlStrategyCalculator.PearlStrategy.ANCHOR_POSITION);
         return true;
+    }
+
+    public boolean checkAndPerformAutoTeleport(org.bukkit.entity.Player target) {
+        if (target == null || !target.isOnline()) return false;
+        if (!canAutoTeleport()) return false;
+
+        Vec3 botPos = bot.position();
+        org.bukkit.Location targetLoc = target.getLocation();
+        Vec3 targetPos = new Vec3(targetLoc.getX(), targetLoc.getY(), targetLoc.getZ());
+
+        double horizontalDistance = Math.sqrt(
+                Math.pow(botPos.x - targetPos.x, 2) +
+                        Math.pow(botPos.z - targetPos.z, 2)
+        );
+        double verticalDistance = Math.abs(botPos.y - targetPos.y);
+        double totalDistance = botPos.distanceTo(targetPos);
+
+        boolean needsTeleport = false;
+        String reason = "";
+
+        if (totalDistance > EMERGENCY_TELEPORT_DISTANCE) {
+            needsTeleport = true;
+            reason = "emergency distance";
+        } else if (horizontalDistance > AUTO_TELEPORT_HORIZONTAL_DISTANCE) {
+            needsTeleport = true;
+            reason = "horizontal distance";
+        } else if (verticalDistance > AUTO_TELEPORT_VERTICAL_DISTANCE) {
+            needsTeleport = true;
+            reason = "vertical distance";
+        }
+
+        if (needsTeleport) {
+            return performAutoTeleport(target, reason);
+        }
+
+        return false;
+    }
+
+    private boolean performAutoTeleport(org.bukkit.entity.Player target, String reason) {
+        try {
+            teleportController.setTarget(target);
+
+            boolean success = teleportController.teleportSafeNear(target);
+            if (!success) {
+                success = teleportController.teleportBeside(target);
+            }
+
+            if (success) {
+                lastAutoTeleportTime = System.currentTimeMillis();
+
+                if (isPreparingPearl) {
+                    isPreparingPearl = false;
+                    pendingThrowTarget = null;
+                    preparationTicks = 0;
+                }
+
+                if (target.isOnline()) {
+                    net.minecraft.world.entity.player.Player nmsTarget = ((CraftPlayer) target).getHandle();
+                    rotationController.updateRotation(nmsTarget);
+                }
+
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+
+        return false;
+    }
+
+    private boolean canAutoTeleport() {
+        long currentTime = System.currentTimeMillis();
+        return currentTime - lastAutoTeleportTime >= AUTO_TELEPORT_COOLDOWN_MS &&
+                !teleportController.isTeleporting();
+    }
+
+    public long getAutoTeleportCooldownRemaining() {
+        long currentTime = System.currentTimeMillis();
+        long timeSinceLastTeleport = currentTime - lastAutoTeleportTime;
+        return Math.max(0, AUTO_TELEPORT_COOLDOWN_MS - timeSinceLastTeleport);
+    }
+
+    public boolean isAutoTeleportReady() {
+        return canAutoTeleport();
     }
 
     public void onDamageReceived() {
