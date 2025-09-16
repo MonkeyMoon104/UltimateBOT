@@ -22,9 +22,7 @@ public class BotRAPVPController {
     private final Level level;
     private final BotInventoryController inventory;
     private final BotRotationController rotation;
-    private final BotCPVPController cpvp;
     private final BotEnderpearlController pearlController;
-
     private final AnchorPlacer anchorPlacer;
     private final AnchorCharger anchorCharger;
     private final AnchorExploder anchorExploder;
@@ -41,12 +39,10 @@ public class BotRAPVPController {
     public BotRAPVPController(Player bot,
                               BotInventoryController inventory,
                               BotRotationController rotation,
-                              BotCPVPController cpvp,
                               BotEnderpearlController pearlController) {
         this.bot = bot;
         this.inventory = inventory;
         this.rotation = rotation;
-        this.cpvp = cpvp;
         this.pearlController = pearlController;
         this.level = bot.level();
 
@@ -116,7 +112,6 @@ public class BotRAPVPController {
             anchorExploder.explodeAnchor(anchorPos);
         } else {
             pearlController.tryPearlToObsidianSide(anchorPos, currentTarget);
-            cpvp.tick(currentTarget);
 
             state = RAPVPState.PLACING_ANCHOR;
             anchorPos = null;

@@ -90,7 +90,6 @@ public class BotAI {
                 bot,
                 inventoryController,
                 rotationController,
-                cpvpController,
                 enderpearlController
         );
         this.rapvpController.setRank(options.getRank());
