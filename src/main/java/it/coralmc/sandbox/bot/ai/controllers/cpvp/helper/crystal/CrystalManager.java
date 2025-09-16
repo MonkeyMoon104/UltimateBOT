@@ -69,7 +69,7 @@ public class CrystalManager {
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
 
-        if (crystalY >= targetY) {
+        if (crystalY > targetY) {
             return false;
         }
 
@@ -77,7 +77,7 @@ public class CrystalManager {
             return false;
         }
 
-        return crystalY < targetY && botY < crystalY;
+        return crystalY <= targetY && botY < crystalY;
     }
 
     public void setConfig(CPVPConfig config) {

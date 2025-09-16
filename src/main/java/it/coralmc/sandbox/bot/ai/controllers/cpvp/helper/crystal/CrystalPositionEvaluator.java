@@ -25,7 +25,7 @@ public class CrystalPositionEvaluator {
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
 
-        if (crystalY >= targetY) {
+        if (crystalY > targetY) {
             return 0.0;
         }
 
@@ -33,7 +33,7 @@ public class CrystalPositionEvaluator {
             return 0.0;
         }
 
-        if (crystalY < targetY && botY < crystalY) {
+        if (crystalY <= targetY && botY < crystalY) {
             Vec3 targetPos = target.position();
             Vec3 crystalCenter = Vec3.atCenterOf(crystalPos.above());
             double distanceToTarget = crystalCenter.distanceTo(targetPos);
@@ -62,7 +62,7 @@ public class CrystalPositionEvaluator {
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
 
-        if (crystalY >= targetY) {
+        if (crystalY > targetY) {
             return 0.0;
         }
 
@@ -70,7 +70,7 @@ public class CrystalPositionEvaluator {
             return 0.0;
         }
 
-        if (crystalY < targetY && botY < crystalY) {
+        if (crystalY <= targetY && botY < crystalY) {
             double distanceToTarget = target.position().distanceTo(crystalPos);
             double distanceToBot = crystalPos.distanceTo(bot.position());
 
