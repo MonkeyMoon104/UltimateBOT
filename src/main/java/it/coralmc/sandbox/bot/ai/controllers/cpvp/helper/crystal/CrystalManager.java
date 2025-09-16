@@ -63,7 +63,21 @@ public class CrystalManager {
         double distanceToBot = bot.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos.above()));
 
-        return distanceToBot <= 10 && distanceToTarget <= maxCrystalDistance;
+        if (distanceToBot > 10 || distanceToTarget > maxCrystalDistance) return false;
+
+        int crystalY = pos.getY() + 1;
+        int botY = bot.blockPosition().getY();
+        int targetY = target.blockPosition().getY();
+
+        if (crystalY >= targetY) {
+            return false;
+        }
+
+        if (botY >= crystalY) {
+            return false;
+        }
+
+        return crystalY < targetY && botY < crystalY;
     }
 
     public void setConfig(CPVPConfig config) {

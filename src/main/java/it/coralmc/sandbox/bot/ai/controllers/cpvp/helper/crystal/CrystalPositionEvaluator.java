@@ -12,15 +12,6 @@ public class CrystalPositionEvaluator {
 
     private final Player bot;
 
-    private static final double[] DAMAGE_CACHE = new double[200];
-
-    static {
-        for (int i = 0; i < DAMAGE_CACHE.length; i++) {
-            double distance = i * 0.1;
-            DAMAGE_CACHE[i] = calculateDamageForDistance(distance);
-        }
-    }
-
     public CrystalPositionEvaluator(Player bot) {
         this.bot = bot;
     }
@@ -29,31 +20,35 @@ public class CrystalPositionEvaluator {
                                         Map<BlockPos, Integer> crystalCountAtPosition,
                                         double optimalDamageRange,
                                         double minCrystalDistance) {
-        Vec3 targetPos = target.position();
-        Vec3 crystalCenter = Vec3.atCenterOf(crystalPos.above());
 
-        double distanceToTarget = crystalCenter.distanceTo(targetPos);
+        int crystalY = crystalPos.getY() + 1;
+        int botY = bot.blockPosition().getY();
+        int targetY = target.blockPosition().getY();
 
-        double score = 0;
-
-        double targetDamage = getCachedDamage(distanceToTarget);
-        score += targetDamage * 55;
-
-        if (distanceToTarget <= optimalDamageRange) {
-            score += (optimalDamageRange - distanceToTarget) * 25;
+        if (crystalY >= targetY) {
+            return 0.0;
         }
 
-        int yDiff = crystalPos.getY() - target.blockPosition().getY();
-        if (yDiff < 0) {
-            score += Math.abs(yDiff) * 50;
-        } else {
-            score += 10;
+        if (botY >= crystalY) {
+            return 0.0;
         }
 
-        int existingCount = crystalCountAtPosition.getOrDefault(crystalPos, 0);
-        score += existingCount * 20;
+        if (crystalY < targetY && botY < crystalY) {
+            Vec3 targetPos = target.position();
+            Vec3 crystalCenter = Vec3.atCenterOf(crystalPos.above());
+            double distanceToTarget = crystalCenter.distanceTo(targetPos);
 
-        return score;
+            double score = Math.max(0, 10.0 - distanceToTarget);
+
+            int yDiff = targetY - crystalY;
+            if (yDiff > 0) {
+                score += yDiff * 2.0;
+            }
+
+            return score;
+        }
+
+        return 0.0;
     }
 
     public double evaluateCrystalForAttack(EndCrystal crystal, Player target,
@@ -63,36 +58,35 @@ public class CrystalPositionEvaluator {
                                            double optimalDamageRange) {
 
         Vec3 crystalPos = crystal.position();
-        double distanceToTarget = target.position().distanceTo(crystalPos);
+        int crystalY = (int) crystalPos.y;
+        int botY = bot.blockPosition().getY();
+        int targetY = target.blockPosition().getY();
 
-        double score = 1.0;
-
-        double distanceToBot = crystalPos.distanceTo(bot.position());
-        score -= Math.max(0, 3.0 - distanceToBot) * 20;
-
-        if (distanceToTarget <= optimalDamageRange) {
-            score += (optimalDamageRange - distanceToTarget) / optimalDamageRange;
+        if (crystalY >= targetY) {
+            return 0.0;
         }
 
-        if (myPlacedCrystals.contains(crystal)) score += 0.5;
-        if (distanceToTarget <= 3.0) score += 0.4;
+        if (botY >= crystalY) {
+            return 0.0;
+        }
 
-        double yDiff = crystalPos.y - target.position().y;
-        if (yDiff < 0) score += Math.abs(yDiff) * 0.3;
+        if (crystalY < targetY && botY < crystalY) {
+            double distanceToTarget = target.position().distanceTo(crystalPos);
+            double distanceToBot = crystalPos.distanceTo(bot.position());
 
-        return score;
-    }
+            double score = 1.0;
 
-    private double getCachedDamage(double distance) {
-        if (distance > 20.0) return 0.0;
-        int index = (int) Math.min(distance * 10, DAMAGE_CACHE.length - 1);
-        return DAMAGE_CACHE[index];
-    }
+            if (distanceToTarget <= 4.0) {
+                score += 2.0;
+            }
 
-    private static double calculateDamageForDistance(double distance) {
-        if (distance > 12.0) return 0.0;
-        double maxDamage = 14.0;
-        double falloff = Math.max(0.0, 1.0 - (distance / 12.0));
-        return maxDamage * falloff * falloff * falloff;
+            if (myPlacedCrystals.contains(crystal)) {
+                score += 1.0;
+            }
+
+            return score;
+        }
+
+        return 0.0;
     }
 }

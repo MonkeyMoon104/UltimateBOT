@@ -13,6 +13,7 @@ public class ObsidianScanner {
 
     private final Level level;
     private CPVPConfig config;
+
     public ObsidianScanner(Level level) {
         this.level = level;
     }
@@ -21,15 +22,21 @@ public class ObsidianScanner {
         BlockPos targetPos = target.blockPosition();
         long currentTime = System.currentTimeMillis();
 
-        for (int y = -5; y <= 4; y++) {
-            for (int x = -9; x <= 9; x++) {
-                for (int z = -9; z <= 9; z++) {
+        for (int y = -3; y <= 2; y++) {
+            for (int x = -6; x <= 6; x++) {
+                for (int z = -6; z <= 6; z++) {
                     BlockPos checkPos = targetPos.offset(x, y, z);
 
                     if (obsidianCache.containsKey(checkPos) &&
                             currentTime - obsidianCache.get(checkPos) < config.getObsidianCacheMs()) {
                         continue;
                     }
+
+                    int obsidianY = checkPos.getY();
+                    int botY = target.blockPosition().getY();
+                    int targetY = target.blockPosition().getY();
+
+                    if (obsidianY >= targetY) continue;
 
                     BlockState state = level.getBlockState(checkPos);
                     if (state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK)) {
