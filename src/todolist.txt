@@ -1,2 +1,1 @@
-1) mettere teleport tramite teleport controller in movement controller quando il node di teleport risulta inacessibile dopo vari tentavi per diminuire carico e aumentare performance e gameplay
-2) fixare che il bot non si piazzi in culo le anchor (dietro di se), return istantaneo se è una posizione di merda
+1) fixare che il bot non si piazzi in culo le anchor (dietro di se), return istantaneo se è una posizione di merda
