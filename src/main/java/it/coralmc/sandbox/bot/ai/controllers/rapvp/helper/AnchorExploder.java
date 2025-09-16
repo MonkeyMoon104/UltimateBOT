@@ -44,9 +44,22 @@ public class AnchorExploder {
                 return;
             }
 
-
             inventory.switchToEmptySlot();
+            rotation.lookAt(Vec3.atCenterOf(anchorPos));
 
+            if (tryVanillaExplosion(anchorPos, anchorState)) {
+                return;
+            }
+
+            tryManualExplosion(anchorPos);
+
+        } catch (Exception e) {
+            SandboxTraining.getInstance().getLogger().warning("Errore durante esplosione anchor: " + e.getMessage());
+        }
+    }
+
+    private boolean tryVanillaExplosion(BlockPos anchorPos, BlockState anchorState) {
+        try {
             BlockHitResult hitResult = new BlockHitResult(
                     Vec3.atCenterOf(anchorPos),
                     Direction.UP,
@@ -54,33 +67,33 @@ public class AnchorExploder {
                     false
             );
 
-            try {
-                InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
+            InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
+            bot.swing(InteractionHand.MAIN_HAND);
 
-                rotation.lookAt(Vec3.atLowerCornerOf(anchorPos));
+            return result.consumesAction();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
-                bot.swing(InteractionHand.MAIN_HAND);
-
-                if (result.consumesAction()) {
-                    return;
-                }
-            } catch (Exception e) {
-                SandboxTraining.getInstance().getLogger().warning("Uso esplosione anchor forzata, try catch fallito, errore: " + e);
-            }
-
+    private void tryManualExplosion(BlockPos anchorPos) {
+        System.out.println("FALLBACK -> USO ESPLOSIONE ANCHOR MANUALE");
+        try {
             bot.level().removeBlock(anchorPos, false);
 
             bot.level().explode(
-                    null,
+                    bot,
                     anchorPos.getX() + 0.5,
                     anchorPos.getY() + 0.5,
                     anchorPos.getZ() + 0.5,
-                    5.0F,
-                    net.minecraft.world.level.Level.ExplosionInteraction.BLOCK
+                    3.5F,
+                    net.minecraft.world.level.Level.ExplosionInteraction.NONE
             );
 
+            bot.swing(InteractionHand.MAIN_HAND);
+
         } catch (Exception e) {
-            e.printStackTrace();
+            SandboxTraining.getInstance().getLogger().warning("Errore durante esplosione manuale: " + e.getMessage());
         }
     }
 
