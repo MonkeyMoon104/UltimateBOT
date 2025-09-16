@@ -108,11 +108,15 @@ gui:
 
   rank-button:
     name: "&bRank"
-    material: "DIAMOND_SWORD"
+    material: "DIAMOND_SWORD" #FALLBACK ITEM
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
     lore:
       - ""
       - "%ranks%"
       - ""
       - "&eClicca per aumentare/diminuire il rank"
-
-

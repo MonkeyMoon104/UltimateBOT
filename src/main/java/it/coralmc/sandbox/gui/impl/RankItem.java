@@ -29,11 +29,13 @@ public class RankItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        boolean status = options.isCombat();
+        BotRank currentRank = options.getRank();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getConfig().getString("gui.rank-button.material")));
+        Material rankMaterial = getRankMaterial(currentRank);
+
+        ItemBuilder builder = new ItemBuilder(rankMaterial);
         builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.rank-button.name")));
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
+        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
 
         var loreLines = training.getConfig().getStringList("gui.rank-button.lore");
         List<String> ranks = Arrays.stream(BotRank.values())
@@ -53,20 +55,45 @@ public class RankItem extends AbstractItem {
         return builder;
     }
 
+    private Material getRankMaterial(BotRank rank) {
+        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase();
+        String materialName = training.getConfig().getString(configPath);
+
+        if (materialName != null) {
+            try {
+                return Material.valueOf(materialName.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                training.getLogger().warning("Invalid material '" + materialName + "' for rank " + rank.name() + " in config. Using fallback");
+            }
+        }
+
+        String defaultMaterial = training.getConfig().getString("gui.rank-button.material", "DIAMOND_SWORD");
+        try {
+            return Material.valueOf(defaultMaterial.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            training.getLogger().warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
+            return Material.DIAMOND_SWORD;
+        }
+    }
+
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-            BotRank currentRank = options.getRank();
-            BotRank[] values = BotRank.values();
-            int index = currentRank.ordinal();
+        BotRank currentRank = options.getRank();
+        BotRank[] values = BotRank.values();
+        int index = currentRank.ordinal();
 
+        if (clickType == ClickType.LEFT) {
             index = (index + 1) % values.length;
+        } else if (clickType == ClickType.RIGHT) {
+            index = (index - 1 + values.length) % values.length;
+        }
 
-            BotRank newRank = values[index];
-            options.setRank(newRank);
+        BotRank newRank = values[index];
+        options.setRank(newRank);
 
-            training.getBotManager().setBotRank(player.getUniqueId(), newRank);
+        training.getBotManager().setBotRank(player.getUniqueId(), newRank);
 
-            player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.getSelectedName()));
+        player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.getSelectedName()));
         notifyWindows();
     }
 }

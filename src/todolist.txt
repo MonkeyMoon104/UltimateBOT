@@ -1,1 +1,0 @@
-1) move all teleport control from movement to enderpearl
