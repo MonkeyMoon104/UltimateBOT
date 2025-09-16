@@ -139,8 +139,17 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         moveToTarget(target, targetDistance);
         actionTaken = true;
 
-        if (!inventoryController.isHoldingCrystal() && cpvpController.canPlaceCrystal()) {
-            inventoryController.switchToCrystal();
+        int botY = bot.blockPosition().getY();
+        int targetY = target.blockPosition().getY();
+
+        if (botY >= targetY) {
+            if (!inventoryController.isHoldingAnchor() && inventoryController.hasItem(net.minecraft.world.item.Items.RESPAWN_ANCHOR)) {
+                inventoryController.switchToAnchor();
+            }
+        } else {
+            if (!inventoryController.isHoldingCrystal() && cpvpController.canPlaceCrystal()) {
+                inventoryController.switchToCrystal();
+            }
         }
 
         return actionTaken;
@@ -182,8 +191,6 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         actionTaken = true;
 
         repositionTimer--;
-        if (repositionTimer <= 0) {
-        }
 
         return actionTaken;
     }
@@ -191,6 +198,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeAnchorSetup(Player target, double distance) {
         if (!((TrainingBot) bot).isCombat()) return false;
+
         if (!rapvpController.isActive()) {
             rapvpController.enable(target);
         }
@@ -198,26 +206,19 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         double targetDistance = 4.0;
         moveToTarget(target, targetDistance);
 
-        if (!rapvpController.isActive() &&
-                System.currentTimeMillis() - 0 > 2000) {
-        }
-
         return true;
     }
 
     @Override
     public boolean executeCrystalSetup(Player target, double distance) {
         if (!((TrainingBot) bot).isCombat()) return false;
+
         movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
         movementController.moveToTarget(target, 5.0);
 
-        if (cpvpController.canPlaceCrystal()) {
-            cpvpController.tryPlaceOptimalCrystals(target);
-        }
-
         if (enderpearlController.canUseEnderpearl() &&
                 bot.position().y > target.position().y - 1 &&
-                random.nextDouble() < 0.3) {
+                random.nextDouble() < 0.2) {
             enderpearlController.tryUseEnderpearl(target);
         }
 
@@ -236,12 +237,6 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         movementController.moveAwayFrom(target, 10.0);
         actionTaken = true;
-
-        if (cpvpController.canPlaceObsidian() && random.nextDouble() < 0.3) {
-        }
-
-        if (bot.getHealth() / bot.getMaxHealth() > 0.4f) {
-        }
 
         return actionTaken;
     }

@@ -56,8 +56,15 @@ public class CombatDataManager implements ICombatDataManager {
         lastPositionUpdate = currentTime;
 
         if (((TrainingBot) bot).isCombat()) {
-            rapvpController.tick();
-            cpvpController.tick(target);
+            int botY = bot.blockPosition().getY();
+            int targetY = target.blockPosition().getY();
+
+            if (botY >= targetY) {
+                rapvpController.tick();
+            }
+            else {
+                cpvpController.tick(target);
+            }
         }
     }
 

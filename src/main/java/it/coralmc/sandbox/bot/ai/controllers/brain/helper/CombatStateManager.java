@@ -41,25 +41,30 @@ public class CombatStateManager implements ICombatStateManager {
 
         CombatState newState = currentState;
 
-        double yDiff = bot.position().y - target.position().y;
+        int botY = bot.blockPosition().getY();
+        int targetY = target.blockPosition().getY();
 
         if (healthPercent < 0.25f) {
             newState = CombatState.RETREATING;
         } else if (consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
             newState = CombatState.DEFENSIVE;
         }
-        else if (Math.abs(yDiff) <= 3.0 && shouldAttemptAnchor(target, currentTime)) {
-            newState = CombatState.ANCHOR_SETUP;
-        }
-        else if (yDiff < -1.0 && cpvpController.canPlaceCrystal()) {
-            newState = CombatState.CRYSTAL_SETUP;
+        else if (shouldAttemptCombat(target, currentTime, distance)) {
+            if (botY >= targetY && shouldAttemptAnchor(target, currentTime)) {
+                newState = CombatState.ANCHOR_SETUP;
+            }
+            else if (botY < targetY && cpvpController.canPlaceCrystal()) {
+                newState = CombatState.CRYSTAL_SETUP;
+            }
+            else if (shouldReposition(target, distance)) {
+                newState = CombatState.REPOSITIONING;
+            }
+            else {
+                newState = CombatState.AGGRESSIVE;
+            }
         }
         else if (shouldReposition(target, distance)) {
             newState = CombatState.REPOSITIONING;
-        } else if (distance > 4.0 && distance < 12.0 && healthPercent > 0.4f) {
-            newState = CombatState.CRYSTAL_SETUP;
-        } else if (distance <= 4.0 && healthPercent > 0.3f) {
-            newState = CombatState.AGGRESSIVE;
         } else {
             newState = CombatState.AGGRESSIVE;
         }
@@ -69,6 +74,11 @@ public class CombatStateManager implements ICombatStateManager {
             lastStateChange = currentTime;
             onStateChange(target);
         }
+    }
+
+    private boolean shouldAttemptCombat(Player target, long currentTime, double distance) {
+        return distance > 1.0 && distance < 12.0 &&
+                bot.getHealth() / bot.getMaxHealth() > 0.3f;
     }
 
     @Override
@@ -99,7 +109,6 @@ public class CombatStateManager implements ICombatStateManager {
         if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
 
         double distance = bot.distanceTo(target);
-
         return distance > 1.0 && distance < 8.0 && target.onGround();
     }
 
