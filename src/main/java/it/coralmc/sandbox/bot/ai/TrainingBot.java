@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.fakeplayer.BotCraftPlayer;
-import it.coralmc.sandbox.bot.ai.handlers.BotAIController;
+import it.coralmc.sandbox.bot.ai.controllers.brain.BotAIController;
 import it.coralmc.sandbox.bot.ai.handlers.BotDeathHandler;
 import it.coralmc.sandbox.bot.ai.handlers.BotEquipmentHandler;
 import it.coralmc.sandbox.bot.ai.handlers.TotemTracker;

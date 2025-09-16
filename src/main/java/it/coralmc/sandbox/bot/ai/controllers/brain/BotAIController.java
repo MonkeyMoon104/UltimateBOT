@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.handlers;
+package it.coralmc.sandbox.bot.ai.controllers.brain;
 
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;

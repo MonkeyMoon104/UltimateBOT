@@ -1,7 +1,7 @@
-package it.coralmc.sandbox.bot.ai.handlers.helper;
+package it.coralmc.sandbox.bot.ai.controllers.brain.helper;
 
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatStateManager;
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.IPathfindingManager;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import it.coralmc.sandbox.bot.ai.controllers.movement.BotMovementController;
 import net.minecraft.core.BlockPos;

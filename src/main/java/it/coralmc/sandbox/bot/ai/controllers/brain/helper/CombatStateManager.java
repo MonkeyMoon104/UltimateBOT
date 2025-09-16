@@ -1,6 +1,6 @@
-package it.coralmc.sandbox.bot.ai.handlers.helper;
+package it.coralmc.sandbox.bot.ai.controllers.brain.helper;
 
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatStateManager;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.inventory.BotInventoryController;
 import it.coralmc.sandbox.bot.ai.controllers.rapvp.BotRAPVPController;

@@ -1,9 +1,9 @@
-package it.coralmc.sandbox.bot.ai.handlers.helper;
+package it.coralmc.sandbox.bot.ai.controllers.brain.helper;
 
 import it.coralmc.sandbox.bot.ai.TrainingBot;
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatDataManager;
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatStateManager;
-import it.coralmc.sandbox.bot.ai.handlers.helper.inter.ICombatStrategyExecutor;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
+import it.coralmc.sandbox.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
 import it.coralmc.sandbox.bot.ai.controllers.attack.BotAttackController;
 import it.coralmc.sandbox.bot.ai.controllers.cpvp.BotCPVPController;
 import it.coralmc.sandbox.bot.ai.controllers.enderpearl.BotEnderpearlController;
