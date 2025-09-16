@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.fakeplayer.BotCraftPlayer;
-import it.coralmc.sandbox.bot.ai.controllers.brain.BotAIController;
+import it.coralmc.sandbox.bot.ai.controllers.brain.BotBrainController;
 import it.coralmc.sandbox.bot.ai.handlers.BotDeathHandler;
 import it.coralmc.sandbox.bot.ai.handlers.BotEquipmentHandler;
 import it.coralmc.sandbox.bot.ai.handlers.TotemTracker;
@@ -23,8 +23,7 @@ public class TrainingBot extends Player {
     private final SandboxTraining plugin;
     private final PlayerOptions playerOptions;
     private final BotCraftPlayer craftEntity;
-
-    private final BotAIController aiController;
+    private final BotBrainController brainController;
     private final TotemTracker totemTracker;
     private final BotDeathHandler deathHandler;
     private final BotEquipmentHandler equipmentHandler;
@@ -48,7 +47,7 @@ public class TrainingBot extends Player {
         this.playerOptions = plugin.getPlayerOptions();
         this.craftEntity = new BotCraftPlayer(this);
 
-        this.aiController = new BotAIController(this, plugin, targetPlayer, follow, botOptions);
+        this.brainController = new BotBrainController(this, plugin, targetPlayer, follow, botOptions);
         this.totemTracker = new TotemTracker(this);
         this.deathHandler = new BotDeathHandler(this, plugin, playerOptions, deadBotMessage);
         this.equipmentHandler = new BotEquipmentHandler(this);
@@ -79,7 +78,7 @@ public class TrainingBot extends Player {
             }
         }
 
-        aiController.onTick();
+        brainController.onTick();
         totemTracker.onTick();
     }
 
@@ -154,9 +153,9 @@ public class TrainingBot extends Player {
         }
     }
 
-    public BotAIController getAiController() { return aiController; }
+    public BotBrainController getBrainController() { return brainController; }
     public TotemTracker getTotemTracker() { return totemTracker; }
-    public org.bukkit.entity.Player getTargetPlayer() { return aiController.getTargetPlayer(); }
+    public org.bukkit.entity.Player getTargetPlayer() { return brainController.getTargetPlayer(); }
     public void setTotemCount(int count) {
         this.totemTracker.setTotemCount(count);
     }
@@ -164,20 +163,20 @@ public class TrainingBot extends Player {
         return this.totemTracker.getTotemCount();
     }
     public void setFollow(boolean follow) {
-        this.aiController.setFollow(follow);
+        this.brainController.setFollow(follow);
     }
     public boolean isFollow() {
-        return this.aiController.isFollow();
+        return this.brainController.isFollow();
     }
 
     public void setCombat(boolean combat) {
-        this.aiController.setCombat(combat);
+        this.brainController.setCombat(combat);
     }
     public boolean isCombat() {
-        return this.aiController.isCombat();
+        return this.brainController.isCombat();
     }
     public BotAI getBotAI() {
-        return this.aiController.getBotAI();
+        return this.brainController.getBotAI();
     }
     public boolean callSuperActuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
         return super.actuallyHurt(level, source, amount, event);

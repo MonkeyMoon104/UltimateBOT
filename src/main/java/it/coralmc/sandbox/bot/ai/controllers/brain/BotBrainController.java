@@ -6,7 +6,7 @@ import it.coralmc.sandbox.bot.ai.BotAI;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.world.entity.player.Player;
 
-public class BotAIController {
+public class BotBrainController {
 
     private final TrainingBot bot;
     private final BotAI botAI;
@@ -15,8 +15,8 @@ public class BotAIController {
     private boolean follow;
     private boolean combat;
 
-    public BotAIController(TrainingBot bot, SandboxTraining plugin,
-                           org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
+    public BotBrainController(TrainingBot bot, SandboxTraining plugin,
+                              org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
         this.bot = bot;
         this.targetPlayer = targetPlayer;
         this.follow = follow;

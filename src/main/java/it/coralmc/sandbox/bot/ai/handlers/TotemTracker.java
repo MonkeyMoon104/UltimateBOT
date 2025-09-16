@@ -44,7 +44,7 @@ public class TotemTracker {
             int consumedTotems = previousEquippedTotems - currentEquippedTotems;
             if (totemCount != -1) {
                 totemCount = Math.max(0, totemCount - consumedTotems);
-                BotOptions options = bot.getAiController().getBotOptions();
+                BotOptions options = bot.getBrainController().getBotOptions();
                 if (options != null) {
                     options.setTotems(totemCount);
 
@@ -60,7 +60,7 @@ public class TotemTracker {
         previousEquippedTotems = currentEquippedTotems;
         previousCombatState = currentCombatState;
 
-        bot.getAiController().getBotAI().manageTotem();
+        bot.getBrainController().getBotAI().manageTotem();
     }
 
     public int getTotemCount() { return totemCount; }
