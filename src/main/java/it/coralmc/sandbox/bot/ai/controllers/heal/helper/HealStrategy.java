@@ -12,6 +12,11 @@ public class HealStrategy implements IHealStrategy {
     private final IHealExecutor healExecutor;
     private final IHealActionManager actionManager;
 
+    private long lastExecuteHealCall = 0;
+    private int consecutiveHealChecks = 0;
+    private static final long EXECUTE_HEAL_INTERVAL = 50;
+    private static final int MAX_CONSECUTIVE_CHECKS = 10;
+
     public HealStrategy(IHealthChecker healthChecker, IHealExecutor healExecutor, IHealActionManager actionManager) {
         this.healthChecker = healthChecker;
         this.healExecutor = healExecutor;
@@ -20,13 +25,30 @@ public class HealStrategy implements IHealStrategy {
 
     @Override
     public void executeHeal(Player bot) {
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastExecuteHealCall < EXECUTE_HEAL_INTERVAL) {
+            consecutiveHealChecks++;
+
+            if (consecutiveHealChecks > MAX_CONSECUTIVE_CHECKS) {
+                if (actionManager instanceof HealActionManager) {
+                    ((HealActionManager) actionManager).forceReset();
+                }
+                consecutiveHealChecks = 0;
+            }
+            return;
+        }
+
+        lastExecuteHealCall = currentTime;
+        consecutiveHealChecks = 0;
+
         actionManager.updateHealAction(bot);
 
         if (actionManager.isHealing()) {
             return;
         }
 
-        if (shouldHeal(bot)) {
+        if (shouldHeal(bot) && actionManager.canStartNewHeal()) {
             actionManager.startHealAction(bot);
         }
     }

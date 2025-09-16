@@ -23,6 +23,8 @@ public class BotMovementController {
     private double currentTargetDistance = 3.0;
     private boolean preferHighGround = false;
     private boolean avoidCorners = true;
+    private long lastMovementTime = 0;
+    private static final long MAX_MOVEMENT_STALL_TIME = 1000;
 
     public BotMovementController(Player bot, Level level) {
         this.bot = bot;
@@ -38,6 +40,10 @@ public class BotMovementController {
 
 
     public void moveTowards(Player target, double targetDistance) {
+        if (isStuckInPlace()) {
+            forceUnstick(target);
+            return;
+        }
         combatStateManager.updateCombatData(target);
         this.currentTargetDistance = targetDistance;
 
@@ -47,6 +53,7 @@ public class BotMovementController {
         );
 
         executeMovementPattern(target, targetDistance, selectedPattern);
+        lastMovementTime = System.currentTimeMillis();
     }
 
     public void moveToTarget(Player target, double targetDistance) {
@@ -74,6 +81,11 @@ public class BotMovementController {
     }
 
     public void maintainDistance(Player target, double targetDistance) {
+        if (isStuckInPlace()) {
+            forceUnstick(target);
+            return;
+        }
+
         double currentDistance = bot.distanceTo(target);
         if (Math.abs(currentDistance - targetDistance) <= 0.3) {
             if (patternSelector.getCurrentPattern() != MovementPattern.STRAFE_CIRCLE) {
@@ -85,8 +97,8 @@ public class BotMovementController {
         } else {
             moveTowards(target, targetDistance);
         }
+        lastMovementTime = System.currentTimeMillis();
     }
-
 
     public boolean calculatePathTo(Vec3 targetPos) {
         return pathfinder.calculatePathTo(targetPos);
@@ -145,11 +157,59 @@ public class BotMovementController {
 
     public void onDamageReceived() {
         combatStateManager.onDamageReceived();
+
+        setUnderFire(true);
+
+        patternSelector.setMovementPattern(MovementPattern.EVASIVE_ZIG_ZAG);
+
+        if (pathfinder.hasActivePath() && pathfinder.shouldRecalculatePath()) {
+            pathfinder.clearPath();
+        }
+
         if (combatStateManager instanceof CombatStateManager) {
             ((CombatStateManager) combatStateManager).setLastSafePosition(bot.position());
         }
+
+        ensureMovement();
+        lastMovementTime = System.currentTimeMillis();
     }
 
+    public boolean isStuckInPlace() {
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastMovementTime > MAX_MOVEMENT_STALL_TIME) {
+            return true;
+        }
+
+        Vec3 velocity = bot.getDeltaMovement();
+        return velocity.lengthSqr() < 0.01;
+    }
+
+    public void forceUnstick(Player target) {
+        resetCombatState();
+        obstacleHandler.clearDiversion();
+
+        setUnderFire(true);
+        emergencyEvade();
+
+        if (target != null) {
+            Vec3 botPos = bot.position();
+            Vec3 targetPos = target.position();
+
+            Vec3 direction = targetPos.subtract(botPos).normalize();
+            Vec3 sideDirection = new Vec3(-direction.z, 0, direction.x);
+
+            Vec3 unstuckPos = botPos.add(sideDirection.scale(3.0));
+            moveToPosition(unstuckPos);
+        } else {
+            double randomX = (Math.random() - 0.5) * 4.0;
+            double randomZ = (Math.random() - 0.5) * 4.0;
+            Vec3 randomPos = bot.position().add(randomX, 0, randomZ);
+            moveToPosition(randomPos);
+        }
+
+        lastMovementTime = System.currentTimeMillis();
+    }
 
     public void forceMovementPattern(MovementPattern pattern) {
         patternSelector.setMovementPattern(pattern);

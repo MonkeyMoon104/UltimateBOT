@@ -141,6 +141,8 @@ public class BotAI {
             );
         }
 
+        boolean isCurrentlyHealing = healController.isHealing();
+
         if (((TrainingBot) bot).isCombat()) {
             if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
                 if (movementController.followPath()) {
@@ -157,20 +159,42 @@ public class BotAI {
 
                 enderpearlController.tick();
 
-                if (((TrainingBot) bot).isCombat()) {
+                if (((TrainingBot) bot).isCombat() && !isCurrentlyHealing) {
                     combatStateManager.updateCombatState(target);
                     combatStrategyExecutor.executeCombatStrategy(target);
+                } else if (isCurrentlyHealing) {
+                    combatStateManager.updateCombatState(target);
+                    executeHealingMovement(target);
                 } else {
                     combatStrategyExecutor.basicFollowBehavior(target);
                 }
             }
         } else {
-            noobMovementController.moveTowards(target, 2.5);
+            if (!isCurrentlyHealing) {
+                noobMovementController.moveTowards(target, 2.5);
+            } else {
+                executeHealingMovement(target);
+            }
         }
 
         if (pathfindingManager instanceof PathfindingManager) {
             ((PathfindingManager) pathfindingManager).updateLastBotPosition();
             ((PathfindingManager) pathfindingManager).updateLastActionTime();
+        }
+    }
+
+    private void executeHealingMovement(Player target) {
+        double distance = bot.distanceTo(target);
+
+        if (distance < 3.0) {
+            movementController.moveAwayFrom(target, 4.0);
+        }
+        else if (distance > 8.0) {
+            movementController.moveTowards(target, 5.0);
+        }
+        else {
+            movementController.setUnderFire(true);
+            movementController.maintainDistance(target, distance);
         }
     }
 

@@ -12,9 +12,11 @@ public class HealActionManager implements IHealActionManager {
     private boolean isHealing = false;
     private int healingTicks = 0;
     private long lastHealTime = 0;
+    private long lastHealAttempt = 0;
 
     private static final int HEAL_DURATION_TICKS = 32;
     private static final long MIN_HEAL_COOLDOWN = 45000;
+    private static final long MIN_HEAL_ATTEMPT_INTERVAL = 2000;
 
     public HealActionManager(IHealExecutor healExecutor) {
         this.healExecutor = healExecutor;
@@ -28,6 +30,7 @@ public class HealActionManager implements IHealActionManager {
         isHealing = true;
         healingTicks = 0;
         lastHealTime = System.currentTimeMillis();
+        lastHealAttempt = System.currentTimeMillis();
     }
 
     @Override
@@ -57,7 +60,16 @@ public class HealActionManager implements IHealActionManager {
         if (isHealing) return false;
 
         long currentTime = System.currentTimeMillis();
-        return (currentTime - lastHealTime) >= MIN_HEAL_COOLDOWN;
+
+        boolean cooldownPassed = (currentTime - lastHealTime) >= MIN_HEAL_COOLDOWN;
+
+        boolean attemptIntervalPassed = (currentTime - lastHealAttempt) >= MIN_HEAL_ATTEMPT_INTERVAL;
+
+        if (!attemptIntervalPassed) {
+            lastHealAttempt = currentTime;
+        }
+
+        return cooldownPassed && attemptIntervalPassed;
     }
 
     @Override
@@ -89,5 +101,16 @@ public class HealActionManager implements IHealActionManager {
             float newHealth = Math.min(currentHealth + 4.0f, bot.getMaxHealth());
             bot.setHealth(newHealth);
         }
+    }
+
+    public boolean isInCooldown() {
+        long currentTime = System.currentTimeMillis();
+        return (currentTime - lastHealTime) < MIN_HEAL_COOLDOWN;
+    }
+
+    public void forceReset() {
+        isHealing = false;
+        healingTicks = 0;
+        lastHealAttempt = System.currentTimeMillis() - MIN_HEAL_ATTEMPT_INTERVAL;
     }
 }

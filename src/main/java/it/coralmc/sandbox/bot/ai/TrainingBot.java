@@ -69,12 +69,14 @@ public class TrainingBot extends Player {
                 totemTracker.onTick();
                 return;
             }
-        }
 
-        if (isCombat()) {
             if (getBotAI().getHealController().shouldHeal()) {
+                getBotAI().getHealController().handleDamageReceived();
                 totemTracker.onTick();
-                return;
+
+                if (getBotAI().getHealController().isHealing()) {
+                    return;
+                }
             }
         }
 
@@ -93,6 +95,9 @@ public class TrainingBot extends Player {
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
         if (isCombat()) {
+
+            getBotAI().getMovementController().onDamageReceived();
+
             net.minecraft.world.entity.Entity attacker = source.getEntity();
             if (attacker instanceof Player nmsPlayer && nmsPlayer.getUUID().equals(getTargetPlayer().getUniqueId())) {
                 if (!source.is(DamageTypes.IN_FIRE) && !source.is(DamageTypes.ON_FIRE) && !source.is(DamageTypes.LAVA)) {
@@ -108,6 +113,13 @@ public class TrainingBot extends Player {
 
             if (!getBotAI().getHealController().isHealing()) {
                 getBotAI().getHealController().handleDamageReceived();
+            } else {
+                getBotAI().getMovementController().setUnderFire(true);
+                getBotAI().getMovementController().emergencyEvade();
+            }
+
+            if (getBotAI().getMovementController().isStuckInPlace()) {
+                getBotAI().getMovementController().forceUnstick(((org.bukkit.craftbukkit.entity.CraftPlayer) getTargetPlayer()).getHandle());
             }
         }
 
