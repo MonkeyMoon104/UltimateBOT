@@ -4,7 +4,7 @@ import it.coralmc.sandbox.utils.ChatColorUtils;
 
 public enum BotRank {
     EASY("&7Easy", "&aEasy"),
-    NORMAL("&7Normal", "&fNormal"),
+    NORMAL("&7Normal", "&1Normal"),
     MEDIUM("&7Medium", "&eMedium"),
     HARD("&7Hard", "&cHard"),
     GOD("&7God", "&6&lGOD");
