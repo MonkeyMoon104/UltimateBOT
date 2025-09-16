@@ -58,8 +58,9 @@ public class CombatDataManager implements ICombatDataManager {
         if (((TrainingBot) bot).isCombat()) {
             int botY = bot.blockPosition().getY();
             int targetY = target.blockPosition().getY();
+            int yDiff = targetY - botY;
 
-            if (botY >= targetY) {
+            if (yDiff < 2) {
                 rapvpController.tick();
             }
             else {

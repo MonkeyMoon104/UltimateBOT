@@ -43,6 +43,7 @@ public class CombatStateManager implements ICombatStateManager {
 
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
+        int yDiff = targetY - botY;
 
         if (healthPercent < 0.25f) {
             newState = CombatState.RETREATING;
@@ -50,10 +51,10 @@ public class CombatStateManager implements ICombatStateManager {
             newState = CombatState.DEFENSIVE;
         }
         else if (shouldAttemptCombat(target, currentTime, distance)) {
-            if (botY >= targetY && shouldAttemptAnchor(target, currentTime)) {
+            if (yDiff < 2 && shouldAttemptAnchor(target, currentTime)) {
                 newState = CombatState.ANCHOR_SETUP;
             }
-            else if (botY < targetY && cpvpController.canPlaceCrystal()) {
+            else if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
                 newState = CombatState.CRYSTAL_SETUP;
             }
             else if (shouldReposition(target, distance)) {
@@ -89,15 +90,11 @@ public class CombatStateManager implements ICombatStateManager {
     @Override
     public void onStateChange(Player target) {
         switch (currentState) {
-            case DEFENSIVE -> {
+            case DEFENSIVE, REPOSITIONING, RETREATING -> {
             }
             case ANCHOR_SETUP -> {
                 rapvpController.enable(target);
                 lastAnchorAttempt = System.currentTimeMillis();
-            }
-            case RETREATING -> {
-            }
-            case REPOSITIONING -> {
             }
         }
     }

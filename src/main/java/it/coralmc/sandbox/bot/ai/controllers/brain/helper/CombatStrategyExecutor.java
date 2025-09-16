@@ -141,8 +141,9 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
+        int yDiff = targetY - botY;
 
-        if (botY >= targetY) {
+        if (yDiff < 2) {
             if (!inventoryController.isHoldingAnchor() && inventoryController.hasItem(net.minecraft.world.item.Items.RESPAWN_ANCHOR)) {
                 inventoryController.switchToAnchor();
             }
@@ -218,7 +219,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (enderpearlController.canUseEnderpearl() &&
                 bot.position().y > target.position().y - 1 &&
-                random.nextDouble() < 0.2) {
+                random.nextDouble() < 0.3) {
             enderpearlController.tryUseEnderpearl(target);
         }
 
