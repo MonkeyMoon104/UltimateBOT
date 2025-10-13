@@ -34,7 +34,27 @@ public class BotEventCommand implements CommandExecutor {
             return true;
         }
 
+        if (hasNormalBotSpawned(player)) {
+            player.sendMessage(ChatColorUtils.translate("&c❌ Hai già un bot normale spawnato! Despawnalo prima di gestire il bot event."));
+            return true;
+        }
+
         new NewBotGUI(player, plugin, true).open();
         return true;
+    }
+
+    private boolean hasNormalBotSpawned(Player player) {
+        if (!plugin.getBotManager().isBotSpawned(player.getUniqueId())) {
+            return false;
+        }
+
+        var bot = plugin.getBotManager().getBotSafe(player.getUniqueId());
+        if (bot != null && bot.getBrainController() != null) {
+            var botOptions = bot.getBrainController().getBotOptions();
+            if (botOptions != null) {
+                return !botOptions.isEventBot();
+            }
+        }
+        return false;
     }
 }

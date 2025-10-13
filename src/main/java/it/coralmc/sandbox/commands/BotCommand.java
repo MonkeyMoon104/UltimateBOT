@@ -1,6 +1,7 @@
 package it.coralmc.sandbox.commands;
 
 import it.coralmc.sandbox.SandboxTraining;
+import it.coralmc.sandbox.bot.ai.TrainingBot;
 import it.coralmc.sandbox.gui.NewBotGUI;
 import it.coralmc.sandbox.utils.ChatColorUtils;
 import org.bukkit.World;
@@ -34,7 +35,24 @@ public class BotCommand implements CommandExecutor {
             return true;
         }
 
+        if (isEventBotActive()) {
+            player.sendMessage(ChatColorUtils.translate("&c❌ C'è un bot event attivo! Non puoi spawnare bot normali durante un evento."));
+            return true;
+        }
+
         new NewBotGUI(player, plugin).open();
         return true;
+    }
+
+    private boolean isEventBotActive() {
+        for (TrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
+            if (bot != null && bot.getBrainController() != null) {
+                var botOptions = bot.getBrainController().getBotOptions();
+                if (botOptions != null && botOptions.isEventBot()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
