@@ -11,6 +11,9 @@ commands:
   bot:
     description: Open bot settings GUI
     permission: sb.bot.use
+  botevent:
+    description: Apri la GUI bot event
+    permission: admin.host.bot
   sbreload:
     description: Ricarica la configurazione o rimuovi bot/mappe
     usage: /sbreload <config|bot|maps|all>
@@ -23,3 +26,6 @@ commands:
     sb.bot.use:
       description: Permette di usare il comando bot
       default: true
+    admin.host.bot:
+      description: Permette di creare un bot evento
+      default: op

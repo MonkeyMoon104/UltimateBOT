@@ -3,7 +3,9 @@ package it.coralmc.sandbox;
 import it.coralmc.sandbox.bot.BotManager;
 import it.coralmc.sandbox.bot.BotRegistry;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
+import it.coralmc.sandbox.bot.ai.services.TargetingService;
 import it.coralmc.sandbox.commands.BotCommand;
+import it.coralmc.sandbox.commands.BotEventCommand;
 import it.coralmc.sandbox.commands.ReloadCommand;
 import it.coralmc.sandbox.listener.PlayerCheckListener;
 import it.coralmc.sandbox.placeholders.BotPlaceholderCoordinator;
@@ -18,6 +20,7 @@ public final class SandboxTraining extends JavaPlugin {
     private BotRegistry botRegistry;
     private BotManager botManager;
     private BotPlaceholderCoordinator placeholderCoordinator;
+    private TargetingService targetingService;
     private static SandboxTraining instance;
 
     @Override
@@ -25,11 +28,13 @@ public final class SandboxTraining extends JavaPlugin {
         instance = this;
         saveDefaultConfig();
 
+        this.targetingService = new TargetingService();
         this.playerOptions = new PlayerOptions();
         this.botRegistry = new BotRegistry();
         this.botManager = new BotManager(this);
 
         getCommand("bot").setExecutor(new BotCommand(this));
+        getCommand("botevent").setExecutor(new BotEventCommand(this));
         getCommand("sbreload").setExecutor(new ReloadCommand(this));
         getServer().getPluginManager().registerEvents(new PlayerCheckListener(this), this);
 
@@ -71,6 +76,10 @@ public final class SandboxTraining extends JavaPlugin {
 
     public BotManager getBotManager() {
         return botManager;
+    }
+
+    public TargetingService getTargetingService() {
+        return targetingService;
     }
 
     public PlayerOptions getPlayerOptions() {
