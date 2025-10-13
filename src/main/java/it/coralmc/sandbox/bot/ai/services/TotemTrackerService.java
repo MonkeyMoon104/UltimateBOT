@@ -1,11 +1,11 @@
-package it.coralmc.sandbox.bot.ai.handlers;
+package it.coralmc.sandbox.bot.ai.services;
 
 import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
-public class TotemTracker {
+public class TotemTrackerService {
 
     private final TrainingBot bot;
     private int totemCount = -1;
@@ -13,7 +13,7 @@ public class TotemTracker {
     private boolean skipNextTotemTracking = false;
     private boolean previousCombatState = false;
 
-    public TotemTracker(TrainingBot bot) {
+    public TotemTrackerService(TrainingBot bot) {
         this.bot = bot;
         this.previousCombatState = bot.isCombat();
     }
