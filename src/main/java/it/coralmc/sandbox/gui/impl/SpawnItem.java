@@ -69,21 +69,24 @@ public class SpawnItem extends AbstractItem {
             playerOptions.remove(player.getUniqueId());
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
-            player.sendMessage(ChatColorUtils.translate("&cBot despawnato"));
+            player.sendMessage(ChatColorUtils.translate(training.getConfig().getString("messages.despawn-bot", "&cBot rimosso!")));
             return;
         }
 
         if (options.isEventBot()) {
             if (isBotEventActive()) {
-                player.sendMessage(ChatColorUtils.translate("&c❌ C'è già un bot event attivo! Despawnalo prima"));
+                String msg = training.getConfig().getString("messages.event-bot-already-active", "&c❌ C'è già un bot event attivo! Despawnalo prima");
+                player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
             training.getBotManager().despawnAll();
-            player.sendMessage(ChatColorUtils.translate("&eTutti i bot normali sono stati despawnati per l'evento"));
+            String msg = training.getConfig().getString("messages.all-normal-bots-despawned", "&eTutti i bot normali sono stati despawnati per l'evento");
+            player.sendMessage(ChatColorUtils.translate(msg));
         }
         else {
             if (isBotEventActive()) {
-                player.sendMessage(ChatColorUtils.translate("&c❌ Non puoi spawnare un bot normale mentre c'è un bot event attivo!"));
+                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event", "&c❌ Non puoi spawnare un bot normale mentre c'è un bot event attivo!");
+                player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
         }
@@ -93,7 +96,8 @@ public class SpawnItem extends AbstractItem {
 
         boolean follow = options.isFollow();
         training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
-        player.sendMessage(ChatColorUtils.translate("&a✓ Bot spawnato con successo!"));
+        String msg = training.getConfig().getString("messages.spawn-bot", "&aBot generato con le impostazioni selezionate!");
+        player.sendMessage(ChatColorUtils.translate(msg));
     }
 
     private boolean isBotEventActive() {

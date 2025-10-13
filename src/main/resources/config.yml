@@ -12,6 +12,11 @@ messages:
   reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
   combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
   dead-bot-message: "{player} was killed by his Bot"
+  event-bot-already-active: "&c❌ C'è già un bot event attivo! Despawnalo prima"
+  all-normal-bots-despawned: "&eTutti i bot normali sono stati despawnati per l'evento"
+  cannot-spawn-normal-during-event: "&c❌ Non puoi spawnare un bot normale mentre c'è un bot event attivo!"
+  event-bot-active-block-normal: "&c❌ C'è un bot event attivo! Non puoi spawnare bot normali durante un evento"
+  must-despawn-normal-bot: "&c❌ Hai già un bot normale spawnato! Despawnalo prima di gestire il bot event"
 
 bot:
   name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot
