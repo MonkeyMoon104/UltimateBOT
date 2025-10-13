@@ -17,11 +17,20 @@ public class BotOptions {
     private boolean follow = false;
     private boolean combat = false;
     private BotRank rank = BotRank.EASY;
+    private boolean isEventBot = false;
 
     public BotOptions(SandboxTraining training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
         this.armor = armor;
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
+    }
+
+    public boolean isEventBot() {
+        return isEventBot;
+    }
+
+    public void setEventBot(boolean eventBot) {
+        isEventBot = eventBot;
     }
 
     public BotRank getRank() {
