@@ -5,9 +5,9 @@ import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.BotOptions;
 import it.coralmc.sandbox.bot.ai.fakeplayer.BotCraftPlayer;
 import it.coralmc.sandbox.bot.ai.controllers.brain.BotBrainController;
-import it.coralmc.sandbox.bot.ai.handlers.BotDeathHandler;
-import it.coralmc.sandbox.bot.ai.handlers.BotEquipmentHandler;
-import it.coralmc.sandbox.bot.ai.handlers.TotemTracker;
+import it.coralmc.sandbox.bot.ai.services.BotDeathService;
+import it.coralmc.sandbox.bot.ai.services.BotEquipmentService;
+import it.coralmc.sandbox.bot.ai.services.TotemTrackerService;
 import it.coralmc.sandbox.utils.armor.PlayerOptions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,9 +24,9 @@ public class TrainingBot extends Player {
     private final PlayerOptions playerOptions;
     private final BotCraftPlayer craftEntity;
     private final BotBrainController brainController;
-    private final TotemTracker totemTracker;
-    private final BotDeathHandler deathHandler;
-    private final BotEquipmentHandler equipmentHandler;
+    private final TotemTrackerService totemTracker;
+    private final BotDeathService deathHandler;
+    private final BotEquipmentService equipmentHandler;
 
     public TrainingBot(Level level,
                        BlockPos pos,
@@ -48,9 +48,9 @@ public class TrainingBot extends Player {
         this.craftEntity = new BotCraftPlayer(this);
 
         this.brainController = new BotBrainController(this, plugin, targetPlayer, follow, botOptions);
-        this.totemTracker = new TotemTracker(this);
-        this.deathHandler = new BotDeathHandler(this, plugin, playerOptions, deadBotMessage);
-        this.equipmentHandler = new BotEquipmentHandler(this);
+        this.totemTracker = new TotemTrackerService(this);
+        this.deathHandler = new BotDeathService(this, plugin, playerOptions, deadBotMessage);
+        this.equipmentHandler = new BotEquipmentService(this);
         getBotAI().getTeleportController().setTarget(targetPlayer);
     }
 
@@ -166,7 +166,7 @@ public class TrainingBot extends Player {
     }
 
     public BotBrainController getBrainController() { return brainController; }
-    public TotemTracker getTotemTracker() { return totemTracker; }
+    public TotemTrackerService getTotemTracker() { return totemTracker; }
     public org.bukkit.entity.Player getTargetPlayer() { return brainController.getTargetPlayer(); }
     public void setTotemCount(int count) {
         this.totemTracker.setTotemCount(count);
