@@ -58,6 +58,7 @@ public class BotSpawner {
                 follow,
                 plugin,
                 config.getString("messages.dead-bot-msg", "You have killed the bot!"),
+                config.getString("messages.dead-bot-event-msg"),
                 botOptions
         );
 

@@ -36,6 +36,7 @@ public class TrainingBot extends Player {
                        boolean follow,
                        SandboxTraining plugin,
                        String deadBotMessage,
+                       String deadBotEventMessage,
                        BotOptions botOptions) {
 
         super(level, pos, yRot, gameProfile);
@@ -49,7 +50,7 @@ public class TrainingBot extends Player {
 
         this.brainController = new BotBrainController(this, plugin, targetPlayer, follow, botOptions);
         this.totemTracker = new TotemTrackerService(this);
-        this.deathHandler = new BotDeathService(this, plugin, playerOptions, deadBotMessage);
+        this.deathHandler = new BotDeathService(this, plugin, playerOptions, deadBotMessage, deadBotEventMessage);
         this.equipmentHandler = new BotEquipmentService(this);
         getBotAI().getTeleportController().setTarget(targetPlayer);
     }

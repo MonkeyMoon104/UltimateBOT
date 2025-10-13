@@ -1,6 +1,7 @@
 messages:
   spawn-bot: "&aBot generato con le impostazioni selezionate!"
   dead-bot-msg: "&aHai ucciso il bot!"
+  dead-bot-event-msg: "&c[&eEVENT&c] &eIl bot è stato ucciso da &b{player}"
   despawn-bot: "&cBot rimosso!"
   save-changes: "&aModifiche salvate!"
   reload-no-permission: "&cNon hai il permesso di usare questo comando"
