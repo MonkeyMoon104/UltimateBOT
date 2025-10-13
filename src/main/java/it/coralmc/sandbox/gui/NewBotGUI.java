@@ -40,6 +40,8 @@ public class NewBotGUI {
 
         options.setEventBot(isEventBot);
 
+        clampTotemCount(options);
+
         CombatItem combatItem = new CombatItem(training, options);
         FollowItem followItem = new FollowItem(training, options, combatItem);
 
@@ -96,5 +98,24 @@ public class NewBotGUI {
                 .build();
 
         window.open();
+    }
+
+    private void clampTotemCount(BotOptions options) {
+        int maxTotem = getMaxTotemCount(options);
+        int currentTotem = options.getTotems();
+
+        if (currentTotem == -1) {
+            return;
+        }
+
+        if (currentTotem > maxTotem) {
+            options.setTotems(maxTotem);
+        }
+    }
+
+    private int getMaxTotemCount(BotOptions options) {
+        int normalMax = training.getConfig().getInt("bot.max-totem-normal", 37);
+        int eventMax = training.getConfig().getInt("bot.max-totem-event", 74);
+        return options.isEventBot() ? eventMax : normalMax;
     }
 }
