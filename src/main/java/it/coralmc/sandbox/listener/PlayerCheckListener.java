@@ -57,10 +57,17 @@ public class PlayerCheckListener implements Listener {
         boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
 
         if (wasBotSpawned) {
-            botManager.despawn(player);
-            String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
-            player.sendMessage(ChatColorUtils.translate(despawnMsg));
-            playerOptions.remove(player.getUniqueId());
+            TrainingBot bot = botManager.getBotSafe(player.getUniqueId());
+            boolean isEventBot = bot != null && bot.getBrainController() != null &&
+                    bot.getBrainController().getBotOptions() != null &&
+                    bot.getBrainController().getBotOptions().isEventBot();
+
+            if (!isEventBot) {
+                botManager.despawn(player);
+                String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
+                player.sendMessage(ChatColorUtils.translate(despawnMsg));
+                playerOptions.remove(player.getUniqueId());
+            }
         }
 
         Entity killer = event.getEntity().getKiller();
