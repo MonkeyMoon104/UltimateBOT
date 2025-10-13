@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.inventoryaccess.component.ComponentWrapper;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -44,16 +43,25 @@ public class TotemItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        if (clickType.isLeftClick() && options.getTotems() < 37) {
-            options.setTotems(options.getTotems() + 1);
+        int maxTotem = getMaxTotemCount();
+        int currentTotem = options.getTotems();
+
+        if (clickType.isLeftClick() && currentTotem < maxTotem) {
+            options.setTotems(currentTotem + 1);
         }
 
-        if (clickType.isRightClick() && options.getTotems() > -1) {
-            options.setTotems(options.getTotems() - 1);
+        if (clickType.isRightClick() && currentTotem > -1) {
+            options.setTotems(currentTotem - 1);
         }
 
         training.getBotManager().updateTotem(player.getUniqueId(), options.getTotems());
 
         notifyWindows();
+    }
+
+    private int getMaxTotemCount() {
+        int normalMax = training.getConfig().getInt("bot.max-totem-normal", 37);
+        int eventMax = training.getConfig().getInt("bot.max-totem-event", 74);
+        return options.isEventBot() ? eventMax : normalMax;
     }
 }

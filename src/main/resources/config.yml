@@ -22,6 +22,8 @@ bot:
   name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
+  max-totem-normal: 37
+  max-totem-event: 74
 
 gui:
   default-armor:
