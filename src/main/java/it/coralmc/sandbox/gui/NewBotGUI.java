@@ -20,10 +20,16 @@ public class NewBotGUI {
 
     private final Player player;
     private final SandboxTraining training;
+    private final boolean isEventBot;
 
     public NewBotGUI(Player player, SandboxTraining training) {
+        this(player, training, false);
+    }
+
+    public NewBotGUI(Player player, SandboxTraining training, boolean isEventBot) {
         this.player = player;
         this.training = training;
+        this.isEventBot = isEventBot;
     }
 
     public void open() {
@@ -31,6 +37,8 @@ public class NewBotGUI {
         if (options == null) {
             options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getConfig(), training));
         }
+
+        options.setEventBot(isEventBot);
 
         CombatItem combatItem = new CombatItem(training, options);
         FollowItem followItem = new FollowItem(training, options, combatItem);
@@ -80,7 +88,7 @@ public class NewBotGUI {
         Window window = Window.single()
                 .setGui(gui)
                 .setViewer(player)
-                .setTitle("ᴋɪᴛ ʀᴏᴏᴍ")
+                .setTitle(isEventBot ? "ᴋɪᴛ ʀᴏᴏᴍ ᴇᴠᴇɴᴛ" : "ᴋɪᴛ ʀᴏᴏᴍ")
                 .addCloseHandler(() -> {
                     UUID playerUUID = player.getUniqueId();
                     training.getPlayerOptions().put(playerUUID, finalOptions);
