@@ -1,4 +1,4 @@
-package it.coralmc.sandbox.bot.ai.handlers;
+package it.coralmc.sandbox.bot.ai.services;
 
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import net.minecraft.server.level.ServerLevel;
@@ -7,11 +7,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class BotEquipmentHandler {
+public class BotEquipmentService {
 
     private final TrainingBot bot;
 
-    public BotEquipmentHandler(TrainingBot bot) {
+    public BotEquipmentService(TrainingBot bot) {
         this.bot = bot;
     }
 
