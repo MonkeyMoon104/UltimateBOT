@@ -9,10 +9,10 @@ depend:
 
 commands:
   bot:
-    description: Open bot settings GUI
+    description: Apri la GUI delle impostazioni del bot normale
     permission: sb.bot.use
   botevent:
-    description: Apri la GUI bot event
+    description: Apri la GUI delle impostazioni del bot evento
     permission: admin.host.bot
   sbreload:
     description: Ricarica la configurazione o rimuovi bot/mappe
