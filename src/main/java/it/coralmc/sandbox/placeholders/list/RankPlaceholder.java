@@ -4,14 +4,17 @@ import it.coralmc.sandbox.SandboxTraining;
 import it.coralmc.sandbox.bot.ai.TrainingBot;
 import it.coralmc.sandbox.bot.ai.rank.BotRank;
 import it.coralmc.sandbox.placeholders.IBotPlaceholder;
+import it.coralmc.sandbox.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
 
 public class RankPlaceholder implements IBotPlaceholder {
 
     private final SandboxTraining plugin;
+    private final PlaceholderHelper helper;
 
     public RankPlaceholder(SandboxTraining plugin) {
         this.plugin = plugin;
+        this.helper = new PlaceholderHelper(plugin);
     }
 
     @Override
@@ -21,7 +24,7 @@ public class RankPlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = plugin.getBot(player);
+        TrainingBot bot = helper.getBotForPlaceholder(player);
         if (bot == null) return "● Offline";
 
         BotRank rank = bot.getBotAI().getRank();
