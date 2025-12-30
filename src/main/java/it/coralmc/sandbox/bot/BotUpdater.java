@@ -26,8 +26,12 @@ public class BotUpdater {
         updateArmor(ownerUUID, armorMap, new HashMap<>());
     }
 
+    private TrainingBot getBot(UUID ownerUUID) {
+        return registry.getBot(ownerUUID);
+    }
+
     public void updateTotem(UUID ownerUUID, int totemCount) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.setTotemCount(totemCount);
             bot.getBotAI().manageTotem();
