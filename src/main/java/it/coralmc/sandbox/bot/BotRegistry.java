@@ -7,10 +7,12 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 
 public class BotRegistry {
 
-    private final Map<UUID, TrainingBot> spawnedBots = new HashMap<>();
+    private final Map<UUID, TrainingBot> spawnedBots = new ConcurrentHashMap<>();
 
     public void registerBot(UUID playerUUID, TrainingBot bot) {
         spawnedBots.put(playerUUID, bot);
@@ -24,6 +26,10 @@ public class BotRegistry {
         TrainingBot bot = spawnedBots.get(playerUUID);
         if (bot == null) return null;
         return bot.getUUID();
+    }
+
+    public TrainingBot computeIfPresent(UUID playerUUID, BiFunction<UUID, TrainingBot, TrainingBot> remappingFunction) {
+        return spawnedBots.computeIfPresent(playerUUID, remappingFunction);
     }
 
     public void removeBot(UUID playerUUID) {
