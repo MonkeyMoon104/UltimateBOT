@@ -39,21 +39,21 @@ public class BotUpdater {
     }
 
     public void updateFollow(UUID ownerUUID, boolean follow) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.setFollow(follow);
         }
     }
 
     public void updateCombat(UUID ownerUUID, boolean combat) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.setCombat(combat);
         }
     }
 
     public void updateInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             net.minecraft.world.item.ItemStack nmsItem = org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item);
             bot.getBotAI().getInventoryController().setItem(slot, nmsItem);
@@ -61,21 +61,21 @@ public class BotUpdater {
     }
 
     public void switchBotSlot(UUID ownerUUID, int slot) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.getBotAI().getInventoryController().switchToSlot(slot);
         }
     }
 
     public void addEnderpearls(UUID ownerUUID, int count) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.getBotAI().getInventoryController().addEnderpearls(count);
         }
     }
 
     public int getBotEnderpearlCount(UUID ownerUUID) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             return bot.getBotAI().getInventoryController().getItemCount(net.minecraft.world.item.Items.ENDER_PEARL);
         }
@@ -83,7 +83,7 @@ public class BotUpdater {
     }
 
     public boolean getSwordSlot(UUID ownerUUID) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             return bot.getBotAI().getInventoryController().isHoldingSword();
         }
@@ -91,7 +91,7 @@ public class BotUpdater {
     }
 
     public boolean getEpearlSlot(UUID ownerUUID) {
-        TrainingBot bot = registry.getAllBots().get(ownerUUID);
+        TrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             return bot.getBotAI().getInventoryController().isHoldingEnderpearl();
         }
