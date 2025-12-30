@@ -38,6 +38,20 @@ public class BotSpawner {
                       int totem,
                       BotOptions botOptions) {
 
+        if (viewer == null || !viewer.isOnline()) {
+            if (plugin != null) {
+                plugin.getLogger().warning("Attempted to spawn bot for null/offline player");
+            }
+            return;
+        }
+
+        if (registry.isBotSpawned(viewer.getUniqueId())) {
+            if (plugin != null) {
+                plugin.getLogger().info("Bot already exists for " + viewer.getName() + ", removing old one");
+            }
+            despawn(viewer);
+        }
+
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
         ServerLevel world = handle.serverLevel();
 
@@ -73,9 +87,15 @@ public class BotSpawner {
 
         bot.getBotAI().getInventoryController().addEnderpearls(16);
         bot.getBotAI().getInventoryController().switchToEnderpearl();
+
+        if (plugin != null) {
+            plugin.getLogger().info("Bot spawned successfully for " + viewer.getName());
+        }
     }
 
     public void despawn(Player owner) {
+        if (owner == null) return;
+
         UUID ownerUUID = owner.getUniqueId();
         UUID botUUID = registry.getBotUUID(ownerUUID);
         if (botUUID == null) return;
