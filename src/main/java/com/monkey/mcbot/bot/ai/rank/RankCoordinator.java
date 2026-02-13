@@ -1,0 +1,144 @@
+package com.monkey.mcbot.bot.ai.rank;
+
+import com.monkey.mcbot.bot.ai.rank.configs.CPVPConfig;
+import com.monkey.mcbot.bot.ai.rank.configs.RAPVPConfig;
+
+public class RankCoordinator {
+
+    public static RAPVPConfig buildRAPVPConfig(BotRank rank) {
+        return switch (rank) {
+            case EASY -> new RAPVPConfig.Builder()
+                    .maxDistance(2)
+                    .predictionTicks(2)
+                    .minMovement(0.01)
+                    .minSafeDistance(1.0)
+                    .anchorSearchCooldownMillis(1000L)
+                    .build();
+            case NORMAL -> new RAPVPConfig.Builder()
+                    .maxDistance(4)
+                    .predictionTicks(3)
+                    .minMovement(0.01)
+                    .minSafeDistance(2.0)
+                    .anchorSearchCooldownMillis(800L)
+                    .build();
+            case MEDIUM -> new RAPVPConfig.Builder()
+                    .maxDistance(6)
+                    .predictionTicks(8)
+                    .minMovement(0.1)
+                    .minSafeDistance(3.0)
+                    .anchorSearchCooldownMillis(500L)
+                    .build();
+            case HARD -> new RAPVPConfig.Builder()
+                    .maxDistance(8)
+                    .predictionTicks(10)
+                    .minMovement(0.01)
+                    .minSafeDistance(4.0)
+                    .anchorSearchCooldownMillis(250L)
+                    .build();
+            case GOD -> new RAPVPConfig.Builder()
+                    .maxDistance(12)
+                    .predictionTicks(20)
+                    .minMovement(0.01)
+                    .minSafeDistance(4.0)
+                    .anchorSearchCooldownMillis(0L)
+                    .build();
+            default -> new RAPVPConfig.Builder().build();
+        };
+    }
+
+    public static CPVPConfig buildCPVPConfig(BotRank rank) {
+        return switch (rank) {
+            case EASY -> new CPVPConfig.Builder()
+                    .maxCrystalDistance(3.0)
+                    .minCrystalDistance(2.0)
+                    .crystalAttackRange(3.0)
+                    .optimalDamageRange(3.0)
+                    .obsidianPlaceCooldownTicks(14)
+                    .crystalPlaceCooldownTicks(14)
+                    .attackCooldownTicks(10)
+                    .obsidianPreparationTime(8)
+                    .crystalPreparationTime(8)
+                    .attackPreparationTime(7)
+                    .positionCooldownMs(6000L)
+                    .fullScanIntervalMs(4000L)
+                    .positionCacheMs(5000L)
+                    .maxPositionsToCheck(2)
+                    .minCrystalScore(9.0)
+                    .minAttackScore(1.5)
+                    .build();
+            case NORMAL -> new CPVPConfig.Builder()
+                    .maxCrystalDistance(4.0)
+                    .minCrystalDistance(2.5)
+                    .crystalAttackRange(4.0)
+                    .optimalDamageRange(4.0)
+                    .obsidianPlaceCooldownTicks(12)
+                    .crystalPlaceCooldownTicks(12)
+                    .attackCooldownTicks(8)
+                    .obsidianPreparationTime(6)
+                    .crystalPreparationTime(6)
+                    .attackPreparationTime(5)
+                    .positionCooldownMs(4000L)
+                    .fullScanIntervalMs(2000L)
+                    .positionCacheMs(3000L)
+                    .maxPositionsToCheck(1)
+                    .minCrystalScore(8.0)
+                    .minAttackScore(1)
+                    .build();
+            case MEDIUM -> new CPVPConfig.Builder()
+                    .maxCrystalDistance(4.0)
+                    .minCrystalDistance(2.8)
+                    .crystalAttackRange(4.0)
+                    .optimalDamageRange(4.0)
+                    .obsidianPlaceCooldownTicks(10)
+                    .crystalPlaceCooldownTicks(12)
+                    .attackCooldownTicks(8)
+                    .obsidianPreparationTime(6)
+                    .crystalPreparationTime(6)
+                    .attackPreparationTime(5)
+                    .positionCooldownMs(4000L)
+                    .fullScanIntervalMs(2000L)
+                    .positionCacheMs(3000L)
+                    .maxPositionsToCheck(1)
+                    .minCrystalScore(8.0)
+                    .minAttackScore(0.8)
+                    .build();
+            case HARD -> new CPVPConfig.Builder()
+                    .maxCrystalDistance(6.0)
+                    .minCrystalDistance(3.0)
+                    .crystalAttackRange(5.0)
+                    .optimalDamageRange(4.0)
+                    .obsidianPlaceCooldownTicks(8)
+                    .crystalPlaceCooldownTicks(10)
+                    .attackCooldownTicks(6)
+                    .obsidianPreparationTime(4)
+                    .crystalPreparationTime(4)
+                    .attackPreparationTime(3)
+                    .positionCooldownMs(3000L)
+                    .fullScanIntervalMs(1000L)
+                    .positionCacheMs(2000L)
+                    .maxPositionsToCheck(1)
+                    .minCrystalScore(8.0)
+                    .minAttackScore(0.6)
+                    .build();
+            case GOD -> new CPVPConfig.Builder()
+                    .maxCrystalDistance(8.0)
+                    .minCrystalDistance(2.8)
+                    .crystalAttackRange(6.5)
+                    .optimalDamageRange(5.0)
+                    .obsidianPlaceCooldownTicks(6)
+                    .crystalPlaceCooldownTicks(8)
+                    .attackCooldownTicks(5)
+                    .obsidianPreparationTime(3)
+                    .crystalPreparationTime(3)
+                    .attackPreparationTime(2)
+                    .positionCooldownMs(2000L)
+                    .fullScanIntervalMs(750L)
+                    .positionCacheMs(1500L)
+                    .maxPositionsToCheck(2)
+                    .minCrystalScore(6.5)
+                    .minAttackScore(0.5)
+                    .build();
+            default -> new CPVPConfig.Builder().build();
+        };
+    }
+}
