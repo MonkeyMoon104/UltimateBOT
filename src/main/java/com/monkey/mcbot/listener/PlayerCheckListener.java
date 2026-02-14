@@ -1,5 +1,6 @@
 package com.monkey.mcbot.listener;
 
+import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.ai.TrainingBot;
@@ -24,6 +25,17 @@ public class PlayerCheckListener implements Listener {
         this.botManager = plugin.getBotManager();
         this.playerOptions = plugin.getPlayerOptions();
     }
+
+    @EventHandler
+    public void onPlayerPreTag(PlayerPreTagEvent event) {
+        Player player = event.getPlayer();
+        TrainingBot bot = botManager.getBot(player.getUniqueId());
+        if (bot == null) return;
+
+        Entity enemy = event.getEnemy();
+        if (enemy != null && enemy.getUniqueId().equals(bot.getUUID())) event.setCancelled(true);
+    }
+
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {

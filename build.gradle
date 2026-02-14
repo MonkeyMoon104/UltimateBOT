@@ -28,6 +28,9 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+    maven{
+        url "https://nexus.sirblobman.xyz/public/"
+    }
 }
 
 paperweight {
@@ -38,6 +41,8 @@ dependencies {
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     implementation "xyz.xenondevs.invui:invui:1.43"
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
+    compileOnly 'com.github.sirblobman.combatlogx:api:11.6-SNAPSHOT'
 }
 
 def targetJavaVersion = 21
