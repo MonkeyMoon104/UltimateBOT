@@ -2,10 +2,8 @@ package com.monkey.mcbot.bot;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.server.level.ClientInformation;
-import net.minecraft.server.level.ParticleStatus;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.player.ChatVisiblity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
@@ -26,9 +24,6 @@ public class BotFactory {
     }
 
     public static ClientInformation createClientInformation() {
-        return new ClientInformation(
-                "it_IT", 10, ChatVisiblity.FULL, true,
-                0, HumanoidArm.RIGHT, false, true, ParticleStatus.ALL
-        );
+        return NMSBridgeManager.get().createClientInformation();
     }
 }

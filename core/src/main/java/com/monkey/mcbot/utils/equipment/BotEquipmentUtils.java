@@ -2,6 +2,7 @@ package com.monkey.mcbot.utils.equipment;
 
 import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.bot.BotRegistry;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -73,9 +74,8 @@ public class BotEquipmentUtils {
         }
 
         if (!equipmentList.isEmpty()) {
-            ClientboundSetEquipmentPacket equipmentPacket = new ClientboundSetEquipmentPacket(
-                    bot.getId(), equipmentList
-            );
+            ClientboundSetEquipmentPacket equipmentPacket = NMSBridgeManager.get()
+                    .createEquipmentPacket(bot.getId(), equipmentList);
 
             for (Player online : Bukkit.getOnlinePlayers()) {
                 ServerPlayer handle = ((CraftPlayer) online).getHandle();

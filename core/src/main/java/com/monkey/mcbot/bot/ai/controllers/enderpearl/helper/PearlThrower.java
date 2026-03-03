@@ -1,6 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.helper.inter.IPearlThrower;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
@@ -41,6 +42,10 @@ public class PearlThrower implements IPearlThrower {
         level.addFreshEntity(enderpearl);
 
         bot.swing(InteractionHand.MAIN_HAND);
-        bot.playSound(net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW, 0.5f, 0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f));
-    }
+        NMSBridgeManager.get().playSoundOnPlayer(
+                bot,
+                net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW,
+                0.5f,
+                0.4f / (level.getRandom().nextFloat() * 0.4f + 0.8f)
+        );    }
 }
