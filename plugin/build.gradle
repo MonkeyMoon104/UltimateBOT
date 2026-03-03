@@ -1,0 +1,14 @@
+apply plugin: 'com.gradleup.shadow'
+
+dependencies {
+    implementation project(':core')
+    implementation project(path: ':v1_21_4', configuration: 'reobf')
+    implementation project(path: ':v1_21_5', configuration: 'reobf')
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    mergeServiceFiles()
+}
+
+build.dependsOn shadowJar

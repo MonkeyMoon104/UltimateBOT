@@ -1,9 +1,13 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven {
-            url = 'https://repo.papermc.io/repository/maven-public/'
-        }
+        maven { url = "https://repo.papermc.io/repository/maven-public/" }
     }
 }
-rootProject.name = 'sandbox-training'
+
+rootProject.name = 'sandboxtraining'
+
+include 'core'
+include 'v1_21_4'
+include 'v1_21_5'
+include 'plugin'

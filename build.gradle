@@ -1,73 +1,32 @@
-import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
-
 plugins {
     id 'java'
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18"
-    id 'com.gradleup.shadow' version '8.3.6'
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.18" apply false
+    id 'com.gradleup.shadow' version '8.3.6' apply false
 }
 
-group = 'com.monkey'
-version = '1.0.0'
+subprojects {
+    apply plugin: 'java'
 
-repositories {
-    mavenCentral()
-    maven {
-        name = "spigot-repo"
-        url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven {
-        name = "papermc-repo"
-        url = "https://repo.papermc.io/repository/maven-public/"
-    }
+    group = 'com.monkey'
+    version = '1.0.0'
 
-    maven {
-        url 'https://repo.xenondevs.xyz/releases'
+    repositories {
+        mavenCentral()
+        maven { url = "https://repo.papermc.io/repository/maven-public/" }
+        maven { url = 'https://repo.xenondevs.xyz/releases' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven { url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+        maven { url = "https://nexus.sirblobman.xyz/public/" }
+        maven { url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
     }
 
-    maven { url = 'https://repo.spongepowered.org/maven' }
-    maven {
-        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
-    maven{
-        url "https://nexus.sirblobman.xyz/public/"
-    }
-}
 
-paperweight {
-    reobfArtifactConfiguration = ReobfArtifactConfiguration.getREOBF_PRODUCTION()
-}
-
-dependencies {
-    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
-    implementation "xyz.xenondevs.invui:invui:1.43"
-    compileOnly 'me.clip:placeholderapi:2.11.6'
-    compileOnly 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
-    compileOnly 'com.github.sirblobman.combatlogx:api:11.6-SNAPSHOT'
-}
-
-def targetJavaVersion = 21
-java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
-    }
-}
-
-processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release.set(21)
     }
 }
