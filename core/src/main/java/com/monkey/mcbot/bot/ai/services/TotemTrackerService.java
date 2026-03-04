@@ -15,7 +15,6 @@ public class TotemTrackerService {
 
     public TotemTrackerService(ITrainingBot bot) {
         this.bot = bot;
-        this.previousCombatState = bot.isCombat();
     }
 
     public void onTick() {

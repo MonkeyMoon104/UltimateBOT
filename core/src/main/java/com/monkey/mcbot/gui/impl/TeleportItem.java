@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -41,6 +42,6 @@ public class TeleportItem extends AbstractItem {
 		ITrainingBot bot = training.getBotManager().getBot(player.getUniqueId());
 		if (bot == null) return;
 
-		bot.asPlayer().moveTo(player.getX(), player.getY(), player.getZ());
+		NMSBridgeManager.get().moveBot(bot.asPlayer(), player.getX(), player.getY(), player.getZ());
 	}
 }

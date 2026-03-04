@@ -1,5 +1,6 @@
 package com.monkey.mcbot.utils;
 
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -31,7 +32,7 @@ public class EntityUtils {
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (online.getUniqueId().equals(playerUUID)) {
                 ServerPlayer handle = ((CraftPlayer) online).getHandle();
-                return handle.serverLevel();
+                return NMSBridgeManager.get().getServerLevel(handle);
             }
         }
         return null;

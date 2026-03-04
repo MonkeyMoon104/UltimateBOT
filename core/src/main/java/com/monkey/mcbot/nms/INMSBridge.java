@@ -64,4 +64,6 @@ public interface INMSBridge {
             String deadBotEventMessage,
             BotOptions botOptions
     );
+
+    void moveBot(Player bot, double x, double y, double z);
 }

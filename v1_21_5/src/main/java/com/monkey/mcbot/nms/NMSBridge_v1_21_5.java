@@ -131,4 +131,9 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
                 deadBotMessage, deadBotEventMessage, botOptions
         );
     }
+
+    @Override
+    public void moveBot(Player bot, double x, double y, double z) {
+        bot.snapTo(x, y, z);
+    }
 }

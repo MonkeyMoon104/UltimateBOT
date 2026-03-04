@@ -65,6 +65,7 @@ public class TrainingBot_v1_21_7 extends Player implements ITrainingBot {
 
     @Override
     public void die(DamageSource cause) {
+        this.getInventory().clearContent();
         super.die(cause);
         logic.onDeath(cause);
     }

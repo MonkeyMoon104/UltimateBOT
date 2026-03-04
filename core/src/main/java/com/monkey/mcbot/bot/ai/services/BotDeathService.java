@@ -25,8 +25,6 @@ public class BotDeathService {
     }
 
     public void handleDeath(DamageSource cause) {
-        bot.asPlayer().getInventory().items.clear();
-
         boolean isEventBot = bot.getBrainController() != null &&
                 bot.getBrainController().getBotOptions() != null &&
                 bot.getBrainController().getBotOptions().isEventBot();
