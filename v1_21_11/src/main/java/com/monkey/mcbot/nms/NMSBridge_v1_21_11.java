@@ -2,14 +2,17 @@ package com.monkey.mcbot.nms;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_5;
+import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_11;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +27,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
@@ -41,7 +44,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class NMSBridge_v1_21_5 implements INMSBridge {
+public class NMSBridge_v1_21_11 implements INMSBridge {
 
     @Override
     public void hurtEntity(Player target, ServerLevel level, DamageSource source, float amount) {
@@ -72,7 +75,7 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     public void playSoundOnPlayer(Player player, SoundEvent sound, float volume, float pitch) {
         player.level().playSeededSound(null,
                 player.getX(), player.getY(), player.getZ(),
-                sound, net.minecraft.sounds.SoundSource.PLAYERS,
+                sound, SoundSource.PLAYERS,
                 volume, pitch, player.level().random.nextLong());
     }
 
@@ -121,7 +124,7 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
 
     @Override
     public ServerLevel getServerLevel(ServerPlayer player) {
-        return player.serverLevel();
+        return (ServerLevel) player.level();
     }
 
     @Override
@@ -135,7 +138,7 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
                                           String deadBotMessage,
                                           String deadBotEventMessage,
                                           BotOptions botOptions) {
-        return new TrainingBot_v1_21_5(
+        return new TrainingBot_v1_21_11(
                 level, pos, yRot, gameProfile,
                 targetPlayer, follow, plugin,
                 deadBotMessage, deadBotEventMessage, botOptions
@@ -150,23 +153,37 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     @Override
     public GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName) {
         GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
-        GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
+        Collection<Property> textures = viewerProfile.properties().get("textures");
+
+        if (textures.isEmpty()) {
+            return new GameProfile(botUUID, botName);
         }
-        return profile;
+
+        com.google.common.collect.ArrayListMultimap<String, Property> multimap =
+                com.google.common.collect.ArrayListMultimap.create();
+        textures.forEach(p -> multimap.put("textures", p));
+
+        return new GameProfile(botUUID, botName, new PropertyMap(multimap));
     }
 
     @Override
     public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
-        ((CraftServer) Bukkit.getServer()).getHandle().getServer()
-                .getProfileCache().add(bot.getGameProfile());
+        try {
+            var server = ((CraftServer) Bukkit.getServer()).getHandle().getServer();
+            var method = server.getClass().getSuperclass().getDeclaredMethod("getProfileCache");
+            method.setAccessible(true);
+            var cache = method.invoke(server);
+            if (cache != null) {
+                cache.getClass().getMethod("add", com.mojang.authlib.GameProfile.class)
+                        .invoke(cache, bot.getGameProfile());
+            }
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public String getProfileName(com.mojang.authlib.GameProfile profile) {
-        return profile.getName();
+        return profile.name();
     }
 
     @Override

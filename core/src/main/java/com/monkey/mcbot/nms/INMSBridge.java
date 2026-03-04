@@ -77,4 +77,6 @@ public interface INMSBridge {
     String getProfileName(com.mojang.authlib.GameProfile profile);
 
     InteractionResult useItemOnBlock(Player bot, ItemStack stack, BlockHitResult hitResult, InteractionHand hand);
+
+    void throwEnderpearl(Player bot, net.minecraft.world.phys.Vec3 targetPos);
 }

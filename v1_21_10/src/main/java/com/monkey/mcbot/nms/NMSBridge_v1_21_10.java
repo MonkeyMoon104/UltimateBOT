@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
@@ -189,5 +190,36 @@ public class NMSBridge_v1_21_10 implements INMSBridge {
     public InteractionResult useItemOnBlock(Player bot, ItemStack stack,
                                             BlockHitResult hitResult, InteractionHand hand) {
         return stack.getItem().useOn(new UseOnContext(bot.level(), bot, hand, stack, hitResult));
+    }
+
+    @Override
+    public void throwEnderpearl(Player bot, Vec3 targetPos) {
+        ThrownEnderpearl enderpearl = new ThrownEnderpearl(
+                net.minecraft.world.entity.EntityType.ENDER_PEARL, bot.level()
+        );
+        enderpearl.setOwner(bot);
+
+        Vec3 botPos = bot.position().add(0, bot.getEyeHeight(), 0);
+        Vec3 direction = targetPos.subtract(botPos);
+        double distance = direction.length();
+
+        double velocityScale = distance < 15
+                ? Math.min(distance * 0.08, 1.2)
+                : Math.min(distance * 0.06, 1.8);
+
+        Vec3 velocity = direction.normalize().scale(velocityScale);
+        velocity = velocity.add(0, 0.2 + distance * 0.02, 0);
+
+        enderpearl.setPos(botPos.x, botPos.y, botPos.z);
+        enderpearl.setDeltaMovement(velocity);
+        bot.level().addFreshEntity(enderpearl);
+
+        bot.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        NMSBridgeManager.get().playSoundOnPlayer(
+                bot,
+                net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW,
+                0.5f,
+                0.4f / (bot.level().getRandom().nextFloat() * 0.4f + 0.8f)
+        );
     }
 }
