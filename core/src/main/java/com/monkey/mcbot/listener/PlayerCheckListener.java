@@ -3,7 +3,7 @@ package com.monkey.mcbot.listener;
 import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotManager;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.entity.Entity;
@@ -29,11 +29,11 @@ public class PlayerCheckListener implements Listener {
     @EventHandler
     public void onPlayerPreTag(PlayerPreTagEvent event) {
         Player player = event.getPlayer();
-        TrainingBot bot = botManager.getBot(player.getUniqueId());
+        ITrainingBot bot = botManager.getBot(player.getUniqueId());
         if (bot == null) return;
 
         Entity enemy = event.getEnemy();
-        if (enemy != null && enemy.getUniqueId().equals(bot.getUUID())) event.setCancelled(true);
+        if (enemy != null && enemy.getUniqueId().equals(bot.asPlayer().getUUID())) event.setCancelled(true);
     }
 
 
@@ -69,7 +69,7 @@ public class PlayerCheckListener implements Listener {
         boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
 
         if (wasBotSpawned) {
-            TrainingBot bot = botManager.getBotSafe(player.getUniqueId());
+            ITrainingBot bot = botManager.getBotSafe(player.getUniqueId());
             boolean isEventBot = bot != null && bot.getBrainController() != null &&
                     bot.getBrainController().getBotOptions() != null &&
                     bot.getBrainController().getBotOptions().isEventBot();
@@ -90,7 +90,7 @@ public class PlayerCheckListener implements Listener {
             return;
         }
 
-        if (killer instanceof TrainingBot) {
+        if (killer instanceof ITrainingBot) {
             String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
             event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             return;
@@ -104,8 +104,8 @@ public class PlayerCheckListener implements Listener {
         }
 
         if (wasBotSpawned && event.getDeathMessage() != null) {
-            TrainingBot bot = botManager.getBot(player.getUniqueId());
-            if (bot != null && event.getDeathMessage().contains(bot.getName().getString())) {
+            ITrainingBot bot = botManager.getBot(player.getUniqueId());
+            if (bot != null && event.getDeathMessage().contains(bot.asPlayer().getName().getString())) {
                 String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
                 event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             }

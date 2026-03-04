@@ -1,12 +1,12 @@
 package com.monkey.mcbot.bot.ai.controllers.totem.helper;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
 
 public class TotemUsageTracker implements ITotemUsageTracker {
 
     @Override
-    public void onTotemUsed(TrainingBot trainingBot) {
+    public void onTotemUsed(ITrainingBot trainingBot) {
         int totemCount = trainingBot.getTotemCount();
 
         if (totemCount > 0) {

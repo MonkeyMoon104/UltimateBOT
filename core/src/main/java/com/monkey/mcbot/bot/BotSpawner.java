@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
@@ -63,7 +63,7 @@ public class BotSpawner {
         Location loc = viewer.getLocation();
         Block block = loc.getWorld().getHighestBlockAt(loc);
 
-        TrainingBot bot = new TrainingBot(
+        ITrainingBot bot = NMSBridgeManager.get().createTrainingBot(
                 world,
                 BlockPos.containing(block.getX(), block.getY(), block.getZ()),
                 0,
@@ -77,10 +77,10 @@ public class BotSpawner {
         );
 
         bot.setTotemCount(totem);
-        ((CraftServer) plugin.getServer()).getHandle().getServer().getProfileCache().add(bot.getGameProfile());
-        world.addFreshEntity(bot);
+        ((CraftServer) plugin.getServer()).getHandle().getServer().getProfileCache().add(bot.asPlayer().getGameProfile());
+        world.addFreshEntity(bot.asPlayer());
         bot.getBotAI().manageTotem();
-        BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
+        BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
 
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
         registry.registerBot(viewer.getUniqueId(), bot);

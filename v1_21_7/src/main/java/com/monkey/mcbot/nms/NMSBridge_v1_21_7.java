@@ -2,6 +2,10 @@ package com.monkey.mcbot.nms;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
+import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_7;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -38,7 +42,7 @@ public class NMSBridge_v1_21_7 implements INMSBridge {
 
     @Override
     public boolean actuallyHurt(Player bot, ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        if (bot instanceof com.monkey.mcbot.bot.ai.TrainingBot trainingBot) {
+        if (bot instanceof com.monkey.mcbot.bot.ai.ITrainingBot trainingBot) {
             return trainingBot.callSuperActuallyHurt(level, source, amount, event);
         }
         return false;
@@ -110,5 +114,23 @@ public class NMSBridge_v1_21_7 implements INMSBridge {
     @Override
     public ServerLevel getServerLevel(ServerPlayer player) {
         return (ServerLevel) player.level();
+    }
+
+    @Override
+    public ITrainingBot createTrainingBot(ServerLevel level,
+                                          BlockPos pos,
+                                          float yRot,
+                                          GameProfile gameProfile,
+                                          org.bukkit.entity.Player targetPlayer,
+                                          boolean follow,
+                                          SandboxTraining plugin,
+                                          String deadBotMessage,
+                                          String deadBotEventMessage,
+                                          BotOptions botOptions) {
+        return new TrainingBot_v1_21_7(
+                level, pos, yRot, gameProfile,
+                targetPlayer, follow, plugin,
+                deadBotMessage, deadBotEventMessage, botOptions
+        );
     }
 }

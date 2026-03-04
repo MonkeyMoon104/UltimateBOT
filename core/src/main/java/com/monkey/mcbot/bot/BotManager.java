@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -44,11 +44,11 @@ public class BotManager {
         spawner.despawnInWorld(owner, fromWorld);
     }
 
-    public TrainingBot getBot(UUID ownerUUID) {
+    public ITrainingBot getBot(UUID ownerUUID) {
         return lookup.getBotByOwnerUUID(ownerUUID);
     }
 
-    public TrainingBot getBotSafe(UUID ownerUUID) {
+    public ITrainingBot getBotSafe(UUID ownerUUID) {
         return lookup.getBotSafe(ownerUUID);
     }
 
@@ -101,21 +101,21 @@ public class BotManager {
     }
 
     public void switchBotToSword(UUID ownerUUID) {
-        TrainingBot bot = getBot(ownerUUID);
+        ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.getBotAI().getInventoryController().switchToSword();
         }
     }
 
     public void switchBotToEnderpearl(UUID ownerUUID) {
-        TrainingBot bot = getBot(ownerUUID);
+        ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.getBotAI().getInventoryController().switchToEnderpearl();
         }
     }
 
     public void switchBotToEmpty(UUID ownerUUID) {
-        TrainingBot bot = getBot(ownerUUID);
+        ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
             bot.getBotAI().getInventoryController().switchToEmptySlot();
         }

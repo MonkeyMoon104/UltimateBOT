@@ -1,9 +1,9 @@
 package com.monkey.mcbot.bot.ai.controllers.totem.helper.interf;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 
 public interface ITotemNotificationManager {
-    void sendTotemWarning(TrainingBot trainingBot);
+    void sendTotemWarning(ITrainingBot trainingBot);
     boolean hasWarnedOutOfTotems();
     void setWarnedOutOfTotems(boolean warned);
     void resetWarning();

@@ -2,7 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotOptions;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.Material;
@@ -102,7 +102,7 @@ public class SpawnItem extends AbstractItem {
 
     private boolean isBotEventActive() {
         for (UUID ownerUUID : training.getBotRegistry().getAllBots().keySet()) {
-            TrainingBot bot = training.getBotManager().getBotSafe(ownerUUID);
+            ITrainingBot bot = training.getBotManager().getBotSafe(ownerUUID);
 
             if (bot != null) {
                 BotOptions botOptions = bot.getBrainController().getBotOptions();

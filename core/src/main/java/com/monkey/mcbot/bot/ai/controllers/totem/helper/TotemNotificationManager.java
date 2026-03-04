@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.totem.helper;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.ITotemNotificationManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 
@@ -14,7 +14,7 @@ public class TotemNotificationManager implements ITotemNotificationManager {
     }
 
     @Override
-    public void sendTotemWarning(TrainingBot trainingBot) {
+    public void sendTotemWarning(ITrainingBot trainingBot) {
         var player = trainingBot.getTargetPlayer();
         if (player != null && player.isOnline()) {
             String msg = plugin.getConfig()

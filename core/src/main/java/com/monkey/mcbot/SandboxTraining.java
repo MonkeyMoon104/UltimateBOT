@@ -2,7 +2,7 @@ package com.monkey.mcbot;
 
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotRegistry;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.BotCommand;
 import com.monkey.mcbot.commands.BotEventCommand;
@@ -66,7 +66,7 @@ public final class SandboxTraining extends JavaPlugin {
         }
     }
 
-    public TrainingBot getBot(Player player) {
+    public ITrainingBot getBot(Player player) {
         if (botManager == null || !botManager.isBotSpawned(player.getUniqueId())) {
             return null;
         }

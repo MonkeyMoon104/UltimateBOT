@@ -3,14 +3,14 @@ package com.monkey.mcbot.bot.ai.controllers.brain;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.BotAI;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class BotBrainController {
 
-    private final TrainingBot bot;
+    private final ITrainingBot bot;
     private final BotAI botAI;
     private org.bukkit.entity.Player targetPlayer;
     private final BotOptions botOptions;
@@ -22,13 +22,13 @@ public class BotBrainController {
     private long lastNmsTargetUpdate = 0;
     private static final long NMS_CACHE_TIME = 100;
 
-    public BotBrainController(TrainingBot bot, SandboxTraining plugin,
+    public BotBrainController(ITrainingBot bot, SandboxTraining plugin,
                               org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
         this.targetingService = plugin.getTargetingService();
         this.bot = bot;
         this.targetPlayer = targetPlayer;
         this.follow = follow;
-        this.botAI = new BotAI(bot, plugin, botOptions);
+        this.botAI = new BotAI(bot.asPlayer(), plugin, botOptions);
         this.botOptions = botOptions;
         this.combat = botOptions.isCombat();
         configureBotAI();
@@ -58,7 +58,6 @@ public class BotBrainController {
         if (target == null) return;
 
         botAI.getRotationController().updateRotation(target);
-
         botAI.tick(targetPlayer);
     }
 

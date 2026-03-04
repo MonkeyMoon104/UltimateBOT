@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.services;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -10,15 +10,15 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 public class BotEquipmentService {
 
-    private final TrainingBot bot;
+    private final ITrainingBot bot;
 
-    public BotEquipmentService(TrainingBot bot) {
+    public BotEquipmentService(ITrainingBot bot) {
         this.bot = bot;
     }
 
     public boolean handleDamage(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
         try {
-            boolean result = NMSBridgeManager.get().actuallyHurt(bot, level, source, amount, event);
+            boolean result = NMSBridgeManager.get().actuallyHurt(bot.asPlayer(), level, source, amount, event);
             if (result) applyArmorFix();
             return result;
         } catch (ClassCastException | NullPointerException e) {
@@ -35,10 +35,10 @@ public class BotEquipmentService {
     private void applyArmorFix() {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                ItemStack armorPiece = bot.getItemBySlot(slot);
+                ItemStack armorPiece = bot.asPlayer().getItemBySlot(slot);
                 if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
                     armorPiece.setDamageValue(0);
-                    bot.setItemSlot(slot, armorPiece);
+                    bot.asPlayer().setItemSlot(slot, armorPiece);
                 }
             }
         }

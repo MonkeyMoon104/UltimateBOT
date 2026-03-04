@@ -1,8 +1,8 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
 
@@ -23,9 +23,9 @@ public class DistancePlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.getBukkitEntity() != null) {
-            double distance = player.getLocation().distance(bot.getBukkitEntity().getLocation());
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
+        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
+            double distance = player.getLocation().distance(bot.asPlayer().getBukkitEntity().getLocation());
             return String.format("◈ %.1fm", distance);
         }
         return "◈ ∞";

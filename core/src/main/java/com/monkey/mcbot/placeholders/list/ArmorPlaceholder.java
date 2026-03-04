@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
@@ -24,9 +24,9 @@ public class ArmorPlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.getBukkitEntity() != null) {
-            ItemStack[] armor = bot.getBukkitEntity().getEquipment().getArmorContents();
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
+        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
+            ItemStack[] armor = bot.asPlayer().getBukkitEntity().getEquipment().getArmorContents();
             int armorPieces = 0;
             for (ItemStack item : armor) {
                 if (item != null && !item.getType().isAir()) {

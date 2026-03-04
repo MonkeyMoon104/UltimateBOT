@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
@@ -24,7 +24,7 @@ public class RankPlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
         if (bot == null) return "● Offline";
 
         BotRank rank = bot.getBotAI().getRank();

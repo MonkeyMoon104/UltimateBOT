@@ -1,7 +1,7 @@
 package com.monkey.mcbot.utils;
 
 import com.mojang.authlib.GameProfile;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
@@ -13,22 +13,22 @@ import java.util.UUID;
 
 public class Packet {
 
-    public static void sendAddPlayerPacket(Player viewer, TrainingBot bot) {
-        GameProfile profile = bot.getGameProfile();
+    public static void sendAddPlayerPacket(Player viewer, ITrainingBot bot) {
+        GameProfile profile = bot.asPlayer().getGameProfile();
 
         ClientboundPlayerInfoUpdatePacket packet = NMSBridgeManager.get().createAddPlayerPacket(
-                bot.getUUID(), profile, profile.getName()
+                bot.asPlayer().getUUID(), profile, profile.getName()
         );
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
         handle.connection.send(packet);
     }
 
-    public static void sendSpawnPlayerPacket(Player viewer, TrainingBot bot) {
+    public static void sendSpawnPlayerPacket(Player viewer, ITrainingBot bot) {
         ClientboundAddEntityPacket spawnPacket = NMSBridgeManager.get().createSpawnPlayerPacket(
-                bot.getId(), bot.getUUID(),
-                bot.getX(), bot.getY(), bot.getZ(),
-                bot.getXRot(), bot.getYRot(), bot.getYHeadRot()
+                bot.asPlayer().getId(), bot.asPlayer().getUUID(),
+                bot.asPlayer().getX(), bot.asPlayer().getY(), bot.asPlayer().getZ(),
+                bot.asPlayer().getXRot(), bot.asPlayer().getYRot(), bot.asPlayer().getYHeadRot()
         );
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();

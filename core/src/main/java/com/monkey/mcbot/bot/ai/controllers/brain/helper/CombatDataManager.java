@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
@@ -55,7 +55,7 @@ public class CombatDataManager implements ICombatDataManager {
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
 
-        if (((TrainingBot) bot).isCombat()) {
+        if (((ITrainingBot) bot).isCombat()) {
             int botY = bot.blockPosition().getY();
             int targetY = target.blockPosition().getY();
             int yDiff = targetY - botY;

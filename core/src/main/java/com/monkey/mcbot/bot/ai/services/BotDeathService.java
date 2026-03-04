@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import net.minecraft.world.damagesource.DamageSource;
@@ -9,13 +9,13 @@ import org.bukkit.Bukkit;
 
 public class BotDeathService {
 
-    private final TrainingBot bot;
+    private final ITrainingBot bot;
     private final SandboxTraining plugin;
     private final PlayerOptions playerOptions;
     private final String deadBotMessage;
     private final String deadBotEventMessage;
 
-    public BotDeathService(TrainingBot bot, SandboxTraining plugin,
+    public BotDeathService(ITrainingBot bot, SandboxTraining plugin,
                            PlayerOptions playerOptions, String deadBotMessage, String deadBotEventMessage) {
         this.bot = bot;
         this.plugin = plugin;
@@ -25,7 +25,7 @@ public class BotDeathService {
     }
 
     public void handleDeath(DamageSource cause) {
-        bot.getInventory().items.clear();
+        bot.asPlayer().getInventory().items.clear();
 
         boolean isEventBot = bot.getBrainController() != null &&
                 bot.getBrainController().getBotOptions() != null &&
@@ -43,7 +43,7 @@ public class BotDeathService {
             }
         }
 
-        bot.discard();
-        plugin.getBotRegistry().removeBotByUUID(bot.getUUID());
+        bot.asPlayer().discard();
+        plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
     }
 }

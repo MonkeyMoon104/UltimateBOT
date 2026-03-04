@@ -1,7 +1,7 @@
 package com.monkey.mcbot.commands;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.gui.NewBotGUI;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.World;
@@ -46,7 +46,7 @@ public class BotCommand implements CommandExecutor {
     }
 
     private boolean isEventBotActive() {
-        for (TrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
+        for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
                 var botOptions = bot.getBrainController().getBotOptions();
                 if (botOptions != null && botOptions.isEventBot()) {

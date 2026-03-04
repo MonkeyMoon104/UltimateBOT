@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot;
 
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.fakeplayer.FakeOfflinePlayer;
-import com.monkey.mcbot.bot.ai.TrainingBot;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -12,9 +12,9 @@ import java.util.function.BiFunction;
 
 public class BotRegistry {
 
-    private final Map<UUID, TrainingBot> spawnedBots = new ConcurrentHashMap<>();
+    private final Map<UUID, ITrainingBot> spawnedBots = new ConcurrentHashMap<>();
 
-    public void registerBot(UUID playerUUID, TrainingBot bot) {
+    public void registerBot(UUID playerUUID, ITrainingBot bot) {
         spawnedBots.put(playerUUID, bot);
     }
 
@@ -23,12 +23,12 @@ public class BotRegistry {
     }
 
     public UUID getBotUUID(UUID playerUUID) {
-        TrainingBot bot = spawnedBots.get(playerUUID);
+        ITrainingBot bot = spawnedBots.get(playerUUID);
         if (bot == null) return null;
-        return bot.getUUID();
+        return bot.asPlayer().getUUID();
     }
 
-    public TrainingBot computeIfPresent(UUID playerUUID, BiFunction<UUID, TrainingBot, TrainingBot> remappingFunction) {
+    public ITrainingBot computeIfPresent(UUID playerUUID, BiFunction<UUID, ITrainingBot, ITrainingBot> remappingFunction) {
         return spawnedBots.computeIfPresent(playerUUID, remappingFunction);
     }
 
@@ -37,14 +37,14 @@ public class BotRegistry {
     }
 
     public void removeBotByUUID(UUID botUUID) {
-        spawnedBots.entrySet().removeIf(entry -> entry.getValue().getUUID().equals(botUUID));
+        spawnedBots.entrySet().removeIf(entry -> entry.getValue().asPlayer().getUUID().equals(botUUID));
     }
 
-    public Map<UUID, TrainingBot> getAllBots() {
+    public Map<UUID, ITrainingBot> getAllBots() {
         return new HashMap<>(spawnedBots);
     }
 
-    public TrainingBot getBot(UUID ownerUUID) {
+    public ITrainingBot getBot(UUID ownerUUID) {
         return spawnedBots.get(ownerUUID);
     }
 
@@ -53,7 +53,7 @@ public class BotRegistry {
     }
 
     public @Nullable FakeOfflinePlayer getFakeOfflinePlayer(UUID uuid) {
-        TrainingBot bot = spawnedBots.get(uuid);
+        ITrainingBot bot = spawnedBots.get(uuid);
         if (bot == null) return null;
         return new FakeOfflinePlayer(bot);
     }

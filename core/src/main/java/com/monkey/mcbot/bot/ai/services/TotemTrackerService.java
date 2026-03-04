@@ -1,26 +1,26 @@
 package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.bot.BotOptions;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 public class TotemTrackerService {
 
-    private final TrainingBot bot;
+    private final ITrainingBot bot;
     private int totemCount = -1;
     private int previousEquippedTotems = 0;
     private boolean skipNextTotemTracking = false;
     private boolean previousCombatState = false;
 
-    public TotemTrackerService(TrainingBot bot) {
+    public TotemTrackerService(ITrainingBot bot) {
         this.bot = bot;
         this.previousCombatState = bot.isCombat();
     }
 
     public void onTick() {
-        ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
-        ItemStack mainhand = bot.getItemBySlot(EquipmentSlot.MAINHAND);
+        ItemStack offhand = bot.asPlayer().getItemBySlot(EquipmentSlot.OFFHAND);
+        ItemStack mainhand = bot.asPlayer().getItemBySlot(EquipmentSlot.MAINHAND);
 
         boolean hasOffhandTotem = offhand != null && !offhand.isEmpty() &&
                 offhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);

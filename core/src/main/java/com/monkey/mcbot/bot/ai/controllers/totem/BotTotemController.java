@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.totem;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.*;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.*;
@@ -30,7 +30,7 @@ public class BotTotemController {
     }
 
     public void manageTotem() {
-        if (!(bot instanceof TrainingBot trainingBot)) return;
+        if (!(bot instanceof ITrainingBot trainingBot)) return;
 
         ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
         ItemStack mainhand = bot.getItemBySlot(EquipmentSlot.MAINHAND);
@@ -62,7 +62,7 @@ public class BotTotemController {
     }
 
     public void onTotemUsed() {
-        if (bot instanceof TrainingBot trainingBot) {
+        if (bot instanceof ITrainingBot trainingBot) {
             usageTracker.onTotemUsed(trainingBot);
         }
     }
@@ -75,7 +75,7 @@ public class BotTotemController {
         inventoryManager.forceEquipTotems(count);
     }
 
-    private void handleNoTotemsWarning(TrainingBot trainingBot) {
+    private void handleNoTotemsWarning(ITrainingBot trainingBot) {
         if (!notificationManager.hasWarnedOutOfTotems()) {
             notificationManager.sendTotemWarning(trainingBot);
             notificationManager.setWarnedOutOfTotems(true);

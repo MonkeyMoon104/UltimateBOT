@@ -1,7 +1,7 @@
 package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,9 +38,9 @@ public class TeleportItem extends AbstractItem {
 	public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
 		if (!training.getBotManager().isBotSpawned(player.getUniqueId())) return;
 
-		TrainingBot bot = training.getBotManager().getBot(player.getUniqueId());
+		ITrainingBot bot = training.getBotManager().getBot(player.getUniqueId());
 		if (bot == null) return;
 
-		bot.moveTo(player.getX(), player.getY(), player.getZ());
+		bot.asPlayer().moveTo(player.getX(), player.getY(), player.getZ());
 	}
 }

@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.services;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
 
@@ -29,8 +29,8 @@ public class TargetingService {
         }
     }
 
-    public Player findClosestPlayer(TrainingBot bot, double maxRange) {
-        UUID botUUID = bot.getUUID();
+    public Player findClosestPlayer(ITrainingBot bot, double maxRange) {
+        UUID botUUID = bot.asPlayer().getUUID();
         long currentTime = System.currentTimeMillis();
 
         TargetCache cached = targetCache.get(botUUID);
@@ -41,10 +41,10 @@ public class TargetingService {
         double closestDistanceSq = maxRange * maxRange;
         Player closestPlayer = null;
 
-        org.bukkit.World botWorld = bot.level().getWorld();
-        double botX = bot.getX();
-        double botY = bot.getY();
-        double botZ = bot.getZ();
+        org.bukkit.World botWorld = bot.asPlayer().level().getWorld();
+        double botX = bot.asPlayer().getX();
+        double botY = bot.asPlayer().getY();
+        double botZ = bot.asPlayer().getZ();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isDead() || player.getGameMode().isInvulnerable()) {

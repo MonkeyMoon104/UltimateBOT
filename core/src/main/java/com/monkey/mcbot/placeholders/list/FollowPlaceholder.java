@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
@@ -23,7 +23,7 @@ public class FollowPlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
         return bot != null ? (bot.isFollow() ? "✓" : "✗") : "✗";
     }
 }

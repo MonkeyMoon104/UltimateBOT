@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.entity.Player;
 
 public class PlaceholderHelper {
@@ -12,8 +12,8 @@ public class PlaceholderHelper {
         this.plugin = plugin;
     }
 
-    public TrainingBot getBotForPlaceholder(Player player) {
-        TrainingBot eventBot = getActiveEventBot();
+    public ITrainingBot getBotForPlaceholder(Player player) {
+        ITrainingBot eventBot = getActiveEventBot();
         if (eventBot != null) {
             return eventBot;
         }
@@ -21,8 +21,8 @@ public class PlaceholderHelper {
         return plugin.getBot(player);
     }
 
-    private TrainingBot getActiveEventBot() {
-        for (TrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
+    private ITrainingBot getActiveEventBot() {
+        for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
                 var botOptions = bot.getBrainController().getBotOptions();
                 if (botOptions != null && botOptions.isEventBot()) {

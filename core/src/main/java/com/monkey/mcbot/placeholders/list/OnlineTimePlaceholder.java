@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
@@ -23,9 +23,9 @@ public class OnlineTimePlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.getBukkitEntity() != null) {
-            long ticks = bot.tickCount;
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
+        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
+            long ticks = bot.asPlayer().tickCount;
             long seconds = ticks / 20;
             long minutes = seconds / 60;
             long hours = minutes / 60;

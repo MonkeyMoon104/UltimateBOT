@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper;
 
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
@@ -54,7 +54,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public void executeCombatStrategy(Player target) {
-        if (!((TrainingBot) bot).isCombat()) {
+        if (!((ITrainingBot) bot).isCombat()) {
             basicFollowBehavior(target);
             return;
         }
@@ -90,7 +90,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     public boolean executeAggressive(Player target, double distance) {
         boolean actionTaken = false;
 
-        if (distance <= 3.5 && ((TrainingBot) bot).isCombat() && ((TrainingBot) bot).isFollow()) {
+        if (distance <= 3.5 && ((ITrainingBot) bot).isCombat() && ((ITrainingBot) bot).isFollow()) {
             attackController.handleAttack(target);
             actionTaken = true;
         }
@@ -115,7 +115,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             inventoryController.switchToSword();
         }
 
-        if (distance <= 3.5 && ((TrainingBot) bot).isFollow()) {
+        if (distance <= 3.5 && ((ITrainingBot) bot).isFollow()) {
             attackController.handleAttack(target);
             actionTaken = true;
         }
@@ -125,7 +125,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeDefensive(Player target, double distance) {
-        if (!((TrainingBot) bot).isCombat()) return false;
+        if (!((ITrainingBot) bot).isCombat()) return false;
         boolean actionTaken = false;
 
         if (enderpearlController.wasRecentlyDamaged() || combatDataManager.getConsecutiveDamageCount() >= 2) {
@@ -158,7 +158,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeRepositioning(Player target, double distance) {
-        if (!((TrainingBot) bot).isCombat()) return false;
+        if (!((ITrainingBot) bot).isCombat()) return false;
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
 
@@ -198,7 +198,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeAnchorSetup(Player target, double distance) {
-        if (!((TrainingBot) bot).isCombat()) return false;
+        if (!((ITrainingBot) bot).isCombat()) return false;
 
         if (!rapvpController.isActive()) {
             rapvpController.enable(target);
@@ -212,7 +212,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeCrystalSetup(Player target, double distance) {
-        if (!((TrainingBot) bot).isCombat()) return false;
+        if (!((ITrainingBot) bot).isCombat()) return false;
 
         movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
         movementController.moveToTarget(target, 5.0);
@@ -228,7 +228,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeRetreating(Player target, double distance) {
-        if (!((TrainingBot) bot).isCombat()) return false;
+        if (!((ITrainingBot) bot).isCombat()) return false;
         boolean actionTaken = false;
 
         if (enderpearlController.canUseEnderpearl()) {

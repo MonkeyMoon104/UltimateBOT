@@ -62,73 +62,32 @@ public class BotAI {
         this.level = bot.level();
         this.options = options;
 
-        this.noobMovementController = new BotNoobMovementController(
-                bot,
-                level
-        );
-
-        this.movementController = new BotMovementController(
-                bot,
-                level
-        );
+        this.noobMovementController = new BotNoobMovementController(bot, level);
+        this.movementController = new BotMovementController(bot, level);
         this.rotationController = new BotRotationController(bot);
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
-        this.healController = new BotHealController(
-                bot,
-                inventoryController
-        );
+        this.healController = new BotHealController(bot, inventoryController);
         this.teleportController = new BotTeleportController(bot);
         this.enderpearlController = new BotEnderpearlController(
-                bot,
-                inventoryController,
-                rotationController
-        );
-        this.cpvpController = new BotCPVPController(
-                bot,
-                inventoryController
-        );
+                bot, inventoryController, rotationController);
+        this.cpvpController = new BotCPVPController(bot, inventoryController);
         this.cpvpController.setRank(options.getRank());
         this.rapvpController = new BotRAPVPController(
-                bot,
-                inventoryController,
-                rotationController,
-                enderpearlController
-        );
+                bot, inventoryController, rotationController, enderpearlController);
         this.rapvpController.setRank(options.getRank());
 
         this.combatStateManager = new CombatStateManager(
-                bot,
-                inventoryController,
-                cpvpController,
-                rapvpController
-        );
+                bot, inventoryController, cpvpController, rapvpController);
         this.combatDataManager = new CombatDataManager(
-                bot,
-                enderpearlController,
-                rapvpController,
-                cpvpController
-        );
+                bot, enderpearlController, rapvpController, cpvpController);
         this.pathfindingManager = new PathfindingManager(
-                bot,
-                level,
-                movementController,
-                enderpearlController,
-                combatStateManager
-        );
+                bot, level, movementController, enderpearlController, combatStateManager);
         this.combatStrategyExecutor = new CombatStrategyExecutor(
-                bot,
-                movementController,
-                rotationController,
-                attackController,
-                inventoryController,
-                enderpearlController,
-                cpvpController,
-                rapvpController,
-                combatStateManager,
-                combatDataManager
-        );
+                bot, movementController, rotationController, attackController,
+                inventoryController, enderpearlController, cpvpController, rapvpController,
+                combatStateManager, combatDataManager);
     }
 
     public void tick(org.bukkit.entity.Player targetBukkitPlayer) {
@@ -147,7 +106,7 @@ public class BotAI {
 
         boolean isCurrentlyHealing = healController.isHealing();
 
-        if (((TrainingBot) bot).isCombat()) {
+        if (((ITrainingBot) bot).isCombat()) {
             if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
                 if (pathfindingManager.isUsingPathfinding()) {
                     pathfindingManager.setUsingPathfinding(false);
@@ -167,10 +126,9 @@ public class BotAI {
                 }
             } else {
                 pathfindingManager.checkForStuck(target);
-
                 enderpearlController.tick();
 
-                if (((TrainingBot) bot).isCombat() && !isCurrentlyHealing) {
+                if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing) {
                     combatStateManager.updateCombatState(target);
                     combatStrategyExecutor.executeCombatStrategy(target);
                 } else if (isCurrentlyHealing) {
@@ -199,11 +157,9 @@ public class BotAI {
 
         if (distance < 3.0) {
             movementController.moveAwayFrom(target, 4.0);
-        }
-        else if (distance > 8.0) {
+        } else if (distance > 8.0) {
             movementController.moveTowards(target, 5.0);
-        }
-        else {
+        } else {
             movementController.setUnderFire(true);
             movementController.maintainDistance(target, distance);
         }
@@ -230,9 +186,7 @@ public class BotAI {
     public BotEnderpearlController getEnderpearlController() { return enderpearlController; }
     public BotCPVPController getCPVPController() { return cpvpController; }
     public BotHealController getHealController() { return healController; }
-    public BotTeleportController getTeleportController() {
-        return teleportController;
-    }
+    public BotTeleportController getTeleportController() { return teleportController; }
     public CombatState getCurrentState() {
         return CombatState.valueOf(combatStateManager.getCurrentState().name());
     }

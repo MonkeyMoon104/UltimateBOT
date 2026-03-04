@@ -1,7 +1,7 @@
 package com.monkey.mcbot.placeholders.list;
 
 import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
@@ -23,10 +23,10 @@ public class HealthBarPlaceholder implements IBotPlaceholder {
 
     @Override
     public String getValue(Player player) {
-        TrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.getBukkitEntity() != null) {
-            double health = bot.getBukkitEntity().getHealth();
-            double maxHealth = bot.getBukkitEntity().getMaxHealth();
+        ITrainingBot bot = helper.getBotForPlaceholder(player);
+        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
+            double health = bot.asPlayer().getBukkitEntity().getHealth();
+            double maxHealth = bot.asPlayer().getBukkitEntity().getMaxHealth();
             double percentage = health / maxHealth;
 
             int filledBars = (int) Math.round(percentage * 10);

@@ -3,10 +3,10 @@ package com.monkey.mcbot.bot.ai.fakeplayer;
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.Title;
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import io.papermc.paper.entity.LookAnchor;
 import io.papermc.paper.entity.PlayerGiveResult;
 import io.papermc.paper.math.Position;
-import com.monkey.mcbot.bot.ai.TrainingBot;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
@@ -45,10 +45,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
 
-    private final TrainingBot trainingBot;
+    private final ITrainingBot trainingBot;
 
-    public BotCraftPlayer(TrainingBot trainingBot) {
-        super((CraftServer) Bukkit.getServer(), trainingBot);
+    public BotCraftPlayer(ITrainingBot trainingBot) {
+        super((CraftServer) Bukkit.getServer(), trainingBot.asPlayer());
         this.trainingBot = trainingBot;
     }
 
@@ -85,7 +85,7 @@ public class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entit
 
     @Override
     public Player getHandle() {
-        return trainingBot;
+        return trainingBot.asPlayer();
     }
 
     @Override
@@ -316,22 +316,22 @@ public class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entit
 
     @Override
     public boolean isSneaking() {
-        return trainingBot.isShiftKeyDown();
+        return trainingBot.asPlayer().isShiftKeyDown();
     }
 
     @Override
     public void setSneaking(boolean sneak) {
-        trainingBot.setShiftKeyDown(sneak);
+        trainingBot.asPlayer().setShiftKeyDown(sneak);
     }
 
     @Override
     public boolean isSprinting() {
-        return trainingBot.isSprinting();
+        return trainingBot.asPlayer().isSprinting();
     }
 
     @Override
     public void setSprinting(boolean sprinting) {
-        trainingBot.setSprinting(sprinting);
+        trainingBot.asPlayer().setSprinting(sprinting);
     }
 
     @Override

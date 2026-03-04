@@ -1,8 +1,8 @@
 package com.monkey.mcbot.bot.ai.fakeplayer;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import com.monkey.mcbot.bot.ai.TrainingBot;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -17,15 +17,15 @@ import java.util.UUID;
 
 public class FakeOfflinePlayer implements OfflinePlayer {
 
-    private final TrainingBot bot;
+    private final ITrainingBot bot;
 
-    public FakeOfflinePlayer(TrainingBot bot) {
+    public FakeOfflinePlayer(ITrainingBot bot) {
         this.bot = bot;
     }
 
     @Override
     public UUID getUniqueId() {
-        return bot.getUUID();
+        return bot.asPlayer().getUUID();
     }
 
     @Override
@@ -65,7 +65,7 @@ public class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public String getName() {
-        return bot.getName().getString();
+        return bot.asPlayer().getName().getString();
     }
 
     @Override
