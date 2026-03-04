@@ -13,11 +13,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.List;
@@ -72,4 +75,6 @@ public interface INMSBridge {
     void addToProfileCache(net.minecraft.world.entity.player.Player bot);
 
     String getProfileName(com.mojang.authlib.GameProfile profile);
+
+    InteractionResult useItemOnBlock(Player bot, ItemStack stack, BlockHitResult hitResult, InteractionHand hand);
 }

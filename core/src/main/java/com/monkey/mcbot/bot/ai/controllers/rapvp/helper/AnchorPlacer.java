@@ -2,9 +2,11 @@ package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -49,13 +51,16 @@ public class AnchorPlacer {
                     false
             );
 
-            stack.useOn(new net.minecraft.world.item.context.UseOnContext(bot, InteractionHand.MAIN_HAND, hitResult));
-            rotation.lookAt(Vec3.atLowerCornerOf(pos));
-            bot.swing(InteractionHand.MAIN_HAND);
+            InteractionResult result = NMSBridgeManager.get()
+                    .useItemOnBlock(bot, stack, hitResult, InteractionHand.MAIN_HAND);
 
-            inventory.onItemUsed(BotInventoryController.ANCHOR_SLOT);
-
-            return true;
+            if (result.consumesAction()) {
+                rotation.lookAt(Vec3.atLowerCornerOf(pos));
+                bot.swing(InteractionHand.MAIN_HAND);
+                inventory.onItemUsed(BotInventoryController.ANCHOR_SLOT);
+                return true;
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }

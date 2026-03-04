@@ -16,6 +16,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -23,8 +25,10 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
@@ -162,5 +166,11 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     @Override
     public String getProfileName(com.mojang.authlib.GameProfile profile) {
         return profile.getName();
+    }
+
+    @Override
+    public InteractionResult useItemOnBlock(Player bot, ItemStack stack,
+                                            BlockHitResult hitResult, InteractionHand hand) {
+        return stack.getItem().useOn(new UseOnContext(bot.level(), bot, hand, stack, hitResult));
     }
 }

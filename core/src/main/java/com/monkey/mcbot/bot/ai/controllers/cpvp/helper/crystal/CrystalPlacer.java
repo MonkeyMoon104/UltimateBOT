@@ -1,6 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -44,8 +45,8 @@ public class CrystalPlacer {
                     false
             );
 
-            UseOnContext context = new UseOnContext(bot, InteractionHand.MAIN_HAND, hitResult);
-            InteractionResult result = crystalStack.useOn(context);
+            InteractionResult result = NMSBridgeManager.get()
+                    .useItemOnBlock(bot, crystalStack, hitResult, InteractionHand.MAIN_HAND);
 
             if (result.consumesAction()) {
                 bot.swing(InteractionHand.MAIN_HAND);

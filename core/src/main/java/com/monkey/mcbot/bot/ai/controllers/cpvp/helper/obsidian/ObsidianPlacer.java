@@ -1,6 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -43,8 +44,8 @@ public class ObsidianPlacer {
                     false
             );
 
-            UseOnContext context = new UseOnContext(bot, InteractionHand.MAIN_HAND, hitResult);
-            InteractionResult result = obsidianStack.useOn(context);
+            InteractionResult result = NMSBridgeManager.get()
+                    .useItemOnBlock(bot, obsidianStack, hitResult, InteractionHand.MAIN_HAND);
 
             if (result.consumesAction()) {
                 bot.swing(InteractionHand.MAIN_HAND);
