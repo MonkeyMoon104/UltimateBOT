@@ -1,6 +1,7 @@
 package com.monkey.mcbot.nms;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotOptions;
@@ -25,8 +26,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
@@ -135,5 +140,27 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     @Override
     public void moveBot(Player bot, double x, double y, double z) {
         bot.snapTo(x, y, z);
+    }
+
+    @Override
+    public GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName) {
+        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
+        Collection<Property> textures = viewerProfile.getProperties().get("textures");
+        GameProfile profile = new GameProfile(botUUID, botName);
+        if (!textures.isEmpty()) {
+            profile.getProperties().put("textures", textures.iterator().next());
+        }
+        return profile;
+    }
+
+    @Override
+    public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
+        ((CraftServer) Bukkit.getServer()).getHandle().getServer()
+                .getProfileCache().add(bot.getGameProfile());
+    }
+
+    @Override
+    public String getProfileName(com.mojang.authlib.GameProfile profile) {
+        return profile.getName();
     }
 }

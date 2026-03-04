@@ -66,4 +66,10 @@ public interface INMSBridge {
     );
 
     void moveBot(Player bot, double x, double y, double z);
+
+    GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName);
+
+    void addToProfileCache(net.minecraft.world.entity.player.Player bot);
+
+    String getProfileName(com.mojang.authlib.GameProfile profile);
 }

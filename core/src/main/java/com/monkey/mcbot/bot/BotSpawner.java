@@ -77,7 +77,7 @@ public class BotSpawner {
         );
 
         bot.setTotemCount(totem);
-        ((CraftServer) plugin.getServer()).getHandle().getServer().getProfileCache().add(bot.asPlayer().getGameProfile());
+        NMSBridgeManager.get().addToProfileCache(bot.asPlayer());
         world.addFreshEntity(bot.asPlayer());
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);

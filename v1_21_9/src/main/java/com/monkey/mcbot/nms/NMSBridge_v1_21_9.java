@@ -1,12 +1,14 @@
 package com.monkey.mcbot.nms;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_7;
+import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_9;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -38,7 +40,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class NMSBridge_v1_21_7 implements INMSBridge {
+public class NMSBridge_v1_21_9 implements INMSBridge {
 
     @Override
     public void hurtEntity(Player target, ServerLevel level, DamageSource source, float amount) {
@@ -132,7 +134,7 @@ public class NMSBridge_v1_21_7 implements INMSBridge {
                                           String deadBotMessage,
                                           String deadBotEventMessage,
                                           BotOptions botOptions) {
-        return new TrainingBot_v1_21_7(
+        return new TrainingBot_v1_21_9(
                 level, pos, yRot, gameProfile,
                 targetPlayer, follow, plugin,
                 deadBotMessage, deadBotEventMessage, botOptions
@@ -147,22 +149,36 @@ public class NMSBridge_v1_21_7 implements INMSBridge {
     @Override
     public GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName) {
         GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
-        GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
+        Collection<Property> textures = viewerProfile.properties().get("textures");
+
+        if (textures.isEmpty()) {
+            return new GameProfile(botUUID, botName);
         }
-        return profile;
+
+        com.google.common.collect.ArrayListMultimap<String, Property> multimap =
+                com.google.common.collect.ArrayListMultimap.create();
+        textures.forEach(p -> multimap.put("textures", p));
+
+        return new GameProfile(botUUID, botName, new PropertyMap(multimap));
     }
 
     @Override
     public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
-        ((CraftServer) Bukkit.getServer()).getHandle().getServer()
-                .getProfileCache().add(bot.getGameProfile());
+        try {
+            var server = ((CraftServer) Bukkit.getServer()).getHandle().getServer();
+            var method = server.getClass().getSuperclass().getDeclaredMethod("getProfileCache");
+            method.setAccessible(true);
+            var cache = method.invoke(server);
+            if (cache != null) {
+                cache.getClass().getMethod("add", com.mojang.authlib.GameProfile.class)
+                        .invoke(cache, bot.getGameProfile());
+            }
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public String getProfileName(com.mojang.authlib.GameProfile profile) {
-        return profile.getName();
+        return profile.name();
     }
 }

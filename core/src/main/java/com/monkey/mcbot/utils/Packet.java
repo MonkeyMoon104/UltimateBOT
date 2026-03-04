@@ -17,7 +17,7 @@ public class Packet {
         GameProfile profile = bot.asPlayer().getGameProfile();
 
         ClientboundPlayerInfoUpdatePacket packet = NMSBridgeManager.get().createAddPlayerPacket(
-                bot.asPlayer().getUUID(), profile, profile.getName()
+                bot.asPlayer().getUUID(), profile, NMSBridgeManager.get().getProfileName(profile)
         );
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
