@@ -20,9 +20,10 @@ public class NMSBridgeManager {
             case "1.21.5" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_5";
             case "1.21.6" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_6";
             case "1.21.7" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_7";
+            case "1.21.8" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_8";
             default -> {
                 logger.severe("[SandboxTraining] Versione non supportata: " + version);
-                logger.severe("[SandboxTraining] Versioni supportate: 1.21.4, 1.21.5, 1.21.6, 1.21.7");
+                logger.severe("[SandboxTraining] Versioni supportate: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8");
                 throw new RuntimeException(
                         "[SandboxTraining] Versione Minecraft non supportata: " + version
                 );
