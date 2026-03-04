@@ -4,6 +4,7 @@ dependencies {
     implementation project(':core')
     implementation project(path: ':v1_21_4', configuration: 'reobf')
     implementation project(path: ':v1_21_5', configuration: 'reobf')
+    implementation project(path: ':v1_21_7', configuration: 'reobf')
 }
 
 shadowJar {

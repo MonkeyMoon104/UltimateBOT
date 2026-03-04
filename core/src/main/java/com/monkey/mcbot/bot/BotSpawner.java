@@ -2,6 +2,7 @@ package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.SandboxTraining;
 import com.monkey.mcbot.bot.ai.TrainingBot;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import net.minecraft.core.BlockPos;
@@ -52,7 +53,7 @@ public class BotSpawner {
         }
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
-        ServerLevel world = handle.serverLevel();
+        ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
 
         UUID botUUID = UUID.randomUUID();
         FileConfiguration config = plugin.getConfig();
@@ -99,7 +100,8 @@ public class BotSpawner {
         UUID botUUID = registry.getBotUUID(ownerUUID);
         if (botUUID == null) return;
 
-        ServerLevel world = ((CraftPlayer) owner).getHandle().serverLevel();
+        ServerPlayer handle = ((CraftPlayer) owner).getHandle();
+        ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
         if (EntityUtils.removeEntity(world, botUUID)) {
             registry.removeBot(ownerUUID);
         }

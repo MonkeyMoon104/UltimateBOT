@@ -18,9 +18,10 @@ public class NMSBridgeManager {
         String className = switch (version) {
             case "1.21.4" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_4";
             case "1.21.5" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_5";
+            case "1.21.7" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_7";
             default -> {
                 logger.severe("[SandboxTraining] Versione non supportata: " + version);
-                logger.severe("[SandboxTraining] Versioni supportate: 1.21.4, 1.21.5");
+                logger.severe("[SandboxTraining] Versioni supportate: 1.21.4, 1.21.5, 1.21.7");
                 throw new RuntimeException(
                         "[SandboxTraining] Versione Minecraft non supportata: " + version
                 );

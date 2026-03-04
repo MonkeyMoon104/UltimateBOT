@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -45,4 +46,6 @@ public interface INMSBridge {
 
     ClientboundSetEquipmentPacket createEquipmentPacket(
             int entityId, List<Pair<EquipmentSlot, ItemStack>> equipment);
+
+    ServerLevel getServerLevel(ServerPlayer player);
 }

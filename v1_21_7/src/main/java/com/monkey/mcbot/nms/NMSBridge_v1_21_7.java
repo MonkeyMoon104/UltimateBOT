@@ -4,7 +4,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.level.ServerLevel;
@@ -27,7 +29,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
-public class NMSBridge_v1_21_4 implements INMSBridge {
+public class NMSBridge_v1_21_7 implements INMSBridge {
 
     @Override
     public void hurtEntity(Player target, ServerLevel level, DamageSource source, float amount) {
@@ -49,12 +51,17 @@ public class NMSBridge_v1_21_4 implements INMSBridge {
 
     @Override
     public void playSound(Level level, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
-        level.playSound(null, pos, sound, source, volume, pitch);
+        level.playSeededSound(null,
+                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                sound, source, volume, pitch, level.random.nextLong());
     }
 
     @Override
     public void playSoundOnPlayer(Player player, SoundEvent sound, float volume, float pitch) {
-        player.playSound(sound, volume, pitch);
+        player.level().playSeededSound(null,
+                player.getX(), player.getY(), player.getZ(),
+                sound, SoundSource.PLAYERS,
+                volume, pitch, player.level().random.nextLong());
     }
 
     @Override
@@ -102,6 +109,6 @@ public class NMSBridge_v1_21_4 implements INMSBridge {
 
     @Override
     public ServerLevel getServerLevel(ServerPlayer player) {
-        return player.serverLevel();
+        return (ServerLevel) player.level();
     }
 }

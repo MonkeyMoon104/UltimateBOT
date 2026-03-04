@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -102,5 +103,10 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     public ClientboundSetEquipmentPacket createEquipmentPacket(
             int entityId, List<Pair<EquipmentSlot, ItemStack>> equipment) {
         return new ClientboundSetEquipmentPacket(entityId, equipment);
+    }
+
+    @Override
+    public ServerLevel getServerLevel(ServerPlayer player) {
+        return player.serverLevel();
     }
 }
