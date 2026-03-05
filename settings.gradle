@@ -5,15 +5,17 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'sandboxtraining'
+rootProject.name = 'MinecraftBot'
 
 include 'core'
-include 'v1_21_4'
-include 'v1_21_5'
-include 'v1_21_6'
-include 'v1_21_7'
-include 'v1_21_8'
-include 'v1_21_9'
-include 'v1_21_10'
-include 'v1_21_11'
+
+include 'versions:v1_21_4'
+include 'versions:v1_21_5'
+include 'versions:v1_21_6'
+include 'versions:v1_21_7'
+include 'versions:v1_21_8'
+include 'versions:v1_21_9'
+include 'versions:v1_21_10'
+include 'versions:v1_21_11'
+
 include 'plugin'
