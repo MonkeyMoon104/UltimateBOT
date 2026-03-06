@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
@@ -15,9 +15,9 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 public class TotemItem extends AbstractItem {
 
     private final BotOptions options;
-    private final SandboxTraining training;
+    private final MinecraftBot training;
 
-    public TotemItem(BotOptions options, SandboxTraining training) {
+    public TotemItem(BotOptions options, MinecraftBot training) {
         this.options = options;
         this.training = training;
     }

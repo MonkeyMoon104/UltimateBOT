@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.mcbot.bot.ai.services.TotemTrackerService;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +25,7 @@ public interface ITrainingBot {
     BotAI getBotAI();
     TotemTrackerService getTotemTracker();
 
-    SandboxTraining getPlugin();
+    MinecraftBot getPlugin();
 
     boolean callSuperActuallyHurt(ServerLevel level, DamageSource source,
                                   float amount, EntityDamageEvent event);

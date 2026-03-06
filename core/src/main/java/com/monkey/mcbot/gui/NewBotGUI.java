@@ -1,8 +1,7 @@
 package com.monkey.mcbot.gui;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
-import com.monkey.mcbot.gui.impl.*;
 import com.monkey.mcbot.gui.impl.*;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import org.bukkit.Material;
@@ -20,14 +19,14 @@ import java.util.UUID;
 public class NewBotGUI {
 
     private final Player player;
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final boolean isEventBot;
 
-    public NewBotGUI(Player player, SandboxTraining training) {
+    public NewBotGUI(Player player, MinecraftBot training) {
         this(player, training, false);
     }
 
-    public NewBotGUI(Player player, SandboxTraining training, boolean isEventBot) {
+    public NewBotGUI(Player player, MinecraftBot training, boolean isEventBot) {
         this.player = player;
         this.training = training;
         this.isEventBot = isEventBot;

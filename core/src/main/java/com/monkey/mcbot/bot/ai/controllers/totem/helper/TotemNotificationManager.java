@@ -1,15 +1,15 @@
 package com.monkey.mcbot.bot.ai.controllers.totem.helper;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.ITotemNotificationManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 
 public class TotemNotificationManager implements ITotemNotificationManager {
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private boolean warnedOutOfTotems = false;
 
-    public TotemNotificationManager(SandboxTraining plugin) {
+    public TotemNotificationManager(MinecraftBot plugin) {
         this.plugin = plugin;
     }
 

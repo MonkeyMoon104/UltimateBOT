@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class BotOptions {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final Map<EquipmentSlot, ItemStack> armor;
     private final Map<EquipmentSlot, Boolean> blast = new HashMap<>();
     private int totems;
@@ -19,7 +19,7 @@ public class BotOptions {
     private BotRank rank = BotRank.EASY;
     private boolean isEventBot = false;
 
-    public BotOptions(SandboxTraining training, Map<EquipmentSlot, ItemStack> armor) {
+    public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
         this.armor = armor;
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);

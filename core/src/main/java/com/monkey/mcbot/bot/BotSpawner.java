@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
@@ -12,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -23,10 +22,10 @@ import java.util.UUID;
 
 public class BotSpawner {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private final BotRegistry registry;
 
-    public BotSpawner(SandboxTraining plugin, BotRegistry registry) {
+    public BotSpawner(MinecraftBot plugin, BotRegistry registry) {
         this.plugin = plugin;
         this.registry = registry;
     }

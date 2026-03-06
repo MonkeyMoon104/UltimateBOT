@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai;
 
 import com.mojang.authlib.GameProfile;
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
@@ -18,7 +18,7 @@ public class TrainingBot_v1_21_4 extends Player implements ITrainingBot {
 
     private final TrainingBotLogic logic;
     private final BotCraftPlayer craftEntity;
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
 
     public TrainingBot_v1_21_4(Level level,
                                BlockPos pos,
@@ -26,7 +26,7 @@ public class TrainingBot_v1_21_4 extends Player implements ITrainingBot {
                                GameProfile gameProfile,
                                org.bukkit.entity.Player targetPlayer,
                                boolean follow,
-                               SandboxTraining plugin,
+                               MinecraftBot plugin,
                                String deadBotMessage,
                                String deadBotEventMessage,
                                BotOptions botOptions) {
@@ -114,7 +114,7 @@ public class TrainingBot_v1_21_4 extends Player implements ITrainingBot {
     @Override public void setCombat(boolean c)                  { logic.getBrainController().setCombat(c); }
     @Override public boolean isCombat()                         { return logic.getBrainController().isCombat(); }
     @Override public BotAI getBotAI()                           { return logic.getBrainController().getBotAI(); }
-    @Override public SandboxTraining getPlugin()                { return plugin; }
+    @Override public MinecraftBot getPlugin()                { return plugin; }
     @Override public Player asPlayer()                          { return this; }
 
     @Override

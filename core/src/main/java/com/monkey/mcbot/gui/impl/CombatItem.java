@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.ChatColorUtils;
@@ -18,10 +18,10 @@ import java.util.List;
 
 public class CombatItem extends AbstractItem {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final BotOptions options;
 
-    public CombatItem(SandboxTraining training, BotOptions options) {
+    public CombatItem(MinecraftBot training, BotOptions options) {
         this.training = training;
         this.options = options;
     }

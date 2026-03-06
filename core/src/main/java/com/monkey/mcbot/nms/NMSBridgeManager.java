@@ -11,9 +11,9 @@ public class NMSBridgeManager {
         Logger logger = Bukkit.getLogger();
         String version = Bukkit.getMinecraftVersion();
 
-        logger.info("[SandboxTraining] ==============================");
-        logger.info("[SandboxTraining] Inizializzazione NMS Bridge...");
-        logger.info("[SandboxTraining] Versione Minecraft rilevata: " + version);
+        logger.info("[MinecraftBot] ==============================");
+        logger.info("[MinecraftBot] Inizializzazione NMS Bridge...");
+        logger.info("[MinecraftBot] Versione Minecraft rilevata: " + version);
 
         String className = switch (version) {
             case "1.21.4" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_4";
@@ -25,36 +25,36 @@ public class NMSBridgeManager {
             case "1.21.10" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_10";
             case "1.21.11" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_11";
             default -> {
-                logger.severe("[SandboxTraining] Versione non supportata: " + version);
-                logger.severe("[SandboxTraining] Versioni supportate: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11");
+                logger.severe("[MinecraftBot] Versione non supportata: " + version);
+                logger.severe("[MinecraftBot] Versioni supportate: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11");
                 throw new RuntimeException(
-                        "[SandboxTraining] Versione Minecraft non supportata: " + version
+                        "[MinecraftBot] Versione Minecraft non supportata: " + version
                 );
             }
         };
 
-        logger.info("[SandboxTraining] Caricamento classe: " + className);
+        logger.info("[MinecraftBot] Caricamento classe: " + className);
 
         try {
             Class<?> clazz = Class.forName(className);
             instance = (INMSBridge) clazz.getDeclaredConstructor().newInstance();
-            logger.info("[SandboxTraining] NMS Bridge caricato con successo!");
-            logger.info("[SandboxTraining] Implementazione attiva: " + instance.getClass().getSimpleName());
-            logger.info("[SandboxTraining] ==============================");
+            logger.info("[MinecraftBot] NMS Bridge caricato con successo!");
+            logger.info("[MinecraftBot] Implementazione attiva: " + instance.getClass().getSimpleName());
+            logger.info("[MinecraftBot] ==============================");
         } catch (ClassNotFoundException e) {
-            logger.severe("[SandboxTraining] Classe bridge non trovata: " + className);
-            logger.severe("[SandboxTraining] Il jar potrebbe essere corrotto o incompleto.");
-            throw new RuntimeException("[SandboxTraining] Classe bridge non trovata: " + className, e);
+            logger.severe("[MinecraftBot] Classe bridge non trovata: " + className);
+            logger.severe("[MinecraftBot] Il jar potrebbe essere corrotto o incompleto.");
+            throw new RuntimeException("[MinecraftBot] Classe bridge non trovata: " + className, e);
         } catch (Exception e) {
-            logger.severe("[SandboxTraining] Errore durante il caricamento del bridge: " + e.getMessage());
-            throw new RuntimeException("[SandboxTraining] Impossibile caricare NMS Bridge", e);
+            logger.severe("[MinecraftBot] Errore durante il caricamento del bridge: " + e.getMessage());
+            throw new RuntimeException("[MinecraftBot] Impossibile caricare NMS Bridge", e);
         }
     }
 
     public static INMSBridge get() {
         if (instance == null) {
             throw new RuntimeException(
-                    "[SandboxTraining] NMSBridgeManager non inizializzato! Chiama init() nell'onEnable."
+                    "[MinecraftBot] NMSBridgeManager non inizializzato! Chiama init() nell'onEnable."
             );
         }
         return instance;

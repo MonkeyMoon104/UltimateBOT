@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
@@ -15,9 +15,9 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 public class TeleportItem extends AbstractItem {
 
-	private final SandboxTraining training;
+	private final MinecraftBot training;
 
-	public TeleportItem(SandboxTraining training) {
+	public TeleportItem(MinecraftBot training) {
 		this.training = training;
 	}
 

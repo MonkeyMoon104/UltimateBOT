@@ -1,7 +1,6 @@
 package com.monkey.mcbot.placeholders;
 
-import com.monkey.mcbot.SandboxTraining;
-import com.monkey.mcbot.placeholders.list.*;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.placeholders.list.*;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
@@ -12,10 +11,10 @@ import java.util.logging.Level;
 
 public class BotPlaceholderCoordinator extends PlaceholderExpansion {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private final Map<String, IBotPlaceholder> placeholders = new HashMap<>();
 
-    public BotPlaceholderCoordinator(SandboxTraining plugin) {
+    public BotPlaceholderCoordinator(MinecraftBot plugin) {
         this.plugin = plugin;
         registerPlaceholders();
     }

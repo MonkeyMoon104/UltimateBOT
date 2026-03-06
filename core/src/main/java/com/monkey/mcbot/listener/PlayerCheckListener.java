@@ -1,7 +1,7 @@
 package com.monkey.mcbot.listener;
 
 import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
@@ -16,11 +16,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerCheckListener implements Listener {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private final BotManager botManager;
     private final PlayerOptions playerOptions;
 
-    public PlayerCheckListener(SandboxTraining plugin) {
+    public PlayerCheckListener(MinecraftBot plugin) {
         this.plugin = plugin;
         this.botManager = plugin.getBotManager();
         this.playerOptions = plugin.getPlayerOptions();

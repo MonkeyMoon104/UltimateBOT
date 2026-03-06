@@ -1,14 +1,14 @@
 package com.monkey.mcbot.placeholders;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.entity.Player;
 
 public class PlaceholderHelper {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
 
-    public PlaceholderHelper(SandboxTraining plugin) {
+    public PlaceholderHelper(MinecraftBot plugin) {
         this.plugin = plugin;
     }
 

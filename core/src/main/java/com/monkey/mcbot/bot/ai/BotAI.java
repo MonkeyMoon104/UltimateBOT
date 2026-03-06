@@ -1,13 +1,12 @@
 package com.monkey.mcbot.bot.ai;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStrategyExecutor;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.PathfindingManager;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
@@ -57,7 +56,7 @@ public class BotAI {
     private final ICombatStrategyExecutor combatStrategyExecutor;
     private final BotOptions options;
 
-    public BotAI(Player bot, SandboxTraining plugin, BotOptions options) {
+    public BotAI(Player bot, MinecraftBot plugin, BotOptions options) {
         this.bot = bot;
         this.level = bot.level();
         this.options = options;

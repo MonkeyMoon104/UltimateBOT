@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
@@ -14,17 +14,17 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 public class FollowItem extends AbstractItem {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final BotOptions options;
     private final CombatItem combatItem;
 
-    public FollowItem(SandboxTraining training, BotOptions options, CombatItem combatItem) {
+    public FollowItem(MinecraftBot training, BotOptions options, CombatItem combatItem) {
         this.training = training;
         this.options = options;
         this.combatItem = combatItem;
     }
 
-    public FollowItem(SandboxTraining training, BotOptions options) {
+    public FollowItem(MinecraftBot training, BotOptions options) {
         this.training = training;
         this.options = options;
         this.combatItem = null;

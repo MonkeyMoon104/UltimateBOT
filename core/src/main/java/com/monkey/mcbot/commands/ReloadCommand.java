@@ -1,6 +1,6 @@
 package com.monkey.mcbot.commands;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,9 +14,9 @@ import java.util.List;
 public class ReloadCommand implements CommandExecutor, TabCompleter {
 
     private static final List<String> OPTIONS = Arrays.asList("config", "bot", "maps", "all");
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
 
-    public ReloadCommand(SandboxTraining plugin) {
+    public ReloadCommand(MinecraftBot plugin) {
         this.plugin = plugin;
     }
 

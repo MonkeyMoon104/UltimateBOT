@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.brain;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.BotAI;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -22,7 +22,7 @@ public class BotBrainController {
     private long lastNmsTargetUpdate = 0;
     private static final long NMS_CACHE_TIME = 100;
 
-    public BotBrainController(ITrainingBot bot, SandboxTraining plugin,
+    public BotBrainController(ITrainingBot bot, MinecraftBot plugin,
                               org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
         this.targetingService = plugin.getTargetingService();
         this.bot = bot;

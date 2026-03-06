@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.mcbot.bot.ai.services.BotDeathService;
@@ -23,7 +23,7 @@ public class TrainingBotLogic {
     private final BotEquipmentService equipmentHandler;
 
     public TrainingBotLogic(ITrainingBot bot,
-                            SandboxTraining plugin,
+                            MinecraftBot plugin,
                             org.bukkit.entity.Player targetPlayer,
                             boolean follow,
                             BotOptions botOptions,

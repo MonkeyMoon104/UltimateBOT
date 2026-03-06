@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import org.bukkit.entity.Player;
@@ -16,7 +16,7 @@ public class BotManager {
     private final BotUpdater updater;
     private final BotLookup lookup;
 
-    public BotManager(SandboxTraining plugin) {
+    public BotManager(MinecraftBot plugin) {
         BotRegistry registry = plugin.getBotRegistry();
         this.spawner = new BotSpawner(plugin, registry);
         this.updater = new BotUpdater(registry);

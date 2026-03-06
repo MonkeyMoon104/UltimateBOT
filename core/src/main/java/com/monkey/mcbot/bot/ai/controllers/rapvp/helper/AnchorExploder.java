@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.nms.NMSBridgeManager;
@@ -55,7 +55,7 @@ public class AnchorExploder {
             tryManualExplosion(anchorPos);
 
         } catch (Exception e) {
-            SandboxTraining.getInstance().getLogger().warning("Errore durante esplosione anchor: " + e.getMessage());
+            MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione anchor: " + e.getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ public class AnchorExploder {
             bot.swing(InteractionHand.MAIN_HAND);
 
         } catch (Exception e) {
-            SandboxTraining.getInstance().getLogger().warning("Errore durante esplosione manuale: " + e.getMessage());
+            MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione manuale: " + e.getMessage());
         }
     }
 

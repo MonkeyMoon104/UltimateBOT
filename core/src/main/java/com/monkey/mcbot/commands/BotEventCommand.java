@@ -1,6 +1,6 @@
 package com.monkey.mcbot.commands;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.gui.NewBotGUI;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.World;
@@ -11,9 +11,9 @@ import org.bukkit.entity.Player;
 
 public class BotEventCommand implements CommandExecutor {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
 
-    public BotEventCommand(SandboxTraining plugin) {
+    public BotEventCommand(MinecraftBot plugin) {
         this.plugin = plugin;
     }
 

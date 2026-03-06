@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
@@ -18,12 +18,12 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 public class ToggleBlastItem extends AbstractItem {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final BotOptions options;
     private final EquipmentSlot slot;
     private final ArmorItem display;
 
-    public ToggleBlastItem(SandboxTraining training, BotOptions options, EquipmentSlot slot, ArmorItem display) {
+    public ToggleBlastItem(MinecraftBot training, BotOptions options, EquipmentSlot slot, ArmorItem display) {
         this.training = training;
         this.options = options;
         this.slot = slot;

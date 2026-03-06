@@ -1,6 +1,6 @@
 package com.monkey.mcbot.bot.ai.services;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
@@ -10,12 +10,12 @@ import org.bukkit.Bukkit;
 public class BotDeathService {
 
     private final ITrainingBot bot;
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private final PlayerOptions playerOptions;
     private final String deadBotMessage;
     private final String deadBotEventMessage;
 
-    public BotDeathService(ITrainingBot bot, SandboxTraining plugin,
+    public BotDeathService(ITrainingBot bot, MinecraftBot plugin,
                            PlayerOptions playerOptions, String deadBotMessage, String deadBotEventMessage) {
         this.bot = bot;
         this.plugin = plugin;

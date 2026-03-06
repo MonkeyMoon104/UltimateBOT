@@ -1,9 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.totem;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.bot.ai.controllers.totem.helper.*;
-import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.*;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.totem.helper.interf.*;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -19,7 +17,7 @@ public class BotTotemController {
     private final ITotemNotificationManager notificationManager;
     private final ITotemUsageTracker usageTracker;
 
-    public BotTotemController(Player bot, SandboxTraining plugin) {
+    public BotTotemController(Player bot, MinecraftBot plugin) {
         this.bot = bot;
 
         this.inventoryManager = new TotemInventoryManager(bot);

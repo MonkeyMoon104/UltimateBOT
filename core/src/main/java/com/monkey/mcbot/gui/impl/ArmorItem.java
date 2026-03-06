@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
@@ -20,12 +20,12 @@ import java.util.List;
 
 public class ArmorItem extends AbstractItem {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final EquipmentSlot slot;
     private final BotOptions options;
     private ItemStack piece;
 
-    public ArmorItem(SandboxTraining training, EquipmentSlot slot, ItemStack piece, BotOptions options) {
+    public ArmorItem(MinecraftBot training, EquipmentSlot slot, ItemStack piece, BotOptions options) {
         this.training = training;
         this.slot = slot;
         this.piece = piece;

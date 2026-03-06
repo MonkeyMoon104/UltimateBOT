@@ -1,6 +1,6 @@
 package com.monkey.mcbot.gui.impl;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
@@ -22,12 +22,12 @@ import java.util.UUID;
 
 public class SpawnItem extends AbstractItem {
 
-    private final SandboxTraining training;
+    private final MinecraftBot training;
     private final Player player;
     private final BotOptions options;
     private final PlayerOptions playerOptions;
 
-    public SpawnItem(SandboxTraining training, Player player, BotOptions options) {
+    public SpawnItem(MinecraftBot training, Player player, BotOptions options) {
         this.training = training;
         this.player = player;
         this.options = options;

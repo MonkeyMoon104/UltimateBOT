@@ -15,14 +15,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class SandboxTraining extends JavaPlugin {
+public final class MinecraftBot extends JavaPlugin {
 
     private PlayerOptions playerOptions;
     private BotRegistry botRegistry;
     private BotManager botManager;
     private BotPlaceholderCoordinator placeholderCoordinator;
     private TargetingService targetingService;
-    private static SandboxTraining instance;
+    private static MinecraftBot instance;
 
     @Override
     public void onEnable() {
@@ -89,7 +89,7 @@ public final class SandboxTraining extends JavaPlugin {
         return playerOptions;
     }
 
-    public static SandboxTraining getInstance() {
+    public static MinecraftBot getInstance() {
         return instance;
     }
 }

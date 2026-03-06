@@ -1,7 +1,7 @@
 package com.monkey.mcbot.nms;
 
 import com.mojang.authlib.GameProfile;
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import net.minecraft.core.BlockPos;
@@ -62,7 +62,7 @@ public interface INMSBridge {
             GameProfile gameProfile,
             org.bukkit.entity.Player targetPlayer,
             boolean follow,
-            SandboxTraining plugin,
+            MinecraftBot plugin,
             String deadBotMessage,
             String deadBotEventMessage,
             BotOptions botOptions

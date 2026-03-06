@@ -1,6 +1,6 @@
 package com.monkey.mcbot.placeholders.list;
 
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.placeholders.IBotPlaceholder;
 import com.monkey.mcbot.placeholders.PlaceholderHelper;
@@ -9,10 +9,10 @@ import org.bukkit.inventory.ItemStack;
 
 public class ArmorPlaceholder implements IBotPlaceholder {
 
-    private final SandboxTraining plugin;
+    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
-    public ArmorPlaceholder(SandboxTraining plugin) {
+    public ArmorPlaceholder(MinecraftBot plugin) {
         this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }

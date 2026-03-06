@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Pair;
-import com.monkey.mcbot.SandboxTraining;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.TrainingBot_v1_21_11;
@@ -134,7 +134,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
                                           GameProfile gameProfile,
                                           org.bukkit.entity.Player targetPlayer,
                                           boolean follow,
-                                          SandboxTraining plugin,
+                                          MinecraftBot plugin,
                                           String deadBotMessage,
                                           String deadBotEventMessage,
                                           BotOptions botOptions) {
