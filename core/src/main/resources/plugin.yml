@@ -1,9 +1,9 @@
-name: sandbox-training
+name: minecraft-bot plugin
 version: '1.0.0'
 main: com.monkey.mcbot.MinecraftBot
 api-version: '1.21'
 authors: [ MonkeyMoon104 ]
-description: Sandbox bot plugin
+description: Minecraft bot plugin
 depend:
   - PlaceholderAPI
 

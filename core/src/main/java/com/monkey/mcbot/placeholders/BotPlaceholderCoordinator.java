@@ -48,17 +48,17 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion {
 
     @Override
     public String getIdentifier() {
-        return "bot";
+        return plugin.getName();
     }
 
     @Override
     public String getAuthor() {
-        return "CoralMC";
+        return plugin.getDescription().getAuthors().toString();
     }
 
     @Override
     public String getVersion() {
-        return "2.0";
+        return "1.0";
     }
 
     @Override
