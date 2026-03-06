@@ -13,6 +13,8 @@ dependencies {
 }
 
 shadowJar {
+    archiveBaseName.set('MinecraftBot')
+    archiveVersion.set('')
     archiveClassifier.set('')
     mergeServiceFiles()
 }
