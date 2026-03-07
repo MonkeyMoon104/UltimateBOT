@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
@@ -73,7 +74,7 @@ public class SpawnItem extends AbstractItem {
             return;
         }
 
-        if (options.isEventBot()) {
+        if (options.getBotType() == BotType.EVENT) {
             if (isBotEventActive()) {
                 String msg = training.getConfig().getString("messages.event-bot-already-active", "&c❌ C'è già un bot event attivo! Despawnalo prima");
                 player.sendMessage(ChatColorUtils.translate(msg));
@@ -106,7 +107,7 @@ public class SpawnItem extends AbstractItem {
 
             if (bot != null) {
                 BotOptions botOptions = bot.getBrainController().getBotOptions();
-                if (botOptions != null && botOptions.isEventBot()) {
+                if (botOptions != null && botOptions.getBotType() == BotType.EVENT) {
                     return true;
                 }
             }

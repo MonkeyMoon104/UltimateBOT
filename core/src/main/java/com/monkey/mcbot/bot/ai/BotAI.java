@@ -2,21 +2,21 @@ package com.monkey.mcbot.bot.ai;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStrategyExecutor;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.PathfindingManager;
-import com.monkey.mcbot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
-import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.mcbot.bot.ai.controllers.heal.BotHealController;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
+import com.monkey.mcbot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
 import com.monkey.mcbot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.bot.ai.controllers.teleport.BotTeleportController;
@@ -90,6 +90,10 @@ public class BotAI {
     }
 
     public void tick(org.bukkit.entity.Player targetBukkitPlayer) {
+        tick(targetBukkitPlayer, true);
+    }
+
+    public void tick(org.bukkit.entity.Player targetBukkitPlayer, boolean allowCombat) {
         if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
@@ -104,8 +108,9 @@ public class BotAI {
         }
 
         boolean isCurrentlyHealing = healController.isHealing();
+        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
 
-        if (((ITrainingBot) bot).isCombat()) {
+        if (combatEnabled) {
             if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
                 if (pathfindingManager.isUsingPathfinding()) {
                     pathfindingManager.setUsingPathfinding(false);
@@ -127,7 +132,7 @@ public class BotAI {
                 pathfindingManager.checkForStuck(target);
                 enderpearlController.tick();
 
-                if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing) {
+                if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
                     combatStateManager.updateCombatState(target);
                     combatStrategyExecutor.executeCombatStrategy(target);
                 } else if (isCurrentlyHealing) {

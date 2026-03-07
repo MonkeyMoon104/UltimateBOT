@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.gui.impl.*;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import org.bukkit.Material;
@@ -20,16 +21,20 @@ public class NewBotGUI {
 
     private final Player player;
     private final MinecraftBot training;
-    private final boolean isEventBot;
+    private final BotType botType;
 
     public NewBotGUI(Player player, MinecraftBot training) {
-        this(player, training, false);
+        this(player, training, BotType.SINGLE);
     }
 
     public NewBotGUI(Player player, MinecraftBot training, boolean isEventBot) {
+        this(player, training, isEventBot ? BotType.EVENT : BotType.SINGLE);
+    }
+
+    public NewBotGUI(Player player, MinecraftBot training, BotType botType) {
         this.player = player;
         this.training = training;
-        this.isEventBot = isEventBot;
+        this.botType = botType == null ? BotType.SINGLE : botType;
     }
 
     public void open() {
@@ -38,7 +43,7 @@ public class NewBotGUI {
             options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getConfig(), training));
         }
 
-        options.setEventBot(isEventBot);
+        options.setBotType(botType);
 
         clampTotemCount(options);
 
@@ -88,7 +93,7 @@ public class NewBotGUI {
         Window window = Window.single()
                 .setGui(gui)
                 .setViewer(player)
-                .setTitle(isEventBot ? "ᴋɪᴛ ʀᴏᴏᴍ ᴇᴠᴇɴᴛ" : "ᴋɪᴛ ʀᴏᴏᴍ")
+                .setTitle(getTitle())
                 .addCloseHandler(() -> {
                     UUID playerUUID = player.getUniqueId();
                     training.getPlayerOptions().put(playerUUID, finalOptions);
@@ -96,6 +101,16 @@ public class NewBotGUI {
                 .build();
 
         window.open();
+    }
+
+    private String getTitle() {
+        if (botType == BotType.EVENT) {
+            return "ᴋɪᴛ ʀᴏᴏᴍ ᴇᴠᴇɴᴛ";
+        }
+        if (botType == BotType.ALLY) {
+            return "ᴋɪᴛ ʀᴏᴏᴍ ᴀʟʟʏ";
+        }
+        return "ᴋɪᴛ ʀᴏᴏᴍ";
     }
 
     private void clampTotemCount(BotOptions options) {

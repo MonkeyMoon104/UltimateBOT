@@ -1,6 +1,7 @@
 package com.monkey.mcbot.placeholders;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.entity.Player;
 
@@ -25,7 +26,7 @@ public class PlaceholderHelper {
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
                 var botOptions = bot.getBrainController().getBotOptions();
-                if (botOptions != null && botOptions.isEventBot()) {
+                if (botOptions != null && botOptions.getBotType() == BotType.EVENT) {
                     return bot;
                 }
             }

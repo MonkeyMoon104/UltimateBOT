@@ -1,8 +1,9 @@
 package com.monkey.mcbot.listener;
 
-import com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent;
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerCheckListener implements Listener {
@@ -27,15 +29,13 @@ public class PlayerCheckListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerPreTag(PlayerPreTagEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        ITrainingBot bot = botManager.getBot(player.getUniqueId());
-        if (bot == null) return;
 
-        Entity enemy = event.getEnemy();
-        if (enemy != null && enemy.getUniqueId().equals(bot.asPlayer().getUUID())) event.setCancelled(true);
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            BotBroadcaster.syncVisibleBotsForPlayer(player, plugin.getBotRegistry().getAllBots().values());
+        }, 15L);
     }
-
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -70,9 +70,10 @@ public class PlayerCheckListener implements Listener {
 
         if (wasBotSpawned) {
             ITrainingBot bot = botManager.getBotSafe(player.getUniqueId());
-            boolean isEventBot = bot != null && bot.getBrainController() != null &&
-                    bot.getBrainController().getBotOptions() != null &&
-                    bot.getBrainController().getBotOptions().isEventBot();
+            boolean isEventBot = bot != null
+                    && bot.getBrainController() != null
+                    && bot.getBrainController().getBotOptions() != null
+                    && bot.getBrainController().getBotOptions().getBotType() == BotType.EVENT;
 
             if (!isEventBot) {
                 botManager.despawn(player);

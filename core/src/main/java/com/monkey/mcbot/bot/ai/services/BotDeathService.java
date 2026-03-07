@@ -1,11 +1,16 @@
 package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 public class BotDeathService {
 
@@ -25,23 +30,45 @@ public class BotDeathService {
     }
 
     public void handleDeath(DamageSource cause) {
-        boolean isEventBot = bot.getBrainController() != null &&
-                bot.getBrainController().getBotOptions() != null &&
-                bot.getBrainController().getBotOptions().isEventBot();
+        BotOptions options = bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
+        boolean isEventBot = options != null && options.getBotType() == BotType.EVENT;
 
-        if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
-            String targetName = bot.getTargetPlayer().getName();
+        Player owner = getOwnerPlayer(options);
 
-            if (isEventBot) {
+        if (isEventBot) {
+            if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
+                String targetName = bot.getTargetPlayer().getName();
                 String translatedMsg = ChatColorUtils.translate(deadBotEventMessage.replace("{player}", targetName));
                 Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(translatedMsg));
-            } else {
+            }
+        } else {
+            if (owner != null && owner.isOnline()) {
+                owner.sendMessage(ChatColorUtils.translate(deadBotMessage));
+            } else if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
                 bot.getTargetPlayer().sendMessage(ChatColorUtils.translate(deadBotMessage));
+            }
+
+            if (options != null && options.getOwnerUUID() != null) {
+                playerOptions.remove(options.getOwnerUUID());
+            } else if (bot.getTargetPlayer() != null) {
                 playerOptions.remove(bot.getTargetPlayer().getUniqueId());
             }
         }
 
         bot.asPlayer().discard();
         plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
+    }
+
+    private Player getOwnerPlayer(BotOptions options) {
+        if (options == null) {
+            return null;
+        }
+
+        UUID ownerUUID = options.getOwnerUUID();
+        if (ownerUUID == null) {
+            return null;
+        }
+
+        return Bukkit.getPlayer(ownerUUID);
     }
 }

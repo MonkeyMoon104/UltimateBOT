@@ -4,11 +4,16 @@ import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.UUID;
 
 public class Packet {
@@ -33,5 +38,26 @@ public class Packet {
 
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
         handle.connection.send(spawnPacket);
+
+        byte yHeadRot = packDegrees(bot.asPlayer().getYHeadRot());
+        byte yBodyRot = packDegrees(bot.asPlayer().getYRot());
+        byte xRot = packDegrees(bot.asPlayer().getXRot());
+
+        handle.connection.send(new ClientboundRotateHeadPacket(bot.asPlayer(), yHeadRot));
+        handle.connection.send(new ClientboundMoveEntityPacket.Rot(
+                bot.asPlayer().getId(),
+                yBodyRot,
+                xRot,
+                bot.asPlayer().onGround()
+        ));
+
+        List<SynchedEntityData.DataValue<?>> metadata = bot.asPlayer().getEntityData().getNonDefaultValues();
+        if (metadata != null && !metadata.isEmpty()) {
+            handle.connection.send(new ClientboundSetEntityDataPacket(bot.asPlayer().getId(), metadata));
+        }
+    }
+
+    private static byte packDegrees(float value) {
+        return (byte) (value * 256.0F / 360.0F);
     }
 }

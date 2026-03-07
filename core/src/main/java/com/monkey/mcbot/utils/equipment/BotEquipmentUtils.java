@@ -84,6 +84,28 @@ public class BotEquipmentUtils {
         }
     }
 
+    public static void sendCurrentEquipmentToViewer(LivingEntity bot, Player viewer) {
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+
+        for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
+            EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(slot);
+            if (nmsSlot == null) {
+                continue;
+            }
+            equipmentList.add(Pair.of(nmsSlot, bot.getItemBySlot(nmsSlot)));
+        }
+
+        if (equipmentList.isEmpty()) {
+            return;
+        }
+
+        ClientboundSetEquipmentPacket equipmentPacket = NMSBridgeManager.get()
+                .createEquipmentPacket(bot.getId(), equipmentList);
+
+        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+        handle.connection.send(equipmentPacket);
+    }
+
     public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID, BotRegistry botRegistry) {
         UUID botUUID = botRegistry.getBotUUID(playerUUID);
         if (botUUID == null) return null;

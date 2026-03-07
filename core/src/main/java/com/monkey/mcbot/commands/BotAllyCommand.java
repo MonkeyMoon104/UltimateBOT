@@ -11,11 +11,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class BotCommand implements CommandExecutor {
+public class BotAllyCommand implements CommandExecutor {
 
     private final MinecraftBot plugin;
 
-    public BotCommand(MinecraftBot plugin) {
+    public BotAllyCommand(MinecraftBot plugin) {
         this.plugin = plugin;
     }
 
@@ -42,13 +42,13 @@ public class BotCommand implements CommandExecutor {
             return true;
         }
 
-        if (hasSpawnedType(player, BotType.ALLY)) {
-            String msg = plugin.getConfig().getString("messages.cannot-open-bot-while-ally", "&cHai gia un bot ally spawnato. Despawnalo prima di usare /bot.");
+        if (hasSpawnedType(player, BotType.SINGLE)) {
+            String msg = plugin.getConfig().getString("messages.cannot-open-botally-while-single", "&cHai gia un bot single spawnato. Despawnalo prima di usare /botally.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
 
-        new NewBotGUI(player, plugin, BotType.SINGLE).open();
+        new NewBotGUI(player, plugin, BotType.ALLY).open();
         return true;
     }
 

@@ -14,18 +14,21 @@ commands:
   botevent:
     description: Apri la GUI delle impostazioni del bot evento
     permission: admin.host.bot
+  botally:
+    description: Apri la GUI delle impostazioni del bot ally
+    permission: sb.bot.use
   sbreload:
     description: Ricarica la configurazione o rimuovi bot/mappe
     usage: /sbreload <config|bot|maps|all>
     permission: sb.admin.use
 
-  permissions:
-    sb.admin.use:
-      description: Permette di usare il comando sbreload
-      default: op
-    sb.bot.use:
-      description: Permette di usare il comando bot
-      default: true
-    admin.host.bot:
-      description: Permette di creare un bot evento
-      default: op
+permissions:
+  sb.admin.use:
+    description: Permette di usare il comando sbreload
+    default: op
+  sb.bot.use:
+    description: Permette di usare il comando bot e botally
+    default: true
+  admin.host.bot:
+    description: Permette di creare un bot evento
+    default: op

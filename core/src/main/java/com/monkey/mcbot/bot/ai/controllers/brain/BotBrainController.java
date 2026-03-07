@@ -2,6 +2,7 @@ package com.monkey.mcbot.bot.ai.controllers.brain;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.BotAI;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
@@ -10,9 +11,12 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class BotBrainController {
 
+    private static final double TARGET_SCAN_RANGE = 32.0;
+
     private final ITrainingBot bot;
     private final BotAI botAI;
     private org.bukkit.entity.Player targetPlayer;
+    private final org.bukkit.entity.Player ownerPlayer;
     private final BotOptions botOptions;
     private boolean follow;
     private boolean combat;
@@ -27,6 +31,7 @@ public class BotBrainController {
         this.targetingService = plugin.getTargetingService();
         this.bot = bot;
         this.targetPlayer = targetPlayer;
+        this.ownerPlayer = targetPlayer;
         this.follow = follow;
         this.botAI = new BotAI(bot.asPlayer(), plugin, botOptions);
         this.botOptions = botOptions;
@@ -42,23 +47,40 @@ public class BotBrainController {
     }
 
     public void onTick() {
-        if (targetPlayer == null || targetPlayer.isDead() || !targetPlayer.isOnline()) {
-            return;
-        }
-
-        if (botOptions.isEventBot()) {
-            updateTargetIfEventBot();
-        }
-
         if (!follow) {
             return;
         }
 
+        updateTargetByType();
+
+        if (targetPlayer == null || targetPlayer.isDead() || !targetPlayer.isOnline()) {
+            return;
+        }
+
         Player target = getNMSTarget();
-        if (target == null) return;
+        if (target == null) {
+            return;
+        }
+
+        boolean allowCombat = shouldUseCombatOnCurrentTarget();
 
         botAI.getRotationController().updateRotation(target);
-        botAI.tick(targetPlayer);
+        botAI.tick(targetPlayer, allowCombat);
+    }
+
+    private boolean shouldUseCombatOnCurrentTarget() {
+        if (!combat) {
+            return false;
+        }
+
+        if (botOptions.getBotType() == BotType.ALLY
+                && ownerPlayer != null
+                && targetPlayer != null
+                && ownerPlayer.getUniqueId().equals(targetPlayer.getUniqueId())) {
+            return false;
+        }
+
+        return true;
     }
 
     private Player getNMSTarget() {
@@ -78,9 +100,35 @@ public class BotBrainController {
         return cachedNmsTarget;
     }
 
-    private void updateTargetIfEventBot() {
-        org.bukkit.entity.Player newTarget = targetingService.findClosestPlayer(bot, 64.0);
+    private void updateTargetByType() {
+        BotType botType = botOptions.getBotType();
 
+        if (botType == BotType.EVENT) {
+            setTargetIfChanged(targetingService.findClosestPlayer(bot, TARGET_SCAN_RANGE));
+            return;
+        }
+
+        if (botType == BotType.ALLY) {
+            if (follow && combat && ownerPlayer != null) {
+                org.bukkit.entity.Player nearbyEnemy = targetingService.findClosestPlayerExcept(
+                        bot,
+                        TARGET_SCAN_RANGE,
+                        ownerPlayer.getUniqueId()
+                );
+
+                if (nearbyEnemy != null) {
+                    setTargetIfChanged(nearbyEnemy);
+                    return;
+                }
+            }
+
+            if (ownerPlayer != null && ownerPlayer.isOnline() && !ownerPlayer.isDead()) {
+                setTargetIfChanged(ownerPlayer);
+            }
+        }
+    }
+
+    private void setTargetIfChanged(org.bukkit.entity.Player newTarget) {
         if (newTarget != null && newTarget != this.targetPlayer) {
             this.targetPlayer = newTarget;
 

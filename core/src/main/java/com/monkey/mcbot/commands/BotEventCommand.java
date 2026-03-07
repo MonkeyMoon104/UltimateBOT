@@ -1,6 +1,7 @@
 package com.monkey.mcbot.commands;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.gui.NewBotGUI;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.World;
@@ -40,7 +41,7 @@ public class BotEventCommand implements CommandExecutor {
             return true;
         }
 
-        new NewBotGUI(player, plugin, true).open();
+        new NewBotGUI(player, plugin, BotType.EVENT).open();
         return true;
     }
 
@@ -53,7 +54,7 @@ public class BotEventCommand implements CommandExecutor {
         if (bot != null && bot.getBrainController() != null) {
             var botOptions = bot.getBrainController().getBotOptions();
             if (botOptions != null) {
-                return !botOptions.isEventBot();
+                return botOptions.getBotType() != BotType.EVENT;
             }
         }
         return false;

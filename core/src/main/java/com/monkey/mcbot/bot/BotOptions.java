@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class BotOptions {
 
@@ -17,7 +18,8 @@ public class BotOptions {
     private boolean follow = false;
     private boolean combat = false;
     private BotRank rank = BotRank.EASY;
-    private boolean isEventBot = false;
+    private BotType botType = BotType.SINGLE;
+    private UUID ownerUUID;
 
     public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
@@ -25,12 +27,28 @@ public class BotOptions {
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
     }
 
+    public BotType getBotType() {
+        return botType;
+    }
+
+    public void setBotType(BotType botType) {
+        this.botType = botType == null ? BotType.SINGLE : botType;
+    }
+
     public boolean isEventBot() {
-        return isEventBot;
+        return botType == BotType.EVENT;
     }
 
     public void setEventBot(boolean eventBot) {
-        isEventBot = eventBot;
+        this.botType = eventBot ? BotType.EVENT : BotType.SINGLE;
+    }
+
+    public UUID getOwnerUUID() {
+        return ownerUUID;
+    }
+
+    public void setOwnerUUID(UUID ownerUUID) {
+        this.ownerUUID = ownerUUID;
     }
 
     public BotRank getRank() {

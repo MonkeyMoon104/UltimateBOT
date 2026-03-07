@@ -4,10 +4,12 @@ import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
+import com.monkey.mcbot.commands.BotAllyCommand;
 import com.monkey.mcbot.commands.BotCommand;
 import com.monkey.mcbot.commands.BotEventCommand;
 import com.monkey.mcbot.commands.ReloadCommand;
 import com.monkey.mcbot.listener.PlayerCheckListener;
+import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.placeholders.BotPlaceholderCoordinator;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
@@ -38,8 +40,10 @@ public final class MinecraftBot extends JavaPlugin {
 
         getCommand("bot").setExecutor(new BotCommand(this));
         getCommand("botevent").setExecutor(new BotEventCommand(this));
+        getCommand("botally").setExecutor(new BotAllyCommand(this));
         getCommand("sbreload").setExecutor(new ReloadCommand(this));
         getServer().getPluginManager().registerEvents(new PlayerCheckListener(this), this);
+        getServer().getPluginManager().registerEvents(new PlayerTagListener(this), this);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             this.placeholderCoordinator = new BotPlaceholderCoordinator(this);

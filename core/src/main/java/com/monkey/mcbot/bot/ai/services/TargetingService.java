@@ -1,8 +1,8 @@
 package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,29 +12,37 @@ public class TargetingService {
 
     private final Map<UUID, TargetCache> targetCache = new HashMap<>();
     private static final long GLOBAL_CACHE_TIME = 250;
-    private static final double MAX_RANGE = 64.0;
-    private static final double MAX_RANGE_SQUARED = MAX_RANGE * MAX_RANGE;
 
     private static class TargetCache {
         Player player;
         long time;
+        UUID excluded;
 
-        TargetCache(Player player, long time) {
+        TargetCache(Player player, long time, UUID excluded) {
             this.player = player;
             this.time = time;
+            this.excluded = excluded;
         }
 
-        boolean isValid() {
-            return player != null && player.isOnline() && !player.isDead();
+        boolean isValid(UUID expectedExcluded) {
+            return player != null
+                    && player.isOnline()
+                    && !player.isDead()
+                    && ((expectedExcluded == null && excluded == null)
+                    || (expectedExcluded != null && expectedExcluded.equals(excluded)));
         }
     }
 
     public Player findClosestPlayer(ITrainingBot bot, double maxRange) {
+        return findClosestPlayerExcept(bot, maxRange, null);
+    }
+
+    public Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, UUID excludedPlayer) {
         UUID botUUID = bot.asPlayer().getUUID();
         long currentTime = System.currentTimeMillis();
 
         TargetCache cached = targetCache.get(botUUID);
-        if (cached != null && (currentTime - cached.time) < GLOBAL_CACHE_TIME && cached.isValid()) {
+        if (cached != null && (currentTime - cached.time) < GLOBAL_CACHE_TIME && cached.isValid(excludedPlayer)) {
             return cached.player;
         }
 
@@ -48,6 +56,10 @@ public class TargetingService {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isDead() || player.getGameMode().isInvulnerable()) {
+                continue;
+            }
+
+            if (excludedPlayer != null && excludedPlayer.equals(player.getUniqueId())) {
                 continue;
             }
 
@@ -67,7 +79,7 @@ public class TargetingService {
         }
 
         if (closestPlayer != null) {
-            targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime));
+            targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer));
         } else {
             targetCache.remove(botUUID);
         }

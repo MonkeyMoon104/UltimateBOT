@@ -55,6 +55,8 @@ public class BotSpawner {
         ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
 
         UUID botUUID = UUID.randomUUID();
+        botOptions.setOwnerUUID(viewer.getUniqueId());
+
         FileConfiguration config = plugin.getConfig();
         String rawName = config.getString("bot.name", "CrystalBot");
         String botName = rawName.replace("%player%", viewer.getName());
@@ -116,6 +118,7 @@ public class BotSpawner {
             }
         });
     }
+
     public void despawnInWorld(Player owner, org.bukkit.World fromWorld) {
         UUID ownerUUID = owner.getUniqueId();
         UUID botUUID = registry.getBotUUID(ownerUUID);
