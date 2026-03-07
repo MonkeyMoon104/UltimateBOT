@@ -34,7 +34,7 @@ public class CombatDataManager implements ICombatDataManager {
     }
 
     @Override
-    public void updateCombatData(Player target) {
+    public void updateCombatData(Player target, boolean allowCombatActions) {
         float currentHealth = bot.getHealth();
         long currentTime = System.currentTimeMillis();
 
@@ -55,7 +55,7 @@ public class CombatDataManager implements ICombatDataManager {
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
 
-        if (((ITrainingBot) bot).isCombat()) {
+        if (((ITrainingBot) bot).isCombat() && allowCombatActions) {
             int botY = bot.blockPosition().getY();
             int targetY = target.blockPosition().getY();
             int yDiff = targetY - botY;

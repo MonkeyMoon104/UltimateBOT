@@ -98,7 +98,10 @@ public class BotAI {
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
 
-        combatDataManager.updateCombatData(target);
+        boolean isCurrentlyHealing = healController.isHealing();
+        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
+
+        combatDataManager.updateCombatData(target, combatEnabled);
 
         if (combatStateManager instanceof CombatStateManager) {
             ((CombatStateManager) combatStateManager).updateDamageData(
@@ -106,9 +109,6 @@ public class BotAI {
                     combatDataManager.getLastDamageTime()
             );
         }
-
-        boolean isCurrentlyHealing = healController.isHealing();
-        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
 
         if (combatEnabled) {
             if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {

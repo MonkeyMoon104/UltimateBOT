@@ -17,19 +17,29 @@ public class TargetingService {
         Player player;
         long time;
         UUID excluded;
+        UUID center;
+        double maxRange;
 
-        TargetCache(Player player, long time, UUID excluded) {
+        TargetCache(Player player, long time, UUID excluded, UUID center, double maxRange) {
             this.player = player;
             this.time = time;
             this.excluded = excluded;
+            this.center = center;
+            this.maxRange = maxRange;
         }
 
-        boolean isValid(UUID expectedExcluded) {
+        boolean isValid(UUID expectedExcluded, UUID expectedCenter, double expectedMaxRange) {
+            boolean excludedMatches = (expectedExcluded == null && excluded == null)
+                    || (expectedExcluded != null && expectedExcluded.equals(excluded));
+            boolean centerMatches = (expectedCenter == null && center == null)
+                    || (expectedCenter != null && expectedCenter.equals(center));
+
             return player != null
                     && player.isOnline()
                     && !player.isDead()
-                    && ((expectedExcluded == null && excluded == null)
-                    || (expectedExcluded != null && expectedExcluded.equals(excluded)));
+                    && excludedMatches
+                    && centerMatches
+                    && Double.compare(maxRange, expectedMaxRange) == 0;
         }
     }
 
@@ -38,21 +48,41 @@ public class TargetingService {
     }
 
     public Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, UUID excludedPlayer) {
+        return findClosestPlayerNearPlayer(
+                bot,
+                (Player) bot.asPlayer().getBukkitEntity(),
+                maxRange,
+                excludedPlayer
+        );
+    }
+
+    public Player findClosestPlayerNearPlayer(ITrainingBot bot,
+                                              Player centerPlayer,
+                                              double maxRange,
+                                              UUID excludedPlayer) {
+        if (centerPlayer == null || !centerPlayer.isOnline() || centerPlayer.isDead()) {
+            targetCache.remove(bot.asPlayer().getUUID());
+            return null;
+        }
+
         UUID botUUID = bot.asPlayer().getUUID();
+        UUID centerUUID = centerPlayer.getUniqueId();
         long currentTime = System.currentTimeMillis();
 
         TargetCache cached = targetCache.get(botUUID);
-        if (cached != null && (currentTime - cached.time) < GLOBAL_CACHE_TIME && cached.isValid(excludedPlayer)) {
+        if (cached != null
+                && (currentTime - cached.time) < GLOBAL_CACHE_TIME
+                && cached.isValid(excludedPlayer, centerUUID, maxRange)) {
             return cached.player;
         }
 
         double closestDistanceSq = maxRange * maxRange;
         Player closestPlayer = null;
 
-        org.bukkit.World botWorld = bot.asPlayer().level().getWorld();
-        double botX = bot.asPlayer().getX();
-        double botY = bot.asPlayer().getY();
-        double botZ = bot.asPlayer().getZ();
+        org.bukkit.World centerWorld = centerPlayer.getWorld();
+        double centerX = centerPlayer.getX();
+        double centerY = centerPlayer.getY();
+        double centerZ = centerPlayer.getZ();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isDead() || player.getGameMode().isInvulnerable()) {
@@ -63,13 +93,13 @@ public class TargetingService {
                 continue;
             }
 
-            if (player.getWorld() != botWorld) {
+            if (!player.getWorld().getUID().equals(centerWorld.getUID())) {
                 continue;
             }
 
-            double dx = player.getX() - botX;
-            double dy = player.getY() - botY;
-            double dz = player.getZ() - botZ;
+            double dx = player.getX() - centerX;
+            double dy = player.getY() - centerY;
+            double dz = player.getZ() - centerZ;
             double distanceSq = dx * dx + dy * dy + dz * dz;
 
             if (distanceSq < closestDistanceSq) {
@@ -79,7 +109,7 @@ public class TargetingService {
         }
 
         if (closestPlayer != null) {
-            targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer));
+            targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, centerUUID, maxRange));
         } else {
             targetCache.remove(botUUID);
         }

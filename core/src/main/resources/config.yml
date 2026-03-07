@@ -19,12 +19,25 @@ messages:
   event-bot-active-block-normal: "&c❌ C'è un bot event attivo! Non puoi spawnare bot normali durante un evento"
   must-despawn-normal-bot: "&c❌ Hai già un bot normale spawnato! Despawnalo prima di gestire il bot event"
 
+  ally:
+    pre-range-alert: "&e%player% si sta avvicinando, monitorando la posizione..."
+    range-alert: "&c%player% rilevato come minaccia, avviando azione di bombardamento"
+
 bot:
   name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
   max-totem-normal: 37
   max-totem-event: 74
+
+  event:
+    range: 32
+
+  ally:
+    range: 16
+    pre-range: 32
+    return-teleport-distance: 12
+    return-teleport-cooldown-ms: 1000
 
 gui:
   default-armor:
