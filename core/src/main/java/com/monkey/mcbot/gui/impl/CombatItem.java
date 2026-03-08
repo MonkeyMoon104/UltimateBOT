@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
@@ -15,6 +16,7 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.List;
+import java.util.UUID;
 
 public class CombatItem extends AbstractItem {
 
@@ -55,25 +57,27 @@ public class CombatItem extends AbstractItem {
             return;
         }
 
+        UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
+
         if (clickType.isLeftClick()) {
             boolean oldStatus = options.isCombat();
             boolean newStatus = !oldStatus;
 
             options.setCombat(newStatus);
-            training.getBotManager().updateCombat(player.getUniqueId(), newStatus);
+            training.getBotManager().updateCombat(managedOwnerUUID, newStatus);
 
             if (newStatus) {
-                training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+                training.getBotManager().switchBotToEnderpearl(managedOwnerUUID);
                 training.getServer().getScheduler().runTaskLater(training, () -> {
-                    training.getBotManager().switchBotToSword(player.getUniqueId());
+                    training.getBotManager().switchBotToSword(managedOwnerUUID);
                 }, 1L);
             } else {
-                if (training.getBotManager().getSwordSlot(player.getUniqueId())) {
+                if (training.getBotManager().getSwordSlot(managedOwnerUUID)) {
                     int totemcount = options.getTotems();
                     if (totemcount > 1) {
-                        training.getBotManager().switchBotToEnderpearl(player.getUniqueId());
+                        training.getBotManager().switchBotToEnderpearl(managedOwnerUUID);
                     } else {
-                        training.getBotManager().switchBotToEmpty(player.getUniqueId());
+                        training.getBotManager().switchBotToEmpty(managedOwnerUUID);
                     }
                 }
             }
@@ -91,11 +95,19 @@ public class CombatItem extends AbstractItem {
             BotRank newRank = values[index];
             options.setRank(newRank);
 
-            training.getBotManager().setBotRank(player.getUniqueId(), newRank);
+            training.getBotManager().setBotRank(managedOwnerUUID, newRank);
 
             player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.name()));
         }
 
         notifyWindows();
+    }
+
+    private UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

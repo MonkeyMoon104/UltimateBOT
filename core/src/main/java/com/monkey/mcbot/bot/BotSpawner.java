@@ -44,32 +44,38 @@ public class BotSpawner {
             return;
         }
 
-        if (registry.isBotSpawned(viewer.getUniqueId())) {
+        Player registryOwner = resolveRegistryOwner(viewer, botOptions);
+        UUID registryOwnerUUID = registryOwner.getUniqueId();
+
+        if (registry.isBotSpawned(registryOwnerUUID)) {
             if (plugin != null) {
-                plugin.getLogger().info("Bot already exists for " + viewer.getName() + ", removing old one");
+                plugin.getLogger().info("Bot already exists for " + registryOwner.getName() + ", removing old one");
             }
-            despawn(viewer);
+            despawnByOwnerUUID(registryOwnerUUID);
         }
 
-        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+        ServerPlayer handle = ((CraftPlayer) registryOwner).getHandle();
         ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
 
         UUID botUUID = UUID.randomUUID();
-        botOptions.setOwnerUUID(viewer.getUniqueId());
+        botOptions.setOwnerUUID(registryOwnerUUID);
+        if (botOptions.getBotType() == BotType.TEAM_ALLY && botOptions.getTeamOwnerUUIDs().isEmpty()) {
+            botOptions.addTeamOwner(registryOwnerUUID);
+        }
 
         FileConfiguration config = plugin.getConfig();
         String rawName = config.getString("bot.name", "CrystalBot");
-        String botName = rawName.replace("%player%", viewer.getName());
+        String botName = rawName.replace("%player%", registryOwner.getName());
 
-        Location loc = viewer.getLocation();
+        Location loc = registryOwner.getLocation();
         Block block = loc.getWorld().getHighestBlockAt(loc);
 
         ITrainingBot bot = NMSBridgeManager.get().createTrainingBot(
                 world,
                 BlockPos.containing(block.getX(), block.getY(), block.getZ()),
                 0,
-                BotFactory.createProfile(viewer, botUUID, botName),
-                viewer,
+                BotFactory.createProfile(registryOwner, botUUID, botName),
+                registryOwner,
                 follow,
                 plugin,
                 config.getString("messages.dead-bot-msg", "You have killed the bot!"),
@@ -84,14 +90,37 @@ public class BotSpawner {
         BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
 
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
-        registry.registerBot(viewer.getUniqueId(), bot);
+        registry.registerBot(registryOwnerUUID, bot);
 
         bot.getBotAI().getInventoryController().addEnderpearls(16);
         bot.getBotAI().getInventoryController().switchToEnderpearl();
 
         if (plugin != null) {
-            plugin.getLogger().info("Bot spawned successfully for " + viewer.getName());
+            plugin.getLogger().info("Bot spawned successfully for " + registryOwner.getName());
         }
+    }
+
+    private Player resolveRegistryOwner(Player viewer, BotOptions botOptions) {
+        if (botOptions == null || botOptions.getBotType() != BotType.TEAM_ALLY) {
+            return viewer;
+        }
+
+        UUID explicitOwner = botOptions.getOwnerUUID();
+        if (explicitOwner != null && botOptions.isTeamOwner(explicitOwner)) {
+            Player explicitOwnerPlayer = Bukkit.getPlayer(explicitOwner);
+            if (explicitOwnerPlayer != null && explicitOwnerPlayer.isOnline()) {
+                return explicitOwnerPlayer;
+            }
+        }
+
+        for (UUID ownerUUID : botOptions.getTeamOwnerUUIDs()) {
+            Player owner = Bukkit.getPlayer(ownerUUID);
+            if (owner != null && owner.isOnline()) {
+                return owner;
+            }
+        }
+
+        return viewer;
     }
 
     public void despawn(Player owner) {
@@ -106,6 +135,33 @@ public class BotSpawner {
         if (EntityUtils.removeEntity(world, botUUID)) {
             registry.removeBot(ownerUUID);
         }
+    }
+
+    public void despawnByOwnerUUID(UUID ownerUUID) {
+        if (ownerUUID == null) {
+            return;
+        }
+
+        UUID botUUID = registry.getBotUUID(ownerUUID);
+        if (botUUID == null) {
+            return;
+        }
+
+        ITrainingBot bot = registry.getBot(ownerUUID);
+        if (bot != null && bot.asPlayer().level() instanceof ServerLevel world) {
+            if (EntityUtils.removeEntity(world, botUUID)) {
+                registry.removeBot(ownerUUID);
+            }
+            return;
+        }
+
+        Player owner = Bukkit.getPlayer(ownerUUID);
+        if (owner != null) {
+            despawn(owner);
+            return;
+        }
+
+        registry.removeBot(ownerUUID);
     }
 
     public void despawnAll() {

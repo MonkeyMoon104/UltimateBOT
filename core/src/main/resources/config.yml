@@ -1,7 +1,7 @@
 messages:
   spawn-bot: "&aBot generato con le impostazioni selezionate!"
   dead-bot-msg: "&aHai ucciso il bot!"
-  dead-bot-event-msg: "&c[&eEVENT&c] &eIl bot è stato ucciso da &b{player}"
+  dead-bot-event-msg: "&c[&eEVENT&c] &eIl bot e stato ucciso da &b{player}"
   despawn-bot: "&cBot rimosso!"
   save-changes: "&aModifiche salvate!"
   reload-no-permission: "&cNon hai il permesso di usare questo comando"
@@ -13,18 +13,39 @@ messages:
   reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
   combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
   dead-bot-message: "{player} was killed by his Bot"
-  event-bot-already-active: "&c❌ C'è già un bot event attivo! Despawnalo prima"
+  event-bot-already-active: "&cX C'e gia un bot event attivo! Despawnalo prima"
   all-normal-bots-despawned: "&eTutti i bot normali sono stati despawnati per l'evento"
-  cannot-spawn-normal-during-event: "&c❌ Non puoi spawnare un bot normale mentre c'è un bot event attivo!"
-  event-bot-active-block-normal: "&c❌ C'è un bot event attivo! Non puoi spawnare bot normali durante un evento"
-  must-despawn-normal-bot: "&c❌ Hai già un bot normale spawnato! Despawnalo prima di gestire il bot event"
+  cannot-spawn-normal-during-event: "&cX Non puoi spawnare un bot normale mentre c'e un bot event attivo!"
+  event-bot-active-block-normal: "&cX C'e un bot event attivo! Non puoi spawnare bot normali durante un evento"
+  must-despawn-normal-bot: "&cX Hai gia un bot normale spawnato! Despawnalo prima di gestire il bot event"
 
   ally:
     pre-range-alert: "&e%player% si sta avvicinando, monitorando la posizione..."
     range-alert: "&c%player% rilevato come minaccia, avviando azione di bombardamento"
 
+  team-ally:
+    pre-range-alert: "&e%player% si sta avvicinando al team, monitorando la posizione..."
+    range-alert: "&c%player% rilevato come minaccia al team, avviando azione di bombardamento"
+    create-usage: "&eUso: /botteamally create <owner1> <owner2> [owner3 ...]"
+    create-min-owners: "&cDevi specificare almeno 2 owner validi online."
+    gui-opened: "&aAperta GUI botteamally con owner impostati."
+    blocked-by-single: "&cHai gia un bot single spawnato. Despawnalo prima di usare /botteamally."
+    blocked-by-ally: "&cHai gia un bot ally spawnato. Despawnalo prima di usare /botteamally."
+    no-active-teamally: "&cNon hai un bot team ally attivo."
+    addowners-usage: "&eUso: /botteamally addowners <player1> [player2 ...]"
+    removeowners-usage: "&eUso: /botteamally removeowners <player1> [player2 ...]"
+    invalid-owner: "&cPlayer non valido/offline: &e%player%"
+    owner-already-present: "&e%player% &7e gia owner del team ally."
+    owner-not-present: "&e%player% &7non e owner del team ally."
+    owner-added: "&aAggiunto owner: &e%player%"
+    owner-removed: "&aRimosso owner: &e%player%"
+    min-owners-reached: "&cNon puoi scendere sotto 2 owner."
+    duplicate-owner: "&cOwner duplicato nel comando: &e%player%"
+    owner-has-active-bot: "&c%player% ha gia un bot attivo (%bottype%). Despawnalo prima."
+    team-spawned-notify: "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: &e%playerlist%"
+
 bot:
-  name: "CrystalBot" # ora si può mettere anche -> name: "%player%Bot", esempio output bot name: MonkeyMoon104Bot
+  name: "CrystalBot"
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
   max-totem-normal: 37
@@ -34,6 +55,12 @@ bot:
     range: 32
 
   ally:
+    range: 16
+    pre-range: 32
+    return-teleport-distance: 12
+    return-teleport-cooldown-ms: 1000
+
+  team-ally:
     range: 16
     pre-range: 32
     return-teleport-distance: 12
@@ -129,7 +156,7 @@ gui:
 
   rank-button:
     name: "&bRank"
-    material: "DIAMOND_SWORD" #FALLBACK ITEM
+    material: "DIAMOND_SWORD"
     ranks-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD

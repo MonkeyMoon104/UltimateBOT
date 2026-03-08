@@ -37,12 +37,12 @@ public class BotCommand implements CommandExecutor {
         }
 
         if (isEventBotActive()) {
-            String msg = plugin.getConfig().getString("messages.event-bot-active-block-normal", "&c❌ C'è un bot event attivo! Non puoi spawnare bot normali durante un evento.");
+            String msg = plugin.getConfig().getString("messages.event-bot-active-block-normal", "&câŒ C'Ã¨ un bot event attivo! Non puoi spawnare bot normali durante un evento.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
 
-        if (hasSpawnedType(player, BotType.ALLY)) {
+        if (hasSpawnedType(player, BotType.ALLY) || plugin.getBotManager().hasActiveTeamAlly(player.getUniqueId())) {
             String msg = plugin.getConfig().getString("messages.cannot-open-bot-while-ally", "&cHai gia un bot ally spawnato. Despawnalo prima di usare /bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;

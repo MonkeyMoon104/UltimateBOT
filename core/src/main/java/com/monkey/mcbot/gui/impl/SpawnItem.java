@@ -6,6 +6,7 @@ import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -18,6 +19,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.window.Window;
 import xyz.xenondevs.invui.window.WindowManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +39,7 @@ public class SpawnItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        boolean status = training.getBotManager().isBotSpawned(player.getUniqueId());
+        boolean status = isManagedBotSpawned();
 
         Material mat = status
                 ? Material.valueOf(training.getConfig().getString("gui.despawn-button.material"))
@@ -63,10 +65,11 @@ public class SpawnItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        boolean status = training.getBotManager().isBotSpawned(player.getUniqueId());
+        boolean status = isManagedBotSpawned();
 
         if (status) {
-            training.getBotManager().despawn(player);
+            UUID managedOwnerUUID = resolveManagedOwnerUUID();
+            training.getBotManager().despawnByOwnerUUID(managedOwnerUUID);
             playerOptions.remove(player.getUniqueId());
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
@@ -76,7 +79,7 @@ public class SpawnItem extends AbstractItem {
 
         if (options.getBotType() == BotType.EVENT) {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.event-bot-already-active", "&c❌ C'è già un bot event attivo! Despawnalo prima");
+                String msg = training.getConfig().getString("messages.event-bot-already-active", "&câŒ C'Ã¨ giÃ  un bot event attivo! Despawnalo prima");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -86,7 +89,7 @@ public class SpawnItem extends AbstractItem {
         }
         else {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event", "&c❌ Non puoi spawnare un bot normale mentre c'è un bot event attivo!");
+                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event", "&câŒ Non puoi spawnare un bot normale mentre c'Ã¨ un bot event attivo!");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -99,6 +102,51 @@ public class SpawnItem extends AbstractItem {
         training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
         String msg = training.getConfig().getString("messages.spawn-bot", "&aBot generato con le impostazioni selezionate!");
         player.sendMessage(ChatColorUtils.translate(msg));
+
+        if (options.getBotType() == BotType.TEAM_ALLY) {
+            notifyTeamOwners(player);
+        }
+    }
+
+    private boolean isManagedBotSpawned() {
+        if (options.getBotType() == BotType.TEAM_ALLY) {
+            return training.getBotManager().hasActiveTeamAlly(player.getUniqueId());
+        }
+        return training.getBotManager().isBotSpawned(player.getUniqueId());
+    }
+
+    private UUID resolveManagedOwnerUUID() {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
+    }
+
+    private void notifyTeamOwners(Player spawner) {
+        String template = training.getConfig().getString(
+                "messages.team-ally.team-spawned-notify",
+                "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: %playerlist%"
+        );
+
+        List<String> ownerNames = new ArrayList<>();
+        for (UUID ownerUUID : options.getTeamOwnerUUIDs()) {
+            String name = Bukkit.getOfflinePlayer(ownerUUID).getName();
+            ownerNames.add(name == null ? ownerUUID.toString() : name);
+        }
+
+        String ownerList = String.join(", ", ownerNames);
+        String message = template
+                .replace("%playerowner%", spawner.getName())
+                .replace("%playerlist%", ownerList);
+
+        for (UUID ownerUUID : options.getTeamOwnerUUIDs()) {
+            Player owner = Bukkit.getPlayer(ownerUUID);
+            if (owner != null && owner.isOnline()) {
+                owner.sendMessage(ChatColorUtils.translate(message));
+            }
+        }
     }
 
     private boolean isBotEventActive() {

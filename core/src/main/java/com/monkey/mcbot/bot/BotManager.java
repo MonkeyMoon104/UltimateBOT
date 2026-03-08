@@ -15,9 +15,11 @@ public class BotManager {
     private final BotSpawner spawner;
     private final BotUpdater updater;
     private final BotLookup lookup;
+    private final BotRegistry registry;
 
     public BotManager(MinecraftBot plugin) {
         BotRegistry registry = plugin.getBotRegistry();
+        this.registry = registry;
         this.spawner = new BotSpawner(plugin, registry);
         this.updater = new BotUpdater(registry);
         this.lookup = new BotLookup(registry);
@@ -34,6 +36,10 @@ public class BotManager {
 
     public void despawn(Player owner) {
         spawner.despawn(owner);
+    }
+
+    public void despawnByOwnerUUID(UUID ownerUUID) {
+        spawner.despawnByOwnerUUID(ownerUUID);
     }
 
     public void despawnAll() {
@@ -59,6 +65,39 @@ public class BotManager {
 
     public void removeBot(UUID botUUID) {
         lookup.removeBot(botUUID);
+    }
+
+    public UUID findTeamAllyPrimaryOwner(UUID teamOwnerUUID) {
+        if (teamOwnerUUID == null) {
+            return null;
+        }
+
+        for (Map.Entry<UUID, ITrainingBot> entry : registry.getAllBots().entrySet()) {
+            ITrainingBot bot = entry.getValue();
+            if (bot == null || bot.getBrainController() == null) {
+                continue;
+            }
+
+            BotOptions options = bot.getBrainController().getBotOptions();
+            if (options == null || options.getBotType() != BotType.TEAM_ALLY) {
+                continue;
+            }
+
+            if (options.isTeamOwner(teamOwnerUUID)) {
+                return entry.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public ITrainingBot getTeamAllyBotByTeamOwner(UUID teamOwnerUUID) {
+        UUID primaryOwner = findTeamAllyPrimaryOwner(teamOwnerUUID);
+        return primaryOwner == null ? null : getBotSafe(primaryOwner);
+    }
+
+    public boolean hasActiveTeamAlly(UUID teamOwnerUUID) {
+        return getTeamAllyBotByTeamOwner(teamOwnerUUID) != null;
     }
 
     public void updateArmor(UUID ownerUUID,

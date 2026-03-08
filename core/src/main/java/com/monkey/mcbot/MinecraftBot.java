@@ -7,6 +7,7 @@ import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.BotAllyCommand;
 import com.monkey.mcbot.commands.BotCommand;
 import com.monkey.mcbot.commands.BotEventCommand;
+import com.monkey.mcbot.commands.BotTeamAllyCommand;
 import com.monkey.mcbot.commands.ReloadCommand;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
@@ -41,6 +42,11 @@ public final class MinecraftBot extends JavaPlugin {
         getCommand("bot").setExecutor(new BotCommand(this));
         getCommand("botevent").setExecutor(new BotEventCommand(this));
         getCommand("botally").setExecutor(new BotAllyCommand(this));
+
+        BotTeamAllyCommand botTeamAllyCommand = new BotTeamAllyCommand(this);
+        getCommand("botteamally").setExecutor(botTeamAllyCommand);
+        getCommand("botteamally").setTabCompleter(botTeamAllyCommand);
+
         getCommand("sbreload").setExecutor(new ReloadCommand(this));
         getServer().getPluginManager().registerEvents(new PlayerCheckListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerTagListener(this), this);

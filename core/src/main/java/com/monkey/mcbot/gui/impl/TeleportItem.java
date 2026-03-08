@@ -13,35 +13,47 @@ import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
+import java.util.UUID;
+
 public class TeleportItem extends AbstractItem {
 
-	private final MinecraftBot training;
+    private final MinecraftBot training;
 
-	public TeleportItem(MinecraftBot training) {
-		this.training = training;
-	}
+    public TeleportItem(MinecraftBot training) {
+        this.training = training;
+    }
 
-	@Override
-	public ItemProvider getItemProvider() {
-		Material mat = Material.valueOf(training.getConfig().getString("gui.teleport-button.material"));
-		String name = training.getConfig().getString("gui.teleport-button.name");
-		var lore = training.getConfig().getStringList("gui.teleport-button.lore");
+    @Override
+    public ItemProvider getItemProvider() {
+        Material mat = Material.valueOf(training.getConfig().getString("gui.teleport-button.material"));
+        String name = training.getConfig().getString("gui.teleport-button.name");
+        var lore = training.getConfig().getStringList("gui.teleport-button.lore");
 
-		ItemBuilder builder = new ItemBuilder(mat);
-		builder.setDisplayName(ChatColorUtils.translate(name));
-		for (String line : lore) {
-			builder.addLoreLines(ChatColorUtils.translate(line));
-		}
-		return builder;
-	}
+        ItemBuilder builder = new ItemBuilder(mat);
+        builder.setDisplayName(ChatColorUtils.translate(name));
+        for (String line : lore) {
+            builder.addLoreLines(ChatColorUtils.translate(line));
+        }
+        return builder;
+    }
 
-	@Override
-	public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-		if (!training.getBotManager().isBotSpawned(player.getUniqueId())) return;
+    @Override
+    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+        UUID botOwnerUUID = resolveBotOwnerUUID(player);
+        if (botOwnerUUID == null || !training.getBotManager().isBotSpawned(botOwnerUUID)) {
+            return;
+        }
 
-		ITrainingBot bot = training.getBotManager().getBot(player.getUniqueId());
-		if (bot == null) return;
+        ITrainingBot bot = training.getBotManager().getBot(botOwnerUUID);
+        if (bot == null) {
+            return;
+        }
 
-		NMSBridgeManager.get().moveBot(bot.asPlayer(), player.getX(), player.getY(), player.getZ());
-	}
+        NMSBridgeManager.get().moveBot(bot.asPlayer(), player.getX(), player.getY(), player.getZ());
+    }
+
+    private UUID resolveBotOwnerUUID(Player player) {
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
+    }
 }

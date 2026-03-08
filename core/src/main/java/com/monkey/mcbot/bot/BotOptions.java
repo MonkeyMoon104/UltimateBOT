@@ -5,8 +5,11 @@ import com.monkey.mcbot.bot.ai.rank.BotRank;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class BotOptions {
@@ -20,6 +23,7 @@ public class BotOptions {
     private BotRank rank = BotRank.EASY;
     private BotType botType = BotType.SINGLE;
     private UUID ownerUUID;
+    private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
 
     public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = training;
@@ -49,6 +53,35 @@ public class BotOptions {
 
     public void setOwnerUUID(UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
+    }
+
+    public Set<UUID> getTeamOwnerUUIDs() {
+        return Collections.unmodifiableSet(teamOwnerUUIDs);
+    }
+
+    public void setTeamOwnerUUIDs(Set<UUID> owners) {
+        this.teamOwnerUUIDs.clear();
+        if (owners != null) {
+            this.teamOwnerUUIDs.addAll(owners);
+        }
+    }
+
+    public boolean addTeamOwner(UUID ownerUUID) {
+        if (ownerUUID == null) {
+            return false;
+        }
+        return this.teamOwnerUUIDs.add(ownerUUID);
+    }
+
+    public boolean removeTeamOwner(UUID ownerUUID) {
+        if (ownerUUID == null) {
+            return false;
+        }
+        return this.teamOwnerUUIDs.remove(ownerUUID);
+    }
+
+    public boolean isTeamOwner(UUID ownerUUID) {
+        return ownerUUID != null && teamOwnerUUIDs.contains(ownerUUID);
     }
 
     public BotRank getRank() {

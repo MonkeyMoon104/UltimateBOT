@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -15,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
+
+import java.util.UUID;
 
 public class ToggleBlastItem extends AbstractItem {
 
@@ -77,10 +80,18 @@ public class ToggleBlastItem extends AbstractItem {
 
         piece.setItemMeta(meta);
 
-        training.getBotManager().updateArmor(player.getUniqueId(), options.getArmor(), options.getBlast());
+        training.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor(), options.getBlast());
 
         display.setPiece(piece);
         display.notifyWindows();
         notifyWindows();
+    }
+
+    private UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

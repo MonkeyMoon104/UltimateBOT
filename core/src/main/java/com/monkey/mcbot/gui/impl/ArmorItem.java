@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import org.bukkit.Material;
@@ -17,6 +18,7 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ArmorItem extends AbstractItem {
 
@@ -58,7 +60,7 @@ public class ArmorItem extends AbstractItem {
         ItemStack updated = piece.withType(next);
 
         options.getArmor().put(slot, updated);
-        training.getBotManager().updateArmor(player.getUniqueId(), options.getArmor());
+        training.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor());
         piece = updated;
 
         notifyWindows();
@@ -66,5 +68,13 @@ public class ArmorItem extends AbstractItem {
 
     public void setPiece(ItemStack piece) {
         this.piece = piece;
+    }
+
+    private UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

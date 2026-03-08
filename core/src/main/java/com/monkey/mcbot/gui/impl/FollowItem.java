@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -53,11 +54,13 @@ public class FollowItem extends AbstractItem {
 
         boolean newFollowStatus = !oldFollowStatus;
         options.setFollow(newFollowStatus);
-        training.getBotManager().updateFollow(player.getUniqueId(), newFollowStatus);
+
+        var managedOwnerUUID = resolveManagedOwnerUUID(player);
+        training.getBotManager().updateFollow(managedOwnerUUID, newFollowStatus);
 
         if (!newFollowStatus && combatStatus) {
             options.setCombat(false);
-            training.getBotManager().updateCombat(player.getUniqueId(), false);
+            training.getBotManager().updateCombat(managedOwnerUUID, false);
 
             if (combatItem != null) {
                 combatItem.notifyWindows();
@@ -65,5 +68,13 @@ public class FollowItem extends AbstractItem {
         }
 
         notifyWindows();
+    }
+
+    private java.util.UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        java.util.UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

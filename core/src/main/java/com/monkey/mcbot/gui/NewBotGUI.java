@@ -52,6 +52,10 @@ public class NewBotGUI {
 
         RankItem rankItem = new RankItem(training, options);
 
+        boolean hasManagedBotSpawned = botType == BotType.TEAM_ALLY
+                ? training.getBotManager().hasActiveTeamAlly(player.getUniqueId())
+                : training.getBotManager().isBotSpawned(player.getUniqueId());
+
         Gui gui = Gui.normal()
                 .setStructure(
                         ". . . . . . . . .",
@@ -65,7 +69,7 @@ public class NewBotGUI {
                 .addIngredient('t', new TotemItem(options, training))
                 .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(training, player, options))
-                .addIngredient('g', training.getBotManager().isBotSpawned(player.getUniqueId())
+                .addIngredient('g', hasManagedBotSpawned
                     ? new TeleportItem(training) : new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
                 .addIngredient('r', rankItem)
@@ -105,12 +109,15 @@ public class NewBotGUI {
 
     private String getTitle() {
         if (botType == BotType.EVENT) {
-            return "ᴋɪᴛ ʀᴏᴏᴍ ᴇᴠᴇɴᴛ";
+            return "KIT ROOM EVENT";
         }
         if (botType == BotType.ALLY) {
-            return "ᴋɪᴛ ʀᴏᴏᴍ ᴀʟʟʏ";
+            return "KIT ROOM ALLY";
         }
-        return "ᴋɪᴛ ʀᴏᴏᴍ";
+        if (botType == BotType.TEAM_ALLY) {
+            return "KIT ROOM TEAM ALLY";
+        }
+        return "KIT ROOM";
     }
 
     private void clampTotemCount(BotOptions options) {

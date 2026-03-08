@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
+
+import java.util.UUID;
 
 public class TotemItem extends AbstractItem {
 
@@ -54,7 +57,7 @@ public class TotemItem extends AbstractItem {
             options.setTotems(currentTotem - 1);
         }
 
-        training.getBotManager().updateTotem(player.getUniqueId(), options.getTotems());
+        training.getBotManager().updateTotem(resolveManagedOwnerUUID(player), options.getTotems());
 
         notifyWindows();
     }
@@ -63,5 +66,13 @@ public class TotemItem extends AbstractItem {
         int normalMax = training.getConfig().getInt("bot.max-totem-normal", 37);
         int eventMax = training.getConfig().getInt("bot.max-totem-event", 74);
         return options.isEventBot() ? eventMax : normalMax;
+    }
+
+    private UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

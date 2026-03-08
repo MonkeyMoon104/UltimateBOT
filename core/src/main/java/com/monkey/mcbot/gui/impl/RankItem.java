@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
@@ -16,6 +17,7 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class RankItem extends AbstractItem {
 
@@ -91,9 +93,17 @@ public class RankItem extends AbstractItem {
         BotRank newRank = values[index];
         options.setRank(newRank);
 
-        training.getBotManager().setBotRank(player.getUniqueId(), newRank);
+        training.getBotManager().setBotRank(resolveManagedOwnerUUID(player), newRank);
 
         player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.getSelectedName()));
         notifyWindows();
+    }
+
+    private UUID resolveManagedOwnerUUID(Player player) {
+        if (options.getBotType() != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

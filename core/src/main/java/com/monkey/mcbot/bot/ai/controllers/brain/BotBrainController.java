@@ -8,8 +8,12 @@ import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import net.minecraft.world.entity.player.Player;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class BotBrainController {
@@ -18,6 +22,16 @@ public class BotBrainController {
         NONE,
         PRE_RANGE,
         RANGE
+    }
+
+    private static class ThreatSelection {
+        private final org.bukkit.entity.Player threat;
+        private final double distanceSq;
+
+        private ThreatSelection(org.bukkit.entity.Player threat, double distanceSq) {
+            this.threat = threat;
+            this.distanceSq = distanceSq;
+        }
     }
 
     private final ITrainingBot bot;
@@ -38,14 +52,21 @@ public class BotBrainController {
     private final String allyPreRangeAlertMessage;
     private final String allyRangeAlertMessage;
 
+    private final double teamAllyRange;
+    private final double teamAllyPreRange;
+    private final double teamAllyReturnTeleportDistance;
+    private final long teamAllyReturnTeleportCooldownMs;
+    private final String teamAllyPreRangeAlertMessage;
+    private final String teamAllyRangeAlertMessage;
+
     private Player cachedNmsTarget = null;
     private long lastNmsTargetUpdate = 0;
     private static final long NMS_CACHE_TIME = 100;
-    private long lastAllyReturnTeleport = 0;
+    private long lastReturnTeleport = 0;
 
-    private boolean allyWatchOnlyMode = false;
-    private AllyAlertState lastAllyAlertState = AllyAlertState.NONE;
-    private UUID lastAllyAlertTarget = null;
+    private boolean watchOnlyMode = false;
+    private AllyAlertState lastAlertState = AllyAlertState.NONE;
+    private UUID lastAlertTarget = null;
 
     public BotBrainController(ITrainingBot bot, MinecraftBot plugin,
                               org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
@@ -60,12 +81,20 @@ public class BotBrainController {
         this.combat = botOptions.isCombat();
 
         this.eventTargetRange = plugin.getConfig().getDouble("bot.event.range");
+
         this.allyRange = plugin.getConfig().getDouble("bot.ally.range");
         this.allyPreRange = plugin.getConfig().getDouble("bot.ally.pre-range");
         this.allyReturnTeleportDistance = plugin.getConfig().getDouble("bot.ally.return-teleport-distance");
         this.allyReturnTeleportCooldownMs = plugin.getConfig().getLong("bot.ally.return-teleport-cooldown-ms");
         this.allyPreRangeAlertMessage = plugin.getConfig().getString("messages.ally.pre-range-alert");
         this.allyRangeAlertMessage = plugin.getConfig().getString("messages.ally.range-alert");
+
+        this.teamAllyRange = plugin.getConfig().getDouble("bot.team-ally.range");
+        this.teamAllyPreRange = plugin.getConfig().getDouble("bot.team-ally.pre-range");
+        this.teamAllyReturnTeleportDistance = plugin.getConfig().getDouble("bot.team-ally.return-teleport-distance");
+        this.teamAllyReturnTeleportCooldownMs = plugin.getConfig().getLong("bot.team-ally.return-teleport-cooldown-ms");
+        this.teamAllyPreRangeAlertMessage = plugin.getConfig().getString("messages.team-ally.pre-range-alert");
+        this.teamAllyRangeAlertMessage = plugin.getConfig().getString("messages.team-ally.range-alert");
 
         configureBotAI();
     }
@@ -97,7 +126,7 @@ public class BotBrainController {
 
         botAI.getRotationController().updateRotation(target);
 
-        if (allyWatchOnlyMode) {
+        if (watchOnlyMode) {
             botAI.getMovementController().clearPath();
             return;
         }
@@ -110,14 +139,30 @@ public class BotBrainController {
             return false;
         }
 
-        if (botOptions.getBotType() == BotType.ALLY
-                && ownerPlayer != null
+        if ((botOptions.getBotType() == BotType.ALLY || botOptions.getBotType() == BotType.TEAM_ALLY)
                 && targetPlayer != null
-                && ownerPlayer.getUniqueId().equals(targetPlayer.getUniqueId())) {
+                && isProtectedOwner(targetPlayer.getUniqueId())) {
             return false;
         }
 
         return true;
+    }
+
+    private boolean isProtectedOwner(UUID uuid) {
+        if (uuid == null) {
+            return false;
+        }
+
+        if (botOptions.getBotType() == BotType.ALLY) {
+            return ownerPlayer != null && uuid.equals(ownerPlayer.getUniqueId());
+        }
+
+        if (botOptions.getBotType() == BotType.TEAM_ALLY) {
+            Set<UUID> owners = botOptions.getTeamOwnerUUIDs();
+            return owners.contains(uuid);
+        }
+
+        return false;
     }
 
     private Player getNMSTarget() {
@@ -141,105 +186,236 @@ public class BotBrainController {
         BotType botType = botOptions.getBotType();
 
         if (botType == BotType.EVENT) {
-            allyWatchOnlyMode = false;
+            watchOnlyMode = false;
             setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
             return;
         }
 
         if (botType == BotType.ALLY) {
-            handleAllyTargeting();
+            List<org.bukkit.entity.Player> owners = getOwnersForAlly();
+            handleOwnerGroupTargeting(
+                    owners,
+                    allyRange,
+                    allyPreRange,
+                    allyReturnTeleportDistance,
+                    allyReturnTeleportCooldownMs,
+                    allyPreRangeAlertMessage,
+                    allyRangeAlertMessage
+            );
             return;
         }
 
-        allyWatchOnlyMode = false;
-        clearAllyAlertState();
+        if (botType == BotType.TEAM_ALLY) {
+            List<org.bukkit.entity.Player> owners = getOwnersForTeamAlly();
+            handleOwnerGroupTargeting(
+                    owners,
+                    teamAllyRange,
+                    teamAllyPreRange,
+                    teamAllyReturnTeleportDistance,
+                    teamAllyReturnTeleportCooldownMs,
+                    teamAllyPreRangeAlertMessage,
+                    teamAllyRangeAlertMessage
+            );
+            return;
+        }
+
+        watchOnlyMode = false;
+        clearAlertState();
     }
 
-    private void handleAllyTargeting() {
-        if (ownerPlayer == null || !ownerPlayer.isOnline() || ownerPlayer.isDead()) {
-            allyWatchOnlyMode = false;
-            clearAllyAlertState();
+    private List<org.bukkit.entity.Player> getOwnersForAlly() {
+        List<org.bukkit.entity.Player> owners = new ArrayList<>();
+        if (ownerPlayer != null && ownerPlayer.isOnline() && !ownerPlayer.isDead()) {
+            owners.add(ownerPlayer);
+        }
+        return owners;
+    }
+
+    private List<org.bukkit.entity.Player> getOwnersForTeamAlly() {
+        List<org.bukkit.entity.Player> owners = new ArrayList<>();
+
+        for (UUID ownerUUID : botOptions.getTeamOwnerUUIDs()) {
+            org.bukkit.entity.Player owner = Bukkit.getPlayer(ownerUUID);
+            if (owner != null && owner.isOnline() && !owner.isDead()) {
+                owners.add(owner);
+            }
+        }
+
+        if (owners.isEmpty() && ownerPlayer != null && ownerPlayer.isOnline() && !ownerPlayer.isDead()) {
+            owners.add(ownerPlayer);
+        }
+
+        return owners;
+    }
+
+    private void handleOwnerGroupTargeting(List<org.bukkit.entity.Player> owners,
+                                           double range,
+                                           double preRange,
+                                           double returnTeleportDistance,
+                                           long returnTeleportCooldownMs,
+                                           String preRangeMessage,
+                                           String rangeMessage) {
+        if (owners.isEmpty()) {
+            watchOnlyMode = false;
+            clearAlertState();
             return;
         }
+
+        org.bukkit.entity.Player closestOwnerToBot = getClosestOwnerToBot(owners);
 
         if (follow && combat) {
-            org.bukkit.entity.Player closestInRange = targetingService.findClosestPlayerNearPlayer(
-                    bot,
-                    ownerPlayer,
-                    allyRange,
-                    ownerPlayer.getUniqueId()
-            );
-
+            ThreatSelection closestInRange = findClosestThreatNearOwners(owners, range);
             if (closestInRange != null) {
-                allyWatchOnlyMode = false;
-                setTargetIfChanged(closestInRange);
-                notifyAllyThreatIfChanged(AllyAlertState.RANGE, closestInRange);
+                watchOnlyMode = false;
+                setTargetIfChanged(closestInRange.threat);
+                notifyThreatIfChanged(AllyAlertState.RANGE, closestInRange.threat, owners, preRangeMessage, rangeMessage);
                 return;
             }
 
-            org.bukkit.entity.Player closestInPreRange = targetingService.findClosestPlayerNearPlayer(
-                    bot,
-                    ownerPlayer,
-                    allyPreRange,
-                    ownerPlayer.getUniqueId()
-            );
-
+            double effectivePreRange = Math.max(preRange, range);
+            ThreatSelection closestInPreRange = findClosestThreatNearOwners(owners, effectivePreRange);
             if (closestInPreRange != null) {
-                allyWatchOnlyMode = true;
-                setTargetIfChanged(closestInPreRange);
-                notifyAllyThreatIfChanged(AllyAlertState.PRE_RANGE, closestInPreRange);
-                tryTeleportBackToOwnerIfFar();
+                watchOnlyMode = true;
+                setTargetIfChanged(closestInPreRange.threat);
+                notifyThreatIfChanged(AllyAlertState.PRE_RANGE, closestInPreRange.threat, owners, preRangeMessage, rangeMessage);
+                tryTeleportBackToOwnerIfFar(closestOwnerToBot, returnTeleportDistance, returnTeleportCooldownMs);
                 return;
             }
         }
 
-        allyWatchOnlyMode = false;
-        setTargetIfChanged(ownerPlayer);
-        clearAllyAlertState();
-        tryTeleportBackToOwnerIfFar();
+        watchOnlyMode = false;
+        clearAlertState();
+
+        if (closestOwnerToBot != null) {
+            setTargetIfChanged(closestOwnerToBot);
+            tryTeleportBackToOwnerIfFar(closestOwnerToBot, returnTeleportDistance, returnTeleportCooldownMs);
+        }
     }
 
-    private void notifyAllyThreatIfChanged(AllyAlertState state, org.bukkit.entity.Player threat) {
-        if (threat == null || ownerPlayer == null || !ownerPlayer.isOnline()) {
+    private ThreatSelection findClosestThreatNearOwners(List<org.bukkit.entity.Player> owners, double range) {
+        if (owners.isEmpty()) {
+            return null;
+        }
+
+        Set<UUID> ownerUUIDs = botOptions.getBotType() == BotType.TEAM_ALLY
+                ? botOptions.getTeamOwnerUUIDs()
+                : Set.of(ownerPlayer.getUniqueId());
+
+        double rangeSq = range * range;
+        ThreatSelection best = null;
+
+        for (org.bukkit.entity.Player candidate : Bukkit.getOnlinePlayers()) {
+            if (candidate.isDead() || candidate.getGameMode().isInvulnerable()) {
+                continue;
+            }
+
+            if (ownerUUIDs.contains(candidate.getUniqueId())) {
+                continue;
+            }
+
+            double bestOwnerDistanceSq = Double.MAX_VALUE;
+            for (org.bukkit.entity.Player owner : owners) {
+                if (!candidate.getWorld().getUID().equals(owner.getWorld().getUID())) {
+                    continue;
+                }
+
+                double dx = candidate.getX() - owner.getX();
+                double dy = candidate.getY() - owner.getY();
+                double dz = candidate.getZ() - owner.getZ();
+                double distanceSq = dx * dx + dy * dy + dz * dz;
+
+                if (distanceSq <= rangeSq && distanceSq < bestOwnerDistanceSq) {
+                    bestOwnerDistanceSq = distanceSq;
+                }
+            }
+
+            if (bestOwnerDistanceSq == Double.MAX_VALUE) {
+                continue;
+            }
+
+            if (best == null || bestOwnerDistanceSq < best.distanceSq) {
+                best = new ThreatSelection(candidate, bestOwnerDistanceSq);
+            }
+        }
+
+        return best;
+    }
+
+    private org.bukkit.entity.Player getClosestOwnerToBot(List<org.bukkit.entity.Player> owners) {
+        org.bukkit.entity.Player bestOwner = null;
+        double bestDistanceSq = Double.MAX_VALUE;
+
+        for (org.bukkit.entity.Player owner : owners) {
+            if (owner == null || !owner.isOnline() || owner.isDead()) {
+                continue;
+            }
+
+            if (!owner.getWorld().getUID().equals(bot.asPlayer().level().getWorld().getUID())) {
+                continue;
+            }
+
+            double distanceSq = bot.asPlayer().distanceToSqr(((CraftPlayer) owner).getHandle());
+            if (distanceSq < bestDistanceSq) {
+                bestDistanceSq = distanceSq;
+                bestOwner = owner;
+            }
+        }
+
+        return bestOwner;
+    }
+
+    private void notifyThreatIfChanged(AllyAlertState state,
+                                       org.bukkit.entity.Player threat,
+                                       List<org.bukkit.entity.Player> owners,
+                                       String preRangeMessage,
+                                       String rangeMessage) {
+        if (threat == null) {
             return;
         }
 
         UUID threatUUID = threat.getUniqueId();
-        if (lastAllyAlertState == state && threatUUID.equals(lastAllyAlertTarget)) {
+        if (lastAlertState == state && threatUUID.equals(lastAlertTarget)) {
             return;
         }
 
-        String template = state == AllyAlertState.RANGE ? allyRangeAlertMessage : allyPreRangeAlertMessage;
+        String template = state == AllyAlertState.RANGE ? rangeMessage : preRangeMessage;
         if (template != null && !template.isBlank()) {
-            ownerPlayer.sendMessage(ChatColorUtils.translate(template.replace("%player%", threat.getName())));
+            String finalMessage = ChatColorUtils.translate(template.replace("%player%", threat.getName()));
+            for (org.bukkit.entity.Player owner : owners) {
+                if (owner != null && owner.isOnline()) {
+                    owner.sendMessage(finalMessage);
+                }
+            }
         }
 
-        lastAllyAlertState = state;
-        lastAllyAlertTarget = threatUUID;
+        lastAlertState = state;
+        lastAlertTarget = threatUUID;
     }
 
-    private void clearAllyAlertState() {
-        lastAllyAlertState = AllyAlertState.NONE;
-        lastAllyAlertTarget = null;
+    private void clearAlertState() {
+        lastAlertState = AllyAlertState.NONE;
+        lastAlertTarget = null;
     }
 
-    private void tryTeleportBackToOwnerIfFar() {
-        if (ownerPlayer == null) {
+    private void tryTeleportBackToOwnerIfFar(org.bukkit.entity.Player owner,
+                                             double returnTeleportDistance,
+                                             long returnTeleportCooldownMs) {
+        if (owner == null) {
             return;
         }
 
-        double distance = bot.asPlayer().distanceTo(((CraftPlayer) ownerPlayer).getHandle());
-        if (distance <= allyReturnTeleportDistance) {
+        double distance = bot.asPlayer().distanceTo(((CraftPlayer) owner).getHandle());
+        if (distance <= returnTeleportDistance) {
             return;
         }
 
         long now = System.currentTimeMillis();
-        if (now - lastAllyReturnTeleport < allyReturnTeleportCooldownMs) {
+        if (now - lastReturnTeleport < returnTeleportCooldownMs) {
             return;
         }
 
-        if (botAI.getTeleportController().teleportSafeNear(ownerPlayer)) {
-            lastAllyReturnTeleport = now;
+        if (botAI.getTeleportController().teleportSafeNear(owner)) {
+            lastReturnTeleport = now;
         }
     }
 
