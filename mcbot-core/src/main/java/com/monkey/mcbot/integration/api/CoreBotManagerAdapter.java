@@ -104,30 +104,29 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         String skinValidationError = validateSkinForMode(botType, settings);
         if (skinValidationError != null) {
-            return BotOperationResult.failure(skinValidationError);
+            return spawnFailure(skinValidationError);
         }
 
         if (botType != BotType.TEAM_ALLY && teamOwners.size() > 1) {
-            return BotOperationResult.failure(botType + " supports exactly one owner.");
+            return spawnFailure(botType + " supports exactly one owner.");
         }
 
         UUID primaryOwnerUUID = resolvePrimaryOwnerUUID(botType, request.ownerUUID(), teamOwners);
         if (primaryOwnerUUID == null) {
-            return BotOperationResult.failure("Cannot resolve an online owner for spawn.");
+            return spawnFailure("Cannot resolve an online owner for spawn.");
         }
 
         Player ownerPlayer = Bukkit.getPlayer(primaryOwnerUUID);
         if (ownerPlayer == null || !ownerPlayer.isOnline()) {
-            return BotOperationResult.failure("Owner must be online.");
+            return spawnFailure("Owner must be online.");
         }
 
         if (botType == BotType.TEAM_ALLY && teamOwners.size() < 2) {
-            return BotOperationResult.failure("TEAM_ALLY requires at least two owners.");
+            return spawnFailure("TEAM_ALLY requires at least two owners.");
         }
 
         Set<UUID> targetUUIDs = new LinkedHashSet<>(request.targetUUIDs());
         if (botType == BotType.SINGLE) {
-            // SINGLE bots must always target their owner.
             targetUUIDs.clear();
             targetUUIDs.add(primaryOwnerUUID);
         }
@@ -136,18 +135,18 @@ public final class CoreBotManagerAdapter implements IBotManager {
             for (UUID teamOwner : teamOwners) {
                 BotType busyType = getOwnerBusyType(teamOwner, primaryOwnerUUID);
                 if (busyType != null) {
-                    return BotOperationResult.failure("Owner " + teamOwner + " already has an active " + busyType + " bot.");
+                    return spawnFailure("Owner " + teamOwner + " already has an active " + busyType + " bot.");
                 }
             }
         }
 
         if (botType == BotType.EVENT) {
             if (isEventBotActive()) {
-                return BotOperationResult.failure("An event bot is already active.");
+                return spawnFailure("An event bot is already active.");
             }
             botManager.despawnAll();
         } else if (isEventBotActive()) {
-            return BotOperationResult.failure("Cannot spawn a non-event bot while an event bot is active.");
+            return spawnFailure("Cannot spawn a non-event bot while an event bot is active.");
         }
 
         UUID targetUUID = targetUUIDs.stream().findFirst().orElse(primaryOwnerUUID);
@@ -188,7 +187,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (ownerReference != null && !ownerReference.isBlank()) {
             ownerUUID = parsePlayerReference(ownerReference).orElse(null);
             if (ownerUUID == null) {
-                return BotOperationResult.failure("Cannot parse owner reference: " + ownerReference);
+                return spawnFailure("Cannot parse owner reference: " + ownerReference);
             }
         }
 
@@ -197,7 +196,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
             for (String targetReference : targetReferences) {
                 UUID parsedTarget = parsePlayerReference(targetReference).orElse(null);
                 if (parsedTarget == null) {
-                    return BotOperationResult.failure("Cannot parse target reference: " + targetReference);
+                    return spawnFailure("Cannot parse target reference: " + targetReference);
                 }
                 targetUUIDs.add(parsedTarget);
             }
@@ -208,7 +207,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
             for (String reference : teamOwnerReferences) {
                 UUID parsed = parsePlayerReference(reference).orElse(null);
                 if (parsed == null) {
-                    return BotOperationResult.failure("Cannot parse team owner reference: " + reference);
+                    return spawnFailure("Cannot parse team owner reference: " + reference);
                 }
                 teamOwners.add(parsed);
             }
@@ -223,7 +222,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                     .build();
             return spawn(request);
         } catch (IllegalArgumentException ex) {
-            return BotOperationResult.failure(ex.getMessage());
+            return spawnFailure(ex.getMessage());
         }
     }
 
@@ -650,6 +649,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
 
         return null;
+    }
+
+    private BotOperationResult spawnFailure(String reason) {
+        return BotOperationResult.failure(reason);
     }
 
     private static BotType toCoreType(BotMode mode) {

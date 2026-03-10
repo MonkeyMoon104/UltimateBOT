@@ -60,9 +60,6 @@ public record BotSkin(
         return new BotSkin(BotSkinSource.OWNER, null, null, null, null);
     }
 
-    /**
-     * Valid only for TEAM_ALLY mode.
-     */
     public static BotSkin firstTeamOwner() {
         return new BotSkin(BotSkinSource.FIRST_TEAM_OWNER, null, null, null, null);
     }

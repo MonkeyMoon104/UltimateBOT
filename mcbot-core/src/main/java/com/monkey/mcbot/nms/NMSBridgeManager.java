@@ -1,19 +1,17 @@
 package com.monkey.mcbot.nms;
 
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import org.bukkit.Bukkit;
 import java.util.logging.Logger;
 
 public class NMSBridgeManager {
 
     private static INMSBridge instance;
+    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11";
 
     public static void init() {
         Logger logger = Bukkit.getLogger();
         String version = Bukkit.getMinecraftVersion();
-
-        logger.info("[MinecraftBot] ==============================");
-        logger.info("[MinecraftBot] Inizializzazione NMS Bridge...");
-        logger.info("[MinecraftBot] Versione Minecraft rilevata: " + version);
 
         String className = switch (version) {
             case "1.21.4" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_4";
@@ -25,28 +23,23 @@ public class NMSBridgeManager {
             case "1.21.10" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_10";
             case "1.21.11" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_11";
             default -> {
-                logger.severe("[MinecraftBot] Versione non supportata: " + version);
-                logger.severe("[MinecraftBot] Versioni supportate: 1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11");
+                MinecraftBotLogging.logNmsUnsupportedVersion(logger, version, SUPPORTED_VERSIONS);
                 throw new RuntimeException(
                         "[MinecraftBot] Versione Minecraft non supportata: " + version
                 );
             }
         };
-
-        logger.info("[MinecraftBot] Caricamento classe: " + className);
+        MinecraftBotLogging.logNmsInitStart(logger, version, className, SUPPORTED_VERSIONS);
 
         try {
             Class<?> clazz = Class.forName(className);
             instance = (INMSBridge) clazz.getDeclaredConstructor().newInstance();
-            logger.info("[MinecraftBot] NMS Bridge caricato con successo!");
-            logger.info("[MinecraftBot] Implementazione attiva: " + instance.getClass().getSimpleName());
-            logger.info("[MinecraftBot] ==============================");
+            MinecraftBotLogging.logNmsInitSuccess(logger, instance);
         } catch (ClassNotFoundException e) {
-            logger.severe("[MinecraftBot] Classe bridge non trovata: " + className);
-            logger.severe("[MinecraftBot] Il jar potrebbe essere corrotto o incompleto.");
+            MinecraftBotLogging.logNmsInitFailure(logger, className, e);
             throw new RuntimeException("[MinecraftBot] Classe bridge non trovata: " + className, e);
         } catch (Exception e) {
-            logger.severe("[MinecraftBot] Errore durante il caricamento del bridge: " + e.getMessage());
+            MinecraftBotLogging.logNmsInitFailure(logger, className, e);
             throw new RuntimeException("[MinecraftBot] Impossibile caricare NMS Bridge", e);
         }
     }

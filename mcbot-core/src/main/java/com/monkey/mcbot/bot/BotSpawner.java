@@ -45,9 +45,6 @@ public class BotSpawner {
                       BotOptions botOptions) {
 
         if (viewer == null || !viewer.isOnline()) {
-            if (plugin != null) {
-                plugin.getLogger().warning("Attempted to spawn bot for null/offline player");
-            }
             return;
         }
 
@@ -56,9 +53,6 @@ public class BotSpawner {
         Player resolvedTarget = resolveTargetPlayer(registryOwner, target, botOptions);
 
         if (registry.isBotSpawned(registryOwnerUUID)) {
-            if (plugin != null) {
-                plugin.getLogger().info("Bot already exists for " + registryOwner.getName() + ", removing old one");
-            }
             despawnByOwnerUUID(registryOwnerUUID);
         }
 
@@ -103,10 +97,6 @@ public class BotSpawner {
 
         bot.getBotAI().getInventoryController().addEnderpearls(16);
         bot.getBotAI().getInventoryController().switchToEnderpearl();
-
-        if (plugin != null) {
-            plugin.getLogger().info("Bot spawned successfully for " + registryOwner.getName());
-        }
     }
 
     private Player resolveTargetPlayer(Player registryOwner, Player target, BotOptions botOptions) {
@@ -306,7 +296,7 @@ public class BotSpawner {
             return "CrystalBot";
         }
 
-        String noSectionColors = candidate.replaceAll("(?i)§[0-9A-FK-ORX]", "");
+        String noSectionColors = candidate.replaceAll("(?i)\\u00A7[0-9A-FK-ORX]", "");
         String noAmpersandColors = noSectionColors.replaceAll("(?i)&[0-9A-FK-ORX]", "");
         String safe = noAmpersandColors.replaceAll("[^A-Za-z0-9_]", "_");
         if (safe.isBlank()) {

@@ -24,14 +24,13 @@ public final class MinecraftBotAPI {
 
     public static void register(MinecraftBotAPI api) {
         instance = Objects.requireNonNull(api, "api");
-        LOGGER.info("MinecraftBotAPI registered.");
+        LOGGER.info(() -> "MinecraftBotAPI registered. plugin=" + api.plugin.getName()
+                + ", botManager=" + api.botManager.getClass().getSimpleName()
+                + ", botRegistry=" + api.botRegistry.getClass().getSimpleName());
     }
 
     public static void unregister() {
-        if (instance != null) {
-            instance = null;
-            LOGGER.info("MinecraftBotAPI unregistered.");
-        }
+        instance = null;
     }
 
     public static MinecraftBotAPI get() {
