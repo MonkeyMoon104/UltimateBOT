@@ -8,8 +8,8 @@ pluginManagement {
 
 rootProject.name = 'MinecraftBot'
 
-include 'api'
-include 'core'
+include 'mcbot-api'
+include 'mcbot-core'
 
 include 'versions:v1_21_4'
 include 'versions:v1_21_5'

@@ -1,7 +1,7 @@
 apply plugin: 'com.gradleup.shadow'
 
 dependencies {
-    implementation project(':core')
+    implementation project(':mcbot-core')
     implementation project(path: ':versions:v1_21_4', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_5', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_6', configuration: 'reobf')

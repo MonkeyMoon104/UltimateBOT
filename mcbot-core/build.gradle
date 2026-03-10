@@ -7,7 +7,7 @@ paperweight {
 }
 
 dependencies {
-    implementation project(':api')
+    implementation project(':mcbot-api')
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 
     implementation "xyz.xenondevs.invui:invui:1.49"

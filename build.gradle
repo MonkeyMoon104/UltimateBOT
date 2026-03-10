@@ -7,8 +7,8 @@ plugins {
 subprojects {
     apply plugin: 'java'
 
-    group = 'com.monkey'
-    version = '1.0.0'
+    group = 'com.monkey.mcbot'
+    version = System.getenv("RELEASE_VERSION") ?: '1.0.0'
 
     repositories {
         mavenCentral()
