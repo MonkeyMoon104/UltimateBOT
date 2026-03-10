@@ -6,6 +6,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Immutable spawn request used by {@code IBotManager.spawn(...)}.
+ *
+ * <p>The request includes mode, ownership, targets and settings.
+ * Validation is enforced in the builder {@link Builder#build()}.</p>
+ */
 public final class BotSpawnRequest {
 
     private final BotMode mode;
@@ -22,34 +28,73 @@ public final class BotSpawnRequest {
         this.settings = builder.settings;
     }
 
+    /**
+     * Creates a new builder for the given mode.
+     *
+     * @param mode spawn mode
+     * @return builder instance
+     */
     public static Builder builder(BotMode mode) {
         return new Builder(mode);
     }
 
+    /**
+     * Returns the selected spawn mode.
+     *
+     * @return mode
+     */
     public BotMode mode() {
         return mode;
     }
 
+    /**
+     * Returns the primary owner UUID.
+     *
+     * @return primary owner UUID, can be null for TEAM_ALLY until build-time resolution
+     */
     public UUID ownerUUID() {
         return ownerUUID;
     }
 
+    /**
+     * Returns the first target UUID, if available.
+     *
+     * @return first target UUID or {@code null}
+     */
     public UUID targetUUID() {
         return targetUUIDs.stream().findFirst().orElse(null);
     }
 
+    /**
+     * Returns all target UUIDs.
+     *
+     * @return immutable target set
+     */
     public Set<UUID> targetUUIDs() {
         return targetUUIDs;
     }
 
+    /**
+     * Returns all TEAM_ALLY owner UUIDs.
+     *
+     * @return immutable team-owner set
+     */
     public Set<UUID> teamOwnerUUIDs() {
         return teamOwnerUUIDs;
     }
 
+    /**
+     * Returns spawn settings.
+     *
+     * @return bot settings
+     */
     public BotSettings settings() {
         return settings;
     }
 
+    /**
+     * Builder for {@link BotSpawnRequest}.
+     */
     public static final class Builder {
         private final BotMode mode;
         private UUID ownerUUID;
@@ -57,15 +102,32 @@ public final class BotSpawnRequest {
         private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
         private BotSettings settings;
 
+        /**
+         * Creates a builder for the provided mode.
+         *
+         * @param mode spawn mode
+         */
         private Builder(BotMode mode) {
             this.mode = Objects.requireNonNull(mode, "mode");
         }
 
+        /**
+         * Sets the primary owner UUID.
+         *
+         * @param ownerUUID primary owner
+         * @return current builder
+         */
         public Builder owner(UUID ownerUUID) {
             this.ownerUUID = ownerUUID;
             return this;
         }
 
+        /**
+         * Replaces current targets with a single target UUID.
+         *
+         * @param targetUUID target UUID (null clears targets)
+         * @return current builder
+         */
         public Builder target(UUID targetUUID) {
             this.targetUUIDs.clear();
             if (targetUUID != null) {
@@ -74,6 +136,12 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /**
+         * Adds a single target UUID to the current target set.
+         *
+         * @param targetUUID target UUID
+         * @return current builder
+         */
         public Builder addTarget(UUID targetUUID) {
             if (targetUUID != null) {
                 this.targetUUIDs.add(targetUUID);
@@ -81,6 +149,14 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /**
+         * Replaces all current targets using the provided collection.
+         *
+         * <p>Null entries are ignored.</p>
+         *
+         * @param targets target collection
+         * @return current builder
+         */
         public Builder targets(Collection<UUID> targets) {
             this.targetUUIDs.clear();
             if (targets != null) {
@@ -93,6 +169,12 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /**
+         * Adds a TEAM_ALLY owner UUID.
+         *
+         * @param teamOwnerUUID owner UUID
+         * @return current builder
+         */
         public Builder addTeamOwner(UUID teamOwnerUUID) {
             if (teamOwnerUUID != null) {
                 this.teamOwnerUUIDs.add(teamOwnerUUID);
@@ -100,6 +182,14 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /**
+         * Replaces TEAM_ALLY owners using the provided collection.
+         *
+         * <p>Null entries are ignored.</p>
+         *
+         * @param owners owner collection
+         * @return current builder
+         */
         public Builder teamOwners(Collection<UUID> owners) {
             this.teamOwnerUUIDs.clear();
             if (owners != null) {
@@ -112,11 +202,27 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /**
+         * Sets required bot settings.
+         *
+         * @param settings spawn settings
+         * @return current builder
+         */
         public Builder settings(BotSettings settings) {
             this.settings = Objects.requireNonNull(settings, "settings");
             return this;
         }
 
+        /**
+         * Builds an immutable spawn request after validating mode constraints.
+         *
+         * <p>Validation rules include:
+         * owner requirement for non-team modes, TEAM_ALLY owner presence, non-null settings,
+         * and SINGLE mode target auto-forcing to owner.</p>
+         *
+         * @return immutable spawn request
+         * @throws IllegalArgumentException when required data is missing or invalid for the mode
+         */
         public BotSpawnRequest build() {
             if (mode != BotMode.TEAM_ALLY && ownerUUID == null) {
                 throw new IllegalArgumentException("ownerUUID is required for non-team bot modes");

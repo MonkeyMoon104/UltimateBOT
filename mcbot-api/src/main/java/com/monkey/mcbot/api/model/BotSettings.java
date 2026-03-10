@@ -2,6 +2,19 @@ package com.monkey.mcbot.api.model;
 
 import java.util.Objects;
 
+/**
+ * Immutable settings payload used to configure bot behavior and editable limits.
+ *
+ * <p>Instances are created through a strict step-builder exposed by {@link #builder()}.
+ * The builder enforces an explicit order and validates logical constraints such as:</p>
+ * <ul>
+ *     <li>{@code combat=true} requires {@code follow=true}</li>
+ *     <li>default values must stay inside their configured min/max ranges</li>
+ *     <li>range boundaries must be coherent (min &lt;= max)</li>
+ * </ul>
+ *
+ * <p>Use these settings in {@link BotSpawnRequest.Builder#settings(BotSettings)} to spawn bots.</p>
+ */
 public final class BotSettings {
 
     private final boolean follow;
@@ -48,139 +61,376 @@ public final class BotSettings {
         this.maxRank = builder.maxRank;
     }
 
+    /**
+     * Starts the mandatory ordered builder chain.
+     *
+     * @return first builder step (bot name)
+     */
     public static BotNameStep builder() {
         return new Builder();
     }
 
+    /**
+     * Returns follow default state.
+     *
+     * @return follow default
+     */
     public boolean follow() {
         return follow;
     }
 
+    /**
+     * Returns combat default state.
+     *
+     * @return combat default
+     */
     public boolean combat() {
         return combat;
     }
 
+    /**
+     * Returns {@code true} only when blast protection is enabled on all armor pieces.
+     *
+     * @return global blast state derived from full profile
+     */
     public boolean blastProtection() {
         return blastProtection.allEnabled();
     }
 
+    /**
+     * Returns full per-slot blast protection profile.
+     *
+     * @return blast protection profile
+     */
     public BotBlastProtection blastProtectionProfile() {
         return blastProtection;
     }
 
+    /**
+     * Returns whether follow can be changed at runtime by users.
+     *
+     * @return follow mutability flag
+     */
     public boolean changeableFollow() {
         return changeableFollow;
     }
 
+    /**
+     * Returns whether combat can be changed at runtime by users.
+     *
+     * @return combat mutability flag
+     */
     public boolean changeableCombat() {
         return changeableCombat;
     }
 
+    /**
+     * Returns whether blast protection can be changed at runtime by users.
+     *
+     * @return blast mutability flag
+     */
     public boolean changeableBlast() {
         return changeableBlast;
     }
 
+    /**
+     * Returns whether armor type can be changed at runtime by users.
+     *
+     * @return armor mutability flag
+     */
     public boolean changeableArmor() {
         return changeableArmor;
     }
 
+    /**
+     * Returns whether totem count can be changed at runtime by users.
+     *
+     * @return totem mutability flag
+     */
     public boolean changeableTotem() {
         return changeableTotem;
     }
 
+    /**
+     * Returns whether bot rank can be changed at runtime by users.
+     *
+     * @return rank mutability flag
+     */
     public boolean changeableRank() {
         return changeableRank;
     }
 
+    /**
+     * Returns bot display-name template configured for spawn.
+     *
+     * @return bot name template
+     */
     public String botNameTemplate() {
         return botNameTemplate;
     }
 
+    /**
+     * Returns skin strategy/configuration.
+     *
+     * @return bot skin config
+     */
     public BotSkin botSkin() {
         return botSkin;
     }
 
+    /**
+     * Returns default armor type.
+     *
+     * @return default armor tier
+     */
     public BotArmorType armorType() {
         return armorType;
     }
 
+    /**
+     * Returns minimum allowed armor type.
+     *
+     * @return min armor tier
+     */
     public BotArmorType minArmorType() {
         return minArmorType;
     }
 
+    /**
+     * Returns maximum allowed armor type.
+     *
+     * @return max armor tier
+     */
     public BotArmorType maxArmorType() {
         return maxArmorType;
     }
 
+    /**
+     * Returns default totem count.
+     *
+     * @return default totem count
+     */
     public int totemCount() {
         return totemCount;
     }
 
+    /**
+     * Returns minimum allowed totem count.
+     *
+     * @return min totem count
+     */
     public int minTotemCount() {
         return minTotemCount;
     }
 
+    /**
+     * Returns maximum allowed totem count.
+     *
+     * @return max totem count
+     */
     public int maxTotemCount() {
         return maxTotemCount;
     }
 
+    /**
+     * Returns default bot rank.
+     *
+     * @return default rank
+     */
     public BotRank rank() {
         return rank;
     }
 
+    /**
+     * Returns minimum allowed bot rank.
+     *
+     * @return min rank
+     */
     public BotRank minRank() {
         return minRank;
     }
 
+    /**
+     * Returns maximum allowed bot rank.
+     *
+     * @return max rank
+     */
     public BotRank maxRank() {
         return maxRank;
     }
 
+    /**
+     * Step 1: choose bot name template.
+     */
     public interface BotNameStep {
+        /**
+         * Sets the bot name template.
+         *
+         * <p>The template must not be blank. Placeholders supported by the core runtime
+         * can be used (for example owner/target placeholders).</p>
+         *
+         * @param botNameTemplate bot name template
+         * @return next step (skin configuration)
+         */
         BotSkinStep setBotNameTemplate(String botNameTemplate);
 
+        /**
+         * Alias of {@link #setBotNameTemplate(String)}.
+         *
+         * @param botNameTemplate bot name template
+         * @return next step (skin configuration)
+         */
         default BotSkinStep setBotName(String botNameTemplate) {
             return setBotNameTemplate(botNameTemplate);
         }
     }
 
+    /**
+     * Step 2: choose bot skin source.
+     */
     public interface BotSkinStep {
+        /**
+         * Sets an explicit skin configuration object.
+         *
+         * @param botSkin skin configuration
+         * @return next step (follow default)
+         */
         FollowStep setBotSkin(BotSkin botSkin);
 
+        /**
+         * Convenience skin selection.
+         *
+         * <p>{@code true} = owner skin, {@code false} = random skin.</p>
+         *
+         * @param useOwnerSkin whether owner skin should be used
+         * @return next step (follow default)
+         */
         FollowStep setBotSkin(boolean useOwnerSkin);
 
+        /**
+         * Uses random skin source.
+         *
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinRandom();
 
+        /**
+         * Uses owner skin source.
+         *
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinOwner();
 
+        /**
+         * Uses first TEAM_ALLY owner skin source.
+         *
+         * <p>This source is intended for TEAM_ALLY mode.</p>
+         *
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinFirstTeamOwner();
 
+        /**
+         * Uses skin from an online player reference.
+         *
+         * @param playerReference online player name or UUID string
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinFromPlayerReference(String playerReference);
 
+        /**
+         * Uses raw texture payload without signature.
+         *
+         * @param textureValue Mojang texture value
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinFromTextureValue(String textureValue);
 
+        /**
+         * Uses raw texture payload with optional signature.
+         *
+         * @param textureValue Mojang texture value
+         * @param textureSignature Mojang texture signature
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinFromTextureValue(String textureValue, String textureSignature);
 
+        /**
+         * Uses texture URL skin source.
+         *
+         * @param textureUrl http/https texture URL
+         * @return next step (follow default)
+         */
         FollowStep setBotSkinFromTextureUrl(String textureUrl);
     }
 
+    /**
+     * Step 3: set follow default.
+     */
     public interface FollowStep {
+        /**
+         * Sets follow default state.
+         *
+         * @param followEnabled follow default
+         * @return next step (follow mutability)
+         */
         ChangeableFollowStep follow(boolean followEnabled);
     }
 
+    /**
+     * Step 4: configure follow mutability.
+     */
     public interface ChangeableFollowStep {
+        /**
+         * Sets whether follow can be changed later.
+         *
+         * @param followChangeable follow changeability
+         * @return next step (combat default)
+         */
         CombatStep setChangeableFollow(boolean followChangeable);
     }
 
+    /**
+     * Step 5: set combat default.
+     */
     public interface CombatStep {
+        /**
+         * Sets combat default state.
+         *
+         * <p>Validation on build enforces: {@code combat=true} requires {@code follow=true}.</p>
+         *
+         * @param combatEnabled combat default
+         * @return next step (combat mutability)
+         */
         ChangeableCombatStep combat(boolean combatEnabled);
     }
 
+    /**
+     * Step 6: configure combat mutability.
+     */
     public interface ChangeableCombatStep {
+        /**
+         * Sets whether combat can be changed later.
+         *
+         * @param combatChangeable combat changeability
+         * @return next step (blast profile)
+         */
         BlastProtectionStep setChangeableCombat(boolean combatChangeable);
     }
 
+    /**
+     * Step 7: configure blast protection profile.
+     */
     public interface BlastProtectionStep {
+        /**
+         * Sets per-slot blast profile using binary integers ({@code 0}/{@code 1}).
+         *
+         * @param bootsBlastEnabled boots blast state (0/1)
+         * @param leggingsBlastEnabled leggings blast state (0/1)
+         * @param chestplateBlastEnabled chestplate blast state (0/1)
+         * @param helmetBlastEnabled helmet blast state (0/1)
+         * @return next step (blast mutability)
+         */
         ChangeableBlastStep blastProtection(
                 int bootsBlastEnabled,
                 int leggingsBlastEnabled,
@@ -188,6 +438,15 @@ public final class BotSettings {
                 int helmetBlastEnabled
         );
 
+        /**
+         * Sets per-slot blast profile using booleans.
+         *
+         * @param bootsBlastEnabled boots blast state
+         * @param leggingsBlastEnabled leggings blast state
+         * @param chestplateBlastEnabled chestplate blast state
+         * @param helmetBlastEnabled helmet blast state
+         * @return next step (blast mutability)
+         */
         ChangeableBlastStep blastProtection(
                 boolean bootsBlastEnabled,
                 boolean leggingsBlastEnabled,
@@ -195,50 +454,161 @@ public final class BotSettings {
                 boolean helmetBlastEnabled
         );
 
+        /**
+         * Sets explicit blast protection profile object.
+         *
+         * @param blastProtectionProfile blast profile
+         * @return next step (blast mutability)
+         */
         ChangeableBlastStep blastProtection(BotBlastProtection blastProtectionProfile);
     }
 
+    /**
+     * Step 8: configure blast mutability.
+     */
     public interface ChangeableBlastStep {
+        /**
+         * Sets whether blast protection can be changed later.
+         *
+         * @param blastChangeable blast changeability
+         * @return next step (armor range)
+         */
         ArmorRangeStep setChangeableBlast(boolean blastChangeable);
     }
 
+    /**
+     * Step 9: configure allowed armor range.
+     */
     public interface ArmorRangeStep {
+        /**
+         * Sets minimum and maximum allowed armor tier.
+         *
+         * @param minArmorType minimum armor tier
+         * @param maxArmorType maximum armor tier
+         * @return next step (default armor)
+         */
         ArmorStep armorValue(BotArmorType minArmorType, BotArmorType maxArmorType);
     }
 
+    /**
+     * Step 10: configure default armor.
+     */
     public interface ArmorStep {
+        /**
+         * Sets default armor tier.
+         *
+         * @param defaultArmorType default armor tier
+         * @return next step (armor mutability)
+         */
         ChangeableArmorStep armor(BotArmorType defaultArmorType);
     }
 
+    /**
+     * Step 11: configure armor mutability.
+     */
     public interface ChangeableArmorStep {
+        /**
+         * Sets whether armor can be changed later.
+         *
+         * @param armorChangeable armor changeability
+         * @return next step (totem range)
+         */
         TotemRangeStep setChangeableArmor(boolean armorChangeable);
     }
 
+    /**
+     * Step 12: configure allowed totem range.
+     */
     public interface TotemRangeStep {
+        /**
+         * Sets minimum and maximum allowed totem count.
+         *
+         * <p>{@code -1} is reserved for unlimited and is valid only as minimum.
+         * Maximum must be {@code >= 0}.</p>
+         *
+         * @param minTotemCount minimum allowed totems
+         * @param maxTotemCount maximum allowed totems
+         * @return next step (default totems)
+         */
         TotemStep totemValue(int minTotemCount, int maxTotemCount);
     }
 
+    /**
+     * Step 13: configure default totem count.
+     */
     public interface TotemStep {
+        /**
+         * Sets default totem count.
+         *
+         * @param defaultTotemCount default totem count
+         * @return next step (totem mutability)
+         */
         ChangeableTotemStep totemCount(int defaultTotemCount);
     }
 
+    /**
+     * Step 14: configure totem mutability.
+     */
     public interface ChangeableTotemStep {
+        /**
+         * Sets whether totem count can be changed later.
+         *
+         * @param totemChangeable totem changeability
+         * @return next step (rank range)
+         */
         RankRangeStep setChangeableTotem(boolean totemChangeable);
     }
 
+    /**
+     * Step 15: configure allowed rank range.
+     */
     public interface RankRangeStep {
+        /**
+         * Sets minimum and maximum allowed rank.
+         *
+         * @param minRank minimum rank
+         * @param maxRank maximum rank
+         * @return next step (default rank)
+         */
         RankStep rankValue(BotRank minRank, BotRank maxRank);
     }
 
+    /**
+     * Step 16: configure default rank.
+     */
     public interface RankStep {
+        /**
+         * Sets default rank.
+         *
+         * @param defaultRank default rank
+         * @return next step (rank mutability)
+         */
         ChangeableRankStep rank(BotRank defaultRank);
     }
 
+    /**
+     * Step 17: configure rank mutability.
+     */
     public interface ChangeableRankStep {
+        /**
+         * Sets whether rank can be changed later.
+         *
+         * @param rankChangeable rank changeability
+         * @return final build step
+         */
         BuildStep setChangeableRank(boolean rankChangeable);
     }
 
+    /**
+     * Final step: builds immutable settings.
+     */
     public interface BuildStep {
+        /**
+         * Builds immutable settings after validation.
+         *
+         * @return immutable bot settings
+         * @throws IllegalArgumentException if any configured rule is invalid or inconsistent
+         */
         BotSettings build();
     }
 
