@@ -3,6 +3,7 @@ package com.monkey.mcbot.gui;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.gui.impl.*;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import org.bukkit.Material;
@@ -39,6 +40,15 @@ public class NewBotGUI {
 
     public void open() {
         BotOptions options = training.getPlayerOptions().getOptions(player.getUniqueId());
+        if (options == null) {
+            UUID managedOwner = resolveManagedOwnerUUID();
+            ITrainingBot activeBot = training.getBotManager().getBotSafe(managedOwner);
+            if (activeBot != null
+                    && activeBot.getBrainController() != null
+                    && activeBot.getBrainController().getBotOptions() != null) {
+                options = activeBot.getBrainController().getBotOptions();
+            }
+        }
         if (options == null) {
             options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getConfig(), training));
         }
@@ -121,21 +131,15 @@ public class NewBotGUI {
     }
 
     private void clampTotemCount(BotOptions options) {
-        int maxTotem = getMaxTotemCount(options);
-        int currentTotem = options.getTotems();
-
-        if (currentTotem == -1) {
-            return;
-        }
-
-        if (currentTotem > maxTotem) {
-            options.setTotems(maxTotem);
-        }
+        options.clampCurrentTotemCount();
     }
 
-    private int getMaxTotemCount(BotOptions options) {
-        int normalMax = training.getConfig().getInt("bot.max-totem-normal", 37);
-        int eventMax = training.getConfig().getInt("bot.max-totem-event", 74);
-        return options.isEventBot() ? eventMax : normalMax;
+    private UUID resolveManagedOwnerUUID() {
+        if (botType != BotType.TEAM_ALLY) {
+            return player.getUniqueId();
+        }
+
+        UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }

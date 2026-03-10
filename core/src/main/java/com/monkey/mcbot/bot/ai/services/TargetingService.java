@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class TargetingService {
@@ -47,12 +48,23 @@ public class TargetingService {
         return findClosestPlayerExcept(bot, maxRange, null);
     }
 
+    public Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
+        return findClosestPlayerNearPlayer(
+                bot,
+                (Player) bot.asPlayer().getBukkitEntity(),
+                maxRange,
+                null,
+                allowedTargets
+        );
+    }
+
     public Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, UUID excludedPlayer) {
         return findClosestPlayerNearPlayer(
                 bot,
                 (Player) bot.asPlayer().getBukkitEntity(),
                 maxRange,
-                excludedPlayer
+                excludedPlayer,
+                Set.of()
         );
     }
 
@@ -60,6 +72,14 @@ public class TargetingService {
                                               Player centerPlayer,
                                               double maxRange,
                                               UUID excludedPlayer) {
+        return findClosestPlayerNearPlayer(bot, centerPlayer, maxRange, excludedPlayer, Set.of());
+    }
+
+    public Player findClosestPlayerNearPlayer(ITrainingBot bot,
+                                              Player centerPlayer,
+                                              double maxRange,
+                                              UUID excludedPlayer,
+                                              Set<UUID> allowedTargets) {
         if (centerPlayer == null || !centerPlayer.isOnline() || centerPlayer.isDead()) {
             targetCache.remove(bot.asPlayer().getUUID());
             return null;
@@ -68,9 +88,11 @@ public class TargetingService {
         UUID botUUID = bot.asPlayer().getUUID();
         UUID centerUUID = centerPlayer.getUniqueId();
         long currentTime = System.currentTimeMillis();
+        boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
 
         TargetCache cached = targetCache.get(botUUID);
-        if (cached != null
+        if (!useAllowedTargetsFilter
+                && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
                 && cached.isValid(excludedPlayer, centerUUID, maxRange)) {
             return cached.player;
@@ -93,6 +115,10 @@ public class TargetingService {
                 continue;
             }
 
+            if (useAllowedTargetsFilter && !allowedTargets.contains(player.getUniqueId())) {
+                continue;
+            }
+
             if (!player.getWorld().getUID().equals(centerWorld.getUID())) {
                 continue;
             }
@@ -109,7 +135,9 @@ public class TargetingService {
         }
 
         if (closestPlayer != null) {
-            targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, centerUUID, maxRange));
+            if (!useAllowedTargetsFilter) {
+                targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, centerUUID, maxRange));
+            }
         } else {
             targetCache.remove(botUUID);
         }

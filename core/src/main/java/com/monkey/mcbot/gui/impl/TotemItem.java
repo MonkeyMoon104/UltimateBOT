@@ -46,26 +46,21 @@ public class TotemItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        int maxTotem = getMaxTotemCount();
+        int maxTotem = options.getMaxTotemCount();
+        int minTotem = options.getMinTotemCount();
         int currentTotem = options.getTotems();
 
         if (clickType.isLeftClick() && currentTotem < maxTotem) {
             options.setTotems(currentTotem + 1);
         }
 
-        if (clickType.isRightClick() && currentTotem > -1) {
+        if (clickType.isRightClick() && currentTotem > minTotem) {
             options.setTotems(currentTotem - 1);
         }
 
         training.getBotManager().updateTotem(resolveManagedOwnerUUID(player), options.getTotems());
 
         notifyWindows();
-    }
-
-    private int getMaxTotemCount() {
-        int normalMax = training.getConfig().getInt("bot.max-totem-normal", 37);
-        int eventMax = training.getConfig().getInt("bot.max-totem-event", 74);
-        return options.isEventBot() ? eventMax : normalMax;
     }
 
     private UUID resolveManagedOwnerUUID(Player player) {

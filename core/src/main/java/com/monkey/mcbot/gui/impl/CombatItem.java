@@ -87,12 +87,7 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isRightClick()) {
             BotRank currentRank = options.getRank();
-            BotRank[] values = BotRank.values();
-            int index = currentRank.ordinal();
-
-            index = (index + 1) % values.length;
-
-            BotRank newRank = values[index];
+            BotRank newRank = options.nextAllowedRank(currentRank, true);
             options.setRank(newRank);
 
             training.getBotManager().setBotRank(managedOwnerUUID, newRank);

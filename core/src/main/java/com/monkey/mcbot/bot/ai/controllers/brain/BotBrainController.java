@@ -184,10 +184,15 @@ public class BotBrainController {
 
     private void updateTargetByType() {
         BotType botType = botOptions.getBotType();
+        Set<UUID> targetFilters = botOptions.getTargetUUIDs();
 
         if (botType == BotType.EVENT) {
             watchOnlyMode = false;
-            setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
+            if (targetFilters.isEmpty()) {
+                setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
+            } else {
+                setTargetIfChanged(targetingService.findClosestPlayerFromList(bot, eventTargetRange, targetFilters));
+            }
             return;
         }
 
@@ -200,7 +205,8 @@ public class BotBrainController {
                     allyReturnTeleportDistance,
                     allyReturnTeleportCooldownMs,
                     allyPreRangeAlertMessage,
-                    allyRangeAlertMessage
+                    allyRangeAlertMessage,
+                    targetFilters
             );
             return;
         }
@@ -214,7 +220,8 @@ public class BotBrainController {
                     teamAllyReturnTeleportDistance,
                     teamAllyReturnTeleportCooldownMs,
                     teamAllyPreRangeAlertMessage,
-                    teamAllyRangeAlertMessage
+                    teamAllyRangeAlertMessage,
+                    targetFilters
             );
             return;
         }
@@ -254,7 +261,8 @@ public class BotBrainController {
                                            double returnTeleportDistance,
                                            long returnTeleportCooldownMs,
                                            String preRangeMessage,
-                                           String rangeMessage) {
+                                           String rangeMessage,
+                                           Set<UUID> targetFilters) {
         if (owners.isEmpty()) {
             watchOnlyMode = false;
             clearAlertState();
@@ -264,7 +272,7 @@ public class BotBrainController {
         org.bukkit.entity.Player closestOwnerToBot = getClosestOwnerToBot(owners);
 
         if (follow && combat) {
-            ThreatSelection closestInRange = findClosestThreatNearOwners(owners, range);
+            ThreatSelection closestInRange = findClosestThreatNearOwners(owners, range, targetFilters);
             if (closestInRange != null) {
                 watchOnlyMode = false;
                 setTargetIfChanged(closestInRange.threat);
@@ -273,7 +281,7 @@ public class BotBrainController {
             }
 
             double effectivePreRange = Math.max(preRange, range);
-            ThreatSelection closestInPreRange = findClosestThreatNearOwners(owners, effectivePreRange);
+            ThreatSelection closestInPreRange = findClosestThreatNearOwners(owners, effectivePreRange, targetFilters);
             if (closestInPreRange != null) {
                 watchOnlyMode = true;
                 setTargetIfChanged(closestInPreRange.threat);
@@ -292,7 +300,9 @@ public class BotBrainController {
         }
     }
 
-    private ThreatSelection findClosestThreatNearOwners(List<org.bukkit.entity.Player> owners, double range) {
+    private ThreatSelection findClosestThreatNearOwners(List<org.bukkit.entity.Player> owners,
+                                                        double range,
+                                                        Set<UUID> targetFilters) {
         if (owners.isEmpty()) {
             return null;
         }
@@ -306,6 +316,10 @@ public class BotBrainController {
 
         for (org.bukkit.entity.Player candidate : Bukkit.getOnlinePlayers()) {
             if (candidate.isDead() || candidate.getGameMode().isInvulnerable()) {
+                continue;
+            }
+
+            if (!targetFilters.isEmpty() && !targetFilters.contains(candidate.getUniqueId())) {
                 continue;
             }
 

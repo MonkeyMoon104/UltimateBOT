@@ -1,5 +1,7 @@
 package com.monkey.mcbot;
 
+import com.monkey.mcbot.api.MinecraftBotAPI;
+import com.monkey.mcbot.api.event.MinecraftBotReadyEvent;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -9,6 +11,8 @@ import com.monkey.mcbot.commands.BotCommand;
 import com.monkey.mcbot.commands.BotEventCommand;
 import com.monkey.mcbot.commands.BotTeamAllyCommand;
 import com.monkey.mcbot.commands.ReloadCommand;
+import com.monkey.mcbot.integration.api.CoreBotManagerAdapter;
+import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.nms.NMSBridgeManager;
@@ -39,6 +43,12 @@ public final class MinecraftBot extends JavaPlugin {
         this.botRegistry = new BotRegistry();
         this.botManager = new BotManager(this);
 
+        MinecraftBotAPI api = new MinecraftBotAPI(
+                this,
+                new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
+                new CoreBotRegistryAdapter(botRegistry)
+        );
+
         getCommand("bot").setExecutor(new BotCommand(this));
         getCommand("botevent").setExecutor(new BotEventCommand(this));
         getCommand("botally").setExecutor(new BotAllyCommand(this));
@@ -61,10 +71,15 @@ public final class MinecraftBot extends JavaPlugin {
         } else {
             getLogger().warning("PlaceholderAPI non trovato! I placeholder non saranno disponibili.");
         }
+
+        MinecraftBotAPI.register(api);
+        getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
     }
 
     @Override
     public void onDisable() {
+        MinecraftBotAPI.unregister();
+
         if (placeholderCoordinator != null) {
             placeholderCoordinator.unregister();
         }

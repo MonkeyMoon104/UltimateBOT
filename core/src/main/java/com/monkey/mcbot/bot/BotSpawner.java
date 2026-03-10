@@ -31,6 +31,7 @@ public class BotSpawner {
     }
 
     public void spawn(Player viewer,
+                      Player target,
                       Map<EquipmentSlot, ItemStack> armorMap,
                       Map<EquipmentSlot, Boolean> blastProtectionMap,
                       boolean follow,
@@ -46,6 +47,7 @@ public class BotSpawner {
 
         Player registryOwner = resolveRegistryOwner(viewer, botOptions);
         UUID registryOwnerUUID = registryOwner.getUniqueId();
+        Player resolvedTarget = resolveTargetPlayer(registryOwner, target, botOptions);
 
         if (registry.isBotSpawned(registryOwnerUUID)) {
             if (plugin != null) {
@@ -75,7 +77,7 @@ public class BotSpawner {
                 BlockPos.containing(block.getX(), block.getY(), block.getZ()),
                 0,
                 BotFactory.createProfile(registryOwner, botUUID, botName),
-                registryOwner,
+                resolvedTarget,
                 follow,
                 plugin,
                 config.getString("messages.dead-bot-msg", "You have killed the bot!"),
@@ -98,6 +100,30 @@ public class BotSpawner {
         if (plugin != null) {
             plugin.getLogger().info("Bot spawned successfully for " + registryOwner.getName());
         }
+    }
+
+    private Player resolveTargetPlayer(Player registryOwner, Player target, BotOptions botOptions) {
+        if (target != null && target.isOnline()) {
+            return target;
+        }
+
+        if (botOptions != null && botOptions.getPreferredTargetUUID() != null) {
+            Player preferred = Bukkit.getPlayer(botOptions.getPreferredTargetUUID());
+            if (preferred != null && preferred.isOnline()) {
+                return preferred;
+            }
+        }
+
+        if (botOptions != null && !botOptions.getTargetUUIDs().isEmpty()) {
+            for (UUID targetUUID : botOptions.getTargetUUIDs()) {
+                Player candidate = Bukkit.getPlayer(targetUUID);
+                if (candidate != null && candidate.isOnline()) {
+                    return candidate;
+                }
+            }
+        }
+
+        return registryOwner;
     }
 
     private Player resolveRegistryOwner(Player viewer, BotOptions botOptions) {

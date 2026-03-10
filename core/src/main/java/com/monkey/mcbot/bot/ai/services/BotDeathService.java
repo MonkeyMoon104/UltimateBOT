@@ -48,7 +48,14 @@ public class BotDeathService {
                 bot.getTargetPlayer().sendMessage(ChatColorUtils.translate(deadBotMessage));
             }
 
-            if (options != null && options.getOwnerUUID() != null) {
+            if (options != null && options.getBotType() == BotType.TEAM_ALLY) {
+                for (UUID teamOwnerUUID : options.getTeamOwnerUUIDs()) {
+                    playerOptions.remove(teamOwnerUUID);
+                }
+                if (options.getOwnerUUID() != null) {
+                    playerOptions.remove(options.getOwnerUUID());
+                }
+            } else if (options != null && options.getOwnerUUID() != null) {
                 playerOptions.remove(options.getOwnerUUID());
             } else if (bot.getTargetPlayer() != null) {
                 playerOptions.remove(bot.getTargetPlayer().getUniqueId());

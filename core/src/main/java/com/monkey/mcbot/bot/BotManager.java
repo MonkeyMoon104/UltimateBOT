@@ -26,12 +26,22 @@ public class BotManager {
     }
 
     public void spawn(Player viewer,
+                      Player target,
                       Map<EquipmentSlot, ItemStack> armorMap,
                       Map<EquipmentSlot, Boolean> blastProtectionMap,
                       boolean follow,
                       int totem,
                       BotOptions botOptions) {
-        spawner.spawn(viewer, armorMap, blastProtectionMap, follow, totem, botOptions);
+        spawner.spawn(viewer, target, armorMap, blastProtectionMap, follow, totem, botOptions);
+    }
+
+    public void spawn(Player viewer,
+                      Map<EquipmentSlot, ItemStack> armorMap,
+                      Map<EquipmentSlot, Boolean> blastProtectionMap,
+                      boolean follow,
+                      int totem,
+                      BotOptions botOptions) {
+        spawner.spawn(viewer, viewer, armorMap, blastProtectionMap, follow, totem, botOptions);
     }
 
     public void despawn(Player owner) {

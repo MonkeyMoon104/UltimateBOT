@@ -7,6 +7,7 @@ pluginManagement {
 
 rootProject.name = 'MinecraftBot'
 
+include 'api'
 include 'core'
 
 include 'versions:v1_21_4'

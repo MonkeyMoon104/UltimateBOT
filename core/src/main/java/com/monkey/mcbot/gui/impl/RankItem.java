@@ -15,7 +15,6 @@ import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +39,7 @@ public class RankItem extends AbstractItem {
         builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
 
         var loreLines = training.getConfig().getStringList("gui.rank-button.lore");
-        List<String> ranks = Arrays.stream(BotRank.values())
+        List<String> ranks = options.getAllowedRanks().stream()
                 .map(botRank -> botRank == options.getRank() ? botRank.getSelectedName() : botRank.getDisplayName())
                 .toList();
 
@@ -81,16 +80,14 @@ public class RankItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         BotRank currentRank = options.getRank();
-        BotRank[] values = BotRank.values();
-        int index = currentRank.ordinal();
+        BotRank newRank = currentRank;
 
         if (clickType == ClickType.LEFT) {
-            index = (index + 1) % values.length;
+            newRank = options.nextAllowedRank(currentRank, true);
         } else if (clickType == ClickType.RIGHT) {
-            index = (index - 1 + values.length) % values.length;
+            newRank = options.nextAllowedRank(currentRank, false);
         }
 
-        BotRank newRank = values[index];
         options.setRank(newRank);
 
         training.getBotManager().setBotRank(resolveManagedOwnerUUID(player), newRank);
