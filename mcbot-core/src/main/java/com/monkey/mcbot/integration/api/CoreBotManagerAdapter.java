@@ -2,10 +2,14 @@ package com.monkey.mcbot.integration.api;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.managers.IBotManager;
+import com.monkey.mcbot.api.model.BotArmorType;
+import com.monkey.mcbot.api.model.BotBlastProtection;
 import com.monkey.mcbot.api.model.BotMode;
 import com.monkey.mcbot.api.model.BotOperationResult;
 import com.monkey.mcbot.api.model.BotRank;
 import com.monkey.mcbot.api.model.BotSettings;
+import com.monkey.mcbot.api.model.BotSkin;
+import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.api.model.BotSource;
 import com.monkey.mcbot.api.model.BotSpawnRequest;
@@ -16,6 +20,7 @@ import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
+import com.monkey.mcbot.utils.armor.ArmorTier;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -90,11 +95,16 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
 
         BotType botType = toCoreType(request.mode());
-        BotSettings settings = request.settings() == null ? BotSettings.builder().build() : request.settings();
+        BotSettings settings = request.settings() == null ? defaultSettings() : request.settings();
 
         Set<UUID> teamOwners = new LinkedHashSet<>(request.teamOwnerUUIDs());
         if (request.ownerUUID() != null) {
             teamOwners.add(request.ownerUUID());
+        }
+
+        String skinValidationError = validateSkinForMode(botType, settings);
+        if (skinValidationError != null) {
+            return BotOperationResult.failure(skinValidationError);
         }
 
         if (botType != BotType.TEAM_ALLY && teamOwners.size() > 1) {
@@ -116,8 +126,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
 
         Set<UUID> targetUUIDs = new LinkedHashSet<>(request.targetUUIDs());
-        if (botType == BotType.SINGLE && targetUUIDs.size() > 1) {
-            return BotOperationResult.failure("SINGLE mode accepts at most one target.");
+        if (botType == BotType.SINGLE) {
+            // SINGLE bots must always target their owner.
+            targetUUIDs.clear();
+            targetUUIDs.add(primaryOwnerUUID);
         }
 
         if (botType == BotType.TEAM_ALLY) {
@@ -138,9 +150,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return BotOperationResult.failure("Cannot spawn a non-event bot while an event bot is active.");
         }
 
-        if (targetUUIDs.isEmpty() && botType == BotType.SINGLE) {
-            targetUUIDs.add(primaryOwnerUUID);
-        }
         UUID targetUUID = targetUUIDs.stream().findFirst().orElse(primaryOwnerUUID);
         Player targetPlayer = Bukkit.getPlayer(targetUUID);
         if (targetPlayer == null || !targetPlayer.isOnline()) {
@@ -210,7 +219,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                     .owner(ownerUUID)
                     .targets(targetUUIDs)
                     .teamOwners(teamOwners)
-                    .settings(settings == null ? BotSettings.builder().build() : settings)
+                    .settings(settings == null ? defaultSettings() : settings)
                     .build();
             return spawn(request);
         } catch (IllegalArgumentException ex) {
@@ -273,6 +282,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
+        if (!options.isChangeableTotem()) {
+            return false;
+        }
+
         int clamped = options.clampTotemCount(totemCount);
         if (clamped != totemCount) {
             return false;
@@ -296,8 +309,21 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
+        if (!options.isChangeableFollow()) {
+            return false;
+        }
+
+        if (!follow && options.isCombat() && !options.isChangeableCombat()) {
+            return false;
+        }
+
         options.setFollow(follow);
         botManager.updateFollow(managedOwner, follow);
+
+        if (!follow && options.isCombat()) {
+            options.setCombat(false);
+            botManager.updateCombat(managedOwner, false);
+        }
         return true;
     }
 
@@ -314,12 +340,38 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
+        if (!options.isChangeableCombat()) {
+            return false;
+        }
+
         if (combat && !options.isFollow()) {
             return false;
         }
 
         options.setCombat(combat);
         botManager.updateCombat(managedOwner, combat);
+        return true;
+    }
+
+    @Override
+    public boolean updateBlastProtection(UUID ownerUUID, boolean blastProtection) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        ITrainingBot bot = getLiveBot(managedOwner);
+        if (bot == null || bot.getBrainController() == null) {
+            return false;
+        }
+
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+
+        if (!options.isChangeableBlast()) {
+            return false;
+        }
+
+        options.setBlastProtection(blastProtection);
+        botManager.updateArmor(managedOwner, options.getArmor(), options.getBlast());
         return true;
     }
 
@@ -337,6 +389,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         BotOptions options = bot.getBrainController().getBotOptions();
         if (options == null) {
+            return false;
+        }
+
+        if (!options.isChangeableRank()) {
             return false;
         }
 
@@ -443,11 +499,23 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setBotType(type);
         options.setCreationSource(BotCreationSource.API);
         options.setOwnerUUID(ownerUUID);
+        options.setBotNameTemplate(settings.botNameTemplate());
+        options.setBotSkin(settings.botSkin());
         options.setPreferredTargetUUID(targetUUID);
         options.setTargetUUIDs(targetUUIDs);
         options.setTeamOwnerUUIDs(teamOwners);
         options.setFollow(settings.follow());
         options.setCombat(settings.combat() && settings.follow());
+        options.setChangeableFollow(settings.changeableFollow());
+        options.setChangeableCombat(settings.changeableCombat());
+        options.setChangeableBlast(settings.changeableBlast());
+        options.setChangeableArmor(settings.changeableArmor());
+        options.setChangeableTotem(settings.changeableTotem());
+        options.setChangeableRank(settings.changeableRank());
+        BotBlastProtection blast = settings.blastProtectionProfile();
+        options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
+        options.setArmorRange(toCoreArmor(settings.minArmorType()), toCoreArmor(settings.maxArmorType()));
+        options.setArmorType(toCoreArmor(settings.armorType()));
         options.setRankRange(toCoreRank(settings.minRank()), toCoreRank(settings.maxRank()));
         options.setRank(toCoreRank(settings.rank()));
         options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
@@ -540,6 +608,50 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return null;
     }
 
+    private BotSettings defaultSettings() {
+        return BotSettings.builder()
+                .setBotNameTemplate(plugin.getConfig().getString("bot.name", "CrystalBot"))
+                .setBotSkinOwner()
+                .follow(false)
+                .setChangeableFollow(true)
+                .combat(false)
+                .setChangeableCombat(true)
+                .blastProtection(0, 0, 0, 0)
+                .setChangeableBlast(true)
+                .armorValue(BotArmorType.LEATHER, BotArmorType.NETHERITE)
+                .armor(BotArmorType.NETHERITE)
+                .setChangeableArmor(true)
+                .totemValue(-1, Integer.MAX_VALUE)
+                .totemCount(-1)
+                .setChangeableTotem(true)
+                .rankValue(BotRank.EASY, BotRank.GOD)
+                .rank(BotRank.EASY)
+                .setChangeableRank(true)
+                .build();
+    }
+
+    private String validateSkinForMode(BotType botType, BotSettings settings) {
+        if (settings == null || settings.botSkin() == null || settings.botSkin().source() == null) {
+            return null;
+        }
+
+        BotSkin skin = settings.botSkin();
+        BotSkinSource source = skin.source();
+
+        if (source == BotSkinSource.FIRST_TEAM_OWNER && botType != BotType.TEAM_ALLY) {
+            return "BotSkin.firstTeamOwner() is valid only for TEAM_ALLY mode.";
+        }
+
+        if (source == BotSkinSource.PLAYER_REFERENCE) {
+            String reference = skin.playerReference();
+            if (reference == null || reference.isBlank() || parsePlayerReference(reference).isEmpty()) {
+                return "BotSkin.player(\"...\") requires an online valid player reference.";
+            }
+        }
+
+        return null;
+    }
+
     private static BotType toCoreType(BotMode mode) {
         return switch (mode) {
             case SINGLE -> BotType.SINGLE;
@@ -559,6 +671,19 @@ public final class CoreBotManagerAdapter implements IBotManager {
             case MEDIUM -> com.monkey.mcbot.bot.ai.rank.BotRank.MEDIUM;
             case HARD -> com.monkey.mcbot.bot.ai.rank.BotRank.HARD;
             case GOD -> com.monkey.mcbot.bot.ai.rank.BotRank.GOD;
+        };
+    }
+
+    private static ArmorTier toCoreArmor(BotArmorType armorType) {
+        if (armorType == null) {
+            return ArmorTier.LEATHER;
+        }
+        return switch (armorType) {
+            case LEATHER -> ArmorTier.LEATHER;
+            case IRON -> ArmorTier.IRON;
+            case GOLDEN -> ArmorTier.GOLDEN;
+            case DIAMOND -> ArmorTier.DIAMOND;
+            case NETHERITE -> ArmorTier.NETHERITE;
         };
     }
 }

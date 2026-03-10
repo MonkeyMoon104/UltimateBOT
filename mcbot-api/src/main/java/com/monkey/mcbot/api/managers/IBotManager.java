@@ -41,6 +41,8 @@ public interface IBotManager {
 
     boolean updateCombat(UUID ownerUUID, boolean combat);
 
+    boolean updateBlastProtection(UUID ownerUUID, boolean blastProtection);
+
     boolean updateRank(UUID ownerUUID, BotRank rank);
 
     boolean remove(UUID ownerUUID);

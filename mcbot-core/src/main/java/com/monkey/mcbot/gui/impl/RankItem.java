@@ -79,6 +79,12 @@ public class RankItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+        if (!options.isChangeableRank()) {
+            String msg = training.getConfig().getString("messages.rank-locked", "&cRank bloccato: non modificabile per questo bot.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
         BotRank currentRank = options.getRank();
         BotRank newRank = currentRank;
 

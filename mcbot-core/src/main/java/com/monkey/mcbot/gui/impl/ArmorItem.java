@@ -54,8 +54,19 @@ public class ArmorItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+        if (!options.isChangeableArmor()) {
+            String msg = training.getConfig().getString("messages.armor-locked", "&cArmor bloccata: non modificabile per questo bot.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
         Material current = piece.getType();
-        Material next = ArmorCycle.getNextArmor(current, slot);
+        Material next = ArmorCycle.getNextArmor(
+                current,
+                slot,
+                options.getMinArmorTier(),
+                options.getMaxArmorTier()
+        );
 
         ItemStack updated = piece.withType(next);
 

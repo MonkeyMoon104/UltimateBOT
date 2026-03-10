@@ -55,7 +55,7 @@ public final class BotSpawnRequest {
         private UUID ownerUUID;
         private final Set<UUID> targetUUIDs = new LinkedHashSet<>();
         private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
-        private BotSettings settings = BotSettings.builder().build();
+        private BotSettings settings;
 
         private Builder(BotMode mode) {
             this.mode = Objects.requireNonNull(mode, "mode");
@@ -126,8 +126,13 @@ public final class BotSpawnRequest {
                 throw new IllegalArgumentException("TEAM_ALLY requires at least one owner");
             }
 
-            if (mode == BotMode.SINGLE && targetUUIDs.size() > 1) {
-                throw new IllegalArgumentException("SINGLE mode accepts at most one target.");
+            if (settings == null) {
+                throw new IllegalArgumentException("settings is required");
+            }
+
+            if (mode == BotMode.SINGLE) {
+                targetUUIDs.clear();
+                targetUUIDs.add(ownerUUID);
             }
 
             return new BotSpawnRequest(this);

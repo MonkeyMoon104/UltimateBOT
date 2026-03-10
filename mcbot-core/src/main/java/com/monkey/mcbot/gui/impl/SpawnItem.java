@@ -70,9 +70,9 @@ public class SpawnItem extends AbstractItem {
         if (status) {
             UUID managedOwnerUUID = resolveManagedOwnerUUID();
             training.getBotManager().despawnByOwnerUUID(managedOwnerUUID);
-            playerOptions.remove(player.getUniqueId());
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
+            clearCachedOptionsAfterDespawn(managedOwnerUUID);
             player.sendMessage(ChatColorUtils.translate(training.getConfig().getString("messages.despawn-bot", "&cBot rimosso!")));
             return;
         }
@@ -122,6 +122,14 @@ public class SpawnItem extends AbstractItem {
 
         UUID teamOwnerUUID = training.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
+    }
+
+    private void clearCachedOptionsAfterDespawn(UUID managedOwnerUUID) {
+        playerOptions.remove(player.getUniqueId());
+        playerOptions.remove(managedOwnerUUID);
+        for (UUID teamOwnerUUID : options.getTeamOwnerUUIDs()) {
+            playerOptions.remove(teamOwnerUUID);
+        }
     }
 
     private void notifyTeamOwners(Player spawner) {

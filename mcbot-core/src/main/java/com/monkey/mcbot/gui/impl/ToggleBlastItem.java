@@ -59,6 +59,12 @@ public class ToggleBlastItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
+        if (!options.isChangeableBlast()) {
+            String msg = training.getConfig().getString("messages.blast-locked", "&cBlast protection bloccata: non modificabile per questo bot.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
         boolean status = options.getBlast().getOrDefault(slot, false);
         options.getBlast().put(slot, !status);
 

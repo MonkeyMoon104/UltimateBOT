@@ -49,10 +49,23 @@ public class FollowItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+        if (!options.isChangeableFollow()) {
+            String msg = training.getConfig().getString("messages.follow-locked", "&cFollow bloccato: non modificabile per questo bot.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
         boolean oldFollowStatus = options.isFollow();
         boolean combatStatus = options.isCombat();
 
         boolean newFollowStatus = !oldFollowStatus;
+
+        if (!newFollowStatus && combatStatus && !options.isChangeableCombat()) {
+            String msg = training.getConfig().getString("messages.follow-lock-combat", "&cNon puoi disattivare follow: combat e' bloccato su ON.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
         options.setFollow(newFollowStatus);
 
         var managedOwnerUUID = resolveManagedOwnerUUID(player);

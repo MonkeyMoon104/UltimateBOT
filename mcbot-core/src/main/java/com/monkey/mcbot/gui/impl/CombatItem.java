@@ -49,19 +49,23 @@ public class CombatItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
-        boolean followStatus = options.isFollow();
-
-        if (!followStatus) {
-            String msg = training.getConfig().getString("combat-need-follow", "&cFollow deve essere ON per abilitare il combat del bot");
-            player.sendMessage(ChatColorUtils.translate(msg));
-            return;
-        }
-
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
 
         if (clickType.isLeftClick()) {
+            if (!options.isChangeableCombat()) {
+                String msg = training.getConfig().getString("messages.combat-locked", "&cCombat bloccato: non modificabile per questo bot.");
+                player.sendMessage(ChatColorUtils.translate(msg));
+                return;
+            }
+
             boolean oldStatus = options.isCombat();
             boolean newStatus = !oldStatus;
+
+            if (newStatus && !options.isFollow()) {
+                String msg = training.getConfig().getString("combat-need-follow", "&cFollow deve essere ON per abilitare il combat del bot");
+                player.sendMessage(ChatColorUtils.translate(msg));
+                return;
+            }
 
             options.setCombat(newStatus);
             training.getBotManager().updateCombat(managedOwnerUUID, newStatus);
@@ -86,6 +90,12 @@ public class CombatItem extends AbstractItem {
         }
 
         if (clickType.isRightClick()) {
+            if (!options.isChangeableRank()) {
+                String msg = training.getConfig().getString("messages.rank-locked", "&cRank bloccato: non modificabile per questo bot.");
+                player.sendMessage(ChatColorUtils.translate(msg));
+                return;
+            }
+
             BotRank currentRank = options.getRank();
             BotRank newRank = options.nextAllowedRank(currentRank, true);
             options.setRank(newRank);
