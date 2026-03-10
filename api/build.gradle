@@ -1,26 +1,9 @@
-apply plugin: 'maven-publish'
-
-java {
-    withSourcesJar()
-    withJavadocJar()
+plugins {
+    id 'it.monkeymoon104.api-publish' version '1.0.1'
 }
 
-javadoc {
-    options.encoding = 'UTF-8'
-    options.addStringOption('Xdoclint:none', '-quiet')
-}
+group = 'com.monkey.mcbot'
 
 dependencies {
     compileOnly "io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT"
-}
-
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = project.group
-            artifactId = 'minecraftbot-api'
-            version = project.version
-            from components.java
-        }
-    }
 }

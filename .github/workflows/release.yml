@@ -1,0 +1,11 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    uses: monkeymoon104/build-infra/.github/workflows/publish-api.yml@main
+    secrets: inherit
