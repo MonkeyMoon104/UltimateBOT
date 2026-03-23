@@ -10,26 +10,26 @@ depend:
 commands:
   bot:
     description: Apri la GUI delle impostazioni del bot normale
-    permission: sb.bot.use
+    permission: mcb.bot.use
   botevent:
     description: Apri la GUI delle impostazioni del bot evento
     permission: admin.host.bot
   botally:
     description: Apri la GUI delle impostazioni del bot ally
-    permission: sb.bot.use
+    permission: mcb.bot.use
   botteamally:
     description: Crea e gestisce un bot team ally
-    permission: sb.bot.use
-  sbreload:
+    permission: mcb.bot.use
+  mcbreload:
     description: Ricarica la configurazione o rimuovi bot/mappe
-    usage: /sbreload <config|bot|maps|all>
-    permission: sb.admin.use
+    usage: /mcbreload <config|bot|maps|all>
+    permission: mcb.admin.use
 
 permissions:
-  sb.admin.use:
-    description: Permette di usare il comando sbreload
+  mcb.admin.use:
+    description: Permette di usare il comando mcbreload
     default: op
-  sb.bot.use:
+  mcb.bot.use:
     description: Permette di usare i comandi bot, botally e botteamally
     default: true
   admin.host.bot:

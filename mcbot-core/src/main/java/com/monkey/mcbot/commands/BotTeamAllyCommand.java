@@ -38,14 +38,16 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (!player.hasPermission("sb.bot.use")) {
+        if (!player.hasPermission("mcb.bot.use")) {
             sendConfigured(player, "messages.reload-no-permission");
             return true;
         }
 
         World world = player.getWorld();
-        if (world.getName().equalsIgnoreCase("SBLobby") || world.getName().equalsIgnoreCase("SBBox")) {
-            player.sendRichMessage("<red>Non puoi qui!");
+        List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
+        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
+            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cNon puoi qui!");
+            player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
 

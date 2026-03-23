@@ -10,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class BotEventCommand implements CommandExecutor {
 
     private final MinecraftBot plugin;
@@ -30,8 +32,10 @@ public class BotEventCommand implements CommandExecutor {
         }
 
         World world = player.getWorld();
-        if (world.getName().equalsIgnoreCase("SBLobby") || world.getName().equalsIgnoreCase("SBBox")) {
-            player.sendRichMessage("<red>Non puoi qui!");
+        List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
+        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
+            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cNon puoi qui!");
+            player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
 

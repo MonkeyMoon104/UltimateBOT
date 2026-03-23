@@ -27,7 +27,7 @@ public class BotCommand implements CommandExecutor {
             return true;
         }
 
-        if (!sender.hasPermission("sb.bot.use")) {
+        if (!sender.hasPermission("mcb.bot.use")) {
             sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-no-permission", "")));
             return true;
         }
