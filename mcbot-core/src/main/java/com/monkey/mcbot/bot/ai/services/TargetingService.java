@@ -45,27 +45,15 @@ public class TargetingService {
     }
 
     public Player findClosestPlayer(ITrainingBot bot, double maxRange) {
-        return findClosestPlayerExcept(bot, maxRange, null);
+        return findClosestPlayerNearBot(bot, maxRange, null, Set.of());
     }
 
     public Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
-        return findClosestPlayerNearPlayer(
-                bot,
-                (Player) bot.asPlayer().getBukkitEntity(),
-                maxRange,
-                null,
-                allowedTargets
-        );
+        return findClosestPlayerNearBot(bot, maxRange, null, allowedTargets);
     }
 
     public Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, UUID excludedPlayer) {
-        return findClosestPlayerNearPlayer(
-                bot,
-                (Player) bot.asPlayer().getBukkitEntity(),
-                maxRange,
-                excludedPlayer,
-                Set.of()
-        );
+        return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, Set.of());
     }
 
     public Player findClosestPlayerNearPlayer(ITrainingBot bot,
@@ -137,6 +125,77 @@ public class TargetingService {
         if (closestPlayer != null) {
             if (!useAllowedTargetsFilter) {
                 targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, centerUUID, maxRange));
+            }
+        } else {
+            targetCache.remove(botUUID);
+        }
+
+        return closestPlayer;
+    }
+
+    private Player findClosestPlayerNearBot(ITrainingBot bot,
+                                            double maxRange,
+                                            UUID excludedPlayer,
+                                            Set<UUID> allowedTargets) {
+        if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
+            return null;
+        }
+
+        UUID botUUID = bot.asPlayer().getUUID();
+        long currentTime = System.currentTimeMillis();
+        boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
+
+        TargetCache cached = targetCache.get(botUUID);
+        if (!useAllowedTargetsFilter
+                && cached != null
+                && (currentTime - cached.time) < GLOBAL_CACHE_TIME
+                && cached.isValid(excludedPlayer, botUUID, maxRange)) {
+            return cached.player;
+        }
+
+        org.bukkit.World centerWorld = bot.asPlayer().level().getWorld();
+        if (centerWorld == null) {
+            targetCache.remove(botUUID);
+            return null;
+        }
+
+        double centerX = bot.asPlayer().getX();
+        double centerY = bot.asPlayer().getY();
+        double centerZ = bot.asPlayer().getZ();
+        double closestDistanceSq = maxRange * maxRange;
+        Player closestPlayer = null;
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isDead() || player.getGameMode().isInvulnerable()) {
+                continue;
+            }
+
+            if (excludedPlayer != null && excludedPlayer.equals(player.getUniqueId())) {
+                continue;
+            }
+
+            if (useAllowedTargetsFilter && !allowedTargets.contains(player.getUniqueId())) {
+                continue;
+            }
+
+            if (!player.getWorld().getUID().equals(centerWorld.getUID())) {
+                continue;
+            }
+
+            double dx = player.getX() - centerX;
+            double dy = player.getY() - centerY;
+            double dz = player.getZ() - centerZ;
+            double distanceSq = dx * dx + dy * dy + dz * dz;
+
+            if (distanceSq < closestDistanceSq) {
+                closestDistanceSq = distanceSq;
+                closestPlayer = player;
+            }
+        }
+
+        if (closestPlayer != null) {
+            if (!useAllowedTargetsFilter) {
+                targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, botUUID, maxRange));
             }
         } else {
             targetCache.remove(botUUID);

@@ -71,10 +71,12 @@ public class TrainingBotLogic {
 
         if (bot.isCombat()) {
             brainController.getBotAI().getMovementController().onDamageReceived();
+            org.bukkit.entity.Player currentTarget = bot.getTargetPlayer();
 
             net.minecraft.world.entity.Entity attacker = source.getEntity();
             if (attacker instanceof Player nmsPlayer &&
-                    nmsPlayer.getUUID().equals(bot.getTargetPlayer().getUniqueId())) {
+                    currentTarget != null &&
+                    nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
                 if (!source.is(DamageTypes.IN_FIRE) &&
                         !source.is(DamageTypes.ON_FIRE) &&
                         !source.is(DamageTypes.LAVA)) {
@@ -95,9 +97,10 @@ public class TrainingBotLogic {
                 brainController.getBotAI().getMovementController().emergencyEvade();
             }
 
-            if (brainController.getBotAI().getMovementController().isStuckInPlace()) {
+            if (currentTarget != null
+                    && brainController.getBotAI().getMovementController().isStuckInPlace()) {
                 brainController.getBotAI().getMovementController().forceUnstick(
-                        ((CraftPlayer) bot.getTargetPlayer()).getHandle()
+                        ((CraftPlayer) currentTarget).getHandle()
                 );
             }
         }

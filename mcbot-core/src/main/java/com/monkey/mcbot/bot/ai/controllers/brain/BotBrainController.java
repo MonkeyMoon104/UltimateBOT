@@ -188,11 +188,10 @@ public class BotBrainController {
 
         if (botType == BotType.EVENT) {
             watchOnlyMode = false;
-            if (targetFilters.isEmpty()) {
-                setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
-            } else {
-                setTargetIfChanged(targetingService.findClosestPlayerFromList(bot, eventTargetRange, targetFilters));
-            }
+            clearAlertState();
+
+            targetingService.invalidateCache(bot.asPlayer().getUUID());
+            setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
             return;
         }
 
