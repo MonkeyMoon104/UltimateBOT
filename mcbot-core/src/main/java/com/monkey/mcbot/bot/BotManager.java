@@ -68,6 +68,33 @@ public class BotManager {
         return lookup.getBotSafe(ownerUUID);
     }
 
+    public ITrainingBot getBotByParticipant(UUID participantUUID) {
+        if (participantUUID == null) {
+            return null;
+        }
+
+        ITrainingBot directBot = getBotSafe(participantUUID);
+        if (directBot != null) {
+            return directBot;
+        }
+
+        return getTeamAllyBotByTeamOwner(participantUUID);
+    }
+
+    public BotType getBotTypeByParticipant(UUID participantUUID) {
+        ITrainingBot bot = getBotByParticipant(participantUUID);
+        if (bot == null || bot.getBrainController() == null) {
+            return null;
+        }
+
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options != null) {
+            return options.getBotType();
+        }
+
+        return hasActiveTeamAlly(participantUUID) ? BotType.TEAM_ALLY : BotType.SINGLE;
+    }
+
 
     public boolean isBotSpawned(UUID ownerUUID) {
         return lookup.isBotSpawned(ownerUUID);

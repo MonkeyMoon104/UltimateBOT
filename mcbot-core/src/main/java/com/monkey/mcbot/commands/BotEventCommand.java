@@ -39,9 +39,9 @@ public class BotEventCommand implements CommandExecutor {
             return true;
         }
 
-        if (hasNormalBotSpawned(player)) {
-            String msg = plugin.getConfig().getString("messages.must-despawn-normal-bot");
-            player.sendMessage(ChatColorUtils.translate(msg));
+        BotType activeType = plugin.getBotManager().getBotTypeByParticipant(player.getUniqueId());
+        if (activeType != null && activeType != BotType.EVENT) {
+            player.sendMessage(ChatColorUtils.translate(getConflictMessage(activeType)));
             return true;
         }
 
@@ -49,22 +49,18 @@ public class BotEventCommand implements CommandExecutor {
         return true;
     }
 
-    private boolean hasNormalBotSpawned(Player player) {
-        if (plugin.getBotManager().hasActiveTeamAlly(player.getUniqueId())) {
-            return true;
+    private String getConflictMessage(BotType activeType) {
+        if (activeType == BotType.SINGLE) {
+            return plugin.getConfig().getString(
+                    "messages.must-despawn-normal-bot",
+                    "&cX Hai gia un bot normale spawnato! Despawnalo prima di gestire il bot event"
+            );
         }
 
-        if (!plugin.getBotManager().isBotSpawned(player.getUniqueId())) {
-            return false;
+        if (activeType == BotType.ALLY) {
+            return "&cX Hai gia un bot ally attivo. Despawnalo prima di gestire il bot event.";
         }
 
-        var bot = plugin.getBotManager().getBotSafe(player.getUniqueId());
-        if (bot != null && bot.getBrainController() != null) {
-            var botOptions = bot.getBrainController().getBotOptions();
-            if (botOptions != null) {
-                return botOptions.getBotType() != BotType.EVENT;
-            }
-        }
-        return false;
+        return "&cX Hai gia un bot team ally attivo. Despawnalo prima di gestire il bot event.";
     }
 }

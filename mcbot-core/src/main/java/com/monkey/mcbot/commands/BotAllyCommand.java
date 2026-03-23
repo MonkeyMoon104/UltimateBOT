@@ -46,9 +46,9 @@ public class BotAllyCommand implements CommandExecutor {
             return true;
         }
 
-        if (hasSpawnedType(player, BotType.SINGLE) || plugin.getBotManager().hasActiveTeamAlly(player.getUniqueId())) {
-            String msg = plugin.getConfig().getString("messages.cannot-open-botally-while-single", "&cHai gia un bot single spawnato. Despawnalo prima di usare /botally.");
-            player.sendMessage(ChatColorUtils.translate(msg));
+        BotType activeType = plugin.getBotManager().getBotTypeByParticipant(player.getUniqueId());
+        if (activeType == BotType.SINGLE || activeType == BotType.TEAM_ALLY) {
+            player.sendMessage(ChatColorUtils.translate(getConflictMessage(activeType)));
             return true;
         }
 
@@ -68,16 +68,14 @@ public class BotAllyCommand implements CommandExecutor {
         return false;
     }
 
-    private boolean hasSpawnedType(Player player, BotType type) {
-        if (!plugin.getBotManager().isBotSpawned(player.getUniqueId())) {
-            return false;
+    private String getConflictMessage(BotType activeType) {
+        if (activeType == BotType.SINGLE) {
+            return plugin.getConfig().getString(
+                    "messages.cannot-open-botally-while-single",
+                    "&cHai gia un bot single spawnato. Despawnalo prima di usare /botally."
+            );
         }
 
-        ITrainingBot bot = plugin.getBotManager().getBotSafe(player.getUniqueId());
-        if (bot == null || bot.getBrainController() == null || bot.getBrainController().getBotOptions() == null) {
-            return false;
-        }
-
-        return bot.getBrainController().getBotOptions().getBotType() == type;
+        return "&cHai gia un bot team ally attivo. Despawnalo prima di usare /botally.";
     }
 }

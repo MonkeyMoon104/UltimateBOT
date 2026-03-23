@@ -19,7 +19,7 @@ public class PlaceholderHelper {
             return eventBot;
         }
 
-        return plugin.getBot(player);
+        return plugin.getBotManager().getBotByParticipant(player.getUniqueId());
     }
 
     private ITrainingBot getActiveEventBot() {
