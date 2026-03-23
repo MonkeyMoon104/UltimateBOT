@@ -14,8 +14,6 @@ import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class NewBotGUI {
@@ -69,7 +67,7 @@ public class NewBotGUI {
         Gui gui = Gui.normal()
                 .setStructure(
                         ". . . . . . . . .",
-                        ". . b b . b b . .",
+                        ". . . . . . . . .",
                         ". . a a t a a . .",
                         ". . . . . . . . .",
                         ". . . s g f . . .",
@@ -85,22 +83,9 @@ public class NewBotGUI {
                 .addIngredient('r', rankItem)
                 .build();
 
-        Map<EquipmentSlot, ArmorItem> armors = new HashMap<>();
-        Map<EquipmentSlot, ToggleBlastItem> blasts = new HashMap<>();
-
         for (EquipmentSlot value : com.monkey.mcbot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             ItemStack piece = options.getArmor().get(value);
-            ArmorItem item = new ArmorItem(training, value, piece, options);
-            armors.put(value, item);
-            blasts.put(value, new ToggleBlastItem(training, options, value, item));
-        }
-
-        for (ToggleBlastItem value : blasts.values()) {
-            gui.addItems(value);
-        }
-
-        for (ArmorItem value : armors.values()) {
-            gui.addItems(value);
+            gui.addItems(new ArmorItem(training, value, piece, options));
         }
 
         BotOptions finalOptions = options;

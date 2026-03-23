@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
+import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -36,15 +37,26 @@ public class ArmorItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        ItemBuilder builder = new ItemBuilder(piece);
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
+        ItemStack displayPiece = piece.clone();
+        BotEquipmentUtils.applyArmorEnchants(displayPiece, isBlastEnabled());
+
+        ItemBuilder builder = new ItemBuilder(displayPiece);
+        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS));
 
         var loreLines = training.getConfig().getStringList("gui.default-armor.lore.set-type");
 
-        String typeName = piece.getType().name();
+        String typeName = formatMaterialName(piece.getType());
+        String blastState = ChatColorUtils.translate(
+                isBlastEnabled()
+                        ? training.getConfig().getString("gui.default-armor.blast-enabled-text", "&aON")
+                        : training.getConfig().getString("gui.default-armor.blast-disabled-text", "&cOFF")
+        );
 
         for (String line : loreLines) {
-            String coloredLine = ChatColorUtils.translate(line.replace("%type%", typeName));
+            String coloredLine = ChatColorUtils.translate(
+                    line.replace("%type%", typeName)
+                            .replace("%blast_state%", blastState)
+            );
             builder.addLoreLines(coloredLine);
         }
 
@@ -54,31 +66,80 @@ public class ArmorItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+        if (clickType.isLeftClick()) {
+            handleArmorCycleClick(player);
+            return;
+        }
+
+        if (clickType.isRightClick()) {
+            handleBlastToggleClick(player);
+        }
+    }
+
+    private void handleArmorCycleClick(Player player) {
         if (!options.isChangeableArmor()) {
             String msg = training.getConfig().getString("messages.armor-locked", "&cArmor bloccata: non modificabile per questo bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
 
-        Material current = piece.getType();
         Material next = ArmorCycle.getNextArmor(
-                current,
+                piece.getType(),
                 slot,
                 options.getMinArmorTier(),
                 options.getMaxArmorTier()
         );
 
-        ItemStack updated = piece.withType(next);
+        ItemStack updated = createUpdatedPiece(next, isBlastEnabled());
+        applyUpdatedPiece(player, updated);
+    }
 
+    private void handleBlastToggleClick(Player player) {
+        if (!options.isChangeableBlast()) {
+            String msg = training.getConfig().getString("messages.blast-locked", "&cBlast protection bloccata: non modificabile per questo bot.");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return;
+        }
+
+        boolean updatedBlastState = !isBlastEnabled();
+        options.getBlast().put(slot, updatedBlastState);
+        ItemStack updated = createUpdatedPiece(piece.getType(), updatedBlastState);
+        applyUpdatedPiece(player, updated);
+    }
+
+    private void applyUpdatedPiece(Player player, ItemStack updated) {
         options.getArmor().put(slot, updated);
-        training.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor());
+        training.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor(), options.getBlast());
         piece = updated;
-
         notifyWindows();
     }
 
-    public void setPiece(ItemStack piece) {
-        this.piece = piece;
+    private ItemStack createUpdatedPiece(Material material, boolean blastEnabled) {
+        ItemStack updated = piece.withType(material);
+        BotEquipmentUtils.applyArmorEnchants(updated, blastEnabled);
+        return updated;
+    }
+
+    private boolean isBlastEnabled() {
+        return options.getBlast().getOrDefault(slot, false);
+    }
+
+    private String formatMaterialName(Material material) {
+        String[] parts = material.name().toLowerCase().split("_");
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < parts.length; i++) {
+            String part = parts[i];
+            if (part.isEmpty()) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(' ');
+            }
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+
+        return builder.toString();
     }
 
     private UUID resolveManagedOwnerUUID(Player player) {

@@ -77,10 +77,15 @@ gui:
     leggings: NETHERITE
     boots: NETHERITE
     no-armor: BARRIER
+    blast-enabled-text: "&aON"
+    blast-disabled-text: "&cOFF"
     lore:
       set-type:
         - "&7Tipo: &e%type%"
-        - "&8Clicca per cambiare il pezzo d'armatura"
+        - "&7Blast Protection: %blast_state%"
+        - ""
+        - "&eClick sinistro: &7cambia il pezzo d'armatura"
+        - "&eClick destro: &7attiva/disattiva il blast"
 
   follow-button:
     name: "&bAttiva/Disattiva Segui"
@@ -133,22 +138,6 @@ gui:
     material: "ENDER_PEARL"
     lore:
       - "&dTippa il bot alla tua posizione"
-
-  enchant-button:
-    enabled-name: "&aBlast Protection: ON"
-    disabled-name: "&cBlast Protection: OFF"
-    enabled-material: "LIME_STAINED_GLASS_PANE"
-    disabled-material: "GLASS_PANE"
-    enabled-lore:
-      - "&7Protezione esplosioni: &aAttiva"
-      - ""
-      - "&cClicca per disabilitare"
-    disabled-lore:
-      - "&7Protezione esplosioni: &cInattiva"
-      - ""
-      - "&aClicca per abilitare"
-    fallback-enabled-lore: "&aClicca per disabilitare"
-    fallback-disabled-lore: "&cClicca per abilitare"
 
   combat-button:
     name: "&bAttiva/Disattiva Combat"
