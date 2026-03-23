@@ -19,6 +19,13 @@ messages:
   cannot-spawn-normal-during-event: "&cX Non puoi spawnare un bot normale mentre c'e un bot event attivo!"
   event-bot-active-block-normal: "&cX C'e un bot event attivo! Non puoi spawnare bot normali durante un evento"
   must-despawn-normal-bot: "&cX Hai gia un bot normale spawnato! Despawnalo prima di gestire il bot event"
+  armor-locked: "&cArmor bloccata: non modificabile per questo bot."
+  blast-locked: "&cBlast protection bloccata: non modificabile per questo bot."
+  combat-locked: "&cCombat bloccato: non modificabile per questo bot."
+  follow-locked: "&cFollow bloccato: non modificabile per questo bot."
+  follow-lock-combat: "&cNon puoi disattivare follow: combat e' bloccato su ON."
+  totem-locked: "&cTotem bloccato: non modificabile per questo bot."
+  rank-locked: "&cRank bloccato: non modificabile per questo bot."
 
   ally:
     pre-range-alert: "&e%player% si sta avvicinando, monitorando la posizione..."
@@ -71,6 +78,59 @@ bot:
     return-teleport-cooldown-ms: 1000
 
 gui:
+
+  tab-border:
+    material: "BLACK_STAINED_GLASS_PANE"
+    name: " "
+
+  tab-item:
+    tab-0:
+      selected:
+        material: "GLOWSTONE_DUST"
+        name: "&eKit &7(selezionato)"
+      unselected:
+        material: "GUNPOWDER"
+        name: "&7Kit"
+    tab-1:
+      selected:
+        material: "GLOWSTONE_DUST"
+        name: "&eRank &7(selezionato)"
+      unselected:
+        material: "GUNPOWDER"
+        name: "&7Rank"
+    tab-2:
+      selected:
+        material: "GLOWSTONE_DUST"
+        name: "&eOwners &7(selezionato)"
+      unselected:
+        material: "GUNPOWDER"
+        name: "&7Owners"
+    tab-3:
+      selected:
+        material: "GLOWSTONE_DUST"
+        name: "&eTargets &7(selezionato)"
+      unselected:
+        material: "GUNPOWDER"
+        name: "&7Targets"
+
+  # Tab 2 — testa di ogni owner del bot
+  owners-tab:
+    head:
+      name: "&e%player%"
+      lore:
+        - "&7Proprietario del bot"
+        - ""
+        - "&8UUID: &7%uuid%"
+
+  # Tab 3 — testa di ogni target del bot
+  targets-tab:
+    head:
+      name: "&c%player%"
+      lore:
+        - "&7Target del bot"
+        - ""
+        - "&8UUID: &7%uuid%"
+
   default-armor:
     helmet: NETHERITE
     chestplate: NETHERITE
