@@ -12,6 +12,7 @@ messages:
   reload-all: "&aConfigurazione, bot e mappe sono state ricaricate/pulite"
   reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
   combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
+  bot-blocked-world: "&cNon puoi qui!"
   dead-bot-message: "{player} was killed by his Bot"
   event-bot-already-active: "&cX C'e gia un bot event attivo! Despawnalo prima"
   all-normal-bots-despawned: "&eTutti i bot normali sono stati despawnati per l'evento"
@@ -45,11 +46,14 @@ messages:
     team-spawned-notify: "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: &e%playerlist%"
 
 bot:
-  name: "CrystalBot"
+  name: "MincraftBot"
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
   max-totem-normal: 37
   max-totem-event: 74
+  blocked-worlds:
+    - "world_nether"
+    - "world_the_end"
 
   event:
     range: 32
