@@ -5,12 +5,7 @@ import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public final class CoreBotRegistryAdapter implements IBotRegistry {
 

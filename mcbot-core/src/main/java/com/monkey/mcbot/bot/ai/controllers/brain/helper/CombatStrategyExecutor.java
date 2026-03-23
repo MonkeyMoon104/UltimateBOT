@@ -1,10 +1,10 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatDataManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
-import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;

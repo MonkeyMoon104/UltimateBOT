@@ -25,11 +25,7 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class TargetsTab {
 

@@ -2,22 +2,8 @@ package com.monkey.mcbot.integration.api;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.managers.IBotManager;
-import com.monkey.mcbot.api.model.BotArmorType;
-import com.monkey.mcbot.api.model.BotBlastProtection;
-import com.monkey.mcbot.api.model.BotMode;
-import com.monkey.mcbot.api.model.BotOperationResult;
-import com.monkey.mcbot.api.model.BotRank;
-import com.monkey.mcbot.api.model.BotSettings;
-import com.monkey.mcbot.api.model.BotSkin;
-import com.monkey.mcbot.api.model.BotSkinSource;
-import com.monkey.mcbot.api.model.BotSnapshot;
-import com.monkey.mcbot.api.model.BotSource;
-import com.monkey.mcbot.api.model.BotSpawnRequest;
-import com.monkey.mcbot.bot.BotCreationSource;
-import com.monkey.mcbot.bot.BotManager;
-import com.monkey.mcbot.bot.BotOptions;
-import com.monkey.mcbot.bot.BotRegistry;
-import com.monkey.mcbot.bot.BotType;
+import com.monkey.mcbot.api.model.*;
+import com.monkey.mcbot.bot.*;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.armor.ArmorTier;
@@ -26,14 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class CoreBotManagerAdapter implements IBotManager {
 

@@ -1,14 +1,9 @@
 package com.monkey.mcbot.utils.equipment;
 
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class EquipmentConverter {
 

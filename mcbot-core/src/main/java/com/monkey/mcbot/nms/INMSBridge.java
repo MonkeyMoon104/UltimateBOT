@@ -1,6 +1,7 @@
 package com.monkey.mcbot.nms;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -25,8 +26,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 
 import java.util.List;
 import java.util.UUID;
-
-import com.mojang.datafixers.util.Pair;
 
 public interface INMSBridge {
 

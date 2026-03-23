@@ -1,6 +1,5 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp;
 
-import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal.CrystalAttacker;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal.CrystalManager;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal.CrystalPlacer;
@@ -8,9 +7,10 @@ import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal.CrystalPositionEv
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPlacer;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPositionFinder;
 import com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianScanner;
+import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
-import com.monkey.mcbot.bot.ai.rank.configs.CPVPConfig;
 import com.monkey.mcbot.bot.ai.rank.RankCoordinator;
+import com.monkey.mcbot.bot.ai.rank.configs.CPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;

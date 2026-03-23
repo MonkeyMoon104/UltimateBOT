@@ -2,8 +2,6 @@ package com.monkey.mcbot.bot.ai.controllers.movement;
 
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.*;
-import com.monkey.mcbot.bot.ai.controllers.movement.helper.*;
-import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;

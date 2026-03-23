@@ -5,8 +5,6 @@ import com.monkey.mcbot.bot.ai.controllers.enderpearl.helper.inter.*;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.bot.ai.controllers.teleport.BotTeleportController;
-import com.monkey.mcbot.bot.ai.controllers.enderpearl.helper.*;
-import com.monkey.mcbot.bot.ai.controllers.enderpearl.helper.inter.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;

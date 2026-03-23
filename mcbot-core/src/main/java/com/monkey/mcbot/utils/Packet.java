@@ -3,18 +3,13 @@ package com.monkey.mcbot.utils;
 import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.game.*;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public class Packet {
 

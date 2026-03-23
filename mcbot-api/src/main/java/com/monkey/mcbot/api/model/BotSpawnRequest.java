@@ -1,10 +1,6 @@
 package com.monkey.mcbot.api.model;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Immutable spawn request used by {@code IBotManager.spawn(...)}.

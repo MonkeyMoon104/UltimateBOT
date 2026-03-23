@@ -1,12 +1,6 @@
 package com.monkey.mcbot.api.managers;
 
-import com.monkey.mcbot.api.model.BotMode;
-import com.monkey.mcbot.api.model.BotOperationResult;
-import com.monkey.mcbot.api.model.BotRank;
-import com.monkey.mcbot.api.model.BotSettings;
-import com.monkey.mcbot.api.model.BotSnapshot;
-import com.monkey.mcbot.api.model.BotSource;
-import com.monkey.mcbot.api.model.BotSpawnRequest;
+import com.monkey.mcbot.api.model.*;
 
 import java.util.Collection;
 import java.util.Map;

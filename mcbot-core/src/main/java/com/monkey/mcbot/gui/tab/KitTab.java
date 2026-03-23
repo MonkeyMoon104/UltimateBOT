@@ -1,13 +1,7 @@
 package com.monkey.mcbot.gui.tab;
 
 import com.monkey.mcbot.bot.BotOptions;
-import com.monkey.mcbot.gui.impl.ArmorItem;
-import com.monkey.mcbot.gui.impl.CombatItem;
-import com.monkey.mcbot.gui.impl.FollowItem;
-import com.monkey.mcbot.gui.impl.RankItem;
-import com.monkey.mcbot.gui.impl.SpawnItem;
-import com.monkey.mcbot.gui.impl.TeleportItem;
-import com.monkey.mcbot.gui.impl.TotemItem;
+import com.monkey.mcbot.gui.impl.*;
 import com.monkey.mcbot.utils.equipment.EquipmentConverter;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;

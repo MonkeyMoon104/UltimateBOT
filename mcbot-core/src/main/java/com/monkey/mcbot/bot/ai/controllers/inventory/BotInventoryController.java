@@ -2,8 +2,6 @@ package com.monkey.mcbot.bot.ai.controllers.inventory;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.*;
-import com.monkey.mcbot.bot.ai.controllers.inventory.helper.*;
-import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

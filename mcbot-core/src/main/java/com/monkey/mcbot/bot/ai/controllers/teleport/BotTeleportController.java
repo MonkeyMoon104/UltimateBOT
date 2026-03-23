@@ -3,7 +3,6 @@ package com.monkey.mcbot.bot.ai.controllers.teleport;
 import com.monkey.mcbot.bot.ai.controllers.teleport.helper.BasicTeleportValidator;
 import com.monkey.mcbot.bot.ai.controllers.teleport.helper.BesideTargetStrategy;
 import com.monkey.mcbot.bot.ai.controllers.teleport.helper.SafeTeleportStrategy;
-import com.monkey.mcbot.bot.ai.controllers.teleport.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.teleport.helper.inter.ITeleportStrategy;
 import com.monkey.mcbot.bot.ai.controllers.teleport.helper.inter.ITeleportValidator;
 import net.minecraft.world.entity.player.Player;
