@@ -6,6 +6,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -35,8 +36,6 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion {
             addPlaceholder(new OnlineTimePlaceholder(plugin));
             addPlaceholder(new PercentageHealthPlaceholder(plugin));
             addPlaceholder(new RankPlaceholder(plugin));
-
-            plugin.getLogger().info("Registrati " + placeholders.size() + " placeholder");
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Errore durante la registrazione dei placeholder", e);
         }
@@ -44,6 +43,16 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion {
 
     private void addPlaceholder(IBotPlaceholder placeholder) {
         placeholders.put(placeholder.getIdentifier().toLowerCase(), placeholder);
+    }
+
+    public int getRegisteredPlaceholderCount() {
+        return placeholders.size();
+    }
+
+    public List<String> getRegisteredPlaceholderKeys() {
+        return placeholders.keySet().stream()
+                .sorted()
+                .toList();
     }
 
     @Override

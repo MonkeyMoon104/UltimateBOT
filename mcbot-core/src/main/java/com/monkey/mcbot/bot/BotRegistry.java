@@ -44,6 +44,10 @@ public class BotRegistry {
         return new HashMap<>(spawnedBots);
     }
 
+    public int size() {
+        return spawnedBots.size();
+    }
+
     public ITrainingBot getBot(UUID ownerUUID) {
         return spawnedBots.get(ownerUUID);
     }

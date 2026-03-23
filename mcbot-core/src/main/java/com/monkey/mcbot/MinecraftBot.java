@@ -20,8 +20,15 @@ import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.placeholders.BotPlaceholderCoordinator;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MinecraftBot extends JavaPlugin {
 
@@ -35,95 +42,113 @@ public final class MinecraftBot extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        MinecraftBotLogging.logBootstrapStart(this);
-        boolean placeholderPresent = false;
-        boolean placeholderRegistered = false;
+        MinecraftBotLogging.StartupSession startup = MinecraftBotLogging.beginBootstrap(this);
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 1, "Configuration");
-        saveDefaultConfig();
-        MinecraftBotLogging.logComponentReady(
-                getLogger(),
-                "Config",
-                "default config loaded | keys=" + getConfig().getKeys(true).size()
-        );
+        try {
+            startup.beginPhase(1, "Boot", "Configuration");
+            saveDefaultConfig();
+            startup.ready("Config", "default file verified");
+            startup.detail("Path", getDataFolder().toPath().resolve("config.yml").toString());
+            startup.detail(
+                    "Profile",
+                    getConfig().getString("bot.name", "CrystalBot")
+                            + " | default totems=" + getConfig().getInt("bot.default-totem-count")
+                            + ", normal max=" + getConfig().getInt("bot.max-totem-normal")
+                            + ", event max=" + getConfig().getInt("bot.max-totem-event")
+            );
+            startup.completePhase("config ready");
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 2, "NMS Bridge");
-        NMSBridgeManager.init();
-        MinecraftBotLogging.logComponentReady(getLogger(), "NMS", NMSBridgeManager.get().getClass().getSimpleName());
-        MinecraftBotLogging.logBotTypeCatalog(getLogger());
-        MinecraftBotLogging.logControllerCatalog(getLogger());
+            startup.beginPhase(2, "NMS", "Compatibility");
+            NMSBridgeManager.init(getLogger());
+            startup.markNmsBridge(NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
+            startup.detail("Catalog", MinecraftBotLogging.catalogSummary());
+            startup.detail("Controllers", MinecraftBotLogging.controllerSummary());
+            startup.completePhase("server compatibility resolved");
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 3, "Core Services");
-        this.targetingService = new TargetingService();
-        MinecraftBotLogging.logComponentReady(getLogger(), "TargetingService", targetingService.getClass().getSimpleName());
-        this.playerOptions = new PlayerOptions();
-        MinecraftBotLogging.logComponentReady(getLogger(), "PlayerOptions", playerOptions.getClass().getSimpleName());
-        this.botRegistry = new BotRegistry();
-        MinecraftBotLogging.logComponentReady(getLogger(), "BotRegistry", botRegistry.getClass().getSimpleName());
-        this.botManager = new BotManager(this);
-        MinecraftBotLogging.logComponentReady(getLogger(), "BotManager", botManager.getClass().getSimpleName());
+            startup.beginPhase(3, "Core", "Runtime");
+            this.targetingService = new TargetingService();
+            this.playerOptions = new PlayerOptions();
+            this.botRegistry = new BotRegistry();
+            this.botManager = new BotManager(this);
+            startup.ready("Runtime", "services created");
+            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager");
+            startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
+            startup.completePhase("runtime core created");
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 4, "API Wiring");
-        MinecraftBotAPI api = new MinecraftBotAPI(
-                this,
-                new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
-                new CoreBotRegistryAdapter(botRegistry)
-        );
-        MinecraftBotLogging.logComponentReady(getLogger(), "CoreBotManagerAdapter", "public API adapter initialized");
-        MinecraftBotLogging.logComponentReady(getLogger(), "CoreBotRegistryAdapter", "public API registry adapter initialized");
+            startup.beginPhase(4, "API", "Wiring");
+            MinecraftBotAPI api = new MinecraftBotAPI(
+                    this,
+                    new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
+                    new CoreBotRegistryAdapter(botRegistry)
+            );
+            startup.ready("API", "adapters wired");
+            startup.detail("Manager", api.getBotManager().getClass().getSimpleName());
+            startup.detail("Registry", api.getBotRegistry().getClass().getSimpleName());
+            startup.completePhase("public API prepared");
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 5, "Commands & Listeners");
-        getCommand("bot").setExecutor(new BotCommand(this));
-        getCommand("botevent").setExecutor(new BotEventCommand(this));
-        getCommand("botally").setExecutor(new BotAllyCommand(this));
+            startup.beginPhase(5, "Hooks", "Commands and Listeners");
 
-        BotTeamAllyCommand botTeamAllyCommand = new BotTeamAllyCommand(this);
-        getCommand("botteamally").setExecutor(botTeamAllyCommand);
-        getCommand("botteamally").setTabCompleter(botTeamAllyCommand);
-        MinecraftBotLogging.logComponentReady(getLogger(), "Commands", "bot,botally,botevent,botteamally,sbreload");
+            List<String> registeredCommands = new ArrayList<>();
+            registerCommand(startup, registeredCommands, "bot", new BotCommand(this));
+            registerCommand(startup, registeredCommands, "botevent", new BotEventCommand(this));
+            registerCommand(startup, registeredCommands, "botally", new BotAllyCommand(this));
 
-        getCommand("sbreload").setExecutor(new ReloadCommand(this));
-        getServer().getPluginManager().registerEvents(new PlayerCheckListener(this), this);
-        getServer().getPluginManager().registerEvents(new PlayerTagListener(this), this);
-        MinecraftBotLogging.logComponentReady(getLogger(), "Listeners", "PlayerCheckListener,PlayerTagListener");
+            BotTeamAllyCommand botTeamAllyCommand = new BotTeamAllyCommand(this);
+            registerCommand(startup, registeredCommands, "botteamally", botTeamAllyCommand, botTeamAllyCommand);
+            registerCommand(startup, registeredCommands, "sbreload", new ReloadCommand(this));
+            startup.markCommands(registeredCommands);
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 6, "Placeholder Integration");
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            placeholderPresent = true;
-            this.placeholderCoordinator = new BotPlaceholderCoordinator(this);
-            if (placeholderCoordinator.register()) {
-                getLogger().info("Placeholder registrati con successo!");
-                placeholderRegistered = true;
-                MinecraftBotLogging.logComponentReady(getLogger(), "PlaceholderAPI", "registered");
+            List<String> registeredListeners = new ArrayList<>();
+            registerListener(startup, registeredListeners, new PlayerCheckListener(this));
+            registerListener(startup, registeredListeners, new PlayerTagListener(this));
+            startup.markListeners(registeredListeners);
+            startup.ready("Hooks", "registrations completed");
+            startup.detail("Commands", joinOrNone(registeredCommands));
+            startup.detail("Listeners", joinOrNone(registeredListeners));
+            startup.completePhase("hooks registered");
+
+            startup.beginPhase(6, "PAPI", "Placeholder Integration");
+            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+                this.placeholderCoordinator = new BotPlaceholderCoordinator(this);
+                boolean placeholderRegistered = placeholderCoordinator.register();
+                List<String> placeholderKeys = placeholderCoordinator.getRegisteredPlaceholderKeys();
+
+                startup.markPlaceholders(true, placeholderRegistered, placeholderKeys);
+                startup.detail("Namespace", placeholderCoordinator.getIdentifier());
+                startup.detail("Placeholders", placeholderKeys.size() + " -> " + joinOrNone(placeholderKeys));
+
+                if (placeholderRegistered) {
+                    startup.ready("PlaceholderAPI", "hook attached");
+                } else {
+                    startup.warn("PlaceholderAPI", "hook failed");
+                }
             } else {
-                getLogger().warning("Errore nella registrazione dei placeholder!");
-                MinecraftBotLogging.logComponentReady(getLogger(), "PlaceholderAPI", "present but registration failed");
+                startup.markPlaceholders(false, false, List.of());
+                startup.warn("PlaceholderAPI", "not found");
             }
-        } else {
-            getLogger().warning("PlaceholderAPI non trovato! I placeholder non saranno disponibili.");
-            MinecraftBotLogging.logComponentReady(getLogger(), "PlaceholderAPI", "not present");
-        }
+            startup.completePhase("placeholder phase completed");
 
-        MinecraftBotLogging.logStartupPhase(getLogger(), 7, "API Registration");
-        MinecraftBotAPI.register(api);
-        MinecraftBotLogging.logApiRegistered(getLogger(), api);
-        getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
-        MinecraftBotLogging.logBootstrapCompleted(this, placeholderPresent, placeholderRegistered);
+            startup.beginPhase(7, "Boot", "Finalize");
+            MinecraftBotAPI.register(api);
+            startup.markApiPublished();
+            MinecraftBotLogging.logApiRegistered(getLogger(), api);
+            getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
+            startup.ready("Event", MinecraftBotReadyEvent.class.getSimpleName() + " fired");
+            startup.completePhase("enable sequence completed");
+
+            startup.completeBootstrap();
+            MinecraftBotLogging.schedulePostEnableDiagnostics(this, startup);
+        } catch (Throwable error) {
+            startup.fail(error);
+            cleanupRuntimeState();
+            throw error;
+        }
     }
 
     @Override
     public void onDisable() {
-        MinecraftBotAPI.unregister();
-
-        if (placeholderCoordinator != null) {
-            placeholderCoordinator.unregister();
-        }
-        if (botManager != null) {
-            botManager.despawnAll();
-        }
-        if (playerOptions != null) {
-            playerOptions.clear();
-        }
+        cleanupRuntimeState();
+        instance = null;
     }
 
     public ITrainingBot getBot(Player player) {
@@ -151,5 +176,68 @@ public final class MinecraftBot extends JavaPlugin {
 
     public static MinecraftBot getInstance() {
         return instance;
+    }
+
+    private void registerCommand(MinecraftBotLogging.StartupSession startup,
+                                 List<String> registeredCommands,
+                                 String name,
+                                 CommandExecutor executor) {
+        registerCommand(startup, registeredCommands, name, executor, null);
+    }
+
+    private void registerCommand(MinecraftBotLogging.StartupSession startup,
+                                 List<String> registeredCommands,
+                                 String name,
+                                 CommandExecutor executor,
+                                 TabCompleter tabCompleter) {
+        PluginCommand command = getCommand(name);
+        if (command == null) {
+            startup.warn("Command /" + name, "missing from plugin.yml");
+            return;
+        }
+
+        command.setExecutor(executor);
+        if (tabCompleter != null) {
+            command.setTabCompleter(tabCompleter);
+        }
+
+        registeredCommands.add(name);
+    }
+
+    private void registerListener(MinecraftBotLogging.StartupSession startup,
+                                  List<String> registeredListeners,
+                                  Listener listener) {
+        getServer().getPluginManager().registerEvents(listener, this);
+        registeredListeners.add(listener.getClass().getSimpleName());
+    }
+
+    private void cleanupRuntimeState() {
+        MinecraftBotAPI.unregister();
+
+        if (placeholderCoordinator != null) {
+            placeholderCoordinator.unregister();
+            placeholderCoordinator = null;
+        }
+        if (botManager != null) {
+            botManager.despawnAll();
+            botManager = null;
+        }
+        if (botRegistry != null) {
+            botRegistry.clear();
+            botRegistry = null;
+        }
+        if (playerOptions != null) {
+            playerOptions.clear();
+            playerOptions = null;
+        }
+        targetingService = null;
+    }
+
+    private String joinOrNone(Iterable<String> values) {
+        if (values == null) {
+            return "none";
+        }
+        String joined = String.join(", ", values);
+        return joined.isBlank() ? "none" : joined;
     }
 }

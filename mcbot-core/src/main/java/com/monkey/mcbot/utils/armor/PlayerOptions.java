@@ -26,4 +26,8 @@ public class PlayerOptions {
         this.options.clear();
     }
 
+    public int size() {
+        return this.options.size();
+    }
+
 }

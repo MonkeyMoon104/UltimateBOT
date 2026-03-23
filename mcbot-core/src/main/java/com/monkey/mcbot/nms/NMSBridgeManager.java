@@ -10,7 +10,10 @@ public class NMSBridgeManager {
     private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11";
 
     public static void init() {
-        Logger logger = Bukkit.getLogger();
+        init(Bukkit.getLogger());
+    }
+
+    public static void init(Logger logger) {
         String version = Bukkit.getMinecraftVersion();
 
         String className = switch (version) {
@@ -42,6 +45,10 @@ public class NMSBridgeManager {
             MinecraftBotLogging.logNmsInitFailure(logger, className, e);
             throw new RuntimeException("[MinecraftBot] Impossibile caricare NMS Bridge", e);
         }
+    }
+
+    public static String getSupportedVersions() {
+        return SUPPORTED_VERSIONS;
     }
 
     public static INMSBridge get() {
