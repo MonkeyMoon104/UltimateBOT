@@ -40,7 +40,7 @@ public class BotEventCommand implements CommandExecutor {
         }
 
         if (hasNormalBotSpawned(player)) {
-            String msg = plugin.getConfig().getString("messages.must-despawn-normal-bot", "&câŒ Hai giÃ  un bot normale spawnato! Despawnalo prima di gestire il bot event.");
+            String msg = plugin.getConfig().getString("messages.must-despawn-normal-bot");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }

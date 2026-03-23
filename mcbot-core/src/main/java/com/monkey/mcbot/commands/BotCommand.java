@@ -41,7 +41,7 @@ public class BotCommand implements CommandExecutor {
         }
 
         if (isEventBotActive()) {
-            String msg = plugin.getConfig().getString("messages.event-bot-active-block-normal", "&câŒ C'Ã¨ un bot event attivo! Non puoi spawnare bot normali durante un evento.");
+            String msg = plugin.getConfig().getString("messages.event-bot-active-block-normal", "&cC'è già un bot event attivo! Non puoi spawnare bot normali durante un evento.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }

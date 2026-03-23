@@ -79,7 +79,7 @@ public class SpawnItem extends AbstractItem {
 
         if (options.getBotType() == BotType.EVENT) {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.event-bot-already-active", "&câŒ C'Ã¨ giÃ  un bot event attivo! Despawnalo prima");
+                String msg = training.getConfig().getString("messages.event-bot-already-active");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -89,7 +89,7 @@ public class SpawnItem extends AbstractItem {
         }
         else {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event", "&câŒ Non puoi spawnare un bot normale mentre c'Ã¨ un bot event attivo!");
+                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
