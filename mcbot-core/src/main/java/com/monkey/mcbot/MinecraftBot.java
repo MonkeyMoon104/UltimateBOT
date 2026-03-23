@@ -95,7 +95,7 @@ public final class MinecraftBot extends JavaPlugin {
 
             BotTeamAllyCommand botTeamAllyCommand = new BotTeamAllyCommand(this);
             registerCommand(startup, registeredCommands, "botteamally", botTeamAllyCommand, botTeamAllyCommand);
-            registerCommand(startup, registeredCommands, "sbreload", new ReloadCommand(this));
+            registerCommand(startup, registeredCommands, "mcbreload", new ReloadCommand(this));
             startup.markCommands(registeredCommands);
 
             List<String> registeredListeners = new ArrayList<>();
