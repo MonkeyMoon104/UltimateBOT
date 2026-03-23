@@ -11,13 +11,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
+import xyz.xenondevs.invui.animation.impl.SplitSequentialAnimation;
 import xyz.xenondevs.invui.gui.Gui;
+import xyz.xenondevs.invui.gui.ScrollGui;
+import xyz.xenondevs.invui.gui.SlotElement;
+import xyz.xenondevs.invui.gui.structure.Markers;
+import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
+import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -34,22 +40,50 @@ public class TargetsTab {
     }
 
     public Gui build(Material borderMaterial, String borderName) {
-        Gui gui = Gui.normal()
+        List<UUID> targets = resolveTargets();
+
+        List<Item> items = new ArrayList<>();
+        for (UUID targetUUID : targets) {
+            items.add(new TargetHeadItem(targetUUID));
+        }
+
+        ScrollGui<Item> gui = ScrollGui.items()
                 .setStructure(
                         "# # # # # # # #",
+                        "# t t t t t t u",
                         "# t t t t t t #",
-                        "# t t t t t t #",
-                        "# t t t t t t #",
+                        "# t t t t t t d",
                         "# # # # # # # #"
                 )
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
+                .addIngredient('t', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
+                .addIngredient('u', new ScrollUpItem())
+                .addIngredient('d', new ScrollDownItem())
+                .setBackground(createEmptyBackground())
+                .setContent(items)
                 .build();
 
-        for (UUID targetUUID : resolveTargets()) {
-            gui.addItems(new TargetHeadItem(targetUUID));
+        if (!items.isEmpty()) {
+            gui.playAnimation(
+                    new SplitSequentialAnimation(3, false),
+                    slotElement -> {
+                        if (!(slotElement instanceof SlotElement.ItemSlotElement itemSlot)) return false;
+                        return itemSlot.getItem() instanceof TargetHeadItem;
+                    }
+            );
         }
 
         return gui;
+    }
+
+    private ItemProvider createEmptyBackground() {
+        ItemStack glass = new ItemStack(Material.WHITE_STAINED_GLASS_PANE);
+        ItemMeta meta = glass.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(" ");
+            glass.setItemMeta(meta);
+        }
+        return new ItemBuilder(glass);
     }
 
     private List<UUID> resolveTargets() {
@@ -90,21 +124,59 @@ public class TargetsTab {
     }
 
     private boolean isProtectedOwner(UUID candidateUUID, BotOptions options) {
-        if (candidateUUID == null || options == null) {
-            return false;
-        }
+        if (candidateUUID == null || options == null) return false;
 
         BotType botType = options.getBotType();
         if (botType == BotType.ALLY) {
             UUID ownerUUID = options.getOwnerUUID();
             return ownerUUID != null && ownerUUID.equals(candidateUUID);
         }
-
         if (botType == BotType.TEAM_ALLY) {
             return options.getTeamOwnerUUIDs().contains(candidateUUID);
         }
-
         return false;
+    }
+
+    private class ScrollUpItem extends ScrollItem {
+
+        public ScrollUpItem() {
+            super(-1);
+        }
+
+        @Override
+        public ItemProvider getItemProvider(ScrollGui<?> gui) {
+            String name = context.getTraining().getConfig()
+                    .getString("gui.targets-tab.scroll-up.name", "&aScorri su");
+            ItemBuilder builder = new ItemBuilder(Material.ARROW)
+                    .setDisplayName(ChatColorUtils.translate(name));
+            if (!gui.canScroll(-1)) {
+                String cantScroll = context.getTraining().getConfig()
+                        .getString("gui.targets-tab.scroll-up.cant-scroll", "&7Sei già in cima");
+                builder.addLoreLines(ChatColorUtils.translate(cantScroll));
+            }
+            return builder;
+        }
+    }
+
+    private class ScrollDownItem extends ScrollItem {
+
+        public ScrollDownItem() {
+            super(1);
+        }
+
+        @Override
+        public ItemProvider getItemProvider(ScrollGui<?> gui) {
+            String name = context.getTraining().getConfig()
+                    .getString("gui.targets-tab.scroll-down.name", "&aScorri giù");
+            ItemBuilder builder = new ItemBuilder(Material.ARROW)
+                    .setDisplayName(ChatColorUtils.translate(name));
+            if (!gui.canScroll(1)) {
+                String cantScroll = context.getTraining().getConfig()
+                        .getString("gui.targets-tab.scroll-down.cant-scroll", "&7Sei già in fondo");
+                builder.addLoreLines(ChatColorUtils.translate(cantScroll));
+            }
+            return builder;
+        }
     }
 
     private class TargetHeadItem extends AbstractItem {
@@ -121,7 +193,9 @@ public class TargetsTab {
             SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(targetUUID);
-            String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : targetUUID.toString();
+            String playerName = offlinePlayer.getName() != null
+                    ? offlinePlayer.getName()
+                    : targetUUID.toString();
 
             if (meta != null) {
                 meta.setOwningPlayer(offlinePlayer);
@@ -132,14 +206,14 @@ public class TargetsTab {
                         nameTemplate.replace("%player%", playerName)
                                 .replace("%uuid%", targetUUID.toString())));
 
-                List<String> loreLines = context.getTraining().getConfig().getStringList("gui.targets-tab.head.lore");
+                List<String> loreLines = context.getTraining().getConfig()
+                        .getStringList("gui.targets-tab.head.lore");
                 List<String> lore = loreLines.stream()
                         .map(line -> ChatColorUtils.translate(
                                 line.replace("%player%", playerName)
                                         .replace("%uuid%", targetUUID.toString())))
                         .toList();
                 meta.setLore(lore);
-
                 skull.setItemMeta(meta);
             }
 

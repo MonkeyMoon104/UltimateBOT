@@ -86,10 +86,10 @@ gui:
   tab-item:
     tab-0:
       selected:
-        material: "GLOWSTONE_DUST"
+        material: "SHIELD"
         name: "&eKit &7(selezionato)"
       unselected:
-        material: "GUNPOWDER"
+        material: "SHIELD"
         name: "&7Kit"
     tab-1:
       selected:
@@ -100,20 +100,19 @@ gui:
         name: "&7Rank"
     tab-2:
       selected:
-        material: "GLOWSTONE_DUST"
+        material: "DRAGON_HEAD"
         name: "&eOwners &7(selezionato)"
       unselected:
-        material: "GUNPOWDER"
+        material: "DRAGON_HEAD"
         name: "&7Owners"
     tab-3:
       selected:
-        material: "GLOWSTONE_DUST"
+        material: "TARGET"
         name: "&eTargets &7(selezionato)"
       unselected:
-        material: "GUNPOWDER"
+        material: "TARGET"
         name: "&7Targets"
 
-  # Tab 2 — testa di ogni owner del bot
   owners-tab:
     head:
       name: "&e%player%"
@@ -121,8 +120,13 @@ gui:
         - "&7Proprietario del bot"
         - ""
         - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScorri su"
+      cant-scroll: "&7Sei già in cima"
+    scroll-down:
+      name: "&aScorri giù"
+      cant-scroll: "&7Sei già in fondo"
 
-  # Tab 3 — testa di ogni target del bot
   targets-tab:
     head:
       name: "&c%player%"
@@ -130,6 +134,12 @@ gui:
         - "&7Target del bot"
         - ""
         - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScorri su"
+      cant-scroll: "&7Sei già in cima"
+    scroll-down:
+      name: "&aScorri giù"
+      cant-scroll: "&7Sei già in fondo"
 
   default-armor:
     helmet: NETHERITE
