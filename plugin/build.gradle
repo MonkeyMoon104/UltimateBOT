@@ -1,4 +1,49 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.8.2'
+    }
+}
+
+import proguard.gradle.ProGuardTask
+
 apply plugin: 'com.gradleup.shadow'
+
+def shadowJarTask = tasks.named('shadowJar')
+def unobfuscatedJarFile = layout.buildDirectory.file('libs/MinecraftBot-unobfuscated.jar')
+def obfuscatedJarFile = layout.buildDirectory.file('libs/MinecraftBot.jar')
+def legacyObfuscatedJarFile = layout.buildDirectory.file('libs/MinecraftBot-obf.jar')
+def proguardMappingFile = layout.buildDirectory.file('reports/proguard/mapping.txt')
+def javaToolchainService = extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService)
+def proguardJdkHome = javaToolchainService.launcherFor {
+    languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(21)
+}.get().metadata.installationPath.asFile
+def javaBaseJmod = new File(proguardJdkHome, 'jmods/java.base.jmod')
+def javaLoggingJmod = new File(proguardJdkHome, 'jmods/java.logging.jmod')
+def externalClasspathFor = { Project dependencyProject ->
+    dependencyProject.sourceSets.main.compileClasspath.filter { candidate ->
+        candidate.exists() && !candidate.toPath().startsWith(rootDir.toPath())
+    }
+}
+def proguardLibraries = files(
+    javaBaseJmod,
+    javaLoggingJmod,
+    externalClasspathFor(project(':mcbot-core')),
+    externalClasspathFor(project(':versions:v1_21_4')),
+    externalClasspathFor(project(':versions:v1_21_5')),
+    externalClasspathFor(project(':versions:v1_21_6')),
+    externalClasspathFor(project(':versions:v1_21_7')),
+    externalClasspathFor(project(':versions:v1_21_8')),
+    externalClasspathFor(project(':versions:v1_21_9')),
+    externalClasspathFor(project(':versions:v1_21_10')),
+    externalClasspathFor(project(':versions:v1_21_11'))
+)
+
+if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
+    throw new GradleException("ProGuard requires a Java 21 JDK with jmods. Resolved toolchain: ${proguardJdkHome}")
+}
 
 dependencies {
     implementation project(':mcbot-core')
@@ -13,10 +58,27 @@ dependencies {
 }
 
 shadowJar {
-    archiveBaseName.set('MinecraftBot')
-    archiveVersion.set('')
-    archiveClassifier.set('')
+    archiveFileName.set('MinecraftBot-unobfuscated.jar')
     mergeServiceFiles()
+}
+
+tasks.register('obfuscatePluginJar', ProGuardTask) {
+    dependsOn shadowJarTask
+
+    doFirst {
+        delete legacyObfuscatedJarFile.get().asFile
+    }
+
+    injars shadowJarTask.get().archiveFile.get().asFile
+    outjars obfuscatedJarFile.get().asFile
+
+    configuration file("$projectDir/proguard.pro")
+    libraryjars proguardLibraries
+    printmapping proguardMappingFile.get().asFile
+}
+
+shadowJarTask.configure {
+    finalizedBy tasks.named('obfuscatePluginJar')
 }
 
 build.dependsOn shadowJar
