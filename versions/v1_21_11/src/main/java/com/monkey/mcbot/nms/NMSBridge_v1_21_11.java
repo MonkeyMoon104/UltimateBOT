@@ -169,13 +169,15 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     @Override
     public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
         try {
-            var server = ((CraftServer) Bukkit.getServer()).getHandle().getServer();
-            var method = server.getClass().getSuperclass().getDeclaredMethod("getProfileCache");
-            method.setAccessible(true);
-            var cache = method.invoke(server);
-            if (cache != null) {
-                cache.getClass().getMethod("add", com.mojang.authlib.GameProfile.class)
-                        .invoke(cache, bot.getGameProfile());
+            var server = ((CraftServer) Bukkit.getServer()).getServer();
+            var services = server.services();
+            var profile = bot.getGameProfile();
+
+            services.nameToIdCache().add(new net.minecraft.server.players.NameAndId(profile));
+
+            var paperServices = services.paper();
+            if (paperServices != null && paperServices.filledProfileCache() != null) {
+                paperServices.filledProfileCache().add(profile);
             }
         } catch (Exception e) {
         }

@@ -53,7 +53,7 @@ messages:
     team-spawned-notify: "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: &e%playerlist%"
 
 bot:
-  name: "MincraftBot"
+  name: "MinecraftBot"
   totem-finish: "[%botname%] Ha finito i totem"
   default-totem-count: -1
   max-totem-normal: 37
