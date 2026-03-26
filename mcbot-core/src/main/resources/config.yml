@@ -1,60 +1,62 @@
 messages:
-  spawn-bot: "&aBot generato con le impostazioni selezionate!"
-  dead-bot-msg: "&aHai ucciso il bot!"
-  dead-bot-event-msg: "&c[&eEVENT&c] &eIl bot e stato ucciso da &b{player}"
-  despawn-bot: "&cBot rimosso!"
-  save-changes: "&aModifiche salvate!"
-  reload-no-permission: "&cNon hai il permesso di usare questo comando"
-  reload-usage: "&eUtilizzo: /sbreload <config|bot|maps|all>"
-  reload-config: "&aConfig ricaricata con successo"
-  reload-bot: "&aTutti i bot attivi sono stati rimossi"
-  reload-maps: "&aTutte le mappe dei player sono state pulite"
-  reload-all: "&aConfigurazione, bot e mappe sono state ricaricate/pulite"
-  reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
-  combat-need-follow: "&cFollow deve essere ON per abilitare il combat del bot"
-  bot-blocked-world: "&cNon puoi qui!"
-  dead-bot-message: "{player} was killed by his Bot"
-  event-bot-already-active: "&cX C'e gia un bot event attivo! Despawnalo prima"
-  all-normal-bots-despawned: "&eTutti i bot normali sono stati despawnati per l'evento"
-  cannot-spawn-normal-during-event: "&cX Non puoi spawnare un bot normale mentre c'e un bot event attivo!"
-  event-bot-active-block-normal: "&cX C'e un bot event attivo! Non puoi spawnare bot normali durante un evento"
-  must-despawn-normal-bot: "&cX Hai gia un bot normale spawnato! Despawnalo prima di gestire il bot event"
-  armor-locked: "&cArmor bloccata: non modificabile per questo bot."
-  blast-locked: "&cBlast protection bloccata: non modificabile per questo bot."
-  combat-locked: "&cCombat bloccato: non modificabile per questo bot."
-  follow-locked: "&cFollow bloccato: non modificabile per questo bot."
-  follow-lock-combat: "&cNon puoi disattivare follow: combat e' bloccato su ON."
-  totem-locked: "&cTotem bloccato: non modificabile per questo bot."
-  rank-locked: "&cRank bloccato: non modificabile per questo bot."
+  spawn-bot: "&aBot spawned with the selected settings!"
+  dead-bot-msg: "&aYou killed the bot!"
+  dead-bot-event-msg: "&c[&eEVENT&c] &eThe bot was killed by &b{player}"
+  despawn-bot: "&cBot removed!"
+  save-changes: "&aChanges saved!"
+  reload-no-permission: "&cYou do not have permission to use this command"
+  reload-usage: "&eUsage: /sbreload <config|bot|maps|all>"
+  reload-config: "&aConfig reloaded successfully"
+  reload-bot: "&aAll active bots have been removed"
+  reload-maps: "&aAll player maps have been cleared"
+  reload-all: "&aConfig, bots, and maps have been reloaded/cleared"
+  reload-invalid-option: "&cInvalid option. Use: config, bot, maps, all"
+  combat-need-follow: "&cFollow must be ON to enable bot combat"
+  bot-blocked-world: "&cYou cannot use this here!"
+  dead-bot-message: "{player} was killed by their Bot"
+  event-bot-already-active: "&cX There is already an active event bot! Despawn it first"
+  all-normal-bots-despawned: "&eAll normal bots have been despawned for the event"
+  cannot-spawn-normal-during-event: "&cX You cannot spawn a normal bot while an event bot is active!"
+  event-bot-active-block-normal: "&cX An event bot is active! You cannot spawn normal bots during an event"
+  must-despawn-normal-bot: "&cX You already have a normal bot spawned! Despawn it before managing the event bot"
+  cannot-open-bot-while-ally: "&cYou already have an ally bot spawned. Despawn it before using /bot."
+  cannot-open-botally-while-single: "&cYou already have a single bot spawned. Despawn it before using /botally."
+  armor-locked: "&cArmor is locked: it cannot be modified for this bot."
+  blast-locked: "&cBlast protection is locked: it cannot be modified for this bot."
+  combat-locked: "&cCombat is locked: it cannot be modified for this bot."
+  follow-locked: "&cFollow is locked: it cannot be modified for this bot."
+  follow-lock-combat: "&cYou cannot disable follow: combat is locked to ON."
+  totem-locked: "&cTotems are locked: they cannot be modified for this bot."
+  rank-locked: "&cRank is locked: it cannot be modified for this bot."
 
   ally:
-    pre-range-alert: "&e%player% si sta avvicinando, monitorando la posizione..."
-    range-alert: "&c%player% rilevato come minaccia, avviando azione di bombardamento"
+    pre-range-alert: "&e%player% is getting closer, monitoring position..."
+    range-alert: "&c%player% detected as a threat, starting bombing action"
 
   team-ally:
-    pre-range-alert: "&e%player% si sta avvicinando al team, monitorando la posizione..."
-    range-alert: "&c%player% rilevato come minaccia al team, avviando azione di bombardamento"
-    create-usage: "&eUso: /botteamally create <owner1> <owner2> [owner3 ...]"
-    create-min-owners: "&cDevi specificare almeno 2 owner validi online."
-    gui-opened: "&aAperta GUI botteamally con owner impostati."
-    blocked-by-single: "&cHai gia un bot single spawnato. Despawnalo prima di usare /botteamally."
-    blocked-by-ally: "&cHai gia un bot ally spawnato. Despawnalo prima di usare /botteamally."
-    no-active-teamally: "&cNon hai un bot team ally attivo."
-    addowners-usage: "&eUso: /botteamally addowners <player1> [player2 ...]"
-    removeowners-usage: "&eUso: /botteamally removeowners <player1> [player2 ...]"
-    invalid-owner: "&cPlayer non valido/offline: &e%player%"
-    owner-already-present: "&e%player% &7e gia owner del team ally."
-    owner-not-present: "&e%player% &7non e owner del team ally."
-    owner-added: "&aAggiunto owner: &e%player%"
-    owner-removed: "&aRimosso owner: &e%player%"
-    min-owners-reached: "&cNon puoi scendere sotto 2 owner."
-    duplicate-owner: "&cOwner duplicato nel comando: &e%player%"
-    owner-has-active-bot: "&c%player% ha gia un bot attivo (%bottype%). Despawnalo prima."
-    team-spawned-notify: "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: &e%playerlist%"
+    pre-range-alert: "&e%player% is getting closer to the team, monitoring position..."
+    range-alert: "&c%player% detected as a threat to the team, starting bombing action"
+    create-usage: "&eUsage: /botteamally create <owner1> <owner2> [owner3 ...]"
+    create-min-owners: "&cYou must specify at least 2 valid online owners."
+    gui-opened: "&aOpened the botteamally GUI with the selected owners."
+    blocked-by-single: "&cYou already have a single bot spawned. Despawn it before using /botteamally."
+    blocked-by-ally: "&cYou already have an ally bot spawned. Despawn it before using /botteamally."
+    no-active-teamally: "&cYou do not have an active team ally bot."
+    addowners-usage: "&eUsage: /botteamally addowners <player1> [player2 ...]"
+    removeowners-usage: "&eUsage: /botteamally removeowners <player1> [player2 ...]"
+    invalid-owner: "&cInvalid/offline player: &e%player%"
+    owner-already-present: "&e%player% &7is already an owner of the team ally bot."
+    owner-not-present: "&e%player% &7is not an owner of the team ally bot."
+    owner-added: "&aAdded owner: &e%player%"
+    owner-removed: "&aRemoved owner: &e%player%"
+    min-owners-reached: "&cYou cannot go below 2 owners."
+    duplicate-owner: "&cDuplicate owner in command: &e%player%"
+    owner-has-active-bot: "&c%player% already has an active bot (%bottype%). Despawn it first."
+    team-spawned-notify: "&aAllied bot spawned by %playerowner% for the team with these owners: &e%playerlist%"
 
 bot:
   name: "MinecraftBot"
-  totem-finish: "[%botname%] Ha finito i totem"
+  totem-finish: "[%botname%] Ran out of totems"
   default-totem-count: -1
   max-totem-normal: 37
   max-totem-event: 74
@@ -87,28 +89,28 @@ gui:
     tab-0:
       selected:
         material: "SHIELD"
-        name: "&eKit &7(selezionato)"
+        name: "&eKit &7(selected)"
       unselected:
         material: "SHIELD"
         name: "&7Kit"
     tab-1:
       selected:
         material: "GLOWSTONE_DUST"
-        name: "&eRank &7(selezionato)"
+        name: "&eRank &7(selected)"
       unselected:
         material: "GUNPOWDER"
         name: "&7Rank"
     tab-2:
       selected:
         material: "DRAGON_HEAD"
-        name: "&eOwners &7(selezionato)"
+        name: "&eOwners &7(selected)"
       unselected:
         material: "DRAGON_HEAD"
         name: "&7Owners"
     tab-3:
       selected:
         material: "TARGET"
-        name: "&eTargets &7(selezionato)"
+        name: "&eTargets &7(selected)"
       unselected:
         material: "TARGET"
         name: "&7Targets"
@@ -117,29 +119,29 @@ gui:
     head:
       name: "&e%player%"
       lore:
-        - "&7Proprietario del bot"
+        - "&7Bot owner"
         - ""
         - "&8UUID: &7%uuid%"
     scroll-up:
-      name: "&aScorri su"
-      cant-scroll: "&7Sei già in cima"
+      name: "&aScroll up"
+      cant-scroll: "&7You are already at the top"
     scroll-down:
-      name: "&aScorri giù"
-      cant-scroll: "&7Sei già in fondo"
+      name: "&aScroll down"
+      cant-scroll: "&7You are already at the bottom"
 
   targets-tab:
     head:
       name: "&c%player%"
       lore:
-        - "&7Target del bot"
+        - "&7Bot target"
         - ""
         - "&8UUID: &7%uuid%"
     scroll-up:
-      name: "&aScorri su"
-      cant-scroll: "&7Sei già in cima"
+      name: "&aScroll up"
+      cant-scroll: "&7You are already at the top"
     scroll-down:
-      name: "&aScorri giù"
-      cant-scroll: "&7Sei già in fondo"
+      name: "&aScroll down"
+      cant-scroll: "&7You are already at the bottom"
 
   default-armor:
     helmet: NETHERITE
@@ -151,71 +153,71 @@ gui:
     blast-disabled-text: "&cOFF"
     lore:
       set-type:
-        - "&7Tipo: &e%type%"
+        - "&7Type: &e%type%"
         - "&7Blast Protection: %blast_state%"
         - ""
-        - "&eClick sinistro: &7cambia il pezzo d'armatura"
-        - "&eClick destro: &7attiva/disattiva il blast"
+        - "&eLeft click: &7change the armor piece"
+        - "&eRight click: &7toggle blast"
 
   follow-button:
-    name: "&bAttiva/Disattiva Segui"
+    name: "&bToggle Follow"
     material: "LEAD"
     lore:
-      - "&7Stato: &e%type%"
+      - "&7Status: &e%type%"
       - ""
-      - "&eClicca per attivare/disattivare il follow"
+      - "&eClick to toggle follow"
 
   spawn-button:
-    name: "&aGenera Bot"
+    name: "&aSpawn Bot"
     material: "SPAWNER"
     lore:
-      - "&7Genera il tuo bot di allenamento"
-      - "&7con la configurazione selezionata"
+      - "&7Spawn your practice bot"
+      - "&7with the selected configuration"
       - ""
-      - "&eClicca per generare!"
+      - "&eClick to spawn!"
 
   despawn-button:
-    name: "&cRimuovi Bot"
+    name: "&cRemove Bot"
     material: "BARRIER"
     lore:
-      - "&7Rimuovi il tuo bot di allenamento"
-      - "&7dal mondo"
+      - "&7Remove your practice bot"
+      - "&7from the world"
       - ""
-      - "&cClicca per rimuovere!"
+      - "&cClick to remove!"
 
   save-button:
-    name: "&aSalva Modifiche"
+    name: "&aSave Changes"
     material: "GREEN_WOOL"
     lore:
-      - "&7Salva le impostazioni attuali"
-      - "&7sul bot attivo"
+      - "&7Save the current settings"
+      - "&7to the active bot"
       - ""
-      - "&aClicca per salvare!"
+      - "&aClick to save!"
 
   totem-button:
-    name: "&eConteggio Totem"
+    name: "&eTotem Count"
     material: "TOTEM_OF_UNDYING"
-    unlimited-text: "Illimitati"
+    unlimited-text: "Unlimited"
     lore:
-      - "&7Conteggio attuale: &a%count%"
+      - "&7Current count: &a%count%"
       - ""
-      - "&eClick sinistro: &a+1"
-      - "&eClick destro: &c-1"
-      - "&7(-1 = Totem illimitati)"
+      - "&eLeft click: &a+1"
+      - "&eRight click: &c-1"
+      - "&7(-1 = Unlimited totems)"
 
   teleport-button:
-    name: "&5Tippa bot"
+    name: "&5Teleport Bot"
     material: "ENDER_PEARL"
     lore:
-      - "&dTippa il bot alla tua posizione"
+      - "&dTeleport the bot to your location"
 
   combat-button:
-    name: "&bAttiva/Disattiva Combat"
+    name: "&bToggle Combat"
     material: "NETHERITE_SWORD"
     lore:
-      - "&7Stato: &e%type%"
+      - "&7Status: &e%type%"
       - ""
-      - "&eClicca per attivare/disattivare il combat"
+      - "&eClick to toggle combat"
 
   rank-button:
     name: "&bRank"
@@ -230,4 +232,4 @@ gui:
       - ""
       - "%ranks%"
       - ""
-      - "&eClicca per aumentare/diminuire il rank"
+      - "&eClick to increase/decrease the rank"
