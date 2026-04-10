@@ -73,7 +73,7 @@ public class SpawnItem extends AbstractItem {
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
-            player.sendMessage(ChatColorUtils.translate(training.getConfig().getString("messages.despawn-bot", "&cBot rimosso!")));
+            player.sendMessage(ChatColorUtils.translate(training.getConfig().getString("messages.despawn-bot", "&cBot removed!")));
             return;
         }
 
@@ -84,7 +84,7 @@ public class SpawnItem extends AbstractItem {
                 return;
             }
             training.getBotManager().despawnAll();
-            String msg = training.getConfig().getString("messages.all-normal-bots-despawned", "&eTutti i bot normali sono stati despawnati per l'evento");
+            String msg = training.getConfig().getString("messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event");
             player.sendMessage(ChatColorUtils.translate(msg));
         }
         else {
@@ -100,7 +100,7 @@ public class SpawnItem extends AbstractItem {
 
         boolean follow = options.isFollow();
         training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
-        String msg = training.getConfig().getString("messages.spawn-bot", "&aBot generato con le impostazioni selezionate!");
+        String msg = training.getConfig().getString("messages.spawn-bot", "&aBot spawned with the selected settings!");
         player.sendMessage(ChatColorUtils.translate(msg));
 
         if (options.getBotType() == BotType.TEAM_ALLY) {
@@ -135,7 +135,7 @@ public class SpawnItem extends AbstractItem {
     private void notifyTeamOwners(Player spawner) {
         String template = training.getConfig().getString(
                 "messages.team-ally.team-spawned-notify",
-                "&aBot alleato spawnato da %playerowner% per il team con i seguenti proprietari: %playerlist%"
+                "&aAllied bot spawned by %playerowner% for the team with these owners: %playerlist%"
         );
 
         List<String> ownerNames = new ArrayList<>();

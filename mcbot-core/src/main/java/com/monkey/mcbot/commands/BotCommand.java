@@ -35,7 +35,7 @@ public class BotCommand implements CommandExecutor {
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cNon puoi qui!");
+            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -43,7 +43,7 @@ public class BotCommand implements CommandExecutor {
         if (isEventBotActive()) {
             String msg = plugin.getConfig().getString(
                     "messages.event-bot-active-block-normal",
-                    "&cX C'e un bot event attivo! Non puoi spawnare bot normali durante un evento."
+                    "&cX An event bot is active! You cannot spawn normal bots during an event."
             );
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
@@ -75,10 +75,10 @@ public class BotCommand implements CommandExecutor {
         if (activeType == BotType.ALLY) {
             return plugin.getConfig().getString(
                     "messages.cannot-open-bot-while-ally",
-                    "&cHai gia un bot ally spawnato. Despawnalo prima di usare /bot."
+                    "&cYou already have an ally bot spawned. Despawn it before using /bot."
             );
         }
 
-        return "&cHai gia un bot team ally attivo. Despawnalo prima di usare /bot.";
+        return "&cYou already have an active team ally bot. Despawn it before using /bot.";
     }
 }

@@ -53,7 +53,7 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isLeftClick()) {
             if (!options.isChangeableCombat()) {
-                String msg = training.getConfig().getString("messages.combat-locked", "&cCombat bloccato: non modificabile per questo bot.");
+                String msg = training.getConfig().getString("messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -62,7 +62,7 @@ public class CombatItem extends AbstractItem {
             boolean newStatus = !oldStatus;
 
             if (newStatus && !options.isFollow()) {
-                String msg = training.getConfig().getString("combat-need-follow", "&cFollow deve essere ON per abilitare il combat del bot");
+                String msg = training.getConfig().getString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -91,7 +91,7 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isRightClick()) {
             if (!options.isChangeableRank()) {
-                String msg = training.getConfig().getString("messages.rank-locked", "&cRank bloccato: non modificabile per questo bot.");
+                String msg = training.getConfig().getString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -102,7 +102,7 @@ public class CombatItem extends AbstractItem {
 
             training.getBotManager().setBotRank(managedOwnerUUID, newRank);
 
-            player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.name()));
+            player.sendMessage(ChatColorUtils.translate("&aRank set to &e" + newRank.name()));
         }
 
         notifyWindows();

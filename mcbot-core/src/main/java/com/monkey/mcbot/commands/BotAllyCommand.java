@@ -35,7 +35,7 @@ public class BotAllyCommand implements CommandExecutor {
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cNon puoi qui!");
+            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -72,10 +72,10 @@ public class BotAllyCommand implements CommandExecutor {
         if (activeType == BotType.SINGLE) {
             return plugin.getConfig().getString(
                     "messages.cannot-open-botally-while-single",
-                    "&cHai gia un bot single spawnato. Despawnalo prima di usare /botally."
+                    "&cYou already have a single bot spawned. Despawn it before using /botally."
             );
         }
 
-        return "&cHai gia un bot team ally attivo. Despawnalo prima di usare /botally.";
+        return "&cYou already have an active team ally bot. Despawn it before using /botally.";
     }
 }

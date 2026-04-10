@@ -78,7 +78,7 @@ public class ArmorItem extends AbstractItem {
 
     private void handleArmorCycleClick(Player player) {
         if (!options.isChangeableArmor()) {
-            String msg = training.getConfig().getString("messages.armor-locked", "&cArmor bloccata: non modificabile per questo bot.");
+            String msg = training.getConfig().getString("messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -96,7 +96,7 @@ public class ArmorItem extends AbstractItem {
 
     private void handleBlastToggleClick(Player player) {
         if (!options.isChangeableBlast()) {
-            String msg = training.getConfig().getString("messages.blast-locked", "&cBlast protection bloccata: non modificabile per questo bot.");
+            String msg = training.getConfig().getString("messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }

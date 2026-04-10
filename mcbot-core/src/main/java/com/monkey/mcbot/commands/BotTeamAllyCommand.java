@@ -40,7 +40,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cNon puoi qui!");
+            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }

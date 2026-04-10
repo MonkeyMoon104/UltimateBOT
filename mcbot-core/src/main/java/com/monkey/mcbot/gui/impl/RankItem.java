@@ -80,7 +80,7 @@ public class RankItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableRank()) {
-            String msg = training.getConfig().getString("messages.rank-locked", "&cRank bloccato: non modificabile per questo bot.");
+            String msg = training.getConfig().getString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -98,7 +98,7 @@ public class RankItem extends AbstractItem {
 
         training.getBotManager().setBotRank(resolveManagedOwnerUUID(player), newRank);
 
-        player.sendMessage(ChatColorUtils.translate("&aRank impostato su &e" + newRank.getSelectedName()));
+        player.sendMessage(ChatColorUtils.translate("&aRank set to &e" + newRank.getSelectedName()));
         notifyWindows();
     }
 
