@@ -7,7 +7,7 @@ messages:
   despawn-bot: "&cBot removed!"
   save-changes: "&aChanges saved!"
   reload-no-permission: "&cYou do not have permission to use this command"
-  reload-usage: "&eUsage: /sbreload <config|bot|maps|all>"
+  reload-usage: "&eUsage: /mcbreload <config|bot|maps|all>"
   reload-config: "&aConfig reloaded successfully"
   reload-bot: "&aAll active bots have been removed"
   reload-maps: "&aAll player maps have been cleared"
