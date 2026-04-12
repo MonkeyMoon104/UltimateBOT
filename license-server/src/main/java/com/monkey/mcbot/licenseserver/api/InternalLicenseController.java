@@ -69,6 +69,19 @@ public class InternalLicenseController {
         provisioningService.deleteLicense(id);
     }
 
+    @DeleteMapping("/{id}/activations/inactive")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void clearInactiveActivations(
+            @RequestHeader("X-Admin-Token") String adminToken,
+            @PathVariable UUID id) {
+        requireAdminToken(adminToken);
+        try {
+            provisioningService.clearInactiveActivations(id);
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
     @GetMapping
     public List<AdminLicenseSearchEntry> search(
             @RequestHeader("X-Admin-Token") String adminToken,

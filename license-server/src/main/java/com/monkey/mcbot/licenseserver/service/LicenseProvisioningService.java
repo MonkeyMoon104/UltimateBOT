@@ -2,12 +2,16 @@ package com.monkey.mcbot.licenseserver.service;
 
 import com.monkey.mcbot.licenseserver.api.dto.AdminCreateLicenseRequest;
 import com.monkey.mcbot.licenseserver.api.dto.AdminCreateLicenseResponse;
+import com.monkey.mcbot.licenseserver.domain.LicenseActivationEntity;
 import com.monkey.mcbot.licenseserver.domain.LicenseEntity;
 import com.monkey.mcbot.licenseserver.domain.LicenseStatus;
+import com.monkey.mcbot.licenseserver.repo.LicenseActivationRepository;
 import com.monkey.mcbot.licenseserver.repo.LicenseRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -18,17 +22,20 @@ public class LicenseProvisioningService {
     private final LicenseHmacService hmacService;
     private final LicenseEventService eventService;
     private final LicenseEncryptionService encryptionService;
+    private final LicenseActivationRepository activationRepository;
 
     public LicenseProvisioningService(LicenseRepository licenseRepository,
                                       LicenseKeyGenerator keyGenerator,
                                       LicenseHmacService hmacService,
                                       LicenseEventService eventService,
-                                      LicenseEncryptionService encryptionService) {
+                                      LicenseEncryptionService encryptionService,
+                                      LicenseActivationRepository activationRepository) {
         this.licenseRepository = licenseRepository;
         this.keyGenerator = keyGenerator;
         this.hmacService = hmacService;
         this.eventService = eventService;
         this.encryptionService = encryptionService;
+        this.activationRepository = activationRepository;
     }
 
     @Transactional
@@ -74,6 +81,27 @@ public class LicenseProvisioningService {
         LicenseEntity license = licenseRepository.findById(licenseId)
                 .orElseThrow(() -> new IllegalArgumentException("License not found: " + licenseId));
         licenseRepository.delete(license);
+    }
+
+    @Transactional
+    public void clearInactiveActivations(UUID licenseId) {
+        LicenseEntity license = licenseRepository.findById(licenseId)
+                .orElseThrow(() -> new IllegalArgumentException("License not found: " + licenseId));
+
+        Instant recentThreshold = Instant.now().minusSeconds(5 * 60);
+
+        List<LicenseActivationEntity> inactive = activationRepository.findAllByLicense(license)
+                .stream()
+                .filter(a -> a.getLastSeenAt().isBefore(recentThreshold))
+                .toList();
+
+        if (inactive.isEmpty()) {
+            throw new IllegalStateException("No inactive activations — all servers appear to be online.");
+        }
+
+        activationRepository.deleteAll(inactive);
+        eventService.log(license, null, "CLEAR_INACTIVE_ACTIVATIONS", "SUCCESS", null,
+                "Cleared " + inactive.size() + " inactive activation(s)", null);
     }
 
     private String generateUniqueKey() {
