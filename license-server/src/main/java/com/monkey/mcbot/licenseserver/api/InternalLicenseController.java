@@ -4,6 +4,7 @@ import com.monkey.mcbot.licenseserver.api.dto.AdminCreateLicenseRequest;
 import com.monkey.mcbot.licenseserver.api.dto.AdminCreateLicenseResponse;
 import com.monkey.mcbot.licenseserver.api.dto.AdminLicenseSearchEntry;
 import com.monkey.mcbot.licenseserver.api.dto.AdminRevokeLicenseRequest;
+import com.monkey.mcbot.licenseserver.api.dto.ExpiringLicenseEntry;
 import com.monkey.mcbot.licenseserver.config.LicenseServerProperties;
 import com.monkey.mcbot.licenseserver.domain.LicenseStatus;
 import com.monkey.mcbot.licenseserver.repo.LicenseRepository;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -110,6 +113,32 @@ public class InternalLicenseController {
                         l.getLicenseKeyEncrypted() != null
                                 ? encryptionService.decrypt(l.getLicenseKeyEncrypted())
                                 : null,
+                        l.getCustomerId(),
+                        l.getProductCode(),
+                        l.getPlanCode(),
+                        l.getStatus(),
+                        l.getExpiresAt(),
+                        l.getMaxServers(),
+                        l.getCreatedAt()
+                ))
+                .toList();
+    }
+
+    @GetMapping("/expiring")
+    public List<ExpiringLicenseEntry> expiring(
+            @RequestHeader("X-Admin-Token") String adminToken,
+            @RequestParam(defaultValue = "30") @Min(1) @Max(365) int withinDays) {
+
+        requireAdminToken(adminToken);
+
+        Instant horizon = Instant.now().plus(withinDays, ChronoUnit.DAYS);
+
+        return licenseRepository
+                .findActiveExpiringBefore(LicenseStatus.ACTIVE, horizon)
+                .stream()
+                .map(l -> new ExpiringLicenseEntry(
+                        l.getId(),
+                        l.getLicenseKeyPrefix(),
                         l.getCustomerId(),
                         l.getProductCode(),
                         l.getPlanCode(),
