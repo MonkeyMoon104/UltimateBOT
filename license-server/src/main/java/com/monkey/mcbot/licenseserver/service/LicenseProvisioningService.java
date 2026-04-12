@@ -17,15 +17,18 @@ public class LicenseProvisioningService {
     private final LicenseKeyGenerator keyGenerator;
     private final LicenseHmacService hmacService;
     private final LicenseEventService eventService;
+    private final LicenseEncryptionService encryptionService;
 
     public LicenseProvisioningService(LicenseRepository licenseRepository,
                                       LicenseKeyGenerator keyGenerator,
                                       LicenseHmacService hmacService,
-                                      LicenseEventService eventService) {
+                                      LicenseEventService eventService,
+                                      LicenseEncryptionService encryptionService) {
         this.licenseRepository = licenseRepository;
         this.keyGenerator = keyGenerator;
         this.hmacService = hmacService;
         this.eventService = eventService;
+        this.encryptionService = encryptionService;
     }
 
     @Transactional
@@ -35,6 +38,7 @@ public class LicenseProvisioningService {
         LicenseEntity license = new LicenseEntity();
         license.setLicenseKeyHmac(hmacService.hmac(licenseKey));
         license.setLicenseKeyPrefix(hmacService.prefix(licenseKey));
+        license.setLicenseKeyEncrypted(encryptionService.encrypt(licenseKey));
         license.setCustomerId(request.customerId());
         license.setProductCode(request.productCode());
         license.setPlanCode(request.planCode());
@@ -63,6 +67,13 @@ public class LicenseProvisioningService {
         license.setRevokedReason(reason);
         licenseRepository.save(license);
         eventService.log(license, null, "REVOKE", "SUCCESS", "REVOKED", reason, null);
+    }
+
+    @Transactional
+    public void deleteLicense(UUID licenseId) {
+        LicenseEntity license = licenseRepository.findById(licenseId)
+                .orElseThrow(() -> new IllegalArgumentException("License not found: " + licenseId));
+        licenseRepository.delete(license);
     }
 
     private String generateUniqueKey() {

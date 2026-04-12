@@ -8,6 +8,7 @@ import java.util.UUID;
 public record AdminLicenseSearchEntry(
         UUID id,
         String licenseKeyPrefix,
+        String licenseKey,
         String customerId,
         String productCode,
         String planCode,

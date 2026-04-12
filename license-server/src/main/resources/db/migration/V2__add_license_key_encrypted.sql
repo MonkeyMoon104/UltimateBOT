@@ -1,0 +1,1 @@
+alter table licenses add column license_key_encrypted varchar(255) null;

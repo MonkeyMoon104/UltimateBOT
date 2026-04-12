@@ -28,6 +28,9 @@ public class LicenseEntity {
     @Column(name = "license_key_prefix", nullable = false, length = 4)
     private String licenseKeyPrefix;
 
+    @Column(name = "license_key_encrypted", length = 255)
+    private String licenseKeyEncrypted;
+
     @Column(name = "customer_id", nullable = false, length = 128)
     private String customerId;
 
@@ -86,6 +89,14 @@ public class LicenseEntity {
 
     public void setLicenseKeyPrefix(String licenseKeyPrefix) {
         this.licenseKeyPrefix = licenseKeyPrefix;
+    }
+
+    public String getLicenseKeyEncrypted() {
+        return licenseKeyEncrypted;
+    }
+
+    public void setLicenseKeyEncrypted(String licenseKeyEncrypted) {
+        this.licenseKeyEncrypted = licenseKeyEncrypted;
     }
 
     public String getCustomerId() {

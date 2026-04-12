@@ -8,6 +8,7 @@ import com.monkey.mcbot.licenseserver.config.LicenseServerProperties;
 import com.monkey.mcbot.licenseserver.domain.LicenseStatus;
 import com.monkey.mcbot.licenseserver.repo.LicenseRepository;
 import com.monkey.mcbot.licenseserver.repo.LicenseSearchSpec;
+import com.monkey.mcbot.licenseserver.service.LicenseEncryptionService;
 import com.monkey.mcbot.licenseserver.service.LicenseProvisioningService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -15,15 +16,7 @@ import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -36,13 +29,16 @@ public class InternalLicenseController {
     private final LicenseProvisioningService provisioningService;
     private final LicenseRepository licenseRepository;
     private final LicenseServerProperties properties;
+    private final LicenseEncryptionService encryptionService;
 
     public InternalLicenseController(LicenseProvisioningService provisioningService,
                                      LicenseRepository licenseRepository,
-                                     LicenseServerProperties properties) {
+                                     LicenseServerProperties properties,
+                                     LicenseEncryptionService encryptionService) {
         this.provisioningService = provisioningService;
         this.licenseRepository = licenseRepository;
         this.properties = properties;
+        this.encryptionService = encryptionService;
     }
 
     @PostMapping
@@ -62,6 +58,15 @@ public class InternalLicenseController {
             @Valid @RequestBody AdminRevokeLicenseRequest request) {
         requireAdminToken(adminToken);
         provisioningService.revokeLicense(id, request.reason());
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(
+            @RequestHeader("X-Admin-Token") String adminToken,
+            @PathVariable UUID id) {
+        requireAdminToken(adminToken);
+        provisioningService.deleteLicense(id);
     }
 
     @GetMapping
@@ -89,6 +94,9 @@ public class InternalLicenseController {
                 .map(l -> new AdminLicenseSearchEntry(
                         l.getId(),
                         l.getLicenseKeyPrefix(),
+                        l.getLicenseKeyEncrypted() != null
+                                ? encryptionService.decrypt(l.getLicenseKeyEncrypted())
+                                : null,
                         l.getCustomerId(),
                         l.getProductCode(),
                         l.getPlanCode(),
