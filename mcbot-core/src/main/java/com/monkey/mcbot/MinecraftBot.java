@@ -9,6 +9,8 @@ import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.*;
 import com.monkey.mcbot.integration.api.CoreBotManagerAdapter;
 import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
+import com.monkey.mcbot.license.LicenseManager;
+import com.monkey.mcbot.license.LicenseStartupResult;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
@@ -33,6 +35,7 @@ public final class MinecraftBot extends JavaPlugin {
     private BotManager botManager;
     private BotPlaceholderCoordinator placeholderCoordinator;
     private TargetingService targetingService;
+    private LicenseManager licenseManager;
     private static MinecraftBot instance;
 
     @Override
@@ -54,14 +57,28 @@ public final class MinecraftBot extends JavaPlugin {
             );
             startup.completePhase("config ready");
 
-            startup.beginPhase(2, "NMS", "Compatibility");
+            startup.beginPhase(2, "License", "Validation");
+            this.licenseManager = new LicenseManager(this);
+            LicenseStartupResult licenseResult = licenseManager.validateOnStartup();
+            if (!licenseResult.allowed()) {
+                startup.warn("License", licenseResult.reasonCode() + " -> " + licenseResult.message());
+                throw new IllegalStateException("License validation failed: " + licenseResult.reasonCode());
+            }
+            if (licenseResult.graceMode()) {
+                startup.warn("License", licenseResult.message());
+            } else {
+                startup.ready("License", licenseResult.message());
+            }
+            startup.completePhase("license ready");
+
+            startup.beginPhase(3, "NMS", "Compatibility");
             NMSBridgeManager.init(getLogger());
             startup.markNmsBridge(NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
             startup.detail("Catalog", MinecraftBotLogging.catalogSummary());
             startup.detail("Controllers", MinecraftBotLogging.controllerSummary());
             startup.completePhase("server compatibility resolved");
 
-            startup.beginPhase(3, "Core", "Runtime");
+            startup.beginPhase(4, "Core", "Runtime");
             this.targetingService = new TargetingService();
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
@@ -71,7 +88,7 @@ public final class MinecraftBot extends JavaPlugin {
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
             startup.completePhase("runtime core created");
 
-            startup.beginPhase(4, "API", "Wiring");
+            startup.beginPhase(5, "API", "Wiring");
             MinecraftBotAPI api = new MinecraftBotAPI(
                     this,
                     new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
@@ -82,7 +99,7 @@ public final class MinecraftBot extends JavaPlugin {
             startup.detail("Registry", api.getBotRegistry().getClass().getSimpleName());
             startup.completePhase("public API prepared");
 
-            startup.beginPhase(5, "Hooks", "Commands and Listeners");
+            startup.beginPhase(6, "Hooks", "Commands and Listeners");
 
             List<String> registeredCommands = new ArrayList<>();
             registerCommand(startup, registeredCommands, "bot", new BotCommand(this));
@@ -103,7 +120,7 @@ public final class MinecraftBot extends JavaPlugin {
             startup.detail("Listeners", joinOrNone(registeredListeners));
             startup.completePhase("hooks registered");
 
-            startup.beginPhase(6, "PAPI", "Placeholder Integration");
+            startup.beginPhase(7, "PAPI", "Placeholder Integration");
             if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
                 this.placeholderCoordinator = new BotPlaceholderCoordinator(this);
                 boolean placeholderRegistered = placeholderCoordinator.register();
@@ -124,12 +141,16 @@ public final class MinecraftBot extends JavaPlugin {
             }
             startup.completePhase("placeholder phase completed");
 
-            startup.beginPhase(7, "Boot", "Finalize");
+            startup.beginPhase(8, "Boot", "Finalize");
             MinecraftBotAPI.register(api);
             startup.markApiPublished();
             MinecraftBotLogging.logApiRegistered(getLogger(), api);
             getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
             startup.ready("Event", MinecraftBotReadyEvent.class.getSimpleName() + " fired");
+            if (licenseManager != null) {
+                licenseManager.startHeartbeat();
+                startup.ready("License", "heartbeat started");
+            }
             startup.completePhase("enable sequence completed");
 
             startup.completeBootstrap();
@@ -208,6 +229,11 @@ public final class MinecraftBot extends JavaPlugin {
     }
 
     private void cleanupRuntimeState() {
+        if (licenseManager != null) {
+            licenseManager.shutdown();
+            licenseManager = null;
+        }
+
         MinecraftBotAPI.unregister();
 
         if (placeholderCoordinator != null) {

@@ -21,3 +21,4 @@ include 'versions:v1_21_10'
 include 'versions:v1_21_11'
 
 include 'plugin'
+include 'license-server'

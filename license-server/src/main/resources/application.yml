@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${LICENSE_DB_URL:jdbc:postgresql://localhost:5432/mcbot_license}
+    username: ${LICENSE_DB_USER:postgres}
+    password: ${LICENSE_DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+license:
+  hmac-secret: ${LICENSE_HMAC_SECRET:change-me}
+  admin-token: ${LICENSE_ADMIN_TOKEN:change-me}
+  active-window-minutes: ${LICENSE_ACTIVE_WINDOW_MINUTES:90}
+  grace-period-hours: ${LICENSE_GRACE_PERIOD_HOURS:24}

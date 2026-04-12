@@ -1,3 +1,5 @@
+license-key: "XXXX-XXXX-XXXX-XXXX"
+
 messages:
   spawn-bot: "&aBot spawned with the selected settings!"
   dead-bot-msg: "&aYou killed the bot!"

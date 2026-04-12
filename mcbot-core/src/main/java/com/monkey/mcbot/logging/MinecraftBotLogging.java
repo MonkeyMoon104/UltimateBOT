@@ -42,7 +42,7 @@ public final class MinecraftBotLogging {
     private static final String RED = "\u001B[91m";
     private static final String MAGENTA = "\u001B[95m";
 
-    private static final int STARTUP_PHASES = 7;
+    private static final int STARTUP_PHASES = 8;
     private static final long WARMUP_REPORT_DELAY_TICKS = 20L;
     private static final long STABLE_REPORT_DELAY_TICKS = 60L;
 
@@ -186,6 +186,7 @@ public final class MinecraftBotLogging {
     private static String moduleColor(String module) {
         return switch (module) {
             case "Boot" -> GOLD;
+            case "License" -> YELLOW;
             case "NMS" -> BLUE;
             case "Core" -> CYAN;
             case "API" -> GREEN;
