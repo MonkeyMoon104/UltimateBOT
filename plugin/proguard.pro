@@ -42,6 +42,15 @@
 -keep class xyz.xenondevs.invui.** { *; }
 -keep class xyz.xenondevs.inventoryaccess.** { *; }
 
+# Keep Jackson intact. The licensing client uses ObjectMapper at startup and
+# Jackson relies on enum metadata/lookup methods that break under aggressive
+# obfuscation.
+-keep class com.fasterxml.jackson.** { *; }
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
 # Optional or server-provided libraries are not bundled in the final jar.
 -dontwarn org.bukkit.**
 -dontwarn io.papermc.**

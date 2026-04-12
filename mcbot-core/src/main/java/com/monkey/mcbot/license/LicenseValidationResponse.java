@@ -1,15 +1,19 @@
 package com.monkey.mcbot.license;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record LicenseValidationResponse(
-        boolean allowed,
-        String status,
-        String reasonCode,
-        String plan,
-        Instant expiresAt,
-        Integer maxServers,
-        String message,
-        Instant graceUntil
+        @JsonProperty("allowed") boolean allowed,
+        @JsonProperty("status") String status,
+        @JsonProperty("reasonCode") String reasonCode,
+        @JsonProperty("plan") String plan,
+        @JsonProperty("expiresAt") Instant expiresAt,
+        @JsonProperty("maxServers") Integer maxServers,
+        @JsonProperty("message") String message,
+        @JsonProperty("graceUntil") Instant graceUntil
 ) {
 }

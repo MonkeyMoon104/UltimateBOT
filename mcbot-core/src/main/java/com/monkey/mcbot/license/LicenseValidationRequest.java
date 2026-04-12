@@ -1,10 +1,12 @@
 package com.monkey.mcbot.license;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record LicenseValidationRequest(
-        String licenseKey,
-        String product,
-        String pluginVersion,
-        String installationId,
-        String fingerprintHash
+        @JsonProperty("licenseKey") String licenseKey,
+        @JsonProperty("product") String product,
+        @JsonProperty("pluginVersion") String pluginVersion,
+        @JsonProperty("installationId") String installationId,
+        @JsonProperty("fingerprintHash") String fingerprintHash
 ) {
 }
