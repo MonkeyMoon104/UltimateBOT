@@ -1,6 +1,7 @@
 package com.monkey.mcbot.license;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -31,7 +32,9 @@ public final class LicenseManager {
 
     public LicenseManager(JavaPlugin plugin) {
         this.plugin = plugin;
-        ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+        ObjectMapper objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .findAndRegisterModules();
         this.installationIdStore = new InstallationIdStore();
         this.licenseStateStore = new LicenseStateStore(objectMapper);
         this.fingerprintService = new ServerFingerprintService();
@@ -55,6 +58,7 @@ public final class LicenseManager {
             licenseStateStore.saveSuccess(plugin.getDataFolder().toPath(), Instant.now());
             return LicenseStartupResult.allowed(false, "License valid");
         } catch (IOException ex) {
+            MinecraftBotLogging.warn(plugin.getLogger(), "License", "Validation request failed -> " + safeMessage(ex.getMessage()));
             boolean graceAllowed = licenseStateStore.hasValidGrace(plugin.getDataFolder().toPath(), GRACE_PERIOD, Instant.now());
             if (!graceAllowed) {
                 return LicenseStartupResult.denied("LICENSE_SERVER_UNREACHABLE", "License server unreachable");
