@@ -9,6 +9,7 @@ import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class BotBrainController {
     }
 
     private void configureBotAI() {
-        if (targetPlayer != null && follow) {
+        if (targetPlayer != null && follow && targetPlayer instanceof CraftPlayer) {
             Player target = ((CraftPlayer) targetPlayer).getHandle();
             botAI.getRotationController().setInstantRotation(target);
         }
@@ -168,16 +169,17 @@ public class BotBrainController {
     private Player getNMSTarget() {
         long currentTime = System.currentTimeMillis();
 
+        if (targetPlayer == null || !targetPlayer.isOnline() || targetPlayer.isDead() || !(targetPlayer instanceof CraftPlayer)) {
+            cachedNmsTarget = null;
+            return null;
+        }
+
         if (cachedNmsTarget != null && (currentTime - lastNmsTargetUpdate) < NMS_CACHE_TIME) {
             return cachedNmsTarget;
         }
 
         lastNmsTargetUpdate = currentTime;
-        if (targetPlayer != null) {
-            cachedNmsTarget = ((CraftPlayer) targetPlayer).getHandle();
-        } else {
-            cachedNmsTarget = null;
-        }
+        cachedNmsTarget = ((CraftPlayer) targetPlayer).getHandle();
 
         return cachedNmsTarget;
     }
@@ -265,6 +267,7 @@ public class BotBrainController {
         if (owners.isEmpty()) {
             watchOnlyMode = false;
             clearAlertState();
+            setTargetIfChanged(null);
             return;
         }
 
@@ -296,7 +299,10 @@ public class BotBrainController {
         if (closestOwnerToBot != null) {
             setTargetIfChanged(closestOwnerToBot);
             tryTeleportBackToOwnerIfFar(closestOwnerToBot, returnTeleportDistance, returnTeleportCooldownMs);
+            return;
         }
+
+        setTargetIfChanged(null);
     }
 
     private ThreatSelection findClosestThreatNearOwners(List<org.bukkit.entity.Player> owners,
@@ -306,19 +312,34 @@ public class BotBrainController {
             return null;
         }
 
-        Set<UUID> ownerUUIDs = botOptions.getBotType() == BotType.TEAM_ALLY
-                ? botOptions.getTeamOwnerUUIDs()
-                : Set.of(ownerPlayer.getUniqueId());
+        Set<UUID> ownerUUIDs;
+        if (botOptions.getBotType() == BotType.TEAM_ALLY) {
+            ownerUUIDs = botOptions.getTeamOwnerUUIDs();
+        } else if (ownerPlayer != null) {
+            ownerUUIDs = Set.of(ownerPlayer.getUniqueId());
+        } else {
+            ownerUUIDs = Set.of();
+        }
 
         double rangeSq = range * range;
         ThreatSelection best = null;
+        UUID botUUID = bot.asPlayer().getUUID();
 
         for (org.bukkit.entity.Player candidate : Bukkit.getOnlinePlayers()) {
-            if (candidate.isDead() || candidate.getGameMode().isInvulnerable()) {
+            if (candidate == null || candidate.isDead()) {
+                continue;
+            }
+
+            GameMode gameMode = candidate.getGameMode();
+            if (gameMode != null && gameMode.isInvulnerable()) {
                 continue;
             }
 
             if (!targetFilters.isEmpty() && !targetFilters.contains(candidate.getUniqueId())) {
+                continue;
+            }
+
+            if (botUUID.equals(candidate.getUniqueId())) {
                 continue;
             }
 
@@ -433,14 +454,14 @@ public class BotBrainController {
     }
 
     private void setTargetIfChanged(org.bukkit.entity.Player newTarget) {
-        if (newTarget != null && newTarget != this.targetPlayer) {
-            this.targetPlayer = newTarget;
-
-            cachedNmsTarget = null;
-            lastNmsTargetUpdate = 0;
-
-            bot.getBotAI().getTeleportController().setTarget(newTarget);
+        if (newTarget == this.targetPlayer) {
+            return;
         }
+
+        this.targetPlayer = newTarget;
+        cachedNmsTarget = null;
+        lastNmsTargetUpdate = 0;
+        bot.getBotAI().getTeleportController().setTarget(newTarget);
     }
 
     public BotAI getBotAI() {

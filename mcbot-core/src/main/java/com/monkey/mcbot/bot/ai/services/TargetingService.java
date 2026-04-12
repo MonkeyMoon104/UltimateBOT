@@ -2,16 +2,17 @@ package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TargetingService {
 
-    private final Map<UUID, TargetCache> targetCache = new HashMap<>();
+    private final Map<UUID, TargetCache> targetCache = new ConcurrentHashMap<>();
     private static final long GLOBAL_CACHE_TIME = 250;
 
     private static class TargetCache {
@@ -95,7 +96,11 @@ public class TargetingService {
         double centerZ = centerPlayer.getZ();
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.isDead() || player.getGameMode().isInvulnerable()) {
+            if (!isValidCandidate(player, centerWorld)) {
+                continue;
+            }
+
+            if (botUUID.equals(player.getUniqueId())) {
                 continue;
             }
 
@@ -104,10 +109,6 @@ public class TargetingService {
             }
 
             if (useAllowedTargetsFilter && !allowedTargets.contains(player.getUniqueId())) {
-                continue;
-            }
-
-            if (!player.getWorld().getUID().equals(centerWorld.getUID())) {
                 continue;
             }
 
@@ -166,7 +167,11 @@ public class TargetingService {
         Player closestPlayer = null;
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.isDead() || player.getGameMode().isInvulnerable()) {
+            if (!isValidCandidate(player, centerWorld)) {
+                continue;
+            }
+
+            if (botUUID.equals(player.getUniqueId())) {
                 continue;
             }
 
@@ -175,10 +180,6 @@ public class TargetingService {
             }
 
             if (useAllowedTargetsFilter && !allowedTargets.contains(player.getUniqueId())) {
-                continue;
-            }
-
-            if (!player.getWorld().getUID().equals(centerWorld.getUID())) {
                 continue;
             }
 
@@ -210,5 +211,23 @@ public class TargetingService {
 
     public void clearCache() {
         targetCache.clear();
+    }
+
+    private boolean isValidCandidate(Player player, org.bukkit.World centerWorld) {
+        if (player == null || centerWorld == null) {
+            return false;
+        }
+
+        org.bukkit.World playerWorld = player.getWorld();
+        if (playerWorld == null || !playerWorld.getUID().equals(centerWorld.getUID())) {
+            return false;
+        }
+
+        if (!player.isOnline() || player.isDead()) {
+            return false;
+        }
+
+        GameMode gameMode = player.getGameMode();
+        return gameMode == null || !gameMode.isInvulnerable();
     }
 }
