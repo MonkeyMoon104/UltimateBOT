@@ -6,6 +6,7 @@ import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
+import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
 import com.monkey.mcbot.utils.EntityUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import net.minecraft.core.BlockPos;
@@ -273,22 +274,7 @@ public class BotSpawner {
     }
 
     private String applyPlaceholderApiIfAvailable(Player owner, String input) {
-        if (input == null || input.isBlank()) {
-            return input;
-        }
-
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") == null) {
-            return input;
-        }
-
-        try {
-            Class<?> placeholderApiClass = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
-            var method = placeholderApiClass.getMethod("setPlaceholders", org.bukkit.OfflinePlayer.class, String.class);
-            Object result = method.invoke(null, owner, input);
-            return result instanceof String resolved ? resolved : input;
-        } catch (Throwable ignored) {
-            return input;
-        }
+        return PlaceholderApiSupport.apply(owner, input);
     }
 
     private static String sanitizeProfileName(String candidate) {

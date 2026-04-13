@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-public class BotPlaceholderCoordinator extends PlaceholderExpansion {
+public class BotPlaceholderCoordinator extends PlaceholderExpansion implements PlaceholderRegistration {
 
     private final MinecraftBot plugin;
     private final Map<String, IBotPlaceholder> placeholders = new HashMap<>();

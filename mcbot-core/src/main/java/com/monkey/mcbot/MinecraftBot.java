@@ -15,9 +15,9 @@ import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
-import com.monkey.mcbot.placeholders.BotPlaceholderCoordinator;
+import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
+import com.monkey.mcbot.placeholders.PlaceholderRegistration;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
@@ -33,7 +33,7 @@ public final class MinecraftBot extends JavaPlugin {
     private PlayerOptions playerOptions;
     private BotRegistry botRegistry;
     private BotManager botManager;
-    private BotPlaceholderCoordinator placeholderCoordinator;
+    private PlaceholderRegistration placeholderCoordinator;
     private TargetingService targetingService;
     private LicenseManager licenseManager;
     private static MinecraftBot instance;
@@ -121,19 +121,24 @@ public final class MinecraftBot extends JavaPlugin {
             startup.completePhase("hooks registered");
 
             startup.beginPhase(7, "PAPI", "Placeholder Integration");
-            if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
-                this.placeholderCoordinator = new BotPlaceholderCoordinator(this);
-                boolean placeholderRegistered = placeholderCoordinator.register();
-                List<String> placeholderKeys = placeholderCoordinator.getRegisteredPlaceholderKeys();
+            if (PlaceholderApiSupport.isAvailable()) {
+                this.placeholderCoordinator = PlaceholderApiSupport.createRegistration(this);
+                if (this.placeholderCoordinator != null) {
+                    boolean placeholderRegistered = placeholderCoordinator.register();
+                    List<String> placeholderKeys = placeholderCoordinator.getRegisteredPlaceholderKeys();
 
-                startup.markPlaceholders(true, placeholderRegistered, placeholderKeys);
-                startup.detail("Namespace", placeholderCoordinator.getIdentifier());
-                startup.detail("Placeholders", placeholderKeys.size() + " -> " + joinOrNone(placeholderKeys));
+                    startup.markPlaceholders(true, placeholderRegistered, placeholderKeys);
+                    startup.detail("Namespace", placeholderCoordinator.getIdentifier());
+                    startup.detail("Placeholders", placeholderKeys.size() + " -> " + joinOrNone(placeholderKeys));
 
-                if (placeholderRegistered) {
-                    startup.ready("PlaceholderAPI", "hook attached");
+                    if (placeholderRegistered) {
+                        startup.ready("PlaceholderAPI", "hook attached");
+                    } else {
+                        startup.warn("PlaceholderAPI", "hook failed");
+                    }
                 } else {
-                    startup.warn("PlaceholderAPI", "hook failed");
+                    startup.markPlaceholders(true, false, List.of());
+                    startup.warn("PlaceholderAPI", "hook initialization failed");
                 }
             } else {
                 startup.markPlaceholders(false, false, List.of());

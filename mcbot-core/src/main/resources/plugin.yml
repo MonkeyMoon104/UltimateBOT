@@ -4,7 +4,7 @@ main: com.monkey.mcbot.MinecraftBot
 api-version: '1.21'
 authors: [ MonkeyMoon104 ]
 description: Minecraft bot plugin
-depend:
+softdepend:
   - PlaceholderAPI
 
 commands:
