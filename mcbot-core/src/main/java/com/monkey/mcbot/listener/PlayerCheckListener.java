@@ -57,7 +57,7 @@ public class PlayerCheckListener implements Listener {
             botManager.despawnBotInWorld(player, event.getFrom());
             player.closeInventory();
 
-            String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
+            String despawnMsg = plugin.getLangString("messages.despawn-bot", "&cBot despawned!");
             player.sendMessage(ChatColorUtils.translate(despawnMsg));
 
             playerOptions.remove(player.getUniqueId());
@@ -78,7 +78,7 @@ public class PlayerCheckListener implements Listener {
 
             if (!isEventBot) {
                 botManager.despawn(player);
-                String despawnMsg = plugin.getConfig().getString("messages.despawn-bot", "&cBot despawned!");
+                String despawnMsg = plugin.getLangString("messages.despawn-bot", "&cBot despawned!");
                 player.sendMessage(ChatColorUtils.translate(despawnMsg));
                 playerOptions.remove(player.getUniqueId());
             }
@@ -87,20 +87,20 @@ public class PlayerCheckListener implements Listener {
         Entity killer = event.getEntity().getKiller();
 
         if (killer instanceof BotCraftPlayer) {
-            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
             event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             return;
         }
 
         if (killer instanceof ITrainingBot) {
-            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
             event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             return;
         }
 
         if (wasBotSpawned && (killer == null ||
                 (event.getDeathMessage() != null && event.getDeathMessage().contains("[Intentional Game Design]")))) {
-            String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
             event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             return;
         }
@@ -108,7 +108,7 @@ public class PlayerCheckListener implements Listener {
         if (wasBotSpawned && event.getDeathMessage() != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
             if (bot != null && event.getDeathMessage().contains(bot.asPlayer().getName().getString())) {
-                String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+                String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
                 event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             }
         }

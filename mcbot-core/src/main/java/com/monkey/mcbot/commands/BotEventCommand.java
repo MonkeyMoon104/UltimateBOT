@@ -27,14 +27,14 @@ public class BotEventCommand implements CommandExecutor {
         }
 
         if (!sender.hasPermission("admin.host.bot")) {
-            sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-no-permission", "")));
+            sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-no-permission", "")));
             return true;
         }
 
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
+            String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -51,7 +51,7 @@ public class BotEventCommand implements CommandExecutor {
 
     private String getConflictMessage(BotType activeType) {
         if (activeType == BotType.SINGLE) {
-            return plugin.getConfig().getString(
+            return plugin.getLangString(
                     "messages.must-despawn-normal-bot",
                     "&cX You already have a normal bot spawned! Despawn it before managing the event bot."
             );

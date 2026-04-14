@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aBot mit den ausgewählten Einstellungen gespawnt!'
+  totem-finish: '[%botname%] Hat keine Totems mehr'
+  dead-bot-msg: '&aDu hast den Bot getötet!'
+  dead-bot-event-msg: '&c[&eEVENT&c] &eDer Bot wurde von &b{player} getötet'
+  despawn-bot: '&cBot entfernt!'
+  save-changes: '&aÄnderungen gespeichert!'
+  reload-no-permission: '&cDu hast keine Berechtigung, diesen Befehl zu verwenden'
+  reload-usage: '&eVerwendung: /mcbreload <config|bot|maps|all>'
+  reload-config: '&aKonfiguration erfolgreich neu geladen'
+  reload-bot: '&aAlle aktiven Bots wurden entfernt'
+  reload-maps: '&aAlle Spielerkarten wurden geleert'
+  reload-all: '&aKonfiguration, Bots und Karten wurden neu geladen/geleert'
+  reload-invalid-option: '&cUngültige Option. Verwende: config, bot, maps, all'
+  combat-need-follow: '&cFollow muss AKTIVIERT sein, um Bot-Kampf zu aktivieren'
+  bot-blocked-world: '&cDu kannst das hier nicht benutzen!'
+  dead-bot-message: '{player} wurde von seinem Bot getötet'
+  event-bot-already-active: '&cX Es ist bereits ein Event-Bot aktiv! Entferne ihn zuerst'
+  all-normal-bots-despawned: '&eAlle normalen Bots wurden für das Event entfernt'
+  cannot-spawn-normal-during-event: '&cX Du kannst keinen normalen Bot spawnen, während ein Event-Bot aktiv ist!'
+  event-bot-active-block-normal: '&cX Ein Event-Bot ist aktiv! Du kannst während eines Events keine normalen Bots spawnen'
+  must-despawn-normal-bot: '&cX Du hast bereits einen normalen Bot gespawnt! Entferne ihn, bevor du den Event-Bot verwaltest'
+  cannot-open-bot-while-ally: '&cDu hast bereits einen Verbündeten-Bot gespawnt. Entferne ihn, bevor du /bot benutzt.'
+  cannot-open-botally-while-single: '&cDu hast bereits einen Einzel-Bot gespawnt. Entferne ihn, bevor du /botally benutzt.'
+  armor-locked: '&cRüstung ist gesperrt: Sie kann für diesen Bot nicht geändert werden.'
+  blast-locked: '&cExplosionsschutz ist gesperrt: Er kann für diesen Bot nicht geändert werden.'
+  combat-locked: '&cKampf ist gesperrt: Er kann für diesen Bot nicht geändert werden.'
+  follow-locked: '&cFollow ist gesperrt: Es kann für diesen Bot nicht geändert werden.'
+  follow-lock-combat: '&cDu kannst follow nicht deaktivieren: Kampf ist auf AN gesperrt.'
+  totem-locked: '&cTotems sind gesperrt: Sie können für diesen Bot nicht geändert werden.'
+  rank-locked: '&cRang ist gesperrt: Er kann für diesen Bot nicht geändert werden.'
+  ally:
+    pre-range-alert: '&e%player% kommt näher, Position wird überwacht...'
+    range-alert: '&c%player% als Bedrohung erkannt, Bombenaktion wird gestartet'
+  team-ally:
+    pre-range-alert: '&e%player% kommt dem Team näher, Position wird überwacht...'
+    range-alert: '&c%player% als Bedrohung für das Team erkannt, Bombenaktion wird gestartet'
+    create-usage: '&eVerwendung: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cDu musst mindestens 2 gültige Online-Besitzer angeben.'
+    gui-opened: '&aDie botteamally-GUI wurde mit den ausgewählten Besitzern geöffnet.'
+    blocked-by-single: '&cDu hast bereits einen Einzel-Bot gespawnt. Entferne ihn, bevor du /botteamally benutzt.'
+    blocked-by-ally: '&cDu hast bereits einen Verbündeten-Bot gespawnt. Entferne ihn, bevor du /botteamally benutzt.'
+    no-active-teamally: '&cDu hast keinen aktiven Team-Verbündeten-Bot.'
+    addowners-usage: '&eVerwendung: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eVerwendung: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cUngültiger/offline Spieler: &e%player%'
+    owner-already-present: '&e%player% &7ist bereits ein Besitzer des Team-Verbündeten-Bots.'
+    owner-not-present: '&e%player% &7ist kein Besitzer des Team-Verbündeten-Bots.'
+    owner-added: '&aBesitzer hinzugefügt: &e%player%'
+    owner-removed: '&aBesitzer entfernt: &e%player%'
+    min-owners-reached: '&cDu kannst nicht unter 2 Besitzer gehen.'
+    duplicate-owner: '&cDoppelter Besitzer im Befehl: &e%player%'
+    owner-has-active-bot: '&c%player% hat bereits einen aktiven Bot (%bottype%). Entferne ihn zuerst.'
+    team-spawned-notify: '&aVerbündeter Bot von %playerowner% für das Team mit diesen Besitzern gespawnt: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(ausgewählt)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRang &7(ausgewählt)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Rang'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eBesitzer &7(ausgewählt)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Besitzer'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eZiele &7(ausgewählt)'
+      unselected:
+        material: TARGET
+        name: '&7Ziele'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Bot-Besitzer'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aNach oben scrollen'
+      cant-scroll: '&7Du bist bereits ganz oben'
+    scroll-down:
+      name: '&aNach unten scrollen'
+      cant-scroll: '&7Du bist bereits ganz unten'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Bot-Ziel'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aNach oben scrollen'
+      cant-scroll: '&7Du bist bereits ganz oben'
+    scroll-down:
+      name: '&aNach unten scrollen'
+      cant-scroll: '&7Du bist bereits ganz unten'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Typ: &e%type%'
+      - '&7Explosionsschutz: %blast_state%'
+      - ''
+      - '&eLinksklick: &7Rüstungsteil ändern'
+      - '&eRechtsklick: &7Blast umschalten'
+  follow-button:
+    name: '&bFollow umschalten'
+    material: LEAD
+    lore:
+    - '&7Status: &e%type%'
+    - ''
+    - '&eKlicken, um Follow umzuschalten'
+  spawn-button:
+    name: '&aBot spawnen'
+    material: SPAWNER
+    lore:
+    - '&7Spawne deinen Übungs-Bot'
+    - '&7mit der ausgewählten Konfiguration'
+    - ''
+    - '&eKlicken zum Spawnen!'
+  despawn-button:
+    name: '&cBot entfernen'
+    material: BARRIER
+    lore:
+    - '&7Entferne deinen Übungs-Bot'
+    - '&7aus der Welt'
+    - ''
+    - '&cKlicken zum Entfernen!'
+  save-button:
+    name: '&aÄnderungen speichern'
+    material: GREEN_WOOL
+    lore:
+    - '&7Speichert die aktuellen Einstellungen'
+    - '&7für den aktiven Bot'
+    - ''
+    - '&aKlicken zum Speichern!'
+  totem-button:
+    name: '&eTotem-Anzahl'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Unbegrenzt
+    lore:
+    - '&7Aktuelle Anzahl: &a%count%'
+    - ''
+    - '&eLinksklick: &a+1'
+    - '&eRechtsklick: &c-1'
+    - '&7(-1 = Unbegrenzte Totems)'
+  teleport-button:
+    name: '&5Bot teleportieren'
+    material: ENDER_PEARL
+    lore:
+    - '&dTeleportiert den Bot zu deinem Standort'
+  combat-button:
+    name: '&bKampf umschalten'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Status: &e%type%'
+    - ''
+    - '&eKlicken, um Kampf umzuschalten'
+  rank-button:
+    name: '&bRang'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eKlicken, um den Rang zu erhöhen/verringern'

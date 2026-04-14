@@ -9,6 +9,7 @@ import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.*;
 import com.monkey.mcbot.integration.api.CoreBotManagerAdapter;
 import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
+import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
 import com.monkey.mcbot.listener.PlayerCheckListener;
@@ -25,11 +26,13 @@ import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -44,6 +47,7 @@ public final class MinecraftBot extends JavaPlugin {
     private TargetingService targetingService;
     private LicenseManager licenseManager;
     private UpdateManager updateManager;
+    private LanguageManager languageManager;
     private static MinecraftBot instance;
 
     @Override
@@ -54,8 +58,10 @@ public final class MinecraftBot extends JavaPlugin {
         try {
             startup.beginPhase(1, "Boot", "Configuration");
             saveDefaultConfig();
+            reloadLanguageConfiguration();
             startup.ready("Config", "default file verified");
             startup.detail("Path", getDataFolder().toPath().resolve("config.yml").toString());
+            startup.detail("Language", languageManager.getActiveLanguageFileName());
             startup.detail(
                     "Profile",
                     getConfig().getString("bot.name", "CrystalBot")
@@ -245,6 +251,46 @@ public final class MinecraftBot extends JavaPlugin {
         return instance;
     }
 
+    public void reloadPluginConfiguration() {
+        reloadConfig();
+        reloadLanguageConfiguration();
+    }
+
+    public void reloadLanguageConfiguration() {
+        if (languageManager == null) {
+            languageManager = new LanguageManager(this);
+        }
+        languageManager.reload();
+    }
+
+    public String getLangString(String path) {
+        if (languageManager == null) {
+            return getConfig().getString(path);
+        }
+        return languageManager.getString(path);
+    }
+
+    public String getLangString(String path, String fallbackValue) {
+        if (languageManager == null) {
+            return getConfig().getString(path, fallbackValue);
+        }
+        return languageManager.getString(path, fallbackValue);
+    }
+
+    public List<String> getLangStringList(String path) {
+        if (languageManager == null) {
+            return getConfig().contains(path) ? getConfig().getStringList(path) : Collections.emptyList();
+        }
+        return languageManager.getStringList(path);
+    }
+
+    public FileConfiguration getLanguageConfig() {
+        if (languageManager == null) {
+            return getConfig();
+        }
+        return languageManager.getActiveLanguageConfiguration();
+    }
+
     private void registerCommand(MinecraftBotLogging.StartupSession startup,
                                  List<String> registeredCommands,
                                  String name,
@@ -353,6 +399,7 @@ public final class MinecraftBot extends JavaPlugin {
             playerOptions = null;
         }
         targetingService = null;
+        languageManager = null;
     }
 
     private String joinOrNone(Iterable<String> values) {

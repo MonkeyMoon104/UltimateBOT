@@ -43,13 +43,13 @@ public class ArmorItem extends AbstractItem {
         ItemBuilder builder = new ItemBuilder(displayPiece);
         builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS));
 
-        var loreLines = training.getConfig().getStringList("gui.default-armor.lore.set-type");
+        var loreLines = training.getLangStringList("gui.default-armor.lore.set-type");
 
         String typeName = formatMaterialName(piece.getType());
         String blastState = ChatColorUtils.translate(
                 isBlastEnabled()
-                        ? training.getConfig().getString("gui.default-armor.blast-enabled-text", "&aON")
-                        : training.getConfig().getString("gui.default-armor.blast-disabled-text", "&cOFF")
+                        ? training.getLangString("gui.default-armor.blast-enabled-text", "&aON")
+                        : training.getLangString("gui.default-armor.blast-disabled-text", "&cOFF")
         );
 
         for (String line : loreLines) {
@@ -78,7 +78,7 @@ public class ArmorItem extends AbstractItem {
 
     private void handleArmorCycleClick(Player player) {
         if (!options.isChangeableArmor()) {
-            String msg = training.getConfig().getString("messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString("messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -96,7 +96,7 @@ public class ArmorItem extends AbstractItem {
 
     private void handleBlastToggleClick(Player player) {
         if (!options.isChangeableBlast()) {
-            String msg = training.getConfig().getString("messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString("messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }

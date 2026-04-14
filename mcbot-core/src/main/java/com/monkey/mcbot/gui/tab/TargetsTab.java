@@ -141,13 +141,11 @@ public class TargetsTab {
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
-            String name = context.getTraining().getConfig()
-                    .getString("gui.targets-tab.scroll-up.name", "&aScorri su");
+            String name = context.getTraining().getLangString("gui.targets-tab.scroll-up.name", "&aScorri su");
             ItemBuilder builder = new ItemBuilder(Material.ARROW)
                     .setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(-1)) {
-                String cantScroll = context.getTraining().getConfig()
-                        .getString("gui.targets-tab.scroll-up.cant-scroll", "&7Sei già in cima");
+                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-up.cant-scroll", "&7Sei già in cima");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -162,13 +160,11 @@ public class TargetsTab {
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
-            String name = context.getTraining().getConfig()
-                    .getString("gui.targets-tab.scroll-down.name", "&aScorri giù");
+            String name = context.getTraining().getLangString("gui.targets-tab.scroll-down.name", "&aScorri giù");
             ItemBuilder builder = new ItemBuilder(Material.ARROW)
                     .setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(1)) {
-                String cantScroll = context.getTraining().getConfig()
-                        .getString("gui.targets-tab.scroll-down.cant-scroll", "&7Sei già in fondo");
+                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-down.cant-scroll", "&7Sei già in fondo");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -196,14 +192,12 @@ public class TargetsTab {
             if (meta != null) {
                 meta.setOwningPlayer(offlinePlayer);
 
-                String nameTemplate = context.getTraining().getConfig()
-                        .getString("gui.targets-tab.head.name", "&c%player%");
+                String nameTemplate = context.getTraining().getLangString("gui.targets-tab.head.name", "&c%player%");
                 meta.setDisplayName(ChatColorUtils.translate(
                         nameTemplate.replace("%player%", playerName)
                                 .replace("%uuid%", targetUUID.toString())));
 
-                List<String> loreLines = context.getTraining().getConfig()
-                        .getStringList("gui.targets-tab.head.lore");
+                List<String> loreLines = context.getTraining().getLangStringList("gui.targets-tab.head.lore");
                 List<String> lore = loreLines.stream()
                         .map(line -> ChatColorUtils.translate(
                                 line.replace("%player%", playerName)

@@ -35,10 +35,10 @@ public class FollowItem extends AbstractItem {
     public ItemProvider getItemProvider() {
         boolean status = options.isFollow();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getConfig().getString("gui.follow-button.material")));
-        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.follow-button.name")));
+        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.follow-button.material")));
+        builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.follow-button.name")));
 
-        var loreLines = training.getConfig().getStringList("gui.follow-button.lore");
+        var loreLines = training.getLangStringList("gui.follow-button.lore");
 
         for (String line : loreLines) {
             String processedLine = line.replace("%type%", status ? "ON" : "OFF");
@@ -50,7 +50,7 @@ public class FollowItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableFollow()) {
-            String msg = training.getConfig().getString("messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString("messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -61,7 +61,7 @@ public class FollowItem extends AbstractItem {
         boolean newFollowStatus = !oldFollowStatus;
 
         if (!newFollowStatus && combatStatus && !options.isChangeableCombat()) {
-            String msg = training.getConfig().getString("messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
+            String msg = training.getLangString("messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }

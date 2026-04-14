@@ -25,9 +25,9 @@ public class TeleportItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        Material mat = Material.valueOf(training.getConfig().getString("gui.teleport-button.material"));
-        String name = training.getConfig().getString("gui.teleport-button.name");
-        var lore = training.getConfig().getStringList("gui.teleport-button.lore");
+        Material mat = Material.valueOf(training.getLangString("gui.teleport-button.material"));
+        String name = training.getLangString("gui.teleport-button.name");
+        var lore = training.getLangStringList("gui.teleport-button.lore");
 
         ItemBuilder builder = new ItemBuilder(mat);
         builder.setDisplayName(ChatColorUtils.translate(name));

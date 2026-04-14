@@ -42,16 +42,16 @@ public class SpawnItem extends AbstractItem {
         boolean status = isManagedBotSpawned();
 
         Material mat = status
-                ? Material.valueOf(training.getConfig().getString("gui.despawn-button.material"))
-                : Material.valueOf(training.getConfig().getString("gui.spawn-button.material"));
+                ? Material.valueOf(training.getLangString("gui.despawn-button.material"))
+                : Material.valueOf(training.getLangString("gui.spawn-button.material"));
 
         String name = status
-                ? training.getConfig().getString("gui.despawn-button.name")
-                : training.getConfig().getString("gui.spawn-button.name");
+                ? training.getLangString("gui.despawn-button.name")
+                : training.getLangString("gui.spawn-button.name");
 
         var lore = status
-                ? training.getConfig().getStringList("gui.despawn-button.lore")
-                : training.getConfig().getStringList("gui.spawn-button.lore");
+                ? training.getLangStringList("gui.despawn-button.lore")
+                : training.getLangStringList("gui.spawn-button.lore");
 
         ItemBuilder builder = new ItemBuilder(mat);
         builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
@@ -73,23 +73,23 @@ public class SpawnItem extends AbstractItem {
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
-            player.sendMessage(ChatColorUtils.translate(training.getConfig().getString("messages.despawn-bot", "&cBot removed!")));
+            player.sendMessage(ChatColorUtils.translate(training.getLangString("messages.despawn-bot", "&cBot removed!")));
             return;
         }
 
         if (options.getBotType() == BotType.EVENT) {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.event-bot-already-active");
+                String msg = training.getLangString("messages.event-bot-already-active");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
             training.getBotManager().despawnAll();
-            String msg = training.getConfig().getString("messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event");
+            String msg = training.getLangString("messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event");
             player.sendMessage(ChatColorUtils.translate(msg));
         }
         else {
             if (isBotEventActive()) {
-                String msg = training.getConfig().getString("messages.cannot-spawn-normal-during-event");
+                String msg = training.getLangString("messages.cannot-spawn-normal-during-event");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -100,7 +100,7 @@ public class SpawnItem extends AbstractItem {
 
         boolean follow = options.isFollow();
         training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
-        String msg = training.getConfig().getString("messages.spawn-bot", "&aBot spawned with the selected settings!");
+        String msg = training.getLangString("messages.spawn-bot", "&aBot spawned with the selected settings!");
         player.sendMessage(ChatColorUtils.translate(msg));
 
         if (options.getBotType() == BotType.TEAM_ALLY) {
@@ -133,7 +133,7 @@ public class SpawnItem extends AbstractItem {
     }
 
     private void notifyTeamOwners(Player spawner) {
-        String template = training.getConfig().getString(
+        String template = training.getLangString(
                 "messages.team-ally.team-spawned-notify",
                 "&aAllied bot spawned by %playerowner% for the team with these owners: %playerlist%"
         );

@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&a選択した設定でボットをスポーンしました！'
+  totem-finish: '[%botname%] トーテムを使い切りました'
+  dead-bot-msg: '&aあなたはボットを倒しました！'
+  dead-bot-event-msg: '&c[&eEVENT&c] &eボットは &b{player} &eに倒されました'
+  despawn-bot: '&cボットを削除しました！'
+  save-changes: '&a変更を保存しました！'
+  reload-no-permission: '&cこのコマンドを使用する権限がありません'
+  reload-usage: '&e使用法: /mcbreload <config|bot|maps|all>'
+  reload-config: '&a設定を正常に再読み込みしました'
+  reload-bot: '&aすべてのアクティブなボットを削除しました'
+  reload-maps: '&aすべてのプレイヤーマップをクリアしました'
+  reload-all: '&a設定、ボット、マップを再読み込み/クリアしました'
+  reload-invalid-option: '&c無効なオプションです。使用可能: config, bot, maps, all'
+  combat-need-follow: '&cボット戦闘を有効にするには Follow を ON にする必要があります'
+  bot-blocked-world: '&cここでは使用できません！'
+  dead-bot-message: '{player} は自分のボットに倒されました'
+  event-bot-already-active: '&cX すでにアクティブなイベントボットがいます！先に削除してください'
+  all-normal-bots-despawned: '&eイベントのため、すべての通常ボットが削除されました'
+  cannot-spawn-normal-during-event: '&cX イベントボットが有効な間は通常ボットをスポーンできません！'
+  event-bot-active-block-normal: '&cX イベントボットが有効です！イベント中は通常ボットをスポーンできません'
+  must-despawn-normal-bot: '&cX すでに通常ボットがスポーンしています！イベントボットを管理する前に削除してください'
+  cannot-open-bot-while-ally: '&cすでに味方ボットがスポーンしています。/bot を使う前に削除してください。'
+  cannot-open-botally-while-single: '&cすでに単体ボットがスポーンしています。/botally を使う前に削除してください。'
+  armor-locked: '&c防具はロックされています: このボットでは変更できません。'
+  blast-locked: '&c爆発耐性はロックされています: このボットでは変更できません。'
+  combat-locked: '&c戦闘はロックされています: このボットでは変更できません。'
+  follow-locked: '&cFollow はロックされています: このボットでは変更できません。'
+  follow-lock-combat: '&cFollow を無効にできません: 戦闘が ON に固定されています。'
+  totem-locked: '&cトーテムはロックされています: このボットでは変更できません。'
+  rank-locked: '&cランクはロックされています: このボットでは変更できません。'
+  ally:
+    pre-range-alert: '&e%player% が近づいています。位置を監視中...'
+    range-alert: '&c%player% を脅威として検知しました。爆撃アクションを開始します'
+  team-ally:
+    pre-range-alert: '&e%player% がチームに近づいています。位置を監視中...'
+    range-alert: '&c%player% をチームへの脅威として検知しました。爆撃アクションを開始します'
+    create-usage: '&e使用法: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&c少なくとも2人の有効なオンライン所有者を指定する必要があります。'
+    gui-opened: '&a選択した所有者で botteamally GUI を開きました。'
+    blocked-by-single: '&cすでに単体ボットがスポーンしています。/botteamally を使う前に削除してください。'
+    blocked-by-ally: '&cすでに味方ボットがスポーンしています。/botteamally を使う前に削除してください。'
+    no-active-teamally: '&cアクティブなチーム味方ボットがありません。'
+    addowners-usage: '&e使用法: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&e使用法: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&c無効/オフラインのプレイヤー: &e%player%'
+    owner-already-present: '&e%player% &7はすでにチーム味方ボットの所有者です。'
+    owner-not-present: '&e%player% &7はチーム味方ボットの所有者ではありません。'
+    owner-added: '&a所有者を追加しました: &e%player%'
+    owner-removed: '&a所有者を削除しました: &e%player%'
+    min-owners-reached: '&c所有者を2人未満にはできません。'
+    duplicate-owner: '&cコマンド内の重複所有者: &e%player%'
+    owner-has-active-bot: '&c%player% はすでにアクティブなボット (%bottype%) を持っています。先に削除してください。'
+    team-spawned-notify: '&a%playerowner% によりチーム用の味方ボットがスポーンしました。所有者: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eキット &7(選択中)'
+      unselected:
+        material: SHIELD
+        name: '&7キット'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eランク &7(選択中)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7ランク'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&e所有者 &7(選択中)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7所有者'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eターゲット &7(選択中)'
+      unselected:
+        material: TARGET
+        name: '&7ターゲット'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7ボット所有者'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a上へスクロール'
+      cant-scroll: '&7すでに一番上です'
+    scroll-down:
+      name: '&a下へスクロール'
+      cant-scroll: '&7すでに一番下です'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7ボットのターゲット'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a上へスクロール'
+      cant-scroll: '&7すでに一番上です'
+    scroll-down:
+      name: '&a下へスクロール'
+      cant-scroll: '&7すでに一番下です'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7タイプ: &e%type%'
+      - '&7爆発耐性: %blast_state%'
+      - ''
+      - '&e左クリック: &7防具パーツを変更'
+      - '&e右クリック: &7爆発を切り替え'
+  follow-button:
+    name: '&bFollow 切り替え'
+    material: LEAD
+    lore:
+    - '&7状態: &e%type%'
+    - ''
+    - '&eクリックして Follow を切り替え'
+  spawn-button:
+    name: '&aボットをスポーン'
+    material: SPAWNER
+    lore:
+    - '&7練習用ボットをスポーンします'
+    - '&7選択した設定で'
+    - ''
+    - '&eクリックしてスポーン！'
+  despawn-button:
+    name: '&cボットを削除'
+    material: BARRIER
+    lore:
+    - '&7練習用ボットを削除します'
+    - '&7ワールドから'
+    - ''
+    - '&cクリックして削除！'
+  save-button:
+    name: '&a変更を保存'
+    material: GREEN_WOOL
+    lore:
+    - '&7現在の設定を保存します'
+    - '&7アクティブなボットに'
+    - ''
+    - '&aクリックして保存！'
+  totem-button:
+    name: '&eトーテム数'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: 無制限
+    lore:
+    - '&7現在の数: &a%count%'
+    - ''
+    - '&e左クリック: &a+1'
+    - '&e右クリック: &c-1'
+    - '&7(-1 = 無制限トーテム)'
+  teleport-button:
+    name: '&5ボットをテレポート'
+    material: ENDER_PEARL
+    lore:
+    - '&dボットをあなたの場所へテレポートします'
+  combat-button:
+    name: '&b戦闘切り替え'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7状態: &e%type%'
+    - ''
+    - '&eクリックして戦闘を切り替え'
+  rank-button:
+    name: '&bランク'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eクリックしてランクを上げ/下げ'

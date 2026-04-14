@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&a机器人已按所选设置生成！'
+  totem-finish: '[%botname%] 图腾已耗尽'
+  dead-bot-msg: '&a你击杀了机器人！'
+  dead-bot-event-msg: '&c[&e活动&c] &e机器人被 &b{player} &e击杀了'
+  despawn-bot: '&c机器人已移除！'
+  save-changes: '&a更改已保存！'
+  reload-no-permission: '&c你没有权限使用此命令'
+  reload-usage: '&e用法：/mcbreload <config|bot|maps|all>'
+  reload-config: '&a配置重载成功'
+  reload-bot: '&a所有活动机器人已被移除'
+  reload-maps: '&a所有玩家地图已被清除'
+  reload-all: '&a配置、机器人和地图已重载/清除'
+  reload-invalid-option: '&c无效选项。请使用：config, bot, maps, all'
+  combat-need-follow: '&c必须将 Follow 设为开启才能启用机器人战斗'
+  bot-blocked-world: '&c你不能在这里使用这个！'
+  dead-bot-message: '{player} 被自己的机器人击杀了'
+  event-bot-already-active: '&cX 已经有一个活动事件机器人！请先将其移除'
+  all-normal-bots-despawned: '&e所有普通机器人已为活动移除'
+  cannot-spawn-normal-during-event: '&cX 当事件机器人处于活动状态时，你不能生成普通机器人！'
+  event-bot-active-block-normal: '&cX 事件机器人处于活动状态！活动期间你不能生成普通机器人'
+  must-despawn-normal-bot: '&cX 你已经生成了一个普通机器人！在管理事件机器人前请先将其移除'
+  cannot-open-bot-while-ally: '&c你已经生成了一个盟友机器人。使用 /bot 前请先将其移除。'
+  cannot-open-botally-while-single: '&c你已经生成了一个单人机器人。使用 /botally 前请先将其移除。'
+  armor-locked: '&c护甲已锁定：无法为此机器人修改。'
+  blast-locked: '&c爆炸保护已锁定：无法为此机器人修改。'
+  combat-locked: '&c战斗已锁定：无法为此机器人修改。'
+  follow-locked: '&cFollow 已锁定：无法为此机器人修改。'
+  follow-lock-combat: '&c你不能关闭 follow：战斗已锁定为开启。'
+  totem-locked: '&c图腾已锁定：无法为此机器人修改。'
+  rank-locked: '&c等级已锁定：无法为此机器人修改。'
+  ally:
+    pre-range-alert: '&e%player% 正在靠近，正在监控位置……'
+    range-alert: '&c检测到 %player% 为威胁，开始轰炸行动'
+  team-ally:
+    pre-range-alert: '&e%player% 正在接近队伍，正在监控位置……'
+    range-alert: '&c检测到 %player% 对队伍构成威胁，开始轰炸行动'
+    create-usage: '&e用法：/botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&c你必须指定至少 2 个有效的在线拥有者。'
+    gui-opened: '&a已使用所选拥有者打开 botteamally GUI。'
+    blocked-by-single: '&c你已经生成了一个单人机器人。使用 /botteamally 前请先将其移除。'
+    blocked-by-ally: '&c你已经生成了一个盟友机器人。使用 /botteamally 前请先将其移除。'
+    no-active-teamally: '&c你没有活动中的团队盟友机器人。'
+    addowners-usage: '&e用法：/botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&e用法：/botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&c无效/离线玩家：&e%player%'
+    owner-already-present: '&e%player% &7已经是团队盟友机器人的拥有者。'
+    owner-not-present: '&e%player% &7不是团队盟友机器人的拥有者。'
+    owner-added: '&a已添加拥有者：&e%player%'
+    owner-removed: '&a已移除拥有者：&e%player%'
+    min-owners-reached: '&c拥有者数量不能少于 2 个。'
+    duplicate-owner: '&c命令中有重复的拥有者：&e%player%'
+    owner-has-active-bot: '&c%player% 已经有一个活动机器人（%bottype%）。请先将其移除。'
+    team-spawned-notify: '&a由 %playerowner% 为团队生成了盟友机器人，拥有者如下：&e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&e套装 &7（已选）'
+      unselected:
+        material: SHIELD
+        name: '&7套装'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&e等级 &7（已选）'
+      unselected:
+        material: GUNPOWDER
+        name: '&7等级'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&e拥有者 &7（已选）'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7拥有者'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&e目标 &7（已选）'
+      unselected:
+        material: TARGET
+        name: '&7目标'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7机器人拥有者'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a向上滚动'
+      cant-scroll: '&7你已经在最上方'
+    scroll-down:
+      name: '&a向下滚动'
+      cant-scroll: '&7你已经在最下方'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7机器人目标'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a向上滚动'
+      cant-scroll: '&7你已经在最上方'
+    scroll-down:
+      name: '&a向下滚动'
+      cant-scroll: '&7你已经在最下方'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7类型：&e%type%'
+      - '&7爆炸保护：%blast_state%'
+      - ''
+      - '&e左键：&7更换护甲部件'
+      - '&e右键：&7切换 blast'
+  follow-button:
+    name: '&b切换 Follow'
+    material: LEAD
+    lore:
+    - '&7状态：&e%type%'
+    - ''
+    - '&e点击切换 follow'
+  spawn-button:
+    name: '&a生成机器人'
+    material: SPAWNER
+    lore:
+    - '&7生成你的练习机器人'
+    - '&7使用所选配置'
+    - ''
+    - '&e点击生成！'
+  despawn-button:
+    name: '&c移除机器人'
+    material: BARRIER
+    lore:
+    - '&7将你的练习机器人移除'
+    - '&7从世界中'
+    - ''
+    - '&c点击移除！'
+  save-button:
+    name: '&a保存更改'
+    material: GREEN_WOOL
+    lore:
+    - '&7保存当前设置'
+    - '&7到活动机器人'
+    - ''
+    - '&a点击保存！'
+  totem-button:
+    name: '&e图腾数量'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: 无限
+    lore:
+    - '&7当前数量：&a%count%'
+    - ''
+    - '&e左键：&a+1'
+    - '&e右键：&c-1'
+    - '&7(-1 = 无限图腾)'
+  teleport-button:
+    name: '&5传送机器人'
+    material: ENDER_PEARL
+    lore:
+    - '&d将机器人传送到你的位置'
+  combat-button:
+    name: '&b切换战斗'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7状态：&e%type%'
+    - ''
+    - '&e点击切换战斗'
+  rank-button:
+    name: '&b等级'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&e点击提高/降低等级'

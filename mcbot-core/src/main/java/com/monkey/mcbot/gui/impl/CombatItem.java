@@ -32,11 +32,11 @@ public class CombatItem extends AbstractItem {
     public ItemProvider getItemProvider() {
         boolean status = options.isCombat();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getConfig().getString("gui.combat-button.material")));
-        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.combat-button.name")));
+        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.combat-button.material")));
+        builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.combat-button.name")));
         builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
 
-        var loreLines = training.getConfig().getStringList("gui.combat-button.lore");
+        var loreLines = training.getLangStringList("gui.combat-button.lore");
 
         for (String line : loreLines) {
             String processedLine = line
@@ -53,7 +53,7 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isLeftClick()) {
             if (!options.isChangeableCombat()) {
-                String msg = training.getConfig().getString("messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString("messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -62,7 +62,7 @@ public class CombatItem extends AbstractItem {
             boolean newStatus = !oldStatus;
 
             if (newStatus && !options.isFollow()) {
-                String msg = training.getConfig().getString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
+                String msg = training.getLangString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -91,7 +91,7 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isRightClick()) {
             if (!options.isChangeableRank()) {
-                String msg = training.getConfig().getString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }

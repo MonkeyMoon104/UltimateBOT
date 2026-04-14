@@ -87,15 +87,15 @@ public class BotBrainController {
         this.allyPreRange = plugin.getConfig().getDouble("bot.ally.pre-range");
         this.allyReturnTeleportDistance = plugin.getConfig().getDouble("bot.ally.return-teleport-distance");
         this.allyReturnTeleportCooldownMs = plugin.getConfig().getLong("bot.ally.return-teleport-cooldown-ms");
-        this.allyPreRangeAlertMessage = plugin.getConfig().getString("messages.ally.pre-range-alert");
-        this.allyRangeAlertMessage = plugin.getConfig().getString("messages.ally.range-alert");
+        this.allyPreRangeAlertMessage = plugin.getLangString("messages.ally.pre-range-alert");
+        this.allyRangeAlertMessage = plugin.getLangString("messages.ally.range-alert");
 
         this.teamAllyRange = plugin.getConfig().getDouble("bot.team-ally.range");
         this.teamAllyPreRange = plugin.getConfig().getDouble("bot.team-ally.pre-range");
         this.teamAllyReturnTeleportDistance = plugin.getConfig().getDouble("bot.team-ally.return-teleport-distance");
         this.teamAllyReturnTeleportCooldownMs = plugin.getConfig().getLong("bot.team-ally.return-teleport-cooldown-ms");
-        this.teamAllyPreRangeAlertMessage = plugin.getConfig().getString("messages.team-ally.pre-range-alert");
-        this.teamAllyRangeAlertMessage = plugin.getConfig().getString("messages.team-ally.range-alert");
+        this.teamAllyPreRangeAlertMessage = plugin.getLangString("messages.team-ally.pre-range-alert");
+        this.teamAllyRangeAlertMessage = plugin.getLangString("messages.team-ally.range-alert");
 
         configureBotAI();
     }

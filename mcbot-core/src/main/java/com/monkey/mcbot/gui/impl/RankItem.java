@@ -35,10 +35,10 @@ public class RankItem extends AbstractItem {
         Material rankMaterial = getRankMaterial(currentRank);
 
         ItemBuilder builder = new ItemBuilder(rankMaterial);
-        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.rank-button.name")));
+        builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.rank-button.name")));
         builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
 
-        var loreLines = training.getConfig().getStringList("gui.rank-button.lore");
+        var loreLines = training.getLangStringList("gui.rank-button.lore");
         List<String> ranks = options.getAllowedRanks().stream()
                 .map(botRank -> botRank == options.getRank() ? botRank.getSelectedName() : botRank.getDisplayName())
                 .toList();
@@ -58,7 +58,7 @@ public class RankItem extends AbstractItem {
 
     private Material getRankMaterial(BotRank rank) {
         String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase();
-        String materialName = training.getConfig().getString(configPath);
+        String materialName = training.getLangString(configPath);
 
         if (materialName != null) {
             try {
@@ -68,7 +68,7 @@ public class RankItem extends AbstractItem {
             }
         }
 
-        String defaultMaterial = training.getConfig().getString("gui.rank-button.material", "DIAMOND_SWORD");
+        String defaultMaterial = training.getLangString("gui.rank-button.material", "DIAMOND_SWORD");
         try {
             return Material.valueOf(defaultMaterial.toUpperCase());
         } catch (IllegalArgumentException e) {
@@ -80,7 +80,7 @@ public class RankItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableRank()) {
-            String msg = training.getConfig().getString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }

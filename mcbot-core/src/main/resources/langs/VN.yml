@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aBot đã được tạo với các cài đặt đã chọn!'
+  totem-finish: '[%botname%] Đã hết totem'
+  dead-bot-msg: '&aBạn đã giết bot!'
+  dead-bot-event-msg: '&c[&eSỰ KIỆN&c] &eBot đã bị &b{player} &egiết'
+  despawn-bot: '&cBot đã bị xóa!'
+  save-changes: '&aĐã lưu thay đổi!'
+  reload-no-permission: '&cBạn không có quyền dùng lệnh này'
+  reload-usage: '&eCách dùng: /mcbreload <config|bot|maps|all>'
+  reload-config: '&aĐã tải lại cấu hình thành công'
+  reload-bot: '&aTất cả bot đang hoạt động đã bị xóa'
+  reload-maps: '&aTất cả bản đồ người chơi đã được xóa'
+  reload-all: '&aCấu hình, bot và bản đồ đã được tải lại/xóa'
+  reload-invalid-option: '&cTùy chọn không hợp lệ. Dùng: config, bot, maps, all'
+  combat-need-follow: '&cFollow phải BẬT để kích hoạt chiến đấu của bot'
+  bot-blocked-world: '&cBạn không thể dùng cái này ở đây!'
+  dead-bot-message: '{player} đã bị Bot của mình giết'
+  event-bot-already-active: '&cX Đã có một bot sự kiện đang hoạt động! Hãy xóa nó trước'
+  all-normal-bots-despawned: '&eTất cả bot thường đã bị xóa cho sự kiện'
+  cannot-spawn-normal-during-event: '&cX Bạn không thể spawn bot thường khi bot sự kiện đang hoạt động!'
+  event-bot-active-block-normal: '&cX Một bot sự kiện đang hoạt động! Bạn không thể spawn bot thường trong lúc có sự kiện'
+  must-despawn-normal-bot: '&cX Bạn đã có một bot thường được spawn! Hãy xóa nó trước khi quản lý bot sự kiện'
+  cannot-open-bot-while-ally: '&cBạn đã có một bot đồng minh được spawn. Hãy xóa nó trước khi dùng /bot.'
+  cannot-open-botally-while-single: '&cBạn đã có một bot đơn được spawn. Hãy xóa nó trước khi dùng /botally.'
+  armor-locked: '&cGiáp đã bị khóa: không thể chỉnh sửa cho bot này.'
+  blast-locked: '&cBảo vệ nổ đã bị khóa: không thể chỉnh sửa cho bot này.'
+  combat-locked: '&cChiến đấu đã bị khóa: không thể chỉnh sửa cho bot này.'
+  follow-locked: '&cFollow đã bị khóa: không thể chỉnh sửa cho bot này.'
+  follow-lock-combat: '&cBạn không thể tắt follow: chiến đấu đang bị khóa ở trạng thái BẬT.'
+  totem-locked: '&cTotem đã bị khóa: không thể chỉnh sửa cho bot này.'
+  rank-locked: '&cCấp bậc đã bị khóa: không thể chỉnh sửa cho bot này.'
+  ally:
+    pre-range-alert: '&e%player% đang đến gần, đang theo dõi vị trí...'
+    range-alert: '&c%player% được phát hiện là mối đe dọa, bắt đầu hành động ném bom'
+  team-ally:
+    pre-range-alert: '&e%player% đang đến gần đội, đang theo dõi vị trí...'
+    range-alert: '&c%player% được phát hiện là mối đe dọa với đội, bắt đầu hành động ném bom'
+    create-usage: '&eCách dùng: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cBạn phải chỉ định ít nhất 2 chủ sở hữu trực tuyến hợp lệ.'
+    gui-opened: '&aĐã mở GUI botteamally với các chủ sở hữu đã chọn.'
+    blocked-by-single: '&cBạn đã có một bot đơn được spawn. Hãy xóa nó trước khi dùng /botteamally.'
+    blocked-by-ally: '&cBạn đã có một bot đồng minh được spawn. Hãy xóa nó trước khi dùng /botteamally.'
+    no-active-teamally: '&cBạn không có bot đồng minh đội nào đang hoạt động.'
+    addowners-usage: '&eCách dùng: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eCách dùng: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cNgười chơi không hợp lệ/offline: &e%player%'
+    owner-already-present: '&e%player% &7đã là chủ sở hữu của bot đồng minh đội.'
+    owner-not-present: '&e%player% &7không phải là chủ sở hữu của bot đồng minh đội.'
+    owner-added: '&aĐã thêm chủ sở hữu: &e%player%'
+    owner-removed: '&aĐã xóa chủ sở hữu: &e%player%'
+    min-owners-reached: '&cBạn không thể xuống dưới 2 chủ sở hữu.'
+    duplicate-owner: '&cChủ sở hữu bị trùng trong lệnh: &e%player%'
+    owner-has-active-bot: '&c%player% đã có một bot đang hoạt động (%bottype%). Hãy xóa nó trước.'
+    team-spawned-notify: '&aBot đồng minh được spawn bởi %playerowner% cho đội với các chủ sở hữu này: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eBộ kit &7(đã chọn)'
+      unselected:
+        material: SHIELD
+        name: '&7Bộ kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eCấp bậc &7(đã chọn)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Cấp bậc'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eChủ sở hữu &7(đã chọn)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Chủ sở hữu'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eMục tiêu &7(đã chọn)'
+      unselected:
+        material: TARGET
+        name: '&7Mục tiêu'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Chủ sở hữu bot'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aCuộn lên'
+      cant-scroll: '&7Bạn đã ở trên cùng'
+    scroll-down:
+      name: '&aCuộn xuống'
+      cant-scroll: '&7Bạn đã ở dưới cùng'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Mục tiêu của bot'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aCuộn lên'
+      cant-scroll: '&7Bạn đã ở trên cùng'
+    scroll-down:
+      name: '&aCuộn xuống'
+      cant-scroll: '&7Bạn đã ở dưới cùng'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Loại: &e%type%'
+      - '&7Bảo vệ nổ: %blast_state%'
+      - ''
+      - '&eNhấp trái: &7đổi mảnh giáp'
+      - '&eNhấp phải: &7bật/tắt blast'
+  follow-button:
+    name: '&bBật/Tắt Follow'
+    material: LEAD
+    lore:
+    - '&7Trạng thái: &e%type%'
+    - ''
+    - '&eNhấp để bật/tắt follow'
+  spawn-button:
+    name: '&aSpawn Bot'
+    material: SPAWNER
+    lore:
+    - '&7Spawn bot luyện tập của bạn'
+    - '&7với cấu hình đã chọn'
+    - ''
+    - '&eNhấp để spawn!'
+  despawn-button:
+    name: '&cXóa Bot'
+    material: BARRIER
+    lore:
+    - '&7Xóa bot luyện tập của bạn'
+    - '&7khỏi thế giới'
+    - ''
+    - '&cNhấp để xóa!'
+  save-button:
+    name: '&aLưu thay đổi'
+    material: GREEN_WOOL
+    lore:
+    - '&7Lưu cài đặt hiện tại'
+    - '&7vào bot đang hoạt động'
+    - ''
+    - '&aNhấp để lưu!'
+  totem-button:
+    name: '&eSố lượng Totem'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Không giới hạn
+    lore:
+    - '&7Số lượng hiện tại: &a%count%'
+    - ''
+    - '&eNhấp trái: &a+1'
+    - '&eNhấp phải: &c-1'
+    - '&7(-1 = Totem không giới hạn)'
+  teleport-button:
+    name: '&5Dịch chuyển Bot'
+    material: ENDER_PEARL
+    lore:
+    - '&dDịch chuyển bot đến vị trí của bạn'
+  combat-button:
+    name: '&bBật/Tắt Combat'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Trạng thái: &e%type%'
+    - ''
+    - '&eNhấp để bật/tắt combat'
+  rank-button:
+    name: '&bCấp bậc'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eNhấp để tăng/giảm cấp bậc'

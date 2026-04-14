@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&a선택한 설정으로 봇이 소환되었습니다!'
+  totem-finish: '[%botname%] 토템을 모두 소진했습니다'
+  dead-bot-msg: '&a당신이 봇을 처치했습니다!'
+  dead-bot-event-msg: '&c[&e이벤트&c] &e봇이 &b{player}&e에게 처치되었습니다'
+  despawn-bot: '&c봇이 제거되었습니다!'
+  save-changes: '&a변경 사항이 저장되었습니다!'
+  reload-no-permission: '&c이 명령어를 사용할 권한이 없습니다'
+  reload-usage: '&e사용법: /mcbreload <config|bot|maps|all>'
+  reload-config: '&a구성이 성공적으로 다시 로드되었습니다'
+  reload-bot: '&a모든 활성 봇이 제거되었습니다'
+  reload-maps: '&a모든 플레이어 맵이 초기화되었습니다'
+  reload-all: '&a구성, 봇, 맵이 다시 로드되거나 초기화되었습니다'
+  reload-invalid-option: '&c잘못된 옵션입니다. 사용 가능: config, bot, maps, all'
+  combat-need-follow: '&c봇 전투를 활성화하려면 추적이 켜져 있어야 합니다'
+  bot-blocked-world: '&c여기서는 이것을 사용할 수 없습니다!'
+  dead-bot-message: '{player} 님이 자신의 봇에게 처치되었습니다'
+  event-bot-already-active: '&cX 이미 활성화된 이벤트 봇이 있습니다! 먼저 제거하세요'
+  all-normal-bots-despawned: '&e이벤트를 위해 모든 일반 봇이 제거되었습니다'
+  cannot-spawn-normal-during-event: '&cX 이벤트 봇이 활성화되어 있는 동안에는 일반 봇을 소환할 수 없습니다!'
+  event-bot-active-block-normal: '&cX 이벤트 봇이 활성화되어 있습니다! 이벤트 중에는 일반 봇을 소환할 수 없습니다'
+  must-despawn-normal-bot: '&cX 이미 일반 봇이 소환되어 있습니다! 이벤트 봇을 관리하기 전에 제거하세요'
+  cannot-open-bot-while-ally: '&c이미 동맹 봇이 소환되어 있습니다. /bot 을 사용하기 전에 제거하세요.'
+  cannot-open-botally-while-single: '&c이미 단일 봇이 소환되어 있습니다. /botally 를 사용하기 전에 제거하세요.'
+  armor-locked: '&c방어구가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  blast-locked: '&c폭발 보호가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  combat-locked: '&c전투가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  follow-locked: '&c추적이 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  follow-lock-combat: '&c추적을 비활성화할 수 없습니다: 전투가 켜짐으로 잠겨 있습니다.'
+  totem-locked: '&c토템이 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  rank-locked: '&c랭크가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  ally:
+    pre-range-alert: '&e%player% 님이 가까워지고 있습니다. 위치를 확인하는 중...'
+    range-alert: '&c%player% 님이 위협으로 감지되었습니다. 폭격 동작을 시작합니다'
+  team-ally:
+    pre-range-alert: '&e%player% 님이 팀에 가까워지고 있습니다. 위치를 확인하는 중...'
+    range-alert: '&c%player% 님이 팀의 위협으로 감지되었습니다. 폭격 동작을 시작합니다'
+    create-usage: '&e사용법: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&c최소 2명의 유효한 온라인 소유자를 지정해야 합니다.'
+    gui-opened: '&a선택한 소유자로 botteamally GUI를 열었습니다.'
+    blocked-by-single: '&c이미 단일 봇이 소환되어 있습니다. /botteamally 를 사용하기 전에 제거하세요.'
+    blocked-by-ally: '&c이미 동맹 봇이 소환되어 있습니다. /botteamally 를 사용하기 전에 제거하세요.'
+    no-active-teamally: '&c활성화된 팀 동맹 봇이 없습니다.'
+    addowners-usage: '&e사용법: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&e사용법: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&c잘못되었거나 오프라인인 플레이어: &e%player%'
+    owner-already-present: '&e%player% &7님은 이미 팀 동맹 봇의 소유자입니다.'
+    owner-not-present: '&e%player% &7님은 팀 동맹 봇의 소유자가 아닙니다.'
+    owner-added: '&a소유자 추가됨: &e%player%'
+    owner-removed: '&a소유자 제거됨: &e%player%'
+    min-owners-reached: '&c소유자를 2명 미만으로 줄일 수 없습니다.'
+    duplicate-owner: '&c명령어에 중복된 소유자: &e%player%'
+    owner-has-active-bot: '&c%player% 님은 이미 활성 봇(%bottype%)을 가지고 있습니다. 먼저 제거하세요.'
+    team-spawned-notify: '&a팀용 동맹 봇이 %playerowner% 님에 의해 소환되었습니다. 소유자: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&e키트 &7(선택됨)'
+      unselected:
+        material: SHIELD
+        name: '&7키트'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&e랭크 &7(선택됨)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7랭크'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&e소유자 &7(선택됨)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7소유자'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&e대상 &7(선택됨)'
+      unselected:
+        material: TARGET
+        name: '&7대상'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7봇 소유자'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a위로 스크롤'
+      cant-scroll: '&7이미 맨 위입니다'
+    scroll-down:
+      name: '&a아래로 스크롤'
+      cant-scroll: '&7이미 맨 아래입니다'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7봇 대상'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&a위로 스크롤'
+      cant-scroll: '&7이미 맨 위입니다'
+    scroll-down:
+      name: '&a아래로 스크롤'
+      cant-scroll: '&7이미 맨 아래입니다'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7유형: &e%type%'
+      - '&7폭발 보호: %blast_state%'
+      - ''
+      - '&e좌클릭: &7방어구 부위 변경'
+      - '&e우클릭: &7폭발 토글'
+  follow-button:
+    name: '&b추적 전환'
+    material: LEAD
+    lore:
+    - '&7상태: &e%type%'
+    - ''
+    - '&e클릭하여 추적 전환'
+  spawn-button:
+    name: '&a봇 소환'
+    material: SPAWNER
+    lore:
+    - '&7연습용 봇을 소환합니다'
+    - '&7선택한 설정으로'
+    - ''
+    - '&e클릭하여 소환!'
+  despawn-button:
+    name: '&c봇 제거'
+    material: BARRIER
+    lore:
+    - '&7연습용 봇을 제거합니다'
+    - '&7월드에서'
+    - ''
+    - '&c클릭하여 제거!'
+  save-button:
+    name: '&a변경 사항 저장'
+    material: GREEN_WOOL
+    lore:
+    - '&7현재 설정을 저장합니다'
+    - '&7활성 봇에'
+    - ''
+    - '&a클릭하여 저장!'
+  totem-button:
+    name: '&e토템 개수'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: 무제한
+    lore:
+    - '&7현재 개수: &a%count%'
+    - ''
+    - '&e좌클릭: &a+1'
+    - '&e우클릭: &c-1'
+    - '&7(-1 = 무제한 토템)'
+  teleport-button:
+    name: '&5봇 순간이동'
+    material: ENDER_PEARL
+    lore:
+    - '&d봇을 당신의 위치로 순간이동시킵니다'
+  combat-button:
+    name: '&b전투 전환'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7상태: &e%type%'
+    - ''
+    - '&e클릭하여 전투 전환'
+  rank-button:
+    name: '&b랭크'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&e클릭하여 랭크를 올리거나 내리기'

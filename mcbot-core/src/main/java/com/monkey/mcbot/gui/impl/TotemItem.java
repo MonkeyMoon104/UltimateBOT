@@ -27,14 +27,14 @@ public class TotemItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getConfig().getString("gui.totem-button.material")));
+        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.totem-button.material")));
 
-        String unlimitedText = training.getConfig().getString("gui.totem-button.unlimited-text");
+        String unlimitedText = training.getLangString("gui.totem-button.unlimited-text");
         String countLine = options.getTotems() == -1
                 ? unlimitedText
                 : String.valueOf(options.getTotems());
-        builder.setDisplayName(ChatColorUtils.translate(training.getConfig().getString("gui.totem-button.name")));
-        var loreLines = training.getConfig().getStringList("gui.totem-button.lore");
+        builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.totem-button.name")));
+        var loreLines = training.getLangStringList("gui.totem-button.lore");
 
         for (String line : loreLines) {
             assert countLine != null;
@@ -47,7 +47,7 @@ public class TotemItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableTotem()) {
-            String msg = training.getConfig().getString("messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
+            String msg = training.getLangString("messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }

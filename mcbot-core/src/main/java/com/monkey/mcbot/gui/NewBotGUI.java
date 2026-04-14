@@ -52,14 +52,14 @@ public class NewBotGUI {
             }
         }
         if (options == null) {
-            options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getConfig(), training));
+            options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
         }
 
         options.setBotType(botType);
         options.clampCurrentTotemCount();
 
-        String borderMatName = training.getConfig().getString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
-        String borderName    = training.getConfig().getString("gui.tab-border.name", " ");
+        String borderMatName = training.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
+        String borderName    = training.getLangString("gui.tab-border.name", " ");
         Material borderMat;
         try {
             borderMat = Material.valueOf(borderMatName.toUpperCase());

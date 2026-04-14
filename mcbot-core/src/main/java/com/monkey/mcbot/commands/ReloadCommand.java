@@ -24,12 +24,12 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (!sender.hasPermission("mcb.admin.use")) {
-            sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-no-permission")));
+            sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-no-permission")));
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-usage")));
+            sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-usage")));
             return true;
         }
 
@@ -38,29 +38,29 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
         switch (option) {
             case "config" -> {
                 reloadConfig();
-                sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-config")));
+                sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-config")));
             }
             case "bot" -> {
                 reloadBot();
-                sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-bot")));
+                sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-bot")));
             }
             case "maps" -> {
                 reloadMaps();
-                sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-maps")));
+                sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-maps")));
             }
             case "all" -> {
                 reloadAll();
-                sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-all")));
+                sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-all")));
             }
             default ->
-                    sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-invalid-option")));
+                    sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-invalid-option")));
         }
 
         return true;
     }
 
     public void reloadConfig() {
-        plugin.reloadConfig();
+        plugin.reloadPluginConfiguration();
     }
 
     public void reloadBot() {

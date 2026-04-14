@@ -473,7 +473,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                                     Set<UUID> targetUUIDs,
                                     Set<UUID> teamOwners,
                                     BotSettings settings) {
-        BotOptions options = new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getConfig(), plugin));
+        BotOptions options = new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
         options.setBotType(type);
         options.setCreationSource(BotCreationSource.API);
         options.setOwnerUUID(ownerUUID);

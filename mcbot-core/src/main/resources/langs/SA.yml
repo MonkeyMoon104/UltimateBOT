@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aتم إنشاء البوت بالإعدادات المحددة!'
+  totem-finish: '[%botname%] نفدت التوتِمات'
+  dead-bot-msg: '&aلقد قتلت البوت!'
+  dead-bot-event-msg: '&c[&eحدث&c] &eتم قتل البوت بواسطة &b{player}'
+  despawn-bot: '&cتمت إزالة البوت!'
+  save-changes: '&aتم حفظ التغييرات!'
+  reload-no-permission: '&cليس لديك إذن لاستخدام هذا الأمر'
+  reload-usage: '&eالاستخدام: /mcbreload <config|bot|maps|all>'
+  reload-config: '&aتمت إعادة تحميل الإعدادات بنجاح'
+  reload-bot: '&aتمت إزالة جميع البوتات النشطة'
+  reload-maps: '&aتم مسح جميع خرائط اللاعبين'
+  reload-all: '&aتمت إعادة تحميل/مسح الإعدادات والبوتات والخرائط'
+  reload-invalid-option: '&cخيار غير صالح. استخدم: config, bot, maps, all'
+  combat-need-follow: '&cيجب أن يكون Follow مفعّلًا لتفعيل قتال البوت'
+  bot-blocked-world: '&cلا يمكنك استخدام هذا هنا!'
+  dead-bot-message: '{player} قُتل بواسطة الـ Bot الخاص به'
+  event-bot-already-active: '&cX يوجد بالفعل بوت حدث نشط! قم بإزالته أولًا'
+  all-normal-bots-despawned: '&eتمت إزالة جميع البوتات العادية من أجل الحدث'
+  cannot-spawn-normal-during-event: '&cX لا يمكنك إنشاء بوت عادي أثناء وجود بوت حدث نشط!'
+  event-bot-active-block-normal: '&cX هناك بوت حدث نشط! لا يمكنك إنشاء بوتات عادية أثناء الحدث'
+  must-despawn-normal-bot: '&cX لديك بالفعل بوت عادي تم إنشاؤه! أزله قبل إدارة بوت الحدث'
+  cannot-open-bot-while-ally: '&cلديك بالفعل بوت حليف تم إنشاؤه. أزله قبل استخدام /bot.'
+  cannot-open-botally-while-single: '&cلديك بالفعل بوت فردي تم إنشاؤه. أزله قبل استخدام /botally.'
+  armor-locked: '&cالدرع مقفل: لا يمكن تعديله لهذا البوت.'
+  blast-locked: '&cحماية الانفجار مقفلة: لا يمكن تعديلها لهذا البوت.'
+  combat-locked: '&cالقتال مقفل: لا يمكن تعديله لهذا البوت.'
+  follow-locked: '&cFollow مقفل: لا يمكن تعديله لهذا البوت.'
+  follow-lock-combat: '&cلا يمكنك تعطيل follow: القتال مقفل على وضع التشغيل.'
+  totem-locked: '&cالتوتِمات مقفلة: لا يمكن تعديلها لهذا البوت.'
+  rank-locked: '&cالرتبة مقفلة: لا يمكن تعديلها لهذا البوت.'
+  ally:
+    pre-range-alert: '&e%player% يقترب، تتم مراقبة الموقع...'
+    range-alert: '&cتم اكتشاف %player% كتهديد، بدء عملية القصف'
+  team-ally:
+    pre-range-alert: '&e%player% يقترب من الفريق، تتم مراقبة الموقع...'
+    range-alert: '&cتم اكتشاف %player% كتهديد للفريق، بدء عملية القصف'
+    create-usage: '&eالاستخدام: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cيجب عليك تحديد مالكين صالحين على الأقل ومتصلين.'
+    gui-opened: '&aتم فتح واجهة botteamally بالمالكين المحددين.'
+    blocked-by-single: '&cلديك بالفعل بوت فردي تم إنشاؤه. أزله قبل استخدام /botteamally.'
+    blocked-by-ally: '&cلديك بالفعل بوت حليف تم إنشاؤه. أزله قبل استخدام /botteamally.'
+    no-active-teamally: '&cليس لديك بوت حليف للفريق نشط.'
+    addowners-usage: '&eالاستخدام: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eالاستخدام: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cلاعب غير صالح/غير متصل: &e%player%'
+    owner-already-present: '&e%player% &7هو بالفعل أحد مالكي بوت الحليف للفريق.'
+    owner-not-present: '&e%player% &7ليس مالكًا لبوت الحليف للفريق.'
+    owner-added: '&aتمت إضافة المالك: &e%player%'
+    owner-removed: '&aتمت إزالة المالك: &e%player%'
+    min-owners-reached: '&cلا يمكنك النزول لأقل من مالكين.'
+    duplicate-owner: '&cمالك مكرر في الأمر: &e%player%'
+    owner-has-active-bot: '&c%player% لديه بالفعل بوت نشط (%bottype%). أزله أولًا.'
+    team-spawned-notify: '&aتم إنشاء بوت حليف بواسطة %playerowner% للفريق مع هؤلاء المالكين: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eالعدة &7(محدد)'
+      unselected:
+        material: SHIELD
+        name: '&7العدة'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eالرتبة &7(محدد)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7الرتبة'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eالمالكون &7(محدد)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7المالكون'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eالأهداف &7(محدد)'
+      unselected:
+        material: TARGET
+        name: '&7الأهداف'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7مالك البوت'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aالتمرير للأعلى'
+      cant-scroll: '&7أنت بالفعل في الأعلى'
+    scroll-down:
+      name: '&aالتمرير للأسفل'
+      cant-scroll: '&7أنت بالفعل في الأسفل'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7هدف البوت'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aالتمرير للأعلى'
+      cant-scroll: '&7أنت بالفعل في الأعلى'
+    scroll-down:
+      name: '&aالتمرير للأسفل'
+      cant-scroll: '&7أنت بالفعل في الأسفل'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7النوع: &e%type%'
+      - '&7حماية الانفجار: %blast_state%'
+      - ''
+      - '&eنقرة يسار: &7تغيير قطعة الدرع'
+      - '&eنقرة يمين: &7تبديل blast'
+  follow-button:
+    name: '&bتبديل Follow'
+    material: LEAD
+    lore:
+    - '&7الحالة: &e%type%'
+    - ''
+    - '&eانقر لتبديل follow'
+  spawn-button:
+    name: '&aإنشاء بوت'
+    material: SPAWNER
+    lore:
+    - '&7أنشئ بوت التدريب الخاص بك'
+    - '&7بالإعدادات المحددة'
+    - ''
+    - '&eانقر للإنشاء!'
+  despawn-button:
+    name: '&cإزالة البوت'
+    material: BARRIER
+    lore:
+    - '&7أزل بوت التدريب الخاص بك'
+    - '&7من العالم'
+    - ''
+    - '&cانقر للإزالة!'
+  save-button:
+    name: '&aحفظ التغييرات'
+    material: GREEN_WOOL
+    lore:
+    - '&7يحفظ الإعدادات الحالية'
+    - '&7للبوت النشط'
+    - ''
+    - '&aانقر للحفظ!'
+  totem-button:
+    name: '&eعدد التوتِمات'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: غير محدود
+    lore:
+    - '&7العدد الحالي: &a%count%'
+    - ''
+    - '&eنقرة يسار: &a+1'
+    - '&eنقرة يمين: &c-1'
+    - '&7(-1 = توتِمات غير محدودة)'
+  teleport-button:
+    name: '&5نقل البوت'
+    material: ENDER_PEARL
+    lore:
+    - '&dينقل البوت إلى موقعك'
+  combat-button:
+    name: '&bتبديل القتال'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7الحالة: &e%type%'
+    - ''
+    - '&eانقر لتبديل القتال'
+  rank-button:
+    name: '&bالرتبة'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eانقر لزيادة/خفض الرتبة'

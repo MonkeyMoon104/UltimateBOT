@@ -28,20 +28,20 @@ public class BotAllyCommand implements CommandExecutor {
         }
 
         if (!sender.hasPermission("mcb.bot.use")) {
-            sender.sendMessage(ChatColorUtils.translate(plugin.getConfig().getString("messages.reload-no-permission", "")));
+            sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-no-permission", "")));
             return true;
         }
 
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
+            String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
 
         if (isEventBotActive()) {
-            String msg = plugin.getConfig().getString("messages.event-bot-active-block-normal");
+            String msg = plugin.getLangString("messages.event-bot-active-block-normal");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -70,7 +70,7 @@ public class BotAllyCommand implements CommandExecutor {
 
     private String getConflictMessage(BotType activeType) {
         if (activeType == BotType.SINGLE) {
-            return plugin.getConfig().getString(
+            return plugin.getLangString(
                     "messages.cannot-open-botally-while-single",
                     "&cYou already have a single bot spawned. Despawn it before using /botally."
             );

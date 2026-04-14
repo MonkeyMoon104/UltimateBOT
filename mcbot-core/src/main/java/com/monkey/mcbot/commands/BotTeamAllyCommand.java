@@ -40,7 +40,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getConfig().getString("messages.bot-blocked-world", "&cYou cannot use this here!");
+            String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -114,7 +114,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
 
         BotOptions options = plugin.getPlayerOptions().getOptions(player.getUniqueId());
         if (options == null) {
-            options = new BotOptions(plugin, com.monkey.mcbot.utils.armor.ArmorCycle.getDefaultArmorFromConfig(plugin.getConfig(), plugin));
+            options = new BotOptions(plugin, com.monkey.mcbot.utils.armor.ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
         }
 
         options.setBotType(BotType.TEAM_ALLY);
@@ -395,14 +395,14 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendConfigured(Player player, String path) {
-        String msg = plugin.getConfig().getString(path);
+        String msg = plugin.getLangString(path);
         if (msg != null && !msg.isBlank()) {
             player.sendMessage(ChatColorUtils.translate(msg));
         }
     }
 
     private void sendConfigured(Player player, String path, String placeholder, String value) {
-        String msg = plugin.getConfig().getString(path);
+        String msg = plugin.getLangString(path);
         if (msg != null && !msg.isBlank()) {
             player.sendMessage(ChatColorUtils.translate(msg.replace(placeholder, value)));
         }
@@ -414,7 +414,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
                                 String valueA,
                                 String placeholderB,
                                 String valueB) {
-        String msg = plugin.getConfig().getString(path);
+        String msg = plugin.getLangString(path);
         if (msg != null && !msg.isBlank()) {
             player.sendMessage(ChatColorUtils.translate(msg.replace(placeholderA, valueA).replace(placeholderB, valueB)));
         }

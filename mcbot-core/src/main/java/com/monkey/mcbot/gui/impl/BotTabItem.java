@@ -32,7 +32,7 @@ public class BotTabItem extends TabItem {
 
         String basePath = "gui.tab-item.tab-" + tab + "." + (selected ? "selected" : "unselected");
 
-        String materialName = training.getConfig().getString(basePath + ".material",
+        String materialName = training.getLangString(basePath + ".material",
                 selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
         String displayName = isTemporarilyHiddenTab()
                 ? HIDDEN_TAB_NAME
@@ -63,7 +63,7 @@ public class BotTabItem extends TabItem {
     }
 
     private String resolveConfiguredDisplayName(String basePath, boolean selected) {
-        return training.getConfig().getString(basePath + ".name",
+        return training.getLangString(basePath + ".name",
                 "&eTab " + tab + (selected ? " &7(selezionato)" : ""));
     }
 }

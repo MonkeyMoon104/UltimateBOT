@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aBot seçilen ayarlarla oluşturuldu!'
+  totem-finish: '[%botname%] Totemleri tükendi'
+  dead-bot-msg: '&aBotu öldürdün!'
+  dead-bot-event-msg: '&c[&eETKİNLİK&c] &eBot &b{player} &etarafından öldürüldü'
+  despawn-bot: '&cBot kaldırıldı!'
+  save-changes: '&aDeğişiklikler kaydedildi!'
+  reload-no-permission: '&cBu komutu kullanma izniniz yok'
+  reload-usage: '&eKullanım: /mcbreload <config|bot|maps|all>'
+  reload-config: '&aYapılandırma başarıyla yeniden yüklendi'
+  reload-bot: '&aTüm aktif botlar kaldırıldı'
+  reload-maps: '&aTüm oyuncu haritaları temizlendi'
+  reload-all: '&aYapılandırma, botlar ve haritalar yeniden yüklendi/temizlendi'
+  reload-invalid-option: '&cGeçersiz seçenek. Şunu kullanın: config, bot, maps, all'
+  combat-need-follow: '&cBot savaşını etkinleştirmek için Follow AÇIK olmalıdır'
+  bot-blocked-world: '&cBunu burada kullanamazsın!'
+  dead-bot-message: '{player}, kendi Botu tarafından öldürüldü'
+  event-bot-already-active: '&cX Zaten aktif bir etkinlik botu var! Önce onu kaldır'
+  all-normal-bots-despawned: '&eEtkinlik için tüm normal botlar kaldırıldı'
+  cannot-spawn-normal-during-event: '&cX Bir etkinlik botu aktifken normal bot oluşturamazsın!'
+  event-bot-active-block-normal: '&cX Bir etkinlik botu aktif! Etkinlik sırasında normal bot oluşturamazsın'
+  must-despawn-normal-bot: '&cX Zaten oluşturulmuş normal bir botun var! Etkinlik botunu yönetmeden önce onu kaldır'
+  cannot-open-bot-while-ally: '&cZaten oluşturulmuş bir müttefik botun var. /bot kullanmadan önce onu kaldır.'
+  cannot-open-botally-while-single: '&cZaten oluşturulmuş tekli bir botun var. /botally kullanmadan önce onu kaldır.'
+  armor-locked: '&cZırh kilitli: bu bot için değiştirilemez.'
+  blast-locked: '&cPatlama koruması kilitli: bu bot için değiştirilemez.'
+  combat-locked: '&cSavaş kilitli: bu bot için değiştirilemez.'
+  follow-locked: '&cFollow kilitli: bu bot için değiştirilemez.'
+  follow-lock-combat: '&cFollow''u devre dışı bırakamazsın: savaş AÇIK olarak kilitli.'
+  totem-locked: '&cTotemler kilitli: bu bot için değiştirilemez.'
+  rank-locked: '&cRütbe kilitli: bu bot için değiştirilemez.'
+  ally:
+    pre-range-alert: '&e%player% yaklaşıyor, konum izleniyor...'
+    range-alert: '&c%player% tehdit olarak algılandı, bombalama eylemi başlatılıyor'
+  team-ally:
+    pre-range-alert: '&e%player% takıma yaklaşıyor, konum izleniyor...'
+    range-alert: '&c%player% takım için tehdit olarak algılandı, bombalama eylemi başlatılıyor'
+    create-usage: '&eKullanım: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cEn az 2 geçerli çevrimiçi sahip belirtmelisiniz.'
+    gui-opened: '&aSeçilen sahiplerle botteamally arayüzü açıldı.'
+    blocked-by-single: '&cZaten oluşturulmuş tekli bir botun var. /botteamally kullanmadan önce onu kaldır.'
+    blocked-by-ally: '&cZaten oluşturulmuş bir müttefik botun var. /botteamally kullanmadan önce onu kaldır.'
+    no-active-teamally: '&cAktif bir takım müttefik botun yok.'
+    addowners-usage: '&eKullanım: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eKullanım: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cGeçersiz/çevrimdışı oyuncu: &e%player%'
+    owner-already-present: '&e%player% &7zaten takım müttefik botunun bir sahibidir.'
+    owner-not-present: '&e%player% &7takım müttefik botunun sahibi değil.'
+    owner-added: '&aSahip eklendi: &e%player%'
+    owner-removed: '&aSahip kaldırıldı: &e%player%'
+    min-owners-reached: '&c2 sahibin altına inemezsin.'
+    duplicate-owner: '&cKomutta yinelenen sahip: &e%player%'
+    owner-has-active-bot: '&c%player% zaten aktif bir bota sahip (%bottype%). Önce onu kaldır.'
+    team-spawned-notify: '&aTakım için şu sahiplerle %playerowner% tarafından müttefik bot oluşturuldu: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(seçili)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRütbe &7(seçili)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Rütbe'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eSahipler &7(seçili)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Sahipler'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eHedefler &7(seçili)'
+      unselected:
+        material: TARGET
+        name: '&7Hedefler'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Bot sahibi'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aYukarı kaydır'
+      cant-scroll: '&7Zaten en üsttesin'
+    scroll-down:
+      name: '&aAşağı kaydır'
+      cant-scroll: '&7Zaten en alttasın'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Bot hedefi'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aYukarı kaydır'
+      cant-scroll: '&7Zaten en üsttesin'
+    scroll-down:
+      name: '&aAşağı kaydır'
+      cant-scroll: '&7Zaten en alttasın'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Tür: &e%type%'
+      - '&7Patlama Koruması: %blast_state%'
+      - ''
+      - '&eSol tık: &7zırh parçasını değiştir'
+      - '&eSağ tık: &7blast''ı aç/kapat'
+  follow-button:
+    name: '&bFollow''u Değiştir'
+    material: LEAD
+    lore:
+    - '&7Durum: &e%type%'
+    - ''
+    - '&eFollow''u değiştirmek için tıkla'
+  spawn-button:
+    name: '&aBot Oluştur'
+    material: SPAWNER
+    lore:
+    - '&7Antrenman botunu oluştur'
+    - '&7seçilen yapılandırmayla'
+    - ''
+    - '&eOluşturmak için tıkla!'
+  despawn-button:
+    name: '&cBotu Kaldır'
+    material: BARRIER
+    lore:
+    - '&7Antrenman botunu kaldır'
+    - '&7dünyadan'
+    - ''
+    - '&cKaldırmak için tıkla!'
+  save-button:
+    name: '&aDeğişiklikleri Kaydet'
+    material: GREEN_WOOL
+    lore:
+    - '&7Geçerli ayarları kaydeder'
+    - '&7aktif bota'
+    - ''
+    - '&aKaydetmek için tıkla!'
+  totem-button:
+    name: '&eTotem Sayısı'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Sınırsız
+    lore:
+    - '&7Geçerli sayı: &a%count%'
+    - ''
+    - '&eSol tık: &a+1'
+    - '&eSağ tık: &c-1'
+    - '&7(-1 = Sınırsız totem)'
+  teleport-button:
+    name: '&5Botu Işınla'
+    material: ENDER_PEARL
+    lore:
+    - '&dBotu bulunduğun konuma ışınlar'
+  combat-button:
+    name: '&bSavaşı Değiştir'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Durum: &e%type%'
+    - ''
+    - '&eSavaşı değiştirmek için tıkla'
+  rank-button:
+    name: '&bRütbe'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eRütbeyi artırmak/azaltmak için tıkla'

@@ -17,8 +17,7 @@ public class TotemNotificationManager implements ITotemNotificationManager {
     public void sendTotemWarning(ITrainingBot trainingBot) {
         var player = trainingBot.getTargetPlayer();
         if (player != null && player.isOnline()) {
-            String msg = plugin.getConfig()
-                    .getString("messages.totem-finish", "[%botname%] Running out of totems");
+            String msg = plugin.getLangString("messages.totem-finish", "[%botname%] Running out of totems");
             String rawName = plugin.getConfig().getString("bot.name", "CrystalBot");
             String botName = rawName.replace("%player%", player.getName());
             msg = msg.replace("%botname%", botName);
