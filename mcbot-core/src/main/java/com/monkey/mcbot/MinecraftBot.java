@@ -20,6 +20,8 @@ import com.monkey.mcbot.placeholders.PlaceholderRegistration;
 import com.monkey.mcbot.update.UpdateManager;
 import com.monkey.mcbot.update.UpdateStartupResult;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
@@ -32,6 +34,8 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public final class MinecraftBot extends JavaPlugin {
+
+    private static final int BSTATS_PLUGIN_ID = 30749;
 
     private PlayerOptions playerOptions;
     private BotRegistry botRegistry;
@@ -180,6 +184,15 @@ public final class MinecraftBot extends JavaPlugin {
             MinecraftBotLogging.logApiRegistered(getLogger(), api);
             getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
             startup.ready("Event", MinecraftBotReadyEvent.class.getSimpleName() + " fired");
+
+            try {
+                Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
+                metrics.addCustomChart(new SimplePie("plugin_version", () -> getPluginMeta().getVersion()));
+                startup.ready("bStats", "metrics enabled");
+            } catch (Throwable metricsError) {
+                startup.warn("bStats", "metrics init failed -> " + formatListenerError(metricsError));
+            }
+
             if (licenseManager != null) {
                 licenseManager.startHeartbeat();
                 startup.ready("License", "heartbeat started");

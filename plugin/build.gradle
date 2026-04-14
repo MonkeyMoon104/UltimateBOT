@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.8.2'
+        classpath 'com.guardsquare:proguard-gradle:7.9.1'
     }
 }
 
@@ -60,6 +60,7 @@ dependencies {
 shadowJar {
     archiveFileName.set('MinecraftBot-unobfuscated.jar')
     mergeServiceFiles()
+    relocate('org.bstats', 'com.monkey.mcbot.libs.bstats')
 }
 
 tasks.register('obfuscatePluginJar', ProGuardTask) {

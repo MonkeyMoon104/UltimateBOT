@@ -46,6 +46,10 @@
 # Jackson relies on enum metadata/lookup methods that break under aggressive
 # obfuscation.
 -keep class com.fasterxml.jackson.** { *; }
+
+# Keep relocated bStats classes stable. Metrics starts during bootstrap and is
+# not worth obfuscating.
+-keep class com.monkey.mcbot.libs.bstats.** { *; }
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);

@@ -10,8 +10,9 @@ dependencies {
     implementation project(':mcbot-api')
     paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
 
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+    implementation 'org.bstats:bstats-bukkit:3.2.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.2'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.2'
     implementation "xyz.xenondevs.invui:invui:1.49"
     compileOnly 'me.clip:placeholderapi:2.12.2'
     compileOnly 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
