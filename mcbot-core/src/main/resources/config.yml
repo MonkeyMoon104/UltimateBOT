@@ -8,6 +8,7 @@ updates:
 
 messages:
   spawn-bot: "&aBot spawned with the selected settings!"
+  totem-finish: "[%botname%] Ran out of totems"
   dead-bot-msg: "&aYou killed the bot!"
   dead-bot-event-msg: "&c[&eEVENT&c] &eThe bot was killed by &b{player}"
   despawn-bot: "&cBot removed!"
@@ -64,7 +65,6 @@ messages:
 
 bot:
   name: "MinecraftBot"
-  totem-finish: "[%botname%] Ran out of totems"
   default-totem-count: -1
   max-totem-normal: 37
   max-totem-event: 74
