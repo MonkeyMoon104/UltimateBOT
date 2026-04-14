@@ -60,8 +60,8 @@ public final class MinecraftBotAPI {
     public static void register(MinecraftBotAPI api) {
         instance = Objects.requireNonNull(api, "api");
         LOGGER.info(() -> "MinecraftBotAPI registered. plugin=" + api.plugin.getName()
-                + ", botManager=" + api.botManager.getClass().getSimpleName()
-                + ", botRegistry=" + api.botRegistry.getClass().getSimpleName());
+                + ", botManager=bound"
+                + ", botRegistry=bound");
     }
 
     /**

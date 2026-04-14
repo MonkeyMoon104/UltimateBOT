@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.entity.Entity;
@@ -85,7 +86,7 @@ public class PlayerCheckListener implements Listener {
 
         Entity killer = event.getEntity().getKiller();
 
-        if (killer instanceof org.bukkit.entity.Player && killer.getClass().getSimpleName().equals("BotCraftPlayer")) {
+        if (killer instanceof BotCraftPlayer) {
             String deathMessage = plugin.getConfig().getString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
             event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
             return;

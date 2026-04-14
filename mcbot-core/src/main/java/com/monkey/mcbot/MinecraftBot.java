@@ -29,6 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public final class MinecraftBot extends JavaPlugin {
 
@@ -110,8 +111,8 @@ public final class MinecraftBot extends JavaPlugin {
                     new CoreBotRegistryAdapter(botRegistry)
             );
             startup.ready("API", "adapters wired");
-            startup.detail("Manager", api.getBotManager().getClass().getSimpleName());
-            startup.detail("Registry", api.getBotRegistry().getClass().getSimpleName());
+            startup.detail("Manager", MinecraftBotLogging.apiManagerSummary());
+            startup.detail("Registry", MinecraftBotLogging.apiRegistrySummary());
             startup.completePhase("public API prepared");
 
             startup.beginPhase(7, "Hooks", "Commands and Listeners");
@@ -127,12 +128,24 @@ public final class MinecraftBot extends JavaPlugin {
             startup.markCommands(registeredCommands);
 
             List<String> registeredListeners = new ArrayList<>();
-            registerListener(startup, registeredListeners, new PlayerCheckListener(this));
-            registerListener(startup, registeredListeners, new PlayerTagListener(this));
-            startup.markListeners(registeredListeners);
+            List<String> disabledListeners = new ArrayList<>();
+            registerListener(startup, registeredListeners, "required", new PlayerCheckListener(this));
+            registerOptionalListener(
+                    startup,
+                    registeredListeners,
+                    disabledListeners,
+                    "optional integration",
+                    this::isCombatLogXListenerAvailable,
+                    "CombatLogX dependency unavailable",
+                    () -> new PlayerTagListener(this)
+            );
+            startup.markListeners(registeredListeners, disabledListeners);
             startup.ready("Hooks", "registrations completed");
             startup.detail("Commands", joinOrNone(registeredCommands));
-            startup.detail("Listeners", joinOrNone(registeredListeners));
+            startup.detail("Listeners", startup.listenerStateCountSummary());
+            if (!disabledListeners.isEmpty()) {
+                startup.detail("Listener fallback", joinOrNone(disabledListeners));
+            }
             startup.completePhase("hooks registered");
 
             startup.beginPhase(8, "PAPI", "Placeholder Integration");
@@ -247,9 +260,54 @@ public final class MinecraftBot extends JavaPlugin {
 
     private void registerListener(MinecraftBotLogging.StartupSession startup,
                                   List<String> registeredListeners,
+                                  String label,
                                   Listener listener) {
         getServer().getPluginManager().registerEvents(listener, this);
-        registeredListeners.add(listener.getClass().getSimpleName());
+        registeredListeners.add(label);
+    }
+
+    private void registerOptionalListener(MinecraftBotLogging.StartupSession startup,
+                                          List<String> registeredListeners,
+                                          List<String> disabledListeners,
+                                          String label,
+                                          Supplier<Boolean> availabilityCheck,
+                                          String unavailableReason,
+                                          Supplier<? extends Listener> listenerSupplier) {
+        if (!availabilityCheck.get()) {
+            disabledListeners.add(label + " -> " + unavailableReason);
+            startup.warn("Listener " + label, "disabled -> " + unavailableReason);
+            return;
+        }
+
+        try {
+            registerListener(startup, registeredListeners, label, listenerSupplier.get());
+        } catch (Throwable error) {
+            String reason = "registration failed: " + formatListenerError(error);
+            disabledListeners.add(label + " -> " + reason);
+            startup.warn("Listener " + label, "disabled -> " + reason);
+        }
+    }
+
+    private boolean isCombatLogXListenerAvailable() {
+        return getServer().getPluginManager().getPlugin("CombatLogX") != null
+                && hasRuntimeClass("com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent");
+    }
+
+    private boolean hasRuntimeClass(String className) {
+        try {
+            Class.forName(className, false, getClassLoader());
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    private String formatListenerError(Throwable error) {
+        String message = error.getMessage();
+        if (message == null || message.isBlank()) {
+            return error.getClass().getSimpleName();
+        }
+        return error.getClass().getSimpleName() + " -> " + message;
     }
 
     private void cleanupRuntimeState() {

@@ -4,21 +4,6 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.MinecraftBotAPI;
 import com.monkey.mcbot.api.model.BotMode;
 import com.monkey.mcbot.bot.BotType;
-import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatDataManager;
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStateManager;
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatStrategyExecutor;
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.PathfindingManager;
-import com.monkey.mcbot.bot.ai.controllers.cpvp.BotCPVPController;
-import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
-import com.monkey.mcbot.bot.ai.controllers.heal.BotHealController;
-import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
-import com.monkey.mcbot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
-import com.monkey.mcbot.bot.ai.controllers.rapvp.BotRAPVPController;
-import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.mcbot.bot.ai.controllers.teleport.BotTeleportController;
-import com.monkey.mcbot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.mcbot.nms.INMSBridge;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -46,23 +31,7 @@ public final class MinecraftBotLogging {
     private static final long WARMUP_REPORT_DELAY_TICKS = 20L;
     private static final long STABLE_REPORT_DELAY_TICKS = 60L;
 
-    private static final List<Class<?>> CONTROLLER_CLASSES = List.of(
-            BotNoobMovementController.class,
-            BotMovementController.class,
-            BotRotationController.class,
-            BotTotemController.class,
-            BotAttackController.class,
-            BotInventoryController.class,
-            BotHealController.class,
-            BotTeleportController.class,
-            BotEnderpearlController.class,
-            BotCPVPController.class,
-            BotRAPVPController.class,
-            CombatStateManager.class,
-            CombatDataManager.class,
-            PathfindingManager.class,
-            CombatStrategyExecutor.class
-    );
+    private static final int INTERNAL_CONTROLLER_COUNT = 15;
 
     private MinecraftBotLogging() {
     }
@@ -88,7 +57,7 @@ public final class MinecraftBotLogging {
                         "Boot",
                         "Startup stable -> memory=" + formatMemorySnapshot()
                                 + " | commands=" + session.commandCount()
-                                + " | listeners=" + session.listenerCount()
+                                + " | listeners=" + session.listenerStateCountSummary()
                                 + " | playerOptions=" + safePlayerOptionCount(plugin)
                 ), STABLE_REPORT_DELAY_TICKS);
     }
@@ -96,13 +65,11 @@ public final class MinecraftBotLogging {
     public static String catalogSummary() {
         return "types=" + BotType.values().length
                 + " | modes=" + BotMode.values().length
-                + " | controllers=" + CONTROLLER_CLASSES.size();
+                + " | controllers=" + INTERNAL_CONTROLLER_COUNT;
     }
 
     public static String controllerSummary() {
-        return CONTROLLER_CLASSES.stream()
-                .map(Class::getSimpleName)
-                .collect(Collectors.joining(", "));
+        return "count=" + INTERNAL_CONTROLLER_COUNT + " | names=hidden";
     }
 
     public static void logNmsInitStart(Logger logger, String minecraftVersion, String className, String supportedVersions) {
@@ -129,10 +96,18 @@ public final class MinecraftBotLogging {
                 logger,
                 "API",
                 "Public API registered -> manager="
-                        + api.getBotManager().getClass().getSimpleName()
+                        + apiManagerSummary()
                         + " | registry="
-                        + api.getBotRegistry().getClass().getSimpleName()
+                        + apiRegistrySummary()
         );
+    }
+
+    public static String apiManagerSummary() {
+        return "bound";
+    }
+
+    public static String apiRegistrySummary() {
+        return "bound";
     }
 
     public static void info(Logger logger, String module, String message) {
@@ -262,6 +237,7 @@ public final class MinecraftBotLogging {
         private String nmsSupportedVersions = "pending";
         private List<String> registeredCommands = List.of();
         private List<String> registeredListeners = List.of();
+        private List<String> disabledListeners = List.of();
         private List<String> registeredPlaceholders = List.of();
         private boolean placeholderPresent;
         private boolean placeholderRegistered;
@@ -316,8 +292,9 @@ public final class MinecraftBotLogging {
             this.registeredCommands = List.copyOf(registeredCommands);
         }
 
-        public void markListeners(List<String> registeredListeners) {
+        public void markListeners(List<String> registeredListeners, List<String> disabledListeners) {
             this.registeredListeners = List.copyOf(registeredListeners);
+            this.disabledListeners = List.copyOf(disabledListeners);
         }
 
         public void markPlaceholders(boolean placeholderPresent,
@@ -353,10 +330,13 @@ public final class MinecraftBotLogging {
                     plugin.getDescription().getName() + " enabled",
                     "Startup time: " + formatDuration(totalDuration),
                     "NMS: " + nmsBridgeName + " | supported: " + nmsSupportedVersions,
-                    "Commands: " + commandCount() + " | listeners: " + listenerCount() + " | placeholders: " + placeholderCount()
+                    "Commands: " + commandCount() + " | listeners: " + listenerStateCountSummary() + " | placeholders: " + placeholderCount()
             );
             MinecraftBotLogging.detail(logger, "Boot", "Command list -> " + joinOrNone(registeredCommands));
-            MinecraftBotLogging.detail(logger, "Boot", "Listener list -> " + joinOrNone(registeredListeners));
+            MinecraftBotLogging.detail(logger, "Boot", "Listener list -> " + listenerStateCountSummary());
+            if (!disabledListeners.isEmpty()) {
+                MinecraftBotLogging.detail(logger, "Boot", "Listener fallback -> " + joinOrNone(disabledListeners));
+            }
             MinecraftBotLogging.detail(logger, "Boot", "Placeholder state -> present=" + placeholderPresent + " registered=" + placeholderRegistered);
             MinecraftBotLogging.detail(logger, "Boot", "Phase timings -> " + phases.stream()
                     .map(phase -> String.format(
@@ -388,6 +368,10 @@ public final class MinecraftBotLogging {
             return registeredListeners.size();
         }
 
+        public int disabledListenerCount() {
+            return disabledListeners.size();
+        }
+
         public int placeholderCount() {
             return registeredPlaceholders.size();
         }
@@ -398,6 +382,14 @@ public final class MinecraftBotLogging {
 
         public String listenerSummary() {
             return joinOrNone(registeredListeners);
+        }
+
+        public String disabledListenerSummary() {
+            return joinOrNone(disabledListeners);
+        }
+
+        public String listenerStateCountSummary() {
+            return "active=" + listenerCount() + " disabled=" + disabledListenerCount();
         }
 
         public String placeholderSummary() {
