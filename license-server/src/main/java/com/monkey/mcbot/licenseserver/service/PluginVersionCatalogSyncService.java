@@ -2,6 +2,7 @@ package com.monkey.mcbot.licenseserver.service;
 
 import com.monkey.mcbot.licenseserver.domain.PluginVersionEntity;
 import com.monkey.mcbot.licenseserver.repo.PluginVersionRepository;
+import com.monkey.mcbot.licenseserver.version.PluginVersionCatalog;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;

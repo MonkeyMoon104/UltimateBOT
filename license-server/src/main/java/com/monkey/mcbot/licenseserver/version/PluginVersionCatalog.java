@@ -1,4 +1,4 @@
-package com.monkey.mcbot.licenseserver.service;
+package com.monkey.mcbot.licenseserver.version;
 
 import org.springframework.stereotype.Component;
 
