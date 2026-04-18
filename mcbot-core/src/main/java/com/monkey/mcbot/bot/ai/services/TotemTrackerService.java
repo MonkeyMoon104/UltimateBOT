@@ -4,6 +4,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public class TotemTrackerService {
 
@@ -21,10 +22,8 @@ public class TotemTrackerService {
         ItemStack offhand = bot.asPlayer().getItemBySlot(EquipmentSlot.OFFHAND);
         ItemStack mainhand = bot.asPlayer().getItemBySlot(EquipmentSlot.MAINHAND);
 
-        boolean hasOffhandTotem = offhand != null && !offhand.isEmpty() &&
-                offhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
-        boolean hasMainhandTotem = mainhand != null && !mainhand.isEmpty() &&
-                mainhand.is(net.minecraft.world.item.Items.TOTEM_OF_UNDYING);
+        boolean hasOffhandTotem = isTotem(offhand);
+        boolean hasMainhandTotem = isTotem(mainhand);
 
         int currentEquippedTotems = (hasOffhandTotem ? 1 : 0) + (hasMainhandTotem ? 1 : 0);
         boolean currentCombatState = bot.isCombat();
@@ -60,6 +59,12 @@ public class TotemTrackerService {
         previousCombatState = currentCombatState;
 
         bot.getBrainController().getBotAI().manageTotem();
+    }
+
+    private boolean isTotem(ItemStack itemStack) {
+        return itemStack != null
+                && !itemStack.isEmpty()
+                && itemStack.getItem() == Items.TOTEM_OF_UNDYING;
     }
 
     public int getTotemCount() { return totemCount; }

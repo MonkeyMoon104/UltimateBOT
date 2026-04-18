@@ -15,7 +15,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public boolean hasTotemInSlot(ItemStack itemStack) {
-        return itemStack != null && !itemStack.isEmpty() && itemStack.is(Items.TOTEM_OF_UNDYING);
+        return itemStack != null
+                && !itemStack.isEmpty()
+                && itemStack.getItem() == Items.TOTEM_OF_UNDYING;
     }
 
     @Override
