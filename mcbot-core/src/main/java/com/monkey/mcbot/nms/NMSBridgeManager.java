@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 public class NMSBridgeManager {
 
     private static INMSBridge instance;
-    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11";
+    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.1, 26.1.2";
 
     public static void init() {
         init(Bukkit.getLogger());
@@ -25,6 +25,8 @@ public class NMSBridgeManager {
             case "1.21.9" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_9";
             case "1.21.10" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_10";
             case "1.21.11" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_11";
+            case "26.1.1" -> "com.monkey.mcbot.nms.NMSBridge_v26_1_1";
+            case "26.1.2" -> "com.monkey.mcbot.nms.NMSBridge_v26_1_2";
             default -> {
                 MinecraftBotLogging.logNmsUnsupportedVersion(logger, version, SUPPORTED_VERSIONS);
                 throw new RuntimeException(
