@@ -38,7 +38,10 @@ public class SafetyValidator implements ISafetyValidator {
         if (!level.getFluidState(pos).isEmpty()) return false;
         if (!level.getFluidState(pos.above()).isEmpty()) return false;
 
-        if (stateBelow.is(Blocks.CACTUS) || stateBelow.is(Blocks.MAGMA_BLOCK) || stateBelow.is(Blocks.LAVA) || stateBelow.is(Blocks.WATER)) {
+        if (stateBelow.getBlock() == Blocks.CACTUS
+                || stateBelow.getBlock() == Blocks.MAGMA_BLOCK
+                || stateBelow.getBlock() == Blocks.LAVA
+                || stateBelow.getBlock() == Blocks.WATER) {
             return false;
         }
 

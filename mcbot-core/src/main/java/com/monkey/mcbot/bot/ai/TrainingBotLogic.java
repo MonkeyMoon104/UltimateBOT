@@ -9,7 +9,6 @@ import com.monkey.mcbot.bot.ai.services.TotemTrackerService;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -77,9 +76,7 @@ public class TrainingBotLogic {
             if (attacker instanceof Player nmsPlayer &&
                     currentTarget != null &&
                     nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
-                if (!source.is(DamageTypes.IN_FIRE) &&
-                        !source.is(DamageTypes.ON_FIRE) &&
-                        !source.is(DamageTypes.LAVA)) {
+                if (!isFireOrLavaDamage(source)) {
                     if (source.isCritical()) {
                         brainController.getBotAI().getEnderpearlController().onDamageReceived();
                     }
@@ -106,6 +103,11 @@ public class TrainingBotLogic {
         }
 
         return result;
+    }
+
+    private boolean isFireOrLavaDamage(DamageSource source) {
+        String msgId = source.getMsgId();
+        return "inFire".equals(msgId) || "onFire".equals(msgId) || "lava".equals(msgId);
     }
 
     public BotBrainController getBrainController() {

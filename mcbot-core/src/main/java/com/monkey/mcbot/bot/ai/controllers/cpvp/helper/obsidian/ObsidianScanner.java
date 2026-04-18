@@ -39,7 +39,7 @@ public class ObsidianScanner {
                     if (obsidianY >= targetY) continue;
 
                     BlockState state = level.getBlockState(checkPos);
-                    if (state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK)) {
+                    if (state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.BEDROCK) {
                         obsidianCache.put(checkPos, currentTime);
                     }
                 }

@@ -57,7 +57,7 @@ public class CrystalManager {
 
     private boolean isValidCrystalPos(BlockPos pos, Player target, Player bot, Level level, double maxCrystalDistance) {
         BlockState state = level.getBlockState(pos);
-        if (!(state.is(Blocks.OBSIDIAN) || state.is(Blocks.BEDROCK))) return false;
+        if (!(state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.BEDROCK)) return false;
         if (!level.getBlockState(pos.above()).isAir() || !level.getBlockState(pos.above(2)).isAir()) return false;
 
         double distanceToBot = bot.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos));
