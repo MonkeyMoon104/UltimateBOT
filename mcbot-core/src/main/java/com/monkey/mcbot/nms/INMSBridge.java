@@ -4,7 +4,9 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
+import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.gui.NewBotGUI;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
@@ -78,4 +80,8 @@ public interface INMSBridge {
     InteractionResult useItemOnBlock(Player bot, ItemStack stack, BlockHitResult hitResult, InteractionHand hand);
 
     void throwEnderpearl(Player bot, net.minecraft.world.phys.Vec3 targetPos);
+
+    default void openBotGui(org.bukkit.entity.Player player, MinecraftBot plugin, BotType botType) {
+        new NewBotGUI(player, plugin, botType).open();
+    }
 }
