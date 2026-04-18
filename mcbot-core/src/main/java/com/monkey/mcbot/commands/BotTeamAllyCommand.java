@@ -4,7 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.gui.NewBotGUI;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -60,7 +60,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
             BotOptions sharedOptions = activeTeamAlly.options();
             sharedOptions.setBotType(BotType.TEAM_ALLY);
             plugin.getPlayerOptions().put(player.getUniqueId(), sharedOptions);
-            new NewBotGUI(player, plugin, BotType.TEAM_ALLY).open();
+            NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
             sendConfigured(player, "messages.team-ally.gui-opened");
             return true;
         }
@@ -122,7 +122,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         options.setOwnerUUID(owners.iterator().next());
         plugin.getPlayerOptions().put(player.getUniqueId(), options);
 
-        new NewBotGUI(player, plugin, BotType.TEAM_ALLY).open();
+        NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
         sendConfigured(player, "messages.team-ally.gui-opened");
         return true;
     }
