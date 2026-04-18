@@ -27,6 +27,7 @@
 -keepclassmembernames class com.monkey.mcbot.bot.ai.ITrainingBot { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBotLogic { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBot_v* { *; }
+-keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBot_v26_1_* { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.fakeplayer.** { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.rank.** { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.services.** { *; }
@@ -41,6 +42,10 @@
 # version-specific implementations through hardcoded reflection strings.
 -keep class xyz.xenondevs.invui.** { *; }
 -keep class xyz.xenondevs.inventoryaccess.** { *; }
+-keep class com.monkey.mcbot.libs.invui.v1.** { *; }
+-keep class com.monkey.mcbot.libs.inventoryaccess.v1.** { *; }
+-keep class com.monkey.mcbot.libs.invui.v2.** { *; }
+-keep class com.monkey.mcbot.libs.inventoryaccess.v2.** { *; }
 
 # Keep Jackson intact. The licensing client uses ObjectMapper at startup and
 # Jackson relies on enum metadata/lookup methods that break under aggressive
