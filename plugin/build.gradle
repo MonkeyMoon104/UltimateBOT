@@ -8,8 +8,26 @@ buildscript {
 }
 
 import proguard.gradle.ProGuardTask
+import org.gradle.api.attributes.java.TargetJvmVersion
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 apply plugin: 'com.gradleup.shadow'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+configurations.matching { it.name in ['compileClasspath', 'runtimeClasspath'] }.configureEach {
+    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
+}
+
+configurations {
+    invuiV2Shade {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
 
 def shadowJarTask = tasks.named('shadowJar')
 def unobfuscatedJarFile = layout.buildDirectory.file('libs/MinecraftBot-unobfuscated.jar')
@@ -38,7 +56,9 @@ def proguardLibraries = files(
     externalClasspathFor(project(':versions:v1_21_8')),
     externalClasspathFor(project(':versions:v1_21_9')),
     externalClasspathFor(project(':versions:v1_21_10')),
-    externalClasspathFor(project(':versions:v1_21_11'))
+    externalClasspathFor(project(':versions:v1_21_11')),
+    externalClasspathFor(project(':versions:v26_1_1')),
+    externalClasspathFor(project(':versions:v26_1_2'))
 )
 
 if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
@@ -55,12 +75,91 @@ dependencies {
     implementation project(path: ':versions:v1_21_9', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_10', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_11', configuration: 'reobf')
+    implementation(project(path: ':versions:v26_1_1', configuration: 'runtimeElements')) {
+        transitive = false
+    }
+    implementation(project(path: ':versions:v26_1_2', configuration: 'runtimeElements')) {
+        transitive = false
+    }
+    invuiV2Shade "xyz.xenondevs.invui:invui:2.0.0"
+}
+
+def relocateInvuiV2Task = tasks.register('relocateInvuiV2', ShadowJar) {
+    archiveFileName.set('invui-v2-relocated.jar')
+    destinationDirectory.set(layout.buildDirectory.dir('tmp/shadow'))
+    configurations = [project.configurations.invuiV2Shade]
+    mergeServiceFiles()
+    relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v2')
+    relocate('xyz.xenondevs.inventoryaccess', 'com.monkey.mcbot.libs.inventoryaccess.v2')
 }
 
 shadowJar {
+    dependsOn relocateInvuiV2Task
     archiveFileName.set('MinecraftBot-unobfuscated.jar')
     mergeServiceFiles()
+    from({
+        zipTree(relocateInvuiV2Task.get().archiveFile.get().asFile)
+    })
     relocate('org.bstats', 'com.monkey.mcbot.libs.bstats')
+    relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v1') {
+        exclude 'com/monkey/mcbot/gui/v26_1_1/**'
+        exclude 'com/monkey/mcbot/gui/v26_1_2/**'
+    }
+    relocate('xyz.xenondevs.inventoryaccess', 'com.monkey.mcbot.libs.inventoryaccess.v1') {
+        exclude 'com/monkey/mcbot/gui/v26_1_1/**'
+        exclude 'com/monkey/mcbot/gui/v26_1_2/**'
+    }
+    relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v2') {
+        include 'com/monkey/mcbot/gui/v26_1_1/**'
+        include 'com/monkey/mcbot/gui/v26_1_2/**'
+    }
+    relocate('xyz.xenondevs.inventoryaccess', 'com.monkey.mcbot.libs.inventoryaccess.v2') {
+        include 'com/monkey/mcbot/gui/v26_1_1/**'
+        include 'com/monkey/mcbot/gui/v26_1_2/**'
+    }
+    doLast {
+        def jarFile = archiveFile.get().asFile
+        def patchedJar = new File(jarFile.parentFile, "${jarFile.name}.patched")
+        def v26Prefixes = [
+                'com/monkey/mcbot/gui/v26_1_1/',
+                'com/monkey/mcbot/gui/v26_1_2/'
+        ]
+
+        def retarget = { byte[] bytes ->
+            def binary = new String(bytes, 'ISO-8859-1')
+                    .replace('com/monkey/mcbot/libs/invui/v1/', 'com/monkey/mcbot/libs/invui/v2/')
+                    .replace('com/monkey/mcbot/libs/inventoryaccess/v1/', 'com/monkey/mcbot/libs/inventoryaccess/v2/')
+            return binary.getBytes('ISO-8859-1')
+        }
+
+        def zip = new java.util.zip.ZipFile(jarFile)
+        def zos = new java.util.zip.ZipOutputStream(new java.io.FileOutputStream(patchedJar))
+
+        try {
+            zip.entries().each { entry ->
+                def newEntry = new java.util.zip.ZipEntry(entry.name)
+                newEntry.time = entry.time
+                zos.putNextEntry(newEntry)
+                def data = zip.getInputStream(entry).bytes
+
+                if (!entry.isDirectory()
+                        && entry.name.endsWith('.class')
+                        && v26Prefixes.any { entry.name.startsWith(it) }) {
+                    data = retarget(data)
+                }
+
+                zos.write(data)
+                zos.closeEntry()
+            }
+        } finally {
+            zos.close()
+            zip.close()
+        }
+
+        if (!jarFile.delete() || !patchedJar.renameTo(jarFile)) {
+            throw new GradleException("Failed to patch ${jarFile.name} with v26 InvUI v2 references")
+        }
+    }
 }
 
 tasks.register('obfuscatePluginJar', ProGuardTask) {
