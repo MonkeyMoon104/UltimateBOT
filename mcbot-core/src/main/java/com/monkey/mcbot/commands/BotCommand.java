@@ -3,7 +3,7 @@ package com.monkey.mcbot.commands;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.gui.NewBotGUI;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -55,7 +55,7 @@ public class BotCommand implements CommandExecutor {
             return true;
         }
 
-        new NewBotGUI(player, plugin, BotType.SINGLE).open();
+        NMSBridgeManager.get().openBotGui(player, plugin, BotType.SINGLE);
         return true;
     }
 
