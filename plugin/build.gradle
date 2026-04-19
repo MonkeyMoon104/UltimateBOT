@@ -97,6 +97,7 @@ shadowJar {
         zipTree(relocateInvuiV2Task.get().archiveFile.get().asFile)
     })
     relocate('org.bstats', 'com.monkey.mcbot.libs.bstats')
+    relocate('com.fasterxml.jackson', 'com.monkey.mcbot.libs.jackson')
     relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v1') {
         exclude 'com/monkey/mcbot/gui/v26_1/**'
     }
@@ -115,12 +116,30 @@ shadowJar {
         def v26Prefixes = [
                 'com/monkey/mcbot/gui/v26_1/'
         ]
+        def maxClassMajor = 65 // Java 21, required for legacy Paper remapper (ASM 9.7.1)
 
         def retarget = { byte[] bytes ->
             def binary = new String(bytes, 'ISO-8859-1')
                     .replace('com/monkey/mcbot/libs/invui/v1/', 'com/monkey/mcbot/libs/invui/v2/')
                     .replace('com/monkey/mcbot/libs/inventoryaccess/v1/', 'com/monkey/mcbot/libs/inventoryaccess/v2/')
             return binary.getBytes('ISO-8859-1')
+        }
+
+        def normalizeClassMajor = { byte[] bytes ->
+            if (bytes == null || bytes.length < 8) {
+                return bytes
+            }
+
+            if ((bytes[0] & 0xFF) != 0xCA || (bytes[1] & 0xFF) != 0xFE || (bytes[2] & 0xFF) != 0xBA || (bytes[3] & 0xFF) != 0xBE) {
+                return bytes
+            }
+
+            int major = ((bytes[6] & 0xFF) << 8) | (bytes[7] & 0xFF)
+            if (major > maxClassMajor) {
+                bytes[6] = (byte) ((maxClassMajor >> 8) & 0xFF)
+                bytes[7] = (byte) (maxClassMajor & 0xFF)
+            }
+            return bytes
         }
 
         def zip = new java.util.zip.ZipFile(jarFile)
@@ -137,6 +156,10 @@ shadowJar {
                         && entry.name.endsWith('.class')
                         && v26Prefixes.any { entry.name.startsWith(it) }) {
                     data = retarget(data)
+                }
+
+                if (!entry.isDirectory() && entry.name.endsWith('.class')) {
+                    data = normalizeClassMajor(data)
                 }
 
                 zos.write(data)
