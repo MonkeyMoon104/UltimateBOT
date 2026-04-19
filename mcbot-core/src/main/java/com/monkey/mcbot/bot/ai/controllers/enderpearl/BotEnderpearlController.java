@@ -9,6 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
@@ -53,6 +55,7 @@ public class BotEnderpearlController {
     private static final double AUTO_TELEPORT_HORIZONTAL_DISTANCE = 25.0;
     private static final double AUTO_TELEPORT_VERTICAL_DISTANCE = 15.0;
     private static final double EMERGENCY_TELEPORT_DISTANCE = 25.0;
+    private static final double EXTREME_EMERGENCY_TELEPORT_DISTANCE = 34.0;
 
     public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
@@ -112,12 +115,18 @@ public class BotEnderpearlController {
     public boolean tryUseEnderpearlToPosition(Vec3 targetPos) {
         if (!canUseEnderpearl() || isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
+        if (targetPos == null) return false;
+
+        Vec3 validatedTarget = validatePearlTarget(targetPos);
+        if (validatedTarget == null) {
+            return false;
+        }
 
         if (!inventoryController.isHoldingEnderpearl()) {
             inventoryController.switchToEnderpearl();
         }
 
-        startPearlPreparation(targetPos, IPearlStrategyCalculator.PearlStrategy.ESCAPE);
+        startPearlPreparation(validatedTarget, IPearlStrategyCalculator.PearlStrategy.ESCAPE);
         return true;
     }
 
@@ -208,16 +217,24 @@ public class BotEnderpearlController {
 
         boolean needsTeleport = false;
         String reason = "";
+        boolean requiresObstacleCheck = false;
 
         if (totalDistance > EMERGENCY_TELEPORT_DISTANCE) {
             needsTeleport = true;
             reason = "emergency distance";
+            requiresObstacleCheck = totalDistance < EXTREME_EMERGENCY_TELEPORT_DISTANCE;
         } else if (horizontalDistance > AUTO_TELEPORT_HORIZONTAL_DISTANCE) {
             needsTeleport = true;
             reason = "horizontal distance";
+            requiresObstacleCheck = true;
         } else if (verticalDistance > AUTO_TELEPORT_VERTICAL_DISTANCE) {
             needsTeleport = true;
             reason = "vertical distance";
+            requiresObstacleCheck = true;
+        }
+
+        if (needsTeleport && requiresObstacleCheck && !hasSolidObstacleBetween(botPos, targetPos)) {
+            return false;
         }
 
         if (needsTeleport) {
@@ -373,5 +390,96 @@ public class BotEnderpearlController {
 
     public IPearlStrategyCalculator.PearlStrategy getCurrentStrategy() {
         return currentStrategy;
+    }
+
+    private boolean hasSolidObstacleBetween(Vec3 start, Vec3 end) {
+        Vec3 delta = end.subtract(start);
+        double distance = delta.length();
+        if (distance < 2.0D) {
+            return false;
+        }
+
+        Vec3 dir = delta.normalize();
+        int solidSamples = 0;
+        double sampleStep = 1.25D;
+
+        for (double t = 1.0D; t < distance; t += sampleStep) {
+            Vec3 p = start.add(dir.scale(t));
+            BlockPos blockPos = BlockPos.containing(p);
+
+            if (level.getBlockState(blockPos).isSolid() || level.getBlockState(blockPos.above()).isSolid()) {
+                solidSamples++;
+                if (solidSamples >= 2) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private Vec3 validatePearlTarget(Vec3 requestedTarget) {
+        Vec3 botPos = bot.position();
+        Vec3 candidate = requestedTarget;
+        double distance = botPos.distanceTo(candidate);
+
+        if (distance < 2.2D) {
+            return null;
+        }
+        if (distance > 15.0D) {
+            Vec3 direction = candidate.subtract(botPos);
+            if (direction.lengthSqr() < 1.0E-5D) {
+                return null;
+            }
+            candidate = botPos.add(direction.normalize().scale(13.5D));
+        }
+
+        BlockPos candidateBlock = BlockPos.containing(candidate);
+        Vec3 safeTarget;
+        if (safetyValidator.isSafeLandingSpot(candidateBlock)) {
+            safeTarget = Vec3.atCenterOf(candidateBlock);
+        } else {
+            safeTarget = safetyValidator.findSafeLandingSpot(candidateBlock);
+        }
+
+        if (safeTarget == null) {
+            return null;
+        }
+
+        if (botPos.distanceTo(safeTarget) < 2.2D || botPos.distanceTo(safeTarget) > 15.0D) {
+            return null;
+        }
+
+        if (!hasThrowPath(safeTarget)) {
+            return null;
+        }
+
+        return safeTarget;
+    }
+
+    private boolean hasThrowPath(Vec3 destination) {
+        Vec3 eyes = bot.getEyePosition(1.0F);
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                eyes,
+                destination,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+
+        HitResult result = level.clip(context);
+        if (result.getType() == HitResult.Type.MISS) {
+            return true;
+        }
+
+        if (result instanceof BlockHitResult blockHit) {
+            BlockPos destinationBlock = BlockPos.containing(destination);
+            BlockPos hitBlock = blockHit.getBlockPos();
+            return hitBlock.equals(destinationBlock)
+                    || hitBlock.equals(destinationBlock.below())
+                    || hitBlock.equals(destinationBlock.above());
+        }
+
+        return false;
     }
 }

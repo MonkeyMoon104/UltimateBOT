@@ -54,6 +54,8 @@ public class CombatStateManager implements ICombatStateManager {
             lastComboPressureTime = currentTime;
         }
         boolean keepComboMomentum = currentTime - lastComboPressureTime < (hyperAggressive ? 900L : 650L);
+        boolean underDamagePressure = consecutiveDamageCount >= 2
+                && currentTime - lastDamageTime < (hyperAggressive ? 1800L : 2200L);
 
         if (keepComboMomentum && healthPercent > (hyperAggressive ? 0.10f : 0.18f)) {
             if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
@@ -63,6 +65,11 @@ public class CombatStateManager implements ICombatStateManager {
             } else {
                 newState = CombatState.AGGRESSIVE;
             }
+        } else if (underDamagePressure
+                && healthPercent > (hyperAggressive ? 0.10f : 0.20f)
+                && yDiff < 2
+                && shouldAttemptAnchor(target, currentTime)) {
+            newState = CombatState.ANCHOR_SETUP;
         } else if (!hyperAggressive && healthPercent < 0.25f) {
             newState = CombatState.RETREATING;
         } else if (hyperAggressive && healthPercent < 0.14f) {

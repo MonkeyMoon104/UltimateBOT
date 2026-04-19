@@ -7,9 +7,9 @@ import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Random;
 
 public class PathfindingManager implements IPathfindingManager {
 
@@ -26,7 +26,9 @@ public class PathfindingManager implements IPathfindingManager {
     private static final double MIN_MOVEMENT_THRESHOLD = 0.1;
 
     private long lastPathfindingAttempt = 0;
-    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 3000;
+    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 2200;
+    private long lastStuckPearlAttempt = 0;
+    private static final long STUCK_PEARL_COOLDOWN = 1200;
     private boolean usingPathfinding = false;
 
     public PathfindingManager(Player bot, Level level, BotMovementController movementController,
@@ -70,6 +72,12 @@ public class PathfindingManager implements IPathfindingManager {
     public void attemptPathfindingOrPearl(Player target) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastPathfindingAttempt < PATHFINDING_ATTEMPT_COOLDOWN) {
+            if (shouldAttemptStuckPearl(target, currentTime)) {
+                if (tryUnstuckPearl(target, currentTime)) {
+                    return;
+                }
+            }
+            forceUnstuck(target);
             return;
         }
 
@@ -85,10 +93,7 @@ public class PathfindingManager implements IPathfindingManager {
                 bot.distanceTo(target) > 4.0 &&
                 hasObstacleBetween(bot.position(), target.position())) {
 
-            Vec3 pearlTarget = calculatePearlTargetAroundPlayer(target);
-            if (pearlTarget != null) {
-                enderpearlController.tryUseEnderpearlToPosition(pearlTarget);
-                usingPathfinding = false;
+            if (tryUnstuckPearl(target, currentTime)) {
                 return;
             }
         }
@@ -118,26 +123,48 @@ public class PathfindingManager implements IPathfindingManager {
     @Override
     public Vec3 calculatePearlTargetAroundPlayer(Player target) {
         Vec3 targetPos = target.position();
-        Random rand = new Random();
+        Vec3 botPos = bot.position();
+        double baseAngle = Math.atan2(botPos.z - targetPos.z, botPos.x - targetPos.x);
 
-        for (int i = 0; i < 8; i++) {
-            double angle = rand.nextDouble() * 2 * Math.PI;
-            double radius = 3 + rand.nextDouble() * 4;
+        double[] radii = {2.8D, 3.4D, 4.1D, 4.8D, 5.4D};
+        double[] angleOffsets = {0D, 25D, -25D, 50D, -50D, 80D, -80D, 110D, -110D, 180D};
+        int[] yOffsets = {0, -1, 1};
 
-            double x = targetPos.x + Math.cos(angle) * radius;
-            double z = targetPos.z + Math.sin(angle) * radius;
-            double y = targetPos.y;
+        Vec3 best = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
 
-            Vec3 potentialTarget = new Vec3(x, y, z);
-            BlockPos blockPos = BlockPos.containing(potentialTarget);
+        for (double radius : radii) {
+            for (double offsetDeg : angleOffsets) {
+                double angle = baseAngle + Math.toRadians(offsetDeg);
+                double x = targetPos.x + Math.cos(angle) * radius;
+                double z = targetPos.z + Math.sin(angle) * radius;
 
-            if (isSafeLandingSpot(blockPos) &&
-                    !hasObstacleBetween(bot.position(), potentialTarget)) {
-                return potentialTarget;
+                for (int yOffset : yOffsets) {
+                    Vec3 potentialTarget = new Vec3(x, targetPos.y + yOffset, z);
+                    BlockPos blockPos = BlockPos.containing(potentialTarget);
+                    if (!isSafeLandingSpot(blockPos)) {
+                        continue;
+                    }
+
+                    Vec3 center = Vec3.atCenterOf(blockPos);
+                    if (!hasThrowPath(center)) {
+                        continue;
+                    }
+
+                    double score = evaluatePearlTargetScore(center, targetPos, botPos);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        best = center;
+                    }
+                }
             }
         }
 
-        return null;
+        if (best != null) {
+            return best;
+        }
+
+        return calculatePearlSideStepTarget(target);
     }
 
     @Override
@@ -157,15 +184,12 @@ public class PathfindingManager implements IPathfindingManager {
             movementController.moveTowards(target, 3.0);
         } else {
             Vec3 strafeDirection = getStrafeDirection(target);
+            if (isFacingSolidWall()) {
+                strafeDirection = strafeDirection.scale(-1.0D);
+            }
             Vec3 botPos = bot.position();
             Vec3 newPos = botPos.add(strafeDirection.scale(2.0));
             movementController.moveToPosition(newPos);
-        }
-
-        if (System.currentTimeMillis() - combatStateManager.getCurrentState().ordinal() > 3000) {
-            if (combatStateManager.getCurrentState() == ICombatStateManager.CombatState.DEFENSIVE ||
-                    combatStateManager.getCurrentState() == ICombatStateManager.CombatState.REPOSITIONING) {
-            }
         }
     }
 
@@ -190,5 +214,124 @@ public class PathfindingManager implements IPathfindingManager {
 
     public void updateLastActionTime() {
         this.lastActionTime = System.currentTimeMillis();
+    }
+
+    private boolean shouldAttemptStuckPearl(Player target, long currentTime) {
+        if (!enderpearlController.canUseEnderpearl()) {
+            return false;
+        }
+        if (currentTime - lastStuckPearlAttempt < STUCK_PEARL_COOLDOWN) {
+            return false;
+        }
+
+        double distance = bot.distanceTo(target);
+        if (distance < 2.2D || distance > 15.0D) {
+            return false;
+        }
+
+        return hasObstacleBetween(bot.position(), target.position()) || isFacingSolidWall() || stuckCounter > 18;
+    }
+
+    private boolean tryUnstuckPearl(Player target, long currentTime) {
+        Vec3 pearlTarget = calculatePearlTargetAroundPlayer(target);
+        if (pearlTarget == null) {
+            return false;
+        }
+
+        if (enderpearlController.tryUseEnderpearlToPosition(pearlTarget)) {
+            lastStuckPearlAttempt = currentTime;
+            usingPathfinding = false;
+            movementController.clearPath();
+            return true;
+        }
+        return false;
+    }
+
+    private Vec3 calculatePearlSideStepTarget(Player target) {
+        Vec3 botPos = bot.position();
+        Vec3 toTarget = target.position().subtract(botPos);
+        if (toTarget.lengthSqr() < 1.0E-5D) {
+            toTarget = bot.getLookAngle();
+        }
+        Vec3 lateral = new Vec3(-toTarget.z, 0.0D, toTarget.x).normalize();
+        if (lateral.lengthSqr() < 1.0E-5D) {
+            return null;
+        }
+
+        double[] scales = {3.2D, 4.0D, 4.8D};
+        for (double scale : scales) {
+            for (int sign : new int[]{1, -1}) {
+                Vec3 candidate = botPos.add(lateral.scale(scale * sign)).add(0.0D, 0.6D, 0.0D);
+                BlockPos blockPos = BlockPos.containing(candidate);
+                if (!isSafeLandingSpot(blockPos)) {
+                    continue;
+                }
+                Vec3 center = Vec3.atCenterOf(blockPos);
+                if (hasThrowPath(center)) {
+                    return center;
+                }
+            }
+        }
+        return null;
+    }
+
+    private double evaluatePearlTargetScore(Vec3 candidate, Vec3 targetPos, Vec3 botPos) {
+        double distToTarget = candidate.distanceTo(targetPos);
+        double distToBot = candidate.distanceTo(botPos);
+        double score = 0.0D;
+        score -= Math.abs(distToTarget - 3.6D) * 2.0D;
+        score -= Math.abs(distToBot - 5.0D) * 0.9D;
+
+        if (!hasObstacleBetween(botPos, candidate)) {
+            score += 1.4D;
+        }
+        if (!hasObstacleBetween(candidate, targetPos)) {
+            score += 0.9D;
+        }
+
+        return score;
+    }
+
+    private boolean isFacingSolidWall() {
+        Vec3 eyes = bot.getEyePosition(1.0F);
+        Vec3 look = bot.getLookAngle();
+        if (look.lengthSqr() < 1.0E-5D) {
+            return false;
+        }
+        look = look.normalize();
+
+        for (double step = 0.8D; step <= 1.8D; step += 0.5D) {
+            Vec3 check = eyes.add(look.scale(step));
+            BlockPos blockPos = BlockPos.containing(check);
+            if (level.getBlockState(blockPos).isSolid() || level.getBlockState(blockPos.above()).isSolid()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasThrowPath(Vec3 destination) {
+        Vec3 eyes = bot.getEyePosition(1.0F);
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                eyes,
+                destination,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+        HitResult result = level.clip(context);
+        if (result.getType() == HitResult.Type.MISS) {
+            return true;
+        }
+
+        if (result instanceof BlockHitResult blockHit) {
+            BlockPos destinationBlock = BlockPos.containing(destination);
+            BlockPos hitBlock = blockHit.getBlockPos();
+            return hitBlock.equals(destinationBlock)
+                    || hitBlock.equals(destinationBlock.below())
+                    || hitBlock.equals(destinationBlock.above());
+        }
+
+        return false;
     }
 }

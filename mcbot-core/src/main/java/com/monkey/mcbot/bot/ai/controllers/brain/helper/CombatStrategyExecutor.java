@@ -149,6 +149,20 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         boolean hyperAggressive = isHyperAggressiveRank();
         boolean actionTaken = false;
 
+        if (shouldForceAnchorBreakout(target, distance)) {
+            if (!rapvpController.isActive()) {
+                rapvpController.enable(target);
+            }
+
+            double anchorBreakoutDistance = Math.max(3.8D, Math.min(4.8D, distance + 0.6D));
+            moveToTarget(target, anchorBreakoutDistance);
+            if (distance <= 3.4D) {
+                maybeBoostMeleeTempo(hyperAggressive);
+                attackController.handleAttack(target);
+            }
+            return true;
+        }
+
         if (distance <= 3.2) {
             attackController.handleAttack(target);
             actionTaken = true;
@@ -354,5 +368,35 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         if (attackController.getAttackCooldown() > 2) {
             attackController.setAttackCooldown(2);
         }
+    }
+
+    private boolean shouldForceAnchorBreakout(Player target, double distance) {
+        if (rapvpController.isActive()) {
+            return false;
+        }
+
+        if (!inventoryController.hasItem(net.minecraft.world.item.Items.RESPAWN_ANCHOR)
+                || !inventoryController.hasItem(net.minecraft.world.item.Items.GLOWSTONE)) {
+            return false;
+        }
+
+        long timeSinceDamage = System.currentTimeMillis() - combatDataManager.getLastDamageTime();
+        int comboCount = combatDataManager.getConsecutiveDamageCount();
+        boolean underPressure = comboCount >= 2 && timeSinceDamage < 2200L;
+        if (!underPressure) {
+            return false;
+        }
+
+        if (distance < 1.4D || distance > 6.6D) {
+            return false;
+        }
+
+        double yDiff = Math.abs(bot.position().y - target.position().y);
+        if (yDiff > 2.3D) {
+            return false;
+        }
+
+        float healthPercent = bot.getHealth() / bot.getMaxHealth();
+        return healthPercent > 0.14f;
     }
 }
