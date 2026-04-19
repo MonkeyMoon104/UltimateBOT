@@ -1,5 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
+import com.monkey.mcbot.bot.ai.controllers.combat.ExplosionDamageEstimator;
 import com.monkey.mcbot.bot.ai.rank.configs.RAPVPConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -38,18 +39,20 @@ public class AnchorPositionFinder {
         Vec3 predictedTargetPos = predictTargetPosition(target);
         BlockPos targetPos = BlockPos.containing(predictedTargetPos);
 
-        BlockPos lethalPos = null;
-        BlockPos smartPos = null;
-        BlockPos safePos = null;
-        BlockPos fallbackPos = null;
-        double maxDistanceSq = 12 * 12;
+        BlockPos bestSafePos = null;
+        double bestSafeScore = Double.NEGATIVE_INFINITY;
+        BlockPos bestRiskyPos = null;
+        double bestRiskyScore = Double.NEGATIVE_INFINITY;
 
-        int[] offsets = {-3, -2, -1, 0, 1, 2, 3};
-        int[] yOffsets = {-2, -1, 0, 1};
+        double maxDistanceSq = (double) config.getMaxDistance() * config.getMaxDistance();
+        int horizontalRadius = Math.max(3, Math.min(config.getMaxDistance(), 8));
+        int downY = -Math.max(2, horizontalRadius / 2);
+        int upY = Math.max(1, horizontalRadius / 3);
+        boolean hyperAggressive = config.getMaxDistance() >= 12 || config.getAnchorSearchCooldownMillis() == 0L;
 
-        for (int dx : offsets) {
-            for (int dz : offsets) {
-                for (int dy : yOffsets) {
+        for (int dx = -horizontalRadius; dx <= horizontalRadius; dx++) {
+            for (int dz = -horizontalRadius; dz <= horizontalRadius; dz++) {
+                for (int dy = downY; dy <= upY; dy++) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
 
                     if (check.equals(bot.blockPosition()) || check.equals(bot.blockPosition().below())) continue;
@@ -63,49 +66,49 @@ public class AnchorPositionFinder {
                     double distSq = botPosition.distanceToSqr(anchorPos);
                     if (distSq > maxDistanceSq) continue;
 
-                    if (!isReachable(check)) continue;
+                    if (!isReachable(check, maxDistanceSq)) continue;
 
-                    if (isAnchorBehindBot(botPosition, anchorPos, botForwardDirection)) {
+                    if (!hyperAggressive && isAnchorBehindBot(botPosition, anchorPos, botForwardDirection)) {
+                        continue;
+                    }
+
+                    double distanceToPredictedTarget = anchorPos.distanceTo(predictedTargetPos);
+                    double distanceToCurrentTarget = anchorPos.distanceTo(currentTargetPos);
+                    double maxAnchorDistanceToTarget = hyperAggressive ? 3.4D : 4.2D;
+                    if (distanceToPredictedTarget > maxAnchorDistanceToTarget
+                            && distanceToCurrentTarget > maxAnchorDistanceToTarget + 0.5D) {
+                        continue;
+                    }
+
+                    if (Math.abs(anchorPos.y - currentTargetPos.y) > 3.0D) {
+                        continue;
+                    }
+
+                    if (!hasLineOfSight(anchorPos, target.getEyePosition(1.0F))) {
                         continue;
                     }
 
                     double distanceToBot = Math.sqrt(distSq);
-                    double distanceToPredictedTarget = anchorPos.distanceTo(predictedTargetPos);
-                    double distanceToCurrentTarget = anchorPos.distanceTo(currentTargetPos);
+                    double score = evaluateAnchorScore(anchorPos, predictedTargetPos, currentTargetPos, botPosition, target, distanceToBot);
+                    if (score <= 0.0D) {
+                        continue;
+                    }
 
-                    boolean isOnOppositeSide = isOnOppositeSideOfTarget(botPosition, predictedTargetPos, anchorPos);
-                    boolean isLethalPosition = isLethalPosition(anchorPos, predictedTargetPos, botPosition, target);
-                    boolean isTrappingPosition = isTrappingPosition(anchorPos, predictedTargetPos, currentTargetPos);
-
-                    if (isLethalPosition && distanceToBot >= config.getMinSafeDistance()) {
-                        if (lethalPos == null ||
-                                distanceToPredictedTarget < Vec3.atCenterOf(lethalPos).distanceTo(predictedTargetPos)) {
-                            lethalPos = check;
+                    if (distanceToBot >= config.getMinSafeDistance()) {
+                        if (score > bestSafeScore) {
+                            bestSafeScore = score;
+                            bestSafePos = check;
                         }
-                    }
-                    else if (isOnOppositeSide && distanceToBot >= config.getMinSafeDistance() &&
-                            (isTrappingPosition || distanceToPredictedTarget <= 3.0)) {
-                        if (smartPos == null ||
-                                distanceToPredictedTarget < Vec3.atCenterOf(smartPos).distanceTo(predictedTargetPos)) {
-                            smartPos = check;
-                        }
-                    }
-                    else if (distanceToBot >= config.getMinSafeDistance()) {
-                        if (safePos == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(safePos))) {
-                            safePos = check;
-                        }
-                    }
-                    else if (fallbackPos == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(fallbackPos))) {
-                        fallbackPos = check;
+                    } else if (score > bestRiskyScore) {
+                        bestRiskyScore = score;
+                        bestRiskyPos = check;
                     }
                 }
             }
         }
 
-        if (lethalPos != null) return Optional.of(lethalPos);
-        if (smartPos != null) return Optional.of(smartPos);
-        if (safePos != null) return Optional.of(safePos);
-        return Optional.ofNullable(fallbackPos);
+        if (bestSafePos != null) return Optional.of(bestSafePos);
+        return Optional.ofNullable(bestRiskyPos);
     }
 
     private Vec3 getBotForwardDirection() {
@@ -131,7 +134,13 @@ public class AnchorPositionFinder {
         Vec3 velocity = target.getDeltaMovement();
 
         if (velocity.horizontalDistance() > config.getMinMovement()) {
-            return currentPos.add(velocity.scale(config.getPredictionTicks()));
+            Vec3 projected = currentPos.add(velocity.scale(config.getPredictionTicks()));
+            Vec3 delta = projected.subtract(currentPos);
+            double maxLead = Math.max(2.0D, config.getMaxDistance() * 0.9D);
+            if (delta.length() > maxLead) {
+                return currentPos.add(delta.normalize().scale(maxLead));
+            }
+            return projected;
         }
 
         return currentPos;
@@ -180,11 +189,11 @@ public class AnchorPositionFinder {
         return dotProduct > 0.4;
     }
 
-    private boolean isReachable(BlockPos pos) {
+    private boolean isReachable(BlockPos pos, double maxDistanceSq) {
         Vec3 botEyes = bot.getEyePosition(1.0F);
         Vec3 targetPos = Vec3.atCenterOf(pos);
 
-        if (botEyes.distanceToSqr(targetPos) > 12 * 12) return false;
+        if (botEyes.distanceToSqr(targetPos) > maxDistanceSq) return false;
 
         net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
                 botEyes,
@@ -195,6 +204,66 @@ public class AnchorPositionFinder {
         );
 
         return level.clip(context).getType() != net.minecraft.world.phys.HitResult.Type.BLOCK;
+    }
+
+    private double evaluateAnchorScore(Vec3 anchorPos,
+                                       Vec3 predictedTargetPos,
+                                       Vec3 currentTargetPos,
+                                       Vec3 botPos,
+                                       Player target,
+                                       double distanceToBot) {
+        double targetDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorPos, target);
+        double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorPos, bot);
+        if (targetDamage < 1.0D) {
+            return -1.0D;
+        }
+
+        if (selfDamage >= bot.getHealth() - 1.0F) {
+            return -1.0D;
+        }
+
+        double distanceToPredictedTarget = anchorPos.distanceTo(predictedTargetPos);
+        double distanceToCurrentTarget = anchorPos.distanceTo(currentTargetPos);
+
+        boolean oppositeSide = isOnOppositeSideOfTarget(botPos, predictedTargetPos, anchorPos);
+        boolean lethal = isLethalPosition(anchorPos, predictedTargetPos, botPos, target);
+        boolean trapping = isTrappingPosition(anchorPos, predictedTargetPos, currentTargetPos);
+
+        double score = (targetDamage * 3.4D) - (selfDamage * 2.9D);
+        score += Math.max(0.0D, 3.5D - distanceToPredictedTarget) * 0.9D;
+        score += Math.max(0.0D, 3.0D - distanceToCurrentTarget) * 0.4D;
+        score -= Math.max(0.0D, distanceToPredictedTarget - 2.6D) * 3.8D;
+        score -= Math.max(0.0D, distanceToCurrentTarget - 3.0D) * 3.1D;
+
+        if (oppositeSide) {
+            score += 1.4D;
+        }
+        if (trapping) {
+            score += 1.2D;
+        }
+        if (lethal) {
+            score += 2.3D;
+        }
+        if (targetDamage > target.getHealth()) {
+            score += 4.0D;
+        }
+
+        if (distanceToBot < config.getMinSafeDistance()) {
+            score -= (config.getMinSafeDistance() - distanceToBot) * 2.8D;
+        }
+
+        return score;
+    }
+
+    private boolean hasLineOfSight(Vec3 start, Vec3 end) {
+        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
+                start,
+                end,
+                net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE,
+                bot
+        );
+        return level.clip(context).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
     }
 
     public void setConfig(RAPVPConfig config) {

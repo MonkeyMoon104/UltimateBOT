@@ -13,6 +13,7 @@ import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.MovementPattern;
 import com.monkey.mcbot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.mcbot.bot.ai.rank.BotRank;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -73,6 +74,9 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (!actionExecuted) {
             moveToTarget(target, 3.0);
+            if (distance <= 3.5 && ((ITrainingBot) bot).isCombat() && ((ITrainingBot) bot).isFollow()) {
+                attackController.handleAttack(target);
+            }
             actionExecuted = true;
         }
 
@@ -88,34 +92,50 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeAggressive(Player target, double distance) {
+        boolean hyperAggressive = isHyperAggressiveRank();
         boolean actionTaken = false;
 
         if (distance <= 3.5 && ((ITrainingBot) bot).isCombat() && ((ITrainingBot) bot).isFollow()) {
+            maybeBoostMeleeTempo(hyperAggressive);
             attackController.handleAttack(target);
             actionTaken = true;
         }
         double targetDistance = 2.5;
 
-        if (distance > 10.0 && enderpearlController.canUseEnderpearl()) {
+        double yDiff = bot.position().y - target.position().y;
+
+        if (!hyperAggressive && distance > 10.0 && enderpearlController.canUseEnderpearl()) {
             enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.AGGRESSIVE_CLOSE);
             return true;
         }
 
-        if (distance > 6.0 && enderpearlController.canUseEnderpearl()) {
+        if (hyperAggressive && distance > 13.0 && yDiff > 3.5 && enderpearlController.canUseEnderpearl()) {
+            enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.REPOSITION_LOW);
+            return true;
+        }
+
+        if (!hyperAggressive && distance > 6.0 && enderpearlController.canUseEnderpearl()) {
             if (enderpearlController.wasRecentlyDamaged() || distance > 9.0) {
                 enderpearlController.tryUseEnderpearl(target);
                 return true;
             }
         }
 
-        moveToTarget(target, targetDistance);
-        actionTaken = true;
+        if (distance <= 1.8) {
+            Vec3 strafeDirection = getStrafeDirection(target);
+            movementController.moveToPosition(bot.position().add(strafeDirection.scale(1.9)));
+            actionTaken = true;
+        } else {
+            moveToTarget(target, targetDistance);
+            actionTaken = true;
+        }
 
         if (!inventoryController.isHoldingSword() && distance <= 4.0) {
             inventoryController.switchToSword();
         }
 
         if (distance <= 3.5 && ((ITrainingBot) bot).isFollow()) {
+            maybeBoostMeleeTempo(hyperAggressive);
             attackController.handleAttack(target);
             actionTaken = true;
         }
@@ -126,16 +146,27 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeDefensive(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
+        boolean hyperAggressive = isHyperAggressiveRank();
         boolean actionTaken = false;
 
-        if (enderpearlController.wasRecentlyDamaged() || combatDataManager.getConsecutiveDamageCount() >= 2) {
+        if (distance <= 3.2) {
+            attackController.handleAttack(target);
+            actionTaken = true;
+        }
+
+        if (!hyperAggressive && (enderpearlController.wasRecentlyDamaged() || combatDataManager.getConsecutiveDamageCount() >= 2)) {
             if (enderpearlController.canUseEnderpearl()) {
                 enderpearlController.tryUseEnderpearl(target);
                 return true;
             }
+        } else if (hyperAggressive && bot.getHealth() / bot.getMaxHealth() < 0.12f && distance > 8.0 && enderpearlController.canUseEnderpearl()) {
+            enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.REPOSITION_LOW);
+            return true;
         }
 
-        double targetDistance = Math.min(8.0, Math.max(5.0, distance + 1.5));
+        double targetDistance = hyperAggressive
+                ? Math.min(6.0, Math.max(3.8, distance + 0.5))
+                : Math.min(8.0, Math.max(5.0, distance + 1.5));
         moveToTarget(target, targetDistance);
         actionTaken = true;
 
@@ -153,12 +184,19 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             }
         }
 
+        if (distance <= 3.5 && ((ITrainingBot) bot).isFollow()) {
+            maybeBoostMeleeTempo(hyperAggressive);
+            attackController.handleAttack(target);
+            actionTaken = true;
+        }
+
         return actionTaken;
     }
 
     @Override
     public boolean executeRepositioning(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
+        boolean hyperAggressive = isHyperAggressiveRank();
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
 
@@ -166,7 +204,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         double optimalDistance = 5.0;
         boolean actionTaken = false;
 
-        if (yDiff > 2.0) {
+        if (yDiff > 2.0 && (!hyperAggressive || yDiff > 4.0)) {
             if (enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
                 enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.REPOSITION_LOW);
                 repositionTimer = 100;
@@ -174,7 +212,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             }
         }
 
-        if (distance > 10.0 && enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
+        if (distance > (hyperAggressive ? 14.0 : 10.0) && enderpearlController.canUseEnderpearl() && repositionTimer <= 0) {
             enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.AGGRESSIVE_CLOSE);
             repositionTimer = 100;
             return true;
@@ -182,12 +220,18 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance < 3.0) {
             movementController.moveAwayFrom(target, optimalDistance);
+            maybeBoostMeleeTempo(hyperAggressive);
+            attackController.handleAttack(target);
         } else if (distance > 8.0) {
             movementController.moveTowards(target, optimalDistance);
         } else {
             Vec3 strafeDirection = getStrafeDirection(target);
             Vec3 newPos = botPos.add(strafeDirection.scale(1.5));
             movementController.moveToPosition(newPos);
+            if (distance <= 3.8) {
+                maybeBoostMeleeTempo(hyperAggressive);
+                attackController.handleAttack(target);
+            }
         }
         actionTaken = true;
 
@@ -215,12 +259,16 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         if (!((ITrainingBot) bot).isCombat()) return false;
 
         movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
-        movementController.moveToTarget(target, 5.0);
+        movementController.moveToTarget(target, 4.6);
 
-        if (enderpearlController.canUseEnderpearl() &&
-                bot.position().y > target.position().y - 1 &&
-                random.nextDouble() < 0.3) {
-            enderpearlController.tryUseEnderpearl(target);
+        boolean hyperAggressive = isHyperAggressiveRank();
+        double yDiff = bot.position().y - target.position().y;
+        if (hyperAggressive &&
+                enderpearlController.canUseEnderpearl() &&
+                yDiff > 4.0 &&
+                distance > 10.5 &&
+                !rapvpController.isActive()) {
+            enderpearlController.tryUseEnderpearl(target, IPearlStrategyCalculator.PearlStrategy.REPOSITION_LOW);
         }
 
         return true;
@@ -229,14 +277,28 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeRetreating(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
+        boolean hyperAggressive = isHyperAggressiveRank();
         boolean actionTaken = false;
 
-        if (enderpearlController.canUseEnderpearl()) {
+        if (distance <= 3.2) {
+            maybeBoostMeleeTempo(hyperAggressive);
+            attackController.handleAttack(target);
+            actionTaken = true;
+        }
+
+        if (!hyperAggressive && enderpearlController.canUseEnderpearl()) {
             enderpearlController.tryUseEnderpearl(target);
             return true;
         }
 
-        movementController.moveAwayFrom(target, 10.0);
+        if (hyperAggressive) {
+            moveToTarget(target, 4.0);
+            if (distance <= 4.0) {
+                attackController.handleAttack(target);
+            }
+        } else {
+            movementController.moveAwayFrom(target, 10.0);
+        }
         actionTaken = true;
 
         return actionTaken;
@@ -275,5 +337,22 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     public void updateRepositionTimer(int value) {
         this.repositionTimer = value;
+    }
+
+    private boolean isHyperAggressiveRank() {
+        BotRank rank = cpvpController.getRank();
+        return rank == BotRank.GOD || rank == BotRank.HARD;
+    }
+
+    private void maybeBoostMeleeTempo(boolean hyperAggressive) {
+        if (!hyperAggressive) {
+            return;
+        }
+        if (random.nextDouble() < 0.35D) {
+            return;
+        }
+        if (attackController.getAttackCooldown() > 2) {
+            attackController.setAttackCooldown(2);
+        }
     }
 }

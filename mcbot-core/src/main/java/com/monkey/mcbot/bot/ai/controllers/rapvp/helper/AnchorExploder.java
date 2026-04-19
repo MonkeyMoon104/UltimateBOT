@@ -29,33 +29,37 @@ public class AnchorExploder {
         this.level = level;
     }
 
-    public void explodeAnchor(BlockPos anchorPos) {
+    public boolean explodeAnchor(BlockPos anchorPos) {
         try {
             if (!hasLineOfSight(anchorPos)) {
-                return;
+                double distanceToAnchor = bot.position().distanceTo(Vec3.atCenterOf(anchorPos));
+                if (distanceToAnchor > 3.2D) {
+                    return false;
+                }
             }
 
             BlockState anchorState = bot.level().getBlockState(anchorPos);
             if (!(anchorState.getBlock() instanceof RespawnAnchorBlock)) {
-                return;
+                return false;
             }
 
             int currentCharges = anchorState.getValue(RespawnAnchorBlock.CHARGE);
             if (currentCharges == 0) {
-                return;
+                return false;
             }
 
             inventory.switchToEmptySlot();
             rotation.lookAt(Vec3.atCenterOf(anchorPos));
 
             if (tryVanillaExplosion(anchorPos, anchorState)) {
-                return;
+                return true;
             }
 
-            tryManualExplosion(anchorPos);
+            return tryManualExplosion(anchorPos);
 
         } catch (Exception e) {
             MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione anchor: " + e.getMessage());
+            return false;
         }
     }
 
@@ -77,7 +81,7 @@ public class AnchorExploder {
         }
     }
 
-    private void tryManualExplosion(BlockPos anchorPos) {
+    private boolean tryManualExplosion(BlockPos anchorPos) {
         System.out.println("FALLBACK -> USO ESPLOSIONE ANCHOR MANUALE");
         try {
             bot.level().removeBlock(anchorPos, false);
@@ -92,9 +96,11 @@ public class AnchorExploder {
             );
 
             bot.swing(InteractionHand.MAIN_HAND);
+            return true;
 
         } catch (Exception e) {
             MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione manuale: " + e.getMessage());
+            return false;
         }
     }
 

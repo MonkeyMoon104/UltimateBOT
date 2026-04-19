@@ -45,8 +45,8 @@ public class BotEnderpearlController {
 
     private long lastPearlUseTime = 0;
     private static final long MIN_TIME_BETWEEN_PEARLS_MS = 700;
-    private static final double MIN_USE_DISTANCE = 3.5;
-    private static final double MAX_USE_DISTANCE = 16.0;
+    private static final double MIN_USE_DISTANCE = 3.2;
+    private static final double MAX_USE_DISTANCE = 14.0;
 
     private long lastAutoTeleportTime = 0;
     private static final long AUTO_TELEPORT_COOLDOWN_MS = 10000;

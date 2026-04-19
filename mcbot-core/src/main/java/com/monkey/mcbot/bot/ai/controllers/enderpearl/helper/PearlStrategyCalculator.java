@@ -7,7 +7,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
-    private static final long DAMAGE_REACTION_WINDOW = 2000;
     private static final long EMERGENCY_PEARL_COOLDOWN = 3000;
     private static final int PREDICT_TICKS = 8;
 
@@ -27,18 +26,12 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
         long currentTime = System.currentTimeMillis();
 
-        if (bot.position().y > target.position().y &&
-                distance > 4.0 && distance < 15.0) {
-            return PearlStrategy.REPOSITION_LOW;
-        }
-
         if (healthPercent < 0.3f ||
                 (damageComboCount >= 2 && currentTime - comboStartTime < 2000)) {
             return PearlStrategy.COMBO_ESCAPE;
         }
 
-
-        if (wasRecentlyDamaged && distance < 4.0) {
+        if (wasRecentlyDamaged && distance < 4.8) {
             return PearlStrategy.ESCAPE;
         }
 
@@ -46,15 +39,15 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
             return PearlStrategy.MELEE_DISENGAGE;
         }
 
-        if (yDiff > 1.5 && distance > 4.0 && distance < 15.0 && repositionPearlCooldown <= 0) {
+        if (yDiff > 2.8 && distance > 4.5 && distance < 12.5 && repositionPearlCooldown <= 0) {
             return PearlStrategy.REPOSITION_LOW;
         }
 
-        if (target.onGround() && distance > 5.0 && distance < 12.0 && yDiff > 0) {
+        if (target.onGround() && distance > 4.6 && distance < 10.5 && yDiff > 0.8) {
             return PearlStrategy.ANCHOR_POSITION;
         }
 
-        if (distance > 8.0 && healthPercent > 0.6f && aggressivePearlCooldown <= 0) {
+        if (distance > 9.0 && distance < 14.0 && healthPercent > 0.6f && aggressivePearlCooldown <= 0) {
             return PearlStrategy.AGGRESSIVE_CLOSE;
         }
 
@@ -71,22 +64,31 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
                 return currentTime - lastEmergencyPearl > EMERGENCY_PEARL_COOLDOWN;
 
             case ESCAPE:
-                return wasRecentlyDamaged || bot.getHealth() < 8.0f;
+                return (wasRecentlyDamaged && distance < 5.2) || bot.getHealth() < 7.0f;
 
             case MELEE_DISENGAGE:
                 return distance < 3.0 && (wasRecentlyDamaged || bot.getHealth() < 10.0f);
 
             case REPOSITION_LOW:
-                return repositionPearlCooldown <= 0 && distance > 4.0;
+                return repositionPearlCooldown <= 0
+                        && distance > 4.5
+                        && distance < 13.0
+                        && bot.position().y - target.position().y > 2.3;
 
             case ANCHOR_POSITION:
-                return target.onGround() && distance > 4.0;
+                return target.onGround()
+                        && distance > 4.2
+                        && distance < 11.0
+                        && bot.position().y - target.position().y > 0.6;
 
             case AGGRESSIVE_CLOSE:
-                return aggressivePearlCooldown <= 0 && distance > 6.0 && bot.getHealth() > 8.0f;
+                return aggressivePearlCooldown <= 0
+                        && distance > 7.0
+                        && distance < 14.5
+                        && bot.getHealth() > 8.0f;
 
             default:
-                return Math.random() < 0.4;
+                return false;
         }
     }
 

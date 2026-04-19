@@ -4,6 +4,8 @@ import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManage
 import com.monkey.mcbot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rapvp.BotRAPVPController;
+import com.monkey.mcbot.bot.ai.controllers.rapvp.helper.RAPVPState;
+import com.monkey.mcbot.bot.ai.rank.BotRank;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 
@@ -18,9 +20,9 @@ public class CombatStateManager implements ICombatStateManager {
     private long lastStateChange = 0;
     private static final long MIN_STATE_DURATION = 500;
     private long lastAnchorAttempt = 0;
-    private static final long ANCHOR_ATTEMPT_COOLDOWN = 8000;
     private long lastDamageTime = 0;
     private int consecutiveDamageCount = 0;
+    private long lastComboPressureTime = 0L;
 
     public CombatStateManager(Player bot, BotInventoryController inventoryController,
                               BotCPVPController cpvpController, BotRAPVPController rapvpController) {
@@ -44,10 +46,28 @@ public class CombatStateManager implements ICombatStateManager {
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
         int yDiff = targetY - botY;
+        BotRank rank = cpvpController.getRank();
+        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        boolean comboWindow = rapvpController.getState() == RAPVPState.WAITING_EXPLOSION
+                || rapvpController.hadRecentAnchorExplosion(hyperAggressive ? 1500L : 1200L);
+        if (comboWindow) {
+            lastComboPressureTime = currentTime;
+        }
+        boolean keepComboMomentum = currentTime - lastComboPressureTime < (hyperAggressive ? 900L : 650L);
 
-        if (healthPercent < 0.25f) {
+        if (keepComboMomentum && healthPercent > (hyperAggressive ? 0.10f : 0.18f)) {
+            if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
+                newState = CombatState.CRYSTAL_SETUP;
+            } else if (shouldAttemptAnchor(target, currentTime)) {
+                newState = CombatState.ANCHOR_SETUP;
+            } else {
+                newState = CombatState.AGGRESSIVE;
+            }
+        } else if (!hyperAggressive && healthPercent < 0.25f) {
             newState = CombatState.RETREATING;
-        } else if (consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
+        } else if (hyperAggressive && healthPercent < 0.14f) {
+            newState = CombatState.DEFENSIVE;
+        } else if (!hyperAggressive && consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
             newState = CombatState.DEFENSIVE;
         }
         else if (shouldAttemptCombat(target, currentTime, distance)) {
@@ -78,8 +98,12 @@ public class CombatStateManager implements ICombatStateManager {
     }
 
     private boolean shouldAttemptCombat(Player target, long currentTime, double distance) {
-        return distance > 1.0 && distance < 12.0 &&
-                bot.getHealth() / bot.getMaxHealth() > 0.3f;
+        BotRank rank = cpvpController.getRank();
+        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        double maxDistance = hyperAggressive ? 16.0 : 12.0;
+        float minHealth = hyperAggressive ? 0.12f : 0.3f;
+        return distance > 0.7 && distance < maxDistance &&
+                bot.getHealth() / bot.getMaxHealth() > minHealth;
     }
 
     @Override
@@ -101,23 +125,43 @@ public class CombatStateManager implements ICombatStateManager {
 
     @Override
     public boolean shouldAttemptAnchor(Player target, long currentTime) {
-        if (currentTime - lastAnchorAttempt < ANCHOR_ATTEMPT_COOLDOWN) return false;
+        if (currentTime - lastAnchorAttempt < getAnchorAttemptCooldown()) return false;
         if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
         if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
 
+        BotRank rank = cpvpController.getRank();
+        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
         double distance = bot.distanceTo(target);
-        return distance > 1.0 && distance < 8.0 && target.onGround();
+        double maxDistance = hyperAggressive ? 11.0 : 8.0;
+        return distance > 1.0 && distance < maxDistance && (target.onGround() || hyperAggressive);
     }
 
     @Override
     public boolean shouldReposition(Player target, double distance) {
+        BotRank rank = cpvpController.getRank();
+        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
         net.minecraft.world.phys.Vec3 botPos = bot.position();
         net.minecraft.world.phys.Vec3 targetPos = target.position();
         double yDiff = botPos.y - targetPos.y;
 
-        return (yDiff < -2 && distance > 2.0) ||
-                (distance < 1.5 && consecutiveDamageCount > 0) ||
+        return (yDiff < -2 && distance > (hyperAggressive ? 1.5 : 2.0)) ||
+                (distance < (hyperAggressive ? 1.2 : 1.5) && consecutiveDamageCount > (hyperAggressive ? 2 : 0)) ||
                 (distance > 15.0);
+    }
+
+    private long getAnchorAttemptCooldown() {
+        BotRank rank = cpvpController.getRank();
+        if (rank == null) {
+            return 8000L;
+        }
+
+        return switch (rank) {
+            case EASY -> 8000L;
+            case NORMAL -> 5200L;
+            case MEDIUM -> 3200L;
+            case HARD -> 1800L;
+            case GOD -> 800L;
+        };
     }
 
     public void updateDamageData(int consecutiveDamageCount, long lastDamageTime) {

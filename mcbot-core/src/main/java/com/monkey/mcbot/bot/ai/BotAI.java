@@ -22,8 +22,10 @@ import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.bot.ai.controllers.teleport.BotTeleportController;
 import com.monkey.mcbot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class BotAI {
@@ -55,6 +57,8 @@ public class BotAI {
     private final IPathfindingManager pathfindingManager;
     private final ICombatStrategyExecutor combatStrategyExecutor;
     private final BotOptions options;
+    private long lastForcedVerticalTeleportTime = 0L;
+    private static final long FORCED_VERTICAL_TELEPORT_COOLDOWN_MS = 3000L;
 
     public BotAI(Player bot, MinecraftBot plugin, BotOptions options) {
         this.bot = bot;
@@ -111,6 +115,19 @@ public class BotAI {
         }
 
         if (combatEnabled) {
+            if (shouldForceVerticalTeleport(target) && canForceVerticalTeleport()) {
+                boolean teleported = teleportController.teleportSafeNear(targetBukkitPlayer)
+                        || teleportController.teleportBeside(targetBukkitPlayer);
+                if (teleported) {
+                    lastForcedVerticalTeleportTime = System.currentTimeMillis();
+                    if (pathfindingManager.isUsingPathfinding()) {
+                        pathfindingManager.setUsingPathfinding(false);
+                        movementController.clearPath();
+                    }
+                    rotationController.updateRotation(target);
+                }
+            }
+
             if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
                 if (pathfindingManager.isUsingPathfinding()) {
                     pathfindingManager.setUsingPathfinding(false);
@@ -193,5 +210,46 @@ public class BotAI {
     public BotTeleportController getTeleportController() { return teleportController; }
     public CombatState getCurrentState() {
         return CombatState.valueOf(combatStateManager.getCurrentState().name());
+    }
+
+    private boolean canForceVerticalTeleport() {
+        return System.currentTimeMillis() - lastForcedVerticalTeleportTime >= FORCED_VERTICAL_TELEPORT_COOLDOWN_MS
+                && !teleportController.isTeleporting();
+    }
+
+    private boolean shouldForceVerticalTeleport(Player target) {
+        Vec3 botPos = bot.position();
+        Vec3 targetPos = target.position();
+        double horizontalDistance = Math.hypot(botPos.x - targetPos.x, botPos.z - targetPos.z);
+        if (horizontalDistance > 3.2D) {
+            return false;
+        }
+
+        double verticalDistance = Math.abs(botPos.y - targetPos.y);
+        if (verticalDistance < 3.0D) {
+            return false;
+        }
+
+        BlockPos botBlock = bot.blockPosition();
+        BlockPos targetBlock = target.blockPosition();
+        int minY = Math.min(botBlock.getY(), targetBlock.getY()) + 1;
+        int maxY = Math.max(botBlock.getY(), targetBlock.getY()) - 1;
+        if (maxY < minY) {
+            return false;
+        }
+
+        int solidBetween = 0;
+        for (int y = minY; y <= maxY; y++) {
+            BlockPos checkAtBotColumn = new BlockPos(botBlock.getX(), y, botBlock.getZ());
+            BlockPos checkAtTargetColumn = new BlockPos(targetBlock.getX(), y, targetBlock.getZ());
+            if (level.getBlockState(checkAtBotColumn).isSolid() || level.getBlockState(checkAtTargetColumn).isSolid()) {
+                solidBetween++;
+                if (solidBetween >= 2) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

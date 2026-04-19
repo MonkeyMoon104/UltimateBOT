@@ -21,6 +21,7 @@ public class ObsidianScanner {
     public void scanForExistingObsidian(Player target, Map<BlockPos, Long> obsidianCache) {
         BlockPos targetPos = target.blockPosition();
         long currentTime = System.currentTimeMillis();
+        double maxUsefulDistance = Math.max(4.5D, Math.min(config.getMaxCrystalDistance(), 7.0D));
 
         for (int y = -3; y <= 2; y++) {
             for (int x = -6; x <= 6; x++) {
@@ -33,13 +34,19 @@ public class ObsidianScanner {
                     }
 
                     int obsidianY = checkPos.getY();
-                    int botY = target.blockPosition().getY();
                     int targetY = target.blockPosition().getY();
 
                     if (obsidianY >= targetY) continue;
 
                     BlockState state = level.getBlockState(checkPos);
                     if (state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.BEDROCK) {
+                        if (!level.getBlockState(checkPos.above()).isAir() || !level.getBlockState(checkPos.above(2)).isAir()) {
+                            continue;
+                        }
+                        double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(checkPos));
+                        if (distanceToTarget > maxUsefulDistance) {
+                            continue;
+                        }
                         obsidianCache.put(checkPos, currentTime);
                     }
                 }

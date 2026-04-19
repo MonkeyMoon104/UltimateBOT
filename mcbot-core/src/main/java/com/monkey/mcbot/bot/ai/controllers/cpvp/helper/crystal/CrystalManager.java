@@ -20,7 +20,11 @@ public class CrystalManager {
     public void cleanupCrystalCounts(Map<BlockPos, Integer> crystalCountAtPosition, Level level) {
         crystalCountAtPosition.entrySet().removeIf(entry -> {
             BlockPos pos = entry.getKey();
-            return findCrystalAt(pos.above(), level) == null;
+            BlockState baseState = level.getBlockState(pos);
+            if (!(baseState.getBlock() == Blocks.OBSIDIAN || baseState.getBlock() == Blocks.BEDROCK)) {
+                return true;
+            }
+            return entry.getValue() <= 0;
         });
     }
 
@@ -62,22 +66,23 @@ public class CrystalManager {
 
         double distanceToBot = bot.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos.above()));
+        double maxBotDistance = Math.max(maxCrystalDistance + 2.0, 8.0);
 
-        if (distanceToBot > 10 || distanceToTarget > maxCrystalDistance) return false;
+        if (distanceToBot > maxBotDistance || distanceToTarget > maxCrystalDistance) return false;
 
         int crystalY = pos.getY() + 1;
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
 
-        if (crystalY > targetY) {
+        if (crystalY > targetY + 2) {
             return false;
         }
 
-        if (botY >= crystalY) {
+        if (botY > crystalY + 2) {
             return false;
         }
 
-        return crystalY <= targetY && botY < crystalY;
+        return true;
     }
 
     public void setConfig(CPVPConfig config) {
