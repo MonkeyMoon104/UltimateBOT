@@ -15,7 +15,8 @@ public class PluginVersionCatalog {
     public List<CatalogVersion> versions() {
         String url = "https://builtbybit.com/resources/minecraftbot-pvp-practice-bots.100308/";
         return List.of(
-                new CatalogVersion("minecraftbot", "1.0.0", url, true)
+                new CatalogVersion("minecraftbot", "1.0.0", url, false),
+                new CatalogVersion("minecraftbot", "1.0.1", url, true)
         );
     }
 
