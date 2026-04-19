@@ -16,17 +16,9 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.gui.Markers;
 import xyz.xenondevs.invui.gui.ScrollGui;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.AbstractScrollGuiBoundItem;
-import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import xyz.xenondevs.invui.item.*;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class TargetsTab {
 

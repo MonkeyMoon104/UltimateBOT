@@ -48,7 +48,7 @@ journalctl -u mcbot-license -n 100 --no-pager
 
 # COMANDO UNICO
 ```bash
-scp .\license-server\build\libs\license-server-1.0.0.jar root@92.112.127.240:/root/license-server.jar && ssh root@92.112.127.240 "systemctl stop mcbot-license && cp /opt/mcbot-license/license-server.jar /opt/mcbot-license/license-server.jar.bak && mv /root/license-server.jar /opt/mcbot-license/license-server.jar && chown mcbot-license:mcbot-license /opt/mcbot-license/license-server.jar && systemctl start mcbot-license && systemctl status mcbot-license --no-pager"
+scp .\license-server\build\libs\license-server-1.0.0.jar root@92.112.127.240:/root/license-server.jar; if ($LASTEXITCODE -eq 0) { ssh root@92.112.127.240 "systemctl stop mcbot-license && cp /opt/mcbot-license/license-server.jar /opt/mcbot-license/license-server.jar.bak && mv /root/license-server.jar /opt/mcbot-license/license-server.jar && chown mcbot-license:mcbot-license /opt/mcbot-license/license-server.jar && systemctl start mcbot-license && systemctl status mcbot-license --no-pager" }
 ```
 
 ## 6. Test rapido

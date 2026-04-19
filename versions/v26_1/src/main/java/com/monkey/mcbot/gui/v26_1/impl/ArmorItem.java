@@ -9,14 +9,13 @@ import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.AbstractItem;
+import xyz.xenondevs.invui.item.ItemBuilder;
+import xyz.xenondevs.invui.item.ItemProvider;
 
 import java.util.UUID;
 
