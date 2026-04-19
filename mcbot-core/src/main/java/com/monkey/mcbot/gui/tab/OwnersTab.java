@@ -58,7 +58,12 @@ public class OwnersTab {
                 .setContent(items)
                 .build();
 
-        if (!items.isEmpty()) {
+        boolean foliaDetected = context.getTraining()
+                .getWrapperManager()
+                .capabilities()
+                .foliaDetected();
+
+        if (!items.isEmpty() && !foliaDetected) {
             gui.playAnimation(
                     new SplitSequentialAnimation(3, false),
                     slotElement -> {

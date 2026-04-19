@@ -2,10 +2,9 @@ package com.monkey.mcbot.license;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.plugin.java.JavaPlugin;
+import com.monkey.mcbot.wrapper.WrapperTask;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -19,18 +18,18 @@ public final class LicenseManager {
     private static final String PRODUCT_CODE = "minecraftbot";
     private static final String PLACEHOLDER_KEY = "XXXX-XXXX-XXXX-XXXX";
 
-    private final JavaPlugin plugin;
+    private final MinecraftBot plugin;
     private final InstallationIdStore installationIdStore;
     private final LicenseStateStore licenseStateStore;
     private final ServerFingerprintService fingerprintService;
     private final LicenseHttpClient licenseHttpClient;
 
-    private BukkitTask heartbeatTask;
+    private WrapperTask heartbeatTask;
     private String licenseKey;
     private String installationId;
     private String fingerprintHash;
 
-    public LicenseManager(JavaPlugin plugin) {
+    public LicenseManager(MinecraftBot plugin) {
         this.plugin = plugin;
         ObjectMapper objectMapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
@@ -72,7 +71,7 @@ public final class LicenseManager {
             return;
         }
 
-        heartbeatTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::runHeartbeatCheck,
+        heartbeatTask = plugin.getWrapperManager().active().runAsyncRepeating(this::runHeartbeatCheck,
                 HEARTBEAT_PERIOD_TICKS, HEARTBEAT_PERIOD_TICKS);
     }
 
@@ -109,9 +108,9 @@ public final class LicenseManager {
     }
 
     private void disablePluginSync(String reason) {
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        plugin.getWrapperManager().active().runSync(() -> {
             plugin.getLogger().severe(reason);
-            Bukkit.getPluginManager().disablePlugin(plugin);
+            plugin.getServer().getPluginManager().disablePlugin(plugin);
         });
     }
 

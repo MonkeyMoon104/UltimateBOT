@@ -1,7 +1,9 @@
 package com.monkey.mcbot.update;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
+import com.monkey.mcbot.wrapper.WrapperTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -12,8 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -23,16 +23,16 @@ public final class UpdateManager implements Listener {
     private static final String PRODUCT_CODE = "minecraftbot";
     private static final String DEFAULT_DOWNLOAD_URL = "https://builtbybit.com/resources/minecraftbot-pvp-practice-bots.100308/";
 
-    private final JavaPlugin plugin;
+    private final MinecraftBot plugin;
     private final UpdateCheckHttpClient updateHttpClient;
     private final long joinNotifyDelayTicks;
     private final boolean periodicBroadcastEnabled;
     private final long periodicIntervalTicks;
 
     private volatile UpdateState lastUpdateState;
-    private BukkitTask periodicTask;
+    private WrapperTask periodicTask;
 
-    public UpdateManager(JavaPlugin plugin) {
+    public UpdateManager(MinecraftBot plugin) {
         this.plugin = plugin;
         this.updateHttpClient = new UpdateCheckHttpClient(new ObjectMapper());
 
@@ -71,8 +71,7 @@ public final class UpdateManager implements Listener {
             return;
         }
 
-        periodicTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
-                plugin,
+        periodicTask = plugin.getWrapperManager().active().runAsyncRepeating(
                 this::runPeriodicCheck,
                 periodicIntervalTicks,
                 periodicIntervalTicks
@@ -93,7 +92,7 @@ public final class UpdateManager implements Listener {
             return;
         }
 
-        Bukkit.getScheduler().runTaskLater(plugin, () -> notifyPlayerIfUpdateAvailable(player), joinNotifyDelayTicks);
+        plugin.getWrapperManager().active().runEntityLater(player, joinNotifyDelayTicks, () -> notifyPlayerIfUpdateAvailable(player));
     }
 
     private void notifyPlayerIfUpdateAvailable(Player player) {
@@ -117,7 +116,7 @@ public final class UpdateManager implements Listener {
                 return;
             }
 
-            Bukkit.getScheduler().runTask(plugin, () -> broadcastToAdmins(state));
+            plugin.getWrapperManager().active().runSync(() -> broadcastToAdmins(state));
         } catch (IOException ex) {
             MinecraftBotLogging.warn(plugin.getLogger(), "Update", "Periodic check failed -> " + safeMessage(ex.getMessage()));
         }
@@ -155,12 +154,12 @@ public final class UpdateManager implements Listener {
 
     private Component buildUpdateMessage(UpdateState state) {
         return Component.text("[MinecraftBot] ", NamedTextColor.GOLD)
-                .append(Component.text("Nuova versione disponibile: ", NamedTextColor.YELLOW))
+                .append(Component.text("New version available: ", NamedTextColor.YELLOW))
                 .append(Component.text(state.latestVersion(), NamedTextColor.GREEN))
-                .append(Component.text(" (hai " + state.currentVersion() + ") ", NamedTextColor.GRAY))
-                .append(Component.text("[Clicca per aprire il link]", NamedTextColor.AQUA)
+                .append(Component.text(" (actually " + state.currentVersion() + ") ", NamedTextColor.GRAY))
+                .append(Component.text("[Click to open link]", NamedTextColor.AQUA)
                         .clickEvent(ClickEvent.openUrl(state.downloadUrl()))
-                        .hoverEvent(HoverEvent.showText(Component.text("Apri pagina download", NamedTextColor.GREEN))));
+                        .hoverEvent(HoverEvent.showText(Component.text("Open download page", NamedTextColor.GREEN))));
     }
 
     private boolean isAdmin(Player player) {

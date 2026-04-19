@@ -41,7 +41,7 @@ public final class MinecraftBotLogging {
     }
 
     public static void schedulePostEnableDiagnostics(MinecraftBot plugin, StartupSession session) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+        plugin.getWrapperManager().active().runSyncLater(() ->
                 info(
                         plugin.getLogger(),
                         "Boot",
@@ -51,7 +51,7 @@ public final class MinecraftBotLogging {
                                 + " | placeholders=" + session.placeholderCount()
                 ), WARMUP_REPORT_DELAY_TICKS);
 
-        plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+        plugin.getWrapperManager().active().runSyncLater(() ->
                 info(
                         plugin.getLogger(),
                         "Boot",

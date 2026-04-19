@@ -8,8 +8,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
 
 public class AnchorPositionFinder {
 
@@ -40,17 +38,16 @@ public class AnchorPositionFinder {
         Vec3 predictedTargetPos = predictTargetPosition(target);
         BlockPos targetPos = BlockPos.containing(predictedTargetPos);
 
-        AtomicReference<BlockPos> lethaltPos = new AtomicReference<>(null);
-        AtomicReference<BlockPos> smartPos = new AtomicReference<>(null);
-        AtomicReference<BlockPos> safePos = new AtomicReference<>(null);
-        AtomicReference<BlockPos> fallbackPos = new AtomicReference<>(null);
+        BlockPos lethalPos = null;
+        BlockPos smartPos = null;
+        BlockPos safePos = null;
+        BlockPos fallbackPos = null;
         double maxDistanceSq = 12 * 12;
 
         int[] offsets = {-3, -2, -1, 0, 1, 2, 3};
         int[] yOffsets = {-2, -1, 0, 1};
 
-        IntStream.range(0, offsets.length).parallel().forEach(i -> {
-            int dx = offsets[i];
+        for (int dx : offsets) {
             for (int dz : offsets) {
                 for (int dy : yOffsets) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
@@ -80,37 +77,35 @@ public class AnchorPositionFinder {
                     boolean isLethalPosition = isLethalPosition(anchorPos, predictedTargetPos, botPosition, target);
                     boolean isTrappingPosition = isTrappingPosition(anchorPos, predictedTargetPos, currentTargetPos);
 
-                    synchronized (this) {
-                        if (isLethalPosition && distanceToBot >= config.getMinSafeDistance()) {
-                            if (lethaltPos.get() == null ||
-                                    distanceToPredictedTarget < Vec3.atCenterOf(lethaltPos.get()).distanceTo(predictedTargetPos)) {
-                                lethaltPos.set(check);
-                            }
+                    if (isLethalPosition && distanceToBot >= config.getMinSafeDistance()) {
+                        if (lethalPos == null ||
+                                distanceToPredictedTarget < Vec3.atCenterOf(lethalPos).distanceTo(predictedTargetPos)) {
+                            lethalPos = check;
                         }
-                        else if (isOnOppositeSide && distanceToBot >= config.getMinSafeDistance() &&
-                                (isTrappingPosition || distanceToPredictedTarget <= 3.0)) {
-                            if (smartPos.get() == null ||
-                                    distanceToPredictedTarget < Vec3.atCenterOf(smartPos.get()).distanceTo(predictedTargetPos)) {
-                                smartPos.set(check);
-                            }
+                    }
+                    else if (isOnOppositeSide && distanceToBot >= config.getMinSafeDistance() &&
+                            (isTrappingPosition || distanceToPredictedTarget <= 3.0)) {
+                        if (smartPos == null ||
+                                distanceToPredictedTarget < Vec3.atCenterOf(smartPos).distanceTo(predictedTargetPos)) {
+                            smartPos = check;
                         }
-                        else if (distanceToBot >= config.getMinSafeDistance()) {
-                            if (safePos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(safePos.get()))) {
-                                safePos.set(check);
-                            }
+                    }
+                    else if (distanceToBot >= config.getMinSafeDistance()) {
+                        if (safePos == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(safePos))) {
+                            safePos = check;
                         }
-                        else if (fallbackPos.get() == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(fallbackPos.get()))) {
-                            fallbackPos.set(check);
-                        }
+                    }
+                    else if (fallbackPos == null || distSq < botPosition.distanceToSqr(Vec3.atCenterOf(fallbackPos))) {
+                        fallbackPos = check;
                     }
                 }
             }
-        });
+        }
 
-        if (lethaltPos.get() != null) return Optional.of(lethaltPos.get());
-        if (smartPos.get() != null) return Optional.of(smartPos.get());
-        if (safePos.get() != null) return Optional.of(safePos.get());
-        return Optional.ofNullable(fallbackPos.get());
+        if (lethalPos != null) return Optional.of(lethalPos);
+        if (smartPos != null) return Optional.of(smartPos);
+        if (safePos != null) return Optional.of(safePos);
+        return Optional.ofNullable(fallbackPos);
     }
 
     private Vec3 getBotForwardDirection() {

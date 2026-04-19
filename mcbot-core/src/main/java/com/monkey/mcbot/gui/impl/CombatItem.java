@@ -72,9 +72,9 @@ public class CombatItem extends AbstractItem {
 
             if (newStatus) {
                 training.getBotManager().switchBotToEnderpearl(managedOwnerUUID);
-                training.getServer().getScheduler().runTaskLater(training, () -> {
+                training.getWrapperManager().active().runEntityLater(player, 1L, () -> {
                     training.getBotManager().switchBotToSword(managedOwnerUUID);
-                }, 1L);
+                });
             } else {
                 if (training.getBotManager().getSwordSlot(managedOwnerUUID)) {
                     int totemcount = options.getTotems();

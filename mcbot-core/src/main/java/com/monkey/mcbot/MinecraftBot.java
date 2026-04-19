@@ -21,6 +21,7 @@ import com.monkey.mcbot.placeholders.PlaceholderRegistration;
 import com.monkey.mcbot.update.UpdateManager;
 import com.monkey.mcbot.update.UpdateStartupResult;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import com.monkey.mcbot.wrapper.WrapperManager;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandExecutor;
@@ -48,11 +49,13 @@ public final class MinecraftBot extends JavaPlugin {
     private LicenseManager licenseManager;
     private UpdateManager updateManager;
     private LanguageManager languageManager;
+    private WrapperManager wrapperManager;
     private static MinecraftBot instance;
 
     @Override
     public void onEnable() {
         instance = this;
+        this.wrapperManager = new WrapperManager(this);
         MinecraftBotLogging.StartupSession startup = MinecraftBotLogging.beginBootstrap(this);
 
         try {
@@ -110,8 +113,9 @@ public final class MinecraftBot extends JavaPlugin {
             this.botRegistry = new BotRegistry();
             this.botManager = new BotManager(this);
             startup.ready("Runtime", "services created");
-            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager");
+            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager, WrapperManager");
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
+            startup.detail("Wrappers", wrapperManager.describeActiveWrapper());
             startup.completePhase("runtime core created");
 
             startup.beginPhase(6, "API", "Wiring");
@@ -249,6 +253,10 @@ public final class MinecraftBot extends JavaPlugin {
 
     public static MinecraftBot getInstance() {
         return instance;
+    }
+
+    public WrapperManager getWrapperManager() {
+        return wrapperManager;
     }
 
     public void reloadPluginConfiguration() {
@@ -400,6 +408,7 @@ public final class MinecraftBot extends JavaPlugin {
         }
         targetingService = null;
         languageManager = null;
+        wrapperManager = null;
     }
 
     private String joinOrNone(Iterable<String> values) {

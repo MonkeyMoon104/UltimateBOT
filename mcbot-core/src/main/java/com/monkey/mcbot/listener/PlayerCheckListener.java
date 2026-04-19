@@ -33,9 +33,9 @@ public class PlayerCheckListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+        plugin.getWrapperManager().active().runEntityLater(player, 15L, () -> {
             BotBroadcaster.syncVisibleBotsForPlayer(player, plugin.getBotRegistry().getAllBots().values());
-        }, 15L);
+        });
     }
 
     @EventHandler
