@@ -27,7 +27,7 @@
 -keepclassmembernames class com.monkey.mcbot.bot.ai.ITrainingBot { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBotLogic { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBot_v* { *; }
--keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBot_v26_1_* { *; }
+-keepclassmembernames class com.monkey.mcbot.bot.ai.TrainingBot_v26_1* { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.fakeplayer.** { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.rank.** { *; }
 -keepclassmembernames class com.monkey.mcbot.bot.ai.services.** { *; }

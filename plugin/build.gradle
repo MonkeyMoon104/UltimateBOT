@@ -57,8 +57,7 @@ def proguardLibraries = files(
     externalClasspathFor(project(':versions:v1_21_9')),
     externalClasspathFor(project(':versions:v1_21_10')),
     externalClasspathFor(project(':versions:v1_21_11')),
-    externalClasspathFor(project(':versions:v26_1_1')),
-    externalClasspathFor(project(':versions:v26_1_2'))
+    externalClasspathFor(project(':versions:v26_1'))
 )
 
 if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
@@ -75,10 +74,7 @@ dependencies {
     implementation project(path: ':versions:v1_21_9', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_10', configuration: 'reobf')
     implementation project(path: ':versions:v1_21_11', configuration: 'reobf')
-    implementation(project(path: ':versions:v26_1_1', configuration: 'runtimeElements')) {
-        transitive = false
-    }
-    implementation(project(path: ':versions:v26_1_2', configuration: 'runtimeElements')) {
+    implementation(project(path: ':versions:v26_1', configuration: 'runtimeElements')) {
         transitive = false
     }
     invuiV2Shade "xyz.xenondevs.invui:invui:2.0.0"
@@ -102,27 +98,22 @@ shadowJar {
     })
     relocate('org.bstats', 'com.monkey.mcbot.libs.bstats')
     relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v1') {
-        exclude 'com/monkey/mcbot/gui/v26_1_1/**'
-        exclude 'com/monkey/mcbot/gui/v26_1_2/**'
+        exclude 'com/monkey/mcbot/gui/v26_1/**'
     }
     relocate('xyz.xenondevs.inventoryaccess', 'com.monkey.mcbot.libs.inventoryaccess.v1') {
-        exclude 'com/monkey/mcbot/gui/v26_1_1/**'
-        exclude 'com/monkey/mcbot/gui/v26_1_2/**'
+        exclude 'com/monkey/mcbot/gui/v26_1/**'
     }
     relocate('xyz.xenondevs.invui', 'com.monkey.mcbot.libs.invui.v2') {
-        include 'com/monkey/mcbot/gui/v26_1_1/**'
-        include 'com/monkey/mcbot/gui/v26_1_2/**'
+        include 'com/monkey/mcbot/gui/v26_1/**'
     }
     relocate('xyz.xenondevs.inventoryaccess', 'com.monkey.mcbot.libs.inventoryaccess.v2') {
-        include 'com/monkey/mcbot/gui/v26_1_1/**'
-        include 'com/monkey/mcbot/gui/v26_1_2/**'
+        include 'com/monkey/mcbot/gui/v26_1/**'
     }
     doLast {
         def jarFile = archiveFile.get().asFile
         def patchedJar = new File(jarFile.parentFile, "${jarFile.name}.patched")
         def v26Prefixes = [
-                'com/monkey/mcbot/gui/v26_1_1/',
-                'com/monkey/mcbot/gui/v26_1_2/'
+                'com/monkey/mcbot/gui/v26_1/'
         ]
 
         def retarget = { byte[] bytes ->
