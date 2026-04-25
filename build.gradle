@@ -4,11 +4,55 @@ plugins {
     id 'com.gradleup.shadow' version '9.4.1' apply false
 }
 
+def runGitCommand = { List<String> args ->
+    try {
+        def output = providers.exec {
+            commandLine(['git'] + args)
+            ignoreExitValue = true
+        }
+        if (output.result.get().exitValue != 0) {
+            return null
+        }
+        def text = output.standardOutput.asText.get().trim()
+        return text ? text : null
+    } catch (Exception ignored) {
+        return null
+    }
+}
+
+def normalizeTagVersion = { String rawTag ->
+    if (!rawTag) {
+        return null
+    }
+    return rawTag.startsWith('v') ? rawTag.substring(1) : rawTag
+}
+
+def resolveProjectVersion = {
+    def envVersion = System.getenv("RELEASE_VERSION")
+    if (envVersion) {
+        return envVersion
+    }
+
+    def exactTag = runGitCommand(['describe', '--tags', '--exact-match', 'HEAD'])
+    if (exactTag) {
+        return normalizeTagVersion(exactTag)
+    }
+
+    def latestTag = runGitCommand(['describe', '--tags', '--abbrev=0'])
+    if (latestTag) {
+        return normalizeTagVersion(latestTag)
+    }
+
+    return '1.0.0'
+}
+
+def projectVersion = resolveProjectVersion()
+
 subprojects {
     apply plugin: 'java'
 
     group = 'com.monkey.mcbot'
-    version = System.getenv("RELEASE_VERSION") ?: '1.0.0'
+    version = projectVersion
 
     repositories {
         mavenCentral()
