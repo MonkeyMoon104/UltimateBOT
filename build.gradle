@@ -31,3 +31,17 @@ subprojects {
         options.compilerArgs += ['-parameters']
     }
 }
+
+tasks.register('publishApiDocs', Sync) {
+    group = 'documentation'
+    description = 'Genera le Javadocs del modulo mcbot-api e le copia nella cartella root docs/ per GitHub Pages.'
+
+    dependsOn ':mcbot-api:javadoc'
+
+    from(project(':mcbot-api').tasks.named('javadoc').map { it.destinationDir })
+    into(layout.projectDirectory.dir('docs'))
+
+    doLast {
+        file("$rootDir/docs/.nojekyll").text = ''
+    }
+}
