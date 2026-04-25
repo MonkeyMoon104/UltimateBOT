@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.monkey.mcbot.api"},{"l":"com.monkey.mcbot.api.event"},{"l":"com.monkey.mcbot.api.managers"},{"l":"com.monkey.mcbot.api.model"}];updateSearchResults();
