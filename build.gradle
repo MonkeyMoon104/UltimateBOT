@@ -78,12 +78,17 @@ subprojects {
 
 tasks.register('publishApiDocs', Sync) {
     group = 'documentation'
-    description = 'Genera le Javadocs del modulo mcbot-api e le copia nella cartella root docs/ per GitHub Pages.'
+    description = 'Genera le Javadocs del modulo mcbot-api e copia solo gli HTML nella subrepo docs/.'
 
     dependsOn ':mcbot-api:javadoc'
 
     from(project(':mcbot-api').tasks.named('javadoc').map { it.destinationDir })
     into(layout.projectDirectory.dir('docs'))
+
+    preserve {
+        include 'CNAME'
+        include '.git/**'
+    }
 
     doLast {
         file("$rootDir/docs/.nojekyll").text = ''
