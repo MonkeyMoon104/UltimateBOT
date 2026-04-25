@@ -252,8 +252,8 @@ public final class MinecraftBotLogging {
                     logger,
                     "Boot",
                     WHITE,
-                    plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion(),
-                    "Authors: " + joinOrNone(plugin.getDescription().getAuthors()),
+                    plugin.getPluginMeta().getName() + " v" + plugin.getPluginMeta().getVersion(),
+                    "Authors: " + joinOrNone(plugin.getPluginMeta().getAuthors()),
                     "Starting up..."
             );
             MinecraftBotLogging.detail(logger, "Boot", "Server -> " + Bukkit.getName() + " | " + Bukkit.getVersion());
@@ -327,7 +327,7 @@ public final class MinecraftBotLogging {
                     logger,
                     "Boot",
                     WHITE,
-                    plugin.getDescription().getName() + " enabled",
+                    plugin.getPluginMeta().getName() + " enabled",
                     "Startup time: " + formatDuration(totalDuration),
                     "NMS: " + nmsBridgeName + " | supported: " + nmsSupportedVersions,
                     "Commands: " + commandCount() + " | listeners: " + listenerStateCountSummary() + " | placeholders: " + placeholderCount()
@@ -353,7 +353,7 @@ public final class MinecraftBotLogging {
                     logger,
                     "Boot",
                     RED,
-                    plugin.getDescription().getName() + " failed to start",
+                    plugin.getPluginMeta().getName() + " failed to start",
                     "Context: " + currentContext,
                     "Elapsed: " + formatDuration(System.nanoTime() - startedAtNanos)
             );

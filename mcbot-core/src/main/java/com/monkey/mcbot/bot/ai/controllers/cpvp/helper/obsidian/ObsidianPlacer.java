@@ -68,7 +68,7 @@ public class ObsidianPlacer {
             BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
             BlockState adjacentState = level.getBlockState(adjacentPos);
 
-            if (adjacentState.isSolid() && !adjacentState.isAir()) {
+            if (adjacentState.isSolidRender() && !adjacentState.isAir()) {
                 double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
                 if (distance <= 6.5) return direction;
             }

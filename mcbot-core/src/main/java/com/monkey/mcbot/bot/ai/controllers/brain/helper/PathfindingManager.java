@@ -303,7 +303,7 @@ public class PathfindingManager implements IPathfindingManager {
         for (double step = 0.8D; step <= 1.8D; step += 0.5D) {
             Vec3 check = eyes.add(look.scale(step));
             BlockPos blockPos = BlockPos.containing(check);
-            if (level.getBlockState(blockPos).isSolid() || level.getBlockState(blockPos.above()).isSolid()) {
+            if (level.getBlockState(blockPos).isSolidRender() || level.getBlockState(blockPos.above()).isSolidRender()) {
                 return true;
             }
         }

@@ -60,7 +60,7 @@ public class AnchorPositionFinder {
                     BlockState state = level.getBlockState(check);
                     BlockState below = level.getBlockState(check.below());
 
-                    if (!state.canBeReplaced() || !below.isSolid()) continue;
+                    if (!state.canBeReplaced() || !below.isSolidRender()) continue;
 
                     Vec3 anchorPos = Vec3.atCenterOf(check);
                     double distSq = botPosition.distanceToSqr(anchorPos);
@@ -156,7 +156,7 @@ public class AnchorPositionFinder {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) continue;
                 BlockPos checkPos = targetBlockPos.offset(dx, 0, dz);
-                if (level.getBlockState(checkPos).isSolid()) {
+                if (level.getBlockState(checkPos).isSolidRender()) {
                     solidBlocks++;
                 }
             }

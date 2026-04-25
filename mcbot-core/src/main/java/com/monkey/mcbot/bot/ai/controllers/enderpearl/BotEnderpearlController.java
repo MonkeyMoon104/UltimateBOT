@@ -407,7 +407,7 @@ public class BotEnderpearlController {
             Vec3 p = start.add(dir.scale(t));
             BlockPos blockPos = BlockPos.containing(p);
 
-            if (level.getBlockState(blockPos).isSolid() || level.getBlockState(blockPos.above()).isSolid()) {
+            if (level.getBlockState(blockPos).isSolidRender() || level.getBlockState(blockPos.above()).isSolidRender()) {
                 solidSamples++;
                 if (solidSamples >= 2) {
                     return true;

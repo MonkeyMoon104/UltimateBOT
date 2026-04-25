@@ -8,6 +8,9 @@ import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,6 +21,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 public class PlayerCheckListener implements Listener {
+
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
 
     private final MinecraftBot plugin;
     private final BotManager botManager;
@@ -68,6 +74,7 @@ public class PlayerCheckListener implements Listener {
     public void onDead(PlayerDeathEvent event) {
         Player player = event.getPlayer();
         boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
+        String currentDeathMessage = getDeathMessageText(event);
 
         if (wasBotSpawned) {
             ITrainingBot bot = botManager.getBotSafe(player.getUniqueId());
@@ -87,30 +94,37 @@ public class PlayerCheckListener implements Listener {
         Entity killer = event.getEntity().getKiller();
 
         if (killer instanceof BotCraftPlayer) {
-            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
-            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            setBotDeathMessage(event, player);
             return;
         }
 
         if (killer instanceof ITrainingBot) {
-            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
-            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            setBotDeathMessage(event, player);
             return;
         }
 
         if (wasBotSpawned && (killer == null ||
-                (event.getDeathMessage() != null && event.getDeathMessage().contains("[Intentional Game Design]")))) {
-            String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
-            event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+                (currentDeathMessage != null && currentDeathMessage.contains("[Intentional Game Design]")))) {
+            setBotDeathMessage(event, player);
             return;
         }
 
-        if (wasBotSpawned && event.getDeathMessage() != null) {
+        if (wasBotSpawned && currentDeathMessage != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
-            if (bot != null && event.getDeathMessage().contains(bot.asPlayer().getName().getString())) {
-                String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
-                event.setDeathMessage(deathMessage.replace("{player}", player.getName()));
+            if (bot != null && currentDeathMessage.contains(bot.asPlayer().getName().getString())) {
+                setBotDeathMessage(event, player);
             }
         }
+    }
+
+    private void setBotDeathMessage(PlayerDeathEvent event, Player player) {
+        String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+        String formatted = ChatColorUtils.translate(deathMessage.replace("{player}", player.getName()));
+        event.deathMessage(LEGACY_SECTION_SERIALIZER.deserialize(formatted));
+    }
+
+    private String getDeathMessageText(PlayerDeathEvent event) {
+        Component deathMessage = event.deathMessage();
+        return deathMessage == null ? null : PLAIN_TEXT_SERIALIZER.serialize(deathMessage);
     }
 }

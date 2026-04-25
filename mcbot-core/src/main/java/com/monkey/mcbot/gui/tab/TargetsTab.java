@@ -4,6 +4,8 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -29,6 +31,7 @@ import java.util.*;
 
 public class TargetsTab {
 
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
     private final BotGuiTabContext context;
 
     public TargetsTab(BotGuiTabContext context) {
@@ -81,7 +84,7 @@ public class TargetsTab {
         ItemStack glass = new ItemStack(Material.WHITE_STAINED_GLASS_PANE);
         ItemMeta meta = glass.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(" ");
+            meta.displayName(Component.text(" "));
             glass.setItemMeta(meta);
         }
         return new ItemBuilder(glass);
@@ -198,17 +201,19 @@ public class TargetsTab {
                 meta.setOwningPlayer(offlinePlayer);
 
                 String nameTemplate = context.getTraining().getLangString("gui.targets-tab.head.name", "&c%player%");
-                meta.setDisplayName(ChatColorUtils.translate(
+                String name = ChatColorUtils.translate(
                         nameTemplate.replace("%player%", playerName)
-                                .replace("%uuid%", targetUUID.toString())));
+                                .replace("%uuid%", targetUUID.toString()));
+                meta.displayName(LEGACY_SECTION_SERIALIZER.deserialize(name));
 
                 List<String> loreLines = context.getTraining().getLangStringList("gui.targets-tab.head.lore");
-                List<String> lore = loreLines.stream()
+                List<? extends Component> lore = loreLines.stream()
                         .map(line -> ChatColorUtils.translate(
                                 line.replace("%player%", playerName)
                                         .replace("%uuid%", targetUUID.toString())))
+                        .map(LEGACY_SECTION_SERIALIZER::deserialize)
                         .toList();
-                meta.setLore(lore);
+                meta.lore(lore);
                 skull.setItemMeta(meta);
             }
 

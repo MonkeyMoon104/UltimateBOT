@@ -73,7 +73,7 @@ public class AnchorPlacer {
             BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
             BlockState adjacentState = bot.level().getBlockState(adjacentPos);
 
-            if (adjacentState.isSolid() && !adjacentState.isAir()) {
+            if (adjacentState.isSolidRender() && !adjacentState.isAir()) {
                 double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
                 if (distance <= 6.5) return direction;
             }
@@ -83,7 +83,7 @@ public class AnchorPlacer {
             BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
             BlockState adjacentState = bot.level().getBlockState(adjacentPos);
 
-            if (adjacentState.isSolid() && !adjacentState.isAir()) {
+            if (adjacentState.isSolidRender() && !adjacentState.isAir()) {
                 double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
                 if (distance <= 6.5) return direction;
             }

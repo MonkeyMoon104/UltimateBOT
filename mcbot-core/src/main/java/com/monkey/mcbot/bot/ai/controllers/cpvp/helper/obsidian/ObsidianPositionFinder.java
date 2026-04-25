@@ -70,7 +70,7 @@ public class ObsidianPositionFinder {
 
     private boolean isValidObsidianPosition(BlockPos pos, Player target, double maxPlacementDistance) {
         if (!level.getBlockState(pos).isAir()) return false;
-        if (!level.getBlockState(pos.below()).isSolid()) return false;
+        if (!level.getBlockState(pos.below()).isSolidRender()) return false;
         if (!level.getBlockState(pos.above()).isAir() || !level.getBlockState(pos.above(2)).isAir()) return false;
 
         double distanceToBot = bot.position().distanceTo(Vec3.atCenterOf(pos));

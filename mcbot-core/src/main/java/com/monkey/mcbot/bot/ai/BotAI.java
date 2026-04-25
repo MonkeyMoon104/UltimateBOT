@@ -242,7 +242,7 @@ public class BotAI {
         for (int y = minY; y <= maxY; y++) {
             BlockPos checkAtBotColumn = new BlockPos(botBlock.getX(), y, botBlock.getZ());
             BlockPos checkAtTargetColumn = new BlockPos(targetBlock.getX(), y, targetBlock.getZ());
-            if (level.getBlockState(checkAtBotColumn).isSolid() || level.getBlockState(checkAtTargetColumn).isSolid()) {
+            if (level.getBlockState(checkAtBotColumn).isSolidRender() || level.getBlockState(checkAtTargetColumn).isSolidRender()) {
                 solidBetween++;
                 if (solidBetween >= 2) {
                     return true;

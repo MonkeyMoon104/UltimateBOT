@@ -62,7 +62,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
 
     @Override
     public String getAuthor() {
-        return plugin.getDescription().getAuthors().toString();
+        return plugin.getPluginMeta().getAuthors().toString();
     }
 
     @Override
