@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("deprecation")
 public class FakeOfflinePlayer implements OfflinePlayer {
 
     private final ITrainingBot bot;

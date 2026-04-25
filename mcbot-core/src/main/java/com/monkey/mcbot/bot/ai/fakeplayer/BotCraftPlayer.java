@@ -43,6 +43,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("deprecation")
 public class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
 
     private final ITrainingBot trainingBot;
