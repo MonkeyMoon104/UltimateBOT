@@ -16,6 +16,29 @@ bot:
     - "world_nether"
     - "world_the_end"
 
+  guard:
+    enabled: true
+    detection:
+      class-prefixes:
+        - "com.monkey.mcbot."
+      class-contains:
+        - "mcbot"
+      exact-names:
+        - "MinecraftBot"
+      name-prefixes: []
+    compatibility:
+      mark-as-npc-for-vault: true
+      npc-metadata-key: "NPC"
+      own-metadata-key: "MinecraftBotGuard"
+      preload-luckperms-users: true
+    protection:
+      clear-fire-ticks: true
+      cancel-combust-events: true
+      cancel-fire-damage: true
+    scanner:
+      interval-ticks: 20
+    debug: false
+
   event:
     range: 32
 

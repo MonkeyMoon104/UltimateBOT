@@ -18,7 +18,8 @@ public class PluginVersionCatalog {
                 new CatalogVersion("minecraftbot", "1.0.0", url, false),
                 new CatalogVersion("minecraftbot", "1.0.1", url, false),
                 new CatalogVersion("minecraftbot", "1.0.2", url, false),
-                new CatalogVersion("minecraftbot", "1.0.3", url, true)
+                new CatalogVersion("minecraftbot", "1.0.3", url, false),
+                new CatalogVersion("minecraftbot", "1.0.4", url, true)
         );
     }
 

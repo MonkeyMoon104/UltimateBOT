@@ -12,6 +12,7 @@ import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
 import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
+import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
@@ -28,6 +29,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -50,6 +52,7 @@ public final class MinecraftBot extends JavaPlugin {
     private UpdateManager updateManager;
     private LanguageManager languageManager;
     private WrapperManager wrapperManager;
+    private BotGuardCompatibilityListener botGuardCompatibilityListener;
     private static MinecraftBot instance;
 
     @Override
@@ -143,6 +146,9 @@ public final class MinecraftBot extends JavaPlugin {
 
             List<String> registeredListeners = new ArrayList<>();
             List<String> disabledListeners = new ArrayList<>();
+            this.botGuardCompatibilityListener = new BotGuardCompatibilityListener(this);
+            registerListener(startup, registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
+            botGuardCompatibilityListener.startScanner();
             registerListener(startup, registeredListeners, "required", new PlayerCheckListener(this));
             registerOptionalListener(
                     startup,
@@ -259,9 +265,19 @@ public final class MinecraftBot extends JavaPlugin {
         return wrapperManager;
     }
 
+    public void markCompatibilityBot(Entity entity) {
+        if (botGuardCompatibilityListener != null) {
+            botGuardCompatibilityListener.markBot(entity);
+        }
+    }
+
     public void reloadPluginConfiguration() {
         reloadConfig();
         reloadLanguageConfiguration();
+        if (botGuardCompatibilityListener != null) {
+            botGuardCompatibilityListener.reloadLocalConfig();
+            botGuardCompatibilityListener.startScanner();
+        }
     }
 
     public void reloadLanguageConfiguration() {
@@ -378,6 +394,11 @@ public final class MinecraftBot extends JavaPlugin {
     }
 
     private void cleanupRuntimeState() {
+        if (botGuardCompatibilityListener != null) {
+            botGuardCompatibilityListener.stopScanner();
+            botGuardCompatibilityListener = null;
+        }
+
         if (updateManager != null) {
             updateManager.shutdown();
             updateManager = null;

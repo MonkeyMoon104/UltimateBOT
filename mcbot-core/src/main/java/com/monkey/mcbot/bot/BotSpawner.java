@@ -90,6 +90,7 @@ public class BotSpawner {
         bot.setTotemCount(totem);
         NMSBridgeManager.get().addToProfileCache(bot.asPlayer());
         world.addFreshEntity(bot.asPlayer());
+        plugin.markCompatibilityBot(bot.asPlayer().getBukkitEntity());
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
 

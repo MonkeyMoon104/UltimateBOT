@@ -1,5 +1,5 @@
 name: MinecraftBot
-version: '1.0.3'
+version: '1.0.4'
 main: com.monkey.mcbot.MinecraftBot
 api-version: '1.21'
 folia-supported: true
@@ -7,6 +7,9 @@ authors: [ MonkeyMoon104 ]
 description: Minecraft bot plugin
 softdepend:
   - PlaceholderAPI
+  - LuckPerms
+loadbefore:
+  - WorldGuard
 
 commands:
   bot:
