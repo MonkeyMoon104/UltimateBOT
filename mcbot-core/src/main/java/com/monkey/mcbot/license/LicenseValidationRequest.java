@@ -7,6 +7,8 @@ public record LicenseValidationRequest(
         @JsonProperty("product") String product,
         @JsonProperty("pluginVersion") String pluginVersion,
         @JsonProperty("installationId") String installationId,
-        @JsonProperty("fingerprintHash") String fingerprintHash
+        @JsonProperty("fingerprintHash") String fingerprintHash,
+        @JsonProperty("hostFingerprint") String hostFingerprint,
+        @JsonProperty("serverPort") Integer serverPort
 ) {
 }

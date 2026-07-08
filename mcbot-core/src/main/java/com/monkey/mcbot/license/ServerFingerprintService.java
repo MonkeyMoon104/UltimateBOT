@@ -11,19 +11,37 @@ import java.util.*;
 
 public final class ServerFingerprintService {
 
-    public String compute(JavaPlugin plugin) {
+    public String computeInstallationFingerprint(JavaPlugin plugin) {
         try {
             List<String> signals = new ArrayList<>();
-            signals.add("host=" + safeHostName());
-            signals.add("os=" + System.getProperty("os.name", ""));
-            signals.add("arch=" + System.getProperty("os.arch", ""));
-            signals.add("java=" + System.getProperty("java.vendor", ""));
+            signals.addAll(baseSignals());
             signals.add("path=" + safePath(plugin.getServer().getWorldContainer().toPath()));
-            signals.add("macs=" + String.join(",", networkFingerprints()));
             return sha256Hex(String.join("|", signals));
         } catch (Exception ex) {
             return sha256Hex(plugin.getDataFolder().getAbsolutePath());
         }
+    }
+
+    public String computeHostFingerprint(JavaPlugin plugin) {
+        try {
+            return sha256Hex(String.join("|", baseSignals()));
+        } catch (Exception ex) {
+            return sha256Hex(safeHostName());
+        }
+    }
+
+    public int resolveServerPort(JavaPlugin plugin) {
+        return plugin.getServer().getPort();
+    }
+
+    private List<String> baseSignals() throws Exception {
+        List<String> signals = new ArrayList<>();
+        signals.add("host=" + safeHostName());
+        signals.add("os=" + System.getProperty("os.name", ""));
+        signals.add("arch=" + System.getProperty("os.arch", ""));
+        signals.add("java=" + System.getProperty("java.vendor", ""));
+        signals.add("macs=" + String.join(",", networkFingerprints()));
+        return signals;
     }
 
     private String safeHostName() {

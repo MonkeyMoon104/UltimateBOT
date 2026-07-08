@@ -28,6 +28,8 @@ public final class LicenseManager {
     private String licenseKey;
     private String installationId;
     private String fingerprintHash;
+    private String hostFingerprint;
+    private int serverPort;
 
     public LicenseManager(MinecraftBot plugin) {
         this.plugin = plugin;
@@ -48,7 +50,9 @@ public final class LicenseManager {
 
         try {
             this.installationId = installationIdStore.loadOrCreate(plugin.getDataFolder().toPath());
-            this.fingerprintHash = fingerprintService.compute(plugin);
+            this.fingerprintHash = fingerprintService.computeInstallationFingerprint(plugin);
+            this.hostFingerprint = fingerprintService.computeHostFingerprint(plugin);
+            this.serverPort = fingerprintService.resolveServerPort(plugin);
             LicenseValidationResponse response = licenseHttpClient.validate(buildRequest());
             if (!response.allowed()) {
                 return LicenseStartupResult.denied(requireReasonCode(response), response.message());
@@ -120,7 +124,9 @@ public final class LicenseManager {
                 PRODUCT_CODE,
                 plugin.getPluginMeta().getVersion(),
                 installationId,
-                fingerprintHash
+                fingerprintHash,
+                hostFingerprint,
+                serverPort
         );
     }
 
