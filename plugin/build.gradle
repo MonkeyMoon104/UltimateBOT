@@ -77,7 +77,7 @@ dependencies {
     implementation(project(path: ':versions:v26_1', configuration: 'runtimeElements')) {
         transitive = false
     }
-    invuiV2Shade "xyz.xenondevs.invui:invui:2.0.0"
+    invuiV2Shade "xyz.xenondevs.invui:invui:2.2.0"
 }
 
 def relocateInvuiV2Task = tasks.register('relocateInvuiV2', ShadowJar) {

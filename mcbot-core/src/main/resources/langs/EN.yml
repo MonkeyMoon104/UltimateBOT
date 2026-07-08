@@ -72,11 +72,11 @@ gui:
         name: "&7Kit"
     tab-1:
       selected:
-        material: "GLOWSTONE_DUST"
-        name: "&eRank &7(selected)"
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&eTemplates &7(selected)"
       unselected:
-        material: "GUNPOWDER"
-        name: "&7Rank"
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&7Templates"
     tab-2:
       selected:
         material: "DRAGON_HEAD"
@@ -135,6 +135,29 @@ gui:
         - ""
         - "&eLeft click: &7change the armor piece"
         - "&eRight click: &7toggle blast"
+
+  templates-background:
+    lore:
+      - "&7Smithing background preview"
+      - "&7Template: &e%template%"
+      - "&7Ore: &e%ore%"
+
+  templates-button:
+    empty-value: "None"
+    template-empty-name: "&fClick to change template"
+    template-name: "&eTemplate: &f%value%"
+    template-lore:
+      - "&7Current selection: &e%value%"
+      - ""
+      - "&eLeft click: &7next template"
+      - "&eRight click: &7previous template"
+    ore-empty-name: "&fClick to change ore"
+    ore-name: "&eOre: &f%value%"
+    ore-lore:
+      - "&7Current selection: &e%value%"
+      - ""
+      - "&eLeft click: &7next ore"
+      - "&eRight click: &7previous ore"
 
   follow-button:
     name: "&bToggle Follow"

@@ -14,9 +14,6 @@ import xyz.xenondevs.invui.item.impl.controlitem.TabItem;
 
 public class BotTabItem extends TabItem {
 
-    private static final int HIDDEN_TAB = 1;
-    private static final String HIDDEN_TAB_NAME = "???";
-
     private final int tab;
     private final MinecraftBot training;
 
@@ -34,9 +31,7 @@ public class BotTabItem extends TabItem {
 
         String materialName = training.getLangString(basePath + ".material",
                 selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
-        String displayName = isTemporarilyHiddenTab()
-                ? HIDDEN_TAB_NAME
-                : resolveConfiguredDisplayName(basePath, selected);
+        String displayName = resolveConfiguredDisplayName(basePath, selected);
 
         Material mat;
         try {
@@ -51,15 +46,7 @@ public class BotTabItem extends TabItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {
-        if (isTemporarilyHiddenTab()) {
-            return;
-        }
-
         super.handleClick(clickType, player, event);
-    }
-
-    private boolean isTemporarilyHiddenTab() {
-        return tab == HIDDEN_TAB;
     }
 
     private String resolveConfiguredDisplayName(String basePath, boolean selected) {

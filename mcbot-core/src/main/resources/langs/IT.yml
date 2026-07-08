@@ -72,11 +72,11 @@ gui:
         name: "&7Kit"
     tab-1:
       selected:
-        material: "GLOWSTONE_DUST"
-        name: "&eRango &7(selezionato)"
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&eTemplates &7(selezionato)"
       unselected:
-        material: "GUNPOWDER"
-        name: "&7Rango"
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&7Templates"
     tab-2:
       selected:
         material: "DRAGON_HEAD"
@@ -135,6 +135,29 @@ gui:
         - ""
         - "&eClick sinistro: &7cambia il pezzo d'armatura"
         - "&eClick destro: &7attiva/disattiva esplosioni"
+
+  templates-background:
+    lore:
+      - "&7Background della forgiatura"
+      - "&7Template: &e%template%"
+      - "&7Minerale: &e%ore%"
+
+  templates-button:
+    empty-value: "Nessuno"
+    template-empty-name: "&fClicca per cambiare template"
+    template-name: "&eTemplate: &f%value%"
+    template-lore:
+      - "&7Selezione attuale: &e%value%"
+      - ""
+      - "&eClick sinistro: &7template successivo"
+      - "&eClick destro: &7template precedente"
+    ore-empty-name: "&fClicca per cambiare minerale"
+    ore-name: "&eMinerale: &f%value%"
+    ore-lore:
+      - "&7Selezione attuale: &e%value%"
+      - ""
+      - "&eClick sinistro: &7minerale successivo"
+      - "&eClick destro: &7minerale precedente"
 
   follow-button:
     name: "&bAttiva/Disattiva Seguimento"

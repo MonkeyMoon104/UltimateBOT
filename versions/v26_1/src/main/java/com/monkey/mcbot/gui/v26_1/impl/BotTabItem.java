@@ -13,9 +13,6 @@ import xyz.xenondevs.invui.item.ItemProvider;
 
 public class BotTabItem extends AbstractTabGuiBoundItem {
 
-    private static final int HIDDEN_TAB = 1;
-    private static final String HIDDEN_TAB_NAME = "???";
-
     private final int tab;
     private final MinecraftBot training;
 
@@ -33,9 +30,7 @@ public class BotTabItem extends AbstractTabGuiBoundItem {
 
         String materialName = training.getLangString(basePath + ".material",
                 selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
-        String displayName = isTemporarilyHiddenTab()
-                ? HIDDEN_TAB_NAME
-                : resolveConfiguredDisplayName(basePath, selected);
+        String displayName = resolveConfiguredDisplayName(basePath, selected);
 
         Material mat;
         try {
@@ -50,14 +45,7 @@ public class BotTabItem extends AbstractTabGuiBoundItem {
 
     @Override
     public void handleClick(ClickType clickType, Player player, Click click) {
-        if (isTemporarilyHiddenTab()) {
-            return;
-        }
         getGui().setTab(tab);
-    }
-
-    private boolean isTemporarilyHiddenTab() {
-        return tab == HIDDEN_TAB;
     }
 
     private String resolveConfiguredDisplayName(String basePath, boolean selected) {

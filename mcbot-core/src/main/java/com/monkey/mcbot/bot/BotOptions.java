@@ -5,6 +5,7 @@ import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.armor.ArmorTier;
+import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -39,6 +40,8 @@ public class BotOptions {
     private BotRank maxRank = BotRank.GOD;
     private ArmorTier minArmorTier = ArmorTier.LEATHER;
     private ArmorTier maxArmorTier = ArmorTier.NETHERITE;
+    private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
+    private final Map<EquipmentSlot, String> trimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
 
     public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = Objects.requireNonNull(training, "training");
@@ -274,6 +277,7 @@ public class BotOptions {
                     : currentPiece.withType(clampedTier.toMaterial(slot));
             armor.put(slot, updated);
         }
+        applyAllTrimSelections();
     }
 
     public void clampCurrentArmor() {
@@ -284,6 +288,7 @@ public class BotOptions {
                     : currentPiece.withType(ArmorCycle.clampArmor(currentPiece.getType(), slot, minArmorTier, maxArmorTier));
             armor.put(slot, updated);
         }
+        applyAllTrimSelections();
     }
 
 
@@ -414,6 +419,51 @@ public class BotOptions {
 
     public Map<EquipmentSlot, Boolean> getBlast() {
         return blast;
+    }
+
+    public String getTrimPatternKey(EquipmentSlot slot) {
+        return trimPatternKeys.get(slot);
+    }
+
+    public void setTrimPatternKey(EquipmentSlot slot, String trimPatternKey) {
+        if (slot == null) {
+            return;
+        }
+        trimPatternKeys.put(slot, trimPatternKey);
+        applyTrimSelection(slot);
+    }
+
+    public String getTrimMaterialKey(EquipmentSlot slot) {
+        return trimMaterialKeys.get(slot);
+    }
+
+    public void setTrimMaterialKey(EquipmentSlot slot, String trimMaterialKey) {
+        if (slot == null) {
+            return;
+        }
+        trimMaterialKeys.put(slot, trimMaterialKey);
+        applyTrimSelection(slot);
+    }
+
+    public boolean hasCompleteTrimSelection(EquipmentSlot slot) {
+        return ArmorTrimUtils.isCompleteSelection(getTrimPatternKey(slot), getTrimMaterialKey(slot));
+    }
+
+    private void applyAllTrimSelections() {
+        for (EquipmentSlot slot : com.monkey.mcbot.utils.equipment.EquipmentConverter.getArmorSlots()) {
+            applyTrimSelection(slot);
+        }
+    }
+
+    private void applyTrimSelection(EquipmentSlot slot) {
+        ItemStack piece = armor.get(slot);
+        if (piece == null) {
+            return;
+        }
+
+        ItemStack updated = new ItemStack(piece.getType(), Math.max(1, piece.getAmount()));
+        ArmorTrimUtils.applyTrim(updated, getTrimPatternKey(slot), getTrimMaterialKey(slot));
+        armor.put(slot, updated);
     }
 
     public boolean isBlastProtection() {

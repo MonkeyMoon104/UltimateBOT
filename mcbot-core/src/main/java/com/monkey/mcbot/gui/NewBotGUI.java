@@ -75,7 +75,7 @@ public class NewBotGUI {
         String translatedBorderName = ChatColorUtils.translate(borderName);
 
         Gui tab0 = new KitTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab1 = new RankTab(tabContext).build(borderMat, translatedBorderName);
+        Gui tab1 = new TemplatesTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
 

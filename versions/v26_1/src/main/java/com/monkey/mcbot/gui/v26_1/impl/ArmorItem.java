@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
+import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -35,7 +36,9 @@ public class ArmorItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider(Player viewer) {
-        ItemStack displayPiece = piece.clone();
+        piece = options.getArmor().getOrDefault(slot, piece);
+        ItemStack displayPiece = new ItemStack(piece.getType(), Math.max(1, piece.getAmount()));
+        ArmorTrimUtils.applyTrim(displayPiece, options.getTrimPatternKey(slot), options.getTrimMaterialKey(slot));
         BotEquipmentUtils.applyArmorEnchants(displayPiece, isBlastEnabled());
 
         ItemBuilder builder = new ItemBuilder(displayPiece);
@@ -111,7 +114,8 @@ public class ArmorItem extends AbstractItem {
     }
 
     private ItemStack createUpdatedPiece(Material material, boolean blastEnabled) {
-        ItemStack updated = piece.withType(material);
+        ItemStack updated = new ItemStack(material);
+        ArmorTrimUtils.applyTrim(updated, options.getTrimPatternKey(slot), options.getTrimMaterialKey(slot));
         BotEquipmentUtils.applyArmorEnchants(updated, blastEnabled);
         return updated;
     }

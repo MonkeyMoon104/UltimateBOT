@@ -2,9 +2,7 @@ package com.monkey.mcbot.gui.v26_1.tab;
 
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.gui.v26_1.impl.*;
-import com.monkey.mcbot.utils.equipment.EquipmentConverter;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.Item;
@@ -24,10 +22,10 @@ public class KitTab {
 
         Gui gui = Gui.builder()
                 .setStructure(
-                        "# r . . . . a #",
-                        "# . . t . . a #",
-                        "# . s g f . a #",
-                        "# c . . . . a #",
+                        "# r . . . . # #",
+                        "# . . t . . # #",
+                        "# . s g f . # #",
+                        "# c . . . . # #",
                         "# # # # # # # #"
                 )
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
@@ -41,11 +39,6 @@ public class KitTab {
                         : Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
                 .build();
-
-        for (EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
-            ItemStack piece = options.getArmor().get(slot);
-            gui.addItems(new ArmorItem(context.getTraining(), slot, piece, options));
-        }
 
         return gui;
     }
