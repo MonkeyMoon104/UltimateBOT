@@ -30,7 +30,7 @@ public class NMSBridgeManager {
         if (className == null) {
             MinecraftBotLogging.logNmsUnsupportedVersion(logger, version, SUPPORTED_VERSIONS);
             throw new RuntimeException(
-                    "[MinecraftBot] Versione Minecraft non supportata: " + version
+                    "[MinecraftBot] Unsupported Minecraft version: " + version
             );
         }
         MinecraftBotLogging.logNmsInitStart(logger, version, className, SUPPORTED_VERSIONS);
@@ -41,10 +41,10 @@ public class NMSBridgeManager {
             MinecraftBotLogging.logNmsInitSuccess(logger, instance);
         } catch (ClassNotFoundException e) {
             MinecraftBotLogging.logNmsInitFailure(logger, className, e);
-            throw new RuntimeException("[MinecraftBot] Classe bridge non trovata: " + className, e);
+            throw new RuntimeException("[MinecraftBot] Bridge class not found: " + className, e);
         } catch (Exception e) {
             MinecraftBotLogging.logNmsInitFailure(logger, className, e);
-            throw new RuntimeException("[MinecraftBot] Impossibile caricare NMS Bridge", e);
+            throw new RuntimeException("[MinecraftBot] Failed to load NMS bridge", e);
         }
     }
 
@@ -65,7 +65,7 @@ public class NMSBridgeManager {
     public static INMSBridge get() {
         if (instance == null) {
             throw new RuntimeException(
-                    "[MinecraftBot] NMSBridgeManager non inizializzato! Chiama init() nell'onEnable."
+                    "[MinecraftBot] NMSBridgeManager is not initialized. Call init() in onEnable."
             );
         }
         return instance;

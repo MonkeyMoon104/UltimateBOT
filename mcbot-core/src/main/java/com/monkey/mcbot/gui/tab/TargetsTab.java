@@ -149,11 +149,11 @@ public class TargetsTab {
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
-            String name = context.getTraining().getLangString("gui.targets-tab.scroll-up.name", "&aScorri su");
+            String name = context.getTraining().getLangString("gui.targets-tab.scroll-up.name", "&aScroll up");
             ItemBuilder builder = new ItemBuilder(Material.ARROW)
                     .setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(-1)) {
-                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-up.cant-scroll", "&7Sei già in cima");
+                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-up.cant-scroll", "&7Already at the top");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -168,11 +168,11 @@ public class TargetsTab {
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
-            String name = context.getTraining().getLangString("gui.targets-tab.scroll-down.name", "&aScorri giù");
+            String name = context.getTraining().getLangString("gui.targets-tab.scroll-down.name", "&aScroll down");
             ItemBuilder builder = new ItemBuilder(Material.ARROW)
                     .setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(1)) {
-                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-down.cant-scroll", "&7Sei già in fondo");
+                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-down.cant-scroll", "&7Already at the bottom");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;

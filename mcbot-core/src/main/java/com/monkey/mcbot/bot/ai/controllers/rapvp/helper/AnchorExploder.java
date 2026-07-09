@@ -58,7 +58,7 @@ public class AnchorExploder {
             return tryManualExplosion(anchorPos);
 
         } catch (Exception e) {
-            MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione anchor: " + e.getMessage());
+            MinecraftBot.getInstance().getLogger().warning("Error while exploding anchor: " + e.getMessage());
             return false;
         }
     }
@@ -82,7 +82,7 @@ public class AnchorExploder {
     }
 
     private boolean tryManualExplosion(BlockPos anchorPos) {
-        System.out.println("FALLBACK -> USO ESPLOSIONE ANCHOR MANUALE");
+        System.out.println("FALLBACK -> USING MANUAL ANCHOR EXPLOSION");
         try {
             bot.level().removeBlock(anchorPos, false);
 
@@ -99,7 +99,7 @@ public class AnchorExploder {
             return true;
 
         } catch (Exception e) {
-            MinecraftBot.getInstance().getLogger().warning("Errore durante esplosione manuale: " + e.getMessage());
+            MinecraftBot.getInstance().getLogger().warning("Error during manual explosion: " + e.getMessage());
             return false;
         }
     }

@@ -37,7 +37,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
             addPlaceholder(new PercentageHealthPlaceholder(plugin));
             addPlaceholder(new RankPlaceholder(plugin));
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Errore durante la registrazione dei placeholder", e);
+            plugin.getLogger().log(Level.SEVERE, "Error while registering placeholders", e);
         }
     }
 
@@ -93,7 +93,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
                 return result != null ? result : "N/A";
             }
         } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Errore nel placeholder " + identifier + " per " + player.getName(), e);
+            plugin.getLogger().log(Level.WARNING, "Error in placeholder " + identifier + " for " + player.getName(), e);
             return "ERROR";
         }
 
