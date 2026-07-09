@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 public class NMSBridgeManager {
 
     private static INMSBridge instance;
-    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.x, 26.2.x (compat)";
+    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.x, 26.2.x";
 
     public static void init() {
         init(Bukkit.getLogger());
@@ -57,7 +57,7 @@ public class NMSBridgeManager {
             return "com.monkey.mcbot.nms.NMSBridge_v26_1";
         }
         if ("26.2".equals(version) || version.startsWith("26.2.")) {
-            return "com.monkey.mcbot.nms.NMSBridge_v26_1";
+            return "com.monkey.mcbot.nms.NMSBridge_v26_2";
         }
         return null;
     }

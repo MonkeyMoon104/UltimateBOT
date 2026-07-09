@@ -16,8 +16,8 @@ tasks.named('reobfJar') {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.1.2.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
     compileOnly project(':mcbot-core')
-    implementation "xyz.xenondevs.invui:invui:2.1.1"
+    implementation "xyz.xenondevs.invui:invui:2.2.0"
 }
 
