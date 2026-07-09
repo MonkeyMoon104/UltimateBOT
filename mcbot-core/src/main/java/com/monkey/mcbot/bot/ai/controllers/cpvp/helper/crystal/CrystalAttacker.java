@@ -1,5 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal;
 
+import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +41,7 @@ public class CrystalAttacker {
             bot.swing(InteractionHand.MAIN_HAND);
             return true;
         } catch (Exception e) {
-            System.err.println("Errore nell'attacco al crystal: " + e.getMessage());
+            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Crystal attack failed -> " + e.getMessage());
             return false;
         }
     }

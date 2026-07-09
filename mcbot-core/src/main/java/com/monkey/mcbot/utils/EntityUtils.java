@@ -7,6 +7,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
@@ -39,10 +41,24 @@ public class EntityUtils {
     }
 
     public static boolean removeEntity(ServerLevel world, UUID entityUUID) {
-        Entity entity = findBotByUUID(world, entityUUID);
-        if (entity != null) {
-            entity.remove(Entity.RemovalReason.DISCARDED);
-            return true;
+        if (world != null) {
+            Entity entity = findBotByUUID(world, entityUUID);
+            if (entity != null) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                return true;
+            }
+        }
+        return removeEntityInLoadedWorlds(entityUUID);
+    }
+
+    public static boolean removeEntityInLoadedWorlds(UUID entityUUID) {
+        for (World loadedWorld : Bukkit.getWorlds()) {
+            ServerLevel handle = ((CraftWorld) loadedWorld).getHandle();
+            Entity entity = findBotByUUID(handle, entityUUID);
+            if (entity != null) {
+                entity.remove(Entity.RemovalReason.DISCARDED);
+                return true;
+            }
         }
         return false;
     }

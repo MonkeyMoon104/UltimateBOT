@@ -37,6 +37,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public final class MinecraftBot extends JavaPlugin {
@@ -271,6 +272,12 @@ public final class MinecraftBot extends JavaPlugin {
         }
     }
 
+    public void forgetCompatibilityBot(UUID entityUUID) {
+        if (botGuardCompatibilityListener != null) {
+            botGuardCompatibilityListener.forgetBot(entityUUID);
+        }
+    }
+
     public void reloadPluginConfiguration() {
         reloadConfig();
         reloadLanguageConfiguration();
@@ -278,6 +285,7 @@ public final class MinecraftBot extends JavaPlugin {
             botGuardCompatibilityListener.reloadLocalConfig();
             botGuardCompatibilityListener.startScanner();
         }
+        applyRuntimeBotConfiguration();
     }
 
     public void reloadLanguageConfiguration() {
@@ -430,6 +438,19 @@ public final class MinecraftBot extends JavaPlugin {
         targetingService = null;
         languageManager = null;
         wrapperManager = null;
+    }
+
+    private void applyRuntimeBotConfiguration() {
+        if (botRegistry == null) {
+            return;
+        }
+
+        boolean infiniteResources = getConfig().getBoolean("bot.combat.infinite-resources", true);
+        for (ITrainingBot bot : botRegistry.getAllBots().values()) {
+            if (bot != null && bot.getBotAI() != null) {
+                bot.getBotAI().getInventoryController().setInfiniteResources(infiniteResources);
+            }
+        }
     }
 
     private String joinOrNone(Iterable<String> values) {

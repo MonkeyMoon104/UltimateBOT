@@ -1,7 +1,9 @@
 package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -62,6 +64,7 @@ public class AnchorPlacer {
             }
             return false;
         } catch (Exception e) {
+            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Anchor placement failed -> " + e.getMessage());
             return false;
         }
     }

@@ -41,6 +41,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -186,8 +187,58 @@ public class NMSBridge_v26_1 implements INMSBridge {
     }
 
     @Override
+    public void removeFromProfileCache(UUID botUUID) {
+        try {
+            var server = ((CraftServer) Bukkit.getServer()).getServer();
+            var services = server.services();
+            var profile = new GameProfile(botUUID, "");
+            var nameAndId = new net.minecraft.server.players.NameAndId(profile);
+
+            removeProfileCacheEntry(services.nameToIdCache(), botUUID, profile, nameAndId);
+
+            var paperServices = services.paper();
+            if (paperServices != null) {
+                removeProfileCacheEntry(paperServices.filledProfileCache(), botUUID, profile, null);
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    @Override
     public String getProfileName(com.mojang.authlib.GameProfile profile) {
         return profile.name();
+    }
+
+    private void removeProfileCacheEntry(Object cache, UUID botUUID, GameProfile profile, Object nameAndId) {
+        if (cache == null) {
+            return;
+        }
+        for (Method method : cache.getClass().getMethods()) {
+            if (!method.getName().equals("remove") || method.getParameterCount() != 1) {
+                continue;
+            }
+            Object argument = resolveRemovalArgument(method.getParameterTypes()[0], botUUID, profile, nameAndId);
+            if (argument != null) {
+                try {
+                    method.invoke(cache, argument);
+                } catch (ReflectiveOperationException ignored) {
+                }
+                return;
+            }
+        }
+    }
+
+    private Object resolveRemovalArgument(Class<?> parameterType, UUID botUUID, GameProfile profile, Object nameAndId) {
+        if (parameterType.isAssignableFrom(UUID.class)) {
+            return botUUID;
+        }
+        if (parameterType.isAssignableFrom(GameProfile.class)) {
+            return profile;
+        }
+        if (nameAndId != null && parameterType.isInstance(nameAndId)) {
+            return nameAndId;
+        }
+        return null;
     }
 
     @Override

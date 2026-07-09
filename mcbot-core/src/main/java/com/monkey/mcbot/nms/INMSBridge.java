@@ -75,6 +75,8 @@ public interface INMSBridge {
 
     void addToProfileCache(net.minecraft.world.entity.player.Player bot);
 
+    void removeFromProfileCache(UUID botUUID);
+
     String getProfileName(com.mojang.authlib.GameProfile profile);
 
     InteractionResult useItemOnBlock(Player bot, ItemStack stack, BlockHitResult hitResult, InteractionHand hand);

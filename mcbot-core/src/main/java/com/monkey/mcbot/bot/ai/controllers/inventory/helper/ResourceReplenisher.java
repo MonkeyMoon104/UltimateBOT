@@ -51,6 +51,7 @@ public class ResourceReplenisher implements IResourceReplenisher {
                 if (currentStack.getItem() == Items.GLOWSTONE && currentStack.getCount() < 64) {
                     currentStack.setCount(64);
                 }
+                break;
             case GOLDEN_APPLE_SLOT:
                 if (currentStack.getItem() == Items.GOLDEN_APPLE && currentStack.getCount() < 64) {
                     currentStack.setCount(64);
@@ -91,6 +92,7 @@ public class ResourceReplenisher implements IResourceReplenisher {
                 if (stack.getItem() == Items.GLOWSTONE) {
                     stack.setCount(64);
                 }
+                break;
             case GOLDEN_APPLE_SLOT:
                 if (stack.getItem() == Items.GOLDEN_APPLE) {
                     stack.setCount(64);

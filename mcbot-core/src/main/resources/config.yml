@@ -15,6 +15,8 @@ bot:
   blocked-worlds:
     - "world_nether"
     - "world_the_end"
+  combat:
+    infinite-resources: true
 
   guard:
     enabled: true

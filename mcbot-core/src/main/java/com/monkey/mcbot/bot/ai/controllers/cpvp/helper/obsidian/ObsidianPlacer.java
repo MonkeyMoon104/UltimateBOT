@@ -1,6 +1,8 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -55,7 +57,7 @@ public class ObsidianPlacer {
             }
 
         } catch (Exception e) {
-            System.err.println("Errore nel piazzamento ossidiana: " + e.getMessage());
+            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Obsidian placement failed -> " + e.getMessage());
         }
 
         return false;

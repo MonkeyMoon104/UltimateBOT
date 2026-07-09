@@ -122,6 +122,15 @@ public final class BotGuardCompatibilityListener implements Listener {
         preloadLuckPerms(entity);
     }
 
+    public void forgetBot(UUID uuid) {
+        if (uuid == null) {
+            return;
+        }
+        discoveredBots.remove(uuid);
+        luckPermsLoaded.remove(uuid);
+        luckPermsQueued.remove(uuid);
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onEntitySpawn(EntitySpawnEvent event) {
         markIfTrainingBot(event.getEntity());

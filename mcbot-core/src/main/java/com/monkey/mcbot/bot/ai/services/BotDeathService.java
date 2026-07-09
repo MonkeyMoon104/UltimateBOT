@@ -4,6 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import net.minecraft.world.damagesource.DamageSource;
@@ -63,6 +64,8 @@ public class BotDeathService {
         }
 
         bot.asPlayer().discard();
+        NMSBridgeManager.get().removeFromProfileCache(bot.asPlayer().getUUID());
+        plugin.forgetCompatibilityBot(bot.asPlayer().getUUID());
         plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
     }
 

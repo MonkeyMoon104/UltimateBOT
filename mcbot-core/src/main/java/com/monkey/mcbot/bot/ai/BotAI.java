@@ -71,6 +71,7 @@ public class BotAI {
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
         this.inventoryController = new BotInventoryController(bot);
+        this.inventoryController.setInfiniteResources(plugin.getConfig().getBoolean("bot.combat.infinite-resources", true));
         this.healController = new BotHealController(bot, inventoryController);
         this.teleportController = new BotTeleportController(bot);
         this.enderpearlController = new BotEnderpearlController(

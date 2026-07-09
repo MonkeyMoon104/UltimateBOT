@@ -5,6 +5,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
 import com.monkey.mcbot.utils.EntityUtils;
@@ -310,9 +311,8 @@ public class BotSpawner {
 
         ServerPlayer handle = ((CraftPlayer) owner).getHandle();
         ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
-        if (EntityUtils.removeEntity(world, botUUID)) {
-            registry.removeBot(ownerUUID);
-        }
+        boolean removed = EntityUtils.removeEntity(world, botUUID);
+        cleanupDespawnState(ownerUUID, botUUID, removed);
     }
 
     public void despawnByOwnerUUID(UUID ownerUUID) {
@@ -327,9 +327,8 @@ public class BotSpawner {
 
         ITrainingBot bot = registry.getBot(ownerUUID);
         if (bot != null && bot.asPlayer().level() instanceof ServerLevel world) {
-            if (EntityUtils.removeEntity(world, botUUID)) {
-                registry.removeBot(ownerUUID);
-            }
+            boolean removed = EntityUtils.removeEntity(world, botUUID);
+            cleanupDespawnState(ownerUUID, botUUID, removed);
             return;
         }
 
@@ -339,7 +338,8 @@ public class BotSpawner {
             return;
         }
 
-        registry.removeBot(ownerUUID);
+        boolean removed = EntityUtils.removeEntityInLoadedWorlds(botUUID);
+        cleanupDespawnState(ownerUUID, botUUID, removed);
     }
 
     public void despawnAll() {
@@ -348,7 +348,9 @@ public class BotSpawner {
             if (owner != null && owner.isOnline()) {
                 despawn(owner);
             } else {
-                registry.removeBot(ownerUUID);
+                UUID botUUID = bot != null && bot.asPlayer() != null ? bot.asPlayer().getUUID() : registry.getBotUUID(ownerUUID);
+                boolean removed = botUUID != null && EntityUtils.removeEntityInLoadedWorlds(botUUID);
+                cleanupDespawnState(ownerUUID, botUUID, removed);
             }
         });
     }
@@ -359,8 +361,20 @@ public class BotSpawner {
         if (botUUID == null) return;
 
         ServerLevel world = ((org.bukkit.craftbukkit.CraftWorld) fromWorld).getHandle();
-        if (EntityUtils.removeEntity(world, botUUID)) {
-            registry.removeBot(ownerUUID);
+        boolean removed = EntityUtils.removeEntity(world, botUUID);
+        cleanupDespawnState(ownerUUID, botUUID, removed);
+    }
+
+    private void cleanupDespawnState(UUID ownerUUID, UUID botUUID, boolean removed) {
+        if (!removed && botUUID != null) {
+            MinecraftBotLogging.warn(plugin.getLogger(), "Bot", "Despawn cleanup could not find entity " + botUUID + " for owner " + ownerUUID);
         }
+
+        if (botUUID != null) {
+            NMSBridgeManager.get().removeFromProfileCache(botUUID);
+            plugin.forgetCompatibilityBot(botUUID);
+        }
+
+        registry.removeBot(ownerUUID);
     }
 }

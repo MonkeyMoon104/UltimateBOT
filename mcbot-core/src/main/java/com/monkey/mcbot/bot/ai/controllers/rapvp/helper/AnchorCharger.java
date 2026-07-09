@@ -1,7 +1,9 @@
 package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
+import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -67,7 +69,7 @@ public class AnchorCharger {
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Anchor charge failed -> " + e.getMessage());
             return false;
         }
     }

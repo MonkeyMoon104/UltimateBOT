@@ -38,6 +38,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -167,8 +168,40 @@ public class NMSBridge_v1_21_6 implements INMSBridge {
     }
 
     @Override
+    public void removeFromProfileCache(UUID botUUID) {
+        Object cache = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
+        removeProfileCacheEntry(cache, botUUID, new GameProfile(botUUID, ""));
+    }
+
+    @Override
     public String getProfileName(com.mojang.authlib.GameProfile profile) {
         return profile.getName();
+    }
+
+    private void removeProfileCacheEntry(Object cache, UUID botUUID, GameProfile profile) {
+        for (Method method : cache.getClass().getMethods()) {
+            if (!method.getName().equals("remove") || method.getParameterCount() != 1) {
+                continue;
+            }
+            Object argument = resolveRemovalArgument(method.getParameterTypes()[0], botUUID, profile);
+            if (argument != null) {
+                try {
+                    method.invoke(cache, argument);
+                } catch (ReflectiveOperationException ignored) {
+                }
+                return;
+            }
+        }
+    }
+
+    private Object resolveRemovalArgument(Class<?> parameterType, UUID botUUID, GameProfile profile) {
+        if (parameterType.isAssignableFrom(UUID.class)) {
+            return botUUID;
+        }
+        if (parameterType.isAssignableFrom(GameProfile.class)) {
+            return profile;
+        }
+        return null;
     }
 
     @Override

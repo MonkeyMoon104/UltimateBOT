@@ -31,7 +31,7 @@ public class BotInventoryController {
         this.equipmentBroadcaster = new EquipmentBroadcaster();
         this.slotManager = new SlotManager(bot, resourceReplenisher, equipmentBroadcaster);
         this.itemChecker = new ItemChecker();
-        this.itemManager = new ItemManager(bot, ((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher, equipmentBroadcaster, slotManager.getCurrentSlot());
+        this.itemManager = new ItemManager(bot, ((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher, equipmentBroadcaster, slotManager);
     }
 
     public void switchToSlot(int slot) {
