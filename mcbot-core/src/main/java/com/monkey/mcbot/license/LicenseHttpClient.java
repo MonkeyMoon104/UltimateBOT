@@ -20,7 +20,7 @@ public final class LicenseHttpClient {
     public LicenseHttpClient(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(3))
+                .connectTimeout(Duration.ofSeconds(10))
                 .build();
 
         String baseUrl = System.getProperty(
@@ -42,19 +42,30 @@ public final class LicenseHttpClient {
     private LicenseValidationResponse send(URI uri, LicenseValidationRequest request) throws IOException {
         try {
             HttpRequest httpRequest = HttpRequest.newBuilder(uri)
-                    .timeout(Duration.ofSeconds(5))
+                    .timeout(Duration.ofSeconds(15))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(request)))
                     .build();
 
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                throw new IOException("License endpoint returned HTTP " + response.statusCode());
+                throw new IOException("License endpoint returned HTTP " + response.statusCode() + " -> " + trimBody(response.body()));
             }
             return objectMapper.readValue(response.body(), LicenseValidationResponse.class);
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new IOException("Interrupted while validating license", ex);
         }
+    }
+
+    private String trimBody(String body) {
+        if (body == null || body.isBlank()) {
+            return "empty response";
+        }
+        String normalized = body.replace('\n', ' ').replace('\r', ' ').trim();
+        if (normalized.length() <= 500) {
+            return normalized;
+        }
+        return normalized.substring(0, 500) + "...";
     }
 }
