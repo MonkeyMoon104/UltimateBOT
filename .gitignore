@@ -49,3 +49,5 @@ bin/
 /.idea/
 /mcbot-api/updatedocs.md
 /mcbot-api/README-PUBLISH.md
+!/mcbot-api/updatedocs.md
+!/mcbot-api/README-PUBLISH.md
