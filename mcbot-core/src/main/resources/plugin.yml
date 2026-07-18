@@ -8,34 +8,33 @@ description: Minecraft bot plugin
 softdepend:
   - PlaceholderAPI
   - LuckPerms
-loadbefore:
   - WorldGuard
 
 commands:
   bot:
-    description: Apri la GUI delle impostazioni del bot normale
+    description: Open the normal bot settings GUI
     permission: mcb.bot.use
   botevent:
-    description: Apri la GUI delle impostazioni del bot evento
+    description: Open the event bot settings GUI
     permission: admin.host.bot
   botally:
-    description: Apri la GUI delle impostazioni del bot ally
+    description: Open the ally bot settings GUI
     permission: mcb.bot.use
   botteamally:
-    description: Crea e gestisce un bot team ally
+    description: Create and manage a team ally bot
     permission: mcb.bot.use
   mcbreload:
-    description: Ricarica la configurazione o rimuovi bot/mappe
+    description: Reload configuration or remove bots/maps
     usage: /mcbreload <config|bot|maps|all>
     permission: mcb.admin.use
 
 permissions:
   mcb.admin.use:
-    description: Permette di usare il comando mcbreload
+    description: Allows using the mcbreload command
     default: op
   mcb.bot.use:
-    description: Permette di usare i comandi bot, botally e botteamally
+    description: Allows using the bot, botally and botteamally commands
     default: true
   admin.host.bot:
-    description: Permette di creare un bot evento
+    description: Allows creating an event bot
     default: op

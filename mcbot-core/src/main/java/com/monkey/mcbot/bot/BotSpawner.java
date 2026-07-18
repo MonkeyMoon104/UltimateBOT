@@ -15,8 +15,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -58,9 +60,6 @@ public class BotSpawner {
             despawnByOwnerUUID(registryOwnerUUID);
         }
 
-        ServerPlayer handle = ((CraftPlayer) registryOwner).getHandle();
-        ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
-
         UUID botUUID = UUID.randomUUID();
         botOptions.setOwnerUUID(registryOwnerUUID);
         if (botOptions.getBotType() == BotType.TEAM_ALLY && botOptions.getTeamOwnerUUIDs().isEmpty()) {
@@ -72,12 +71,13 @@ public class BotSpawner {
         String botName = resolveBotName(nameTemplate, registryOwner, resolvedTarget, botOptions);
         GameProfile profile = resolveProfile(registryOwner, botUUID, botName, botOptions);
 
-        Location loc = registryOwner.getLocation();
-        Block block = loc.getWorld().getHighestBlockAt(loc);
+        Location spawnLocation = resolveSpawnLocation(registryOwner, botOptions);
+        ServerLevel world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
+        BlockPos spawnPos = BlockPos.containing(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
 
         ITrainingBot bot = NMSBridgeManager.get().createTrainingBot(
                 world,
-                BlockPos.containing(block.getX(), block.getY(), block.getZ()),
+                spawnPos,
                 0,
                 profile,
                 resolvedTarget,
@@ -94,12 +94,58 @@ public class BotSpawner {
         plugin.markCompatibilityBot(bot.asPlayer().getBukkitEntity());
         bot.getBotAI().manageTotem();
         BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
+        applyCustomEquipment(bot, botOptions);
 
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
         registry.registerBot(registryOwnerUUID, bot);
 
-        bot.getBotAI().getInventoryController().addEnderpearls(16);
-        bot.getBotAI().getInventoryController().switchToEnderpearl();
+        if (botOptions == null || botOptions.isEnderPearls()) {
+            bot.getBotAI().getInventoryController().addEnderpearls(16);
+            bot.getBotAI().getInventoryController().switchToEnderpearl();
+        } else {
+            bot.getBotAI().getInventoryController().setItem(
+                    com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
+                    net.minecraft.world.item.ItemStack.EMPTY
+            );
+        }
+    }
+
+    private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {
+        if (botOptions != null && botOptions.getSpawnLocation() != null) {
+            com.monkey.mcbot.api.model.BotLocation apiLocation = botOptions.getSpawnLocation();
+            World world = apiLocation.worldUUID() == null ? null : Bukkit.getWorld(apiLocation.worldUUID());
+            if (world == null && apiLocation.worldName() != null) {
+                world = Bukkit.getWorld(apiLocation.worldName());
+            }
+            if (world != null) {
+                return new Location(
+                        world,
+                        apiLocation.x(),
+                        apiLocation.y(),
+                        apiLocation.z(),
+                        apiLocation.yaw(),
+                        apiLocation.pitch()
+                );
+            }
+        }
+
+        Location loc = registryOwner.getLocation();
+        Block block = loc.getWorld().getHighestBlockAt(loc);
+        return new Location(loc.getWorld(), block.getX(), block.getY(), block.getZ(), loc.getYaw(), loc.getPitch());
+    }
+
+    private void applyCustomEquipment(ITrainingBot bot, BotOptions botOptions) {
+        if (botOptions == null || botOptions.getEquipmentContents().isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<Integer, ItemStack> entry : botOptions.getEquipmentContents().entrySet()) {
+            if (entry.getKey() == null || entry.getValue() == null) {
+                continue;
+            }
+            net.minecraft.world.item.ItemStack nmsItem = org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(entry.getValue());
+            bot.getBotAI().getInventoryController().setItem(entry.getKey(), nmsItem);
+        }
     }
 
     private Player resolveTargetPlayer(Player registryOwner, Player target, BotOptions botOptions) {

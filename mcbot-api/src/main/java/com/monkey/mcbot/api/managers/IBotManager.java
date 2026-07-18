@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Public service interface for creating, managing and removing MinecraftBot instances.
@@ -149,6 +151,26 @@ public interface IBotManager {
      * @return {@code true} if update was applied
      */
     boolean updateRank(UUID ownerUUID, BotRank rank);
+
+    boolean updateArmor(UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
+
+    boolean updateEquipment(UUID ownerUUID, Map<Integer, ItemStack> equipment);
+
+    boolean updateEquipmentSlot(UUID ownerUUID, int slot, ItemStack item);
+
+    boolean updateAutoTarget(UUID ownerUUID, boolean autoTarget, double range);
+
+    boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp);
+
+    boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
+
+    boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
+
+    boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);
+
+    boolean updateKillMessage(UUID ownerUUID, String killMessage);
+
+    boolean disableKillMessage(UUID ownerUUID);
 
     /**
      * Removes/despawns the bot associated with the given owner.

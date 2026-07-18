@@ -37,16 +37,20 @@ public class BotDeathService {
         Player owner = getOwnerPlayer(options);
 
         if (isEventBot) {
-            if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
+            if (isKillMessageEnabled(options) && bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
                 String targetName = bot.getTargetPlayer().getName();
-                String translatedMsg = ChatColorUtils.translate(deadBotEventMessage.replace("{player}", targetName));
+                String template = resolveKillMessage(options, deadBotEventMessage);
+                String translatedMsg = ChatColorUtils.translate(template.replace("{player}", targetName));
                 Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(translatedMsg));
             }
         } else {
-            if (owner != null && owner.isOnline()) {
-                owner.sendMessage(ChatColorUtils.translate(deadBotMessage));
-            } else if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
-                bot.getTargetPlayer().sendMessage(ChatColorUtils.translate(deadBotMessage));
+            if (isKillMessageEnabled(options)) {
+                String message = ChatColorUtils.translate(resolveKillMessage(options, deadBotMessage));
+                if (owner != null && owner.isOnline()) {
+                    owner.sendMessage(message);
+                } else if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
+                    bot.getTargetPlayer().sendMessage(message);
+                }
             }
 
             if (options != null && options.getBotType() == BotType.TEAM_ALLY) {
@@ -80,5 +84,16 @@ public class BotDeathService {
         }
 
         return Bukkit.getPlayer(ownerUUID);
+    }
+
+    private boolean isKillMessageEnabled(BotOptions options) {
+        return options == null || options.isKillMessageEnabled();
+    }
+
+    private String resolveKillMessage(BotOptions options, String fallback) {
+        if (options != null && options.getCustomKillMessage() != null) {
+            return options.getCustomKillMessage();
+        }
+        return fallback == null ? "" : fallback;
     }
 }

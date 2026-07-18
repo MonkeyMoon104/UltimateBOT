@@ -3,6 +3,7 @@ package com.monkey.mcbot.listener;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
+import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
@@ -76,14 +77,18 @@ public class PlayerCheckListener implements Listener {
         boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
         String currentDeathMessage = getDeathMessageText(event);
 
+        BotOptions options = null;
         if (wasBotSpawned) {
             ITrainingBot bot = botManager.getBotSafe(player.getUniqueId());
+            options = bot != null && bot.getBrainController() != null
+                    ? bot.getBrainController().getBotOptions()
+                    : null;
             boolean isEventBot = bot != null
                     && bot.getBrainController() != null
-                    && bot.getBrainController().getBotOptions() != null
-                    && bot.getBrainController().getBotOptions().getBotType() == BotType.EVENT;
+                    && options != null
+                    && options.getBotType() == BotType.EVENT;
 
-            if (!isEventBot) {
+            if (!isEventBot && (options == null || !options.isStayAfterOwnerDeath())) {
                 botManager.despawn(player);
                 String despawnMsg = plugin.getLangString("messages.despawn-bot", "&cBot despawned!");
                 player.sendMessage(ChatColorUtils.translate(despawnMsg));
@@ -94,31 +99,39 @@ public class PlayerCheckListener implements Listener {
         Entity killer = event.getEntity().getKiller();
 
         if (killer instanceof BotCraftPlayer) {
-            setBotDeathMessage(event, player);
+            setBotDeathMessage(event, player, options);
             return;
         }
 
         if (killer instanceof ITrainingBot) {
-            setBotDeathMessage(event, player);
+            setBotDeathMessage(event, player, options);
             return;
         }
 
         if (wasBotSpawned && (killer == null ||
                 (currentDeathMessage != null && currentDeathMessage.contains("[Intentional Game Design]")))) {
-            setBotDeathMessage(event, player);
+            setBotDeathMessage(event, player, options);
             return;
         }
 
         if (wasBotSpawned && currentDeathMessage != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
             if (bot != null && currentDeathMessage.contains(bot.asPlayer().getName().getString())) {
-                setBotDeathMessage(event, player);
+                setBotDeathMessage(event, player, options);
             }
         }
     }
 
-    private void setBotDeathMessage(PlayerDeathEvent event, Player player) {
-        String deathMessage = plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot");
+    private void setBotDeathMessage(PlayerDeathEvent event, Player player, BotOptions options) {
+        if (options != null && !options.isKillMessageEnabled()) {
+            event.deathMessage(null);
+            return;
+        }
+
+        String configured = options == null ? null : options.getCustomKillMessage();
+        String deathMessage = configured == null
+                ? plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot")
+                : configured;
         String formatted = ChatColorUtils.translate(deathMessage.replace("{player}", player.getName()));
         event.deathMessage(LEGACY_SECTION_SERIALIZER.deserialize(formatted));
     }

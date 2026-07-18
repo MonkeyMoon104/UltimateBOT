@@ -6,17 +6,20 @@ paperweight {
     reobfArtifactConfiguration = ReobfArtifactConfiguration.getREOBF_PRODUCTION()
 }
 
+def libsCatalog = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension).named('libs')
+
 dependencies {
     implementation project(':mcbot-api')
-    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle(libsCatalog.findVersion('paper-bundle-1_21_4').get().requiredVersion)
 
-    implementation 'org.bstats:bstats-bukkit:3.2.1'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.1'
-    implementation "xyz.xenondevs.invui:invui:1.49"
-    compileOnly 'me.clip:placeholderapi:2.12.3'
-    compileOnly 'com.github.sirblobman.api:core:2.9-SNAPSHOT'
-    compileOnly 'com.github.sirblobman.combatlogx:api:11.6-SNAPSHOT'
+    implementation libs.bstats.bukkit
+    implementation libs.jackson.databind
+    implementation libs.jackson.datatype.jsr310
+    implementation libs.invui.v1
+    compileOnly libs.placeholderapi
+    compileOnly libs.worldguard.bukkit
+    compileOnly libs.sirblobman.core
+    compileOnly libs.combatlogx.api
 }
 
 processResources {

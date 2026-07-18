@@ -384,6 +384,141 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateArmor(UUID ownerUUID,
+                               Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor,
+                               Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtection) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null || !options.isChangeableArmor()) {
+            return false;
+        }
+        if (armor != null) {
+            options.getArmor().putAll(armor);
+        }
+        if (blastProtection != null) {
+            options.getBlast().putAll(blastProtection);
+        }
+        botManager.updateArmor(managedOwner, options.getArmor(), options.getBlast());
+        return true;
+    }
+
+    @Override
+    public boolean updateEquipment(UUID ownerUUID, Map<Integer, org.bukkit.inventory.ItemStack> equipment) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null) {
+            return false;
+        }
+        options.setEquipmentContents(equipment);
+        if (equipment != null) {
+            for (Map.Entry<Integer, org.bukkit.inventory.ItemStack> entry : equipment.entrySet()) {
+                updateEquipmentSlot(managedOwner, entry.getKey(), entry.getValue());
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean updateEquipmentSlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null || slot < 0 || slot > 40) {
+            return false;
+        }
+        if (item == null) {
+            options.getEquipmentContents().remove(slot);
+            botManager.updateBotInventorySlot(managedOwner, slot, new org.bukkit.inventory.ItemStack(org.bukkit.Material.AIR));
+            return true;
+        }
+        options.getEquipmentContents().put(slot, item.clone());
+        botManager.updateBotInventorySlot(managedOwner, slot, item);
+        return true;
+    }
+
+    @Override
+    public boolean updateAutoTarget(UUID ownerUUID, boolean autoTarget, double range) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null || range <= 0.0D) {
+            return false;
+        }
+        options.setAutoTarget(autoTarget);
+        options.setAutoTargetRange(range);
+        return true;
+    }
+
+    @Override
+    public boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setRespectWorldGuardPvp(respectWorldGuardPvp);
+        return true;
+    }
+
+    @Override
+    public boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setStayAfterOwnerDeath(stayAfterOwnerDeath);
+        return true;
+    }
+
+    @Override
+    public boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp) {
+        ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
+        if (bot == null || bot.getBrainController() == null) {
+            return false;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+        options.setCrystalPvp(crystalPvp);
+        bot.getBotAI().getCPVPController().setEnabled(crystalPvp);
+        return true;
+    }
+
+    @Override
+    public boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls) {
+        ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
+        if (bot == null || bot.getBrainController() == null) {
+            return false;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+        options.setEnderPearls(enderPearls);
+        bot.getBotAI().getEnderpearlController().setEnabled(enderPearls);
+        return true;
+    }
+
+    @Override
+    public boolean updateKillMessage(UUID ownerUUID, String killMessage) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setKillMessageEnabled(true);
+        options.setCustomKillMessage(killMessage);
+        return true;
+    }
+
+    @Override
+    public boolean disableKillMessage(UUID ownerUUID) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setKillMessageEnabled(false);
+        options.setCustomKillMessage(null);
+        return true;
+    }
+
+    @Override
     public boolean remove(UUID ownerUUID) {
         if (ownerUUID == null) {
             return false;
@@ -456,6 +591,14 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return botManager.getBotSafe(ownerUUID);
     }
 
+    private BotOptions getLiveOptions(UUID ownerUUID) {
+        ITrainingBot bot = getLiveBot(ownerUUID);
+        if (bot == null || bot.getBrainController() == null) {
+            return null;
+        }
+        return bot.getBrainController().getBotOptions();
+    }
+
     private UUID resolveManagedOwner(UUID ownerUUID) {
         if (ownerUUID == null) {
             return null;
@@ -479,6 +622,15 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setOwnerUUID(ownerUUID);
         options.setBotNameTemplate(settings.botNameTemplate());
         options.setBotSkin(settings.botSkin());
+        options.setSpawnLocation(settings.spawnLocation());
+        options.setAutoTarget(settings.autoTarget());
+        options.setAutoTargetRange(settings.autoTargetRange());
+        options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
+        options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
+        options.setCrystalPvp(settings.crystalPvp());
+        options.setEnderPearls(settings.enderPearls());
+        options.setKillMessageEnabled(settings.killMessageEnabled());
+        options.setCustomKillMessage(settings.killMessage());
         options.setPreferredTargetUUID(targetUUID);
         options.setTargetUUIDs(targetUUIDs);
         options.setTeamOwnerUUIDs(teamOwners);
@@ -494,6 +646,16 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
         options.setArmorRange(toCoreArmor(settings.minArmorType()), toCoreArmor(settings.maxArmorType()));
         options.setArmorType(toCoreArmor(settings.armorType()));
+        if (!settings.armorContents().isEmpty()) {
+            options.getArmor().putAll(settings.armorContents());
+        }
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry : settings.armorTrimPatternKeys().entrySet()) {
+            options.setTrimPatternKey(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry : settings.armorTrimMaterialKeys().entrySet()) {
+            options.setTrimMaterialKey(entry.getKey(), entry.getValue());
+        }
+        options.setEquipmentContents(settings.equipmentContents());
         options.setRankRange(toCoreRank(settings.minRank()), toCoreRank(settings.maxRank()));
         options.setRank(toCoreRank(settings.rank()));
         options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());

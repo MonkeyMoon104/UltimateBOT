@@ -9,6 +9,7 @@ import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.*;
 import com.monkey.mcbot.integration.api.CoreBotManagerAdapter;
 import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
+import com.monkey.mcbot.integration.worldguard.WorldGuardPvpService;
 import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
@@ -54,6 +55,7 @@ public final class MinecraftBot extends JavaPlugin {
     private LanguageManager languageManager;
     private WrapperManager wrapperManager;
     private BotGuardCompatibilityListener botGuardCompatibilityListener;
+    private WorldGuardPvpService worldGuardPvpService;
     private static MinecraftBot instance;
 
     @Override
@@ -115,9 +117,10 @@ public final class MinecraftBot extends JavaPlugin {
             this.targetingService = new TargetingService();
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
+            this.worldGuardPvpService = new WorldGuardPvpService(this);
             this.botManager = new BotManager(this);
             startup.ready("Runtime", "services created");
-            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager, WrapperManager");
+            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager, WrapperManager, WorldGuardPvpService");
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
             startup.detail("Wrappers", wrapperManager.describeActiveWrapper());
             startup.completePhase("runtime core created");
@@ -264,6 +267,10 @@ public final class MinecraftBot extends JavaPlugin {
 
     public WrapperManager getWrapperManager() {
         return wrapperManager;
+    }
+
+    public WorldGuardPvpService getWorldGuardPvpService() {
+        return worldGuardPvpService;
     }
 
     public void markCompatibilityBot(Entity entity) {
@@ -436,6 +443,7 @@ public final class MinecraftBot extends JavaPlugin {
             playerOptions = null;
         }
         targetingService = null;
+        worldGuardPvpService = null;
         languageManager = null;
         wrapperManager = null;
     }

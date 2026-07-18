@@ -62,6 +62,7 @@ public class BotCPVPController {
     private boolean isPreparingAttack = false;
     private EndCrystal pendingAttackCrystal = null;
     private int attackPreparationTicks = 0;
+    private boolean enabled = true;
 
     public BotCPVPController(Player bot, BotInventoryController inventoryController) {
         this.bot = bot;
@@ -78,6 +79,10 @@ public class BotCPVPController {
     }
 
     public void tick(Player target) {
+        if (!enabled) {
+            resetPendingActions();
+            return;
+        }
         if (obsidianPlaceCooldown > 0) obsidianPlaceCooldown--;
         if (crystalPlaceCooldown > 0) crystalPlaceCooldown--;
         if (attackCooldown > 0) attackCooldown--;
@@ -121,6 +126,7 @@ public class BotCPVPController {
     }
 
     public boolean tryPlaceObsidianForCrystal(Player target) {
+        if (!enabled) return false;
         if (isPreparingObsidian || isPreparingCrystal || isPreparingAttack) return false;
         if (!canPlaceObsidian()) return false;
 
@@ -361,11 +367,11 @@ public class BotCPVPController {
     }
 
     public boolean canPlaceObsidian() {
-        return obsidianPlaceCooldown <= 0 && hasObsidian() && bot.isAlive();
+        return enabled && obsidianPlaceCooldown <= 0 && hasObsidian() && bot.isAlive();
     }
 
     public boolean canPlaceCrystal() {
-        return crystalPlaceCooldown <= 0 && inventoryController.hasItem(Items.END_CRYSTAL) && bot.isAlive();
+        return enabled && crystalPlaceCooldown <= 0 && inventoryController.hasItem(Items.END_CRYSTAL) && bot.isAlive();
     }
 
     public boolean hasObsidian() {
@@ -414,6 +420,7 @@ public class BotCPVPController {
     }
 
     public Optional<BlockPos> getBestObsidianForPearl(Player target) {
+        if (!enabled) return Optional.empty();
         List<BlockPos> bestPositions = obsidianPositionFinder.findBestObsidianPositions(
                 target,
                 1,
@@ -555,6 +562,30 @@ public class BotCPVPController {
 
     public CPVPConfig getConfig() {
         return config;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (!enabled) {
+            resetPendingActions();
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    private void resetPendingActions() {
+        isPreparingObsidian = false;
+        pendingObsidianPos = null;
+        obsidianPreparationTicks = 0;
+        isPreparingCrystal = false;
+        pendingCrystalPos = null;
+        crystalPreparationTicks = 0;
+        isPreparingAttack = false;
+        pendingAttackCrystal = null;
+        attackPreparationTicks = 0;
+        queuedCrystalPlacements.clear();
     }
 
     private List<EndCrystal> collectCrystalAttackCandidates(Player target) {

@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.guardsquare:proguard-gradle:7.9.1'
+        classpath libs.proguard.gradle
     }
 }
 
@@ -12,6 +12,8 @@ import org.gradle.api.attributes.java.TargetJvmVersion
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 apply plugin: 'com.gradleup.shadow'
+
+def libsCatalog = extensions.getByType(org.gradle.api.artifacts.VersionCatalogsExtension).named('libs')
 
 java {
     sourceCompatibility = JavaVersion.VERSION_25
@@ -85,8 +87,8 @@ dependencies {
     implementation(project(path: ':versions:v26_2', configuration: 'runtimeElements')) {
         transitive = false
     }
-    invuiV2_1Shade "xyz.xenondevs.invui:invui:2.1.1"
-    invuiV2_2Shade "xyz.xenondevs.invui:invui:2.2.0"
+    invuiV2_1Shade libsCatalog.findLibrary('invui-v2-1').get()
+    invuiV2_2Shade libsCatalog.findLibrary('invui-v2-2').get()
 }
 
 def relocateInvuiV2_1Task = tasks.register('relocateInvuiV2_1', ShadowJar) {

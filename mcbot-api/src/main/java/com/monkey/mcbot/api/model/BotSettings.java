@@ -1,5 +1,11 @@
 package com.monkey.mcbot.api.model;
 
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -37,6 +43,19 @@ public final class BotSettings {
     private final BotRank rank;
     private final BotRank minRank;
     private final BotRank maxRank;
+    private final BotLocation spawnLocation;
+    private final boolean autoTarget;
+    private final double autoTargetRange;
+    private final boolean respectWorldGuardPvp;
+    private final boolean stayAfterOwnerDeath;
+    private final boolean crystalPvp;
+    private final boolean enderPearls;
+    private final boolean killMessageEnabled;
+    private final String killMessage;
+    private final Map<EquipmentSlot, ItemStack> armorContents;
+    private final Map<Integer, ItemStack> equipmentContents;
+    private final Map<EquipmentSlot, String> armorTrimPatternKeys;
+    private final Map<EquipmentSlot, String> armorTrimMaterialKeys;
 
     private BotSettings(Builder builder) {
         this.follow = builder.follow;
@@ -59,6 +78,19 @@ public final class BotSettings {
         this.rank = builder.rank;
         this.minRank = builder.minRank;
         this.maxRank = builder.maxRank;
+        this.spawnLocation = builder.spawnLocation;
+        this.autoTarget = builder.autoTarget;
+        this.autoTargetRange = builder.autoTargetRange;
+        this.respectWorldGuardPvp = builder.respectWorldGuardPvp;
+        this.stayAfterOwnerDeath = builder.stayAfterOwnerDeath;
+        this.crystalPvp = builder.crystalPvp;
+        this.enderPearls = builder.enderPearls;
+        this.killMessageEnabled = builder.killMessageEnabled;
+        this.killMessage = builder.killMessage;
+        this.armorContents = copyItemMap(builder.armorContents);
+        this.equipmentContents = copyItemMap(builder.equipmentContents);
+        this.armorTrimPatternKeys = Map.copyOf(builder.armorTrimPatternKeys);
+        this.armorTrimMaterialKeys = Map.copyOf(builder.armorTrimMaterialKeys);
     }
 
     /**
@@ -257,6 +289,58 @@ public final class BotSettings {
      */
     public BotRank maxRank() {
         return maxRank;
+    }
+
+    public BotLocation spawnLocation() {
+        return spawnLocation;
+    }
+
+    public boolean autoTarget() {
+        return autoTarget;
+    }
+
+    public double autoTargetRange() {
+        return autoTargetRange;
+    }
+
+    public boolean respectWorldGuardPvp() {
+        return respectWorldGuardPvp;
+    }
+
+    public boolean stayAfterOwnerDeath() {
+        return stayAfterOwnerDeath;
+    }
+
+    public boolean crystalPvp() {
+        return crystalPvp;
+    }
+
+    public boolean enderPearls() {
+        return enderPearls;
+    }
+
+    public boolean killMessageEnabled() {
+        return killMessageEnabled;
+    }
+
+    public String killMessage() {
+        return killMessage;
+    }
+
+    public Map<EquipmentSlot, ItemStack> armorContents() {
+        return copyItemMap(armorContents);
+    }
+
+    public Map<Integer, ItemStack> equipmentContents() {
+        return copyItemMap(equipmentContents);
+    }
+
+    public Map<EquipmentSlot, String> armorTrimPatternKeys() {
+        return Map.copyOf(armorTrimPatternKeys);
+    }
+
+    public Map<EquipmentSlot, String> armorTrimMaterialKeys() {
+        return Map.copyOf(armorTrimMaterialKeys);
     }
 
     /**
@@ -603,6 +687,30 @@ public final class BotSettings {
      * Final step: builds immutable settings.
      */
     public interface BuildStep {
+        BuildStep spawnLocation(BotLocation spawnLocation);
+
+        BuildStep autoTarget(boolean autoTarget);
+
+        BuildStep autoTargetRange(double autoTargetRange);
+
+        BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp);
+
+        BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath);
+
+        BuildStep crystalPvp(boolean crystalPvp);
+
+        BuildStep enderPearls(boolean enderPearls);
+
+        BuildStep killMessage(String killMessage);
+
+        BuildStep disableKillMessage();
+
+        BuildStep armorContents(Map<EquipmentSlot, ItemStack> armorContents);
+
+        BuildStep equipmentContents(Map<Integer, ItemStack> equipmentContents);
+
+        BuildStep armorTrim(EquipmentSlot slot, String patternKey, String materialKey);
+
         /**
          * Builds immutable settings after validation.
          *
@@ -650,6 +758,19 @@ public final class BotSettings {
         private BotRank rank;
         private BotRank minRank;
         private BotRank maxRank;
+        private BotLocation spawnLocation;
+        private boolean autoTarget = false;
+        private double autoTargetRange = 16.0D;
+        private boolean respectWorldGuardPvp = false;
+        private boolean stayAfterOwnerDeath = false;
+        private boolean crystalPvp = true;
+        private boolean enderPearls = true;
+        private boolean killMessageEnabled = true;
+        private String killMessage;
+        private final Map<EquipmentSlot, ItemStack> armorContents = new EnumMap<>(EquipmentSlot.class);
+        private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
+        private final Map<EquipmentSlot, String> armorTrimPatternKeys = new EnumMap<>(EquipmentSlot.class);
+        private final Map<EquipmentSlot, String> armorTrimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
 
         private Builder() {
         }
@@ -836,6 +957,93 @@ public final class BotSettings {
         }
 
         @Override
+        public BuildStep spawnLocation(BotLocation spawnLocation) {
+            this.spawnLocation = spawnLocation;
+            return this;
+        }
+
+        @Override
+        public BuildStep autoTarget(boolean autoTarget) {
+            this.autoTarget = autoTarget;
+            return this;
+        }
+
+        @Override
+        public BuildStep autoTargetRange(double autoTargetRange) {
+            this.autoTargetRange = autoTargetRange;
+            return this;
+        }
+
+        @Override
+        public BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp) {
+            this.respectWorldGuardPvp = respectWorldGuardPvp;
+            return this;
+        }
+
+        @Override
+        public BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath) {
+            this.stayAfterOwnerDeath = stayAfterOwnerDeath;
+            return this;
+        }
+
+        @Override
+        public BuildStep crystalPvp(boolean crystalPvp) {
+            this.crystalPvp = crystalPvp;
+            return this;
+        }
+
+        @Override
+        public BuildStep enderPearls(boolean enderPearls) {
+            this.enderPearls = enderPearls;
+            return this;
+        }
+
+        @Override
+        public BuildStep killMessage(String killMessage) {
+            this.killMessageEnabled = true;
+            this.killMessage = killMessage;
+            return this;
+        }
+
+        @Override
+        public BuildStep disableKillMessage() {
+            this.killMessageEnabled = false;
+            this.killMessage = null;
+            return this;
+        }
+
+        @Override
+        public BuildStep armorContents(Map<EquipmentSlot, ItemStack> armorContents) {
+            this.armorContents.clear();
+            this.armorContents.putAll(copyItemMap(armorContents));
+            return this;
+        }
+
+        @Override
+        public BuildStep equipmentContents(Map<Integer, ItemStack> equipmentContents) {
+            this.equipmentContents.clear();
+            this.equipmentContents.putAll(copyItemMap(equipmentContents));
+            return this;
+        }
+
+        @Override
+        public BuildStep armorTrim(EquipmentSlot slot, String patternKey, String materialKey) {
+            if (slot != null) {
+                if (patternKey == null || patternKey.isBlank()) {
+                    this.armorTrimPatternKeys.remove(slot);
+                } else {
+                    this.armorTrimPatternKeys.put(slot, patternKey);
+                }
+                if (materialKey == null || materialKey.isBlank()) {
+                    this.armorTrimMaterialKeys.remove(slot);
+                } else {
+                    this.armorTrimMaterialKeys.put(slot, materialKey);
+                }
+            }
+            return this;
+        }
+
+        @Override
         public BotSettings build() {
             blastProtection = Objects.requireNonNull(blastProtection, "blastProtection");
             armorType = Objects.requireNonNull(armorType, "armorType");
@@ -884,6 +1092,10 @@ public final class BotSettings {
                 throw new IllegalArgumentException("follow cannot be changeable while combat is fixed to true");
             }
 
+            if (autoTargetRange <= 0.0D) {
+                throw new IllegalArgumentException("autoTargetRange must be greater than 0");
+            }
+
             return new BotSettings(this);
         }
 
@@ -910,5 +1122,18 @@ public final class BotSettings {
                 throw new IllegalArgumentException("min rank cannot be greater than max rank");
             }
         }
+    }
+
+    private static <K> Map<K, ItemStack> copyItemMap(Map<K, ItemStack> source) {
+        if (source == null || source.isEmpty()) {
+            return Map.of();
+        }
+        Map<K, ItemStack> copy = new HashMap<>();
+        for (Map.Entry<K, ItemStack> entry : source.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                copy.put(entry.getKey(), entry.getValue().clone());
+            }
+        }
+        return Map.copyOf(copy);
     }
 }

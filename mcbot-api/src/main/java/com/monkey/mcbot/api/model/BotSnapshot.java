@@ -35,7 +35,14 @@ public record BotSnapshot(
         int maxTotemCount,
         UUID targetUUID,
         Set<UUID> targetUUIDs,
-        BotSource source
+        BotSource source,
+        boolean autoTarget,
+        double autoTargetRange,
+        boolean respectWorldGuardPvp,
+        boolean stayAfterOwnerDeath,
+        boolean crystalPvp,
+        boolean enderPearls,
+        boolean killMessageEnabled
 ) {
     public BotSnapshot {
         botType = botType == null || botType.isBlank() ? "UNKNOWN" : botType;

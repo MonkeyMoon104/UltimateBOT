@@ -76,7 +76,9 @@ public class BotAI {
         this.teleportController = new BotTeleportController(bot);
         this.enderpearlController = new BotEnderpearlController(
                 bot, inventoryController, rotationController);
+        this.enderpearlController.setEnabled(options.isEnderPearls());
         this.cpvpController = new BotCPVPController(bot, inventoryController);
+        this.cpvpController.setEnabled(options.isCrystalPvp());
         this.cpvpController.setRank(options.getRank());
         this.rapvpController = new BotRAPVPController(
                 bot, inventoryController, rotationController, enderpearlController);
@@ -129,7 +131,7 @@ public class BotAI {
                 }
             }
 
-            if (enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
+            if (options.isEnderPearls() && enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
                 if (pathfindingManager.isUsingPathfinding()) {
                     pathfindingManager.setUsingPathfinding(false);
                     movementController.clearPath();

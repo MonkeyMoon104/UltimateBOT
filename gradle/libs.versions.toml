@@ -1,0 +1,44 @@
+[versions]
+paperweight = "2.0.0-beta.21"
+shadow = "9.6.0"
+api-publish = "1.0.1"
+bstats = "3.2.1"
+jackson = "2.22.1"
+invui-v1 = "1.49"
+invui-v2-1 = "2.1.1"
+invui-v2-2 = "2.2.0"
+placeholderapi = "2.12.3"
+worldguard = "7.0.17"
+sirblobman-core = "2.9-SNAPSHOT"
+combatlogx-api = "11.6-SNAPSHOT"
+paper-api = "1.21.4-R0.1-SNAPSHOT"
+proguard = "7.9.1"
+paper-bundle-1_21_4 = "1.21.4-R0.1-SNAPSHOT"
+paper-bundle-1_21_5 = "1.21.5-R0.1-SNAPSHOT"
+paper-bundle-1_21_6 = "1.21.6-R0.1-SNAPSHOT"
+paper-bundle-1_21_7 = "1.21.7-R0.1-SNAPSHOT"
+paper-bundle-1_21_8 = "1.21.8-R0.1-SNAPSHOT"
+paper-bundle-1_21_9 = "1.21.9-R0.1-SNAPSHOT"
+paper-bundle-1_21_10 = "1.21.10-R0.1-SNAPSHOT"
+paper-bundle-1_21_11 = "1.21.11-R0.1-SNAPSHOT"
+paper-bundle-26_1 = "26.1.2.build.+"
+paper-bundle-26_2 = "26.2.build.+"
+
+[libraries]
+bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+invui-v1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v1" }
+invui-v2-1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-1" }
+invui-v2-2 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-2" }
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
+sirblobman-core = { module = "com.github.sirblobman.api:core", version.ref = "sirblobman-core" }
+combatlogx-api = { module = "com.github.sirblobman.combatlogx:api", version.ref = "combatlogx-api" }
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard" }
+
+[plugins]
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+api-publish = { id = "it.monkeymoon104.api-publish", version.ref = "api-publish" }

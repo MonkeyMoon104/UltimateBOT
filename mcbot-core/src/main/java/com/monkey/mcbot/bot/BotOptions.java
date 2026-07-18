@@ -1,6 +1,7 @@
 package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
@@ -42,6 +43,16 @@ public class BotOptions {
     private ArmorTier maxArmorTier = ArmorTier.NETHERITE;
     private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
     private final Map<EquipmentSlot, String> trimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
+    private BotLocation spawnLocation;
+    private boolean autoTarget = false;
+    private double autoTargetRange = 16.0D;
+    private boolean respectWorldGuardPvp = false;
+    private boolean stayAfterOwnerDeath = false;
+    private boolean crystalPvp = true;
+    private boolean enderPearls = true;
+    private boolean killMessageEnabled = true;
+    private String customKillMessage;
+    private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
 
     public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = Objects.requireNonNull(training, "training");
@@ -141,6 +152,93 @@ public class BotOptions {
 
     public void setBotSkin(BotSkin botSkin) {
         this.botSkin = botSkin == null ? BotSkin.owner() : botSkin;
+    }
+
+    public BotLocation getSpawnLocation() {
+        return spawnLocation;
+    }
+
+    public void setSpawnLocation(BotLocation spawnLocation) {
+        this.spawnLocation = spawnLocation;
+    }
+
+    public boolean isAutoTarget() {
+        return autoTarget;
+    }
+
+    public void setAutoTarget(boolean autoTarget) {
+        this.autoTarget = autoTarget;
+    }
+
+    public double getAutoTargetRange() {
+        return autoTargetRange;
+    }
+
+    public void setAutoTargetRange(double autoTargetRange) {
+        this.autoTargetRange = autoTargetRange <= 0.0D ? 16.0D : autoTargetRange;
+    }
+
+    public boolean isRespectWorldGuardPvp() {
+        return respectWorldGuardPvp;
+    }
+
+    public void setRespectWorldGuardPvp(boolean respectWorldGuardPvp) {
+        this.respectWorldGuardPvp = respectWorldGuardPvp;
+    }
+
+    public boolean isStayAfterOwnerDeath() {
+        return stayAfterOwnerDeath;
+    }
+
+    public void setStayAfterOwnerDeath(boolean stayAfterOwnerDeath) {
+        this.stayAfterOwnerDeath = stayAfterOwnerDeath;
+    }
+
+    public boolean isCrystalPvp() {
+        return crystalPvp;
+    }
+
+    public void setCrystalPvp(boolean crystalPvp) {
+        this.crystalPvp = crystalPvp;
+    }
+
+    public boolean isEnderPearls() {
+        return enderPearls;
+    }
+
+    public void setEnderPearls(boolean enderPearls) {
+        this.enderPearls = enderPearls;
+    }
+
+    public boolean isKillMessageEnabled() {
+        return killMessageEnabled;
+    }
+
+    public void setKillMessageEnabled(boolean killMessageEnabled) {
+        this.killMessageEnabled = killMessageEnabled;
+    }
+
+    public String getCustomKillMessage() {
+        return customKillMessage;
+    }
+
+    public void setCustomKillMessage(String customKillMessage) {
+        this.customKillMessage = customKillMessage == null || customKillMessage.isBlank() ? null : customKillMessage;
+    }
+
+    public Map<Integer, ItemStack> getEquipmentContents() {
+        return equipmentContents;
+    }
+
+    public void setEquipmentContents(Map<Integer, ItemStack> equipmentContents) {
+        this.equipmentContents.clear();
+        if (equipmentContents != null) {
+            for (Map.Entry<Integer, ItemStack> entry : equipmentContents.entrySet()) {
+                if (entry.getKey() != null && entry.getValue() != null) {
+                    this.equipmentContents.put(entry.getKey(), entry.getValue().clone());
+                }
+            }
+        }
     }
 
     public Set<UUID> getTeamOwnerUUIDs() {

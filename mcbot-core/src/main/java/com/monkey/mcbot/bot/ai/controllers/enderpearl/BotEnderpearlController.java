@@ -56,6 +56,7 @@ public class BotEnderpearlController {
     private static final double AUTO_TELEPORT_VERTICAL_DISTANCE = 15.0;
     private static final double EMERGENCY_TELEPORT_DISTANCE = 25.0;
     private static final double EXTREME_EMERGENCY_TELEPORT_DISTANCE = 34.0;
+    private boolean enabled = true;
 
     public BotEnderpearlController(Player bot, BotInventoryController inventoryController, BotRotationController rotationController) {
         this.bot = bot;
@@ -76,6 +77,7 @@ public class BotEnderpearlController {
     }
 
     public boolean tryUseEnderpearl(Player target, IPearlStrategyCalculator.PearlStrategy forcedStrategy) {
+        if (!enabled) return false;
         if (isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
 
@@ -113,6 +115,7 @@ public class BotEnderpearlController {
     }
 
     public boolean tryUseEnderpearlToPosition(Vec3 targetPos) {
+        if (!enabled) return false;
         if (!canUseEnderpearl() || isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
         if (targetPos == null) return false;
@@ -148,6 +151,7 @@ public class BotEnderpearlController {
     }
 
     public boolean tryPearlToObsidianSide(BlockPos obsidianPos, Player target) {
+        if (!enabled) return false;
         if (!canUseEnderpearl() || isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
 
@@ -201,6 +205,7 @@ public class BotEnderpearlController {
     }
 
     public boolean checkAndPerformAutoTeleport(org.bukkit.entity.Player target) {
+        if (!enabled) return false;
         if (target == null || !target.isOnline()) return false;
         if (!canAutoTeleport()) return false;
 
@@ -325,6 +330,12 @@ public class BotEnderpearlController {
     }
 
     public void tick() {
+        if (!enabled) {
+            isPreparingPearl = false;
+            pendingThrowTarget = null;
+            preparationTicks = 0;
+            return;
+        }
         if (enderpearlCooldown > 0) enderpearlCooldown--;
         if (aggressivePearlCooldown > 0) aggressivePearlCooldown--;
         if (repositionPearlCooldown > 0) repositionPearlCooldown--;
@@ -347,6 +358,7 @@ public class BotEnderpearlController {
     }
 
     public boolean canUseEnderpearl() {
+        if (!enabled) return false;
         if (isPreparingPearl) return false;
         if (enderpearlCooldown > 0) return false;
         if (!inventoryController.hasEnderpearls()) return false;
@@ -369,6 +381,7 @@ public class BotEnderpearlController {
     }
 
     public boolean shouldUseEnderpearl(Player target) {
+        if (!enabled) return false;
         IPearlStrategyCalculator.PearlStrategy strategy = strategyCalculator.determineOptimalStrategy(bot, target,
                 damageTracker.wasRecentlyDamaged(), damageTracker.getDamageComboCount(),
                 damageTracker.getComboStartTime(), repositionPearlCooldown, aggressivePearlCooldown);
@@ -382,6 +395,19 @@ public class BotEnderpearlController {
 
     public boolean isThrowingPearl() {
         return isPreparingPearl;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (!enabled) {
+            isPreparingPearl = false;
+            pendingThrowTarget = null;
+            preparationTicks = 0;
+        }
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public int getDamageComboCount() {

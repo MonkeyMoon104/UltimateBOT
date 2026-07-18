@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class TargetingService {
 
@@ -47,6 +48,10 @@ public class TargetingService {
 
     public Player findClosestPlayer(ITrainingBot bot, double maxRange) {
         return findClosestPlayerNearBot(bot, maxRange, null, Set.of());
+    }
+
+    public Player findClosestPlayer(ITrainingBot bot, double maxRange, Predicate<Player> candidateFilter) {
+        return findClosestPlayerNearBot(bot, maxRange, null, Set.of(), candidateFilter);
     }
 
     public Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
@@ -138,6 +143,14 @@ public class TargetingService {
                                             double maxRange,
                                             UUID excludedPlayer,
                                             Set<UUID> allowedTargets) {
+        return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, allowedTargets, null);
+    }
+
+    private Player findClosestPlayerNearBot(ITrainingBot bot,
+                                            double maxRange,
+                                            UUID excludedPlayer,
+                                            Set<UUID> allowedTargets,
+                                            Predicate<Player> candidateFilter) {
         if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
             return null;
         }
@@ -145,9 +158,11 @@ public class TargetingService {
         UUID botUUID = bot.asPlayer().getUUID();
         long currentTime = System.currentTimeMillis();
         boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
+        boolean useDynamicFilter = candidateFilter != null;
 
         TargetCache cached = targetCache.get(botUUID);
         if (!useAllowedTargetsFilter
+                && !useDynamicFilter
                 && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
                 && cached.isValid(excludedPlayer, botUUID, maxRange)) {
@@ -183,6 +198,10 @@ public class TargetingService {
                 continue;
             }
 
+            if (candidateFilter != null && !candidateFilter.test(player)) {
+                continue;
+            }
+
             double dx = player.getX() - centerX;
             double dy = player.getY() - centerY;
             double dz = player.getZ() - centerZ;
@@ -195,7 +214,7 @@ public class TargetingService {
         }
 
         if (closestPlayer != null) {
-            if (!useAllowedTargetsFilter) {
+            if (!useAllowedTargetsFilter && !useDynamicFilter) {
                 targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, botUUID, maxRange));
             }
         } else {

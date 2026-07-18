@@ -140,6 +140,10 @@ public class BotBrainController {
             return false;
         }
 
+        if (!isWorldGuardPvpAllowedForCurrentFight()) {
+            return false;
+        }
+
         if ((botOptions.getBotType() == BotType.ALLY || botOptions.getBotType() == BotType.TEAM_ALLY)
                 && targetPlayer != null
                 && isProtectedOwner(targetPlayer.getUniqueId())) {
@@ -193,7 +197,7 @@ public class BotBrainController {
             clearAlertState();
 
             targetingService.invalidateCache(bot.asPlayer().getUUID());
-            setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange));
+            setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange, this::isValidPvpTarget));
             return;
         }
 
@@ -224,6 +228,13 @@ public class BotBrainController {
                     teamAllyRangeAlertMessage,
                     targetFilters
             );
+            return;
+        }
+
+        if (botType == BotType.SINGLE && botOptions.isAutoTarget()) {
+            watchOnlyMode = false;
+            clearAlertState();
+            setTargetIfChanged(targetingService.findClosestPlayer(bot, botOptions.getAutoTargetRange(), this::isValidPvpTarget));
             return;
         }
 
@@ -347,6 +358,10 @@ public class BotBrainController {
                 continue;
             }
 
+            if (!isValidPvpTarget(candidate)) {
+                continue;
+            }
+
             double bestOwnerDistanceSq = Double.MAX_VALUE;
             for (org.bukkit.entity.Player owner : owners) {
                 if (!candidate.getWorld().getUID().equals(owner.getWorld().getUID())) {
@@ -373,6 +388,27 @@ public class BotBrainController {
         }
 
         return best;
+    }
+
+    private boolean isValidPvpTarget(org.bukkit.entity.Player candidate) {
+        if (candidate == null) {
+            return false;
+        }
+        if (!botOptions.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
+            return true;
+        }
+        return plugin.getWorldGuardPvpService().isPvpAllowed(candidate.getLocation());
+    }
+
+    private boolean isWorldGuardPvpAllowedForCurrentFight() {
+        if (!botOptions.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
+            return true;
+        }
+        if (targetPlayer != null && !plugin.getWorldGuardPvpService().isPvpAllowed(targetPlayer.getLocation())) {
+            return false;
+        }
+        org.bukkit.entity.Entity bukkitBot = bot.asPlayer().getBukkitEntity();
+        return bukkitBot == null || plugin.getWorldGuardPvpService().isPvpAllowed(bukkitBot.getLocation());
     }
 
     private org.bukkit.entity.Player getClosestOwnerToBot(List<org.bukkit.entity.Player> owners) {

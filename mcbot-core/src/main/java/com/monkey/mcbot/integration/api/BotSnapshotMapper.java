@@ -30,6 +30,13 @@ final class BotSnapshotMapper {
         int maxTotemCount = -1;
         Set<UUID> targetUUIDs = Set.of();
         BotSource source = BotSource.CORE;
+        boolean autoTarget = false;
+        double autoTargetRange = 16.0D;
+        boolean respectWorldGuardPvp = false;
+        boolean stayAfterOwnerDeath = false;
+        boolean crystalPvp = true;
+        boolean enderPearls = true;
+        boolean killMessageEnabled = true;
         if (bot.getBrainController() != null) {
             BotOptions options = bot.getBrainController().getBotOptions();
             if (options != null && options.getBotType() != null) {
@@ -43,6 +50,13 @@ final class BotSnapshotMapper {
                 source = options.getCreationSource() == BotCreationSource.API
                         ? BotSource.API
                         : BotSource.CORE;
+                autoTarget = options.isAutoTarget();
+                autoTargetRange = options.getAutoTargetRange();
+                respectWorldGuardPvp = options.isRespectWorldGuardPvp();
+                stayAfterOwnerDeath = options.isStayAfterOwnerDeath();
+                crystalPvp = options.isCrystalPvp();
+                enderPearls = options.isEnderPearls();
+                killMessageEnabled = options.isKillMessageEnabled();
             }
         }
 
@@ -63,7 +77,14 @@ final class BotSnapshotMapper {
                 maxTotemCount,
                 targetUUID,
                 targetUUIDs,
-                source
+                source,
+                autoTarget,
+                autoTargetRange,
+                respectWorldGuardPvp,
+                stayAfterOwnerDeath,
+                crystalPvp,
+                enderPearls,
+                killMessageEnabled
         );
     }
 }
