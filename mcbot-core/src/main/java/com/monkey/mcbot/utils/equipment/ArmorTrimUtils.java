@@ -1,5 +1,7 @@
 package com.monkey.mcbot.utils.equipment;
 
+import io.papermc.paper.registry.RegistryAccess;
+import io.papermc.paper.registry.RegistryKey;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -34,11 +36,11 @@ public final class ArmorTrimUtils {
     }
 
     public static List<String> getTrimPatternKeys() {
-        return resolveOrderedKeys(PATTERN_ORDER, Registry.TRIM_PATTERN);
+        return resolveOrderedKeys(PATTERN_ORDER, trimPatternRegistry());
     }
 
     public static List<String> getTrimMaterialKeys() {
-        return resolveOrderedKeys(MATERIAL_ORDER, Registry.TRIM_MATERIAL);
+        return resolveOrderedKeys(MATERIAL_ORDER, trimMaterialRegistry());
     }
 
     public static String getNextTrimPatternKey(@Nullable String currentKey, boolean forward) {
@@ -185,13 +187,21 @@ public final class ArmorTrimUtils {
     @Nullable
     private static TrimPattern resolveTrimPattern(@Nullable String patternKey) {
         String normalized = normalizeKey(patternKey);
-        return normalized == null ? null : Registry.TRIM_PATTERN.get(NamespacedKey.minecraft(normalized));
+        return normalized == null ? null : trimPatternRegistry().get(NamespacedKey.minecraft(normalized));
     }
 
     @Nullable
     private static TrimMaterial resolveTrimMaterial(@Nullable String materialKey) {
         String normalized = normalizeKey(materialKey);
-        return normalized == null ? null : Registry.TRIM_MATERIAL.get(NamespacedKey.minecraft(normalized));
+        return normalized == null ? null : trimMaterialRegistry().get(NamespacedKey.minecraft(normalized));
+    }
+
+    private static Registry<TrimPattern> trimPatternRegistry() {
+        return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN);
+    }
+
+    private static Registry<TrimMaterial> trimMaterialRegistry() {
+        return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL);
     }
 
     private static <T extends org.bukkit.Keyed> List<String> resolveOrderedKeys(List<String> preferredOrder, Registry<T> registry) {

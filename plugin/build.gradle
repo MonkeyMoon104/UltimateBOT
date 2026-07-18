@@ -9,6 +9,7 @@ buildscript {
 
 import proguard.gradle.ProGuardTask
 import org.gradle.api.attributes.java.TargetJvmVersion
+import org.gradle.api.file.DuplicatesStrategy
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 apply plugin: 'com.gradleup.shadow'
@@ -22,6 +23,13 @@ java {
 
 configurations.matching { it.name in ['compileClasspath', 'runtimeClasspath'] }.configureEach {
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
+}
+
+tasks.withType(ShadowJar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching(['META-INF/services/**', 'META-INF/*.kotlin_module']) {
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }
 
 configurations {
