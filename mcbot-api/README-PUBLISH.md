@@ -1,10 +1,17 @@
-# Release API e pubblicazione docs
+# Release API, publish e GitHub Pages
 
-Questa guida spiega l'ordine corretto per rilasciare una nuova versione di `mcbot-api`, pubblicarla tramite GitHub Actions e aggiornare le Javadocs su GitHub Pages.
+Questa e l'unica guida da seguire per:
+
+- aggiornare `mcbot-api`
+- pubblicare una nuova versione API
+- aggiornare le Javadocs su GitHub Pages
+- evitare il problema della pagina docs che mostra ancora la versione vecchia
+
+Non mantenere procedure duplicate in altri file: se cambia il flow, aggiorna solo questo file.
 
 ## Come viene calcolata la versione
 
-La versione del progetto viene risolta nel `build.gradle` root in questo ordine:
+La versione viene risolta dal `build.gradle` root in questo ordine:
 
 1. Variabile ambiente `RELEASE_VERSION`, usata dalla CI.
 2. Tag Git esatto sul commit corrente, per esempio `v1.0.6`.
@@ -13,11 +20,20 @@ La versione del progetto viene risolta nel `build.gradle` root in questo ordine:
 
 Per questo motivo le Javadocs devono essere rigenerate quando il commit si trova gia sul tag corretto, altrimenti possono rimanere con la versione precedente.
 
-## Release completa API
+## Regola principale
+
+La release API e la pubblicazione docs sono due cose diverse:
+
+- Il tag `vX.Y.Z` pubblica l'API tramite GitHub Actions.
+- Il submodule `docs` pubblica le Javadocs su GitHub Pages.
+
+Il tag deve esistere prima di rigenerare le Javadocs, oppure il titolo puo restare alla versione precedente.
+
+## Release completa
 
 Esempio: rilascio `1.0.6`.
 
-### 1. Verifica e build
+### 1. Verifica stato e build
 
 ```powershell
 git status --short
@@ -26,7 +42,7 @@ git status --short
 
 La build deve passare prima di creare il tag.
 
-### 2. Commit e push delle modifiche codice
+### 2. Commit e push del codice
 
 ```powershell
 git add .
@@ -36,7 +52,7 @@ git push origin mcbot
 
 Usa un messaggio coerente con il contenuto reale della release.
 
-### 3. Crea e pusha il tag API
+### 3. Crea e pusha il tag
 
 ```powershell
 git tag v1.0.6
@@ -53,9 +69,9 @@ MonkeyMoon104/build-infra/.github/workflows/publish-api.yml@main
 
 Quindi il publish API online parte da GitHub Actions, non da un comando manuale locale.
 
-### 4. Rigenera le Javadocs con il tag gia presente
+### 4. Rigenera le Javadocs dopo il tag
 
-Dopo aver creato il tag, rigenera forzando il modulo API:
+Questo passaggio deve essere fatto dopo il tag. Usa sempre `:mcbot-api:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
 
 ```powershell
 .\gradlew.bat :mcbot-api:clean :mcbot-api:javadoc publishApiDocs
@@ -73,7 +89,7 @@ Deve mostrare:
 mcbot-api 1.0.6 API
 ```
 
-### 5. Commit e push nel repo docs
+### 5. Commit e push delle docs
 
 `docs` e un submodule separato, quindi va committato dentro `docs`:
 
@@ -84,7 +100,7 @@ git -C docs commit -m "docs(api): regenerate javadocs for 1.0.6"
 git -C docs push origin master
 ```
 
-### 6. Commit e push del puntatore docs nel repo principale
+### 6. Commit e push del puntatore `docs`
 
 Dopo il push del submodule, il repo principale vede `docs` come modificato:
 
@@ -95,9 +111,9 @@ git commit -m "docs(api): point to 1.0.6 javadocs"
 git push origin mcbot
 ```
 
-### 7. Sposta il tag se hai aggiornato il puntatore docs dopo il tag
+### 7. Allinea il tag al commit finale
 
-Se hai creato il tag prima del commit che aggiorna il puntatore `docs`, sposta il tag sul commit finale:
+Se dopo il tag hai creato il commit che aggiorna il puntatore `docs`, sposta il tag sul commit finale:
 
 ```powershell
 git tag -f v1.0.6
@@ -106,7 +122,32 @@ git push --force origin v1.0.6
 
 Questo mantiene tag release, codice e puntatore docs sullo stesso commit.
 
-## Sequenza rapida consigliata
+## Aggiornare solo le docs
+
+Usa questa procedura solo se l'API e gia rilasciata e vuoi correggere/rigenerare GitHub Pages.
+
+```powershell
+git describe --tags --exact-match HEAD
+.\gradlew.bat :mcbot-api:clean :mcbot-api:javadoc publishApiDocs
+Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
+
+git -C docs add mcbot
+git -C docs commit -m "docs(api): regenerate javadocs for X.Y.Z"
+git -C docs push origin master
+
+git add docs
+git commit -m "docs(api): point to X.Y.Z javadocs"
+git push origin mcbot
+```
+
+Se il commit finale deve essere incluso nella release corrente, sposta anche il tag:
+
+```powershell
+git tag -f vX.Y.Z
+git push --force origin vX.Y.Z
+```
+
+## Comandi rapidi
 
 ```powershell
 .\gradlew.bat :plugin:shadowJar
@@ -137,4 +178,4 @@ git ls-remote --tags origin vX.Y.Z
 Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
 ```
 
-Su GitHub Pages potrebbe servire qualche minuto prima che la nuova versione sia visibile.
+Su GitHub Pages potrebbe servire qualche minuto prima che la nuova versione sia visibile. Se localmente il file mostra la versione corretta ma online no, aspetta e forza refresh del browser.
