@@ -467,6 +467,23 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateIdleWander(UUID ownerUUID,
+                                    boolean idleWander,
+                                    double idleWanderRadius,
+                                    double idleReturnDistance,
+                                    long idleReturnDelayMs) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null || idleWanderRadius <= 0.0D || idleReturnDistance <= 0.0D || idleReturnDelayMs < 0L) {
+            return false;
+        }
+        options.setIdleWander(idleWander);
+        options.setIdleWanderRadius(idleWanderRadius);
+        options.setIdleReturnDistance(idleReturnDistance);
+        options.setIdleReturnDelayMs(idleReturnDelayMs);
+        return true;
+    }
+
+    @Override
     public boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp) {
         ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
         if (bot == null || bot.getBrainController() == null) {
@@ -478,6 +495,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
         options.setCrystalPvp(crystalPvp);
         bot.getBotAI().getCPVPController().setEnabled(crystalPvp);
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
+                crystalPvp
+                        ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.END_CRYSTAL, 64)
+                        : net.minecraft.world.item.ItemStack.EMPTY
+        );
         return true;
     }
 
@@ -627,6 +650,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setAutoTargetRange(settings.autoTargetRange());
         options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
         options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
+        options.setIdleWander(settings.idleWander());
+        options.setIdleWanderRadius(settings.idleWanderRadius());
+        options.setIdleReturnDistance(settings.idleReturnDistance());
+        options.setIdleReturnDelayMs(settings.idleReturnDelayMs());
         options.setCrystalPvp(settings.crystalPvp());
         options.setEnderPearls(settings.enderPearls());
         options.setKillMessageEnabled(settings.killMessageEnabled());

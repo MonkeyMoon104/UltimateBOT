@@ -48,6 +48,10 @@ public class BotOptions {
     private double autoTargetRange = 16.0D;
     private boolean respectWorldGuardPvp = false;
     private boolean stayAfterOwnerDeath = false;
+    private boolean idleWander = false;
+    private double idleWanderRadius = 10.0D;
+    private double idleReturnDistance = 24.0D;
+    private long idleReturnDelayMs = 8000L;
     private boolean crystalPvp = true;
     private boolean enderPearls = true;
     private boolean killMessageEnabled = true;
@@ -192,6 +196,38 @@ public class BotOptions {
 
     public void setStayAfterOwnerDeath(boolean stayAfterOwnerDeath) {
         this.stayAfterOwnerDeath = stayAfterOwnerDeath;
+    }
+
+    public boolean isIdleWander() {
+        return idleWander;
+    }
+
+    public void setIdleWander(boolean idleWander) {
+        this.idleWander = idleWander;
+    }
+
+    public double getIdleWanderRadius() {
+        return idleWanderRadius;
+    }
+
+    public void setIdleWanderRadius(double idleWanderRadius) {
+        this.idleWanderRadius = idleWanderRadius <= 0.0D ? 10.0D : idleWanderRadius;
+    }
+
+    public double getIdleReturnDistance() {
+        return idleReturnDistance;
+    }
+
+    public void setIdleReturnDistance(double idleReturnDistance) {
+        this.idleReturnDistance = idleReturnDistance <= 0.0D ? 24.0D : idleReturnDistance;
+    }
+
+    public long getIdleReturnDelayMs() {
+        return idleReturnDelayMs;
+    }
+
+    public void setIdleReturnDelayMs(long idleReturnDelayMs) {
+        this.idleReturnDelayMs = Math.max(0L, idleReturnDelayMs);
     }
 
     public boolean isCrystalPvp() {

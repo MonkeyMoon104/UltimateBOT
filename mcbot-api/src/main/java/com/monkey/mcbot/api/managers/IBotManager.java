@@ -164,6 +164,12 @@ public interface IBotManager {
 
     boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
 
+    boolean updateIdleWander(UUID ownerUUID,
+                             boolean idleWander,
+                             double idleWanderRadius,
+                             double idleReturnDistance,
+                             long idleReturnDelayMs);
+
     boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
 
     boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);

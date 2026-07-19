@@ -115,11 +115,13 @@ public class BotBrainController {
         updateTargetByType();
 
         if (targetPlayer == null || targetPlayer.isDead() || !targetPlayer.isOnline()) {
+            botAI.tickIdle();
             return;
         }
 
         Player target = getNMSTarget();
         if (target == null) {
+            botAI.tickIdle();
             return;
         }
 

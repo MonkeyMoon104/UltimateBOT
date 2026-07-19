@@ -1,6 +1,7 @@
 package com.monkey.mcbot.bot.ai;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.CombatDataManager;
@@ -26,7 +27,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+
+import java.util.Random;
 
 public class BotAI {
 
@@ -57,13 +63,21 @@ public class BotAI {
     private final IPathfindingManager pathfindingManager;
     private final ICombatStrategyExecutor combatStrategyExecutor;
     private final BotOptions options;
+    private final MinecraftBot plugin;
+    private final Random idleRandom = new Random();
     private long lastForcedVerticalTeleportTime = 0L;
+    private long lastSeenTargetTime = System.currentTimeMillis();
+    private long lastIdleDestinationTime = 0L;
+    private Vec3 idleDestination;
     private static final long FORCED_VERTICAL_TELEPORT_COOLDOWN_MS = 3000L;
+    private static final long IDLE_DESTINATION_RETRY_MS = 3500L;
+    private static final double IDLE_DESTINATION_REACHED_DISTANCE = 1.6D;
 
     public BotAI(Player bot, MinecraftBot plugin, BotOptions options) {
         this.bot = bot;
         this.level = bot.level();
         this.options = options;
+        this.plugin = plugin;
 
         this.noobMovementController = new BotNoobMovementController(bot, level);
         this.movementController = new BotMovementController(bot, level);
@@ -101,7 +115,11 @@ public class BotAI {
     }
 
     public void tick(org.bukkit.entity.Player targetBukkitPlayer, boolean allowCombat) {
+        cpvpController.setEnabled(options.isCrystalPvp());
+        enderpearlController.setEnabled(options.isEnderPearls());
         if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
+        lastSeenTargetTime = System.currentTimeMillis();
+        idleDestination = null;
 
         Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
 
@@ -173,6 +191,44 @@ public class BotAI {
         if (pathfindingManager instanceof PathfindingManager) {
             ((PathfindingManager) pathfindingManager).updateLastBotPosition();
             ((PathfindingManager) pathfindingManager).updateLastActionTime();
+        }
+    }
+
+    public void tickIdle() {
+        cpvpController.setEnabled(options.isCrystalPvp());
+        enderpearlController.setEnabled(options.isEnderPearls());
+
+        if (!options.isIdleWander()) {
+            idleDestination = null;
+            movementController.stopMovement();
+            return;
+        }
+
+        Vec3 spawn = resolveSpawnPosition();
+        if (spawn == null) {
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        double distanceFromSpawn = bot.position().distanceTo(spawn);
+        boolean shouldReturn = distanceFromSpawn > options.getIdleReturnDistance()
+                || now - lastSeenTargetTime >= options.getIdleReturnDelayMs();
+
+        if (shouldReturn && distanceFromSpawn > IDLE_DESTINATION_REACHED_DISTANCE) {
+            idleDestination = spawn;
+            moveIdleTo(spawn);
+            return;
+        }
+
+        if (idleDestination == null
+                || bot.position().distanceTo(idleDestination) <= IDLE_DESTINATION_REACHED_DISTANCE
+                || now - lastIdleDestinationTime >= IDLE_DESTINATION_RETRY_MS) {
+            idleDestination = findIdleDestination(spawn);
+            lastIdleDestinationTime = now;
+        }
+
+        if (idleDestination != null) {
+            moveIdleTo(idleDestination);
         }
     }
 
@@ -254,5 +310,77 @@ public class BotAI {
         }
 
         return false;
+    }
+
+    private void moveIdleTo(Vec3 destination) {
+        movementController.moveToPosition(destination);
+        rotationController.lookAt(destination.x, destination.y, destination.z);
+    }
+
+    private Vec3 findIdleDestination(Vec3 spawn) {
+        double radius = options.getIdleWanderRadius();
+        for (int attempt = 0; attempt < 12; attempt++) {
+            double angle = idleRandom.nextDouble() * Math.PI * 2.0D;
+            double distance = 2.0D + idleRandom.nextDouble() * Math.max(1.0D, radius - 2.0D);
+            int x = (int) Math.floor(spawn.x + Math.cos(angle) * distance);
+            int z = (int) Math.floor(spawn.z + Math.sin(angle) * distance);
+            int y = findSafeY(x, (int) Math.round(spawn.y), z);
+            if (y == Integer.MIN_VALUE) {
+                continue;
+            }
+
+            Vec3 candidate = new Vec3(x + 0.5D, y, z + 0.5D);
+            if (isPvpAllowed(candidate)) {
+                return candidate;
+            }
+        }
+        return spawn;
+    }
+
+    private int findSafeY(int x, int baseY, int z) {
+        World world = bot.getBukkitEntity().getWorld();
+        int minBuildHeight = world == null ? -64 : world.getMinHeight();
+        int maxBuildHeight = world == null ? 320 : world.getMaxHeight();
+        int minY = Math.max(minBuildHeight, baseY - 6);
+        int maxY = Math.min(maxBuildHeight - 2, baseY + 6);
+        for (int y = maxY; y >= minY; y--) {
+            BlockPos feet = new BlockPos(x, y, z);
+            BlockPos head = feet.above();
+            BlockPos ground = feet.below();
+            if (!level.getBlockState(ground).isSolidRender()) {
+                continue;
+            }
+            if (level.getBlockState(feet).isSolidRender() || level.getBlockState(head).isSolidRender()) {
+                continue;
+            }
+            return y;
+        }
+        return Integer.MIN_VALUE;
+    }
+
+    private Vec3 resolveSpawnPosition() {
+        BotLocation spawn = options.getSpawnLocation();
+        if (spawn == null) {
+            return null;
+        }
+        return new Vec3(spawn.x(), spawn.y(), spawn.z());
+    }
+
+    private boolean isPvpAllowed(Vec3 position) {
+        if (!options.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
+            return true;
+        }
+
+        World world = bot.getBukkitEntity().getWorld();
+        if (world == null) {
+            BotLocation spawn = options.getSpawnLocation();
+            world = spawn == null || spawn.worldUUID() == null ? null : Bukkit.getWorld(spawn.worldUUID());
+        }
+        if (world == null) {
+            return false;
+        }
+
+        Location location = new Location(world, position.x, position.y, position.z);
+        return plugin.getWorldGuardPvpService().isPvpAllowed(location);
     }
 }

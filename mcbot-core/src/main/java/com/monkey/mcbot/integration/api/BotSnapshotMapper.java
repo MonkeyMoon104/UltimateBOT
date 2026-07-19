@@ -10,12 +10,12 @@ import org.bukkit.entity.Player;
 import java.util.Set;
 import java.util.UUID;
 
-final class BotSnapshotMapper {
+public final class BotSnapshotMapper {
 
     private BotSnapshotMapper() {
     }
 
-    static BotSnapshot toSnapshot(UUID ownerUUID, ITrainingBot bot) {
+    public static BotSnapshot toSnapshot(UUID ownerUUID, ITrainingBot bot) {
         if (bot == null) {
             return null;
         }
@@ -34,6 +34,10 @@ final class BotSnapshotMapper {
         double autoTargetRange = 16.0D;
         boolean respectWorldGuardPvp = false;
         boolean stayAfterOwnerDeath = false;
+        boolean idleWander = false;
+        double idleWanderRadius = 10.0D;
+        double idleReturnDistance = 24.0D;
+        long idleReturnDelayMs = 8000L;
         boolean crystalPvp = true;
         boolean enderPearls = true;
         boolean killMessageEnabled = true;
@@ -54,6 +58,10 @@ final class BotSnapshotMapper {
                 autoTargetRange = options.getAutoTargetRange();
                 respectWorldGuardPvp = options.isRespectWorldGuardPvp();
                 stayAfterOwnerDeath = options.isStayAfterOwnerDeath();
+                idleWander = options.isIdleWander();
+                idleWanderRadius = options.getIdleWanderRadius();
+                idleReturnDistance = options.getIdleReturnDistance();
+                idleReturnDelayMs = options.getIdleReturnDelayMs();
                 crystalPvp = options.isCrystalPvp();
                 enderPearls = options.isEnderPearls();
                 killMessageEnabled = options.isKillMessageEnabled();
@@ -82,6 +90,10 @@ final class BotSnapshotMapper {
                 autoTargetRange,
                 respectWorldGuardPvp,
                 stayAfterOwnerDeath,
+                idleWander,
+                idleWanderRadius,
+                idleReturnDistance,
+                idleReturnDelayMs,
                 crystalPvp,
                 enderPearls,
                 killMessageEnabled

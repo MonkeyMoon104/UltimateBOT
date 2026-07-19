@@ -1,12 +1,15 @@
 package com.monkey.mcbot.listener;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.BotKillPlayerEvent;
+import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
+import com.monkey.mcbot.integration.api.BotSnapshotMapper;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import net.kyori.adventure.text.Component;
@@ -21,6 +24,9 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Map;
+import java.util.UUID;
+
 public class PlayerCheckListener implements Listener {
 
     private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
@@ -29,6 +35,9 @@ public class PlayerCheckListener implements Listener {
     private final MinecraftBot plugin;
     private final BotManager botManager;
     private final PlayerOptions playerOptions;
+
+    private record BotKillContext(UUID ownerUUID, ITrainingBot bot, BotOptions options) {
+    }
 
     public PlayerCheckListener(MinecraftBot plugin) {
         this.plugin = plugin;
@@ -97,6 +106,13 @@ public class PlayerCheckListener implements Listener {
         }
 
         Entity killer = event.getEntity().getKiller();
+        BotKillContext killContext = resolveBotKillContext(player, killer, wasBotSpawned, currentDeathMessage);
+
+        if (killContext != null) {
+            setBotDeathMessage(event, player, killContext.options());
+            callBotKillEvent(player, killContext);
+            return;
+        }
 
         if (killer instanceof BotCraftPlayer) {
             setBotDeathMessage(event, player, options);
@@ -104,12 +120,6 @@ public class PlayerCheckListener implements Listener {
         }
 
         if (killer instanceof ITrainingBot) {
-            setBotDeathMessage(event, player, options);
-            return;
-        }
-
-        if (wasBotSpawned && (killer == null ||
-                (currentDeathMessage != null && currentDeathMessage.contains("[Intentional Game Design]")))) {
             setBotDeathMessage(event, player, options);
             return;
         }
@@ -139,5 +149,84 @@ public class PlayerCheckListener implements Listener {
     private String getDeathMessageText(PlayerDeathEvent event) {
         Component deathMessage = event.deathMessage();
         return deathMessage == null ? null : PLAIN_TEXT_SERIALIZER.serialize(deathMessage);
+    }
+
+    private BotKillContext resolveBotKillContext(Player victim,
+                                                 Entity killer,
+                                                 boolean victimOwnsBot,
+                                                 String currentDeathMessage) {
+        UUID killerUUID = killer == null ? null : killer.getUniqueId();
+        if (killerUUID != null) {
+            BotKillContext direct = findBotByBotUUID(killerUUID);
+            if (direct != null) {
+                return direct;
+            }
+            return null;
+        }
+
+        boolean crystalLikeKill = killer == null
+                && currentDeathMessage != null
+                && currentDeathMessage.contains("[Intentional Game Design]");
+
+        for (Map.Entry<UUID, ITrainingBot> entry : plugin.getBotRegistry().getAllBots().entrySet()) {
+            ITrainingBot candidate = entry.getValue();
+            if (candidate == null || candidate.getTargetPlayer() == null) {
+                continue;
+            }
+            if (candidate.getTargetPlayer().getUniqueId().equals(victim.getUniqueId())) {
+                if (crystalLikeKill || deathMessageNamesBot(currentDeathMessage, candidate)) {
+                    return toKillContext(entry.getKey(), candidate);
+                }
+            }
+        }
+
+        if (victimOwnsBot) {
+            ITrainingBot ownedBot = botManager.getBotSafe(victim.getUniqueId());
+            if (ownedBot != null && (crystalLikeKill || deathMessageNamesBot(currentDeathMessage, ownedBot))) {
+                return toKillContext(victim.getUniqueId(), ownedBot);
+            }
+        }
+
+        return null;
+    }
+
+    private boolean deathMessageNamesBot(String deathMessage, ITrainingBot bot) {
+        return deathMessage != null
+                && bot != null
+                && bot.asPlayer() != null
+                && deathMessage.contains(bot.asPlayer().getName().getString());
+    }
+
+    private BotKillContext findBotByBotUUID(UUID botUUID) {
+        if (botUUID == null) {
+            return null;
+        }
+        for (Map.Entry<UUID, ITrainingBot> entry : plugin.getBotRegistry().getAllBots().entrySet()) {
+            ITrainingBot candidate = entry.getValue();
+            if (candidate != null && candidate.asPlayer() != null && botUUID.equals(candidate.asPlayer().getUUID())) {
+                return toKillContext(entry.getKey(), candidate);
+            }
+        }
+        return null;
+    }
+
+    private BotKillContext toKillContext(UUID ownerUUID, ITrainingBot bot) {
+        BotOptions options = bot != null && bot.getBrainController() != null
+                ? bot.getBrainController().getBotOptions()
+                : null;
+        return new BotKillContext(ownerUUID, bot, options);
+    }
+
+    private void callBotKillEvent(Player victim, BotKillContext context) {
+        if (context == null || context.bot() == null || context.bot().asPlayer() == null) {
+            return;
+        }
+        BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(context.ownerUUID(), context.bot());
+        plugin.getServer().getPluginManager().callEvent(new BotKillPlayerEvent(
+                context.ownerUUID(),
+                context.bot().asPlayer().getUUID(),
+                victim,
+                snapshot
+        ));
     }
 }

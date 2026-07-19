@@ -40,6 +40,10 @@ public record BotSnapshot(
         double autoTargetRange,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
+        boolean idleWander,
+        double idleWanderRadius,
+        double idleReturnDistance,
+        long idleReturnDelayMs,
         boolean crystalPvp,
         boolean enderPearls,
         boolean killMessageEnabled

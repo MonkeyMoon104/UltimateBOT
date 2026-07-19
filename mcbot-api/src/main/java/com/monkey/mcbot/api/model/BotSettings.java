@@ -48,6 +48,10 @@ public final class BotSettings {
     private final double autoTargetRange;
     private final boolean respectWorldGuardPvp;
     private final boolean stayAfterOwnerDeath;
+    private final boolean idleWander;
+    private final double idleWanderRadius;
+    private final double idleReturnDistance;
+    private final long idleReturnDelayMs;
     private final boolean crystalPvp;
     private final boolean enderPearls;
     private final boolean killMessageEnabled;
@@ -83,6 +87,10 @@ public final class BotSettings {
         this.autoTargetRange = builder.autoTargetRange;
         this.respectWorldGuardPvp = builder.respectWorldGuardPvp;
         this.stayAfterOwnerDeath = builder.stayAfterOwnerDeath;
+        this.idleWander = builder.idleWander;
+        this.idleWanderRadius = builder.idleWanderRadius;
+        this.idleReturnDistance = builder.idleReturnDistance;
+        this.idleReturnDelayMs = builder.idleReturnDelayMs;
         this.crystalPvp = builder.crystalPvp;
         this.enderPearls = builder.enderPearls;
         this.killMessageEnabled = builder.killMessageEnabled;
@@ -309,6 +317,22 @@ public final class BotSettings {
 
     public boolean stayAfterOwnerDeath() {
         return stayAfterOwnerDeath;
+    }
+
+    public boolean idleWander() {
+        return idleWander;
+    }
+
+    public double idleWanderRadius() {
+        return idleWanderRadius;
+    }
+
+    public double idleReturnDistance() {
+        return idleReturnDistance;
+    }
+
+    public long idleReturnDelayMs() {
+        return idleReturnDelayMs;
     }
 
     public boolean crystalPvp() {
@@ -697,6 +721,14 @@ public final class BotSettings {
 
         BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath);
 
+        BuildStep idleWander(boolean idleWander);
+
+        BuildStep idleWanderRadius(double idleWanderRadius);
+
+        BuildStep idleReturnDistance(double idleReturnDistance);
+
+        BuildStep idleReturnDelayMs(long idleReturnDelayMs);
+
         BuildStep crystalPvp(boolean crystalPvp);
 
         BuildStep enderPearls(boolean enderPearls);
@@ -763,6 +795,10 @@ public final class BotSettings {
         private double autoTargetRange = 16.0D;
         private boolean respectWorldGuardPvp = false;
         private boolean stayAfterOwnerDeath = false;
+        private boolean idleWander = false;
+        private double idleWanderRadius = 10.0D;
+        private double idleReturnDistance = 24.0D;
+        private long idleReturnDelayMs = 8000L;
         private boolean crystalPvp = true;
         private boolean enderPearls = true;
         private boolean killMessageEnabled = true;
@@ -987,6 +1023,30 @@ public final class BotSettings {
         }
 
         @Override
+        public BuildStep idleWander(boolean idleWander) {
+            this.idleWander = idleWander;
+            return this;
+        }
+
+        @Override
+        public BuildStep idleWanderRadius(double idleWanderRadius) {
+            this.idleWanderRadius = idleWanderRadius;
+            return this;
+        }
+
+        @Override
+        public BuildStep idleReturnDistance(double idleReturnDistance) {
+            this.idleReturnDistance = idleReturnDistance;
+            return this;
+        }
+
+        @Override
+        public BuildStep idleReturnDelayMs(long idleReturnDelayMs) {
+            this.idleReturnDelayMs = idleReturnDelayMs;
+            return this;
+        }
+
+        @Override
         public BuildStep crystalPvp(boolean crystalPvp) {
             this.crystalPvp = crystalPvp;
             return this;
@@ -1094,6 +1154,18 @@ public final class BotSettings {
 
             if (autoTargetRange <= 0.0D) {
                 throw new IllegalArgumentException("autoTargetRange must be greater than 0");
+            }
+
+            if (idleWanderRadius <= 0.0D) {
+                throw new IllegalArgumentException("idleWanderRadius must be greater than 0");
+            }
+
+            if (idleReturnDistance <= 0.0D) {
+                throw new IllegalArgumentException("idleReturnDistance must be greater than 0");
+            }
+
+            if (idleReturnDelayMs < 0L) {
+                throw new IllegalArgumentException("idleReturnDelayMs cannot be negative");
             }
 
             return new BotSettings(this);

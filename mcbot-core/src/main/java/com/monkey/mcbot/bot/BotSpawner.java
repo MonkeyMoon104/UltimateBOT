@@ -2,6 +2,7 @@ package com.monkey.mcbot.bot;
 
 import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -72,6 +73,7 @@ public class BotSpawner {
         GameProfile profile = resolveProfile(registryOwner, botUUID, botName, botOptions);
 
         Location spawnLocation = resolveSpawnLocation(registryOwner, botOptions);
+        botOptions.setSpawnLocation(BotLocation.of(spawnLocation));
         ServerLevel world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
         BlockPos spawnPos = BlockPos.containing(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
 
@@ -105,6 +107,14 @@ public class BotSpawner {
         } else {
             bot.getBotAI().getInventoryController().setItem(
                     com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
+                    net.minecraft.world.item.ItemStack.EMPTY
+            );
+        }
+
+        if (botOptions != null && !botOptions.isCrystalPvp()) {
+            bot.getBotAI().getCPVPController().setEnabled(false);
+            bot.getBotAI().getInventoryController().setItem(
+                    com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
                     net.minecraft.world.item.ItemStack.EMPTY
             );
         }
