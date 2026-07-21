@@ -1,8 +1,9 @@
 plugins {
-    id 'java-library'
     alias(libs.plugins.api.publish)
 }
 
+group = "com.monkey.mcbot"
+
 dependencies {
-    api libs.jackson.databind
+    compileOnly(libs.paper.api)
 }

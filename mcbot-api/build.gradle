@@ -1,9 +1,0 @@
-plugins {
-    alias(libs.plugins.api.publish)
-}
-
-group = 'com.monkey.mcbot'
-
-dependencies {
-    compileOnly libs.paper.api
-}
