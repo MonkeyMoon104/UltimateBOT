@@ -76,8 +76,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
         BotType botType = toCoreType(request.mode());
         BotSettings settings = request.settings() == null ? defaultSettings() : request.settings();
 
+        Set<UUID> targetUUIDs = new LinkedHashSet<>(request.targetUUIDs());
         Set<UUID> teamOwners = new LinkedHashSet<>(request.teamOwnerUUIDs());
-        if (request.ownerUUID() != null) {
+        if (botType == BotType.TEAM_ALLY && request.ownerUUID() != null) {
             teamOwners.add(request.ownerUUID());
         }
 
@@ -90,9 +91,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return spawnFailure(botType + " supports exactly one owner.");
         }
 
-        UUID primaryOwnerUUID = resolvePrimaryOwnerUUID(botType, request.ownerUUID(), teamOwners);
+        UUID primaryOwnerUUID = resolvePrimaryOwnerUUID(botType, request.ownerUUID(), teamOwners, targetUUIDs);
         if (primaryOwnerUUID == null) {
-            return spawnFailure("Cannot resolve an online owner for spawn.");
+            return spawnFailure(botType == BotType.EVENT
+                    ? "Cannot resolve an online context player for event bot spawn."
+                    : "Cannot resolve an online owner for spawn.");
         }
 
         Player ownerPlayer = Bukkit.getPlayer(primaryOwnerUUID);
@@ -104,7 +107,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return spawnFailure("TEAM_ALLY requires at least two owners.");
         }
 
-        Set<UUID> targetUUIDs = new LinkedHashSet<>(request.targetUUIDs());
         if (botType == BotType.SINGLE) {
             targetUUIDs.clear();
             targetUUIDs.add(primaryOwnerUUID);
@@ -708,30 +710,58 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
     }
 
-    private UUID resolvePrimaryOwnerUUID(BotType type, @Nullable UUID requestedOwnerUUID, Set<UUID> teamOwners) {
-        if (type != BotType.TEAM_ALLY) {
-            if (requestedOwnerUUID == null) {
-                return null;
+    private UUID resolvePrimaryOwnerUUID(BotType type,
+                                         @Nullable UUID requestedOwnerUUID,
+                                         Set<UUID> teamOwners,
+                                         Set<UUID> targetUUIDs) {
+        if (type == BotType.EVENT) {
+            UUID contextOwner = resolveOnlineUUID(requestedOwnerUUID);
+            if (contextOwner != null) {
+                return contextOwner;
             }
-            Player owner = Bukkit.getPlayer(requestedOwnerUUID);
-            return owner != null && owner.isOnline() ? requestedOwnerUUID : null;
+
+            for (UUID targetUUID : targetUUIDs) {
+                contextOwner = resolveOnlineUUID(targetUUID);
+                if (contextOwner != null) {
+                    return contextOwner;
+                }
+            }
+
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                if (player != null && player.isOnline()) {
+                    return player.getUniqueId();
+                }
+            }
+
+            return null;
         }
 
-        if (requestedOwnerUUID != null) {
-            Player owner = Bukkit.getPlayer(requestedOwnerUUID);
-            if (owner != null && owner.isOnline()) {
-                return requestedOwnerUUID;
-            }
+        if (type != BotType.TEAM_ALLY) {
+            return resolveOnlineUUID(requestedOwnerUUID);
+        }
+
+        UUID owner = resolveOnlineUUID(requestedOwnerUUID);
+        if (owner != null) {
+            return owner;
         }
 
         for (UUID teamOwner : teamOwners) {
-            Player owner = Bukkit.getPlayer(teamOwner);
-            if (owner != null && owner.isOnline()) {
-                return teamOwner;
+            owner = resolveOnlineUUID(teamOwner);
+            if (owner != null) {
+                return owner;
             }
         }
 
         return null;
+    }
+
+    private UUID resolveOnlineUUID(@Nullable UUID uuid) {
+        if (uuid == null) {
+            return null;
+        }
+
+        Player player = Bukkit.getPlayer(uuid);
+        return player != null && player.isOnline() ? uuid : null;
     }
 
     private boolean isEventBotActive() {

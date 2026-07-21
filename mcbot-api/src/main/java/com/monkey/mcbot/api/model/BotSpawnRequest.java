@@ -46,7 +46,7 @@ public final class BotSpawnRequest {
     /**
      * Returns the primary owner UUID.
      *
-     * @return primary owner UUID, can be null for TEAM_ALLY until build-time resolution
+     * @return primary owner UUID, can be null for EVENT and TEAM_ALLY until runtime resolution
      */
     public UUID ownerUUID() {
         return ownerUUID;
@@ -213,15 +213,15 @@ public final class BotSpawnRequest {
          * Builds an immutable spawn request after validating mode constraints.
          *
          * <p>Validation rules include:
-         * owner requirement for non-team modes, TEAM_ALLY owner presence, non-null settings,
+         * owner requirement for SINGLE and ALLY modes, TEAM_ALLY owner presence, non-null settings,
          * and SINGLE mode target auto-forcing to owner.</p>
          *
          * @return immutable spawn request
          * @throws IllegalArgumentException when required data is missing or invalid for the mode
          */
         public BotSpawnRequest build() {
-            if (mode != BotMode.TEAM_ALLY && ownerUUID == null) {
-                throw new IllegalArgumentException("ownerUUID is required for non-team bot modes");
+            if ((mode == BotMode.SINGLE || mode == BotMode.ALLY) && ownerUUID == null) {
+                throw new IllegalArgumentException("ownerUUID is required for single and ally bot modes");
             }
 
             if (mode == BotMode.TEAM_ALLY && teamOwnerUUIDs.isEmpty() && ownerUUID == null) {
