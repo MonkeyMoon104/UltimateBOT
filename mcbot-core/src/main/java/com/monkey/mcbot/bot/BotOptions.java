@@ -53,6 +53,7 @@ public class BotOptions {
     private double idleReturnDistance = 24.0D;
     private long idleReturnDelayMs = 8000L;
     private boolean crystalPvp = true;
+    private boolean explosions = true;
     private boolean enderPearls = true;
     private boolean killMessageEnabled = true;
     private String customKillMessage;
@@ -236,6 +237,17 @@ public class BotOptions {
 
     public void setCrystalPvp(boolean crystalPvp) {
         this.crystalPvp = crystalPvp;
+    }
+
+    public boolean isExplosions() {
+        return explosions;
+    }
+
+    public void setExplosions(boolean explosions) {
+        this.explosions = explosions;
+        if (!explosions) {
+            this.crystalPvp = false;
+        }
     }
 
     public boolean isEnderPearls() {

@@ -115,7 +115,7 @@ public class BotAI {
     }
 
     public void tick(org.bukkit.entity.Player targetBukkitPlayer, boolean allowCombat) {
-        cpvpController.setEnabled(options.isCrystalPvp());
+        syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
         if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
         lastSeenTargetTime = System.currentTimeMillis();
@@ -195,7 +195,7 @@ public class BotAI {
     }
 
     public void tickIdle() {
-        cpvpController.setEnabled(options.isCrystalPvp());
+        syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
 
         if (!options.isIdleWander()) {
@@ -265,6 +265,7 @@ public class BotAI {
     public BotInventoryController getInventoryController() { return inventoryController; }
     public BotEnderpearlController getEnderpearlController() { return enderpearlController; }
     public BotCPVPController getCPVPController() { return cpvpController; }
+    public BotRAPVPController getRAPVPController() { return rapvpController; }
     public BotHealController getHealController() { return healController; }
     public BotTeleportController getTeleportController() { return teleportController; }
     public CombatState getCurrentState() {
@@ -274,6 +275,19 @@ public class BotAI {
     private boolean canForceVerticalTeleport() {
         return System.currentTimeMillis() - lastForcedVerticalTeleportTime >= FORCED_VERTICAL_TELEPORT_COOLDOWN_MS
                 && !teleportController.isTeleporting();
+    }
+
+    private void syncExplosiveCombat() {
+        boolean explosionsEnabled = options.isExplosions();
+        cpvpController.setEnabled(explosionsEnabled && options.isCrystalPvp());
+        if (explosionsEnabled) {
+            return;
+        }
+
+        rapvpController.disable();
+        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
+        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
+        inventoryController.setItem(BotInventoryController.GLOW_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
     }
 
     private boolean shouldForceVerticalTeleport(Player target) {

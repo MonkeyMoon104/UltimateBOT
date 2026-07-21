@@ -54,7 +54,7 @@ public class BotSpawner {
         }
 
         Player registryOwner = resolveRegistryOwner(viewer, botOptions);
-        UUID registryOwnerUUID = registryOwner.getUniqueId();
+        UUID registryOwnerUUID = resolveRegistryOwnerUUID(registryOwner, botOptions);
         Player resolvedTarget = resolveTargetPlayer(registryOwner, target, botOptions);
 
         if (registry.isBotSpawned(registryOwnerUUID)) {
@@ -111,13 +111,35 @@ public class BotSpawner {
             );
         }
 
-        if (botOptions != null && !botOptions.isCrystalPvp()) {
+        if (botOptions != null && (!botOptions.isCrystalPvp() || !botOptions.isExplosions())) {
             bot.getBotAI().getCPVPController().setEnabled(false);
-            bot.getBotAI().getInventoryController().setItem(
-                    com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                    net.minecraft.world.item.ItemStack.EMPTY
-            );
+            clearExplosiveItems(bot);
         }
+    }
+
+    private UUID resolveRegistryOwnerUUID(Player registryOwner, BotOptions botOptions) {
+        if (botOptions != null
+                && botOptions.getCreationSource() == BotCreationSource.API
+                && botOptions.getBotType() == BotType.EVENT
+                && botOptions.getOwnerUUID() != null) {
+            return botOptions.getOwnerUUID();
+        }
+        return registryOwner.getUniqueId();
+    }
+
+    private void clearExplosiveItems(ITrainingBot bot) {
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
     }
 
     private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {

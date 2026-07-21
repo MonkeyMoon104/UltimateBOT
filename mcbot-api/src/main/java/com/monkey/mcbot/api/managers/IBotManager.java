@@ -172,6 +172,10 @@ public interface IBotManager {
 
     boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
 
+    default boolean updateExplosions(UUID ownerUUID, boolean explosions) {
+        return false;
+    }
+
     boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);
 
     boolean updateKillMessage(UUID ownerUUID, String killMessage);

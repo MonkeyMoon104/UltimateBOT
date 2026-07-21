@@ -45,6 +45,7 @@ public record BotSnapshot(
         double idleReturnDistance,
         long idleReturnDelayMs,
         boolean crystalPvp,
+        boolean explosions,
         boolean enderPearls,
         boolean killMessageEnabled
 ) {

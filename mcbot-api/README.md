@@ -114,7 +114,7 @@ Use `IBotRegistry` when you only need monitoring or status inspection. Use `IBot
 | Mode | Meaning |
 | --- | --- |
 | `SINGLE` | personal bot for one owner; target is forced to the owner |
-| `EVENT` | exclusive event bot mode |
+| `EVENT` | API-manageable event bot mode; ownerless API spawns can coexist as independent bots |
 | `ALLY` | defensive ally for one owner |
 | `TEAM_ALLY` | shared ally bot for multiple owners |
 
@@ -211,12 +211,12 @@ BotSpawnRequest.builder(BotMode.SINGLE)
 ```
 
 Validation rules enforced by the request builder and the current core implementation:
-- non-team modes require a primary owner UUID
+- `SINGLE` and `ALLY` require a primary owner UUID
+- `EVENT` can omit owner UUID; the returned snapshot owner UUID is the generated management key for future updates/removal
 - `TEAM_ALLY` requires at least one owner in the request and at least two team owners at effective spawn time
 - `settings` is mandatory
 - `SINGLE` forces the target set to the owner
 - an online primary owner must be resolvable at spawn time
-- `EVENT` cannot coexist with non-event active bots
 
 ## Result and Snapshot Model
 ### `BotOperationResult`
@@ -243,6 +243,7 @@ Exposes a read-only view of:
 - current target
 - full target UUID set
 - creation source (`CORE` or `API`)
+- auto target, WorldGuard PvP respect, idle wander, Crystal PvP, explosions, Ender Pearls and kill-message state
 
 `BotSnapshot.hasTarget()` is a convenience check for target presence.
 
@@ -252,6 +253,8 @@ The current core implementation returns `false` from update methods when:
 - the requested field is locked by configuration
 - the requested value is outside allowed bounds
 - the requested state would break runtime rules
+
+Use `BotSettings.explosions(false)` or `IBotManager.updateExplosions(ownerUUID, false)` to disable all bot-driven explosive combat. This also disables Crystal PvP and Respawn Anchor PvP and clears the explosive inventory slots.
 
 Examples:
 - enabling combat fails if follow is currently disabled
@@ -320,6 +323,8 @@ public final class ExamplePlugin extends JavaPlugin implements Listener {
                 .rankValue(BotRank.NORMAL, BotRank.GOD)
                 .rank(BotRank.HARD)
                 .setChangeableRank(true)
+                .explosions(false)
+                .crystalPvp(false)
                 .build();
 
         BotSpawnRequest request = BotSpawnRequest.builder(BotMode.ALLY)

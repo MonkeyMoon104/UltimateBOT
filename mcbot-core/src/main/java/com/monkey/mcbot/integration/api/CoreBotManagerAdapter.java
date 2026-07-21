@@ -91,17 +91,19 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return spawnFailure(botType + " supports exactly one owner.");
         }
 
-        UUID primaryOwnerUUID = resolvePrimaryOwnerUUID(botType, request.ownerUUID(), teamOwners, targetUUIDs);
-        if (primaryOwnerUUID == null) {
+        UUID contextOwnerUUID = resolvePrimaryOwnerUUID(botType, request.ownerUUID(), teamOwners, targetUUIDs);
+        if (contextOwnerUUID == null) {
             return spawnFailure(botType == BotType.EVENT
                     ? "Cannot resolve an online context player for event bot spawn."
                     : "Cannot resolve an online owner for spawn.");
         }
 
-        Player ownerPlayer = Bukkit.getPlayer(primaryOwnerUUID);
+        Player ownerPlayer = Bukkit.getPlayer(contextOwnerUUID);
         if (ownerPlayer == null || !ownerPlayer.isOnline()) {
             return spawnFailure("Owner must be online.");
         }
+
+        UUID primaryOwnerUUID = resolveManagedOwnerUUID(botType, request.ownerUUID(), contextOwnerUUID);
 
         if (botType == BotType.TEAM_ALLY && teamOwners.size() < 2) {
             return spawnFailure("TEAM_ALLY requires at least two owners.");
@@ -119,15 +121,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
                     return spawnFailure("Owner " + teamOwner + " already has an active " + busyType + " bot.");
                 }
             }
-        }
-
-        if (botType == BotType.EVENT) {
-            if (isEventBotActive()) {
-                return spawnFailure("An event bot is already active.");
-            }
-            botManager.despawnAll();
-        } else if (isEventBotActive()) {
-            return spawnFailure("Cannot spawn a non-event bot while an event bot is active.");
         }
 
         UUID targetUUID = targetUUIDs.stream().findFirst().orElse(primaryOwnerUUID);
@@ -495,6 +488,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null) {
             return false;
         }
+        if (crystalPvp && !options.isExplosions()) {
+            return false;
+        }
         options.setCrystalPvp(crystalPvp);
         bot.getBotAI().getCPVPController().setEnabled(crystalPvp);
         bot.getBotAI().getInventoryController().setItem(
@@ -503,6 +499,27 @@ public final class CoreBotManagerAdapter implements IBotManager {
                         ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.END_CRYSTAL, 64)
                         : net.minecraft.world.item.ItemStack.EMPTY
         );
+        return true;
+    }
+
+    @Override
+    public boolean updateExplosions(UUID ownerUUID, boolean explosions) {
+        ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
+        if (bot == null || bot.getBrainController() == null) {
+            return false;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+
+        options.setExplosions(explosions);
+        if (!explosions) {
+            options.setCrystalPvp(false);
+            bot.getBotAI().getCPVPController().setEnabled(false);
+            bot.getBotAI().getRAPVPController().disable();
+            clearExplosiveItems(bot);
+        }
         return true;
     }
 
@@ -657,6 +674,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setIdleReturnDistance(settings.idleReturnDistance());
         options.setIdleReturnDelayMs(settings.idleReturnDelayMs());
         options.setCrystalPvp(settings.crystalPvp());
+        options.setExplosions(settings.explosions());
         options.setEnderPearls(settings.enderPearls());
         options.setKillMessageEnabled(settings.killMessageEnabled());
         options.setCustomKillMessage(settings.killMessage());
@@ -699,6 +717,13 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 playerOptions.put(teamOwner, options);
             }
         }
+    }
+
+    private UUID resolveManagedOwnerUUID(BotType type, @Nullable UUID requestedOwnerUUID, UUID contextOwnerUUID) {
+        if (type == BotType.EVENT && requestedOwnerUUID == null) {
+            return UUID.randomUUID();
+        }
+        return contextOwnerUUID;
     }
 
     private void removeCachedOptions(UUID ownerUUID, @Nullable BotOptions options) {
@@ -775,6 +800,21 @@ public final class CoreBotManagerAdapter implements IBotManager {
             }
         }
         return false;
+    }
+
+    private void clearExplosiveItems(ITrainingBot bot) {
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
+        bot.getBotAI().getInventoryController().setItem(
+                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
+                net.minecraft.world.item.ItemStack.EMPTY
+        );
     }
 
     private @Nullable BotType getOwnerBusyType(UUID ownerUUID, @Nullable UUID allowedTeamPrimaryOwner) {

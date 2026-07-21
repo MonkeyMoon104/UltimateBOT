@@ -39,6 +39,7 @@ public final class BotSnapshotMapper {
         double idleReturnDistance = 24.0D;
         long idleReturnDelayMs = 8000L;
         boolean crystalPvp = true;
+        boolean explosions = true;
         boolean enderPearls = true;
         boolean killMessageEnabled = true;
         if (bot.getBrainController() != null) {
@@ -63,6 +64,7 @@ public final class BotSnapshotMapper {
                 idleReturnDistance = options.getIdleReturnDistance();
                 idleReturnDelayMs = options.getIdleReturnDelayMs();
                 crystalPvp = options.isCrystalPvp();
+                explosions = options.isExplosions();
                 enderPearls = options.isEnderPearls();
                 killMessageEnabled = options.isKillMessageEnabled();
             }
@@ -95,6 +97,7 @@ public final class BotSnapshotMapper {
                 idleReturnDistance,
                 idleReturnDelayMs,
                 crystalPvp,
+                explosions,
                 enderPearls,
                 killMessageEnabled
         );

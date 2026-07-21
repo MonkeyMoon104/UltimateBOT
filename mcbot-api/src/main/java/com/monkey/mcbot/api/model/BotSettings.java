@@ -14,7 +14,7 @@ import java.util.Objects;
  * <p>Instances are created through a strict step-builder exposed by {@link #builder()}.
  * The builder enforces an explicit order and validates logical constraints such as:</p>
  * <ul>
- *     <li>{@code combat=true} requires {@code follow=true}</li>
+ *     <li>{@code combat=true} automatically enables {@code follow}</li>
  *     <li>default values must stay inside their configured min/max ranges</li>
  *     <li>range boundaries must be coherent (min &lt;= max)</li>
  * </ul>
@@ -53,6 +53,7 @@ public final class BotSettings {
     private final double idleReturnDistance;
     private final long idleReturnDelayMs;
     private final boolean crystalPvp;
+    private final boolean explosions;
     private final boolean enderPearls;
     private final boolean killMessageEnabled;
     private final String killMessage;
@@ -92,6 +93,7 @@ public final class BotSettings {
         this.idleReturnDistance = builder.idleReturnDistance;
         this.idleReturnDelayMs = builder.idleReturnDelayMs;
         this.crystalPvp = builder.crystalPvp;
+        this.explosions = builder.explosions;
         this.enderPearls = builder.enderPearls;
         this.killMessageEnabled = builder.killMessageEnabled;
         this.killMessage = builder.killMessage;
@@ -339,6 +341,10 @@ public final class BotSettings {
         return crystalPvp;
     }
 
+    public boolean explosions() {
+        return explosions;
+    }
+
     public boolean enderPearls() {
         return enderPearls;
     }
@@ -505,7 +511,7 @@ public final class BotSettings {
         /**
          * Sets combat default state.
          *
-         * <p>Validation on build enforces: {@code combat=true} requires {@code follow=true}.</p>
+         * <p>Build-time normalization enables follow when {@code combat=true}.</p>
          *
          * @param combatEnabled combat default
          * @return next step (combat mutability)
@@ -731,6 +737,8 @@ public final class BotSettings {
 
         BuildStep crystalPvp(boolean crystalPvp);
 
+        BuildStep explosions(boolean explosions);
+
         BuildStep enderPearls(boolean enderPearls);
 
         BuildStep killMessage(String killMessage);
@@ -800,6 +808,7 @@ public final class BotSettings {
         private double idleReturnDistance = 24.0D;
         private long idleReturnDelayMs = 8000L;
         private boolean crystalPvp = true;
+        private boolean explosions = true;
         private boolean enderPearls = true;
         private boolean killMessageEnabled = true;
         private String killMessage;
@@ -1053,6 +1062,12 @@ public final class BotSettings {
         }
 
         @Override
+        public BuildStep explosions(boolean explosions) {
+            this.explosions = explosions;
+            return this;
+        }
+
+        @Override
         public BuildStep enderPearls(boolean enderPearls) {
             this.enderPearls = enderPearls;
             return this;
@@ -1140,8 +1155,8 @@ public final class BotSettings {
                 );
             }
 
-            if (!follow && combat) {
-                throw new IllegalArgumentException("combat cannot be true when follow is false");
+            if (combat && !follow) {
+                follow = true;
             }
 
             if (!follow && !changeableFollow && changeableCombat) {
