@@ -102,3 +102,24 @@ tasks.register('publishApiDocs', Sync) {
         file("$rootDir/docs/.nojekyll").text = ''
     }
 }
+
+tasks.register('publishSdkDocs', Sync) {
+    group = 'documentation'
+    description = 'Genera le Javadocs del modulo mcbot-sdk e le copia in docs/mcbot-sdk/.'
+
+    dependsOn ':mcbot-sdk:javadoc'
+
+    from(project(':mcbot-sdk').tasks.named('javadoc').map { it.destinationDir })
+
+    into(layout.projectDirectory.dir('docs/mcbot-sdk'))
+
+    doLast {
+        file("$rootDir/docs/.nojekyll").text = ''
+    }
+}
+
+tasks.register('publishAllDocs') {
+    group = 'documentation'
+    description = 'Genera e copia tutte le Javadocs pubbliche.'
+    dependsOn 'publishApiDocs', 'publishSdkDocs'
+}

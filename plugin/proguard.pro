@@ -10,6 +10,9 @@
 # Keep the public API untouched for third-party plugin compatibility.
 -keep class com.monkey.mcbot.api.** { *; }
 
+# Keep remote API DTO names stable for Jackson JSON serialization.
+-keep class com.monkey.mcbot.remote.** { *; }
+
 # Keep version-specific bridge classes because NMSBridgeManager loads them by name.
 -keep class com.monkey.mcbot.nms.NMSBridge_v* { *; }
 

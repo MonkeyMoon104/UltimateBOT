@@ -53,6 +53,15 @@ dependencies {
 }
 ```
 
+Use `mcbot-api` for in-server Paper plugins that directly integrate with the loaded MinecraftBot plugin.
+If you need an includable dependency, use the separate Java-only remote SDK:
+
+```gradle
+dependencies {
+    implementation "com.monkey.mcbot:mcbot-sdk:<version>"
+}
+```
+
 Suggested plugin declaration:
 - use `depend: [MinecraftBot]` if your plugin cannot function without MinecraftBot
 - use `softdepend: [MinecraftBot]` if the integration is optional and you can work without it

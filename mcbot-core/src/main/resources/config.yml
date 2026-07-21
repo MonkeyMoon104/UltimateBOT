@@ -7,6 +7,13 @@ updates:
     enabled: true
     interval-minutes: 30
 
+remote-api:
+  enabled: false
+  host: "127.0.0.1"
+  port: 8765
+  base-path: "/mcbot/api/v1"
+  token: "change-me"
+
 bot:
   name: "MinecraftBot"
   default-totem-count: -1

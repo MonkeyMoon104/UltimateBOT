@@ -2,8 +2,8 @@
 
 Questa e l'unica guida da seguire per:
 
-- aggiornare `mcbot-api`
-- pubblicare una nuova versione API
+- aggiornare `mcbot-api` e `mcbot-sdk`
+- pubblicare una nuova versione API/SDK
 - aggiornare le Javadocs su GitHub Pages
 - evitare il problema della pagina docs che mostra ancora la versione vecchia
 
@@ -71,22 +71,24 @@ Quindi il publish API online parte da GitHub Actions, non da un comando manuale 
 
 ### 4. Rigenera le Javadocs dopo il tag
 
-Questo passaggio deve essere fatto dopo il tag. Usa sempre `:mcbot-api:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
+Questo passaggio deve essere fatto dopo il tag. Usa sempre `:mcbot-api:clean` e `:mcbot-sdk:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
 
 ```powershell
-.\gradlew.bat :mcbot-api:clean :mcbot-api:javadoc publishApiDocs
+.\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
 ```
 
 Controlla il titolo:
 
 ```powershell
 Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
+Select-String -Path docs\mcbot-sdk\index.html -Pattern "mcbot-sdk"
 ```
 
 Deve mostrare:
 
 ```text
 mcbot-api 1.0.6 API
+mcbot-sdk 1.0.6 API
 ```
 
 ### 5. Commit e push delle docs
@@ -95,7 +97,7 @@ mcbot-api 1.0.6 API
 
 ```powershell
 git -C docs status --short
-git -C docs add mcbot
+git -C docs add mcbot mcbot-sdk
 git -C docs commit -m "docs(api): regenerate javadocs for 1.0.6"
 git -C docs push origin master
 ```
@@ -128,10 +130,11 @@ Usa questa procedura solo se l'API e gia rilasciata e vuoi correggere/rigenerare
 
 ```powershell
 git describe --tags --exact-match HEAD
-.\gradlew.bat :mcbot-api:clean :mcbot-api:javadoc publishApiDocs
+.\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
 Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
+Select-String -Path docs\mcbot-sdk\index.html -Pattern "mcbot-sdk"
 
-git -C docs add mcbot
+git -C docs add mcbot mcbot-sdk
 git -C docs commit -m "docs(api): regenerate javadocs for X.Y.Z"
 git -C docs push origin master
 
@@ -157,8 +160,8 @@ git push origin mcbot
 git tag vX.Y.Z
 git push origin vX.Y.Z
 
-.\gradlew.bat :mcbot-api:clean :mcbot-api:javadoc publishApiDocs
-git -C docs add mcbot
+.\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
+git -C docs add mcbot mcbot-sdk
 git -C docs commit -m "docs(api): regenerate javadocs for X.Y.Z"
 git -C docs push origin master
 
@@ -176,6 +179,7 @@ git status --short
 git tag --points-at HEAD
 git ls-remote --tags origin vX.Y.Z
 Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
+Select-String -Path docs\mcbot-sdk\index.html -Pattern "mcbot-sdk"
 ```
 
 Su GitHub Pages potrebbe servire qualche minuto prima che la nuova versione sia visibile. Se localmente il file mostra la versione corretta ma online no, aspetta e forza refresh del browser.

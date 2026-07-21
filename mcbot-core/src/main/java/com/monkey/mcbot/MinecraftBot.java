@@ -20,6 +20,7 @@ import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
 import com.monkey.mcbot.placeholders.PlaceholderRegistration;
+import com.monkey.mcbot.remote.RemoteApiServer;
 import com.monkey.mcbot.update.UpdateManager;
 import com.monkey.mcbot.update.UpdateStartupResult;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
@@ -56,6 +57,7 @@ public final class MinecraftBot extends JavaPlugin {
     private WrapperManager wrapperManager;
     private BotGuardCompatibilityListener botGuardCompatibilityListener;
     private WorldGuardPvpService worldGuardPvpService;
+    private RemoteApiServer remoteApiServer;
     private static MinecraftBot instance;
 
     @Override
@@ -204,6 +206,8 @@ public final class MinecraftBot extends JavaPlugin {
             MinecraftBotLogging.logApiRegistered(getLogger(), api);
             getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
             startup.ready("Event", MinecraftBotReadyEvent.class.getSimpleName() + " fired");
+            this.remoteApiServer = new RemoteApiServer(this, api);
+            this.remoteApiServer.start();
 
             try {
                 Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
@@ -409,6 +413,11 @@ public final class MinecraftBot extends JavaPlugin {
     }
 
     private void cleanupRuntimeState() {
+        if (remoteApiServer != null) {
+            remoteApiServer.stop();
+            remoteApiServer = null;
+        }
+
         if (botGuardCompatibilityListener != null) {
             botGuardCompatibilityListener.stopScanner();
             botGuardCompatibilityListener = null;
