@@ -1,6 +1,7 @@
 package com.monkey.mcbot.sdk;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.sdk.model.BotOperationResponse;
 import com.monkey.mcbot.sdk.model.BotSnapshotResponse;
@@ -36,7 +37,11 @@ public final class MinecraftBotClient implements AutoCloseable {
     private MinecraftBotClient(Builder builder) {
         this.baseUri = normalizeBaseUri(builder.baseUri);
         this.token = Objects.requireNonNull(builder.token, "token");
-        this.objectMapper = builder.objectMapper == null ? new ObjectMapper() : builder.objectMapper;
+        this.objectMapper = builder.objectMapper == null
+                ? new ObjectMapper()
+                .findAndRegisterModules()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                : builder.objectMapper;
         this.httpClient = builder.httpClient == null
                 ? HttpClient.newBuilder().connectTimeout(builder.timeout).build()
                 : builder.httpClient;
@@ -143,7 +148,7 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     @Override
     public void close() {
-        // HttpClient does not require explicit shutdown on Java 21.
+        httpClient.close();
     }
 
     public static final class Builder {
