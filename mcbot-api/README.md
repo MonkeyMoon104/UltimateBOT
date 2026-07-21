@@ -97,6 +97,7 @@ Do not instantiate `MinecraftBotAPI` yourself. That constructor is for the core 
 ### Removal
 - `remove(UUID ownerUUID)`
 - `removeBySource(BotSource source)`
+- `removeAll()`
 - `despawn(UUID ownerUUID)`
 - `despawnAll()`
 - `getActiveBotCount()`
@@ -346,6 +347,7 @@ public final class ExamplePlugin extends JavaPlugin implements Listener {
 - Treat `MinecraftBotAPI.register(...)` and `unregister()` as core-only lifecycle operations
 - Use `IBotRegistry` for read-only dashboards, placeholders and monitoring integrations
 - Use `BotSource` and `removeBySource(...)` if your plugin needs to clean up only its own API-created bots
+- Use `removeAll()` when your plugin needs to clear every active bot and know how many were removed
 - Keep your integration on the server thread
 
 The last point is an implementation-based recommendation: the current core spawn and update paths interact directly with Bukkit and NMS runtime objects, so main-thread usage is the safe default.

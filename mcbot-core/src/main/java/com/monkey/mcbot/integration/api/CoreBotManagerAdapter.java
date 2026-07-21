@@ -611,6 +611,13 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public int removeAll() {
+        int activeBots = getActiveBotCount();
+        despawnAll();
+        return activeBots;
+    }
+
+    @Override
     public void despawn(UUID ownerUUID) {
         remove(ownerUUID);
     }

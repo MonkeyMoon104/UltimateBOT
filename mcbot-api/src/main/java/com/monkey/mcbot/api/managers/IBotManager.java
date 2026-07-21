@@ -199,6 +199,20 @@ public interface IBotManager {
     int removeBySource(BotSource source);
 
     /**
+     * Removes all currently active bots and returns how many were tracked before cleanup.
+     *
+     * <p>This is the preferred API method for integrations that need an explicit
+     * "remove all" operation. {@link #despawnAll()} remains available as a void alias.</p>
+     *
+     * @return number of bots that were active before removal
+     */
+    default int removeAll() {
+        int activeBots = getActiveBotCount();
+        despawnAll();
+        return activeBots;
+    }
+
+    /**
      * Alias for {@link #remove(UUID)}.
      *
      * @param ownerUUID owner UUID
