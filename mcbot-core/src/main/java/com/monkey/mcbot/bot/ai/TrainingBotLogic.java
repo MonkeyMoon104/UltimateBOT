@@ -69,14 +69,17 @@ public class TrainingBotLogic {
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
         if (bot.isCombat()) {
-            brainController.getBotAI().getMovementController().onDamageReceived();
+            boolean fireOrLavaDamage = isFireOrLavaDamage(source);
+            if (!fireOrLavaDamage) {
+                brainController.getBotAI().getMovementController().onDamageReceived();
+            }
             org.bukkit.entity.Player currentTarget = bot.getTargetPlayer();
 
             net.minecraft.world.entity.Entity attacker = source.getEntity();
             if (attacker instanceof Player nmsPlayer &&
                     currentTarget != null &&
                     nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
-                if (!isFireOrLavaDamage(source)) {
+                if (!fireOrLavaDamage) {
                     if (source.isCritical()) {
                         brainController.getBotAI().getEnderpearlController().onDamageReceived();
                     }
@@ -90,8 +93,10 @@ public class TrainingBotLogic {
             if (!brainController.getBotAI().getHealController().isHealing()) {
                 brainController.getBotAI().getHealController().handleDamageReceived();
             } else {
-                brainController.getBotAI().getMovementController().setUnderFire(true);
-                brainController.getBotAI().getMovementController().emergencyEvade();
+                if (!fireOrLavaDamage) {
+                    brainController.getBotAI().getMovementController().setUnderFire(true);
+                    brainController.getBotAI().getMovementController().emergencyEvade();
+                }
             }
 
             if (currentTarget != null

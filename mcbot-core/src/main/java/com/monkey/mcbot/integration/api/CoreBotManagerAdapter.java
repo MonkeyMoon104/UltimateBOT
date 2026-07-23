@@ -46,6 +46,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public Optional<BotSnapshot> getBotByBotUUID(UUID botUUID) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID == null ? Optional.empty() : getBot(ownerUUID);
+    }
+
+    @Override
     public Optional<BotSnapshot> getTeamAllyBot(UUID teamOwnerUUID) {
         if (teamOwnerUUID == null) {
             return Optional.empty();
@@ -442,6 +448,28 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateAutoTargetByBotUUID(UUID botUUID, boolean autoTarget, double range) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateAutoTarget(ownerUUID, autoTarget, range);
+    }
+
+    @Override
+    public boolean updateAttackBots(UUID ownerUUID, boolean attackBots) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setAttackBots(attackBots);
+        return true;
+    }
+
+    @Override
+    public boolean updateAttackBotsByBotUUID(UUID botUUID, boolean attackBots) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateAttackBots(ownerUUID, attackBots);
+    }
+
+    @Override
     public boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp) {
         BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
         if (options == null) {
@@ -503,6 +531,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateCrystalPvpByBotUUID(UUID botUUID, boolean crystalPvp) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateCrystalPvp(ownerUUID, crystalPvp);
+    }
+
+    @Override
     public boolean updateExplosions(UUID ownerUUID, boolean explosions) {
         ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
         if (bot == null || bot.getBrainController() == null) {
@@ -524,6 +558,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateExplosionsByBotUUID(UUID botUUID, boolean explosions) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateExplosions(ownerUUID, explosions);
+    }
+
+    @Override
     public boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls) {
         ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
         if (bot == null || bot.getBrainController() == null) {
@@ -536,6 +576,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setEnderPearls(enderPearls);
         bot.getBotAI().getEnderpearlController().setEnabled(enderPearls);
         return true;
+    }
+
+    @Override
+    public boolean updateEnderPearlsByBotUUID(UUID botUUID, boolean enderPearls) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateEnderPearls(ownerUUID, enderPearls);
     }
 
     @Override
@@ -579,6 +625,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         botManager.despawnByOwnerUUID(managedOwner);
         removeCachedOptions(managedOwner, options);
         return true;
+    }
+
+    @Override
+    public boolean removeByBotUUID(UUID botUUID) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && remove(ownerUUID);
     }
 
     @Override
@@ -674,6 +726,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setSpawnLocation(settings.spawnLocation());
         options.setAutoTarget(settings.autoTarget());
         options.setAutoTargetRange(settings.autoTargetRange());
+        options.setAttackBots(settings.attackBots());
         options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
         options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
         options.setIdleWander(settings.idleWander());

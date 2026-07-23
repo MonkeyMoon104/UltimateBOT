@@ -46,6 +46,7 @@ public class BotOptions {
     private BotLocation spawnLocation;
     private boolean autoTarget = false;
     private double autoTargetRange = 16.0D;
+    private boolean attackBots = false;
     private boolean respectWorldGuardPvp = false;
     private boolean stayAfterOwnerDeath = false;
     private boolean idleWander = false;
@@ -65,6 +66,10 @@ public class BotOptions {
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
         this.totems = clampTotemCount(this.totems);
         clampCurrentArmor();
+    }
+
+    public MinecraftBot getTraining() {
+        return training;
     }
 
     public BotType getBotType() {
@@ -181,6 +186,14 @@ public class BotOptions {
 
     public void setAutoTargetRange(double autoTargetRange) {
         this.autoTargetRange = autoTargetRange <= 0.0D ? 16.0D : autoTargetRange;
+    }
+
+    public boolean isAttackBots() {
+        return attackBots;
+    }
+
+    public void setAttackBots(boolean attackBots) {
+        this.attackBots = attackBots;
     }
 
     public boolean isRespectWorldGuardPvp() {

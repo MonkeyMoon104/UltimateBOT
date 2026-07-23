@@ -146,11 +146,22 @@ public final class RemoteApiServer {
             return;
         }
 
-        UUID ownerUUID = UUID.fromString(parts[1]);
+        UUID requestedUUID = UUID.fromString(parts[1]);
         IBotManager manager = api.getBotManager();
+        UUID ownerUUID = resolveOwnerUUID(manager, requestedUUID);
+
+        if ("GET".equals(method) && parts.length == 2) {
+            BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
+            if (snapshot == null) {
+                writeJson(exchange, 404, RemoteOperationResponse.failure("Bot not found."));
+            } else {
+                writeJson(exchange, 200, snapshot);
+            }
+            return;
+        }
 
         if ("DELETE".equals(method) && parts.length == 2) {
-            boolean removed = runSync(() -> manager.remove(ownerUUID));
+            boolean removed = runSync(() -> ownerUUID != null ? manager.remove(ownerUUID) : manager.removeByBotUUID(requestedUUID));
             writeJson(exchange, removed ? 200 : 404, new RemoteOperationResponse(removed, removed ? "Bot removed." : "Bot not found.", null, removed ? 1 : 0));
             return;
         }
@@ -163,12 +174,13 @@ public final class RemoteApiServer {
         TogglePayload payload = readJson(exchange, TogglePayload.class);
         boolean enabled = payload != null && Boolean.TRUE.equals(payload.enabled);
         boolean updated = switch (parts[2]) {
-            case "crystal-pvp" -> runSync(() -> manager.updateCrystalPvp(ownerUUID, enabled));
-            case "explosions" -> runSync(() -> manager.updateExplosions(ownerUUID, enabled));
-            case "ender-pearls" -> runSync(() -> manager.updateEnderPearls(ownerUUID, enabled));
+            case "crystal-pvp" -> runSync(() -> ownerUUID != null ? manager.updateCrystalPvp(ownerUUID, enabled) : manager.updateCrystalPvpByBotUUID(requestedUUID, enabled));
+            case "explosions" -> runSync(() -> ownerUUID != null ? manager.updateExplosions(ownerUUID, enabled) : manager.updateExplosionsByBotUUID(requestedUUID, enabled));
+            case "ender-pearls" -> runSync(() -> ownerUUID != null ? manager.updateEnderPearls(ownerUUID, enabled) : manager.updateEnderPearlsByBotUUID(requestedUUID, enabled));
+            case "attack-bots" -> runSync(() -> ownerUUID != null ? manager.updateAttackBots(ownerUUID, enabled) : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
             default -> false;
         };
-        BotSnapshot snapshot = runSync(() -> manager.getBot(ownerUUID).orElse(null));
+        BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
         writeJson(exchange, updated ? 200 : 400, new RemoteOperationResponse(updated, updated ? "Bot updated." : "Bot update failed.", snapshot, null));
     }
 
@@ -208,6 +220,7 @@ public final class RemoteApiServer {
 
         buildStep.autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
+                .attackBots(defaultBoolean(safe.attackBots, false))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
                 .stayAfterOwnerDeath(defaultBoolean(safe.stayAfterOwnerDeath, false))
                 .idleWander(defaultBoolean(safe.idleWander, false))
@@ -225,6 +238,18 @@ public final class RemoteApiServer {
         }
 
         return buildStep.build();
+    }
+
+    private UUID resolveOwnerUUID(IBotManager manager, UUID requestedUUID) {
+        if (requestedUUID == null) {
+            return null;
+        }
+        if (manager.getBot(requestedUUID).isPresent()) {
+            return requestedUUID;
+        }
+        return manager.getBotByBotUUID(requestedUUID)
+                .map(BotSnapshot::ownerUUID)
+                .orElse(null);
     }
 
     private BotSettings.FollowStep applySkin(BotSettings.BotSkinStep skinStep, String skin) {
@@ -361,6 +386,7 @@ public final class RemoteApiServer {
         public RemoteLocationPayload spawnLocation;
         public Boolean autoTarget;
         public Double autoTargetRange;
+        public Boolean attackBots;
         public Boolean respectWorldGuardPvp;
         public Boolean stayAfterOwnerDeath;
         public Boolean idleWander;

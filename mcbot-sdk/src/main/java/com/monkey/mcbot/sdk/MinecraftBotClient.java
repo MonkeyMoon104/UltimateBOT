@@ -59,12 +59,20 @@ public final class MinecraftBotClient implements AutoCloseable {
         return send("GET", "/bots", null, BOT_LIST_TYPE);
     }
 
+    public BotSnapshotResponse getBot(UUID ownerOrBotUUID) {
+        return send("GET", "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID"), null, BotSnapshotResponse.class);
+    }
+
     public BotOperationResponse spawnEventBot(EventBotSpawnRequest request) {
         return send("POST", "/bots/event", Objects.requireNonNull(request, "request"), BotOperationResponse.class);
     }
 
     public BotOperationResponse remove(UUID ownerUUID) {
         return send("DELETE", "/bots/" + Objects.requireNonNull(ownerUUID, "ownerUUID"), null, BotOperationResponse.class);
+    }
+
+    public BotOperationResponse removeByBotUUID(UUID botUUID) {
+        return send("DELETE", "/bots/" + Objects.requireNonNull(botUUID, "botUUID"), null, BotOperationResponse.class);
     }
 
     public BotOperationResponse removeAll() {
@@ -75,12 +83,32 @@ public final class MinecraftBotClient implements AutoCloseable {
         return toggle(ownerUUID, "crystal-pvp", enabled);
     }
 
+    public BotOperationResponse updateCrystalPvpByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "crystal-pvp", enabled);
+    }
+
     public BotOperationResponse updateExplosions(UUID ownerUUID, boolean enabled) {
         return toggle(ownerUUID, "explosions", enabled);
     }
 
+    public BotOperationResponse updateExplosionsByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "explosions", enabled);
+    }
+
     public BotOperationResponse updateEnderPearls(UUID ownerUUID, boolean enabled) {
         return toggle(ownerUUID, "ender-pearls", enabled);
+    }
+
+    public BotOperationResponse updateEnderPearlsByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "ender-pearls", enabled);
+    }
+
+    public BotOperationResponse updateAttackBots(UUID ownerUUID, boolean enabled) {
+        return toggle(ownerUUID, "attack-bots", enabled);
+    }
+
+    public BotOperationResponse updateAttackBotsByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "attack-bots", enabled);
     }
 
     private BotOperationResponse toggle(UUID ownerUUID, String field, boolean enabled) {

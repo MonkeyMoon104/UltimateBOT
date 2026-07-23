@@ -356,6 +356,11 @@ public class BotBrainController {
                 continue;
             }
 
+            if (!botOptions.isAttackBots()
+                    && plugin.getBotRegistry().getOwnerUUIDByBotUUID(candidate.getUniqueId()) != null) {
+                continue;
+            }
+
             if (ownerUUIDs.contains(candidate.getUniqueId())) {
                 continue;
             }

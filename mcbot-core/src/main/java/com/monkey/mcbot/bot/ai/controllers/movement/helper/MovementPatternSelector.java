@@ -25,9 +25,12 @@ public class MovementPatternSelector implements IMovementPatternSelector {
 
         double distance = botPos.distanceTo(targetPos);
         double yDiff = botPos.y - targetPos.y;
+        boolean airborneTargetAbove = !target.onGround() && targetPos.y > botPos.y + 0.5D;
 
         MovementPattern newPattern;
-        if (isUnderFire || consecutiveHits >= 2) {
+        if (airborneTargetAbove && distance <= 8.0D) {
+            newPattern = distance < 3.5D ? MovementPattern.STRAFE_CIRCLE : MovementPattern.DIRECT;
+        } else if (isUnderFire || consecutiveHits >= 2) {
             newPattern = MovementPattern.EVASIVE_ZIG_ZAG;
         } else if (distance < 4.0 && targetDistance < 4.0) {
             newPattern = MovementPattern.STRAFE_CIRCLE;

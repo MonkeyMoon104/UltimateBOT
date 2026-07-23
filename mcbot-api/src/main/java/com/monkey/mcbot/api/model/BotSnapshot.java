@@ -20,6 +20,7 @@ import java.util.UUID;
  * @param targetUUID primary target UUID, when available
  * @param targetUUIDs full target set (for multi-target modes)
  * @param source origin of bot creation (core/api)
+ * @param attackBots whether this bot can target other managed bots
  */
 public record BotSnapshot(
         UUID ownerUUID,
@@ -38,6 +39,7 @@ public record BotSnapshot(
         BotSource source,
         boolean autoTarget,
         double autoTargetRange,
+        boolean attackBots,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,

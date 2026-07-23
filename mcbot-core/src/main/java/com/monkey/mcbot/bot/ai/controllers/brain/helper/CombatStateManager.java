@@ -150,6 +150,9 @@ public class CombatStateManager implements ICombatStateManager {
         net.minecraft.world.phys.Vec3 botPos = bot.position();
         net.minecraft.world.phys.Vec3 targetPos = target.position();
         double yDiff = botPos.y - targetPos.y;
+        if (!target.onGround() && targetPos.y > botPos.y + 0.5D) {
+            return distance > 14.0D;
+        }
 
         return (yDiff < -2 && distance > (hyperAggressive ? 1.5 : 2.0)) ||
                 (distance < (hyperAggressive ? 1.2 : 1.5) && consecutiveDamageCount > (hyperAggressive ? 2 : 0)) ||

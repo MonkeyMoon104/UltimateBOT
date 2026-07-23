@@ -28,6 +28,19 @@ public class BotRegistry {
         return bot.asPlayer().getUUID();
     }
 
+    public UUID getOwnerUUIDByBotUUID(UUID botUUID) {
+        if (botUUID == null) {
+            return null;
+        }
+        for (Map.Entry<UUID, ITrainingBot> entry : spawnedBots.entrySet()) {
+            ITrainingBot bot = entry.getValue();
+            if (bot != null && bot.asPlayer() != null && botUUID.equals(bot.asPlayer().getUUID())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     public ITrainingBot computeIfPresent(UUID playerUUID, BiFunction<UUID, ITrainingBot, ITrainingBot> remappingFunction) {
         return spawnedBots.computeIfPresent(playerUUID, remappingFunction);
     }

@@ -36,6 +36,10 @@ public interface IBotManager {
      */
     Optional<BotSnapshot> getBot(UUID ownerUUID);
 
+    default Optional<BotSnapshot> getBotByBotUUID(UUID botUUID) {
+        return Optional.empty();
+    }
+
     /**
      * Returns the TEAM_ALLY bot snapshot associated with a team owner UUID.
      *
@@ -160,6 +164,18 @@ public interface IBotManager {
 
     boolean updateAutoTarget(UUID ownerUUID, boolean autoTarget, double range);
 
+    default boolean updateAutoTargetByBotUUID(UUID botUUID, boolean autoTarget, double range) {
+        return false;
+    }
+
+    default boolean updateAttackBots(UUID ownerUUID, boolean attackBots) {
+        return false;
+    }
+
+    default boolean updateAttackBotsByBotUUID(UUID botUUID, boolean attackBots) {
+        return false;
+    }
+
     boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp);
 
     boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
@@ -172,11 +188,23 @@ public interface IBotManager {
 
     boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
 
+    default boolean updateCrystalPvpByBotUUID(UUID botUUID, boolean crystalPvp) {
+        return false;
+    }
+
     default boolean updateExplosions(UUID ownerUUID, boolean explosions) {
         return false;
     }
 
+    default boolean updateExplosionsByBotUUID(UUID botUUID, boolean explosions) {
+        return false;
+    }
+
     boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);
+
+    default boolean updateEnderPearlsByBotUUID(UUID botUUID, boolean enderPearls) {
+        return false;
+    }
 
     boolean updateKillMessage(UUID ownerUUID, String killMessage);
 
@@ -189,6 +217,10 @@ public interface IBotManager {
      * @return {@code true} if a bot was present and removed
      */
     boolean remove(UUID ownerUUID);
+
+    default boolean removeByBotUUID(UUID botUUID) {
+        return false;
+    }
 
     /**
      * Removes all active bots created from the given source.

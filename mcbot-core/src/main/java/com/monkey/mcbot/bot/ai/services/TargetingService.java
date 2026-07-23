@@ -1,5 +1,6 @@
 package com.monkey.mcbot.bot.ai.services;
 
+import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -89,7 +90,10 @@ public class TargetingService {
                 && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
                 && cached.isValid(excludedPlayer, centerUUID, maxRange)) {
-            return cached.player;
+            if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
+                return cached.player;
+            }
+            targetCache.remove(botUUID);
         }
 
         double closestDistanceSq = maxRange * maxRange;
@@ -106,6 +110,10 @@ public class TargetingService {
             }
 
             if (botUUID.equals(player.getUniqueId())) {
+                continue;
+            }
+
+            if (!canTargetManagedBot(bot, player.getUniqueId())) {
                 continue;
             }
 
@@ -166,7 +174,10 @@ public class TargetingService {
                 && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
                 && cached.isValid(excludedPlayer, botUUID, maxRange)) {
-            return cached.player;
+            if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
+                return cached.player;
+            }
+            targetCache.remove(botUUID);
         }
 
         org.bukkit.World centerWorld = bot.asPlayer().level().getWorld();
@@ -187,6 +198,10 @@ public class TargetingService {
             }
 
             if (botUUID.equals(player.getUniqueId())) {
+                continue;
+            }
+
+            if (!canTargetManagedBot(bot, player.getUniqueId())) {
                 continue;
             }
 
@@ -230,6 +245,17 @@ public class TargetingService {
 
     public void clearCache() {
         targetCache.clear();
+    }
+
+    private boolean canTargetManagedBot(ITrainingBot bot, UUID candidateUUID) {
+        if (bot == null || candidateUUID == null || bot.getBrainController() == null) {
+            return true;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null || options.isAttackBots()) {
+            return true;
+        }
+        return options.getTraining().getBotRegistry().getOwnerUUIDByBotUUID(candidateUUID) == null;
     }
 
     private boolean isValidCandidate(Player player, org.bukkit.World centerWorld) {

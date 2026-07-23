@@ -32,6 +32,7 @@ public final class BotSnapshotMapper {
         BotSource source = BotSource.CORE;
         boolean autoTarget = false;
         double autoTargetRange = 16.0D;
+        boolean attackBots = false;
         boolean respectWorldGuardPvp = false;
         boolean stayAfterOwnerDeath = false;
         boolean idleWander = false;
@@ -57,6 +58,7 @@ public final class BotSnapshotMapper {
                         : BotSource.CORE;
                 autoTarget = options.isAutoTarget();
                 autoTargetRange = options.getAutoTargetRange();
+                attackBots = options.isAttackBots();
                 respectWorldGuardPvp = options.isRespectWorldGuardPvp();
                 stayAfterOwnerDeath = options.isStayAfterOwnerDeath();
                 idleWander = options.isIdleWander();
@@ -90,6 +92,7 @@ public final class BotSnapshotMapper {
                 source,
                 autoTarget,
                 autoTargetRange,
+                attackBots,
                 respectWorldGuardPvp,
                 stayAfterOwnerDeath,
                 idleWander,

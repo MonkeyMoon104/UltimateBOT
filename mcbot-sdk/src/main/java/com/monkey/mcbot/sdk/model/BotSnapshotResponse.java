@@ -22,6 +22,7 @@ import java.util.UUID;
  * @param source creation source
  * @param autoTarget whether automatic target acquisition is enabled
  * @param autoTargetRange target acquisition range
+ * @param attackBots whether this bot can target other managed bots
  * @param respectWorldGuardPvp whether PvP-disabled WorldGuard regions are avoided
  * @param stayAfterOwnerDeath whether the bot remains after owner death
  * @param idleWander whether idle wandering is enabled
@@ -50,6 +51,7 @@ public record BotSnapshotResponse(
         String source,
         boolean autoTarget,
         double autoTargetRange,
+        boolean attackBots,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,

@@ -46,6 +46,7 @@ public final class BotSettings {
     private final BotLocation spawnLocation;
     private final boolean autoTarget;
     private final double autoTargetRange;
+    private final boolean attackBots;
     private final boolean respectWorldGuardPvp;
     private final boolean stayAfterOwnerDeath;
     private final boolean idleWander;
@@ -86,6 +87,7 @@ public final class BotSettings {
         this.spawnLocation = builder.spawnLocation;
         this.autoTarget = builder.autoTarget;
         this.autoTargetRange = builder.autoTargetRange;
+        this.attackBots = builder.attackBots;
         this.respectWorldGuardPvp = builder.respectWorldGuardPvp;
         this.stayAfterOwnerDeath = builder.stayAfterOwnerDeath;
         this.idleWander = builder.idleWander;
@@ -311,6 +313,10 @@ public final class BotSettings {
 
     public double autoTargetRange() {
         return autoTargetRange;
+    }
+
+    public boolean attackBots() {
+        return attackBots;
     }
 
     public boolean respectWorldGuardPvp() {
@@ -723,6 +729,8 @@ public final class BotSettings {
 
         BuildStep autoTargetRange(double autoTargetRange);
 
+        BuildStep attackBots(boolean attackBots);
+
         BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp);
 
         BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath);
@@ -801,6 +809,7 @@ public final class BotSettings {
         private BotLocation spawnLocation;
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
+        private boolean attackBots = false;
         private boolean respectWorldGuardPvp = false;
         private boolean stayAfterOwnerDeath = false;
         private boolean idleWander = false;
@@ -1016,6 +1025,12 @@ public final class BotSettings {
         @Override
         public BuildStep autoTargetRange(double autoTargetRange) {
             this.autoTargetRange = autoTargetRange;
+            return this;
+        }
+
+        @Override
+        public BuildStep attackBots(boolean attackBots) {
+            this.attackBots = attackBots;
             return this;
         }
 
