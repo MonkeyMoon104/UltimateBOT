@@ -1,5 +1,5 @@
 name: MinecraftBot
-version: '1.0.12'
+version: '${version}'
 main: com.monkey.mcbot.MinecraftBot
 api-version: '1.21'
 folia-supported: true

@@ -9,40 +9,50 @@ Questa e l'unica guida da seguire per:
 
 Non mantenere procedure duplicate in altri file: se cambia il flow, aggiorna solo questo file.
 
-## Come viene calcolata la versione
+## Dove si cambia la versione
 
-La versione viene risolta dal `build.gradle` root in questo ordine:
+La versione generale del progetto si cambia solo in `gradle.properties`:
 
-1. Variabile ambiente `RELEASE_VERSION`, usata dalla CI.
-2. Tag Git esatto sul commit corrente, per esempio `v1.0.6`.
-3. Ultimo tag disponibile nel repository.
-4. Fallback `1.0.0` solo se non ci sono tag.
+```properties
+mcbot.version=X.Y.Z
+```
 
-Per questo motivo le Javadocs devono essere rigenerate quando il commit si trova gia sul tag corretto, altrimenti possono rimanere con la versione precedente.
+Gradle usa quella property per tutti i moduli, per il `plugin.yml` generato dentro il jar e per i titoli delle Javadocs API/SDK.
+
+Non mettere versioni hardcoded in `plugin.yml`, nei `build.gradle.kts` dei moduli o in altri file di build.
 
 ## Regola principale
 
 La release API e la pubblicazione docs sono due cose diverse:
 
-- Il tag `vX.Y.Z` pubblica l'API tramite GitHub Actions.
+- `mcbot.version=X.Y.Z` decide la versione reale generata da Gradle.
+- Il tag `vX.Y.Z` deve combaciare con `mcbot.version` e pubblica l'API tramite GitHub Actions.
 - Il submodule `docs` pubblica le Javadocs su GitHub Pages.
 
-Il tag deve esistere prima di rigenerare le Javadocs, oppure il titolo puo restare alla versione precedente.
+Le Javadocs vanno rigenerate dopo aver cambiato `mcbot.version`, cosi il titolo mostra subito la versione corretta.
 
 ## Release completa
 
-Esempio: rilascio `1.0.6`.
+Esempio: rilascio `1.1.0`.
 
-### 1. Verifica stato e build
+### 1. Aggiorna la versione
+
+Modifica solo `gradle.properties`:
+
+```properties
+mcbot.version=1.1.0
+```
+
+### 2. Verifica stato e build
 
 ```powershell
 git status --short
 .\gradlew.bat :plugin:shadowJar
 ```
 
-La build deve passare prima di creare il tag.
+La build deve passare prima di creare tag e docs.
 
-### 2. Commit e push del codice
+### 3. Commit e push del codice
 
 ```powershell
 git add .
@@ -52,26 +62,9 @@ git push origin mcbot
 
 Usa un messaggio coerente con il contenuto reale della release.
 
-### 3. Crea e pusha il tag
+### 4. Rigenera le Javadocs
 
-```powershell
-git tag v1.0.6
-git push origin v1.0.6
-```
-
-Il push del tag `v*` avvia `.github/workflows/release.yml`.
-
-Quel workflow richiama:
-
-```text
-MonkeyMoon104/build-infra/.github/workflows/publish-api.yml@main
-```
-
-Quindi il publish API online parte da GitHub Actions, non da un comando manuale locale.
-
-### 4. Rigenera le Javadocs dopo il tag
-
-Questo passaggio deve essere fatto dopo il tag. Usa sempre `:mcbot-api:clean` e `:mcbot-sdk:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
+Usa sempre `:mcbot-api:clean` e `:mcbot-sdk:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
 
 ```powershell
 .\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
@@ -87,8 +80,8 @@ Select-String -Path docs\mcbot-sdk\index.html -Pattern "mcbot-sdk"
 Deve mostrare:
 
 ```text
-mcbot-api 1.0.6 API
-mcbot-sdk 1.0.6 API
+mcbot-api 1.1.0 API
+mcbot-sdk 1.1.0 API
 ```
 
 ### 5. Commit e push delle docs
@@ -98,7 +91,7 @@ mcbot-sdk 1.0.6 API
 ```powershell
 git -C docs status --short
 git -C docs add mcbot mcbot-sdk
-git -C docs commit -m "docs(api): regenerate javadocs for 1.0.6"
+git -C docs commit -m "docs(api): regenerate javadocs for 1.1.0"
 git -C docs push origin master
 ```
 
@@ -109,27 +102,26 @@ Dopo il push del submodule, il repo principale vede `docs` come modificato:
 ```powershell
 git status --short
 git add docs
-git commit -m "docs(api): point to 1.0.6 javadocs"
+git commit -m "docs(api): point to 1.1.0 javadocs"
 git push origin mcbot
 ```
 
-### 7. Allinea il tag al commit finale
+### 7. Crea e pusha il tag finale
 
-Se dopo il tag hai creato il commit che aggiorna il puntatore `docs`, sposta il tag sul commit finale:
+Il tag deve essere creato sul commit finale, dopo il puntatore `docs`:
 
 ```powershell
-git tag -f v1.0.6
-git push --force origin v1.0.6
+git tag v1.1.0
+git push origin v1.1.0
 ```
 
-Questo mantiene tag release, codice e puntatore docs sullo stesso commit.
+Il push del tag `v*` avvia `.github/workflows/release.yml`, che pubblica l'API tramite GitHub Actions.
 
 ## Aggiornare solo le docs
 
-Usa questa procedura solo se l'API e gia rilasciata e vuoi correggere/rigenerare GitHub Pages.
+Usa questa procedura solo se vuoi correggere/rigenerare GitHub Pages senza cambiare API.
 
 ```powershell
-git describe --tags --exact-match HEAD
 .\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
 Select-String -Path docs\mcbot\index.html -Pattern "mcbot-api"
 Select-String -Path docs\mcbot-sdk\index.html -Pattern "mcbot-sdk"
@@ -143,22 +135,14 @@ git commit -m "docs(api): point to X.Y.Z javadocs"
 git push origin mcbot
 ```
 
-Se il commit finale deve essere incluso nella release corrente, sposta anche il tag:
-
-```powershell
-git tag -f vX.Y.Z
-git push --force origin vX.Y.Z
-```
-
 ## Comandi rapidi
 
 ```powershell
+# prima modifica mcbot.version in gradle.properties
 .\gradlew.bat :plugin:shadowJar
 git add .
 git commit -m "feat(api): <descrizione>"
 git push origin mcbot
-git tag vX.Y.Z
-git push origin vX.Y.Z
 
 .\gradlew.bat :mcbot-api:clean :mcbot-sdk:clean publishAllDocs
 git -C docs add mcbot mcbot-sdk
@@ -168,8 +152,8 @@ git -C docs push origin master
 git add docs
 git commit -m "docs(api): point to X.Y.Z javadocs"
 git push origin mcbot
-git tag -f vX.Y.Z
-git push --force origin vX.Y.Z
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 ## Controlli finali

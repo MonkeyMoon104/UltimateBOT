@@ -8,46 +8,9 @@ plugins {
     alias(libs.plugins.shadow) apply false
 }
 
-fun runGitCommand(args: List<String>): String? {
-    return try {
-        val output = providers.exec {
-            commandLine(listOf("git") + args)
-            isIgnoreExitValue = true
-        }
-        if (output.result.get().exitValue != 0) {
-            null
-        } else {
-            output.standardOutput.asText.get().trim().takeIf(String::isNotEmpty)
-        }
-    } catch (_: Exception) {
-        null
-    }
-}
+val resolvedProjectVersion = providers.gradleProperty("mcbot.version").get()
 
-fun normalizeTagVersion(rawTag: String?): String? {
-    if (rawTag.isNullOrBlank()) {
-        return null
-    }
-    return if (rawTag.startsWith("v")) rawTag.substring(1) else rawTag
-}
-
-fun resolveProjectVersion(): String {
-    System.getenv("RELEASE_VERSION")?.takeIf(String::isNotBlank)?.let {
-        return it
-    }
-
-    normalizeTagVersion(runGitCommand(listOf("describe", "--tags", "--exact-match", "HEAD")))?.let {
-        return it
-    }
-
-    normalizeTagVersion(runGitCommand(listOf("describe", "--tags", "--abbrev=0")))?.let {
-        return it
-    }
-
-    return "1.0.0"
-}
-
-val resolvedProjectVersion = resolveProjectVersion()
+version = resolvedProjectVersion
 
 subprojects {
     apply(plugin = "java")
