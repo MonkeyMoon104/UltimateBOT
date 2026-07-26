@@ -121,9 +121,16 @@ public class BotAI {
         lastSeenTargetTime = System.currentTimeMillis();
         idleDestination = null;
 
-        Player target = ((CraftPlayer) targetBukkitPlayer).getHandle();
+        Player target = resolveNmsTarget(targetBukkitPlayer);
+        if (target == null) {
+            tickIdle();
+            return;
+        }
 
-        boolean isCurrentlyHealing = healController.isHealing();
+        if (!options.isHealing() && healController.isHealing()) {
+            healController.resetHealState();
+        }
+        boolean isCurrentlyHealing = options.isHealing() && healController.isHealing();
         boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
 
         combatDataManager.updateCombatData(target, combatEnabled);
@@ -275,6 +282,20 @@ public class BotAI {
     private boolean canForceVerticalTeleport() {
         return System.currentTimeMillis() - lastForcedVerticalTeleportTime >= FORCED_VERTICAL_TELEPORT_COOLDOWN_MS
                 && !teleportController.isTeleporting();
+    }
+
+    private Player resolveNmsTarget(org.bukkit.entity.Player targetBukkitPlayer) {
+        if (targetBukkitPlayer instanceof CraftPlayer craftPlayer) {
+            return craftPlayer.getHandle();
+        }
+        for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
+            if (managedBot != null
+                    && managedBot.asPlayer() != null
+                    && managedBot.asPlayer().getUUID().equals(targetBukkitPlayer.getUniqueId())) {
+                return managedBot.asPlayer();
+            }
+        }
+        return null;
     }
 
     private void syncExplosiveCombat() {

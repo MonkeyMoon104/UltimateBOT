@@ -49,6 +49,7 @@ public record BotSnapshot(
         boolean crystalPvp,
         boolean explosions,
         boolean enderPearls,
+        boolean healing,
         boolean killMessageEnabled
 ) {
     public BotSnapshot {

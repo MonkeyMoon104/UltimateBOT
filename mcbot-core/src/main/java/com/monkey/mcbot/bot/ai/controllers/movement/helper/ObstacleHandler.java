@@ -28,6 +28,17 @@ public class ObstacleHandler implements IObstacleHandler {
 
     @Override
     public boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
+        BlockPos immediate = BlockPos.containing(botX + dx * 0.7, botY, botZ + dz * 0.7);
+        BlockPos immediateHead = immediate.above();
+        if (!blockValidator.isPositionPassableCached(immediate)) {
+            if (bot.onGround() && blockValidator.isPositionPassableCached(immediateHead)) {
+                bot.setDeltaMovement(moveX * 1.15, jumpVelocity, moveZ * 1.15);
+            } else {
+                handleHighObstacle(dx, dz);
+            }
+            return true;
+        }
+
         BlockPos front = BlockPos.containing(botX + dx * 2, botY, botZ + dz * 2);
         BlockPos above = front.above();
         BlockPos below = front.below();

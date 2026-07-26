@@ -87,6 +87,8 @@ public class BotEquipmentUtils {
     public static void sendCurrentEquipmentToViewer(LivingEntity bot, Player viewer) {
         List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
 
+        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
+
         for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
             EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(slot);
             if (nmsSlot == null) {

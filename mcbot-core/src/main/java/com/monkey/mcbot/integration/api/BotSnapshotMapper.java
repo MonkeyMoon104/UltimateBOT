@@ -42,6 +42,7 @@ public final class BotSnapshotMapper {
         boolean crystalPvp = true;
         boolean explosions = true;
         boolean enderPearls = true;
+        boolean healing = true;
         boolean killMessageEnabled = true;
         if (bot.getBrainController() != null) {
             BotOptions options = bot.getBrainController().getBotOptions();
@@ -68,6 +69,7 @@ public final class BotSnapshotMapper {
                 crystalPvp = options.isCrystalPvp();
                 explosions = options.isExplosions();
                 enderPearls = options.isEnderPearls();
+                healing = options.isHealing();
                 killMessageEnabled = options.isKillMessageEnabled();
             }
         }
@@ -102,6 +104,7 @@ public final class BotSnapshotMapper {
                 crystalPvp,
                 explosions,
                 enderPearls,
+                healing,
                 killMessageEnabled
         );
     }

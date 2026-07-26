@@ -6,6 +6,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -32,14 +35,14 @@ public class TargetingService {
             this.maxRange = maxRange;
         }
 
-        boolean isValid(UUID expectedExcluded, UUID expectedCenter, double expectedMaxRange) {
+        boolean isValid(ITrainingBot bot, UUID expectedExcluded, UUID expectedCenter, double expectedMaxRange) {
             boolean excludedMatches = (expectedExcluded == null && excluded == null)
                     || (expectedExcluded != null && expectedExcluded.equals(excluded));
             boolean centerMatches = (expectedCenter == null && center == null)
                     || (expectedCenter != null && expectedCenter.equals(center));
 
             return player != null
-                    && player.isOnline()
+                    && isCandidateOnline(bot, player)
                     && !player.isDead()
                     && excludedMatches
                     && centerMatches
@@ -89,7 +92,7 @@ public class TargetingService {
         if (!useAllowedTargetsFilter
                 && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
-                && cached.isValid(excludedPlayer, centerUUID, maxRange)) {
+                && cached.isValid(bot, excludedPlayer, centerUUID, maxRange)) {
             if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
                 return cached.player;
             }
@@ -104,8 +107,8 @@ public class TargetingService {
         double centerY = centerPlayer.getY();
         double centerZ = centerPlayer.getZ();
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isValidCandidate(player, centerWorld)) {
+        for (Player player : collectTargetCandidates(bot)) {
+            if (!isValidCandidate(bot, player, centerWorld)) {
                 continue;
             }
 
@@ -173,7 +176,7 @@ public class TargetingService {
                 && !useDynamicFilter
                 && cached != null
                 && (currentTime - cached.time) < GLOBAL_CACHE_TIME
-                && cached.isValid(excludedPlayer, botUUID, maxRange)) {
+                && cached.isValid(bot, excludedPlayer, botUUID, maxRange)) {
             if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
                 return cached.player;
             }
@@ -192,8 +195,8 @@ public class TargetingService {
         double closestDistanceSq = maxRange * maxRange;
         Player closestPlayer = null;
 
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isValidCandidate(player, centerWorld)) {
+        for (Player player : collectTargetCandidates(bot)) {
+            if (!isValidCandidate(bot, player, centerWorld)) {
                 continue;
             }
 
@@ -258,7 +261,32 @@ public class TargetingService {
         return options.getTraining().getBotRegistry().getOwnerUUIDByBotUUID(candidateUUID) == null;
     }
 
-    private boolean isValidCandidate(Player player, org.bukkit.World centerWorld) {
+    private List<Player> collectTargetCandidates(ITrainingBot bot) {
+        Map<UUID, Player> candidates = new LinkedHashMap<>();
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online != null) {
+                candidates.put(online.getUniqueId(), online);
+            }
+        }
+
+        BotOptions options = bot == null || bot.getBrainController() == null ? null : bot.getBrainController().getBotOptions();
+        if (options == null || !options.isAttackBots()) {
+            return new ArrayList<>(candidates.values());
+        }
+
+        for (ITrainingBot managedBot : options.getTraining().getBotRegistry().getAllBots().values()) {
+            if (managedBot == null || managedBot.asPlayer() == null) {
+                continue;
+            }
+            if (managedBot.asPlayer().getBukkitEntity() instanceof Player managedPlayer) {
+                candidates.put(managedPlayer.getUniqueId(), managedPlayer);
+            }
+        }
+
+        return new ArrayList<>(candidates.values());
+    }
+
+    private boolean isValidCandidate(ITrainingBot bot, Player player, org.bukkit.World centerWorld) {
         if (player == null || centerWorld == null) {
             return false;
         }
@@ -268,11 +296,24 @@ public class TargetingService {
             return false;
         }
 
-        if (!player.isOnline() || player.isDead()) {
+        if (!isCandidateOnline(bot, player) || player.isDead()) {
             return false;
         }
 
         GameMode gameMode = player.getGameMode();
         return gameMode == null || !gameMode.isInvulnerable();
+    }
+
+    private static boolean isCandidateOnline(ITrainingBot bot, Player player) {
+        if (player == null) {
+            return false;
+        }
+        if (player.isOnline()) {
+            return true;
+        }
+        BotOptions options = bot == null || bot.getBrainController() == null ? null : bot.getBrainController().getBotOptions();
+        return options != null
+                && options.isAttackBots()
+                && options.getTraining().getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null;
     }
 }

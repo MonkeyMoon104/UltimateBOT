@@ -56,6 +56,7 @@ public class BotOptions {
     private boolean crystalPvp = true;
     private boolean explosions = true;
     private boolean enderPearls = true;
+    private boolean healing = true;
     private boolean killMessageEnabled = true;
     private String customKillMessage;
     private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
@@ -269,6 +270,14 @@ public class BotOptions {
 
     public void setEnderPearls(boolean enderPearls) {
         this.enderPearls = enderPearls;
+    }
+
+    public boolean isHealing() {
+        return healing;
+    }
+
+    public void setHealing(boolean healing) {
+        this.healing = healing;
     }
 
     public boolean isKillMessageEnabled() {

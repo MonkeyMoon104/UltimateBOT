@@ -34,6 +34,7 @@ import java.util.UUID;
  * @param crystalPvp whether crystal PvP logic is enabled
  * @param explosions whether explosive combat is enabled
  * @param enderPearls whether ender pearl logic is enabled
+ * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
  * @param killMessage custom kill message, or null for default
  */
@@ -66,6 +67,7 @@ public record EventBotSpawnRequest(
         boolean crystalPvp,
         boolean explosions,
         boolean enderPearls,
+        boolean healing,
         boolean killMessageEnabled,
         String killMessage
 ) {
@@ -121,6 +123,7 @@ public record EventBotSpawnRequest(
         private boolean crystalPvp = true;
         private boolean explosions = true;
         private boolean enderPearls = true;
+        private boolean healing = true;
         private boolean killMessageEnabled = true;
         private String killMessage;
 
@@ -164,6 +167,8 @@ public record EventBotSpawnRequest(
         public Builder crystalPvp(boolean crystalPvp) { this.crystalPvp = crystalPvp; return this; }
         public Builder explosions(boolean explosions) { this.explosions = explosions; return this; }
         public Builder enderPearls(boolean enderPearls) { this.enderPearls = enderPearls; return this; }
+        public Builder healing(boolean healing) { this.healing = healing; return this; }
+        public Builder disableHealing() { this.healing = false; return this; }
         public Builder killMessage(String killMessage) { this.killMessageEnabled = true; this.killMessage = killMessage; return this; }
         public Builder disableKillMessage() { this.killMessageEnabled = false; this.killMessage = null; return this; }
         public Builder disableExplosiveCombat() { this.crystalPvp = false; this.explosions = false; return this; }
@@ -206,6 +211,7 @@ public record EventBotSpawnRequest(
                     crystalPvp,
                     explosions,
                     enderPearls,
+                    healing,
                     killMessageEnabled,
                     killMessage
             );

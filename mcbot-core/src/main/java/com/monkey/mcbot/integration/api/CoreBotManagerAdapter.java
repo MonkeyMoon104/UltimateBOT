@@ -292,17 +292,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        if (!follow && options.isCombat() && !options.isChangeableCombat()) {
-            return false;
-        }
-
         options.setFollow(follow);
         botManager.updateFollow(managedOwner, follow);
-
-        if (!follow && options.isCombat()) {
-            options.setCombat(false);
-            botManager.updateCombat(managedOwner, false);
-        }
         return true;
     }
 
@@ -323,12 +314,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        if (combat && !options.isFollow()) {
-            return false;
-        }
-
         options.setCombat(combat);
         botManager.updateCombat(managedOwner, combat);
+        if (combat) {
+            botManager.switchBotToSword(managedOwner);
+        }
         return true;
     }
 
@@ -585,6 +575,29 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateHealing(UUID ownerUUID, boolean healing) {
+        ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
+        if (bot == null || bot.getBrainController() == null) {
+            return false;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+        options.setHealing(healing);
+        if (!healing) {
+            bot.getBotAI().getHealController().resetHealState();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean updateHealingByBotUUID(UUID botUUID, boolean healing) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateHealing(ownerUUID, healing);
+    }
+
+    @Override
     public boolean updateKillMessage(UUID ownerUUID, String killMessage) {
         BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
         if (options == null) {
@@ -736,13 +749,14 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setCrystalPvp(settings.crystalPvp());
         options.setExplosions(settings.explosions());
         options.setEnderPearls(settings.enderPearls());
+        options.setHealing(settings.healing());
         options.setKillMessageEnabled(settings.killMessageEnabled());
         options.setCustomKillMessage(settings.killMessage());
         options.setPreferredTargetUUID(targetUUID);
         options.setTargetUUIDs(targetUUIDs);
         options.setTeamOwnerUUIDs(teamOwners);
         options.setFollow(settings.follow());
-        options.setCombat(settings.combat() && settings.follow());
+        options.setCombat(settings.combat());
         options.setChangeableFollow(settings.changeableFollow());
         options.setChangeableCombat(settings.changeableCombat());
         options.setChangeableBlast(settings.changeableBlast());
@@ -924,6 +938,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .rankValue(BotRank.EASY, BotRank.GOD)
                 .rank(BotRank.EASY)
                 .setChangeableRank(true)
+                .healing(plugin.getConfig().getBoolean("bot.combat.healing", true))
                 .build();
     }
 

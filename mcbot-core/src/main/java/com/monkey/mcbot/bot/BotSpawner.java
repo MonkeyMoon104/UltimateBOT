@@ -103,12 +103,17 @@ public class BotSpawner {
 
         if (botOptions == null || botOptions.isEnderPearls()) {
             bot.getBotAI().getInventoryController().addEnderpearls(16);
-            bot.getBotAI().getInventoryController().switchToEnderpearl();
         } else {
             bot.getBotAI().getInventoryController().setItem(
                     com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
                     net.minecraft.world.item.ItemStack.EMPTY
             );
+        }
+
+        if (botOptions == null || botOptions.isCombat()) {
+            bot.getBotAI().getInventoryController().switchToSword();
+        } else if (botOptions.isEnderPearls()) {
+            bot.getBotAI().getInventoryController().switchToEnderpearl();
         }
 
         if (botOptions != null && (!botOptions.isCrystalPvp() || !botOptions.isExplosions())) {

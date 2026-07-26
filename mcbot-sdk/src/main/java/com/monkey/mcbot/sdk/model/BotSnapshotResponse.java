@@ -32,6 +32,7 @@ import java.util.UUID;
  * @param crystalPvp whether crystal PvP logic is enabled
  * @param explosions whether explosive combat is enabled
  * @param enderPearls whether ender pearl logic is enabled
+ * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
  */
 public record BotSnapshotResponse(
@@ -61,6 +62,7 @@ public record BotSnapshotResponse(
         boolean crystalPvp,
         boolean explosions,
         boolean enderPearls,
+        boolean healing,
         boolean killMessageEnabled
 ) {
     /**

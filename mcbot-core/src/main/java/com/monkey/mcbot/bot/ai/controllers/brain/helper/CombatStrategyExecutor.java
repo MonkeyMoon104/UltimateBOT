@@ -74,7 +74,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (!actionExecuted) {
             moveToTarget(target, 3.0);
-            if (distance <= 3.5 && ((ITrainingBot) bot).isCombat() && ((ITrainingBot) bot).isFollow()) {
+            if (distance <= 3.5 && ((ITrainingBot) bot).isCombat()) {
                 attackController.handleAttack(target);
             }
             actionExecuted = true;
@@ -95,7 +95,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         boolean hyperAggressive = isHyperAggressiveRank();
         boolean actionTaken = false;
 
-        if (distance <= 3.5 && ((ITrainingBot) bot).isCombat() && ((ITrainingBot) bot).isFollow()) {
+        if (distance <= 3.5 && ((ITrainingBot) bot).isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
             attackController.handleAttack(target);
             actionTaken = true;
@@ -134,7 +134,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             inventoryController.switchToSword();
         }
 
-        if (distance <= 3.5 && ((ITrainingBot) bot).isFollow()) {
+        if (distance <= 3.5 && ((ITrainingBot) bot).isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
             attackController.handleAttack(target);
             actionTaken = true;
@@ -198,7 +198,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             }
         }
 
-        if (distance <= 3.5 && ((ITrainingBot) bot).isFollow()) {
+        if (distance <= 3.5 && ((ITrainingBot) bot).isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
             attackController.handleAttack(target);
             actionTaken = true;

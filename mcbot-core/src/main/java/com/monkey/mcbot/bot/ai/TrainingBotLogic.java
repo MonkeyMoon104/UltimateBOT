@@ -68,7 +68,7 @@ public class TrainingBotLogic {
 
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
-        if (bot.isCombat()) {
+        if (bot.isCombat() && brainController.getBotOptions().isHealing()) {
             boolean fireOrLavaDamage = isFireOrLavaDamage(source);
             if (!fireOrLavaDamage) {
                 brainController.getBotAI().getMovementController().onDamageReceived();
@@ -90,7 +90,9 @@ public class TrainingBotLogic {
                 brainController.getBotAI().getTeleportController().handleSuffocationDamage();
             }
 
-            if (!brainController.getBotAI().getHealController().isHealing()) {
+            if (!brainController.getBotOptions().isHealing()) {
+                brainController.getBotAI().getHealController().resetHealState();
+            } else if (!brainController.getBotAI().getHealController().isHealing()) {
                 brainController.getBotAI().getHealController().handleDamageReceived();
             } else {
                 if (!fireOrLavaDamage) {

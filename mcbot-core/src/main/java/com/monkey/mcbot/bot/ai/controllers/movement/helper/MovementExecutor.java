@@ -271,9 +271,9 @@ public class MovementExecutor implements IMovementExecutor {
     public void ensureMovement() {
         if (bot.getDeltaMovement().horizontalDistance() < 0.05 && bot.onGround()) {
             double randomAngle = Math.random() * 2 * Math.PI;
-            double smallMoveX = Math.cos(randomAngle) * movementSpeed * 0.3;
-            double smallMoveZ = Math.sin(randomAngle) * movementSpeed * 0.3;
-            bot.setDeltaMovement(smallMoveX, bot.getDeltaMovement().y, smallMoveZ);
+            double smallMoveX = Math.cos(randomAngle) * movementSpeed * 0.75;
+            double smallMoveZ = Math.sin(randomAngle) * movementSpeed * 0.75;
+            bot.setDeltaMovement(smallMoveX, jumpVelocity * 0.65, smallMoveZ);
         }
     }
 

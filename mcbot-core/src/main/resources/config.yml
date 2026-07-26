@@ -24,6 +24,7 @@ bot:
     - "world_the_end"
   combat:
     infinite-resources: true
+    healing: true
 
   guard:
     enabled: true

@@ -206,6 +206,14 @@ public interface IBotManager {
         return false;
     }
 
+    default boolean updateHealing(UUID ownerUUID, boolean healing) {
+        return false;
+    }
+
+    default boolean updateHealingByBotUUID(UUID botUUID, boolean healing) {
+        return false;
+    }
+
     boolean updateKillMessage(UUID ownerUUID, String killMessage);
 
     boolean disableKillMessage(UUID ownerUUID);

@@ -7,6 +7,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +18,7 @@ public class SlotManager implements ISlotManager {
 
     private final Player bot;
     private final Map<Integer, ItemStack> hotbarSlots = new HashMap<>();
-    private int currentSlot = 0;
+    private int currentSlot = -1;
 
     public static final int SWORD_SLOT = 0;
     public static final int ENDERPEARL_SLOT = 1;
@@ -38,7 +41,7 @@ public class SlotManager implements ISlotManager {
     }
 
     private void initializeDefaultItems() {
-        hotbarSlots.put(SWORD_SLOT, new ItemStack(Items.NETHERITE_SWORD));
+        hotbarSlots.put(SWORD_SLOT, createDefaultSword());
         hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, 16));
         hotbarSlots.put(TOTEM_SLOT, new ItemStack(Items.TOTEM_OF_UNDYING));
         hotbarSlots.put(OBSIDIAN_SLOT, new ItemStack(Items.OBSIDIAN, 64));
@@ -50,11 +53,16 @@ public class SlotManager implements ISlotManager {
         switchToSlot(SWORD_SLOT);
     }
 
+    private ItemStack createDefaultSword() {
+        org.bukkit.inventory.ItemStack sword = new org.bukkit.inventory.ItemStack(Material.NETHERITE_SWORD);
+        sword.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 2);
+        return CraftItemStack.asNMSCopy(sword);
+    }
+
     @Override
     public void switchToSlot(int slot) {
         if (slot < 0 || slot > 8) return;
         if (!hotbarSlots.containsKey(slot)) return;
-        if (currentSlot == slot) return;
 
         resourceReplenisher.replenishItem(hotbarSlots, slot);
 

@@ -13,7 +13,9 @@ import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -108,13 +110,9 @@ public class BotBrainController {
     }
 
     public void onTick() {
-        if (!follow) {
-            return;
-        }
-
         updateTargetByType();
 
-        if (targetPlayer == null || targetPlayer.isDead() || !targetPlayer.isOnline()) {
+        if (!isTargetAvailable(targetPlayer)) {
             botAI.tickIdle();
             return;
         }
@@ -134,7 +132,11 @@ public class BotBrainController {
             return;
         }
 
-        botAI.tick(targetPlayer, allowCombat);
+        if (follow || allowCombat) {
+            botAI.tick(targetPlayer, allowCombat);
+        } else {
+            botAI.tickIdle();
+        }
     }
 
     private boolean shouldUseCombatOnCurrentTarget() {
@@ -175,7 +177,7 @@ public class BotBrainController {
     private Player getNMSTarget() {
         long currentTime = System.currentTimeMillis();
 
-        if (targetPlayer == null || !targetPlayer.isOnline() || targetPlayer.isDead() || !(targetPlayer instanceof CraftPlayer)) {
+        if (!isTargetAvailable(targetPlayer)) {
             cachedNmsTarget = null;
             return null;
         }
@@ -185,7 +187,7 @@ public class BotBrainController {
         }
 
         lastNmsTargetUpdate = currentTime;
-        cachedNmsTarget = ((CraftPlayer) targetPlayer).getHandle();
+        cachedNmsTarget = resolveNmsPlayer(targetPlayer);
 
         return cachedNmsTarget;
     }
@@ -338,7 +340,7 @@ public class BotBrainController {
         ThreatSelection best = null;
         UUID botUUID = bot.asPlayer().getUUID();
 
-        for (org.bukkit.entity.Player candidate : Bukkit.getOnlinePlayers()) {
+        for (org.bukkit.entity.Player candidate : collectThreatCandidates()) {
             if (candidate == null || candidate.isDead()) {
                 continue;
             }
@@ -397,6 +399,30 @@ public class BotBrainController {
         return best;
     }
 
+    private List<org.bukkit.entity.Player> collectThreatCandidates() {
+        Map<UUID, org.bukkit.entity.Player> candidates = new LinkedHashMap<>();
+        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            if (online != null) {
+                candidates.put(online.getUniqueId(), online);
+            }
+        }
+
+        if (!botOptions.isAttackBots()) {
+            return new ArrayList<>(candidates.values());
+        }
+
+        for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
+            if (managedBot == null || managedBot.asPlayer() == null) {
+                continue;
+            }
+            if (managedBot.asPlayer().getBukkitEntity() instanceof org.bukkit.entity.Player managedPlayer) {
+                candidates.put(managedPlayer.getUniqueId(), managedPlayer);
+            }
+        }
+
+        return new ArrayList<>(candidates.values());
+    }
+
     private boolean isValidPvpTarget(org.bukkit.entity.Player candidate) {
         if (candidate == null) {
             return false;
@@ -405,6 +431,28 @@ public class BotBrainController {
             return true;
         }
         return plugin.getWorldGuardPvpService().isPvpAllowed(candidate.getLocation());
+    }
+
+    private boolean isTargetAvailable(org.bukkit.entity.Player candidate) {
+        if (candidate == null || candidate.isDead()) {
+            return false;
+        }
+        return candidate.isOnline()
+                || plugin.getBotRegistry().getOwnerUUIDByBotUUID(candidate.getUniqueId()) != null;
+    }
+
+    private Player resolveNmsPlayer(org.bukkit.entity.Player candidate) {
+        if (candidate instanceof CraftPlayer craftPlayer) {
+            return craftPlayer.getHandle();
+        }
+        for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
+            if (managedBot != null
+                    && managedBot.asPlayer() != null
+                    && managedBot.asPlayer().getUUID().equals(candidate.getUniqueId())) {
+                return managedBot.asPlayer();
+            }
+        }
+        return null;
     }
 
     private boolean isWorldGuardPvpAllowedForCurrentFight() {

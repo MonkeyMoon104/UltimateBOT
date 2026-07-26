@@ -56,6 +56,7 @@ public final class BotSettings {
     private final boolean crystalPvp;
     private final boolean explosions;
     private final boolean enderPearls;
+    private final boolean healing;
     private final boolean killMessageEnabled;
     private final String killMessage;
     private final Map<EquipmentSlot, ItemStack> armorContents;
@@ -97,6 +98,7 @@ public final class BotSettings {
         this.crystalPvp = builder.crystalPvp;
         this.explosions = builder.explosions;
         this.enderPearls = builder.enderPearls;
+        this.healing = builder.healing;
         this.killMessageEnabled = builder.killMessageEnabled;
         this.killMessage = builder.killMessage;
         this.armorContents = copyItemMap(builder.armorContents);
@@ -353,6 +355,10 @@ public final class BotSettings {
 
     public boolean enderPearls() {
         return enderPearls;
+    }
+
+    public boolean healing() {
+        return healing;
     }
 
     public boolean killMessageEnabled() {
@@ -749,6 +755,10 @@ public final class BotSettings {
 
         BuildStep enderPearls(boolean enderPearls);
 
+        BuildStep healing(boolean healing);
+
+        BuildStep disableHealing();
+
         BuildStep killMessage(String killMessage);
 
         BuildStep disableKillMessage();
@@ -819,6 +829,7 @@ public final class BotSettings {
         private boolean crystalPvp = true;
         private boolean explosions = true;
         private boolean enderPearls = true;
+        private boolean healing = true;
         private boolean killMessageEnabled = true;
         private String killMessage;
         private final Map<EquipmentSlot, ItemStack> armorContents = new EnumMap<>(EquipmentSlot.class);
@@ -1085,6 +1096,18 @@ public final class BotSettings {
         @Override
         public BuildStep enderPearls(boolean enderPearls) {
             this.enderPearls = enderPearls;
+            return this;
+        }
+
+        @Override
+        public BuildStep healing(boolean healing) {
+            this.healing = healing;
+            return this;
+        }
+
+        @Override
+        public BuildStep disableHealing() {
+            this.healing = false;
             return this;
         }
 

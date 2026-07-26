@@ -188,6 +188,10 @@ public class BotMovementController {
 
         setUnderFire(true);
         emergencyEvade();
+        if (bot.onGround()) {
+            Vec3 velocity = bot.getDeltaMovement();
+            bot.setDeltaMovement(velocity.x, Math.max(velocity.y, 0.36), velocity.z);
+        }
 
         if (target != null) {
             Vec3 botPos = bot.position();

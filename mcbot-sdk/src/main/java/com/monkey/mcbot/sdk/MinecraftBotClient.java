@@ -103,6 +103,14 @@ public final class MinecraftBotClient implements AutoCloseable {
         return toggle(Objects.requireNonNull(botUUID, "botUUID"), "ender-pearls", enabled);
     }
 
+    public BotOperationResponse updateHealing(UUID ownerUUID, boolean enabled) {
+        return toggle(ownerUUID, "healing", enabled);
+    }
+
+    public BotOperationResponse updateHealingByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "healing", enabled);
+    }
+
     public BotOperationResponse updateAttackBots(UUID ownerUUID, boolean enabled) {
         return toggle(ownerUUID, "attack-bots", enabled);
     }
