@@ -13,6 +13,9 @@ sirblobman-core = "2.9-SNAPSHOT"
 combatlogx-api = "11.6-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 proguard = "7.9.1"
+packetevents = "2.13.0"
+junit = "5.14.4"
+junit-platform = "1.14.4"
 paper-bundle-1_21_4 = "1.21.4-R0.1-SNAPSHOT"
 paper-bundle-1_21_5 = "1.21.5-R0.1-SNAPSHOT"
 paper-bundle-1_21_6 = "1.21.6-R0.1-SNAPSHOT"
@@ -37,6 +40,9 @@ sirblobman-core = { module = "com.github.sirblobman.api:core", version.ref = "si
 combatlogx-api = { module = "com.github.sirblobman.combatlogx:api", version.ref = "combatlogx-api" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard" }
+packetevents-spigot = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }

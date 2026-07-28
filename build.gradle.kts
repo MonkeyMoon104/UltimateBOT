@@ -25,6 +25,7 @@ subprojects {
         maven("https://repo.spongepowered.org/maven")
         maven("https://maven.enginehub.org/repo/")
         maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
+        maven("https://repo.codemc.io/repository/maven-releases/")
         maven("https://nexus.sirblobman.xyz/public/")
         maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     }

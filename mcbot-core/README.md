@@ -31,7 +31,8 @@ This module is the implementation layer, not the final multi-version distributio
 - Java 21
 - Paper 1.21.4 through 1.21.11
 - Final packaged jar: `plugin/build/libs/MinecraftBot.jar`
-- Declared runtime dependency in `plugin.yml`: `PlaceholderAPI`
+- Required runtime dependency: `PacketEvents 2.13.x`
+- Optional integrations: PlaceholderAPI, LuckPerms and WorldGuard
 
 Deployment note:
 - the current source also registers a CombatLogX `PlayerPreTagEvent` listener, so production deployments should keep a compatible CombatLogX runtime available, or guard/remove that hook in the release build
@@ -94,6 +95,7 @@ Core integration points include:
 - `BotPlaceholderCoordinator` for PlaceholderAPI
 - `CoreBotManagerAdapter` and `CoreBotRegistryAdapter` for public API exposure
 - `INMSBridge` and `NMSBridgeManager` for multi-version server support
+- `BotPacketGateway` for PacketEvents-backed client rendering
 
 ## Bot Modes
 ### `SINGLE`
@@ -315,6 +317,7 @@ Third-party integrations should consume the public API from `mcbot-api`, not int
 
 ## Operational Notes
 - This is a Paper-oriented, NMS-backed implementation module
+- PacketEvents is intentionally external and must be installed on the server
 - PlaceholderAPI is part of the declared plugin dependency model
 - Player option state is runtime-only; the core does not persist it to a database
 - If you need a stable external integration surface, depend on `mcbot-api` instead of importing `mcbot-core`

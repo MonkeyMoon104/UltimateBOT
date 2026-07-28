@@ -23,6 +23,13 @@ dependencies {
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.sirblobman.core)
     compileOnly(libs.combatlogx.api)
+    compileOnly(libs.packetevents.spigot)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.processResources {

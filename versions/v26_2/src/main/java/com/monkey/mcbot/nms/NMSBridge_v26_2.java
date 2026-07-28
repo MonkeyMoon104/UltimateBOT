@@ -3,7 +3,6 @@ package com.monkey.mcbot.nms;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
@@ -11,10 +10,6 @@ import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.TrainingBot_v26_2;
 import com.monkey.mcbot.gui.v26_2.NewBotGUI_v26_2;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -91,40 +85,6 @@ public class NMSBridge_v26_2 implements INMSBridge {
         );
     }
 
-    @Override
-    public ClientboundPlayerInfoUpdatePacket createAddPlayerPacket(
-            UUID uuid, GameProfile profile, String displayName) {
-
-        ClientboundPlayerInfoUpdatePacket.Entry entry = new ClientboundPlayerInfoUpdatePacket.Entry(
-                uuid, profile, true, 0, GameType.SURVIVAL,
-                Component.literal(displayName), true, 0, null
-        );
-        return new ClientboundPlayerInfoUpdatePacket(
-                EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER),
-                List.of(entry)
-        );
-    }
-
-    @Override
-    public ClientboundAddEntityPacket createSpawnPlayerPacket(
-            int entityId, UUID uuid,
-            double x, double y, double z,
-            float xRot, float yRot, double yHeadRot) {
-
-        return new ClientboundAddEntityPacket(
-                entityId, uuid, x, y, z,
-                xRot, yRot,
-                EntityTypes.PLAYER, 0,
-                new Vec3(0, 0, 0),
-                yHeadRot
-        );
-    }
-
-    @Override
-    public ClientboundSetEquipmentPacket createEquipmentPacket(
-            int entityId, List<Pair<EquipmentSlot, ItemStack>> equipment) {
-        return new ClientboundSetEquipmentPacket(entityId, equipment);
-    }
 
     @Override
     public ServerLevel getServerLevel(ServerPlayer player) {

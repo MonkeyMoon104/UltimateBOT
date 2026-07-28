@@ -1,18 +1,15 @@
 package com.monkey.mcbot.utils.equipment;
 
-import com.mojang.datafixers.util.Pair;
+import com.monkey.mcbot.protocol.BotEquipment;
 import com.monkey.mcbot.bot.BotRegistry;
-import com.monkey.mcbot.nms.NMSBridgeManager;
+import com.monkey.mcbot.protocol.PacketEventsBotPacketGateway;
 import com.monkey.mcbot.utils.EntityUtils;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -58,7 +55,7 @@ public class BotEquipmentUtils {
 
     public static void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
                                           Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
-        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+        List<BotEquipment> equipmentList = new ArrayList<>();
 
         for (var entry : armorMap.entrySet()) {
             EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(entry.getKey());
@@ -68,44 +65,15 @@ public class BotEquipmentUtils {
                 boolean hasBlastProtection = blastProtectionMap.getOrDefault(entry.getKey(), false);
                 applyArmorEnchants(bukkitItem, hasBlastProtection);
 
-                ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
-                equipmentList.add(Pair.of(nmsSlot, nmsItem));
+                equipmentList.add(new BotEquipment(entry.getKey(), bukkitItem));
             }
         }
 
         if (!equipmentList.isEmpty()) {
-            ClientboundSetEquipmentPacket equipmentPacket = NMSBridgeManager.get()
-                    .createEquipmentPacket(bot.getId(), equipmentList);
-
             for (Player online : Bukkit.getOnlinePlayers()) {
-                ServerPlayer handle = ((CraftPlayer) online).getHandle();
-                handle.connection.send(equipmentPacket);
+                PacketEventsBotPacketGateway.get().sendEquipment(online, bot.getId(), equipmentList);
             }
         }
-    }
-
-    public static void sendCurrentEquipmentToViewer(LivingEntity bot, Player viewer) {
-        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
-
-        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
-
-        for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
-            EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(slot);
-            if (nmsSlot == null) {
-                continue;
-            }
-            equipmentList.add(Pair.of(nmsSlot, bot.getItemBySlot(nmsSlot)));
-        }
-
-        if (equipmentList.isEmpty()) {
-            return;
-        }
-
-        ClientboundSetEquipmentPacket equipmentPacket = NMSBridgeManager.get()
-                .createEquipmentPacket(bot.getId(), equipmentList);
-
-        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
-        handle.connection.send(equipmentPacket);
     }
 
     public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID, BotRegistry botRegistry) {
