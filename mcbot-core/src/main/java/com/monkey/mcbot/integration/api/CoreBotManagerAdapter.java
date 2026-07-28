@@ -5,8 +5,6 @@ import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.model.*;
 import com.monkey.mcbot.bot.*;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.utils.armor.ArmorCycle;
-import com.monkey.mcbot.utils.armor.ArmorTier;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,12 +18,14 @@ public final class CoreBotManagerAdapter implements IBotManager {
     private final BotManager botManager;
     private final BotRegistry botRegistry;
     private final PlayerOptions playerOptions;
+    private final ApiBotOptionsFactory optionsFactory;
 
     public CoreBotManagerAdapter(MinecraftBot plugin, BotManager botManager, BotRegistry botRegistry, PlayerOptions playerOptions) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.botManager = Objects.requireNonNull(botManager, "botManager");
         this.botRegistry = Objects.requireNonNull(botRegistry, "botRegistry");
         this.playerOptions = Objects.requireNonNull(playerOptions, "playerOptions");
+        this.optionsFactory = new ApiBotOptionsFactory(plugin);
     }
 
     @Override
@@ -136,7 +136,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
             targetUUID = primaryOwnerUUID;
         }
 
-        BotOptions options = buildOptions(botType, primaryOwnerUUID, targetUUID, targetUUIDs, teamOwners, settings);
+        BotOptions options = optionsFactory.create(
+                botType, primaryOwnerUUID, targetUUID, targetUUIDs, teamOwners, settings
+        );
         botManager.spawn(
                 ownerPlayer,
                 targetPlayer,
@@ -365,7 +367,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        com.monkey.mcbot.bot.ai.rank.BotRank coreRank = toCoreRank(rank);
+        com.monkey.mcbot.bot.ai.rank.BotRank coreRank = ApiBotOptionsFactory.toCoreRank(rank);
         if (!options.isRankAllowed(coreRank)) {
             return false;
         }
@@ -724,65 +726,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return teamPrimaryOwner == null ? ownerUUID : teamPrimaryOwner;
     }
 
-    private BotOptions buildOptions(BotType type,
-                                    UUID ownerUUID,
-                                    UUID targetUUID,
-                                    Set<UUID> targetUUIDs,
-                                    Set<UUID> teamOwners,
-                                    BotSettings settings) {
-        BotOptions options = new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
-        options.setBotType(type);
-        options.setCreationSource(BotCreationSource.API);
-        options.setOwnerUUID(ownerUUID);
-        options.setBotNameTemplate(settings.botNameTemplate());
-        options.setBotSkin(settings.botSkin());
-        options.setSpawnLocation(settings.spawnLocation());
-        options.setAutoTarget(settings.autoTarget());
-        options.setAutoTargetRange(settings.autoTargetRange());
-        options.setAttackBots(settings.attackBots());
-        options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
-        options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
-        options.setIdleWander(settings.idleWander());
-        options.setIdleWanderRadius(settings.idleWanderRadius());
-        options.setIdleReturnDistance(settings.idleReturnDistance());
-        options.setIdleReturnDelayMs(settings.idleReturnDelayMs());
-        options.setCrystalPvp(settings.crystalPvp());
-        options.setExplosions(settings.explosions());
-        options.setEnderPearls(settings.enderPearls());
-        options.setHealing(settings.healing());
-        options.setKillMessageEnabled(settings.killMessageEnabled());
-        options.setCustomKillMessage(settings.killMessage());
-        options.setPreferredTargetUUID(targetUUID);
-        options.setTargetUUIDs(targetUUIDs);
-        options.setTeamOwnerUUIDs(teamOwners);
-        options.setFollow(settings.follow());
-        options.setCombat(settings.combat());
-        options.setChangeableFollow(settings.changeableFollow());
-        options.setChangeableCombat(settings.changeableCombat());
-        options.setChangeableBlast(settings.changeableBlast());
-        options.setChangeableArmor(settings.changeableArmor());
-        options.setChangeableTotem(settings.changeableTotem());
-        options.setChangeableRank(settings.changeableRank());
-        BotBlastProtection blast = settings.blastProtectionProfile();
-        options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
-        options.setArmorRange(toCoreArmor(settings.minArmorType()), toCoreArmor(settings.maxArmorType()));
-        options.setArmorType(toCoreArmor(settings.armorType()));
-        if (!settings.armorContents().isEmpty()) {
-            options.getArmor().putAll(settings.armorContents());
-        }
-        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry : settings.armorTrimPatternKeys().entrySet()) {
-            options.setTrimPatternKey(entry.getKey(), entry.getValue());
-        }
-        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry : settings.armorTrimMaterialKeys().entrySet()) {
-            options.setTrimMaterialKey(entry.getKey(), entry.getValue());
-        }
-        options.setEquipmentContents(settings.equipmentContents());
-        options.setRankRange(toCoreRank(settings.minRank()), toCoreRank(settings.maxRank()));
-        options.setRank(toCoreRank(settings.rank()));
-        options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
-        options.setTotems(settings.totemCount());
-        return options;
-    }
 
     private void cacheOptions(BotOptions options, UUID ownerUUID, Set<UUID> teamOwners) {
         playerOptions.put(ownerUUID, options);
@@ -977,29 +920,4 @@ public final class CoreBotManagerAdapter implements IBotManager {
         };
     }
 
-    private static com.monkey.mcbot.bot.ai.rank.BotRank toCoreRank(BotRank rank) {
-        if (rank == null) {
-            return com.monkey.mcbot.bot.ai.rank.BotRank.EASY;
-        }
-        return switch (rank) {
-            case EASY -> com.monkey.mcbot.bot.ai.rank.BotRank.EASY;
-            case NORMAL -> com.monkey.mcbot.bot.ai.rank.BotRank.NORMAL;
-            case MEDIUM -> com.monkey.mcbot.bot.ai.rank.BotRank.MEDIUM;
-            case HARD -> com.monkey.mcbot.bot.ai.rank.BotRank.HARD;
-            case GOD -> com.monkey.mcbot.bot.ai.rank.BotRank.GOD;
-        };
-    }
-
-    private static ArmorTier toCoreArmor(BotArmorType armorType) {
-        if (armorType == null) {
-            return ArmorTier.LEATHER;
-        }
-        return switch (armorType) {
-            case LEATHER -> ArmorTier.LEATHER;
-            case IRON -> ArmorTier.IRON;
-            case GOLDEN -> ArmorTier.GOLDEN;
-            case DIAMOND -> ArmorTier.DIAMOND;
-            case NETHERITE -> ArmorTier.NETHERITE;
-        };
-    }
 }

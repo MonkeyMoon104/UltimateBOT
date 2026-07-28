@@ -3,12 +3,9 @@ package com.monkey.mcbot.bot;
 import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.model.BotLocation;
-import com.monkey.mcbot.api.model.BotSkin;
-import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
-import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
 import com.monkey.mcbot.utils.EntityUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
 import net.minecraft.core.BlockPos;
@@ -25,9 +22,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,6 +29,7 @@ public class BotSpawner {
 
     private final MinecraftBot plugin;
     private final BotRegistry registry;
+    private final BotProfileResolver profileResolver = new BotProfileResolver();
 
     public BotSpawner(MinecraftBot plugin, BotRegistry registry) {
         this.plugin = plugin;
@@ -68,9 +63,9 @@ public class BotSpawner {
         }
 
         FileConfiguration config = plugin.getConfig();
-        String nameTemplate = resolveBotNameTemplate(config, botOptions);
-        String botName = resolveBotName(nameTemplate, registryOwner, resolvedTarget, botOptions);
-        GameProfile profile = resolveProfile(registryOwner, botUUID, botName, botOptions);
+        GameProfile profile = profileResolver.resolve(
+                config, registryOwner, resolvedTarget, botUUID, botOptions
+        );
 
         Location spawnLocation = resolveSpawnLocation(registryOwner, botOptions);
         botOptions.setSpawnLocation(BotLocation.of(spawnLocation));
@@ -232,158 +227,6 @@ public class BotSpawner {
         return viewer;
     }
 
-    private String resolveBotNameTemplate(FileConfiguration config, BotOptions botOptions) {
-        String configured = config.getString("bot.name", "CrystalBot");
-        if (botOptions == null || botOptions.getCreationSource() != BotCreationSource.API) {
-            return configured;
-        }
-
-        String customTemplate = botOptions.getBotNameTemplate();
-        return customTemplate == null || customTemplate.isBlank() ? configured : customTemplate;
-    }
-
-    private String resolveBotName(String nameTemplate, Player owner, Player target, BotOptions botOptions) {
-        String template = nameTemplate == null || nameTemplate.isBlank() ? "CrystalBot" : nameTemplate;
-
-        String firstOwnerName = owner.getName();
-        if (botOptions != null && botOptions.getBotType() == BotType.TEAM_ALLY && !botOptions.getTeamOwnerUUIDs().isEmpty()) {
-            Player firstTeamOwner = resolveFirstTeamOwnerPlayer(botOptions);
-            if (firstTeamOwner != null) {
-                firstOwnerName = firstTeamOwner.getName();
-            }
-        }
-
-        String ownersCount = botOptions == null
-                ? "1"
-                : String.valueOf(Math.max(1, botOptions.getTeamOwnerUUIDs().isEmpty() ? 1 : botOptions.getTeamOwnerUUIDs().size()));
-
-        String replaced = template
-                .replace("%player%", owner.getName())
-                .replace("%owner%", owner.getName())
-                .replace("%owner_name%", owner.getName())
-                .replace("%target%", target == null ? owner.getName() : target.getName())
-                .replace("%first_owner%", firstOwnerName)
-                .replace("%owners_count%", ownersCount)
-                .replace("%mode%", botOptions == null ? BotType.SINGLE.name().toLowerCase(Locale.ROOT) : botOptions.getBotType().name().toLowerCase(Locale.ROOT));
-
-        replaced = applyPlaceholderApiIfAvailable(owner, replaced);
-        return sanitizeProfileName(replaced);
-    }
-
-    private GameProfile resolveProfile(Player owner, UUID botUUID, String botName, BotOptions botOptions) {
-        if (botOptions == null || botOptions.getCreationSource() != BotCreationSource.API) {
-            return BotFactory.createProfile(owner, botUUID, botName);
-        }
-
-        BotSkin skin = botOptions.getBotSkin();
-        if (skin == null) {
-            return BotFactory.createProfile(owner, botUUID, botName);
-        }
-
-        BotSkinSource source = skin.source();
-        if (source == null) {
-            return BotFactory.createProfile(owner, botUUID, botName);
-        }
-
-        return switch (source) {
-            case RANDOM -> BotFactory.createRandomProfile(botUUID, botName);
-            case OWNER -> BotFactory.createProfile(owner, botUUID, botName);
-            case FIRST_TEAM_OWNER -> {
-                Player firstOwner = resolveFirstTeamOwnerPlayer(botOptions);
-                if (firstOwner != null && firstOwner.isOnline()) {
-                    yield BotFactory.createProfile(firstOwner, botUUID, botName);
-                }
-                yield BotFactory.createProfile(owner, botUUID, botName);
-            }
-            case PLAYER_REFERENCE -> {
-                Player referenced = resolvePlayerReference(skin.playerReference());
-                if (referenced != null && referenced.isOnline()) {
-                    yield BotFactory.createProfile(referenced, botUUID, botName);
-                }
-                yield BotFactory.createProfile(owner, botUUID, botName);
-            }
-            case TEXTURE_VALUE -> BotFactory.createProfileWithTexture(
-                    botUUID,
-                    botName,
-                    skin.textureValue(),
-                    skin.textureSignature()
-            );
-            case TEXTURE_URL -> BotFactory.createProfileWithTexture(
-                    botUUID,
-                    botName,
-                    buildTextureValueFromUrl(skin.textureUrl()),
-                    null
-            );
-        };
-    }
-
-    private Player resolveFirstTeamOwnerPlayer(BotOptions botOptions) {
-        if (botOptions == null) {
-            return null;
-        }
-
-        for (UUID ownerUUID : botOptions.getTeamOwnerUUIDs()) {
-            Player owner = Bukkit.getPlayer(ownerUUID);
-            if (owner != null && owner.isOnline()) {
-                return owner;
-            }
-        }
-        return null;
-    }
-
-    private Player resolvePlayerReference(String reference) {
-        if (reference == null || reference.isBlank()) {
-            return null;
-        }
-
-        Player exact = Bukkit.getPlayerExact(reference);
-        if (exact != null && exact.isOnline()) {
-            return exact;
-        }
-
-        try {
-            UUID uuid = UUID.fromString(reference);
-            Player byUuid = Bukkit.getPlayer(uuid);
-            if (byUuid != null && byUuid.isOnline()) {
-                return byUuid;
-            }
-        } catch (IllegalArgumentException ignored) {
-        }
-
-        Player fuzzy = Bukkit.getPlayer(reference);
-        if (fuzzy != null && fuzzy.isOnline()) {
-            return fuzzy;
-        }
-
-        return null;
-    }
-
-    private String applyPlaceholderApiIfAvailable(Player owner, String input) {
-        return PlaceholderApiSupport.apply(owner, input);
-    }
-
-    private static String sanitizeProfileName(String candidate) {
-        if (candidate == null || candidate.isBlank()) {
-            return "CrystalBot";
-        }
-
-        String noSectionColors = candidate.replaceAll("(?i)\\u00A7[0-9A-FK-ORX]", "");
-        String noAmpersandColors = noSectionColors.replaceAll("(?i)&[0-9A-FK-ORX]", "");
-        String safe = noAmpersandColors.replaceAll("[^A-Za-z0-9_]", "_");
-        if (safe.isBlank()) {
-            safe = "CrystalBot";
-        }
-        return safe.length() > 16 ? safe.substring(0, 16) : safe;
-    }
-
-    private static String buildTextureValueFromUrl(String textureUrl) {
-        if (textureUrl == null || textureUrl.isBlank()) {
-            return null;
-        }
-
-        String payload = "{\"textures\":{\"SKIN\":{\"url\":\"" + textureUrl + "\"}}}";
-        return Base64.getEncoder().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
-    }
 
     public void despawn(Player owner) {
         if (owner == null) return;

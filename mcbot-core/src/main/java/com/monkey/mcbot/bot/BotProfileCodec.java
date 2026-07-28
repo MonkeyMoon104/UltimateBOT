@@ -1,0 +1,33 @@
+package com.monkey.mcbot.bot;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
+final class BotProfileCodec {
+
+    private BotProfileCodec() {
+    }
+
+    static String sanitizeName(String candidate) {
+        if (candidate == null || candidate.isBlank()) {
+            return "CrystalBot";
+        }
+
+        String noSectionColors = candidate.replaceAll("(?i)\\u00A7[0-9A-FK-ORX]", "");
+        String noAmpersandColors = noSectionColors.replaceAll("(?i)&[0-9A-FK-ORX]", "");
+        String safe = noAmpersandColors.replaceAll("[^A-Za-z0-9_]", "_");
+        if (safe.isBlank()) {
+            safe = "CrystalBot";
+        }
+        return safe.length() > 16 ? safe.substring(0, 16) : safe;
+    }
+
+    static String textureValueFromUrl(String textureUrl) {
+        if (textureUrl == null || textureUrl.isBlank()) {
+            return null;
+        }
+
+        String payload = "{\"textures\":{\"SKIN\":{\"url\":\"" + textureUrl + "\"}}}";
+        return Base64.getEncoder().encodeToString(payload.getBytes(StandardCharsets.UTF_8));
+    }
+}
