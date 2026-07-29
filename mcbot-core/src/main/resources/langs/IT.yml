@@ -219,6 +219,14 @@ gui:
       - ""
       - "&eClicca per attivare/disattivare il combattimento"
 
+  target-mode-button:
+    name: "&bModalità attacco"
+    current: "&7Attuale: &e%mode%"
+    click: "&aClicca per cambiare"
+    players: "Giocatori"
+    mobs: "Mob"
+    both: "Giocatori + mob"
+
   rank-button:
     name: "&bRango"
     material: "DIAMOND_SWORD"

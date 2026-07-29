@@ -219,6 +219,14 @@ gui:
       - ""
       - "&eClick to toggle combat"
 
+  target-mode-button:
+    name: "&bAttack Mode"
+    current: "&7Current: &e%mode%"
+    click: "&aClick to change"
+    players: "Players"
+    mobs: "Mobs"
+    both: "Players + mobs"
+
   rank-button:
     name: "&bRank"
     material: "DIAMOND_SWORD"

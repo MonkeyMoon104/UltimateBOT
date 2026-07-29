@@ -25,7 +25,7 @@ public class KitTab {
                         "# r . . . . # #",
                         "# . . t . . # #",
                         "# . s g f . # #",
-                        "# c . . . . # #",
+                        "# c . . m . # #",
                         "# # # # # # # #"
                 )
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
@@ -38,6 +38,7 @@ public class KitTab {
                         ? new TeleportItem(context.getTraining())
                         : new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
+                .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
 
         return gui;
