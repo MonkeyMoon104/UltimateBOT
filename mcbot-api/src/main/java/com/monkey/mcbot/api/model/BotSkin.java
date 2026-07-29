@@ -1,5 +1,7 @@
 package com.monkey.mcbot.api.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.net.URI;
 import java.util.Objects;
 
@@ -14,10 +16,10 @@ import java.util.Objects;
  */
 public record BotSkin(
         BotSkinSource source,
-        String playerReference,
-        String textureValue,
-        String textureSignature,
-        String textureUrl
+        @Nullable String playerReference,
+        @Nullable String textureValue,
+        @Nullable String textureSignature,
+        @Nullable String textureUrl
 ) {
     /**
      * Canonical constructor with source-specific normalization and validation.
@@ -147,7 +149,7 @@ public record BotSkin(
         }
     }
 
-    private static String trimToNull(String value) {
+    private static @Nullable String trimToNull(@Nullable String value) {
         if (value == null) {
             return null;
         }

@@ -6,6 +6,7 @@ import com.monkey.mcbot.api.event.base.BotEventSource;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import org.jspecify.annotations.Nullable;
 
 /** Fired when a bot is about to regain health. */
 public final class BotHealEvent extends BotEvent implements Cancellable {
@@ -14,7 +15,7 @@ public final class BotHealEvent extends BotEvent implements Cancellable {
     private double amount;
     private boolean cancelled;
 
-    public BotHealEvent(long sequence, BotSnapshot snapshot, String reason, double amount) {
+    public BotHealEvent(long sequence, BotSnapshot snapshot, @Nullable String reason, double amount) {
         super(sequence, snapshot.ownerUUID(), snapshot.botUUID(), BotEventSource.BUKKIT, snapshot);
         this.reason = reason == null ? "UNKNOWN" : reason;
         this.amount = Math.max(0.0D, amount);

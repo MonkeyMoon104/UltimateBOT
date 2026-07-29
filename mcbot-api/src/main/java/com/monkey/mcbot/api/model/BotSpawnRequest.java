@@ -1,5 +1,7 @@
 package com.monkey.mcbot.api.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.*;
 
 /**
@@ -11,7 +13,7 @@ import java.util.*;
 public final class BotSpawnRequest {
 
     private final BotMode mode;
-    private final UUID ownerUUID;
+    private final @Nullable UUID ownerUUID;
     private final Set<UUID> targetUUIDs;
     private final Set<UUID> teamOwnerUUIDs;
     private final BotSettings settings;
@@ -21,7 +23,7 @@ public final class BotSpawnRequest {
         this.ownerUUID = builder.ownerUUID;
         this.targetUUIDs = Set.copyOf(builder.targetUUIDs);
         this.teamOwnerUUIDs = Set.copyOf(builder.teamOwnerUUIDs);
-        this.settings = builder.settings;
+        this.settings = Objects.requireNonNull(builder.settings, "settings");
     }
 
     /**
@@ -48,7 +50,7 @@ public final class BotSpawnRequest {
      *
      * @return primary owner UUID, can be null for EVENT and TEAM_ALLY until runtime resolution
      */
-    public UUID ownerUUID() {
+    public @Nullable UUID ownerUUID() {
         return ownerUUID;
     }
 
@@ -57,7 +59,7 @@ public final class BotSpawnRequest {
      *
      * @return first target UUID or {@code null}
      */
-    public UUID targetUUID() {
+    public @Nullable UUID targetUUID() {
         return targetUUIDs.stream().findFirst().orElse(null);
     }
 
@@ -93,10 +95,10 @@ public final class BotSpawnRequest {
      */
     public static final class Builder {
         private final BotMode mode;
-        private UUID ownerUUID;
+        private @Nullable UUID ownerUUID;
         private final Set<UUID> targetUUIDs = new LinkedHashSet<>();
         private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
-        private BotSettings settings;
+        private @Nullable BotSettings settings;
 
         /**
          * Creates a builder for the provided mode.
@@ -113,7 +115,7 @@ public final class BotSpawnRequest {
          * @param ownerUUID primary owner
          * @return current builder
          */
-        public Builder owner(UUID ownerUUID) {
+        public Builder owner(@Nullable UUID ownerUUID) {
             this.ownerUUID = ownerUUID;
             return this;
         }
@@ -124,7 +126,7 @@ public final class BotSpawnRequest {
          * @param targetUUID target UUID (null clears targets)
          * @return current builder
          */
-        public Builder target(UUID targetUUID) {
+        public Builder target(@Nullable UUID targetUUID) {
             this.targetUUIDs.clear();
             if (targetUUID != null) {
                 this.targetUUIDs.add(targetUUID);
@@ -138,7 +140,7 @@ public final class BotSpawnRequest {
          * @param targetUUID target UUID
          * @return current builder
          */
-        public Builder addTarget(UUID targetUUID) {
+        public Builder addTarget(@Nullable UUID targetUUID) {
             if (targetUUID != null) {
                 this.targetUUIDs.add(targetUUID);
             }
@@ -153,7 +155,7 @@ public final class BotSpawnRequest {
          * @param targets target collection
          * @return current builder
          */
-        public Builder targets(Collection<UUID> targets) {
+        public Builder targets(@Nullable Collection<@Nullable UUID> targets) {
             this.targetUUIDs.clear();
             if (targets != null) {
                 for (UUID target : targets) {
@@ -171,7 +173,7 @@ public final class BotSpawnRequest {
          * @param teamOwnerUUID owner UUID
          * @return current builder
          */
-        public Builder addTeamOwner(UUID teamOwnerUUID) {
+        public Builder addTeamOwner(@Nullable UUID teamOwnerUUID) {
             if (teamOwnerUUID != null) {
                 this.teamOwnerUUIDs.add(teamOwnerUUID);
             }
@@ -186,7 +188,7 @@ public final class BotSpawnRequest {
          * @param owners owner collection
          * @return current builder
          */
-        public Builder teamOwners(Collection<UUID> owners) {
+        public Builder teamOwners(@Nullable Collection<@Nullable UUID> owners) {
             this.teamOwnerUUIDs.clear();
             if (owners != null) {
                 for (UUID owner : owners) {

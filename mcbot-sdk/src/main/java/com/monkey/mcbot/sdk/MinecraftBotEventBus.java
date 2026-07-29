@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.sdk.event.BotEventEnvelope;
 import com.monkey.mcbot.sdk.event.BotEventSubscription;
 import com.monkey.mcbot.sdk.event.SdkBotEventType;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -29,10 +30,10 @@ public final class MinecraftBotEventBus implements AutoCloseable {
     private final Set<Subscription> subscriptions = ConcurrentHashMap.newKeySet();
 
     MinecraftBotEventBus(URI baseUri, String token, HttpClient client, ObjectMapper mapper) {
-        this.baseUri = baseUri;
-        this.token = token;
-        this.client = client;
-        this.mapper = mapper;
+        this.baseUri = Objects.requireNonNull(baseUri, "baseUri");
+        this.token = Objects.requireNonNull(token, "token");
+        this.client = Objects.requireNonNull(client, "client");
+        this.mapper = Objects.requireNonNull(mapper, "mapper");
     }
 
     public BotEventSubscription subscribe(Consumer<BotEventEnvelope> listener) {
@@ -74,18 +75,18 @@ public final class MinecraftBotEventBus implements AutoCloseable {
     private final class Subscription implements BotEventSubscription {
         private final Set<SdkBotEventType> types;
         private final Consumer<BotEventEnvelope> listener;
-        private final UUID ownerUUID;
-        private final UUID botUUID;
+        private final @Nullable UUID ownerUUID;
+        private final @Nullable UUID botUUID;
         private final AtomicBoolean active = new AtomicBoolean(true);
         private final AtomicLong lastEventId = new AtomicLong();
-        private volatile Thread worker;
+        private volatile @Nullable Thread worker;
 
-        private Subscription(Set<SdkBotEventType> types, UUID ownerUUID, UUID botUUID,
+        private Subscription(Set<SdkBotEventType> types, @Nullable UUID ownerUUID, @Nullable UUID botUUID,
                              Consumer<BotEventEnvelope> listener) {
-            this.types = types;
+            this.types = Objects.requireNonNull(types, "types");
             this.ownerUUID = ownerUUID;
             this.botUUID = botUUID;
-            this.listener = listener;
+            this.listener = Objects.requireNonNull(listener, "listener");
         }
 
         private void start() {

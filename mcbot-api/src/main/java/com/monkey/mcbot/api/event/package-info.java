@@ -6,4 +6,5 @@
  * {@code state} for configuration and target changes, and {@code action} for
  * independent bot actions.</p>
  */
+@org.jspecify.annotations.NullMarked
 package com.monkey.mcbot.api.event;

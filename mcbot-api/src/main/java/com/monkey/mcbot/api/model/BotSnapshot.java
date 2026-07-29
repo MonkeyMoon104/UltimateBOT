@@ -1,5 +1,7 @@
 package com.monkey.mcbot.api.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ import java.util.UUID;
  */
 public record BotSnapshot(
         UUID ownerUUID,
-        UUID botUUID,
+        @Nullable UUID botUUID,
         String botType,
         String botRank,
         String minBotRank,
@@ -36,7 +38,7 @@ public record BotSnapshot(
         int totemCount,
         int minTotemCount,
         int maxTotemCount,
-        UUID targetUUID,
+        @Nullable UUID targetUUID,
         Set<UUID> targetUUIDs,
         BotSource source,
         boolean autoTarget,

@@ -1,5 +1,7 @@
 package com.monkey.mcbot.api.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Optional;
 
 /**
@@ -12,7 +14,7 @@ import java.util.Optional;
 public record BotOperationResult(
         boolean success,
         String message,
-        BotSnapshot snapshot
+        @Nullable BotSnapshot snapshot
 ) {
     /**
      * Creates a successful operation result.
@@ -21,7 +23,7 @@ public record BotOperationResult(
      * @param snapshot bot snapshot after operation, may be {@code null}
      * @return success result
      */
-    public static BotOperationResult success(String message, BotSnapshot snapshot) {
+    public static BotOperationResult success(String message, @Nullable BotSnapshot snapshot) {
         return new BotOperationResult(true, message, snapshot);
     }
 

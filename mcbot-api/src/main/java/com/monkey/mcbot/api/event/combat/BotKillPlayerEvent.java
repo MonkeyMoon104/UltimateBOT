@@ -35,7 +35,7 @@ public final class BotKillPlayerEvent extends Event {
         this.ownerUUID = Objects.requireNonNull(ownerUUID, "ownerUUID");
         this.botUUID = Objects.requireNonNull(botUUID, "botUUID");
         this.victim = Objects.requireNonNull(victim, "victim");
-        this.botSnapshot = botSnapshot;
+        this.botSnapshot = Objects.requireNonNull(botSnapshot, "botSnapshot");
     }
 
     public UUID getOwnerUUID() {

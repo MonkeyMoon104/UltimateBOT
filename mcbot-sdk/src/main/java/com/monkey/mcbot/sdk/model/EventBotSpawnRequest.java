@@ -1,6 +1,9 @@
 package com.monkey.mcbot.sdk.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -41,7 +44,7 @@ import java.util.UUID;
  * @param killMessage custom kill message, or null for default
  */
 public record EventBotSpawnRequest(
-        UUID ownerUUID,
+        @Nullable UUID ownerUUID,
         List<UUID> targetUUIDs,
         String botNameTemplate,
         String botSkin,
@@ -56,7 +59,7 @@ public record EventBotSpawnRequest(
         String rank,
         String minRank,
         String maxRank,
-        BotLocationRequest spawnLocation,
+        @Nullable BotLocationRequest spawnLocation,
         boolean autoTarget,
         double autoTargetRange,
         boolean attackBots,
@@ -73,8 +76,21 @@ public record EventBotSpawnRequest(
         boolean enderPearls,
         boolean healing,
         boolean killMessageEnabled,
-        String killMessage
+        @Nullable String killMessage
 ) {
+    public EventBotSpawnRequest {
+        targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs);
+        botNameTemplate = Objects.requireNonNull(botNameTemplate, "botNameTemplate");
+        botSkin = Objects.requireNonNull(botSkin, "botSkin");
+        armor = Objects.requireNonNull(armor, "armor");
+        minArmor = Objects.requireNonNull(minArmor, "minArmor");
+        maxArmor = Objects.requireNonNull(maxArmor, "maxArmor");
+        rank = Objects.requireNonNull(rank, "rank");
+        minRank = Objects.requireNonNull(minRank, "minRank");
+        maxRank = Objects.requireNonNull(maxRank, "maxRank");
+        targetMode = Objects.requireNonNull(targetMode, "targetMode");
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -99,7 +115,7 @@ public record EventBotSpawnRequest(
     }
 
     public static final class Builder {
-        private UUID ownerUUID;
+        private @Nullable UUID ownerUUID;
         private List<UUID> targetUUIDs = List.of();
         private String botNameTemplate = "MinecraftBot";
         private String botSkin = "RANDOM";
@@ -114,7 +130,7 @@ public record EventBotSpawnRequest(
         private String rank = "EASY";
         private String minRank = "EASY";
         private String maxRank = "GOD";
-        private BotLocationRequest spawnLocation;
+        private @Nullable BotLocationRequest spawnLocation;
         private boolean autoTarget = true;
         private double autoTargetRange = 16.0D;
         private boolean attackBots = false;
@@ -131,40 +147,40 @@ public record EventBotSpawnRequest(
         private boolean enderPearls = true;
         private boolean healing = true;
         private boolean killMessageEnabled = true;
-        private String killMessage;
+        private @Nullable String killMessage;
 
         private Builder() {
         }
 
-        public Builder ownerUUID(UUID ownerUUID) { this.ownerUUID = ownerUUID; return this; }
-        public Builder targetUUIDs(List<UUID> targetUUIDs) { this.targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs); return this; }
-        public Builder botNameTemplate(String botNameTemplate) { this.botNameTemplate = botNameTemplate; return this; }
-        public Builder botSkin(String botSkin) { this.botSkin = botSkin; return this; }
+        public Builder ownerUUID(@Nullable UUID ownerUUID) { this.ownerUUID = ownerUUID; return this; }
+        public Builder targetUUIDs(@Nullable List<UUID> targetUUIDs) { this.targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs); return this; }
+        public Builder botNameTemplate(String botNameTemplate) { this.botNameTemplate = Objects.requireNonNull(botNameTemplate, "botNameTemplate"); return this; }
+        public Builder botSkin(String botSkin) { this.botSkin = Objects.requireNonNull(botSkin, "botSkin"); return this; }
         public Builder follow(boolean follow) { this.follow = follow; return this; }
         public Builder combat(boolean combat) { this.combat = combat; return this; }
-        public Builder armor(String armor) { this.armor = armor; return this; }
-        public Builder armor(SdkBotArmor armor) { this.armor = armor == null ? null : armor.apiValue(); return this; }
-        public Builder armorRange(String minArmor, String maxArmor) { this.minArmor = minArmor; this.maxArmor = maxArmor; return this; }
+        public Builder armor(String armor) { this.armor = Objects.requireNonNull(armor, "armor"); return this; }
+        public Builder armor(SdkBotArmor armor) { this.armor = Objects.requireNonNull(armor, "armor").apiValue(); return this; }
+        public Builder armorRange(String minArmor, String maxArmor) { this.minArmor = Objects.requireNonNull(minArmor, "minArmor"); this.maxArmor = Objects.requireNonNull(maxArmor, "maxArmor"); return this; }
         public Builder armorRange(SdkBotArmor minArmor, SdkBotArmor maxArmor) {
-            this.minArmor = minArmor == null ? null : minArmor.apiValue();
-            this.maxArmor = maxArmor == null ? null : maxArmor.apiValue();
+            this.minArmor = Objects.requireNonNull(minArmor, "minArmor").apiValue();
+            this.maxArmor = Objects.requireNonNull(maxArmor, "maxArmor").apiValue();
             return this;
         }
         public Builder totemCount(int totemCount) { this.totemCount = totemCount; return this; }
         public Builder totemRange(int minTotemCount, int maxTotemCount) { this.minTotemCount = minTotemCount; this.maxTotemCount = maxTotemCount; return this; }
-        public Builder rank(String rank) { this.rank = rank; return this; }
-        public Builder rank(SdkBotRank rank) { this.rank = rank == null ? null : rank.apiValue(); return this; }
-        public Builder rankRange(String minRank, String maxRank) { this.minRank = minRank; this.maxRank = maxRank; return this; }
+        public Builder rank(String rank) { this.rank = Objects.requireNonNull(rank, "rank"); return this; }
+        public Builder rank(SdkBotRank rank) { this.rank = Objects.requireNonNull(rank, "rank").apiValue(); return this; }
+        public Builder rankRange(String minRank, String maxRank) { this.minRank = Objects.requireNonNull(minRank, "minRank"); this.maxRank = Objects.requireNonNull(maxRank, "maxRank"); return this; }
         public Builder rankRange(SdkBotRank minRank, SdkBotRank maxRank) {
-            this.minRank = minRank == null ? null : minRank.apiValue();
-            this.maxRank = maxRank == null ? null : maxRank.apiValue();
+            this.minRank = Objects.requireNonNull(minRank, "minRank").apiValue();
+            this.maxRank = Objects.requireNonNull(maxRank, "maxRank").apiValue();
             return this;
         }
-        public Builder spawnLocation(BotLocationRequest spawnLocation) { this.spawnLocation = spawnLocation; return this; }
+        public Builder spawnLocation(@Nullable BotLocationRequest spawnLocation) { this.spawnLocation = spawnLocation; return this; }
         public Builder autoTarget(boolean autoTarget) { this.autoTarget = autoTarget; return this; }
         public Builder autoTargetRange(double autoTargetRange) { this.autoTargetRange = autoTargetRange; return this; }
         public Builder attackBots(boolean attackBots) { this.attackBots = attackBots; return this; }
-        public Builder targetMode(SdkBotTargetMode targetMode) { this.targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode; return this; }
+        public Builder targetMode(SdkBotTargetMode targetMode) { this.targetMode = Objects.requireNonNull(targetMode, "targetMode"); return this; }
         public Builder respectWorldGuardPvp(boolean respectWorldGuardPvp) { this.respectWorldGuardPvp = respectWorldGuardPvp; return this; }
         public Builder stayAfterOwnerDeath(boolean stayAfterOwnerDeath) { this.stayAfterOwnerDeath = stayAfterOwnerDeath; return this; }
         public Builder idleWander(boolean idleWander) { this.idleWander = idleWander; return this; }
@@ -177,7 +193,7 @@ public record EventBotSpawnRequest(
         public Builder enderPearls(boolean enderPearls) { this.enderPearls = enderPearls; return this; }
         public Builder healing(boolean healing) { this.healing = healing; return this; }
         public Builder disableHealing() { this.healing = false; return this; }
-        public Builder killMessage(String killMessage) { this.killMessageEnabled = true; this.killMessage = killMessage; return this; }
+        public Builder killMessage(String killMessage) { this.killMessageEnabled = true; this.killMessage = Objects.requireNonNull(killMessage, "killMessage"); return this; }
         public Builder disableKillMessage() { this.killMessageEnabled = false; this.killMessage = null; return this; }
         public Builder disableExplosiveCombat() { this.crystalPvp = false; this.explosions = false; return this; }
         public Builder stationary() { this.idleWander = false; return this; }

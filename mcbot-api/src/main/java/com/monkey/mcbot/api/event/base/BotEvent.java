@@ -1,6 +1,7 @@
 package com.monkey.mcbot.api.event.base;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
+import org.jspecify.annotations.Nullable;
 import org.bukkit.event.Event;
 
 import java.time.Instant;
@@ -16,10 +17,10 @@ public abstract class BotEvent extends Event {
     private final UUID ownerUUID;
     private final UUID botUUID;
     private final BotEventSource source;
-    private final BotSnapshot botSnapshot;
+    private final @Nullable BotSnapshot botSnapshot;
 
     protected BotEvent(long sequence, UUID ownerUUID, UUID botUUID,
-                       BotEventSource source, BotSnapshot botSnapshot) {
+                       @Nullable BotEventSource source, @Nullable BotSnapshot botSnapshot) {
         this.eventId = UUID.randomUUID();
         this.sequence = sequence;
         this.occurredAt = Instant.now();
@@ -35,5 +36,5 @@ public abstract class BotEvent extends Event {
     public final UUID getOwnerUUID() { return ownerUUID; }
     public final UUID getBotUUID() { return botUUID; }
     public final BotEventSource getSource() { return source; }
-    public final BotSnapshot getBotSnapshot() { return botSnapshot; }
+    public final @Nullable BotSnapshot getBotSnapshot() { return botSnapshot; }
 }

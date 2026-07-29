@@ -16,6 +16,7 @@ proguard = "7.9.1"
 packetevents = "2.13.0"
 junit = "5.14.4"
 junit-platform = "1.14.4"
+jspecify = "1.0.0"
 paper-bundle-1_21_4 = "1.21.4-R0.1-SNAPSHOT"
 paper-bundle-1_21_5 = "1.21.5-R0.1-SNAPSHOT"
 paper-bundle-1_21_6 = "1.21.6-R0.1-SNAPSHOT"
@@ -43,6 +44,7 @@ proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "p
 packetevents-spigot = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }

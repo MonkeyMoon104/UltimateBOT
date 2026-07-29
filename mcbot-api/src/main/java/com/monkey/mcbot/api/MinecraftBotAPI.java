@@ -3,6 +3,7 @@ package com.monkey.mcbot.api;
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.managers.IBotRegistry;
 import com.monkey.mcbot.api.event.bus.BotEventBus;
+import org.jspecify.annotations.Nullable;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
@@ -28,7 +29,7 @@ import java.util.logging.Logger;
 public final class MinecraftBotAPI {
 
     private static final Logger LOGGER = Logger.getLogger("MinecraftBot/API");
-    private static volatile MinecraftBotAPI instance;
+    private static volatile @Nullable MinecraftBotAPI instance;
 
     private final Plugin plugin;
     private final IBotManager botManager;
@@ -96,7 +97,7 @@ public final class MinecraftBotAPI {
      *
      * @return API instance, or {@code null} if not registered
      */
-    public static MinecraftBotAPI getOrNull() {
+    public static @Nullable MinecraftBotAPI getOrNull() {
         return instance;
     }
 

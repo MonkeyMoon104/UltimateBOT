@@ -9,6 +9,7 @@ import com.monkey.mcbot.sdk.model.EventBotSpawnRequest;
 import com.monkey.mcbot.sdk.model.ToggleRequest;
 import com.monkey.mcbot.sdk.model.SdkBotTargetMode;
 import com.monkey.mcbot.sdk.model.TargetModeRequest;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -156,7 +157,7 @@ public final class MinecraftBotClient implements AutoCloseable {
         return send("PATCH", "/bots/" + ownerUUID + "/" + field, new ToggleRequest(enabled), BotOperationResponse.class);
     }
 
-    private <T> T send(String method, String path, Object body, Class<T> responseType) {
+    private <T> T send(String method, String path, @Nullable Object body, Class<T> responseType) {
         try {
             HttpResponse<String> response = httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
             return decodeResponse(response, responseType);
@@ -168,7 +169,7 @@ public final class MinecraftBotClient implements AutoCloseable {
         }
     }
 
-    private <T> T send(String method, String path, Object body, TypeReference<T> responseType) {
+    private <T> T send(String method, String path, @Nullable Object body, TypeReference<T> responseType) {
         try {
             HttpResponse<String> response = httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
@@ -183,7 +184,7 @@ public final class MinecraftBotClient implements AutoCloseable {
         }
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) throws IOException {
+    private HttpRequest buildRequest(String method, String path, @Nullable Object body) throws IOException {
         HttpRequest.Builder builder = HttpRequest.newBuilder(baseUri.resolve(trimLeadingSlash(path)))
                 .header("Authorization", "Bearer " + token)
                 .header("Accept", "application/json");
@@ -222,10 +223,10 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     public static final class Builder {
         private URI baseUri = URI.create("http://127.0.0.1:8765/mcbot/api/v1/");
-        private String token;
+        private @Nullable String token;
         private Duration timeout = Duration.ofSeconds(5);
-        private HttpClient httpClient;
-        private ObjectMapper objectMapper;
+        private @Nullable HttpClient httpClient;
+        private @Nullable ObjectMapper objectMapper;
 
         private Builder() {
         }
@@ -250,12 +251,12 @@ public final class MinecraftBotClient implements AutoCloseable {
             return this;
         }
 
-        public Builder httpClient(HttpClient httpClient) {
+        public Builder httpClient(@Nullable HttpClient httpClient) {
             this.httpClient = httpClient;
             return this;
         }
 
-        public Builder objectMapper(ObjectMapper objectMapper) {
+        public Builder objectMapper(@Nullable ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
             return this;
         }

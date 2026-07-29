@@ -1,6 +1,7 @@
 package com.monkey.mcbot.api.managers;
 
 import com.monkey.mcbot.api.model.*;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -80,10 +81,10 @@ public interface IBotManager {
      * @return operation result with success flag and details
      */
     BotOperationResult spawnByReferences(BotMode mode,
-                                         String ownerReference,
-                                         Collection<String> targetReferences,
-                                         Collection<String> teamOwnerReferences,
-                                         BotSettings settings);
+                                         @Nullable String ownerReference,
+                                         @Nullable Collection<String> targetReferences,
+                                         @Nullable Collection<String> teamOwnerReferences,
+                                         @Nullable BotSettings settings);
 
     /**
      * Parses a single player reference into an online UUID.

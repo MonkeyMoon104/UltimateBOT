@@ -1,5 +1,7 @@
 package com.monkey.mcbot.sdk.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.UUID;
 
 /**
@@ -14,8 +16,8 @@ import java.util.UUID;
  * @param pitch pitch rotation
  */
 public record BotLocationRequest(
-        String worldName,
-        UUID worldUUID,
+        @Nullable String worldName,
+        @Nullable UUID worldUUID,
         double x,
         double y,
         double z,

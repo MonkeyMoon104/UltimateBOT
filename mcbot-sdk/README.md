@@ -2,6 +2,10 @@
 
 `mcbot-sdk` is the Java-only remote client for MinecraftBot.
 
+The SDK publishes JSpecify nullability contracts. Public parameters and return values are
+non-null by default, while optional response fields and builder values are explicitly
+annotated with `@Nullable`.
+
 Use this artifact with `implementation` when you do not want to depend on Bukkit/Paper classloading or the in-server `mcbot-api` singleton.
 
 ## Gradle

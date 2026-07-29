@@ -2,6 +2,7 @@ package com.monkey.mcbot.api.model;
 
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public final class BotSettings {
     private final BotRank rank;
     private final BotRank minRank;
     private final BotRank maxRank;
-    private final BotLocation spawnLocation;
+    private final @Nullable BotLocation spawnLocation;
     private final boolean autoTarget;
     private final double autoTargetRange;
     private final boolean attackBots;
@@ -60,7 +61,7 @@ public final class BotSettings {
     private final boolean enderPearls;
     private final boolean healing;
     private final boolean killMessageEnabled;
-    private final String killMessage;
+    private final @Nullable String killMessage;
     private final Map<EquipmentSlot, ItemStack> armorContents;
     private final Map<Integer, ItemStack> equipmentContents;
     private final Map<EquipmentSlot, String> armorTrimPatternKeys;
@@ -309,7 +310,7 @@ public final class BotSettings {
         return maxRank;
     }
 
-    public BotLocation spawnLocation() {
+    public @Nullable BotLocation spawnLocation() {
         return spawnLocation;
     }
 
@@ -377,7 +378,7 @@ public final class BotSettings {
         return killMessageEnabled;
     }
 
-    public String killMessage() {
+    public @Nullable String killMessage() {
         return killMessage;
     }
 
@@ -741,7 +742,7 @@ public final class BotSettings {
      * Final step: builds immutable settings.
      */
     public interface BuildStep {
-        BuildStep spawnLocation(BotLocation spawnLocation);
+        BuildStep spawnLocation(@Nullable BotLocation spawnLocation);
 
         BuildStep autoTarget(boolean autoTarget);
 
@@ -775,7 +776,7 @@ public final class BotSettings {
 
         BuildStep disableHealing();
 
-        BuildStep killMessage(String killMessage);
+        BuildStep killMessage(@Nullable String killMessage);
 
         BuildStep disableKillMessage();
 
@@ -783,7 +784,8 @@ public final class BotSettings {
 
         BuildStep equipmentContents(Map<Integer, ItemStack> equipmentContents);
 
-        BuildStep armorTrim(EquipmentSlot slot, String patternKey, String materialKey);
+        BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey,
+                            @Nullable String materialKey);
 
         /**
          * Builds immutable settings after validation.
@@ -832,7 +834,7 @@ public final class BotSettings {
         private BotRank rank;
         private BotRank minRank;
         private BotRank maxRank;
-        private BotLocation spawnLocation;
+        private @Nullable BotLocation spawnLocation;
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
         private boolean attackBots = false;
@@ -849,7 +851,7 @@ public final class BotSettings {
         private boolean enderPearls = true;
         private boolean healing = true;
         private boolean killMessageEnabled = true;
-        private String killMessage;
+        private @Nullable String killMessage;
         private final Map<EquipmentSlot, ItemStack> armorContents = new EnumMap<>(EquipmentSlot.class);
         private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
         private final Map<EquipmentSlot, String> armorTrimPatternKeys = new EnumMap<>(EquipmentSlot.class);
@@ -1040,7 +1042,7 @@ public final class BotSettings {
         }
 
         @Override
-        public BuildStep spawnLocation(BotLocation spawnLocation) {
+        public BuildStep spawnLocation(@Nullable BotLocation spawnLocation) {
             this.spawnLocation = spawnLocation;
             return this;
         }
@@ -1142,7 +1144,7 @@ public final class BotSettings {
         }
 
         @Override
-        public BuildStep killMessage(String killMessage) {
+        public BuildStep killMessage(@Nullable String killMessage) {
             this.killMessageEnabled = true;
             this.killMessage = killMessage;
             return this;
@@ -1170,7 +1172,8 @@ public final class BotSettings {
         }
 
         @Override
-        public BuildStep armorTrim(EquipmentSlot slot, String patternKey, String materialKey) {
+        public BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey,
+                                   @Nullable String materialKey) {
             if (slot != null) {
                 if (patternKey == null || patternKey.isBlank()) {
                     this.armorTrimPatternKeys.remove(slot);
@@ -1279,7 +1282,7 @@ public final class BotSettings {
         }
     }
 
-    private static <K> Map<K, ItemStack> copyItemMap(Map<K, ItemStack> source) {
+    private static <K> Map<K, ItemStack> copyItemMap(@Nullable Map<K, ItemStack> source) {
         if (source == null || source.isEmpty()) {
             return Map.of();
         }

@@ -1,6 +1,7 @@
 package com.monkey.mcbot.sdk.event;
 
 import com.monkey.mcbot.sdk.model.BotSnapshotResponse;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Map;
@@ -19,7 +20,7 @@ public record BotEventEnvelope(
         UUID ownerUUID,
         UUID botUUID,
         String source,
-        BotSnapshotResponse snapshot,
+        @Nullable BotSnapshotResponse snapshot,
         Map<String, Object> payload
 ) {
     public BotEventEnvelope {

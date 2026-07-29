@@ -1,5 +1,7 @@
 package com.monkey.mcbot.sdk.model;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Standard response returned by remote API operations.
  *
@@ -10,9 +12,9 @@ package com.monkey.mcbot.sdk.model;
  */
 public record BotOperationResponse(
         boolean success,
-        String message,
-        BotSnapshotResponse snapshot,
-        Integer removedCount
+        @Nullable String message,
+        @Nullable BotSnapshotResponse snapshot,
+        @Nullable Integer removedCount
 ) {
     /**
      * Returns {@code true} when the response contains a bot snapshot.

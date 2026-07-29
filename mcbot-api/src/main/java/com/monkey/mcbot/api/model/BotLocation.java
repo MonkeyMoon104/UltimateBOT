@@ -2,6 +2,7 @@ package com.monkey.mcbot.api.model;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -10,8 +11,8 @@ import java.util.UUID;
  * Immutable API-safe spawn location payload.
  */
 public record BotLocation(
-        String worldName,
-        UUID worldUUID,
+        @Nullable String worldName,
+        @Nullable UUID worldUUID,
         double x,
         double y,
         double z,

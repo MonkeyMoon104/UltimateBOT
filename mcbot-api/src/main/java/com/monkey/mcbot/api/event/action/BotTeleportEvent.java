@@ -7,6 +7,7 @@ import com.monkey.mcbot.api.model.BotSnapshot;
 import org.bukkit.Location;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
+import org.jspecify.annotations.Nullable;
 import java.util.Objects;
 
 /** Fired before a managed bot teleports. */
@@ -17,7 +18,8 @@ public final class BotTeleportEvent extends BotEvent implements Cancellable {
     private final String cause;
     private boolean cancelled;
 
-    public BotTeleportEvent(long sequence, BotSnapshot snapshot, Location from, Location to, String cause) {
+    public BotTeleportEvent(long sequence, BotSnapshot snapshot, Location from, Location to,
+                            @Nullable String cause) {
         super(sequence, snapshot.ownerUUID(), snapshot.botUUID(), BotEventSource.BUKKIT, snapshot);
         this.from = Objects.requireNonNull(from, "from").clone();
         this.to = Objects.requireNonNull(to, "to").clone();

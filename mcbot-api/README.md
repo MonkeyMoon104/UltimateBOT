@@ -13,6 +13,10 @@ It exposes:
 
 This module intentionally contains no GUI logic, no runtime AI implementation and no NMS code. It is the boundary that third-party plugins should depend on.
 
+Public packages are null-marked with JSpecify. Parameters and return values are non-null
+unless explicitly annotated with `@Nullable`; invalid required arguments fail fast at the
+API boundary.
+
 ## What This Module Provides
 ### Entry Point
 - `MinecraftBotAPI`

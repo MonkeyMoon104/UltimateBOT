@@ -1,5 +1,7 @@
 package com.monkey.mcbot.sdk.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,8 +40,8 @@ import java.util.UUID;
  * @param killMessageEnabled whether the built-in kill message is enabled
  */
 public record BotSnapshotResponse(
-        UUID ownerUUID,
-        UUID botUUID,
+        @Nullable UUID ownerUUID,
+        @Nullable UUID botUUID,
         String botType,
         String botRank,
         String minBotRank,
@@ -49,7 +51,7 @@ public record BotSnapshotResponse(
         int totemCount,
         int minTotemCount,
         int maxTotemCount,
-        UUID targetUUID,
+        @Nullable UUID targetUUID,
         Set<UUID> targetUUIDs,
         String source,
         boolean autoTarget,
@@ -69,13 +71,23 @@ public record BotSnapshotResponse(
         boolean healing,
         boolean killMessageEnabled
 ) {
+    public BotSnapshotResponse {
+        botType = botType == null || botType.isBlank() ? "UNKNOWN" : botType;
+        botRank = botRank == null || botRank.isBlank() ? "UNKNOWN" : botRank;
+        minBotRank = minBotRank == null || minBotRank.isBlank() ? "EASY" : minBotRank;
+        maxBotRank = maxBotRank == null || maxBotRank.isBlank() ? "GOD" : maxBotRank;
+        targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
+        source = source == null || source.isBlank() ? "CORE" : source;
+        targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode;
+    }
+
     /**
      * Returns whether the bot currently has any target configured.
      *
      * @return whether a target is present
      */
     public boolean hasTarget() {
-        return targetUUID != null || targetUUIDs != null && !targetUUIDs.isEmpty();
+        return targetUUID != null || !targetUUIDs.isEmpty();
     }
 
     /**
@@ -84,7 +96,7 @@ public record BotSnapshotResponse(
      * @return whether more than one target UUID is configured
      */
     public boolean hasMultipleTargets() {
-        return targetUUIDs != null && targetUUIDs.size() > 1;
+        return targetUUIDs.size() > 1;
     }
 
     /**
@@ -111,7 +123,7 @@ public record BotSnapshotResponse(
      * @return whether min and max rank differ from the selected rank
      */
     public boolean usesRankRange() {
-        return botRank == null || !botRank.equalsIgnoreCase(minBotRank) || !botRank.equalsIgnoreCase(maxBotRank);
+        return !botRank.equalsIgnoreCase(minBotRank) || !botRank.equalsIgnoreCase(maxBotRank);
     }
 
 }
