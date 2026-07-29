@@ -9,6 +9,7 @@ It exposes:
 - the mutable bot management interface
 - the read-only registry interface
 - the shared model types used to spawn, inspect and update bots
+- a typed Bukkit-backed EventBus and cancellable runtime events
 
 This module intentionally contains no GUI logic, no runtime AI implementation and no NMS code. It is the boundary that third-party plugins should depend on.
 
@@ -16,8 +17,13 @@ This module intentionally contains no GUI logic, no runtime AI implementation an
 ### Entry Point
 - `MinecraftBotAPI`
 
-### Lifecycle Event
+### Events and EventBus
 - `MinecraftBotReadyEvent`
+- lifecycle: spawn, despawn and death
+- combat: target, attack, damage, kill, explosion and totem use
+- actions: heal and teleport
+- cancellable runtime setting changes
+- `MinecraftBotAPI.getEventBus()` for functional subscriptions
 
 ### Service Interfaces
 - `IBotManager`
@@ -82,6 +88,31 @@ Do not instantiate `MinecraftBotAPI` yourself. That constructor is for the core 
 | `MinecraftBotAPI` | global singleton entrypoint that exposes the manager and registry |
 | `IBotManager` | create, update, remove and resolve bots |
 | `IBotRegistry` | inspect active bots through immutable snapshots |
+| `BotEventBus` | subscribe to the same events delivered through Bukkit `@EventHandler` |
+
+## EventBus
+
+Every bot event extends `BotEvent` and provides an event ID, a per-bot sequence,
+timestamp, owner UUID, bot UUID, source and immutable snapshot. Developers may use
+normal Bukkit listeners or the functional EventBus; both receive the same event instance.
+
+```java
+BotEventSubscription subscription = MinecraftBotAPI.get().getEventBus().subscribe(
+        this,
+        BotExplosionEvent.class,
+        event -> event.setBlockDamage(true)
+);
+```
+
+Close the returned subscription when it is no longer needed. Bukkit also removes its
+listener automatically when the owning plugin is disabled.
+
+Available runtime events include `BotSpawnPrepareEvent`, `BotSpawnEvent`,
+`BotDespawnPrepareEvent`, `BotDespawnEvent`, `BotDeathEvent`,
+`BotTargetChangeEvent`, `BotSettingsChangeEvent`, `BotAttackEvent`, `BotDamageEvent`,
+`BotKillEntityEvent`, `BotExplosionEvent`, `BotTotemUseEvent`, `BotHealEvent` and
+`BotTeleportEvent`. Cancellable events can modify their safe mutable properties before
+the underlying action continues.
 
 ## `IBotManager` at a Glance
 ### Lookup and Parsing
@@ -266,7 +297,7 @@ The current core implementation returns `false` from update methods when:
 
 Use `BotSettings.explosions(false)` or `IBotManager.updateExplosions(ownerUUID, false)` to disable all bot-driven explosive combat. This also disables Crystal PvP and Respawn Anchor PvP and clears the explosive inventory slots.
 
-Explosion terrain damage is independent from explosion entity damage. By default, bot crystals and respawn anchors keep their explosion, damage and knockback but preserve blocks. Use `BotSettings.explosionBlockDamage(true)` or `IBotManager.updateExplosionBlockDamage(ownerUUID, true)` when bot explosions should also destroy terrain. Do not cancel Bukkit explosion events to protect blocks: cancellation removes the explosion action; clear the event block list instead.
+Explosion terrain damage is independent from explosion entity damage. By default, bot crystals and respawn anchors keep their explosion, damage and knockback but preserve blocks. Use `BotSettings.explosionBlockDamage(true)`, `IBotManager.updateExplosionBlockDamage(ownerUUID, true)` or `BotExplosionEvent.setBlockDamage(true)` when bot explosions should also destroy terrain. Cancelling `BotExplosionEvent` cancels the full explosion.
 
 Examples:
 - enabling combat fails if follow is currently disabled

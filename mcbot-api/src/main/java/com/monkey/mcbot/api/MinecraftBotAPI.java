@@ -2,6 +2,7 @@ package com.monkey.mcbot.api;
 
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.managers.IBotRegistry;
+import com.monkey.mcbot.api.event.BotEventBus;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
@@ -32,6 +33,7 @@ public final class MinecraftBotAPI {
     private final Plugin plugin;
     private final IBotManager botManager;
     private final IBotRegistry botRegistry;
+    private final BotEventBus eventBus;
 
     /**
      * Creates a new API container.
@@ -48,6 +50,7 @@ public final class MinecraftBotAPI {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.botManager = Objects.requireNonNull(botManager, "botManager");
         this.botRegistry = Objects.requireNonNull(botRegistry, "botRegistry");
+        this.eventBus = new BotEventBus();
     }
 
     /**
@@ -131,5 +134,10 @@ public final class MinecraftBotAPI {
      */
     public IBotRegistry getBotRegistry() {
         return botRegistry;
+    }
+
+    /** Returns the typed Bukkit-backed event subscription facade. */
+    public BotEventBus getEventBus() {
+        return eventBus;
     }
 }
