@@ -2,6 +2,7 @@ package com.monkey.mcbot.integration.api;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.api.model.BotSource;
+import com.monkey.mcbot.api.model.BotTargetMode;
 import com.monkey.mcbot.bot.BotCreationSource;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -33,6 +34,7 @@ public final class BotSnapshotMapper {
         boolean autoTarget = false;
         double autoTargetRange = 16.0D;
         boolean attackBots = false;
+        BotTargetMode targetMode = BotTargetMode.PLAYERS;
         boolean respectWorldGuardPvp = false;
         boolean stayAfterOwnerDeath = false;
         boolean idleWander = false;
@@ -60,6 +62,7 @@ public final class BotSnapshotMapper {
                 autoTarget = options.isAutoTarget();
                 autoTargetRange = options.getAutoTargetRange();
                 attackBots = options.isAttackBots();
+                targetMode = options.getTargetMode();
                 respectWorldGuardPvp = options.isRespectWorldGuardPvp();
                 stayAfterOwnerDeath = options.isStayAfterOwnerDeath();
                 idleWander = options.isIdleWander();
@@ -74,7 +77,9 @@ public final class BotSnapshotMapper {
             }
         }
 
-        Player target = bot.getTargetPlayer();
+        org.bukkit.entity.LivingEntity target = bot.getBrainController() == null
+                ? bot.getTargetPlayer()
+                : bot.getBrainController().getActiveTarget();
         UUID targetUUID = target != null ? target.getUniqueId() : null;
 
         return new BotSnapshot(
@@ -95,6 +100,7 @@ public final class BotSnapshotMapper {
                 autoTarget,
                 autoTargetRange,
                 attackBots,
+                targetMode,
                 respectWorldGuardPvp,
                 stayAfterOwnerDeath,
                 idleWander,

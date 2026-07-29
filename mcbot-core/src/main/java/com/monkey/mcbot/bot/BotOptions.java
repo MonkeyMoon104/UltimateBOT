@@ -3,6 +3,7 @@ package com.monkey.mcbot.bot;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.model.BotSkin;
+import com.monkey.mcbot.api.model.BotTargetMode;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.armor.ArmorTier;
@@ -47,6 +48,7 @@ public class BotOptions {
     private boolean autoTarget = false;
     private double autoTargetRange = 16.0D;
     private boolean attackBots = false;
+    private BotTargetMode targetMode = BotTargetMode.PLAYERS;
     private boolean respectWorldGuardPvp = false;
     private boolean stayAfterOwnerDeath = false;
     private boolean idleWander = false;
@@ -195,6 +197,14 @@ public class BotOptions {
 
     public void setAttackBots(boolean attackBots) {
         this.attackBots = attackBots;
+    }
+
+    public BotTargetMode getTargetMode() {
+        return targetMode;
+    }
+
+    public void setTargetMode(BotTargetMode targetMode) {
+        this.targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;
     }
 
     public boolean isRespectWorldGuardPvp() {

@@ -47,6 +47,7 @@ public final class BotSettings {
     private final boolean autoTarget;
     private final double autoTargetRange;
     private final boolean attackBots;
+    private final BotTargetMode targetMode;
     private final boolean respectWorldGuardPvp;
     private final boolean stayAfterOwnerDeath;
     private final boolean idleWander;
@@ -89,6 +90,7 @@ public final class BotSettings {
         this.autoTarget = builder.autoTarget;
         this.autoTargetRange = builder.autoTargetRange;
         this.attackBots = builder.attackBots;
+        this.targetMode = builder.targetMode;
         this.respectWorldGuardPvp = builder.respectWorldGuardPvp;
         this.stayAfterOwnerDeath = builder.stayAfterOwnerDeath;
         this.idleWander = builder.idleWander;
@@ -319,6 +321,10 @@ public final class BotSettings {
 
     public boolean attackBots() {
         return attackBots;
+    }
+
+    public BotTargetMode targetMode() {
+        return targetMode;
     }
 
     public boolean respectWorldGuardPvp() {
@@ -737,6 +743,8 @@ public final class BotSettings {
 
         BuildStep attackBots(boolean attackBots);
 
+        BuildStep targetMode(BotTargetMode targetMode);
+
         BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp);
 
         BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath);
@@ -820,6 +828,7 @@ public final class BotSettings {
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
         private boolean attackBots = false;
+        private BotTargetMode targetMode = BotTargetMode.PLAYERS;
         private boolean respectWorldGuardPvp = false;
         private boolean stayAfterOwnerDeath = false;
         private boolean idleWander = false;
@@ -1042,6 +1051,12 @@ public final class BotSettings {
         @Override
         public BuildStep attackBots(boolean attackBots) {
             this.attackBots = attackBots;
+            return this;
+        }
+
+        @Override
+        public BuildStep targetMode(BotTargetMode targetMode) {
+            this.targetMode = Objects.requireNonNull(targetMode, "targetMode");
             return this;
         }
 

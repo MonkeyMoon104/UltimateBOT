@@ -43,6 +43,7 @@ final class ApiBotOptionsFactory {
         options.setAutoTarget(settings.autoTarget());
         options.setAutoTargetRange(settings.autoTargetRange());
         options.setAttackBots(settings.attackBots());
+        options.setTargetMode(settings.targetMode());
         options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
         options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
         options.setIdleWander(settings.idleWander());

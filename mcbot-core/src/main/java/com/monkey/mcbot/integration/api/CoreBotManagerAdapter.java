@@ -462,6 +462,22 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateTargetMode(UUID ownerUUID, com.monkey.mcbot.api.model.BotTargetMode targetMode) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null || targetMode == null) {
+            return false;
+        }
+        options.setTargetMode(targetMode);
+        return true;
+    }
+
+    @Override
+    public boolean updateTargetModeByBotUUID(UUID botUUID, com.monkey.mcbot.api.model.BotTargetMode targetMode) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateTargetMode(ownerUUID, targetMode);
+    }
+
+    @Override
     public boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp) {
         BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
         if (options == null) {

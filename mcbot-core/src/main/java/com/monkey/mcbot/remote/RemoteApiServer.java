@@ -171,6 +171,19 @@ public final class RemoteApiServer {
             return;
         }
 
+        if ("target-mode".equals(parts[2])) {
+            TargetModePayload payload = readJson(exchange, TargetModePayload.class);
+            com.monkey.mcbot.api.model.BotTargetMode mode = payload == null ? null
+                    : enumValue(com.monkey.mcbot.api.model.BotTargetMode.class, payload.targetMode, null);
+            boolean updated = mode != null && runSync(() -> ownerUUID != null
+                    ? manager.updateTargetMode(ownerUUID, mode)
+                    : manager.updateTargetModeByBotUUID(requestedUUID, mode));
+            BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
+            writeJson(exchange, updated ? 200 : 400,
+                    new RemoteOperationResponse(updated, updated ? "Bot updated." : "Invalid target mode.", snapshot, null));
+            return;
+        }
+
         TogglePayload payload = readJson(exchange, TogglePayload.class);
         boolean enabled = payload != null && Boolean.TRUE.equals(payload.enabled);
         boolean updated = switch (parts[2]) {
@@ -222,6 +235,8 @@ public final class RemoteApiServer {
         buildStep.autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
+                .targetMode(enumValue(com.monkey.mcbot.api.model.BotTargetMode.class, safe.targetMode,
+                        com.monkey.mcbot.api.model.BotTargetMode.PLAYERS))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
                 .stayAfterOwnerDeath(defaultBoolean(safe.stayAfterOwnerDeath, false))
                 .idleWander(defaultBoolean(safe.idleWander, false))
@@ -389,6 +404,7 @@ public final class RemoteApiServer {
         public Boolean autoTarget;
         public Double autoTargetRange;
         public Boolean attackBots;
+        public String targetMode;
         public Boolean respectWorldGuardPvp;
         public Boolean stayAfterOwnerDeath;
         public Boolean idleWander;
@@ -401,6 +417,10 @@ public final class RemoteApiServer {
         public Boolean healing;
         public Boolean killMessageEnabled;
         public String killMessage;
+    }
+
+    public static final class TargetModePayload {
+        public String targetMode;
     }
 
     public static final class RemoteLocationPayload {

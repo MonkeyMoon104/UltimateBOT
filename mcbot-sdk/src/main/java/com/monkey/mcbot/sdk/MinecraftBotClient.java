@@ -7,6 +7,8 @@ import com.monkey.mcbot.sdk.model.BotOperationResponse;
 import com.monkey.mcbot.sdk.model.BotSnapshotResponse;
 import com.monkey.mcbot.sdk.model.EventBotSpawnRequest;
 import com.monkey.mcbot.sdk.model.ToggleRequest;
+import com.monkey.mcbot.sdk.model.SdkBotTargetMode;
+import com.monkey.mcbot.sdk.model.TargetModeRequest;
 
 import java.io.IOException;
 import java.net.URI;
@@ -117,6 +119,21 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     public BotOperationResponse updateAttackBotsByBotUUID(UUID botUUID, boolean enabled) {
         return toggle(Objects.requireNonNull(botUUID, "botUUID"), "attack-bots", enabled);
+    }
+
+    public BotOperationResponse updateTargetMode(UUID ownerUUID, SdkBotTargetMode targetMode) {
+        return targetMode(ownerUUID, targetMode);
+    }
+
+    public BotOperationResponse updateTargetModeByBotUUID(UUID botUUID, SdkBotTargetMode targetMode) {
+        return targetMode(botUUID, targetMode);
+    }
+
+    private BotOperationResponse targetMode(UUID ownerOrBotUUID, SdkBotTargetMode targetMode) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        Objects.requireNonNull(targetMode, "targetMode");
+        return send("PATCH", "/bots/" + ownerOrBotUUID + "/target-mode",
+                new TargetModeRequest(targetMode), BotOperationResponse.class);
     }
 
     private BotOperationResponse toggle(UUID ownerUUID, String field, boolean enabled) {

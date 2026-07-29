@@ -25,6 +25,7 @@ import java.util.UUID;
  * @param autoTarget whether automatic target acquisition is enabled
  * @param autoTargetRange target acquisition range
  * @param attackBots whether this bot may target other managed bots
+ * @param targetMode categories of living entities this bot may attack
  * @param respectWorldGuardPvp whether PvP-disabled WorldGuard regions are avoided
  * @param stayAfterOwnerDeath whether the bot remains after owner death
  * @param idleWander whether idle wandering is enabled
@@ -58,6 +59,7 @@ public record EventBotSpawnRequest(
         boolean autoTarget,
         double autoTargetRange,
         boolean attackBots,
+        SdkBotTargetMode targetMode,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,
@@ -114,6 +116,7 @@ public record EventBotSpawnRequest(
         private boolean autoTarget = true;
         private double autoTargetRange = 16.0D;
         private boolean attackBots = false;
+        private SdkBotTargetMode targetMode = SdkBotTargetMode.PLAYERS;
         private boolean respectWorldGuardPvp = false;
         private boolean stayAfterOwnerDeath = false;
         private boolean idleWander = false;
@@ -158,6 +161,7 @@ public record EventBotSpawnRequest(
         public Builder autoTarget(boolean autoTarget) { this.autoTarget = autoTarget; return this; }
         public Builder autoTargetRange(double autoTargetRange) { this.autoTargetRange = autoTargetRange; return this; }
         public Builder attackBots(boolean attackBots) { this.attackBots = attackBots; return this; }
+        public Builder targetMode(SdkBotTargetMode targetMode) { this.targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode; return this; }
         public Builder respectWorldGuardPvp(boolean respectWorldGuardPvp) { this.respectWorldGuardPvp = respectWorldGuardPvp; return this; }
         public Builder stayAfterOwnerDeath(boolean stayAfterOwnerDeath) { this.stayAfterOwnerDeath = stayAfterOwnerDeath; return this; }
         public Builder idleWander(boolean idleWander) { this.idleWander = idleWander; return this; }
@@ -202,6 +206,7 @@ public record EventBotSpawnRequest(
                     autoTarget,
                     autoTargetRange,
                     attackBots,
+                    targetMode,
                     respectWorldGuardPvp,
                     stayAfterOwnerDeath,
                     idleWander,

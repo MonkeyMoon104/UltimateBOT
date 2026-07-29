@@ -21,6 +21,7 @@ import java.util.UUID;
  * @param targetUUIDs full target set (for multi-target modes)
  * @param source origin of bot creation (core/api)
  * @param attackBots whether this bot can target other managed bots
+ * @param targetMode categories of living entities this bot may attack
  */
 public record BotSnapshot(
         UUID ownerUUID,
@@ -40,6 +41,7 @@ public record BotSnapshot(
         boolean autoTarget,
         double autoTargetRange,
         boolean attackBots,
+        BotTargetMode targetMode,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,
@@ -59,6 +61,7 @@ public record BotSnapshot(
         maxBotRank = maxBotRank == null || maxBotRank.isBlank() ? "GOD" : maxBotRank;
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
         source = source == null ? BotSource.CORE : source;
+        targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;
     }
 
     /**

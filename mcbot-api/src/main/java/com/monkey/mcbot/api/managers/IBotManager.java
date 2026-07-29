@@ -176,6 +176,14 @@ public interface IBotManager {
         return false;
     }
 
+    default boolean updateTargetMode(UUID ownerUUID, BotTargetMode targetMode) {
+        return false;
+    }
+
+    default boolean updateTargetModeByBotUUID(UUID botUUID, BotTargetMode targetMode) {
+        return false;
+    }
+
     boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp);
 
     boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
