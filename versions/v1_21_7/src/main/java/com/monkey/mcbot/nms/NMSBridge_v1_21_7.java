@@ -85,7 +85,7 @@ public class NMSBridge_v1_21_7 implements INMSBridge {
 
     @Override
     public ServerLevel getServerLevel(ServerPlayer player) {
-        return (ServerLevel) player.level();
+        return player.level();
     }
 
     @Override

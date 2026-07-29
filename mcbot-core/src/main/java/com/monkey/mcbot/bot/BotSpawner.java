@@ -41,8 +41,8 @@ public class BotSpawner {
     private final BotProfileResolver profileResolver = new BotProfileResolver();
 
     public BotSpawner(MinecraftBot plugin, BotRegistry registry) {
-        this.plugin = plugin;
-        this.registry = registry;
+        this.plugin = java.util.Objects.requireNonNull(plugin, "plugin");
+        this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
     public boolean spawn(Player viewer,

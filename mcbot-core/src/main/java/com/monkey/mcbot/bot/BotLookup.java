@@ -12,7 +12,7 @@ public class BotLookup {
     private final BotRegistry registry;
 
     public BotLookup(BotRegistry registry) {
-        this.registry = registry;
+        this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
     public ITrainingBot getBotByOwnerUUID(UUID ownerUUID) {

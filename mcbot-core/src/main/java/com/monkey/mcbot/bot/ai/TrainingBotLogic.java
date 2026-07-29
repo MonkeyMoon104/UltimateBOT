@@ -29,9 +29,11 @@ public class TrainingBotLogic {
                             String deadBotMessage,
                             String deadBotEventMessage) {
 
+        java.util.Objects.requireNonNull(plugin, "plugin");
+        java.util.Objects.requireNonNull(botOptions, "botOptions");
         PlayerOptions playerOptions = plugin.getPlayerOptions();
 
-        this.bot = bot;
+        this.bot = java.util.Objects.requireNonNull(bot, "bot");
         this.brainController = new BotBrainController(bot, plugin, targetPlayer, follow, botOptions);
         this.totemTracker = new TotemTrackerService(bot);
         this.deathHandler = new BotDeathService(bot, plugin, playerOptions, deadBotMessage, deadBotEventMessage);

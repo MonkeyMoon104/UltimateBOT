@@ -79,6 +79,9 @@ public class BotBrainController {
 
     public BotBrainController(ITrainingBot bot, MinecraftBot plugin,
                               org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
+        java.util.Objects.requireNonNull(bot, "bot");
+        java.util.Objects.requireNonNull(plugin, "plugin");
+        java.util.Objects.requireNonNull(botOptions, "botOptions");
         this.targetingService = plugin.getTargetingService();
         this.bot = bot;
         this.plugin = plugin;

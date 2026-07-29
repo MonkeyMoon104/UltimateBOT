@@ -13,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-public class BotOptions {
+public final class BotOptions {
 
     private final MinecraftBot training;
     private final Map<EquipmentSlot, ItemStack> armor;

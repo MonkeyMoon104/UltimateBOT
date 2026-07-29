@@ -19,8 +19,9 @@ public class BotManager {
     private final BotRegistry registry;
 
     public BotManager(MinecraftBot plugin) {
+        java.util.Objects.requireNonNull(plugin, "plugin");
         BotRegistry registry = plugin.getBotRegistry();
-        this.registry = registry;
+        this.registry = java.util.Objects.requireNonNull(registry, "registry");
         this.spawner = new BotSpawner(plugin, registry);
         this.updater = new BotUpdater(registry);
         this.lookup = new BotLookup(registry);

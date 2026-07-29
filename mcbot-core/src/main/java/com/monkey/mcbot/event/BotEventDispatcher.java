@@ -19,7 +19,7 @@ public final class BotEventDispatcher {
     private final CopyOnWriteArrayList<Consumer<BotEvent>> observers = new CopyOnWriteArrayList<>();
 
     public BotEventDispatcher(MinecraftBot plugin) {
-        this.plugin = plugin;
+        this.plugin = java.util.Objects.requireNonNull(plugin, "plugin");
     }
 
     public long nextSequence(UUID botUUID) {

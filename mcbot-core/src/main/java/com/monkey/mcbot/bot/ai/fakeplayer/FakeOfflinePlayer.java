@@ -15,8 +15,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
+/* Bukkit requires deprecated compatibility members on the OfflinePlayer contract. */
 @SuppressWarnings("deprecation")
-public class FakeOfflinePlayer implements OfflinePlayer {
+public final class FakeOfflinePlayer implements OfflinePlayer {
 
     private final ITrainingBot bot;
 

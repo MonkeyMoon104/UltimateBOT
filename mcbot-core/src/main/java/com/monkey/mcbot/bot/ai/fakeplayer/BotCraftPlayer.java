@@ -43,8 +43,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
+/* Bukkit requires deprecated compatibility members on the Player contract. */
 @SuppressWarnings("deprecation")
-public class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
+public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
 
     private final ITrainingBot trainingBot;
 

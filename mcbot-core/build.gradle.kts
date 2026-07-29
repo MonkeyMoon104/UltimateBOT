@@ -1,5 +1,7 @@
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.tasks.testing.Test
+import org.gradle.language.jvm.tasks.ProcessResources
 
 plugins {
     alias(libs.plugins.paperweight.userdev)
@@ -28,11 +30,11 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
+tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.processResources {
+tasks.named<ProcessResources>("processResources") {
     val props = mapOf("version" to version)
     inputs.properties(props)
     filteringCharset = "UTF-8"

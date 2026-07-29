@@ -14,7 +14,7 @@ import net.minecraft.world.level.Level;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class TrainingBot_v1_21_7 extends Player implements ITrainingBot {
+public final class TrainingBot_v1_21_7 extends Player implements ITrainingBot {
 
     private final TrainingBotLogic logic;
     private final BotCraftPlayer craftEntity;

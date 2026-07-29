@@ -84,10 +84,10 @@ public class BotAI {
     private static final int SUSTAIN_FOOD_TRIGGER_LEVEL = 6;
 
     public BotAI(Player bot, MinecraftBot plugin, BotOptions options) {
-        this.bot = bot;
+        this.bot = java.util.Objects.requireNonNull(bot, "bot");
         this.level = bot.level();
-        this.options = options;
-        this.plugin = plugin;
+        this.options = java.util.Objects.requireNonNull(options, "options");
+        this.plugin = java.util.Objects.requireNonNull(plugin, "plugin");
 
         this.noobMovementController = new BotNoobMovementController(bot, level);
         this.movementController = new BotMovementController(bot, level);

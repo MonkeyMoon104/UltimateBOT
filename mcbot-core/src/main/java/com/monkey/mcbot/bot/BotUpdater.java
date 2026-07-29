@@ -12,7 +12,7 @@ public class BotUpdater {
     private final BotRegistry registry;
 
     public BotUpdater(BotRegistry registry) {
-        this.registry = registry;
+        this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
     public void updateArmor(UUID ownerUUID,

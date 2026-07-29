@@ -14,7 +14,7 @@ import org.bukkit.enchantments.Enchantment;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SlotManager implements ISlotManager {
+public final class SlotManager implements ISlotManager {
 
     private final Player bot;
     private final Map<Integer, ItemStack> hotbarSlots = new HashMap<>();
@@ -34,9 +34,9 @@ public class SlotManager implements ISlotManager {
     private final IEquipmentBroadcaster equipmentBroadcaster;
 
     public SlotManager(Player bot, IResourceReplenisher resourceReplenisher, IEquipmentBroadcaster equipmentBroadcaster) {
-        this.bot = bot;
-        this.resourceReplenisher = resourceReplenisher;
-        this.equipmentBroadcaster = equipmentBroadcaster;
+        this.bot = java.util.Objects.requireNonNull(bot, "bot");
+        this.resourceReplenisher = java.util.Objects.requireNonNull(resourceReplenisher, "resourceReplenisher");
+        this.equipmentBroadcaster = java.util.Objects.requireNonNull(equipmentBroadcaster, "equipmentBroadcaster");
         initializeDefaultItems();
     }
 

@@ -25,7 +25,7 @@ public class BotAttackController {
     private final IAttackStrategy attackStrategy;
 
     public BotAttackController(Player bot) {
-        this.bot = bot;
+        this.bot = java.util.Objects.requireNonNull(bot, "bot");
 
         this.cooldownManager = new CooldownManager();
         this.attackExecutor = new AttackExecutor();
