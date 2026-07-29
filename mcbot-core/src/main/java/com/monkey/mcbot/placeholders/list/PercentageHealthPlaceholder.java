@@ -8,11 +8,9 @@ import org.bukkit.entity.Player;
 
 public class PercentageHealthPlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public PercentageHealthPlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 

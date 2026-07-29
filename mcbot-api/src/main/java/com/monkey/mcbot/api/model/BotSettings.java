@@ -1,13 +1,12 @@
 package com.monkey.mcbot.api.model;
 
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.Nullable;
-
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable settings payload used to configure bot behavior and editable limits.
@@ -571,11 +570,7 @@ public final class BotSettings {
          * @return next step (blast mutability)
          */
         ChangeableBlastStep blastProtection(
-                int bootsBlastEnabled,
-                int leggingsBlastEnabled,
-                int chestplateBlastEnabled,
-                int helmetBlastEnabled
-        );
+                int bootsBlastEnabled, int leggingsBlastEnabled, int chestplateBlastEnabled, int helmetBlastEnabled);
 
         /**
          * Sets per-slot blast profile using booleans.
@@ -590,8 +585,7 @@ public final class BotSettings {
                 boolean bootsBlastEnabled,
                 boolean leggingsBlastEnabled,
                 boolean chestplateBlastEnabled,
-                boolean helmetBlastEnabled
-        );
+                boolean helmetBlastEnabled);
 
         /**
          * Sets explicit blast protection profile object.
@@ -784,8 +778,7 @@ public final class BotSettings {
 
         BuildStep equipmentContents(Map<Integer, ItemStack> equipmentContents);
 
-        BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey,
-                            @Nullable String materialKey);
+        BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey, @Nullable String materialKey);
 
         /**
          * Builds immutable settings after validation.
@@ -796,44 +789,45 @@ public final class BotSettings {
         BotSettings build();
     }
 
-    private static final class Builder implements BotNameStep,
-            BotSkinStep,
-            FollowStep,
-            ChangeableFollowStep,
-            CombatStep,
-            ChangeableCombatStep,
-            BlastProtectionStep,
-            ChangeableBlastStep,
-            ArmorRangeStep,
-            ArmorStep,
-            ChangeableArmorStep,
-            TotemRangeStep,
-            TotemStep,
-            ChangeableTotemStep,
-            RankRangeStep,
-            RankStep,
-            ChangeableRankStep,
-            BuildStep {
+    private static final class Builder
+            implements BotNameStep,
+                    BotSkinStep,
+                    FollowStep,
+                    ChangeableFollowStep,
+                    CombatStep,
+                    ChangeableCombatStep,
+                    BlastProtectionStep,
+                    ChangeableBlastStep,
+                    ArmorRangeStep,
+                    ArmorStep,
+                    ChangeableArmorStep,
+                    TotemRangeStep,
+                    TotemStep,
+                    ChangeableTotemStep,
+                    RankRangeStep,
+                    RankStep,
+                    ChangeableRankStep,
+                    BuildStep {
         private boolean follow;
         private boolean combat;
-        private BotBlastProtection blastProtection;
+        private BotBlastProtection blastProtection = BotBlastProtection.all(false);
         private boolean changeableFollow;
         private boolean changeableCombat;
         private boolean changeableBlast;
         private boolean changeableArmor;
         private boolean changeableTotem;
         private boolean changeableRank;
-        private String botNameTemplate;
-        private BotSkin botSkin;
-        private BotArmorType armorType;
-        private BotArmorType minArmorType;
-        private BotArmorType maxArmorType;
+        private String botNameTemplate = "";
+        private BotSkin botSkin = BotSkin.random();
+        private BotArmorType armorType = BotArmorType.LEATHER;
+        private BotArmorType minArmorType = BotArmorType.LEATHER;
+        private BotArmorType maxArmorType = BotArmorType.NETHERITE;
         private int totemCount;
         private int minTotemCount;
         private int maxTotemCount;
-        private BotRank rank;
-        private BotRank minRank;
-        private BotRank maxRank;
+        private BotRank rank = BotRank.EASY;
+        private BotRank minRank = BotRank.EASY;
+        private BotRank maxRank = BotRank.GOD;
         private @Nullable BotLocation spawnLocation;
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
@@ -857,12 +851,12 @@ public final class BotSettings {
         private final Map<EquipmentSlot, String> armorTrimPatternKeys = new EnumMap<>(EquipmentSlot.class);
         private final Map<EquipmentSlot, String> armorTrimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
 
-        private Builder() {
-        }
+        private Builder() {}
 
         @Override
         public BotSkinStep setBotNameTemplate(String botNameTemplate) {
-            this.botNameTemplate = Objects.requireNonNull(botNameTemplate, "botNameTemplate").trim();
+            this.botNameTemplate =
+                    Objects.requireNonNull(botNameTemplate, "botNameTemplate").trim();
             return this;
         }
 
@@ -945,30 +939,21 @@ public final class BotSettings {
         }
 
         @Override
-        public ChangeableBlastStep blastProtection(int bootsBlastEnabled,
-                                                   int leggingsBlastEnabled,
-                                                   int chestplateBlastEnabled,
-                                                   int helmetBlastEnabled) {
+        public ChangeableBlastStep blastProtection(
+                int bootsBlastEnabled, int leggingsBlastEnabled, int chestplateBlastEnabled, int helmetBlastEnabled) {
             this.blastProtection = BotBlastProtection.of(
-                    bootsBlastEnabled,
-                    leggingsBlastEnabled,
-                    chestplateBlastEnabled,
-                    helmetBlastEnabled
-            );
+                    bootsBlastEnabled, leggingsBlastEnabled, chestplateBlastEnabled, helmetBlastEnabled);
             return this;
         }
 
         @Override
-        public ChangeableBlastStep blastProtection(boolean bootsBlastEnabled,
-                                                   boolean leggingsBlastEnabled,
-                                                   boolean chestplateBlastEnabled,
-                                                   boolean helmetBlastEnabled) {
+        public ChangeableBlastStep blastProtection(
+                boolean bootsBlastEnabled,
+                boolean leggingsBlastEnabled,
+                boolean chestplateBlastEnabled,
+                boolean helmetBlastEnabled) {
             this.blastProtection = BotBlastProtection.of(
-                    bootsBlastEnabled,
-                    leggingsBlastEnabled,
-                    chestplateBlastEnabled,
-                    helmetBlastEnabled
-            );
+                    bootsBlastEnabled, leggingsBlastEnabled, chestplateBlastEnabled, helmetBlastEnabled);
             return this;
         }
 
@@ -1172,8 +1157,8 @@ public final class BotSettings {
         }
 
         @Override
-        public BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey,
-                                   @Nullable String materialKey) {
+        public BuildStep armorTrim(
+                @Nullable EquipmentSlot slot, @Nullable String patternKey, @Nullable String materialKey) {
             if (slot != null) {
                 if (patternKey == null || patternKey.isBlank()) {
                     this.armorTrimPatternKeys.remove(slot);
@@ -1191,14 +1176,14 @@ public final class BotSettings {
 
         @Override
         public BotSettings build() {
-            blastProtection = Objects.requireNonNull(blastProtection, "blastProtection");
-            armorType = Objects.requireNonNull(armorType, "armorType");
-            minArmorType = Objects.requireNonNull(minArmorType, "minArmorType");
-            maxArmorType = Objects.requireNonNull(maxArmorType, "maxArmorType");
-            rank = Objects.requireNonNull(rank, "rank");
-            minRank = Objects.requireNonNull(minRank, "minRank");
-            maxRank = Objects.requireNonNull(maxRank, "maxRank");
-            botSkin = Objects.requireNonNull(botSkin, "botSkin");
+            Objects.requireNonNull(blastProtection, "blastProtection");
+            Objects.requireNonNull(armorType, "armorType");
+            Objects.requireNonNull(minArmorType, "minArmorType");
+            Objects.requireNonNull(maxArmorType, "maxArmorType");
+            Objects.requireNonNull(rank, "rank");
+            Objects.requireNonNull(minRank, "minRank");
+            Objects.requireNonNull(maxRank, "maxRank");
+            Objects.requireNonNull(botSkin, "botSkin");
             if (botNameTemplate == null || botNameTemplate.isBlank()) {
                 throw new IllegalArgumentException("botNameTemplate cannot be blank");
             }
@@ -1206,24 +1191,20 @@ public final class BotSettings {
             validateTotemRange(minTotemCount, maxTotemCount);
             validateRankRange(minRank, maxRank);
 
-            if (armorType.ordinal() < minArmorType.ordinal() || armorType.ordinal() > maxArmorType.ordinal()) {
+            if (armorType.compareTo(minArmorType) < 0 || armorType.compareTo(maxArmorType) > 0) {
                 throw new IllegalArgumentException(
-                        "armor must be within range [" + minArmorType + ", " + maxArmorType + "]"
-                );
+                        "armor must be within range [" + minArmorType + ", " + maxArmorType + "]");
             }
 
             if (totemCount < minTotemCount || totemCount > maxTotemCount) {
                 if (totemCount != -1 || minTotemCount > -1) {
                     throw new IllegalArgumentException(
-                            "totemCount must be within range [" + minTotemCount + ", " + maxTotemCount + "]"
-                    );
+                            "totemCount must be within range [" + minTotemCount + ", " + maxTotemCount + "]");
                 }
             }
 
-            if (rank.ordinal() < minRank.ordinal() || rank.ordinal() > maxRank.ordinal()) {
-                throw new IllegalArgumentException(
-                        "rank must be within range [" + minRank + ", " + maxRank + "]"
-                );
+            if (rank.compareTo(minRank) < 0 || rank.compareTo(maxRank) > 0) {
+                throw new IllegalArgumentException("rank must be within range [" + minRank + ", " + maxRank + "]");
             }
 
             if (combat && !follow) {
@@ -1270,13 +1251,13 @@ public final class BotSettings {
         }
 
         private static void validateArmorRange(BotArmorType minArmorType, BotArmorType maxArmorType) {
-            if (minArmorType.ordinal() > maxArmorType.ordinal()) {
+            if (minArmorType.compareTo(maxArmorType) > 0) {
                 throw new IllegalArgumentException("min armor cannot be greater than max armor");
             }
         }
 
         private static void validateRankRange(BotRank min, BotRank max) {
-            if (min.ordinal() > max.ordinal()) {
+            if (min.compareTo(max) > 0) {
                 throw new IllegalArgumentException("min rank cannot be greater than max rank");
             }
         }

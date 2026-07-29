@@ -5,14 +5,12 @@ import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.IMovementExecu
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class MovementExecutor implements IMovementExecutor {
     private static final int ZIG_ZAG_CHANGE_TICKS = 12;
 
     private final Player bot;
-    private final Level level;
     private final IBlockStateValidator blockValidator;
     private final IObstacleHandler obstacleHandler;
 
@@ -23,9 +21,8 @@ public class MovementExecutor implements IMovementExecutor {
     private int zigZagDirection = 1;
     private int zigZagCounter = 0;
 
-    public MovementExecutor(Player bot, Level level, IBlockStateValidator blockValidator, IObstacleHandler obstacleHandler) {
+    public MovementExecutor(Player bot, IBlockStateValidator blockValidator, IObstacleHandler obstacleHandler) {
         this.bot = bot;
-        this.level = level;
         this.blockValidator = blockValidator;
         this.obstacleHandler = obstacleHandler;
     }
@@ -84,8 +81,6 @@ public class MovementExecutor implements IMovementExecutor {
     public void executeStrafeCircle(Player target, double targetDistance) {
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
-        double currentDistance = botPos.distanceTo(targetPos);
-
         double angleSpeed = 0.08 + (Math.random() * 0.04);
         strafeAngle += strafeClockwise ? angleSpeed : -angleSpeed;
 
@@ -157,7 +152,8 @@ public class MovementExecutor implements IMovementExecutor {
             double moveX = zigzagDirection.x * movementSpeed * 1.2;
             double moveZ = zigzagDirection.z * movementSpeed * 1.2;
 
-            if (!obstacleHandler.handleObstacles(zigzagDirection.x, zigzagDirection.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
+            if (!obstacleHandler.handleObstacles(
+                    zigzagDirection.x, zigzagDirection.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
                 bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
             }
         } else {
@@ -167,7 +163,8 @@ public class MovementExecutor implements IMovementExecutor {
             double moveX = strafeDir.x * movementSpeed;
             double moveZ = strafeDir.z * movementSpeed;
 
-            if (!obstacleHandler.handleObstacles(strafeDir.x, strafeDir.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
+            if (!obstacleHandler.handleObstacles(
+                    strafeDir.x, strafeDir.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
                 bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
             }
         }
@@ -183,7 +180,8 @@ public class MovementExecutor implements IMovementExecutor {
             double moveX = bestDirection.x * movementSpeed;
             double moveZ = bestDirection.z * movementSpeed;
 
-            if (!obstacleHandler.handleObstacles(bestDirection.x, bestDirection.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
+            if (!obstacleHandler.handleObstacles(
+                    bestDirection.x, bestDirection.z, botPos.x, botPos.y, botPos.z, moveX, moveZ)) {
                 bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
             }
         } else {
@@ -296,15 +294,11 @@ public class MovementExecutor implements IMovementExecutor {
     private Vec3 rotateDirection(Vec3 direction, double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
-        return new Vec3(
-                direction.x * cos - direction.z * sin,
-                direction.y,
-                direction.x * sin + direction.z * cos
-        );
+        return new Vec3(direction.x * cos - direction.z * sin, direction.y, direction.x * sin + direction.z * cos);
     }
 
     private boolean isPathSafeOptimized(Vec3 from, Vec3 direction, double distance) {
-        int steps = Math.min((int) (distance), 3);
+        int steps = Math.min((int) distance, 3);
         for (int i = 1; i <= steps; i++) {
             Vec3 checkPos = from.add(direction.scale(i));
             BlockPos blockPos = BlockPos.containing(checkPos);

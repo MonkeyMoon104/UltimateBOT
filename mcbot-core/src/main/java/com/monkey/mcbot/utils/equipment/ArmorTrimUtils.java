@@ -2,6 +2,10 @@ package com.monkey.mcbot.utils.equipment;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -14,26 +18,42 @@ import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 public final class ArmorTrimUtils {
 
     private static final List<String> PATTERN_ORDER = List.of(
-            "sentry", "dune", "coast", "wild", "ward", "eye", "vex", "tide",
-            "snout", "rib", "spire", "wayfinder", "shaper", "silence", "raiser",
-            "host", "flow", "bolt"
-    );
+            "sentry",
+            "dune",
+            "coast",
+            "wild",
+            "ward",
+            "eye",
+            "vex",
+            "tide",
+            "snout",
+            "rib",
+            "spire",
+            "wayfinder",
+            "shaper",
+            "silence",
+            "raiser",
+            "host",
+            "flow",
+            "bolt");
 
     private static final List<String> MATERIAL_ORDER = List.of(
-            "quartz", "iron", "netherite", "redstone", "copper", "gold",
-            "emerald", "diamond", "lapis", "amethyst", "resin"
-    );
+            "quartz",
+            "iron",
+            "netherite",
+            "redstone",
+            "copper",
+            "gold",
+            "emerald",
+            "diamond",
+            "lapis",
+            "amethyst",
+            "resin");
 
-    private ArmorTrimUtils() {
-    }
+    private ArmorTrimUtils() {}
 
     public static List<String> getTrimPatternKeys() {
         return resolveOrderedKeys(PATTERN_ORDER, trimPatternRegistry());
@@ -51,9 +71,8 @@ public final class ArmorTrimUtils {
         return getNextKey(getTrimMaterialKeys(), currentKey, forward);
     }
 
-    public static void applyTrimSelection(Map<EquipmentSlot, ItemStack> armorMap,
-                                          @Nullable String patternKey,
-                                          @Nullable String materialKey) {
+    public static void applyTrimSelection(
+            Map<EquipmentSlot, ItemStack> armorMap, @Nullable String patternKey, @Nullable String materialKey) {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : armorMap.entrySet()) {
             ItemStack piece = entry.getValue();
             if (piece == null) {
@@ -66,9 +85,7 @@ public final class ArmorTrimUtils {
         }
     }
 
-    public static void applyTrim(ItemStack item,
-                                 @Nullable String patternKey,
-                                 @Nullable String materialKey) {
+    public static void applyTrim(ItemStack item, @Nullable String patternKey, @Nullable String materialKey) {
         if (item == null || item.getType() == Material.AIR) {
             return;
         }
@@ -148,7 +165,7 @@ public final class ArmorTrimUtils {
             return "";
         }
 
-        String[] parts = normalized.split("_");
+        String[] parts = normalized.split("_", -1);
         StringBuilder builder = new StringBuilder();
         for (String part : parts) {
             if (part.isEmpty()) {
@@ -162,8 +179,7 @@ public final class ArmorTrimUtils {
         return builder.toString();
     }
 
-    @Nullable
-    private static String getNextKey(List<String> values, @Nullable String currentKey, boolean forward) {
+    @Nullable private static String getNextKey(List<String> values, @Nullable String currentKey, boolean forward) {
         if (values.isEmpty()) {
             return null;
         }
@@ -178,20 +194,16 @@ public final class ArmorTrimUtils {
             return forward ? values.getFirst() : values.getLast();
         }
 
-        int nextIndex = forward
-                ? (index + 1) % values.size()
-                : (index - 1 + values.size()) % values.size();
+        int nextIndex = forward ? (index + 1) % values.size() : (index - 1 + values.size()) % values.size();
         return values.get(nextIndex);
     }
 
-    @Nullable
-    private static TrimPattern resolveTrimPattern(@Nullable String patternKey) {
+    @Nullable private static TrimPattern resolveTrimPattern(@Nullable String patternKey) {
         String normalized = normalizeKey(patternKey);
         return normalized == null ? null : trimPatternRegistry().get(NamespacedKey.minecraft(normalized));
     }
 
-    @Nullable
-    private static TrimMaterial resolveTrimMaterial(@Nullable String materialKey) {
+    @Nullable private static TrimMaterial resolveTrimMaterial(@Nullable String materialKey) {
         String normalized = normalizeKey(materialKey);
         return normalized == null ? null : trimMaterialRegistry().get(NamespacedKey.minecraft(normalized));
     }
@@ -204,7 +216,8 @@ public final class ArmorTrimUtils {
         return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL);
     }
 
-    private static <T extends org.bukkit.Keyed> List<String> resolveOrderedKeys(List<String> preferredOrder, Registry<T> registry) {
+    private static <T extends org.bukkit.Keyed> List<String> resolveOrderedKeys(
+            List<String> preferredOrder, Registry<T> registry) {
         List<String> available = new ArrayList<>();
 
         for (String key : preferredOrder) {
@@ -216,8 +229,7 @@ public final class ArmorTrimUtils {
         return available;
     }
 
-    @Nullable
-    private static String normalizeKey(@Nullable String key) {
+    @Nullable private static String normalizeKey(@Nullable String key) {
         if (key == null) {
             return null;
         }

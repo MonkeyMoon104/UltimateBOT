@@ -1,9 +1,9 @@
 package com.monkey.mcbot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import java.util.Map;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import java.util.Map;
 
 public class ResourceReplenisher implements IResourceReplenisher {
 
@@ -27,78 +27,19 @@ public class ResourceReplenisher implements IResourceReplenisher {
         if (currentStack == null || currentStack.isEmpty()) return;
 
         switch (slot) {
-            case OBSIDIAN_SLOT:
-                if (currentStack.getItem() == Items.OBSIDIAN && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case CRYSTAL_SLOT:
-                if (currentStack.getItem() == Items.END_CRYSTAL && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case ENDERPEARL_SLOT:
-                if (currentStack.getItem() == Items.ENDER_PEARL && currentStack.getCount() < 16) {
-                    currentStack.setCount(16);
-                }
-                break;
-            case ANCHOR_SLOT:
-                if (currentStack.getItem() == Items.RESPAWN_ANCHOR && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case GLOW_SLOT:
-                if (currentStack.getItem() == Items.GLOWSTONE && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
-            case GOLDEN_APPLE_SLOT:
-                if (currentStack.getItem() == Items.GOLDEN_APPLE && currentStack.getCount() < 64) {
-                    currentStack.setCount(64);
-                }
-                break;
+            case OBSIDIAN_SLOT -> refill(currentStack, Items.OBSIDIAN, 64);
+            case CRYSTAL_SLOT -> refill(currentStack, Items.END_CRYSTAL, 64);
+            case ENDERPEARL_SLOT -> refill(currentStack, Items.ENDER_PEARL, 16);
+            case ANCHOR_SLOT -> refill(currentStack, Items.RESPAWN_ANCHOR, 64);
+            case GLOW_SLOT -> refill(currentStack, Items.GLOWSTONE, 64);
+            case GOLDEN_APPLE_SLOT -> refill(currentStack, Items.GOLDEN_APPLE, 64);
+            default -> {}
         }
     }
 
     @Override
     public void onItemUsed(Map<Integer, ItemStack> hotbarSlots, int slot) {
-        if (!infiniteResources) return;
-
-        ItemStack stack = hotbarSlots.get(slot);
-        if (stack == null || stack.isEmpty()) return;
-
-        switch (slot) {
-            case OBSIDIAN_SLOT:
-                if (stack.getItem() == Items.OBSIDIAN) {
-                    stack.setCount(64);
-                }
-                break;
-            case CRYSTAL_SLOT:
-                if (stack.getItem() == Items.END_CRYSTAL) {
-                    stack.setCount(64);
-                }
-                break;
-            case ENDERPEARL_SLOT:
-                if (stack.getItem() == Items.ENDER_PEARL) {
-                    stack.setCount(16);
-                }
-                break;
-            case ANCHOR_SLOT:
-                if (stack.getItem() == Items.RESPAWN_ANCHOR) {
-                    stack.setCount(64);
-                }
-                break;
-            case GLOW_SLOT:
-                if (stack.getItem() == Items.GLOWSTONE) {
-                    stack.setCount(64);
-                }
-                break;
-            case GOLDEN_APPLE_SLOT:
-                if (stack.getItem() == Items.GOLDEN_APPLE) {
-                    stack.setCount(64);
-                }
-                break;
-        }
+        replenishItem(hotbarSlots, slot);
     }
 
     @Override
@@ -116,5 +57,11 @@ public class ResourceReplenisher implements IResourceReplenisher {
     @Override
     public boolean hasInfiniteResources() {
         return infiniteResources;
+    }
+
+    private static void refill(ItemStack stack, net.minecraft.world.item.Item expectedItem, int count) {
+        if (expectedItem.equals(stack.getItem()) && stack.getCount() < count) {
+            stack.setCount(count);
+        }
     }
 }

@@ -7,6 +7,8 @@ import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -17,8 +19,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.UUID;
 
 public class ArmorItem extends AbstractItem {
 
@@ -48,20 +48,16 @@ public class ArmorItem extends AbstractItem {
         String blastState = ChatColorUtils.translate(
                 isBlastEnabled()
                         ? training.getLangString("gui.default-armor.blast-enabled-text", "&aON")
-                        : training.getLangString("gui.default-armor.blast-disabled-text", "&cOFF")
-        );
+                        : training.getLangString("gui.default-armor.blast-disabled-text", "&cOFF"));
 
         for (String line : loreLines) {
-            String coloredLine = ChatColorUtils.translate(
-                    line.replace("%type%", typeName)
-                            .replace("%blast_state%", blastState)
-            );
+            String coloredLine =
+                    ChatColorUtils.translate(line.replace("%type%", typeName).replace("%blast_state%", blastState));
             builder.addLegacyLoreLines(coloredLine);
         }
 
         return builder;
     }
-
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
@@ -77,17 +73,14 @@ public class ArmorItem extends AbstractItem {
 
     private void handleArmorCycleClick(Player player) {
         if (!options.isChangeableArmor()) {
-            String msg = training.getLangString("messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
 
-        Material next = ArmorCycle.getNextArmor(
-                piece.getType(),
-                slot,
-                options.getMinArmorTier(),
-                options.getMaxArmorTier()
-        );
+        Material next =
+                ArmorCycle.getNextArmor(piece.getType(), slot, options.getMinArmorTier(), options.getMaxArmorTier());
 
         ItemStack updated = createUpdatedPiece(next, isBlastEnabled());
         applyUpdatedPiece(player, updated);
@@ -95,7 +88,8 @@ public class ArmorItem extends AbstractItem {
 
     private void handleBlastToggleClick(Player player) {
         if (!options.isChangeableBlast()) {
-            String msg = training.getLangString("messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -125,7 +119,7 @@ public class ArmorItem extends AbstractItem {
     }
 
     private String formatMaterialName(Material material) {
-        String[] parts = material.name().toLowerCase().split("_");
+        String[] parts = material.name().toLowerCase(Locale.ROOT).split("_", -1);
         StringBuilder builder = new StringBuilder();
 
         for (int i = 0; i < parts.length; i++) {
@@ -150,6 +144,3 @@ public class ArmorItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-
-

@@ -8,11 +8,9 @@ import org.bukkit.entity.Player;
 
 public class CombatPlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public CombatPlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 

@@ -8,6 +8,7 @@ import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.bot.ai.rank.RankCoordinator;
 import com.monkey.mcbot.bot.ai.rank.configs.RAPVPConfig;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -15,14 +16,11 @@ import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Optional;
-
 public class BotRAPVPController {
 
     private final Player bot;
     private final Level level;
     private final BotInventoryController inventory;
-    private final BotRotationController rotation;
     private final BotEnderpearlController pearlController;
     private final AnchorPlacer anchorPlacer;
     private final AnchorCharger anchorCharger;
@@ -39,13 +37,13 @@ public class BotRAPVPController {
     private int failedExplosionAttempts = 0;
     private long lastAnchorExplosionTime = 0L;
 
-    public BotRAPVPController(Player bot,
-                              BotInventoryController inventory,
-                              BotRotationController rotation,
-                              BotEnderpearlController pearlController) {
+    public BotRAPVPController(
+            Player bot,
+            BotInventoryController inventory,
+            BotRotationController rotation,
+            BotEnderpearlController pearlController) {
         this.bot = bot;
         this.inventory = inventory;
-        this.rotation = rotation;
         this.pearlController = pearlController;
         this.level = bot.level();
 
@@ -78,8 +76,7 @@ public class BotRAPVPController {
                 case PLACING_ANCHOR -> handlePlacingAnchor();
                 case CHARGING_ANCHOR -> handleChargingAnchor();
                 case WAITING_EXPLOSION -> handleWaitingExplosion();
-                case IDLE -> {
-                }
+                case IDLE -> {}
             }
         }
     }
@@ -286,7 +283,8 @@ public class BotRAPVPController {
                         continue;
                     }
 
-                    double targetDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorCenter, currentTarget);
+                    double targetDamage =
+                            ExplosionDamageEstimator.estimateAnchorDamage(level, anchorCenter, currentTarget);
                     double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorCenter, bot);
                     if (selfDamage >= bot.getHealth() - 1.0F) {
                         continue;

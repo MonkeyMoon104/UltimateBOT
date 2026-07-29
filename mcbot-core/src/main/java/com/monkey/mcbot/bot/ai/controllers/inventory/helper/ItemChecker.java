@@ -1,10 +1,10 @@
 package com.monkey.mcbot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
+import java.util.Map;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import java.util.Map;
 
 public class ItemChecker implements IItemChecker {
 
@@ -20,37 +20,51 @@ public class ItemChecker implements IItemChecker {
 
     @Override
     public boolean isHoldingSword(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == SWORD_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.NETHERITE_SWORD;
+        return currentSlot == SWORD_SLOT
+                && Items.NETHERITE_SWORD.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingEnderpearl(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ENDERPEARL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.ENDER_PEARL;
+        return currentSlot == ENDERPEARL_SLOT
+                && Items.ENDER_PEARL.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingObsidian(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == OBSIDIAN_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.OBSIDIAN;
+        return currentSlot == OBSIDIAN_SLOT
+                && Items.OBSIDIAN.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingCrystal(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == CRYSTAL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.END_CRYSTAL;
+        return currentSlot == CRYSTAL_SLOT
+                && Items.END_CRYSTAL.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingAnchor(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ANCHOR_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.RESPAWN_ANCHOR;
+        return currentSlot == ANCHOR_SLOT
+                && Items.RESPAWN_ANCHOR.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GLOW_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.GLOWSTONE;
+        return currentSlot == GLOW_SLOT
+                && Items.GLOWSTONE.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
     public boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GOLDEN_APPLE_SLOT && getCurrentItem(currentSlot, hotbarSlots).getItem() == Items.GOLDEN_APPLE;
+        return currentSlot == GOLDEN_APPLE_SLOT
+                && Items.GOLDEN_APPLE.equals(
+                        getCurrentItem(currentSlot, hotbarSlots).getItem());
     }
 
     @Override
@@ -65,15 +79,15 @@ public class ItemChecker implements IItemChecker {
     @Override
     public int getItemCount(Map<Integer, ItemStack> hotbarSlots, Item item, boolean infiniteResources) {
         if (infiniteResources) {
-            if (item == Items.OBSIDIAN || item == Items.END_CRYSTAL) {
+            if (Items.OBSIDIAN.equals(item) || Items.END_CRYSTAL.equals(item)) {
                 return 64;
-            } else if (item == Items.ENDER_PEARL) {
+            } else if (Items.ENDER_PEARL.equals(item)) {
                 return 16;
             }
         }
 
         for (ItemStack stack : hotbarSlots.values()) {
-            if (stack.getItem() == item) {
+            if (stack.getItem().equals(item)) {
                 return stack.getCount();
             }
         }

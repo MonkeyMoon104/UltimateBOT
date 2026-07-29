@@ -3,20 +3,19 @@ package com.monkey.mcbot.bot.ai.fakeplayer;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import io.papermc.paper.persistence.PersistentDataContainerView;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
-
-/* Bukkit requires deprecated compatibility members on the OfflinePlayer contract. */
-@SuppressWarnings("deprecation")
+/* Bukkit dictates deprecated and return-only generic compatibility signatures on OfflinePlayer. */
+@SuppressWarnings({"deprecation", "TypeParameterUnusedInFormals"})
 public final class FakeOfflinePlayer implements OfflinePlayer {
 
     private final ITrainingBot bot;
@@ -41,17 +40,20 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(@Nullable String s, @Nullable Date date, @Nullable String s1) {
+    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
+            @Nullable String s, @Nullable Date date, @Nullable String s1) {
         return null;
     }
 
     @Override
-    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(@Nullable String s, @Nullable Instant instant, @Nullable String s1) {
+    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
+            @Nullable String s, @Nullable Instant instant, @Nullable String s1) {
         return null;
     }
 
     @Override
-    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(@Nullable String s, @Nullable Duration duration, @Nullable String s1) {
+    public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
+            @Nullable String s, @Nullable Duration duration, @Nullable String s1) {
         return null;
     }
 
@@ -61,9 +63,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void setWhitelisted(boolean b) {
-
-    }
+    public void setWhitelisted(boolean b) {}
 
     @Override
     public String getName() {
@@ -121,29 +121,19 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void incrementStatistic(Statistic statistic) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic) throws IllegalArgumentException {
-
-    }
+    public void decrementStatistic(Statistic statistic) throws IllegalArgumentException {}
 
     @Override
-    public void incrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-
-    }
+    public void decrementStatistic(Statistic statistic, int i) throws IllegalArgumentException {}
 
     @Override
-    public void setStatistic(Statistic statistic, int i) throws IllegalArgumentException {
-
-    }
+    public void setStatistic(Statistic statistic, int i) throws IllegalArgumentException {}
 
     @Override
     public int getStatistic(Statistic statistic) throws IllegalArgumentException {
@@ -151,14 +141,10 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
-
-    }
+    public void decrementStatistic(Statistic statistic, Material material) throws IllegalArgumentException {}
 
     @Override
     public int getStatistic(Statistic statistic, Material material) throws IllegalArgumentException {
@@ -166,29 +152,19 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void incrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-
-    }
+    public void decrementStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {}
 
     @Override
-    public void setStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {
-
-    }
+    public void setStatistic(Statistic statistic, Material material, int i) throws IllegalArgumentException {}
 
     @Override
-    public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
-
-    }
+    public void decrementStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {}
 
     @Override
     public int getStatistic(Statistic statistic, EntityType entityType) throws IllegalArgumentException {
@@ -196,19 +172,13 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void incrementStatistic(Statistic statistic, EntityType entityType, int i) throws IllegalArgumentException {
-
-    }
+    public void incrementStatistic(Statistic statistic, EntityType entityType, int i) throws IllegalArgumentException {}
 
     @Override
-    public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {
-
-    }
+    public void decrementStatistic(Statistic statistic, EntityType entityType, int i) {}
 
     @Override
-    public void setStatistic(Statistic statistic, EntityType entityType, int i) {
-
-    }
+    public void setStatistic(Statistic statistic, EntityType entityType, int i) {}
 
     @Override
     public @Nullable Location getLastDeathLocation() {
@@ -236,7 +206,5 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public void setOp(boolean b) {
-
-    }
+    public void setOp(boolean b) {}
 }

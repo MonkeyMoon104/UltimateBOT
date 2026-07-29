@@ -37,7 +37,7 @@ public class AnchorCharger {
             }
 
             ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || stack.getItem() != Items.GLOWSTONE) {
+            if (stack == null || !Items.GLOWSTONE.equals(stack.getItem())) {
                 return false;
             }
 
@@ -55,11 +55,14 @@ public class AnchorCharger {
 
             bot.level().setBlock(anchorPos, newState, 3);
 
-            NMSBridgeManager.get().playSound(
-                    bot.level(), anchorPos,
-                    net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
-                    net.minecraft.sounds.SoundSource.BLOCKS,
-                    1.0F, 1.0F);
+            NMSBridgeManager.get()
+                    .playSound(
+                            bot.level(),
+                            anchorPos,
+                            net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
+                            net.minecraft.sounds.SoundSource.BLOCKS,
+                            1.0F,
+                            1.0F);
 
             rotation.lookAt(Vec3.atLowerCornerOf(anchorPos));
 
@@ -69,7 +72,8 @@ public class AnchorCharger {
             return true;
 
         } catch (Exception e) {
-            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Anchor charge failed -> " + e.getMessage());
+            MinecraftBotLogging.warn(
+                    MinecraftBot.getInstance().getLogger(), "Combat", "Anchor charge failed -> " + e.getMessage());
             return false;
         }
     }
@@ -83,11 +87,10 @@ public class AnchorCharger {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                || result.getBlockPos().equals(pos);
     }
 }

@@ -3,14 +3,16 @@ package com.monkey.mcbot.bot.ai.controllers.attack.helper;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.mcbot.nms.NMSBridgeManager;
+import java.util.Objects;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class AttackExecutor implements IAttackExecutor {
+    private static final System.Logger LOGGER = System.getLogger(AttackExecutor.class.getName());
 
     public static final String BOT_FIRE_ASPECT_METADATA = "MinecraftBotFireAspectUntil";
     private static final int FIRE_ASPECT_SECONDS = 4;
@@ -33,10 +35,10 @@ public class AttackExecutor implements IAttackExecutor {
 
             net.minecraft.server.level.ServerLevel serverLevel = getCachedServerLevel(bot);
 
-            NMSBridgeManager.get().hurtEntity(target, serverLevel, bot.damageSources().playerAttack(bot), criticalDamage);
+            NMSBridgeManager.get()
+                    .hurtEntity(target, serverLevel, bot.damageSources().playerAttack(bot), criticalDamage);
             applyFireAspect(bot, target);
             applyLavaDamage(bot, target);
-
 
         } catch (Exception e) {
             performNormalAttack(bot, target);
@@ -55,7 +57,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (!(bot instanceof ITrainingBot trainingBot) || target == null || target.fireImmune()) {
             return;
         }
-        if (bot.getMainHandItem().getItem() != Items.NETHERITE_SWORD) {
+        if (!Items.NETHERITE_SWORD.equals(bot.getMainHandItem().getItem())) {
             return;
         }
 
@@ -64,11 +66,12 @@ public class AttackExecutor implements IAttackExecutor {
             if (bukkitTarget != null) {
                 bukkitTarget.setMetadata(
                         BOT_FIRE_ASPECT_METADATA,
-                        new FixedMetadataValue(trainingBot.getPlugin(), System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS)
-                );
+                        new FixedMetadataValue(
+                                trainingBot.getPlugin(), System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS));
             }
             target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), FIRE_ASPECT_SECONDS * 20));
-        } catch (Exception ignored) {
+        } catch (RuntimeException fireAspectError) {
+            LOGGER.log(System.Logger.Level.DEBUG, "Could not apply bot fire aspect metadata", fireAspectError);
         }
     }
 
@@ -76,7 +79,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (!(bot instanceof ITrainingBot trainingBot) || target == null || target.fireImmune()) {
             return;
         }
-        if (bot.getMainHandItem().getItem() != Items.NETHERITE_SWORD || bot.distanceTo(target) > 3.7D) {
+        if (!Items.NETHERITE_SWORD.equals(bot.getMainHandItem().getItem()) || bot.distanceTo(target) > 3.7D) {
             return;
         }
 
@@ -84,22 +87,22 @@ public class AttackExecutor implements IAttackExecutor {
             Entity bukkitTarget = target.getBukkitEntity();
             long now = System.currentTimeMillis();
             if (bukkitTarget != null) {
-                for (org.bukkit.metadata.MetadataValue value : bukkitTarget.getMetadata(BOT_LAVA_DAMAGE_COOLDOWN_METADATA)) {
-                    if (value.getOwningPlugin() == trainingBot.getPlugin() && value.asLong() > now) {
+                for (org.bukkit.metadata.MetadataValue value :
+                        bukkitTarget.getMetadata(BOT_LAVA_DAMAGE_COOLDOWN_METADATA)) {
+                    if (Objects.equals(value.getOwningPlugin(), trainingBot.getPlugin()) && value.asLong() > now) {
                         return;
                     }
                 }
                 bukkitTarget.setMetadata(
                         BOT_FIRE_ASPECT_METADATA,
-                        new FixedMetadataValue(trainingBot.getPlugin(), now + FIRE_ASPECT_METADATA_MS)
-                );
+                        new FixedMetadataValue(trainingBot.getPlugin(), now + FIRE_ASPECT_METADATA_MS));
                 bukkitTarget.setMetadata(
                         BOT_LAVA_DAMAGE_COOLDOWN_METADATA,
-                        new FixedMetadataValue(trainingBot.getPlugin(), now + LAVA_DAMAGE_COOLDOWN_MS)
-                );
+                        new FixedMetadataValue(trainingBot.getPlugin(), now + LAVA_DAMAGE_COOLDOWN_MS));
             }
             scheduleLavaDamage(trainingBot, bot, target);
-        } catch (Exception ignored) {
+        } catch (RuntimeException lavaPreparationError) {
+            LOGGER.log(System.Logger.Level.DEBUG, "Could not prepare bot lava damage", lavaPreparationError);
         }
     }
 
@@ -108,38 +111,57 @@ public class AttackExecutor implements IAttackExecutor {
             return;
         }
 
-        trainingBot.getPlugin().getWrapperManager().active().runSyncLater(() -> {
-            try {
-                if (bot.isRemoved() || target.isRemoved() || !target.isAlive() || target.fireImmune()) {
-                    return;
-                }
-                if (bot.distanceTo(target) > 6.0D || !(target.level() instanceof net.minecraft.server.level.ServerLevel targetLevel)) {
-                    return;
-                }
+        trainingBot
+                .getPlugin()
+                .getWrapperManager()
+                .active()
+                .runSyncLater(
+                        () -> {
+                            try {
+                                if (bot.isRemoved() || target.isRemoved() || !target.isAlive() || target.fireImmune()) {
+                                    return;
+                                }
+                                if (bot.distanceTo(target) > 6.0D
+                                        || !(target.level()
+                                                instanceof net.minecraft.server.level.ServerLevel targetLevel)) {
+                                    return;
+                                }
 
-                Entity bukkitTarget = target.getBukkitEntity();
-                if (bukkitTarget != null) {
-                    bukkitTarget.setMetadata(
-                            BOT_FIRE_ASPECT_METADATA,
-                            new FixedMetadataValue(trainingBot.getPlugin(), System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS)
-                    );
-                }
-                NMSBridgeManager.get().hurtEntity(target, targetLevel, bot.damageSources().lava(), LAVA_DAMAGE);
-            } catch (Exception ignored) {
-            }
-        }, LAVA_DAMAGE_DELAY_TICKS);
+                                Entity bukkitTarget = target.getBukkitEntity();
+                                if (bukkitTarget != null) {
+                                    bukkitTarget.setMetadata(
+                                            BOT_FIRE_ASPECT_METADATA,
+                                            new FixedMetadataValue(
+                                                    trainingBot.getPlugin(),
+                                                    System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS));
+                                }
+                                NMSBridgeManager.get()
+                                        .hurtEntity(
+                                                target,
+                                                targetLevel,
+                                                bot.damageSources().lava(),
+                                                LAVA_DAMAGE);
+                            } catch (RuntimeException lavaDamageError) {
+                                LOGGER.log(
+                                        System.Logger.Level.DEBUG,
+                                        "Could not apply delayed bot lava damage",
+                                        lavaDamageError);
+                            }
+                        },
+                        LAVA_DAMAGE_DELAY_TICKS);
     }
 
     private float getCachedBaseDamage(Player bot) {
-        if (lastDamageCalculatedBot != bot || cachedBaseDamage < 0) {
-            cachedBaseDamage = (float) bot.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
+        if (!Objects.equals(lastDamageCalculatedBot, bot) || cachedBaseDamage < 0) {
+            cachedBaseDamage =
+                    (float) bot.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE);
             lastDamageCalculatedBot = bot;
         }
         return cachedBaseDamage;
     }
 
     private net.minecraft.server.level.ServerLevel getCachedServerLevel(Player bot) {
-        if (lastServerLevelBot != bot || cachedServerLevel == null) {
+        if (!Objects.equals(lastServerLevelBot, bot) || cachedServerLevel == null) {
             cachedServerLevel = (net.minecraft.server.level.ServerLevel) bot.level();
             lastServerLevelBot = bot;
         }

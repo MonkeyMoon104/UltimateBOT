@@ -1,10 +1,6 @@
 package com.monkey.mcbot.lang;
 
 import com.monkey.mcbot.MinecraftBot;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +13,9 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class LanguageManager {
 
@@ -49,9 +48,8 @@ public final class LanguageManager {
 
         defaultLanguageConfiguration = loadLanguageFromDisk(DEFAULT_LANG_FILE);
 
-        String configuredLanguage = normalizeLanguageFileName(
-                plugin.getConfig().getString(LANG_FILE_CONFIG_KEY, DEFAULT_LANG_FILE)
-        );
+        String configuredLanguage =
+                normalizeLanguageFileName(plugin.getConfig().getString(LANG_FILE_CONFIG_KEY, DEFAULT_LANG_FILE));
 
         LoadedLanguage loaded = loadConfiguredLanguage(configuredLanguage);
         activeLanguageConfiguration = loaded.configuration;
@@ -59,16 +57,15 @@ public final class LanguageManager {
         fallbackToDefault = loaded.fallback;
 
         if (fallbackToDefault && !DEFAULT_LANG_FILE.equalsIgnoreCase(configuredLanguage)) {
-            plugin.getLogger().warning(
-                    "Using fallback language '" + DEFAULT_LANG_FILE + "' because '" + configuredLanguage + "' is invalid."
-            );
+            plugin.getLogger()
+                    .warning("Using fallback language '" + DEFAULT_LANG_FILE + "' because '" + configuredLanguage
+                            + "' is invalid.");
         }
 
-        plugin.getLogger().info(
-                "Language loaded: " + activeLanguageFileName
+        plugin.getLogger()
+                .info("Language loaded: " + activeLanguageFileName
                         + (fallbackToDefault ? " (fallback default)" : "")
-                        + ". Available files: " + String.join(", ", knownLanguageFiles)
-        );
+                        + ". Available files: " + String.join(", ", knownLanguageFiles));
     }
 
     public synchronized String getString(String path) {
@@ -207,11 +204,11 @@ public final class LanguageManager {
                     copiedAny = true;
                     plugin.getLogger().info("Installed bundled language file: " + languageFileName);
                 } catch (IOException copyException) {
-                    plugin.getLogger().log(
-                            Level.WARNING,
-                            "Failed to copy bundled language '" + languageFileName + "' to disk.",
-                            copyException
-                    );
+                    plugin.getLogger()
+                            .log(
+                                    Level.WARNING,
+                                    "Failed to copy bundled language '" + languageFileName + "' to disk.",
+                                    copyException);
                 }
             }
         } catch (IOException ioException) {
@@ -231,11 +228,12 @@ public final class LanguageManager {
             plugin.saveResource(LANGS_DIRECTORY + "/" + DEFAULT_LANG_FILE, false);
             plugin.getLogger().info("Installed default language file: " + DEFAULT_LANG_FILE);
         } catch (IllegalArgumentException ex) {
-            plugin.getLogger().log(
-                    Level.SEVERE,
-                    "Default language resource '" + LANGS_DIRECTORY + "/" + DEFAULT_LANG_FILE + "' is missing from jar.",
-                    ex
-            );
+            plugin.getLogger()
+                    .log(
+                            Level.SEVERE,
+                            "Default language resource '" + LANGS_DIRECTORY + "/" + DEFAULT_LANG_FILE
+                                    + "' is missing from jar.",
+                            ex);
         }
     }
 
@@ -252,7 +250,7 @@ public final class LanguageManager {
             }
 
             String name = entry.getName();
-            if (name.toLowerCase().endsWith(".yml")) {
+            if (name.toLowerCase(Locale.ROOT).endsWith(".yml")) {
                 files.add(name);
             }
         }
@@ -270,15 +268,15 @@ public final class LanguageManager {
     }
 
     private void logMissingKeys(String configuredFileName, Set<String> missingKeys) {
-        plugin.getLogger().severe(
-                "Language file '" + configuredFileName + "' is missing " + missingKeys.size()
-                        + " required key(s). Falling back to " + DEFAULT_LANG_FILE + "."
-        );
+        plugin.getLogger()
+                .severe("Language file '" + configuredFileName + "' is missing " + missingKeys.size()
+                        + " required key(s). Falling back to " + DEFAULT_LANG_FILE + ".");
 
         int index = 0;
         for (String missingKey : missingKeys) {
             if (index >= MAX_MISSING_KEYS_TO_LOG) {
-                plugin.getLogger().severe("... and " + (missingKeys.size() - MAX_MISSING_KEYS_TO_LOG) + " more key(s).");
+                plugin.getLogger()
+                        .severe("... and " + (missingKeys.size() - MAX_MISSING_KEYS_TO_LOG) + " more key(s).");
                 break;
             }
             plugin.getLogger().severe("Missing key: " + missingKey);
@@ -314,7 +312,7 @@ public final class LanguageManager {
             trimmed = trimmed.substring(slashIndex + 1);
         }
 
-        if (!trimmed.toLowerCase().endsWith(".yml")) {
+        if (!trimmed.toLowerCase(Locale.ROOT).endsWith(".yml")) {
             trimmed = trimmed + ".yml";
         }
 

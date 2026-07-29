@@ -39,7 +39,7 @@ public class AnchorPlacer {
             }
 
             ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || stack.getItem() != Items.RESPAWN_ANCHOR) return false;
+            if (stack == null || !Items.RESPAWN_ANCHOR.equals(stack.getItem())) return false;
 
             Direction bestFace = findBestPlacementFace(pos);
             if (bestFace == null) bestFace = Direction.UP;
@@ -47,14 +47,10 @@ public class AnchorPlacer {
             BlockPos adjacentPos = pos.relative(bestFace.getOpposite());
 
             BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5),
-                    bestFace,
-                    adjacentPos,
-                    false
-            );
+                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5), bestFace, adjacentPos, false);
 
-            InteractionResult result = NMSBridgeManager.get()
-                    .useItemOnBlock(bot, stack, hitResult, InteractionHand.MAIN_HAND);
+            InteractionResult result =
+                    NMSBridgeManager.get().useItemOnBlock(bot, stack, hitResult, InteractionHand.MAIN_HAND);
 
             if (result.consumesAction()) {
                 rotation.lookAt(Vec3.atLowerCornerOf(pos));
@@ -64,7 +60,8 @@ public class AnchorPlacer {
             }
             return false;
         } catch (Exception e) {
-            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Anchor placement failed -> " + e.getMessage());
+            MinecraftBotLogging.warn(
+                    MinecraftBot.getInstance().getLogger(), "Combat", "Anchor placement failed -> " + e.getMessage());
             return false;
         }
     }
@@ -82,7 +79,7 @@ public class AnchorPlacer {
             }
         }
 
-        for (Direction direction : new Direction[]{Direction.UP, Direction.DOWN}) {
+        for (Direction direction : new Direction[] {Direction.UP, Direction.DOWN}) {
             BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
             BlockState adjacentState = bot.level().getBlockState(adjacentPos);
 
@@ -104,12 +101,11 @@ public class AnchorPlacer {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                || result.getBlockPos().equals(pos);
     }
 
     private boolean isReachable(BlockPos pos) {
@@ -124,12 +120,11 @@ public class AnchorPlacer {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
 
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                || result.getBlockPos().equals(pos);
     }
 }

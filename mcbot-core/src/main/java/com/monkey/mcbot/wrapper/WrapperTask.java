@@ -1,10 +1,10 @@
 package com.monkey.mcbot.wrapper;
 
+import java.lang.reflect.Method;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.lang.reflect.Method;
-
 public record WrapperTask(String backend, Object handle, Runnable cancelAction) {
+    private static final System.Logger LOGGER = System.getLogger(WrapperTask.class.getName());
 
     public static WrapperTask none(String backend) {
         return new WrapperTask(backend, null, null);
@@ -34,8 +34,8 @@ public record WrapperTask(String backend, Object handle, Runnable cancelAction) 
         try {
             Method cancel = taskHandle.getClass().getMethod("cancel");
             cancel.invoke(taskHandle);
-        } catch (Exception ignored) {
+        } catch (ReflectiveOperationException cancelError) {
+            LOGGER.log(System.Logger.Level.WARNING, "Failed to cancel reflective scheduler task", cancelError);
         }
     }
 }
-

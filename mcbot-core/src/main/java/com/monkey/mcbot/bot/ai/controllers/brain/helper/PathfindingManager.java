@@ -1,6 +1,5 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper;
 
-import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
@@ -17,7 +16,6 @@ public class PathfindingManager implements IPathfindingManager {
     private final Level level;
     private final BotMovementController movementController;
     private final BotEnderpearlController enderpearlController;
-    private final ICombatStateManager combatStateManager;
 
     private long lastActionTime = 0;
     private Vec3 lastBotPosition;
@@ -31,13 +29,15 @@ public class PathfindingManager implements IPathfindingManager {
     private static final long STUCK_PEARL_COOLDOWN = 1200;
     private boolean usingPathfinding = false;
 
-    public PathfindingManager(Player bot, Level level, BotMovementController movementController,
-                              BotEnderpearlController enderpearlController, ICombatStateManager combatStateManager) {
+    public PathfindingManager(
+            Player bot,
+            Level level,
+            BotMovementController movementController,
+            BotEnderpearlController enderpearlController) {
         this.bot = bot;
         this.level = level;
         this.movementController = movementController;
         this.enderpearlController = enderpearlController;
-        this.combatStateManager = combatStateManager;
         this.lastBotPosition = bot.position();
     }
 
@@ -89,9 +89,9 @@ public class PathfindingManager implements IPathfindingManager {
             return;
         }
 
-        if (enderpearlController.canUseEnderpearl() &&
-                bot.distanceTo(target) > 4.0 &&
-                hasObstacleBetween(bot.position(), target.position())) {
+        if (enderpearlController.canUseEnderpearl()
+                && bot.distanceTo(target) > 4.0
+                && hasObstacleBetween(bot.position(), target.position())) {
 
             if (tryUnstuckPearl(target, currentTime)) {
                 return;
@@ -111,8 +111,8 @@ public class PathfindingManager implements IPathfindingManager {
             Vec3 checkPos = start.add(direction.scale(i * 0.5));
             BlockPos blockPos = BlockPos.containing(checkPos);
 
-            if (!level.getBlockState(blockPos).isAir() ||
-                    !level.getBlockState(blockPos.above()).isAir()) {
+            if (!level.getBlockState(blockPos).isAir()
+                    || !level.getBlockState(blockPos.above()).isAir()) {
                 return true;
             }
         }
@@ -169,9 +169,9 @@ public class PathfindingManager implements IPathfindingManager {
 
     @Override
     public boolean isSafeLandingSpot(BlockPos pos) {
-        return !level.getBlockState(pos.below()).isAir() &&
-                level.getBlockState(pos).isAir() &&
-                level.getBlockState(pos.above()).isAir();
+        return !level.getBlockState(pos.below()).isAir()
+                && level.getBlockState(pos).isAir()
+                && level.getBlockState(pos.above()).isAir();
     }
 
     @Override
@@ -260,7 +260,7 @@ public class PathfindingManager implements IPathfindingManager {
 
         double[] scales = {3.2D, 4.0D, 4.8D};
         for (double scale : scales) {
-            for (int sign : new int[]{1, -1}) {
+            for (int sign : new int[] {1, -1}) {
                 Vec3 candidate = botPos.add(lateral.scale(scale * sign)).add(0.0D, 0.6D, 0.0D);
                 BlockPos blockPos = BlockPos.containing(candidate);
                 if (!isSafeLandingSpot(blockPos)) {
@@ -303,7 +303,8 @@ public class PathfindingManager implements IPathfindingManager {
         for (double step = 0.8D; step <= 1.8D; step += 0.5D) {
             Vec3 check = eyes.add(look.scale(step));
             BlockPos blockPos = BlockPos.containing(check);
-            if (level.getBlockState(blockPos).isSolidRender() || level.getBlockState(blockPos.above()).isSolidRender()) {
+            if (level.getBlockState(blockPos).isSolidRender()
+                    || level.getBlockState(blockPos.above()).isSolidRender()) {
                 return true;
             }
         }
@@ -317,8 +318,7 @@ public class PathfindingManager implements IPathfindingManager {
                 destination,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
         HitResult result = level.clip(context);
         if (result.getType() == HitResult.Type.MISS) {
             return true;

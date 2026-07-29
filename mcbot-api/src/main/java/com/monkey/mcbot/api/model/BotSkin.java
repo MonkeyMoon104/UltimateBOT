@@ -1,9 +1,8 @@
 package com.monkey.mcbot.api.model;
 
-import org.jspecify.annotations.Nullable;
-
 import java.net.URI;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Skin/profile configuration for API-spawned bots.
@@ -19,8 +18,7 @@ public record BotSkin(
         @Nullable String playerReference,
         @Nullable String textureValue,
         @Nullable String textureSignature,
-        @Nullable String textureUrl
-) {
+        @Nullable String textureUrl) {
     /**
      * Canonical constructor with source-specific normalization and validation.
      *
@@ -28,7 +26,7 @@ public record BotSkin(
      * are validated and may throw {@link IllegalArgumentException}.</p>
      */
     public BotSkin {
-        source = Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(source, "source");
 
         playerReference = trimToNull(playerReference);
         textureValue = trimToNull(textureValue);

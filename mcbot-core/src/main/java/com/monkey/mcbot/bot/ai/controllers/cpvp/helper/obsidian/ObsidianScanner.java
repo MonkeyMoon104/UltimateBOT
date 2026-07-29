@@ -1,13 +1,12 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian;
 
 import com.monkey.mcbot.bot.ai.rank.configs.CPVPConfig;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-
-import java.util.Map;
 
 public class ObsidianScanner {
 
@@ -28,8 +27,8 @@ public class ObsidianScanner {
                 for (int z = -6; z <= 6; z++) {
                     BlockPos checkPos = targetPos.offset(x, y, z);
 
-                    if (obsidianCache.containsKey(checkPos) &&
-                            currentTime - obsidianCache.get(checkPos) < config.getObsidianCacheMs()) {
+                    if (obsidianCache.containsKey(checkPos)
+                            && currentTime - obsidianCache.get(checkPos) < config.getObsidianCacheMs()) {
                         continue;
                     }
 
@@ -39,11 +38,13 @@ public class ObsidianScanner {
                     if (obsidianY >= targetY) continue;
 
                     BlockState state = level.getBlockState(checkPos);
-                    if (state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.BEDROCK) {
-                        if (!level.getBlockState(checkPos.above()).isAir() || !level.getBlockState(checkPos.above(2)).isAir()) {
+                    if (Blocks.OBSIDIAN.equals(state.getBlock()) || Blocks.BEDROCK.equals(state.getBlock())) {
+                        if (!level.getBlockState(checkPos.above()).isAir()
+                                || !level.getBlockState(checkPos.above(2)).isAir()) {
                             continue;
                         }
-                        double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(checkPos));
+                        double distanceToTarget =
+                                target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(checkPos));
                         if (distanceToTarget > maxUsefulDistance) {
                             continue;
                         }

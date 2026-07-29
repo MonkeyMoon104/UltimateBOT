@@ -2,39 +2,38 @@ package com.monkey.mcbot.bot.ai.controllers.movement;
 
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.*;
+import com.monkey.mcbot.config.RuntimeSettings;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class BotMovementController {
     private final Player bot;
-    private final Level level;
 
-    private final IBlockStateValidator blockValidator;
+    private final BlockStateValidator blockValidator;
     private final IPathfinder pathfinder;
     private final IObstacleHandler obstacleHandler;
-    private final IMovementExecutor movementExecutor;
+    private final MovementExecutor movementExecutor;
     private final IMovementPatternSelector patternSelector;
-    private final ICombatStateManager combatStateManager;
+    private final CombatStateManager combatStateManager;
 
-    private double currentTargetDistance = 3.0;
-    private boolean preferHighGround = false;
-    private boolean avoidCorners = true;
     private long lastMovementTime = 0;
     private static final long MAX_MOVEMENT_STALL_TIME = 1000;
 
-    public BotMovementController(Player bot, Level level) {
+    public BotMovementController(Player bot, Level level, RuntimeSettings.CacheSettings blockCacheSettings) {
         this.bot = bot;
-        this.level = level;
 
-        this.blockValidator = new BlockStateValidator(level);
+        this.blockValidator = new BlockStateValidator(level, blockCacheSettings);
         this.obstacleHandler = new ObstacleHandler(bot, level, blockValidator, 0.25, 0.42);
-        this.movementExecutor = new MovementExecutor(bot, level, blockValidator, obstacleHandler);
+        this.movementExecutor = new MovementExecutor(bot, blockValidator, obstacleHandler);
         this.pathfinder = new JumpPointSearchPathfinder(bot, blockValidator);
         this.patternSelector = new MovementPatternSelector(obstacleHandler);
         this.combatStateManager = new CombatStateManager();
     }
 
+    public void reconfigureBlockStateCache(RuntimeSettings.CacheSettings settings) {
+        blockValidator.reconfigure(settings);
+    }
 
     public void moveTowards(Player target, double targetDistance) {
         if (isStuckInPlace()) {
@@ -42,12 +41,14 @@ public class BotMovementController {
             return;
         }
         combatStateManager.updateCombatData(target);
-        this.currentTargetDistance = targetDistance;
 
         MovementPattern selectedPattern = patternSelector.selectOptimalPattern(
-                target, targetDistance, bot.position(), target.position(),
-                combatStateManager.isUnderFire(), combatStateManager.getConsecutiveHits()
-        );
+                target,
+                targetDistance,
+                bot.position(),
+                target.position(),
+                combatStateManager.isUnderFire(),
+                combatStateManager.getConsecutiveHits());
 
         executeMovementPattern(target, targetDistance, selectedPattern);
         lastMovementTime = System.currentTimeMillis();
@@ -69,9 +70,8 @@ public class BotMovementController {
 
     public void moveAwayFrom(Player target, double targetDistance) {
         combatStateManager.updateCombatData(target);
-        this.currentTargetDistance = targetDistance;
-        if (patternSelector.getCurrentPattern() != MovementPattern.RETREAT_SPIRAL &&
-                patternSelector.getCurrentPattern() != MovementPattern.EVASIVE_ZIG_ZAG) {
+        if (patternSelector.getCurrentPattern() != MovementPattern.RETREAT_SPIRAL
+                && patternSelector.getCurrentPattern() != MovementPattern.EVASIVE_ZIG_ZAG) {
             patternSelector.setMovementPattern(MovementPattern.RETREAT_SPIRAL);
         }
         executeRetreatMovement(target, targetDistance);
@@ -128,7 +128,6 @@ public class BotMovementController {
         return pathfinder.getCurrentPathPoint();
     }
 
-
     public void moveToPosition(Vec3 targetPos) {
         movementExecutor.moveToPosition(targetPos);
     }
@@ -142,7 +141,6 @@ public class BotMovementController {
     public void ensureMovement() {
         movementExecutor.ensureMovement();
     }
-
 
     public void setUnderFire(boolean underFire) {
         combatStateManager.setUnderFire(underFire);
@@ -163,9 +161,7 @@ public class BotMovementController {
             pathfinder.clearPath();
         }
 
-        if (combatStateManager instanceof CombatStateManager) {
-            ((CombatStateManager) combatStateManager).setLastSafePosition(bot.position());
-        }
+        combatStateManager.setLastSafePosition(bot.position());
 
         ensureMovement();
         lastMovementTime = System.currentTimeMillis();
@@ -227,44 +223,26 @@ public class BotMovementController {
     }
 
     public void seekHighGround() {
-        setPreferHighGround(true);
         patternSelector.setMovementPattern(MovementPattern.TERRAIN_ADAPTIVE);
     }
 
     public void beginStrafe() {
-        MovementPattern strafePattern = Math.random() < 0.7 ?
-                MovementPattern.STRAFE_CIRCLE : MovementPattern.STRAFE_FIGURE8;
+        MovementPattern strafePattern =
+                Math.random() < 0.7 ? MovementPattern.STRAFE_CIRCLE : MovementPattern.STRAFE_FIGURE8;
         patternSelector.setMovementPattern(strafePattern);
     }
 
-
     public void setMovementSpeed(double speed) {
-        if (movementExecutor instanceof MovementExecutor) {
-            ((MovementExecutor) movementExecutor).setMovementSpeed(speed);
-        }
+        movementExecutor.setMovementSpeed(speed);
     }
 
     public double getMovementSpeed() {
-        if (movementExecutor instanceof MovementExecutor) {
-            return ((MovementExecutor) movementExecutor).getMovementSpeed();
-        }
-        return 0.25;
+        return movementExecutor.getMovementSpeed();
     }
 
     public void setJumpVelocity(double velocity) {
-        if (movementExecutor instanceof MovementExecutor) {
-            ((MovementExecutor) movementExecutor).setJumpVelocity(velocity);
-        }
+        movementExecutor.setJumpVelocity(velocity);
     }
-
-    public void setPreferHighGround(boolean prefer) {
-        this.preferHighGround = prefer;
-    }
-
-    public void setAvoidCorners(boolean avoid) {
-        this.avoidCorners = avoid;
-    }
-
 
     public boolean isDiverting() {
         return obstacleHandler.isDiverting();
@@ -272,14 +250,12 @@ public class BotMovementController {
 
     public boolean isEvading() {
         MovementPattern current = patternSelector.getCurrentPattern();
-        return current == MovementPattern.EVASIVE_ZIG_ZAG ||
-                current == MovementPattern.RETREAT_SPIRAL;
+        return current == MovementPattern.EVASIVE_ZIG_ZAG || current == MovementPattern.RETREAT_SPIRAL;
     }
 
     public boolean isStrafing() {
         MovementPattern current = patternSelector.getCurrentPattern();
-        return current == MovementPattern.STRAFE_CIRCLE ||
-                current == MovementPattern.STRAFE_FIGURE8;
+        return current == MovementPattern.STRAFE_CIRCLE || current == MovementPattern.STRAFE_FIGURE8;
     }
 
     public boolean isRetreating() {
@@ -316,7 +292,6 @@ public class BotMovementController {
     public void forceCacheClean() {
         blockValidator.forceCacheClean();
     }
-
 
     private void executeMovementPattern(Player target, double targetDistance, MovementPattern pattern) {
         switch (pattern) {

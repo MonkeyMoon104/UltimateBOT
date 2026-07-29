@@ -11,14 +11,11 @@ import org.bukkit.event.Listener;
 
 public class PlayerTagListener implements Listener {
 
-    private final MinecraftBot plugin;
     private final BotManager botManager;
 
     public PlayerTagListener(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.botManager = plugin.getBotManager();
     }
-
 
     @EventHandler
     public void onPlayerPreTag(PlayerPreTagEvent event) {

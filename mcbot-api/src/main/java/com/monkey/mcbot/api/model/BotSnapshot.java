@@ -1,9 +1,9 @@
 package com.monkey.mcbot.api.model;
 
-import org.jspecify.annotations.Nullable;
-
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable runtime snapshot of a managed bot.
@@ -56,8 +56,7 @@ public record BotSnapshot(
         boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
-        boolean killMessageEnabled
-) {
+        boolean killMessageEnabled) {
     public BotSnapshot {
         botType = botType == null || botType.isBlank() ? "UNKNOWN" : botType;
         botRank = botRank == null || botRank.isBlank() ? "UNKNOWN" : botRank;
@@ -75,5 +74,15 @@ public record BotSnapshot(
      */
     public boolean hasTarget() {
         return targetUUID != null || !targetUUIDs.isEmpty();
+    }
+
+    /**
+     * Returns the runtime entity UUID or fails when this is a pre-spawn snapshot.
+     *
+     * @return available runtime bot UUID
+     * @throws NullPointerException when the bot entity is not available yet
+     */
+    public UUID requireBotUUID() {
+        return Objects.requireNonNull(botUUID, "botUUID is unavailable for this snapshot");
     }
 }

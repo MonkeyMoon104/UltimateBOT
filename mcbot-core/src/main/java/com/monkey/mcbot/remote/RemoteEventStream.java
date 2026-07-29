@@ -18,7 +18,6 @@ import com.monkey.mcbot.api.event.lifecycle.BotSpawnPrepareEvent;
 import com.monkey.mcbot.api.event.state.BotSettingsChangeEvent;
 import com.monkey.mcbot.api.event.state.BotTargetChangeEvent;
 import com.sun.net.httpserver.HttpExchange;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /** Bounded replayable Server-Sent Events bridge for SDK clients. */
 final class RemoteEventStream implements AutoCloseable {
+    private static final System.Logger LOGGER = System.getLogger(RemoteEventStream.class.getName());
     private static final int BUFFER_SIZE = 256;
     private final ObjectMapper mapper;
     private final AtomicLong ids = new AtomicLong();
@@ -97,16 +97,27 @@ final class RemoteEventStream implements AutoCloseable {
     private RemoteBotEvent map(BotEvent event) {
         Map<String, Object> payload = new LinkedHashMap<>();
         String type = typeOf(event);
-        if (event instanceof BotDespawnEvent value) payload.put("reason", value.getReason().name());
+        if (event instanceof BotDespawnEvent value)
+            payload.put("reason", value.getReason().name());
         if (event instanceof BotDeathEvent value) payload.put("damageType", value.getDamageType());
         if (event instanceof BotKillEntityEvent value) {
             payload.put("victimUUID", value.getVictim().getUniqueId());
             payload.put("victimType", value.getVictim().getType().name());
         }
         if (event instanceof BotTargetChangeEvent value) {
-            payload.put("previousTargetUUID", value.getPreviousTarget() == null ? null : value.getPreviousTarget().getUniqueId());
-            payload.put("newTargetUUID", value.getNewTarget() == null ? null : value.getNewTarget().getUniqueId());
-            payload.put("newTargetType", value.getNewTarget() == null ? null : value.getNewTarget().getType().name());
+            payload.put(
+                    "previousTargetUUID",
+                    value.getPreviousTarget() == null
+                            ? null
+                            : value.getPreviousTarget().getUniqueId());
+            payload.put(
+                    "newTargetUUID",
+                    value.getNewTarget() == null ? null : value.getNewTarget().getUniqueId());
+            payload.put(
+                    "newTargetType",
+                    value.getNewTarget() == null
+                            ? null
+                            : value.getNewTarget().getType().name());
         }
         if (event instanceof BotSettingsChangeEvent value) {
             payload.put("setting", value.getSetting().name());
@@ -121,7 +132,11 @@ final class RemoteEventStream implements AutoCloseable {
         if (event instanceof BotExplosionEvent value) {
             payload.put("explosionType", value.getExplosionType().name());
             payload.put("blockDamage", value.isBlockDamage());
-            payload.put("world", value.getLocation().getWorld() == null ? null : value.getLocation().getWorld().getName());
+            payload.put(
+                    "world",
+                    value.getLocation().getWorld() == null
+                            ? null
+                            : value.getLocation().getWorld().getName());
             payload.put("x", value.getLocation().getX());
             payload.put("y", value.getLocation().getY());
             payload.put("z", value.getLocation().getZ());
@@ -136,7 +151,11 @@ final class RemoteEventStream implements AutoCloseable {
         }
         if (event instanceof BotTeleportEvent value) {
             payload.put("cause", value.getCause());
-            payload.put("world", value.getTo().getWorld() == null ? null : value.getTo().getWorld().getName());
+            payload.put(
+                    "world",
+                    value.getTo().getWorld() == null
+                            ? null
+                            : value.getTo().getWorld().getName());
             payload.put("x", value.getTo().getX());
             payload.put("y", value.getTo().getY());
             payload.put("z", value.getTo().getZ());
@@ -145,9 +164,18 @@ final class RemoteEventStream implements AutoCloseable {
             payload.put("consumed", value.getConsumed());
             payload.put("remaining", value.getRemaining());
         }
-        return new RemoteBotEvent(ids.incrementAndGet(), 1, type, event.getEventId(), event.getSequence(),
-                event.getOccurredAt(), event.getOwnerUUID(), event.getBotUUID(), event.getSource().name(),
-                event.getBotSnapshot(), Collections.unmodifiableMap(new LinkedHashMap<>(payload)));
+        return new RemoteBotEvent(
+                ids.incrementAndGet(),
+                1,
+                type,
+                event.getEventId(),
+                event.getSequence(),
+                event.getOccurredAt(),
+                event.getOwnerUUID(),
+                event.getBotUUID(),
+                event.getSource().name(),
+                event.getBotSnapshot(),
+                Collections.unmodifiableMap(new LinkedHashMap<>(payload)));
     }
 
     private static String typeOf(BotEvent event) {
@@ -169,8 +197,8 @@ final class RemoteEventStream implements AutoCloseable {
     }
 
     private void write(OutputStream output, RemoteBotEvent event) throws IOException {
-        String frame = "id: " + event.id() + "\nevent: " + event.type()
-                + "\ndata: " + mapper.writeValueAsString(event) + "\n\n";
+        String frame = "id: " + event.id() + "\nevent: " + event.type() + "\ndata: " + mapper.writeValueAsString(event)
+                + "\n\n";
         output.write(frame.getBytes(StandardCharsets.UTF_8));
         output.flush();
     }
@@ -182,21 +210,24 @@ final class RemoteEventStream implements AutoCloseable {
     }
 
     private static long parseLastId(String value) {
-        try { return value == null ? 0L : Long.parseLong(value); }
-        catch (NumberFormatException ignored) { return 0L; }
+        try {
+            return value == null ? 0L : Long.parseLong(value);
+        } catch (NumberFormatException ignored) {
+            return 0L;
+        }
     }
 
     private static Set<String> parseTypes(String value) {
         if (value == null || value.isBlank()) return Set.of();
         Set<String> result = new HashSet<>();
-        for (String type : value.split(",")) result.add(type.trim().toUpperCase(Locale.ROOT));
+        for (String type : value.split(",", -1)) result.add(type.trim().toUpperCase(Locale.ROOT));
         return Set.copyOf(result);
     }
 
     private static Map<String, String> parseFilters(String query) {
         if (query == null || query.isBlank()) return Map.of();
         Map<String, String> result = new HashMap<>();
-        for (String part : query.split("&")) {
+        for (String part : query.split("&", -1)) {
             int separator = part.indexOf('=');
             if (separator > 0) result.put(part.substring(0, separator), part.substring(separator + 1));
         }
@@ -204,15 +235,24 @@ final class RemoteEventStream implements AutoCloseable {
     }
 
     private static UUID parseUuid(String value) {
-        try { return value == null || value.isBlank() ? null : UUID.fromString(value); }
-        catch (IllegalArgumentException ignored) { return null; }
+        try {
+            return value == null || value.isBlank() ? null : UUID.fromString(value);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     @Override
     public void close() {
-        try { observer.close(); } catch (Exception ignored) { }
+        try {
+            observer.close();
+        } catch (Exception closeError) {
+            LOGGER.log(System.Logger.Level.WARNING, "Failed to close the core event observer", closeError);
+        }
         clients.clear();
-        synchronized (replay) { replay.clear(); }
+        synchronized (replay) {
+            replay.clear();
+        }
     }
 
     private static final class Client {
@@ -220,11 +260,13 @@ final class RemoteEventStream implements AutoCloseable {
         private final UUID ownerUUID;
         private final UUID botUUID;
         private final ArrayBlockingQueue<RemoteBotEvent> queue = new ArrayBlockingQueue<>(BUFFER_SIZE);
+
         private Client(Set<String> types, UUID ownerUUID, UUID botUUID) {
             this.types = types;
             this.ownerUUID = ownerUUID;
             this.botUUID = botUUID;
         }
+
         private boolean accepts(RemoteBotEvent event) {
             return (types.isEmpty() || types.contains(event.type()))
                     && (ownerUUID == null || ownerUUID.equals(event.ownerUUID()))

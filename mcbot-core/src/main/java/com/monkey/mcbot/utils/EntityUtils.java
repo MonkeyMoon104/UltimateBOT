@@ -1,6 +1,8 @@
 package com.monkey.mcbot.utils;
 
 import com.monkey.mcbot.nms.NMSBridgeManager;
+import java.util.List;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -12,22 +14,18 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.UUID;
-
 public class EntityUtils {
     public static Entity findBotByUUID(ServerLevel world, UUID botUUID) {
-        List<? extends Entity> entities = world.getEntities(
-                EntityTypeTest.forClass(Entity.class),
-                entity -> entity.getUUID().equals(botUUID)
-        );
+        List<? extends Entity> entities =
+                world.getEntities(EntityTypeTest.forClass(Entity.class), entity -> entity.getUUID()
+                        .equals(botUUID));
 
         return entities.isEmpty() ? null : entities.getFirst();
     }
 
     public static LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
         Entity entity = findBotByUUID(world, botUUID);
-        return entity instanceof LivingEntity ? (LivingEntity) entity : null;
+        return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
     public static ServerLevel getPlayerWorld(UUID playerUUID) {

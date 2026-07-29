@@ -2,13 +2,13 @@ package com.monkey.mcbot.placeholders;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.placeholders.list.*;
-import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.entity.Player;
-
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.entity.Player;
 
 public class BotPlaceholderCoordinator extends PlaceholderExpansion implements PlaceholderRegistration {
 
@@ -42,17 +42,16 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
     }
 
     private void addPlaceholder(IBotPlaceholder placeholder) {
-        placeholders.put(placeholder.getIdentifier().toLowerCase(), placeholder);
+        placeholders.put(placeholder.getIdentifier().toLowerCase(Locale.ROOT), placeholder);
     }
 
     public int getRegisteredPlaceholderCount() {
         return placeholders.size();
     }
 
+    @Override
     public List<String> getRegisteredPlaceholderKeys() {
-        return placeholders.keySet().stream()
-                .sorted()
-                .toList();
+        return placeholders.keySet().stream().sorted().toList();
     }
 
     @Override
@@ -87,7 +86,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
         }
 
         try {
-            IBotPlaceholder placeholder = placeholders.get(identifier.toLowerCase());
+            IBotPlaceholder placeholder = placeholders.get(identifier.toLowerCase(Locale.ROOT));
             if (placeholder != null) {
                 String result = placeholder.getValue(player);
                 return result != null ? result : "N/A";

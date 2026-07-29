@@ -24,3 +24,4 @@ include("versions:v26_1")
 include("versions:v26_2")
 
 include("plugin")
+include("benchmarks")

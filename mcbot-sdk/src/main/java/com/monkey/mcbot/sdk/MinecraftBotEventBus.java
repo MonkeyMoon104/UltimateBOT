@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.sdk.event.BotEventEnvelope;
 import com.monkey.mcbot.sdk.event.BotEventSubscription;
 import com.monkey.mcbot.sdk.event.SdkBotEventType;
-import org.jspecify.annotations.Nullable;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -20,9 +18,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /** Reconnecting Server-Sent Events client for MinecraftBot remote events. */
 public final class MinecraftBotEventBus implements AutoCloseable {
+    private static final System.Logger LOGGER = System.getLogger(MinecraftBotEventBus.class.getName());
+
     private final URI baseUri;
     private final String token;
     private final HttpClient client;
@@ -49,19 +50,25 @@ public final class MinecraftBotEventBus implements AutoCloseable {
         return subscription;
     }
 
-    public BotEventSubscription subscribeForOwner(UUID ownerUUID, Set<SdkBotEventType> types,
-                                                   Consumer<BotEventEnvelope> listener) {
-        Subscription subscription = new Subscription(Set.copyOf(types),
-                Objects.requireNonNull(ownerUUID, "ownerUUID"), null, Objects.requireNonNull(listener, "listener"));
+    public BotEventSubscription subscribeForOwner(
+            UUID ownerUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
+        Subscription subscription = new Subscription(
+                Set.copyOf(types),
+                Objects.requireNonNull(ownerUUID, "ownerUUID"),
+                null,
+                Objects.requireNonNull(listener, "listener"));
         subscriptions.add(subscription);
         subscription.start();
         return subscription;
     }
 
-    public BotEventSubscription subscribeForBot(UUID botUUID, Set<SdkBotEventType> types,
-                                                 Consumer<BotEventEnvelope> listener) {
-        Subscription subscription = new Subscription(Set.copyOf(types), null,
-                Objects.requireNonNull(botUUID, "botUUID"), Objects.requireNonNull(listener, "listener"));
+    public BotEventSubscription subscribeForBot(
+            UUID botUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
+        Subscription subscription = new Subscription(
+                Set.copyOf(types),
+                null,
+                Objects.requireNonNull(botUUID, "botUUID"),
+                Objects.requireNonNull(listener, "listener"));
         subscriptions.add(subscription);
         subscription.start();
         return subscription;
@@ -81,8 +88,11 @@ public final class MinecraftBotEventBus implements AutoCloseable {
         private final AtomicLong lastEventId = new AtomicLong();
         private volatile @Nullable Thread worker;
 
-        private Subscription(Set<SdkBotEventType> types, @Nullable UUID ownerUUID, @Nullable UUID botUUID,
-                             Consumer<BotEventEnvelope> listener) {
+        private Subscription(
+                Set<SdkBotEventType> types,
+                @Nullable UUID ownerUUID,
+                @Nullable UUID botUUID,
+                Consumer<BotEventEnvelope> listener) {
             this.types = Objects.requireNonNull(types, "types");
             this.ownerUUID = ownerUUID;
             this.botUUID = botUUID;
@@ -119,18 +129,24 @@ public final class MinecraftBotEventBus implements AutoCloseable {
                     .header("Accept", "text/event-stream")
                     .GET();
             if (lastEventId.get() > 0L) request.header("Last-Event-ID", Long.toString(lastEventId.get()));
-            HttpResponse<java.io.InputStream> response = client.send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<java.io.InputStream> response =
+                    client.send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 response.body().close();
                 throw new MinecraftBotClientException("Event stream returned HTTP " + response.statusCode());
             }
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(response.body(), StandardCharsets.UTF_8))) {
                 String line;
                 while (active.get() && (line = reader.readLine()) != null) {
                     if (!line.startsWith("data:")) continue;
                     BotEventEnvelope event = mapper.readValue(line.substring(5).trim(), BotEventEnvelope.class);
                     lastEventId.set(event.id());
-                    try { listener.accept(event); } catch (RuntimeException ignored) { }
+                    try {
+                        listener.accept(event);
+                    } catch (RuntimeException listenerError) {
+                        LOGGER.log(System.Logger.Level.WARNING, "MinecraftBot event listener failed", listenerError);
+                    }
                 }
             }
         }
@@ -138,7 +154,11 @@ public final class MinecraftBotEventBus implements AutoCloseable {
         private URI eventsUri() {
             List<String> filters = new ArrayList<>();
             if (!types.isEmpty()) {
-                String joined = types.stream().map(Enum::name).sorted().reduce((a, b) -> a + "," + b).orElse("");
+                String joined = types.stream()
+                        .map(Enum::name)
+                        .sorted()
+                        .reduce((a, b) -> a + "," + b)
+                        .orElse("");
                 filters.add("types=" + URLEncoder.encode(joined, StandardCharsets.UTF_8));
             }
             if (ownerUUID != null) filters.add("ownerUUID=" + ownerUUID);
@@ -146,9 +166,18 @@ public final class MinecraftBotEventBus implements AutoCloseable {
             return baseUri.resolve("events" + (filters.isEmpty() ? "" : "?" + String.join("&", filters)));
         }
 
-        @Override public boolean isActive() { return active.get(); }
-        @Override public long getLastEventId() { return lastEventId.get(); }
-        @Override public void close() {
+        @Override
+        public boolean isActive() {
+            return active.get();
+        }
+
+        @Override
+        public long getLastEventId() {
+            return lastEventId.get();
+        }
+
+        @Override
+        public void close() {
             if (active.compareAndSet(true, false)) {
                 subscriptions.remove(this);
                 Thread current = worker;

@@ -8,6 +8,9 @@ import com.monkey.mcbot.gui.v26_2.impl.BotTabItem;
 import com.monkey.mcbot.gui.v26_2.tab.*;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.xenondevs.invui.gui.Gui;
@@ -16,9 +19,6 @@ import xyz.xenondevs.invui.gui.TabGui;
 import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.window.Window;
-
-import java.util.List;
-import java.util.UUID;
 
 public class NewBotGUI_v26_2 {
 
@@ -52,7 +52,8 @@ public class NewBotGUI_v26_2 {
             }
         }
         if (options == null) {
-            options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
+            options = new BotOptions(
+                    training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
         }
 
         options.setBotType(botType);
@@ -62,7 +63,7 @@ public class NewBotGUI_v26_2 {
         String borderName = training.getLangString("gui.tab-border.name", " ");
         Material borderMat;
         try {
-            borderMat = Material.valueOf(borderMatName.toUpperCase());
+            borderMat = Material.valueOf(borderMatName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             borderMat = Material.BLACK_STAINED_GLASS_PANE;
         }
@@ -84,8 +85,7 @@ public class NewBotGUI_v26_2 {
                         "2 x x x x x x x x",
                         ". x x x x x x x x",
                         "3 x x x x x x x x",
-                        ". x x x x x x x x"
-                )
+                        ". x x x x x x x x")
                 .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
                 .addIngredient('.', borderItem)
                 .addIngredient('0', new BotTabItem(0, training))
@@ -124,5 +124,3 @@ public class NewBotGUI_v26_2 {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-

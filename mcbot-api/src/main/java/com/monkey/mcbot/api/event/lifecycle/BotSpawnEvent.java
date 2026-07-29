@@ -2,11 +2,10 @@ package com.monkey.mcbot.api.event.lifecycle;
 
 import com.monkey.mcbot.api.event.base.BotEvent;
 import com.monkey.mcbot.api.event.base.BotEventSource;
-
 import com.monkey.mcbot.api.model.BotSnapshot;
+import java.util.Objects;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.HandlerList;
-import java.util.Objects;
 
 /** Fired after a bot is spawned and registered. */
 public final class BotSpawnEvent extends BotEvent {
@@ -14,10 +13,20 @@ public final class BotSpawnEvent extends BotEvent {
     private final HumanEntity bot;
 
     public BotSpawnEvent(long sequence, BotSnapshot snapshot, BotEventSource source, HumanEntity bot) {
-        super(sequence, snapshot.ownerUUID(), snapshot.botUUID(), source, snapshot);
+        super(sequence, snapshot.ownerUUID(), snapshot.requireBotUUID(), source, snapshot);
         this.bot = Objects.requireNonNull(bot, "bot");
     }
-    public HumanEntity getBot() { return bot; }
-    @Override public HandlerList getHandlers() { return HANDLERS; }
-    public static HandlerList getHandlerList() { return HANDLERS; }
+
+    public HumanEntity getBot() {
+        return bot;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return HANDLERS;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
 }

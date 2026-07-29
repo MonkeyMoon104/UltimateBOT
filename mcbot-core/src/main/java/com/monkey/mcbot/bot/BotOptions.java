@@ -8,10 +8,9 @@ import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.armor.ArmorTier;
 import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
+import java.util.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.*;
 
 public final class BotOptions {
 
@@ -387,7 +386,7 @@ public final class BotOptions {
         if (rank == null) {
             return false;
         }
-        return rank.ordinal() >= minRank.ordinal() && rank.ordinal() <= maxRank.ordinal();
+        return rank.compareTo(minRank) >= 0 && rank.compareTo(maxRank) <= 0;
     }
 
     public BotRank nextAllowedRank(BotRank current, boolean forward) {
@@ -440,17 +439,17 @@ public final class BotOptions {
         if (armorTier == null) {
             return false;
         }
-        return armorTier.ordinal() >= minArmorTier.ordinal() && armorTier.ordinal() <= maxArmorTier.ordinal();
+        return armorTier.compareTo(minArmorTier) >= 0 && armorTier.compareTo(maxArmorTier) <= 0;
     }
 
     public ArmorTier clampArmorTier(ArmorTier armorTier) {
         if (armorTier == null) {
             return minArmorTier;
         }
-        if (armorTier.ordinal() < minArmorTier.ordinal()) {
+        if (armorTier.compareTo(minArmorTier) < 0) {
             return minArmorTier;
         }
-        if (armorTier.ordinal() > maxArmorTier.ordinal()) {
+        if (armorTier.compareTo(maxArmorTier) > 0) {
             return maxArmorTier;
         }
         return armorTier;
@@ -473,12 +472,12 @@ public final class BotOptions {
             ItemStack currentPiece = armor.get(slot);
             ItemStack updated = currentPiece == null
                     ? new ItemStack(minArmorTier.toMaterial(slot))
-                    : currentPiece.withType(ArmorCycle.clampArmor(currentPiece.getType(), slot, minArmorTier, maxArmorTier));
+                    : currentPiece.withType(
+                            ArmorCycle.clampArmor(currentPiece.getType(), slot, minArmorTier, maxArmorTier));
             armor.put(slot, updated);
         }
         applyAllTrimSelections();
     }
-
 
     public int getTotems() {
         return totems;
@@ -496,8 +495,13 @@ public final class BotOptions {
         this.follow = follow;
     }
 
-    public boolean isCombat() {return combat; }
-    public void setCombat(boolean combat) {this.combat = combat; }
+    public boolean isCombat() {
+        return combat;
+    }
+
+    public void setCombat(boolean combat) {
+        this.combat = combat;
+    }
 
     public boolean isChangeableFollow() {
         return changeableFollow;
@@ -667,26 +671,24 @@ public final class BotOptions {
         setBlastProtection(blastProtection, blastProtection, blastProtection, blastProtection);
     }
 
-    public void setBlastProtection(boolean bootsBlastEnabled,
-                                   boolean leggingsBlastEnabled,
-                                   boolean chestplateBlastEnabled,
-                                   boolean helmetBlastEnabled) {
+    public void setBlastProtection(
+            boolean bootsBlastEnabled,
+            boolean leggingsBlastEnabled,
+            boolean chestplateBlastEnabled,
+            boolean helmetBlastEnabled) {
         blast.put(EquipmentSlot.FEET, bootsBlastEnabled);
         blast.put(EquipmentSlot.LEGS, leggingsBlastEnabled);
         blast.put(EquipmentSlot.CHEST, chestplateBlastEnabled);
         blast.put(EquipmentSlot.HEAD, helmetBlastEnabled);
     }
 
-    public void setBlastProtection(int bootsBlastEnabled,
-                                   int leggingsBlastEnabled,
-                                   int chestplateBlastEnabled,
-                                   int helmetBlastEnabled) {
+    public void setBlastProtection(
+            int bootsBlastEnabled, int leggingsBlastEnabled, int chestplateBlastEnabled, int helmetBlastEnabled) {
         setBlastProtection(
                 parseBlastBinary(bootsBlastEnabled, "boots"),
                 parseBlastBinary(leggingsBlastEnabled, "leggings"),
                 parseBlastBinary(chestplateBlastEnabled, "chestplate"),
-                parseBlastBinary(helmetBlastEnabled, "helmet")
-        );
+                parseBlastBinary(helmetBlastEnabled, "helmet"));
     }
 
     private int getCoreMaxTotemCount() {
@@ -711,7 +713,7 @@ public final class BotOptions {
         if (minRank == null || maxRank == null) {
             throw new IllegalArgumentException("rank bounds cannot be null");
         }
-        if (minRank.ordinal() > maxRank.ordinal()) {
+        if (minRank.compareTo(maxRank) > 0) {
             throw new IllegalArgumentException("min rank cannot be greater than max rank");
         }
     }
@@ -720,7 +722,7 @@ public final class BotOptions {
         if (minArmorTier == null || maxArmorTier == null) {
             throw new IllegalArgumentException("armor bounds cannot be null");
         }
-        if (minArmorTier.ordinal() > maxArmorTier.ordinal()) {
+        if (minArmorTier.compareTo(maxArmorTier) > 0) {
             throw new IllegalArgumentException("min armor cannot be greater than max armor");
         }
     }
@@ -736,10 +738,10 @@ public final class BotOptions {
     }
 
     private BotRank clampRank(BotRank candidate) {
-        if (candidate.ordinal() < minRank.ordinal()) {
+        if (candidate.compareTo(minRank) < 0) {
             return minRank;
         }
-        if (candidate.ordinal() > maxRank.ordinal()) {
+        if (candidate.compareTo(maxRank) > 0) {
             return maxRank;
         }
         return candidate;

@@ -2,6 +2,7 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -29,19 +30,17 @@ public class BotTabItem extends TabItem {
 
         String basePath = "gui.tab-item.tab-" + tab + "." + (selected ? "selected" : "unselected");
 
-        String materialName = training.getLangString(basePath + ".material",
-                selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
+        String materialName = training.getLangString(basePath + ".material", selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
         String displayName = resolveConfiguredDisplayName(basePath, selected);
 
         Material mat;
         try {
-            mat = Material.valueOf(materialName.toUpperCase());
+            mat = Material.valueOf(materialName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             mat = selected ? Material.GLOWSTONE_DUST : Material.GUNPOWDER;
         }
 
-        return new ItemBuilder(mat)
-                .setDisplayName(ChatColorUtils.translate(displayName));
+        return new ItemBuilder(mat).setDisplayName(ChatColorUtils.translate(displayName));
     }
 
     @Override
@@ -50,7 +49,6 @@ public class BotTabItem extends TabItem {
     }
 
     private String resolveConfiguredDisplayName(String basePath, boolean selected) {
-        return training.getLangString(basePath + ".name",
-                "&eTab " + tab + (selected ? " &7(selezionato)" : ""));
+        return training.getLangString(basePath + ".name", "&eTab " + tab + (selected ? " &7(selezionato)" : ""));
     }
 }

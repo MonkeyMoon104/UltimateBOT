@@ -1,28 +1,27 @@
 package com.monkey.mcbot.bot.ai.controllers.brain;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.state.BotTargetChangeEvent;
+import com.monkey.mcbot.api.model.BotSnapshot;
+import com.monkey.mcbot.api.model.BotTargetMode;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
-import com.monkey.mcbot.api.model.BotTargetMode;
 import com.monkey.mcbot.bot.ai.BotAI;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.utils.ChatColorUtils;
-import net.minecraft.world.entity.player.Player;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
-import com.monkey.mcbot.api.event.state.BotTargetChangeEvent;
-import com.monkey.mcbot.api.model.BotSnapshot;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.world.entity.player.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 
 public class BotBrainController {
 
@@ -68,17 +67,18 @@ public class BotBrainController {
     private final String teamAllyPreRangeAlertMessage;
     private final String teamAllyRangeAlertMessage;
 
-    private Player cachedNmsTarget = null;
-    private long lastNmsTargetUpdate = 0;
-    private static final long NMS_CACHE_TIME = 100;
     private long lastReturnTeleport = 0;
 
     private boolean watchOnlyMode = false;
     private AllyAlertState lastAlertState = AllyAlertState.NONE;
     private UUID lastAlertTarget = null;
 
-    public BotBrainController(ITrainingBot bot, MinecraftBot plugin,
-                              org.bukkit.entity.Player targetPlayer, boolean follow, BotOptions botOptions) {
+    public BotBrainController(
+            ITrainingBot bot,
+            MinecraftBot plugin,
+            org.bukkit.entity.Player targetPlayer,
+            boolean follow,
+            BotOptions botOptions) {
         java.util.Objects.requireNonNull(bot, "bot");
         java.util.Objects.requireNonNull(plugin, "plugin");
         java.util.Objects.requireNonNull(botOptions, "botOptions");
@@ -123,12 +123,18 @@ public class BotBrainController {
 
         LivingEntity selectedTarget = selectActiveTarget();
         if (!sameTarget(activeTarget, selectedTarget)) {
-            UUID ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
-            BotSnapshot snapshot = ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
+            UUID ownerUUID =
+                    plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+            BotSnapshot snapshot =
+                    ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
             if (snapshot != null) {
-                BotTargetChangeEvent event = plugin.getBotEventDispatcher().publish(new BotTargetChangeEvent(
-                        plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
-                        snapshot, activeTarget, selectedTarget));
+                BotTargetChangeEvent event = plugin.getBotEventDispatcher()
+                        .publish(new BotTargetChangeEvent(
+                                plugin.getBotEventDispatcher()
+                                        .nextSequence(bot.asPlayer().getUUID()),
+                                snapshot,
+                                activeTarget,
+                                selectedTarget));
                 selectedTarget = event.isCancelled() ? activeTarget : event.getNewTarget();
             }
         }
@@ -158,8 +164,8 @@ public class BotBrainController {
     }
 
     private boolean sameTarget(LivingEntity first, LivingEntity second) {
-        if (first == second) return true;
-        return first != null && second != null && first.getUniqueId().equals(second.getUniqueId());
+        if (first == null || second == null) return first == null && second == null;
+        return first.getUniqueId().equals(second.getUniqueId());
     }
 
     private LivingEntity selectActiveTarget() {
@@ -167,12 +173,8 @@ public class BotBrainController {
         boolean playerSelectable = mode.allowsPlayers()
                 && isTargetAvailable(targetPlayer)
                 && (!combat || shouldUseCombatOnCurrentTarget());
-        org.bukkit.entity.Player player = playerSelectable
-                ? targetPlayer
-                : null;
-        Mob mob = mode.allowsMobs() && combat
-                ? targetingService.findClosestMob(bot, getMobTargetRange())
-                : null;
+        org.bukkit.entity.Player player = playerSelectable ? targetPlayer : null;
+        Mob mob = mode.allowsMobs() && combat ? targetingService.findClosestMob(bot, getMobTargetRange()) : null;
 
         if (player == null) {
             return mob;
@@ -242,24 +244,6 @@ public class BotBrainController {
         return false;
     }
 
-    private Player getNMSTarget() {
-        long currentTime = System.currentTimeMillis();
-
-        if (!isTargetAvailable(targetPlayer)) {
-            cachedNmsTarget = null;
-            return null;
-        }
-
-        if (cachedNmsTarget != null && (currentTime - lastNmsTargetUpdate) < NMS_CACHE_TIME) {
-            return cachedNmsTarget;
-        }
-
-        lastNmsTargetUpdate = currentTime;
-        cachedNmsTarget = resolveNmsPlayer(targetPlayer);
-
-        return cachedNmsTarget;
-    }
-
     private void updateTargetByType() {
         BotType botType = botOptions.getBotType();
         Set<UUID> targetFilters = botOptions.getTargetUUIDs();
@@ -283,8 +267,7 @@ public class BotBrainController {
                     allyReturnTeleportCooldownMs,
                     allyPreRangeAlertMessage,
                     allyRangeAlertMessage,
-                    targetFilters
-            );
+                    targetFilters);
             return;
         }
 
@@ -298,15 +281,15 @@ public class BotBrainController {
                     teamAllyReturnTeleportCooldownMs,
                     teamAllyPreRangeAlertMessage,
                     teamAllyRangeAlertMessage,
-                    targetFilters
-            );
+                    targetFilters);
             return;
         }
 
         if (botType == BotType.SINGLE && botOptions.isAutoTarget()) {
             watchOnlyMode = false;
             clearAlertState();
-            setTargetIfChanged(targetingService.findClosestPlayer(bot, botOptions.getAutoTargetRange(), this::isValidPvpTarget));
+            setTargetIfChanged(
+                    targetingService.findClosestPlayer(bot, botOptions.getAutoTargetRange(), this::isValidPvpTarget));
             return;
         }
 
@@ -339,14 +322,15 @@ public class BotBrainController {
         return owners;
     }
 
-    private void handleOwnerGroupTargeting(List<org.bukkit.entity.Player> owners,
-                                           double range,
-                                           double preRange,
-                                           double returnTeleportDistance,
-                                           long returnTeleportCooldownMs,
-                                           String preRangeMessage,
-                                           String rangeMessage,
-                                           Set<UUID> targetFilters) {
+    private void handleOwnerGroupTargeting(
+            List<org.bukkit.entity.Player> owners,
+            double range,
+            double preRange,
+            double returnTeleportDistance,
+            long returnTeleportCooldownMs,
+            String preRangeMessage,
+            String rangeMessage,
+            Set<UUID> targetFilters) {
         if (owners.isEmpty()) {
             watchOnlyMode = false;
             clearAlertState();
@@ -361,7 +345,8 @@ public class BotBrainController {
             if (closestInRange != null) {
                 watchOnlyMode = false;
                 setTargetIfChanged(closestInRange.threat);
-                notifyThreatIfChanged(AllyAlertState.RANGE, closestInRange.threat, owners, preRangeMessage, rangeMessage);
+                notifyThreatIfChanged(
+                        AllyAlertState.RANGE, closestInRange.threat, owners, preRangeMessage, rangeMessage);
                 return;
             }
 
@@ -370,7 +355,8 @@ public class BotBrainController {
             if (closestInPreRange != null) {
                 watchOnlyMode = true;
                 setTargetIfChanged(closestInPreRange.threat);
-                notifyThreatIfChanged(AllyAlertState.PRE_RANGE, closestInPreRange.threat, owners, preRangeMessage, rangeMessage);
+                notifyThreatIfChanged(
+                        AllyAlertState.PRE_RANGE, closestInPreRange.threat, owners, preRangeMessage, rangeMessage);
                 tryTeleportBackToOwnerIfFar(closestOwnerToBot, returnTeleportDistance, returnTeleportCooldownMs);
                 return;
             }
@@ -388,9 +374,8 @@ public class BotBrainController {
         setTargetIfChanged(null);
     }
 
-    private ThreatSelection findClosestThreatNearOwners(List<org.bukkit.entity.Player> owners,
-                                                        double range,
-                                                        Set<UUID> targetFilters) {
+    private ThreatSelection findClosestThreatNearOwners(
+            List<org.bukkit.entity.Player> owners, double range, Set<UUID> targetFilters) {
         if (owners.isEmpty()) {
             return null;
         }
@@ -505,22 +490,7 @@ public class BotBrainController {
         if (candidate == null || candidate.isDead()) {
             return false;
         }
-        return candidate.isOnline()
-                || plugin.getBotRegistry().getOwnerUUIDByBotUUID(candidate.getUniqueId()) != null;
-    }
-
-    private Player resolveNmsPlayer(org.bukkit.entity.Player candidate) {
-        if (candidate instanceof CraftPlayer craftPlayer) {
-            return craftPlayer.getHandle();
-        }
-        for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
-            if (managedBot != null
-                    && managedBot.asPlayer() != null
-                    && managedBot.asPlayer().getUUID().equals(candidate.getUniqueId())) {
-                return managedBot.asPlayer();
-            }
-        }
-        return null;
+        return candidate.isOnline() || plugin.getBotRegistry().getOwnerUUIDByBotUUID(candidate.getUniqueId()) != null;
     }
 
     private boolean isWorldGuardPvpAllowedForCurrentFight() {
@@ -543,7 +513,9 @@ public class BotBrainController {
                 continue;
             }
 
-            if (!owner.getWorld().getUID().equals(bot.asPlayer().level().getWorld().getUID())) {
+            if (!owner.getWorld()
+                    .getUID()
+                    .equals(bot.asPlayer().level().getWorld().getUID())) {
                 continue;
             }
 
@@ -557,11 +529,12 @@ public class BotBrainController {
         return bestOwner;
     }
 
-    private void notifyThreatIfChanged(AllyAlertState state,
-                                       org.bukkit.entity.Player threat,
-                                       List<org.bukkit.entity.Player> owners,
-                                       String preRangeMessage,
-                                       String rangeMessage) {
+    private void notifyThreatIfChanged(
+            AllyAlertState state,
+            org.bukkit.entity.Player threat,
+            List<org.bukkit.entity.Player> owners,
+            String preRangeMessage,
+            String rangeMessage) {
         if (threat == null) {
             return;
         }
@@ -590,9 +563,8 @@ public class BotBrainController {
         lastAlertTarget = null;
     }
 
-    private void tryTeleportBackToOwnerIfFar(org.bukkit.entity.Player owner,
-                                             double returnTeleportDistance,
-                                             long returnTeleportCooldownMs) {
+    private void tryTeleportBackToOwnerIfFar(
+            org.bukkit.entity.Player owner, double returnTeleportDistance, long returnTeleportCooldownMs) {
         if (owner == null) {
             return;
         }
@@ -613,13 +585,11 @@ public class BotBrainController {
     }
 
     private void setTargetIfChanged(org.bukkit.entity.Player newTarget) {
-        if (newTarget == this.targetPlayer) {
+        if (sameTarget(newTarget, this.targetPlayer)) {
             return;
         }
 
         this.targetPlayer = newTarget;
-        cachedNmsTarget = null;
-        lastNmsTargetUpdate = 0;
         bot.getBotAI().getTeleportController().setTarget(newTarget);
     }
 

@@ -5,6 +5,9 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -13,9 +16,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.List;
-import java.util.UUID;
 
 public class RankItem extends AbstractItem {
 
@@ -54,22 +54,25 @@ public class RankItem extends AbstractItem {
     }
 
     private Material getRankMaterial(BotRank rank) {
-        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase();
+        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase(Locale.ROOT);
         String materialName = training.getLangString(configPath);
 
         if (materialName != null) {
             try {
-                return Material.valueOf(materialName.toUpperCase());
+                return Material.valueOf(materialName.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                training.getLogger().warning("Invalid material '" + materialName + "' for rank " + rank.name() + " in config. Using fallback");
+                training.getLogger()
+                        .warning("Invalid material '" + materialName + "' for rank " + rank.name()
+                                + " in config. Using fallback");
             }
         }
 
         String defaultMaterial = training.getLangString("gui.rank-button.material", "DIAMOND_SWORD");
         try {
-            return Material.valueOf(defaultMaterial.toUpperCase());
+            return Material.valueOf(defaultMaterial.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            training.getLogger().warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
+            training.getLogger()
+                    .warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
             return Material.DIAMOND_SWORD;
         }
     }
@@ -77,7 +80,8 @@ public class RankItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (!options.isChangeableRank()) {
-            String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -107,7 +111,3 @@ public class RankItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-
-
-

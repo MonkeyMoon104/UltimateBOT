@@ -14,6 +14,23 @@ remote-api:
   base-path: "/mcbot/api/v1"
   token: "change-me"
 
+observability:
+  # Internal Micrometer metrics. Changes require a plugin restart.
+  enabled: true
+  # Exposes authenticated Prometheus data at <remote-api.base-path>/metrics.
+  prometheus-endpoint-enabled: true
+
+performance:
+  caches:
+    # Short-lived player target results. Values are validated and safely fall back to defaults.
+    target:
+      maximum-size: 2048
+      expire-after-write-ms: 250
+    # Passability checks used by pathfinding and movement.
+    block-state:
+      maximum-size: 1000
+      expire-after-write-ms: 5000
+
 bot:
   name: "MinecraftBot"
   default-totem-count: -1

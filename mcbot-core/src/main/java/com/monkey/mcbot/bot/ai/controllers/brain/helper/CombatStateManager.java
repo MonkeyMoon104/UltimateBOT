@@ -24,8 +24,11 @@ public class CombatStateManager implements ICombatStateManager {
     private int consecutiveDamageCount = 0;
     private long lastComboPressureTime = 0L;
 
-    public CombatStateManager(Player bot, BotInventoryController inventoryController,
-                              BotCPVPController cpvpController, BotRAPVPController rapvpController) {
+    public CombatStateManager(
+            Player bot,
+            BotInventoryController inventoryController,
+            BotCPVPController cpvpController,
+            BotRAPVPController rapvpController) {
         this.bot = bot;
         this.inventoryController = inventoryController;
         this.cpvpController = cpvpController;
@@ -54,8 +57,8 @@ public class CombatStateManager implements ICombatStateManager {
             lastComboPressureTime = currentTime;
         }
         boolean keepComboMomentum = currentTime - lastComboPressureTime < (hyperAggressive ? 900L : 650L);
-        boolean underDamagePressure = consecutiveDamageCount >= 2
-                && currentTime - lastDamageTime < (hyperAggressive ? 1800L : 2200L);
+        boolean underDamagePressure =
+                consecutiveDamageCount >= 2 && currentTime - lastDamageTime < (hyperAggressive ? 1800L : 2200L);
 
         if (keepComboMomentum && healthPercent > (hyperAggressive ? 0.10f : 0.18f)) {
             if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
@@ -76,22 +79,17 @@ public class CombatStateManager implements ICombatStateManager {
             newState = CombatState.DEFENSIVE;
         } else if (!hyperAggressive && consecutiveDamageCount >= 2 && currentTime - lastDamageTime < 1500) {
             newState = CombatState.DEFENSIVE;
-        }
-        else if (shouldAttemptCombat(target, currentTime, distance)) {
+        } else if (shouldAttemptCombat(distance)) {
             if (yDiff < 2 && shouldAttemptAnchor(target, currentTime)) {
                 newState = CombatState.ANCHOR_SETUP;
-            }
-            else if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
+            } else if (yDiff >= 2 && cpvpController.canPlaceCrystal()) {
                 newState = CombatState.CRYSTAL_SETUP;
-            }
-            else if (shouldReposition(target, distance)) {
+            } else if (shouldReposition(target, distance)) {
                 newState = CombatState.REPOSITIONING;
-            }
-            else {
+            } else {
                 newState = CombatState.AGGRESSIVE;
             }
-        }
-        else if (shouldReposition(target, distance)) {
+        } else if (shouldReposition(target, distance)) {
             newState = CombatState.REPOSITIONING;
         } else {
             newState = CombatState.AGGRESSIVE;
@@ -104,13 +102,12 @@ public class CombatStateManager implements ICombatStateManager {
         }
     }
 
-    private boolean shouldAttemptCombat(Player target, long currentTime, double distance) {
+    private boolean shouldAttemptCombat(double distance) {
         BotRank rank = cpvpController.getRank();
         boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
         double maxDistance = hyperAggressive ? 16.0 : 12.0;
         float minHealth = hyperAggressive ? 0.12f : 0.3f;
-        return distance > 0.7 && distance < maxDistance &&
-                bot.getHealth() / bot.getMaxHealth() > minHealth;
+        return distance > 0.7 && distance < maxDistance && bot.getHealth() / bot.getMaxHealth() > minHealth;
     }
 
     @Override
@@ -121,8 +118,7 @@ public class CombatStateManager implements ICombatStateManager {
     @Override
     public void onStateChange(Player target) {
         switch (currentState) {
-            case DEFENSIVE, REPOSITIONING, RETREATING -> {
-            }
+            case AGGRESSIVE, CRYSTAL_SETUP, DEFENSIVE, REPOSITIONING, RETREATING -> {}
             case ANCHOR_SETUP -> {
                 rapvpController.enable(target);
                 lastAnchorAttempt = System.currentTimeMillis();
@@ -154,9 +150,9 @@ public class CombatStateManager implements ICombatStateManager {
             return distance > 14.0D;
         }
 
-        return (yDiff < -2 && distance > (hyperAggressive ? 1.5 : 2.0)) ||
-                (distance < (hyperAggressive ? 1.2 : 1.5) && consecutiveDamageCount > (hyperAggressive ? 2 : 0)) ||
-                (distance > 15.0);
+        return (yDiff < -2 && distance > (hyperAggressive ? 1.5 : 2.0))
+                || (distance < (hyperAggressive ? 1.2 : 1.5) && consecutiveDamageCount > (hyperAggressive ? 2 : 0))
+                || (distance > 15.0);
     }
 
     private long getAnchorAttemptCooldown() {

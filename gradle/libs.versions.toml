@@ -17,6 +17,21 @@ packetevents = "2.13.0"
 junit = "5.14.4"
 junit-platform = "1.14.4"
 jspecify = "1.0.0"
+caffeine = "3.2.4"
+configurate = "4.2.0"
+mockito = "5.23.0"
+mockbukkit = "4.45.0"
+assertj = "3.27.7"
+errorprone = "2.50.0"
+errorprone-plugin = "5.1.0"
+spotless = "8.8.0"
+archunit = "1.4.2"
+awaitility = "4.3.0"
+nullaway = "0.13.8"
+jmh = "1.37"
+jmh-plugin = "0.7.3"
+revapi-plugin = "1.8.0"
+micrometer = "1.17.0"
 paper-bundle-1_21_4 = "1.21.4-R0.1-SNAPSHOT"
 paper-bundle-1_21_5 = "1.21.5-R0.1-SNAPSHOT"
 paper-bundle-1_21_6 = "1.21.6-R0.1-SNAPSHOT"
@@ -45,8 +60,25 @@ packetevents-spigot = { module = "com.github.retrooper:packetevents-spigot", ver
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockbukkit = { module = "org.mockbukkit.mockbukkit:mockbukkit-v1.21", version.ref = "mockbukkit" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+errorprone-core = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
+nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 api-publish = { id = "it.monkeymoon104.api-publish", version.ref = "api-publish" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+jmh = { id = "me.champeau.jmh", version.ref = "jmh-plugin" }
+revapi = { id = "org.revapi.revapi-gradle-plugin", version.ref = "revapi-plugin" }

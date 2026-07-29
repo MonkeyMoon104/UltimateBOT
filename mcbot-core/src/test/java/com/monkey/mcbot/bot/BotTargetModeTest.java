@@ -1,28 +1,26 @@
 package com.monkey.mcbot.bot;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.monkey.mcbot.api.model.BotTargetMode;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BotTargetModeTest {
 
     @Test
     void cyclesThroughEveryModeAndReturnsToPlayers() {
-        assertSame(BotTargetMode.MOBS, BotTargetMode.PLAYERS.next());
-        assertSame(BotTargetMode.PLAYERS_AND_MOBS, BotTargetMode.MOBS.next());
-        assertSame(BotTargetMode.PLAYERS, BotTargetMode.PLAYERS_AND_MOBS.next());
+        assertThat(BotTargetMode.PLAYERS.next()).isSameAs(BotTargetMode.MOBS);
+        assertThat(BotTargetMode.MOBS.next()).isSameAs(BotTargetMode.PLAYERS_AND_MOBS);
+        assertThat(BotTargetMode.PLAYERS_AND_MOBS.next()).isSameAs(BotTargetMode.PLAYERS);
     }
 
     @Test
     void exposesAllowedTargetCategories() {
-        assertTrue(BotTargetMode.PLAYERS.allowsPlayers());
-        assertFalse(BotTargetMode.PLAYERS.allowsMobs());
-        assertFalse(BotTargetMode.MOBS.allowsPlayers());
-        assertTrue(BotTargetMode.MOBS.allowsMobs());
-        assertTrue(BotTargetMode.PLAYERS_AND_MOBS.allowsPlayers());
-        assertTrue(BotTargetMode.PLAYERS_AND_MOBS.allowsMobs());
+        assertThat(BotTargetMode.PLAYERS.allowsPlayers()).isTrue();
+        assertThat(BotTargetMode.PLAYERS.allowsMobs()).isFalse();
+        assertThat(BotTargetMode.MOBS.allowsPlayers()).isFalse();
+        assertThat(BotTargetMode.MOBS.allowsMobs()).isTrue();
+        assertThat(BotTargetMode.PLAYERS_AND_MOBS.allowsPlayers()).isTrue();
+        assertThat(BotTargetMode.PLAYERS_AND_MOBS.allowsMobs()).isTrue();
     }
 }

@@ -37,17 +37,13 @@ public class CrystalPlacer {
 
         try {
             ItemStack crystalStack = inventoryController.getCurrentItem();
-            if (crystalStack.getItem() != Items.END_CRYSTAL) return false;
+            if (!Items.END_CRYSTAL.equals(crystalStack.getItem())) return false;
 
-            BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(pos).add(0, 0.5, 0),
-                    Direction.UP,
-                    pos,
-                    false
-            );
+            BlockHitResult hitResult =
+                    new BlockHitResult(Vec3.atCenterOf(pos).add(0, 0.5, 0), Direction.UP, pos, false);
 
-            InteractionResult result = NMSBridgeManager.get()
-                    .useItemOnBlock(bot, crystalStack, hitResult, InteractionHand.MAIN_HAND);
+            InteractionResult result =
+                    NMSBridgeManager.get().useItemOnBlock(bot, crystalStack, hitResult, InteractionHand.MAIN_HAND);
 
             if (result.consumesAction()) {
                 bot.swing(InteractionHand.MAIN_HAND);
@@ -57,7 +53,8 @@ public class CrystalPlacer {
                 return true;
             }
         } catch (Exception e) {
-            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Crystal placement failed -> " + e.getMessage());
+            MinecraftBotLogging.warn(
+                    MinecraftBot.getInstance().getLogger(), "Combat", "Crystal placement failed -> " + e.getMessage());
         }
 
         return false;
@@ -72,11 +69,10 @@ public class CrystalPlacer {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                || result.getBlockPos().equals(pos);
     }
 }

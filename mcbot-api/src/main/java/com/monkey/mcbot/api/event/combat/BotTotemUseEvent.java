@@ -2,7 +2,6 @@ package com.monkey.mcbot.api.event.combat;
 
 import com.monkey.mcbot.api.event.base.BotEvent;
 import com.monkey.mcbot.api.event.base.BotEventSource;
-
 import com.monkey.mcbot.api.model.BotSnapshot;
 import org.bukkit.event.HandlerList;
 
@@ -13,12 +12,25 @@ public final class BotTotemUseEvent extends BotEvent {
     private final int remaining;
 
     public BotTotemUseEvent(long sequence, BotSnapshot snapshot, int consumed, int remaining) {
-        super(sequence, snapshot.ownerUUID(), snapshot.botUUID(), BotEventSource.BUKKIT, snapshot);
+        super(sequence, snapshot.ownerUUID(), snapshot.requireBotUUID(), BotEventSource.BUKKIT, snapshot);
         this.consumed = consumed;
         this.remaining = remaining;
     }
-    public int getConsumed() { return consumed; }
-    public int getRemaining() { return remaining; }
-    @Override public HandlerList getHandlers() { return HANDLERS; }
-    public static HandlerList getHandlerList() { return HANDLERS; }
+
+    public int getConsumed() {
+        return consumed;
+    }
+
+    public int getRemaining() {
+        return remaining;
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+        return HANDLERS;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
 }

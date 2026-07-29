@@ -9,11 +9,9 @@ import org.bukkit.entity.Player;
 
 public class RankPlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public RankPlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 

@@ -8,11 +8,9 @@ import org.bukkit.entity.Player;
 
 public class OnlineTimePlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public OnlineTimePlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 

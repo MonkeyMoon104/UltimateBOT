@@ -22,7 +22,6 @@ public class BotNoobMovementController {
 
     public void moveTowards(Player target, double targetDistance) {
         double targetX = target.getX();
-        double targetY = target.getY();
         double targetZ = target.getZ();
 
         double botX = bot.getX();
@@ -30,7 +29,6 @@ public class BotNoobMovementController {
         double botZ = bot.getZ();
 
         double dx = targetX - botX;
-        double dy = targetY - botY;
         double dz = targetZ - botZ;
 
         double currentDistance = Math.sqrt(dx * dx + dz * dz);
@@ -62,7 +60,7 @@ public class BotNoobMovementController {
         double moveX = dx * movementSpeed;
         double moveZ = dz * movementSpeed;
 
-        if (handleObstacles(dx, dz, botX, botY, botZ, moveX, moveZ)) {
+        if (handleObstacles(dx, dz, botX, botY, botZ)) {
             return;
         }
 
@@ -92,21 +90,24 @@ public class BotNoobMovementController {
         double moveX = dx * movementSpeed;
         double moveZ = dz * movementSpeed;
 
-        if (handleObstacles(dx, dz, botX, bot.getY(), botZ, moveX, moveZ)) {
+        if (handleObstacles(dx, dz, botX, bot.getY(), botZ)) {
             return;
         }
 
         bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
     }
 
-    private boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
+    private boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ) {
         BlockPos front = BlockPos.containing(botX + dx, botY, botZ + dz);
         BlockPos above = front.above();
         BlockPos above2 = above.above();
 
-        boolean frontBlocked = !level.getBlockState(front).getCollisionShape(level, front).isEmpty();
-        boolean aboveClear = level.getBlockState(above).getCollisionShape(level, above).isEmpty();
-        boolean above2Clear = level.getBlockState(above2).getCollisionShape(level, above2).isEmpty();
+        boolean frontBlocked =
+                !level.getBlockState(front).getCollisionShape(level, front).isEmpty();
+        boolean aboveClear =
+                level.getBlockState(above).getCollisionShape(level, above).isEmpty();
+        boolean above2Clear =
+                level.getBlockState(above2).getCollisionShape(level, above2).isEmpty();
 
         boolean canStepUp = frontBlocked && aboveClear;
         boolean tooHigh = frontBlocked && !aboveClear && !above2Clear;
@@ -149,14 +150,14 @@ public class BotNoobMovementController {
         for (int i = 1; i <= maxTries; i++) {
             double offset = Math.toRadians(12 * i);
 
-            for (int sign : new int[]{1, -1}) {
+            for (int sign : new int[] {1, -1}) {
                 double newAngle = angle + offset * sign;
 
                 double newDx = Math.cos(newAngle);
                 double newDz = Math.sin(newAngle);
 
                 if (isPathClear(newDx, newDz)) {
-                    return new double[]{newDx, newDz};
+                    return new double[] {newDx, newDz};
                 }
             }
         }
@@ -169,9 +170,14 @@ public class BotNoobMovementController {
         BlockPos checkAbove = checkPos.above();
         BlockPos checkAbove2 = checkAbove.above();
 
-        boolean frontClear = level.getBlockState(checkPos).getCollisionShape(level, checkPos).isEmpty();
-        boolean aboveClear = level.getBlockState(checkAbove).getCollisionShape(level, checkAbove).isEmpty();
-        boolean above2Clear = level.getBlockState(checkAbove2).getCollisionShape(level, checkAbove2).isEmpty();
+        boolean frontClear =
+                level.getBlockState(checkPos).getCollisionShape(level, checkPos).isEmpty();
+        boolean aboveClear = level.getBlockState(checkAbove)
+                .getCollisionShape(level, checkAbove)
+                .isEmpty();
+        boolean above2Clear = level.getBlockState(checkAbove2)
+                .getCollisionShape(level, checkAbove2)
+                .isEmpty();
 
         return frontClear && aboveClear && above2Clear;
     }

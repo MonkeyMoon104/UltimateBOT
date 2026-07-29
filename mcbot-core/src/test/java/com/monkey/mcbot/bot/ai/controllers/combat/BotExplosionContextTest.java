@@ -1,35 +1,34 @@
 package com.monkey.mcbot.bot.ai.controllers.combat;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class BotExplosionContextTest {
 
     @Test
     void suppressesOnlyProtectedBotExplosions() {
-        assertFalse(BotExplosionContext.isBlockDamageSuppressed());
+        assertThat(BotExplosionContext.isBlockDamageSuppressed()).isFalse();
 
         BotExplosionContext.execute(false, () -> {
-            assertTrue(BotExplosionContext.isBlockDamageSuppressed());
+            assertThat(BotExplosionContext.isBlockDamageSuppressed()).isTrue();
             return null;
         });
 
-        assertFalse(BotExplosionContext.isBlockDamageSuppressed());
+        assertThat(BotExplosionContext.isBlockDamageSuppressed()).isFalse();
         BotExplosionContext.execute(true, () -> {
-            assertFalse(BotExplosionContext.isBlockDamageSuppressed());
+            assertThat(BotExplosionContext.isBlockDamageSuppressed()).isFalse();
             return null;
         });
     }
 
     @Test
     void alwaysClearsThreadStateAfterFailure() {
-        assertThrows(IllegalStateException.class, () ->
-                BotExplosionContext.execute(false, () -> {
+        assertThatThrownBy(() -> BotExplosionContext.execute(false, () -> {
                     throw new IllegalStateException("boom");
-                }));
-        assertFalse(BotExplosionContext.isBlockDamageSuppressed());
+                }))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(BotExplosionContext.isBlockDamageSuppressed()).isFalse();
     }
 }

@@ -8,7 +8,6 @@ import net.minecraft.world.phys.Vec3;
 public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
     private static final long EMERGENCY_PEARL_COOLDOWN = 3000;
-    private static final int PREDICT_TICKS = 8;
 
     private final IPositionCalculator positionCalculator;
 
@@ -17,7 +16,14 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
     }
 
     @Override
-    public PearlStrategy determineOptimalStrategy(Player bot, Player target, boolean wasRecentlyDamaged, int damageComboCount, long comboStartTime, int repositionPearlCooldown, int aggressivePearlCooldown) {
+    public PearlStrategy determineOptimalStrategy(
+            Player bot,
+            Player target,
+            boolean wasRecentlyDamaged,
+            int damageComboCount,
+            long comboStartTime,
+            int repositionPearlCooldown,
+            int aggressivePearlCooldown) {
         double distance = bot.distanceTo(target);
         float healthPercent = bot.getHealth() / bot.getMaxHealth();
         Vec3 botPos = bot.position();
@@ -26,8 +32,7 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
         long currentTime = System.currentTimeMillis();
 
-        if (healthPercent < 0.3f ||
-                (damageComboCount >= 2 && currentTime - comboStartTime < 2000)) {
+        if (healthPercent < 0.3f || (damageComboCount >= 2 && currentTime - comboStartTime < 2000)) {
             return PearlStrategy.COMBO_ESCAPE;
         }
 
@@ -55,68 +60,43 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
     }
 
     @Override
-    public boolean shouldUsePearlForStrategy(PearlStrategy strategy, Player bot, Player target, boolean wasRecentlyDamaged, long lastEmergencyPearl, int repositionPearlCooldown, int aggressivePearlCooldown) {
+    public boolean shouldUsePearlForStrategy(
+            PearlStrategy strategy,
+            Player bot,
+            Player target,
+            boolean wasRecentlyDamaged,
+            long lastEmergencyPearl,
+            int repositionPearlCooldown,
+            int aggressivePearlCooldown) {
         double distance = bot.distanceTo(target);
         long currentTime = System.currentTimeMillis();
 
-        switch (strategy) {
-            case COMBO_ESCAPE:
-                return currentTime - lastEmergencyPearl > EMERGENCY_PEARL_COOLDOWN;
-
-            case ESCAPE:
-                return (wasRecentlyDamaged && distance < 5.2) || bot.getHealth() < 7.0f;
-
-            case MELEE_DISENGAGE:
-                return distance < 3.0 && (wasRecentlyDamaged || bot.getHealth() < 10.0f);
-
-            case REPOSITION_LOW:
-                return repositionPearlCooldown <= 0
+        return switch (strategy) {
+            case COMBO_ESCAPE -> currentTime - lastEmergencyPearl > EMERGENCY_PEARL_COOLDOWN;
+            case ESCAPE -> (wasRecentlyDamaged && distance < 5.2) || bot.getHealth() < 7.0f;
+            case MELEE_DISENGAGE -> distance < 3.0 && (wasRecentlyDamaged || bot.getHealth() < 10.0f);
+            case REPOSITION_LOW ->
+                repositionPearlCooldown <= 0
                         && distance > 4.5
                         && distance < 13.0
                         && bot.position().y - target.position().y > 2.3;
-
-            case ANCHOR_POSITION:
-                return target.onGround()
-                        && distance > 4.2
-                        && distance < 11.0
-                        && bot.position().y - target.position().y > 0.6;
-
-            case AGGRESSIVE_CLOSE:
-                return aggressivePearlCooldown <= 0
-                        && distance > 7.0
-                        && distance < 14.5
-                        && bot.getHealth() > 8.0f;
-
-            default:
-                return false;
-        }
+            case ANCHOR_POSITION ->
+                target.onGround() && distance > 4.2 && distance < 11.0 && bot.position().y - target.position().y > 0.6;
+            case AGGRESSIVE_CLOSE ->
+                aggressivePearlCooldown <= 0 && distance > 7.0 && distance < 14.5 && bot.getHealth() > 8.0f;
+        };
     }
 
     @Override
-    public Vec3 calculateTargetForStrategy(PearlStrategy strategy, Player bot, Player target, Vec3 predictedTargetMovement) {
-        Vec3 botPos = bot.position();
-        Vec3 targetPos = target.position();
-        Vec3 predictedTargetPos = targetPos.add(predictedTargetMovement.scale(PREDICT_TICKS / 20.0));
-
-        switch (strategy) {
-            case COMBO_ESCAPE:
-            case ESCAPE:
-                return positionCalculator.calculateEmergencyEscape(bot, target);
-
-            case MELEE_DISENGAGE:
-                return positionCalculator.calculateMeleeDisengage(bot, target);
-
-            case REPOSITION_LOW:
-                return positionCalculator.calculateLowGroundPosition(bot, target);
-
-            case ANCHOR_POSITION:
-                return positionCalculator.calculateAnchorPosition(bot, target);
-
-            case AGGRESSIVE_CLOSE:
-                return positionCalculator.calculateAggressiveApproach(bot, target, predictedTargetMovement);
-
-            default:
-                return positionCalculator.calculateStandardEscape(bot, target);
-        }
+    public Vec3 calculateTargetForStrategy(
+            PearlStrategy strategy, Player bot, Player target, Vec3 predictedTargetMovement) {
+        return switch (strategy) {
+            case COMBO_ESCAPE, ESCAPE -> positionCalculator.calculateEmergencyEscape(bot, target);
+            case MELEE_DISENGAGE -> positionCalculator.calculateMeleeDisengage(bot, target);
+            case REPOSITION_LOW -> positionCalculator.calculateLowGroundPosition(bot, target);
+            case ANCHOR_POSITION -> positionCalculator.calculateAnchorPosition(bot, target);
+            case AGGRESSIVE_CLOSE ->
+                positionCalculator.calculateAggressiveApproach(bot, target, predictedTargetMovement);
+        };
     }
 }

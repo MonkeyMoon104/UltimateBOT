@@ -4,6 +4,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -27,11 +28,10 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem;
 
-import java.util.*;
-
 public class TargetsTab {
 
-    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
     private final BotGuiTabContext context;
 
     public TargetsTab(BotGuiTabContext context) {
@@ -48,12 +48,7 @@ public class TargetsTab {
 
         ScrollGui<Item> gui = ScrollGui.items()
                 .setStructure(
-                        "# # # # # # # #",
-                        "# t t t t t t u",
-                        "# t t t t t t #",
-                        "# t t t t t t d",
-                        "# # # # # # # #"
-                )
+                        "# # # # # # # #", "# t t t t t t u", "# t t t t t t #", "# t t t t t t d", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('t', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
                 .addIngredient('u', new ScrollUpItem())
@@ -62,19 +57,14 @@ public class TargetsTab {
                 .setContent(items)
                 .build();
 
-        boolean foliaDetected = context.getTraining()
-                .getWrapperManager()
-                .capabilities()
-                .foliaDetected();
+        boolean foliaDetected =
+                context.getTraining().getWrapperManager().capabilities().foliaDetected();
 
         if (!items.isEmpty() && !foliaDetected) {
-            gui.playAnimation(
-                    new SplitSequentialAnimation(3, false),
-                    slotElement -> {
-                        if (!(slotElement instanceof SlotElement.ItemSlotElement itemSlot)) return false;
-                        return itemSlot.getItem() instanceof TargetHeadItem;
-                    }
-            );
+            gui.playAnimation(new SplitSequentialAnimation(3, false), slotElement -> {
+                if (!(slotElement instanceof SlotElement.ItemSlotElement itemSlot)) return false;
+                return itemSlot.getItem() instanceof TargetHeadItem;
+            });
         }
 
         return gui;
@@ -102,8 +92,7 @@ public class TargetsTab {
             }
 
             UUID preferredTargetUUID = effectiveOptions.getPreferredTargetUUID();
-            if (preferredTargetUUID != null
-                    && !isProtectedOwner(preferredTargetUUID, effectiveOptions)) {
+            if (preferredTargetUUID != null && !isProtectedOwner(preferredTargetUUID, effectiveOptions)) {
                 targets.add(preferredTargetUUID);
             }
         }
@@ -112,13 +101,11 @@ public class TargetsTab {
             ITrainingBot managedBot = context.resolveManagedBot();
             if (managedBot != null) {
                 Player targetPlayer = managedBot.getTargetPlayer();
-                if (targetPlayer == null
-                        && managedBot.getBrainController() != null) {
+                if (targetPlayer == null && managedBot.getBrainController() != null) {
                     targetPlayer = managedBot.getBrainController().getTargetPlayer();
                 }
 
-                if (targetPlayer != null
-                        && !isProtectedOwner(targetPlayer.getUniqueId(), effectiveOptions)) {
+                if (targetPlayer != null && !isProtectedOwner(targetPlayer.getUniqueId(), effectiveOptions)) {
                     targets.add(targetPlayer.getUniqueId());
                 }
             }
@@ -143,17 +130,17 @@ public class TargetsTab {
 
     private class ScrollUpItem extends ScrollItem {
 
-        public ScrollUpItem() {
+        ScrollUpItem() {
             super(-1);
         }
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
             String name = context.getTraining().getLangString("gui.targets-tab.scroll-up.name", "&aScroll up");
-            ItemBuilder builder = new ItemBuilder(Material.ARROW)
-                    .setDisplayName(ChatColorUtils.translate(name));
+            ItemBuilder builder = new ItemBuilder(Material.ARROW).setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(-1)) {
-                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-up.cant-scroll", "&7Already at the top");
+                String cantScroll = context.getTraining()
+                        .getLangString("gui.targets-tab.scroll-up.cant-scroll", "&7Already at the top");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -162,17 +149,17 @@ public class TargetsTab {
 
     private class ScrollDownItem extends ScrollItem {
 
-        public ScrollDownItem() {
+        ScrollDownItem() {
             super(1);
         }
 
         @Override
         public ItemProvider getItemProvider(ScrollGui<?> gui) {
             String name = context.getTraining().getLangString("gui.targets-tab.scroll-down.name", "&aScroll down");
-            ItemBuilder builder = new ItemBuilder(Material.ARROW)
-                    .setDisplayName(ChatColorUtils.translate(name));
+            ItemBuilder builder = new ItemBuilder(Material.ARROW).setDisplayName(ChatColorUtils.translate(name));
             if (!gui.canScroll(1)) {
-                String cantScroll = context.getTraining().getLangString("gui.targets-tab.scroll-down.cant-scroll", "&7Already at the bottom");
+                String cantScroll = context.getTraining()
+                        .getLangString("gui.targets-tab.scroll-down.cant-scroll", "&7Already at the bottom");
                 builder.addLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -193,24 +180,20 @@ public class TargetsTab {
             SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(targetUUID);
-            String playerName = offlinePlayer.getName() != null
-                    ? offlinePlayer.getName()
-                    : targetUUID.toString();
+            String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : targetUUID.toString();
 
             if (meta != null) {
                 meta.setOwningPlayer(offlinePlayer);
 
                 String nameTemplate = context.getTraining().getLangString("gui.targets-tab.head.name", "&c%player%");
                 String name = ChatColorUtils.translate(
-                        nameTemplate.replace("%player%", playerName)
-                                .replace("%uuid%", targetUUID.toString()));
+                        nameTemplate.replace("%player%", playerName).replace("%uuid%", targetUUID.toString()));
                 meta.displayName(LEGACY_SECTION_SERIALIZER.deserialize(name));
 
                 List<String> loreLines = context.getTraining().getLangStringList("gui.targets-tab.head.lore");
                 List<? extends Component> lore = loreLines.stream()
                         .map(line -> ChatColorUtils.translate(
-                                line.replace("%player%", playerName)
-                                        .replace("%uuid%", targetUUID.toString())))
+                                line.replace("%player%", playerName).replace("%uuid%", targetUUID.toString())))
                         .map(LEGACY_SECTION_SERIALIZER::deserialize)
                         .toList();
                 meta.lore(lore);
@@ -221,8 +204,7 @@ public class TargetsTab {
         }
 
         @Override
-        public void handleClick(@NotNull ClickType clickType, @NotNull Player player,
-                                @NotNull InventoryClickEvent event) {
-        }
+        public void handleClick(
+                @NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent event) {}
     }
 }

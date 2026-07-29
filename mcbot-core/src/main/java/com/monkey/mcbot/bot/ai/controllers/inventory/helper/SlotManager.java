@@ -3,6 +3,8 @@ package com.monkey.mcbot.bot.ai.controllers.inventory.helper;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -10,9 +12,6 @@ import net.minecraft.world.item.Items;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public final class SlotManager implements ISlotManager {
 
@@ -33,7 +32,8 @@ public final class SlotManager implements ISlotManager {
     private final IResourceReplenisher resourceReplenisher;
     private final IEquipmentBroadcaster equipmentBroadcaster;
 
-    public SlotManager(Player bot, IResourceReplenisher resourceReplenisher, IEquipmentBroadcaster equipmentBroadcaster) {
+    public SlotManager(
+            Player bot, IResourceReplenisher resourceReplenisher, IEquipmentBroadcaster equipmentBroadcaster) {
         this.bot = java.util.Objects.requireNonNull(bot, "bot");
         this.resourceReplenisher = java.util.Objects.requireNonNull(resourceReplenisher, "resourceReplenisher");
         this.equipmentBroadcaster = java.util.Objects.requireNonNull(equipmentBroadcaster, "equipmentBroadcaster");

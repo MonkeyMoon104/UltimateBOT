@@ -4,20 +4,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.MinecraftBotAPI;
+import com.monkey.mcbot.api.event.base.BotEventSource;
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.model.*;
+import com.monkey.mcbot.event.BotEventSourceContext;
+import com.monkey.mcbot.metrics.BotMetrics;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.bukkit.Bukkit;
-import com.monkey.mcbot.event.BotEventSourceContext;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
+import org.bukkit.Bukkit;
 
 public final class RemoteApiServer {
 
@@ -48,7 +49,9 @@ public final class RemoteApiServer {
 
         token = plugin.getConfig().getString("remote-api.token", "");
         if (token == null || token.isBlank() || "change-me".equalsIgnoreCase(token)) {
-            plugin.getLogger().warning("Remote API is enabled but remote-api.token is not configured. Remote API will not start.");
+            plugin.getLogger()
+                    .warning(
+                            "Remote API is enabled but remote-api.token is not configured. Remote API will not start.");
             return;
         }
 
@@ -86,6 +89,10 @@ public final class RemoteApiServer {
     }
 
     private void handle(HttpExchange exchange) throws IOException {
+        long startedNanos = System.nanoTime();
+        String method = exchange.getRequestMethod();
+        String metricRoute = metricRoute(relativePath(exchange));
+        BotMetrics metrics = plugin.getBotMetrics();
         try {
             if (!isAuthorized(exchange)) {
                 writeJson(exchange, 401, RemoteOperationResponse.failure("Unauthorized"));
@@ -93,10 +100,17 @@ public final class RemoteApiServer {
             }
 
             String relativePath = relativePath(exchange);
-            String method = exchange.getRequestMethod();
-
             if ("GET".equals(method) && "/health".equals(relativePath)) {
                 writeJson(exchange, 200, RemoteOperationResponse.success("MinecraftBot remote API is online.", null));
+                return;
+            }
+
+            if ("GET".equals(method) && "/metrics".equals(relativePath)) {
+                if (!metrics.isPrometheusEndpointEnabled()) {
+                    writeJson(exchange, 404, RemoteOperationResponse.failure("Metrics endpoint is disabled."));
+                } else {
+                    writeText(exchange, 200, metrics.scrape());
+                }
                 return;
             }
 
@@ -142,6 +156,8 @@ public final class RemoteApiServer {
             plugin.getLogger().warning("Remote API request failed: " + ex.getMessage());
             writeJson(exchange, 500, RemoteOperationResponse.failure("Internal remote API error."));
         } finally {
+            metrics.recordRemoteRequest(
+                    method, metricRoute, exchange.getResponseCode(), System.nanoTime() - startedNanos);
             exchange.close();
         }
     }
@@ -162,7 +178,7 @@ public final class RemoteApiServer {
     }
 
     private void handleBotMutation(HttpExchange exchange, String method, String relativePath) throws IOException {
-        String[] parts = relativePath.substring(1).split("/");
+        String[] parts = relativePath.substring(1).split("/", -1);
         if (parts.length < 2 || !"bots".equals(parts[0])) {
             writeJson(exchange, 404, RemoteOperationResponse.failure("Endpoint not found."));
             return;
@@ -173,7 +189,9 @@ public final class RemoteApiServer {
         UUID ownerUUID = resolveOwnerUUID(manager, requestedUUID);
 
         if ("GET".equals(method) && parts.length == 2) {
-            BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
+            BotSnapshot snapshot = runSync(() -> ownerUUID != null
+                    ? manager.getBot(ownerUUID).orElse(null)
+                    : manager.getBotByBotUUID(requestedUUID).orElse(null));
             if (snapshot == null) {
                 writeJson(exchange, 404, RemoteOperationResponse.failure("Bot not found."));
             } else {
@@ -183,8 +201,13 @@ public final class RemoteApiServer {
         }
 
         if ("DELETE".equals(method) && parts.length == 2) {
-            boolean removed = runSync(() -> ownerUUID != null ? manager.remove(ownerUUID) : manager.removeByBotUUID(requestedUUID));
-            writeJson(exchange, removed ? 200 : 404, new RemoteOperationResponse(removed, removed ? "Bot removed." : "Bot not found.", null, removed ? 1 : 0));
+            boolean removed = runSync(
+                    () -> ownerUUID != null ? manager.remove(ownerUUID) : manager.removeByBotUUID(requestedUUID));
+            writeJson(
+                    exchange,
+                    removed ? 200 : 404,
+                    new RemoteOperationResponse(
+                            removed, removed ? "Bot removed." : "Bot not found.", null, removed ? 1 : 0));
             return;
         }
 
@@ -195,51 +218,90 @@ public final class RemoteApiServer {
 
         if ("target-mode".equals(parts[2])) {
             TargetModePayload payload = readJson(exchange, TargetModePayload.class);
-            com.monkey.mcbot.api.model.BotTargetMode mode = payload == null ? null
+            com.monkey.mcbot.api.model.BotTargetMode mode = payload == null
+                    ? null
                     : enumValue(com.monkey.mcbot.api.model.BotTargetMode.class, payload.targetMode, null);
-            boolean updated = mode != null && runSync(() -> ownerUUID != null
-                    ? manager.updateTargetMode(ownerUUID, mode)
-                    : manager.updateTargetModeByBotUUID(requestedUUID, mode));
-            BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
-            writeJson(exchange, updated ? 200 : 400,
-                    new RemoteOperationResponse(updated, updated ? "Bot updated." : "Invalid target mode.", snapshot, null));
+            boolean updated = mode != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateTargetMode(ownerUUID, mode)
+                            : manager.updateTargetModeByBotUUID(requestedUUID, mode));
+            BotSnapshot snapshot = runSync(() -> ownerUUID != null
+                    ? manager.getBot(ownerUUID).orElse(null)
+                    : manager.getBotByBotUUID(requestedUUID).orElse(null));
+            writeJson(
+                    exchange,
+                    updated ? 200 : 400,
+                    new RemoteOperationResponse(
+                            updated, updated ? "Bot updated." : "Invalid target mode.", snapshot, null));
             return;
         }
 
         TogglePayload payload = readJson(exchange, TogglePayload.class);
         boolean enabled = payload != null && Boolean.TRUE.equals(payload.enabled);
-        boolean updated = switch (parts[2]) {
-            case "crystal-pvp" -> runSync(() -> ownerUUID != null ? manager.updateCrystalPvp(ownerUUID, enabled) : manager.updateCrystalPvpByBotUUID(requestedUUID, enabled));
-            case "explosions" -> runSync(() -> ownerUUID != null ? manager.updateExplosions(ownerUUID, enabled) : manager.updateExplosionsByBotUUID(requestedUUID, enabled));
-            case "explosion-block-damage" -> runSync(() -> ownerUUID != null ? manager.updateExplosionBlockDamage(ownerUUID, enabled) : manager.updateExplosionBlockDamageByBotUUID(requestedUUID, enabled));
-            case "ender-pearls" -> runSync(() -> ownerUUID != null ? manager.updateEnderPearls(ownerUUID, enabled) : manager.updateEnderPearlsByBotUUID(requestedUUID, enabled));
-            case "healing" -> runSync(() -> ownerUUID != null ? manager.updateHealing(ownerUUID, enabled) : manager.updateHealingByBotUUID(requestedUUID, enabled));
-            case "attack-bots" -> runSync(() -> ownerUUID != null ? manager.updateAttackBots(ownerUUID, enabled) : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
-            default -> false;
-        };
-        BotSnapshot snapshot = runSync(() -> ownerUUID != null ? manager.getBot(ownerUUID).orElse(null) : manager.getBotByBotUUID(requestedUUID).orElse(null));
-        writeJson(exchange, updated ? 200 : 400, new RemoteOperationResponse(updated, updated ? "Bot updated." : "Bot update failed.", snapshot, null));
+        boolean updated =
+                switch (parts[2]) {
+                    case "crystal-pvp" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateCrystalPvp(ownerUUID, enabled)
+                                : manager.updateCrystalPvpByBotUUID(requestedUUID, enabled));
+                    case "explosions" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateExplosions(ownerUUID, enabled)
+                                : manager.updateExplosionsByBotUUID(requestedUUID, enabled));
+                    case "explosion-block-damage" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateExplosionBlockDamage(ownerUUID, enabled)
+                                : manager.updateExplosionBlockDamageByBotUUID(requestedUUID, enabled));
+                    case "ender-pearls" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateEnderPearls(ownerUUID, enabled)
+                                : manager.updateEnderPearlsByBotUUID(requestedUUID, enabled));
+                    case "healing" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateHealing(ownerUUID, enabled)
+                                : manager.updateHealingByBotUUID(requestedUUID, enabled));
+                    case "attack-bots" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateAttackBots(ownerUUID, enabled)
+                                : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
+                    default -> false;
+                };
+        BotSnapshot snapshot = runSync(() -> ownerUUID != null
+                ? manager.getBot(ownerUUID).orElse(null)
+                : manager.getBotByBotUUID(requestedUUID).orElse(null));
+        writeJson(
+                exchange,
+                updated ? 200 : 400,
+                new RemoteOperationResponse(updated, updated ? "Bot updated." : "Bot update failed.", snapshot, null));
     }
 
     private BotSettings buildSettings(EventBotSpawnPayload payload) {
         EventBotSpawnPayload safe = payload == null ? new EventBotSpawnPayload() : payload;
         BotSettings.BuildStep buildStep = applySkin(
-                BotSettings.builder().setBotNameTemplate(defaultString(safe.botNameTemplate, plugin.getConfig().getString("bot.name", "MinecraftBot"))),
-                safe.botSkin
-        )
+                        BotSettings.builder()
+                                .setBotNameTemplate(defaultString(
+                                        safe.botNameTemplate,
+                                        plugin.getConfig().getString("bot.name", "MinecraftBot"))),
+                        safe.botSkin)
                 .follow(defaultBoolean(safe.follow, true))
                 .setChangeableFollow(defaultBoolean(safe.changeableFollow, true))
                 .combat(defaultBoolean(safe.combat, true))
                 .setChangeableCombat(defaultBoolean(safe.changeableCombat, true))
                 .blastProtection(false, false, false, false)
                 .setChangeableBlast(defaultBoolean(safe.changeableBlast, true))
-                .armorValue(enumValue(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER), enumValue(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
+                .armorValue(
+                        enumValue(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
+                        enumValue(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
                 .armor(enumValue(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
                 .setChangeableArmor(defaultBoolean(safe.changeableArmor, true))
-                .totemValue(defaultInt(safe.minTotemCount, -1), defaultInt(safe.maxTotemCount, plugin.getConfig().getInt("bot.max-totem-event", 74)))
+                .totemValue(
+                        defaultInt(safe.minTotemCount, -1),
+                        defaultInt(safe.maxTotemCount, plugin.getConfig().getInt("bot.max-totem-event", 74)))
                 .totemCount(defaultInt(safe.totemCount, -1))
                 .setChangeableTotem(defaultBoolean(safe.changeableTotem, true))
-                .rankValue(enumValue(BotRank.class, safe.minRank, BotRank.EASY), enumValue(BotRank.class, safe.maxRank, BotRank.GOD))
+                .rankValue(
+                        enumValue(BotRank.class, safe.minRank, BotRank.EASY),
+                        enumValue(BotRank.class, safe.maxRank, BotRank.GOD))
                 .rank(enumValue(BotRank.class, safe.rank, BotRank.EASY))
                 .setChangeableRank(defaultBoolean(safe.changeableRank, true));
 
@@ -251,14 +313,16 @@ public final class RemoteApiServer {
                     safe.spawnLocation.y,
                     safe.spawnLocation.z,
                     safe.spawnLocation.yaw,
-                    safe.spawnLocation.pitch
-            ));
+                    safe.spawnLocation.pitch));
         }
 
-        buildStep.autoTarget(defaultBoolean(safe.autoTarget, true))
+        buildStep
+                .autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
-                .targetMode(enumValue(com.monkey.mcbot.api.model.BotTargetMode.class, safe.targetMode,
+                .targetMode(enumValue(
+                        com.monkey.mcbot.api.model.BotTargetMode.class,
+                        safe.targetMode,
                         com.monkey.mcbot.api.model.BotTargetMode.PLAYERS))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
                 .stayAfterOwnerDeath(defaultBoolean(safe.stayAfterOwnerDeath, false))
@@ -330,6 +394,15 @@ public final class RemoteApiServer {
         }
     }
 
+    private void writeText(HttpExchange exchange, int status, String body) throws IOException {
+        byte[] response = body.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "text/plain; version=0.0.4; charset=UTF-8");
+        exchange.sendResponseHeaders(status, response.length);
+        try (OutputStream output = exchange.getResponseBody()) {
+            output.write(response);
+        }
+    }
+
     private <T> T runSync(java.util.concurrent.Callable<T> callable) {
         if (Bukkit.isPrimaryThread()) {
             try {
@@ -339,8 +412,9 @@ public final class RemoteApiServer {
             }
         }
         try {
-            return Bukkit.getScheduler().callSyncMethod(plugin,
-                    () -> BotEventSourceContext.call(BotEventSource.REMOTE_API, callable)).get();
+            return Bukkit.getScheduler()
+                    .callSyncMethod(plugin, () -> BotEventSourceContext.call(BotEventSource.REMOTE_API, callable))
+                    .get();
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -352,6 +426,29 @@ public final class RemoteApiServer {
             path = "/" + path;
         }
         return path.endsWith("/") && path.length() > 1 ? path.substring(0, path.length() - 1) : path;
+    }
+
+    private static String metricRoute(String relativePath) {
+        if (relativePath.startsWith("/bots/")) {
+            String[] parts = relativePath.substring(1).split("/", -1);
+            if (parts.length < 3) {
+                return "/bots/{bot}";
+            }
+            return switch (parts[2]) {
+                case "target-mode",
+                        "crystal-pvp",
+                        "explosions",
+                        "explosion-block-damage",
+                        "ender-pearls",
+                        "healing",
+                        "attack-bots" -> "/bots/{bot}/" + parts[2];
+                default -> "/bots/{bot}/unmatched";
+            };
+        }
+        return switch (relativePath) {
+            case "/health", "/metrics", "/events", "/bots", "/bots/count", "/bots/event" -> relativePath;
+            default -> "/unmatched";
+        };
     }
 
     private static String defaultString(String value, String fallback) {
@@ -385,7 +482,8 @@ public final class RemoteApiServer {
         }
     }
 
-    private record RemoteOperationResponse(boolean success, String message, BotSnapshot snapshot, Integer removedCount) {
+    private record RemoteOperationResponse(
+            boolean success, String message, BotSnapshot snapshot, Integer removedCount) {
         static RemoteOperationResponse success(String message, BotSnapshot snapshot) {
             return new RemoteOperationResponse(true, message, snapshot, null);
         }

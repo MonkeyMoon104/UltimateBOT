@@ -1,8 +1,7 @@
 package com.monkey.mcbot.sdk.model;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * World position used when spawning a bot at an explicit location.
@@ -16,14 +15,7 @@ import java.util.UUID;
  * @param pitch pitch rotation
  */
 public record BotLocationRequest(
-        @Nullable String worldName,
-        @Nullable UUID worldUUID,
-        double x,
-        double y,
-        double z,
-        float yaw,
-        float pitch
-) {
+        @Nullable String worldName, @Nullable UUID worldUUID, double x, double y, double z, float yaw, float pitch) {
     /**
      * Creates a location request by world name.
      *
@@ -67,6 +59,6 @@ public record BotLocationRequest(
      * @return whether the location can resolve a world
      */
     public boolean hasWorldReference() {
-        return worldUUID != null || worldName != null && !worldName.isBlank();
+        return worldUUID != null || (worldName != null && !worldName.isBlank());
     }
 }

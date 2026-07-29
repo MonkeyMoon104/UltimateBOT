@@ -1,7 +1,5 @@
 package com.monkey.mcbot.bot.ai.controllers.heal.helper;
 
-import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealActionManager;
-import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
 import net.minecraft.world.entity.player.Player;
@@ -9,17 +7,15 @@ import net.minecraft.world.entity.player.Player;
 public class HealStrategy implements IHealStrategy {
 
     private final IHealthChecker healthChecker;
-    private final IHealExecutor healExecutor;
-    private final IHealActionManager actionManager;
+    private final HealActionManager actionManager;
 
     private long lastExecuteHealCall = 0;
     private int consecutiveHealChecks = 0;
     private static final long EXECUTE_HEAL_INTERVAL = 50;
     private static final int MAX_CONSECUTIVE_CHECKS = 10;
 
-    public HealStrategy(IHealthChecker healthChecker, IHealExecutor healExecutor, IHealActionManager actionManager) {
+    public HealStrategy(IHealthChecker healthChecker, HealActionManager actionManager) {
         this.healthChecker = healthChecker;
-        this.healExecutor = healExecutor;
         this.actionManager = actionManager;
     }
 
@@ -31,9 +27,7 @@ public class HealStrategy implements IHealStrategy {
             consecutiveHealChecks++;
 
             if (consecutiveHealChecks > MAX_CONSECUTIVE_CHECKS) {
-                if (actionManager instanceof HealActionManager) {
-                    ((HealActionManager) actionManager).forceReset();
-                }
+                actionManager.forceReset();
                 consecutiveHealChecks = 0;
             }
             return;

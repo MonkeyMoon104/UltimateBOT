@@ -1,6 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.artifacts.VersionCatalogsExtension
+import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.jvm.toolchain.JavaLanguageVersion
@@ -8,6 +8,9 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import proguard.gradle.ProGuardTask
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
@@ -26,10 +29,10 @@ fun normalizeClassMajor(bytes: ByteArray, maxClassMajor: Int): ByteArray {
         return bytes
     }
 
-    if ((bytes[0].toInt() and 0xFF) != 0xCA
-        || (bytes[1].toInt() and 0xFF) != 0xFE
-        || (bytes[2].toInt() and 0xFF) != 0xBA
-        || (bytes[3].toInt() and 0xFF) != 0xBE
+    if ((bytes[0].toInt() and 0xFF) != 0xCA ||
+        (bytes[1].toInt() and 0xFF) != 0xFE ||
+        (bytes[2].toInt() and 0xFF) != 0xBA ||
+        (bytes[3].toInt() and 0xFF) != 0xBE
     ) {
         return bytes
     }
@@ -116,7 +119,7 @@ val proguardLibraries = files(
     externalClasspathFor(project(":versions:v1_21_10")),
     externalClasspathFor(project(":versions:v1_21_11")),
     externalClasspathFor(project(":versions:v26_1")),
-    externalClasspathFor(project(":versions:v26_2"))
+    externalClasspathFor(project(":versions:v26_2")),
 )
 
 if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
@@ -173,6 +176,12 @@ tasks.named<ShadowJar>("shadowJar") {
     })
     relocate("org.bstats", "com.monkey.mcbot.libs.bstats")
     relocate("com.fasterxml.jackson", "com.monkey.mcbot.libs.jackson")
+    relocate("com.github.benmanes.caffeine", "com.monkey.mcbot.libs.caffeine")
+    relocate("org.spongepowered.configurate", "com.monkey.mcbot.libs.configurate")
+    relocate("org.yaml.snakeyaml", "com.monkey.mcbot.libs.snakeyaml")
+    relocate("io.leangen.geantyref", "com.monkey.mcbot.libs.geantyref")
+    relocate("io.micrometer", "com.monkey.mcbot.libs.micrometer")
+    relocate("io.prometheus", "com.monkey.mcbot.libs.prometheus")
     relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.v1") {
         exclude("com/monkey/mcbot/gui/v26_1/**")
         exclude("com/monkey/mcbot/gui/v26_2/**")
@@ -198,7 +207,7 @@ tasks.named<ShadowJar>("shadowJar") {
         val patchedJar = File(jarFile.parentFile, "${jarFile.name}.patched")
         val v26Retargets = listOf(
             InvuiRetarget("com/monkey/mcbot/gui/v26_1/", "com/monkey/mcbot/libs/invui/a1/", "com/monkey/mcbot/libs/inventoryaccess/a1/"),
-            InvuiRetarget("com/monkey/mcbot/gui/v26_2/", "com/monkey/mcbot/libs/invui/a2/", "com/monkey/mcbot/libs/inventoryaccess/a2/")
+            InvuiRetarget("com/monkey/mcbot/gui/v26_2/", "com/monkey/mcbot/libs/invui/a2/", "com/monkey/mcbot/libs/inventoryaccess/a2/"),
         )
         val maxClassMajor = 65
 
@@ -223,8 +232,15 @@ tasks.named<ShadowJar>("shadowJar") {
             }
         }
 
-        if (!jarFile.delete() || !patchedJar.renameTo(jarFile)) {
-            throw GradleException("Failed to patch ${jarFile.name} with v26 InvUI v2 references")
+        try {
+            Files.move(
+                patchedJar.toPath(),
+                jarFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE,
+            )
+        } catch (_: AtomicMoveNotSupportedException) {
+            Files.move(patchedJar.toPath(), jarFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 }

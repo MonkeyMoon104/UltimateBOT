@@ -4,7 +4,6 @@ import com.monkey.mcbot.bot.ai.controllers.heal.helper.HealActionManager;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.HealExecutor;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.HealStrategy;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.HealthChecker;
-import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealActionManager;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.mcbot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
@@ -18,7 +17,7 @@ public class BotHealController {
 
     private final IHealthChecker healthChecker;
     private final IHealExecutor healExecutor;
-    private final IHealActionManager actionManager;
+    private final HealActionManager actionManager;
     private final IHealStrategy healStrategy;
 
     public BotHealController(Player bot, BotInventoryController inventoryController) {
@@ -28,7 +27,7 @@ public class BotHealController {
         this.healthChecker = new HealthChecker();
         this.healExecutor = new HealExecutor(inventoryController);
         this.actionManager = new HealActionManager(healExecutor);
-        this.healStrategy = new HealStrategy(healthChecker, healExecutor, actionManager);
+        this.healStrategy = new HealStrategy(healthChecker, actionManager);
     }
 
     public void handleDamageReceived() {
@@ -64,6 +63,7 @@ public class BotHealController {
     public boolean hasGoldenApple() {
         return inventoryController.hasInfiniteResources();
     }
+
     public void resetHealState() {
         actionManager.resetHealAction();
     }

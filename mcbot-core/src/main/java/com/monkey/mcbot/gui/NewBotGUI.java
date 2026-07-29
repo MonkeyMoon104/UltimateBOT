@@ -8,6 +8,9 @@ import com.monkey.mcbot.gui.impl.BotTabItem;
 import com.monkey.mcbot.gui.tab.*;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.xenondevs.invui.gui.Gui;
@@ -16,9 +19,6 @@ import xyz.xenondevs.invui.gui.structure.Markers;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
-
-import java.util.Arrays;
-import java.util.UUID;
 
 public class NewBotGUI {
 
@@ -52,24 +52,24 @@ public class NewBotGUI {
             }
         }
         if (options == null) {
-            options = new BotOptions(training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
+            options = new BotOptions(
+                    training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
         }
 
         options.setBotType(botType);
         options.clampCurrentTotemCount();
 
         String borderMatName = training.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
-        String borderName    = training.getLangString("gui.tab-border.name", " ");
+        String borderName = training.getLangString("gui.tab-border.name", " ");
         Material borderMat;
         try {
-            borderMat = Material.valueOf(borderMatName.toUpperCase());
+            borderMat = Material.valueOf(borderMatName.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             borderMat = Material.BLACK_STAINED_GLASS_PANE;
         }
-        SimpleItem borderItem = new SimpleItem(
-                new ItemBuilder(borderMat)
-                        .setDisplayName(ChatColorUtils.translate(borderName))
-                        .get(String.valueOf(1)));
+        SimpleItem borderItem = new SimpleItem(new ItemBuilder(borderMat)
+                .setDisplayName(ChatColorUtils.translate(borderName))
+                .get(String.valueOf(1)));
 
         BotGuiTabContext tabContext = new BotGuiTabContext(player, training, options, botType);
         String translatedBorderName = ChatColorUtils.translate(borderName);
@@ -86,8 +86,7 @@ public class NewBotGUI {
                         "2 x x x x x x x x",
                         ". x x x x x x x x",
                         "3 x x x x x x x x",
-                        ". x x x x x x x x"
-                )
+                        ". x x x x x x x x")
                 .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
                 .addIngredient('.', borderItem)
                 .addIngredient('0', new BotTabItem(0, training))
@@ -112,9 +111,9 @@ public class NewBotGUI {
     }
 
     private String getTitle() {
-        if (botType == BotType.EVENT)      return "KIT ROOM EVENT";
-        if (botType == BotType.ALLY)       return "KIT ROOM ALLY";
-        if (botType == BotType.TEAM_ALLY)  return "KIT ROOM TEAM ALLY";
+        if (botType == BotType.EVENT) return "KIT ROOM EVENT";
+        if (botType == BotType.ALLY) return "KIT ROOM ALLY";
+        if (botType == BotType.TEAM_ALLY) return "KIT ROOM TEAM ALLY";
         return "KIT ROOM";
     }
 

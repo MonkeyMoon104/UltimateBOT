@@ -18,7 +18,8 @@ public class ObstacleHandler implements IObstacleHandler {
     private int diversionTicks = 0;
     private boolean isUnderFire = false;
 
-    public ObstacleHandler(Player bot, Level level, IBlockStateValidator blockValidator, double movementSpeed, double jumpVelocity) {
+    public ObstacleHandler(
+            Player bot, Level level, IBlockStateValidator blockValidator, double movementSpeed, double jumpVelocity) {
         this.bot = bot;
         this.level = level;
         this.blockValidator = blockValidator;
@@ -27,7 +28,8 @@ public class ObstacleHandler implements IObstacleHandler {
     }
 
     @Override
-    public boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
+    public boolean handleObstacles(
+            double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
         BlockPos immediate = BlockPos.containing(botX + dx * 0.7, botY, botZ + dz * 0.7);
         BlockPos immediateHead = immediate.above();
         if (!blockValidator.isPositionPassableCached(immediate)) {
@@ -89,13 +91,13 @@ public class ObstacleHandler implements IObstacleHandler {
 
         for (int i = 1; i <= maxTries; i++) {
             double offset = Math.toRadians(20 * i);
-            for (int sign : new int[]{1, -1}) {
+            for (int sign : new int[] {1, -1}) {
                 double newAngle = angle + offset * sign;
                 double newDx = Math.cos(newAngle);
                 double newDz = Math.sin(newAngle);
 
                 if (isPathClearOptimized(newDx, newDz)) {
-                    return new double[]{newDx, newDz};
+                    return new double[] {newDx, newDz};
                 }
             }
         }
@@ -112,12 +114,7 @@ public class ObstacleHandler implements IObstacleHandler {
         BlockPos centerPos = BlockPos.containing(position);
         int solidBlocks = 0;
 
-        BlockPos[] checkPositions = {
-                centerPos.north(),
-                centerPos.south(),
-                centerPos.east(),
-                centerPos.west()
-        };
+        BlockPos[] checkPositions = {centerPos.north(), centerPos.south(), centerPos.east(), centerPos.west()};
 
         for (BlockPos checkPos : checkPositions) {
             if (!blockValidator.isPositionPassableCached(checkPos)) {
@@ -145,14 +142,17 @@ public class ObstacleHandler implements IObstacleHandler {
         return false;
     }
 
+    @Override
     public boolean isDiverting() {
         return diversionTicks > 0 && diversionDirection != null;
     }
 
+    @Override
     public void setUnderFire(boolean underFire) {
         this.isUnderFire = underFire;
     }
 
+    @Override
     public void clearDiversion() {
         diversionDirection = null;
         diversionTicks = 0;

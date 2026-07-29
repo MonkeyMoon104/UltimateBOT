@@ -1,22 +1,54 @@
 package com.monkey.mcbot.bot.ai.services;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Mob;
-
+import com.monkey.mcbot.config.RuntimeSettings;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Mob;
+import org.bukkit.entity.Player;
 
 public class TargetingService {
+
+    private volatile Cache<UUID, TargetCache> targetCache;
+    private CacheStats retiredCacheStats = CacheStats.empty();
+
+    public TargetingService(RuntimeSettings.CacheSettings settings) {
+        this.targetCache = createCache(settings);
+    }
+
+    public synchronized void reconfigure(RuntimeSettings.CacheSettings settings) {
+        Cache<UUID, TargetCache> previousCache = targetCache;
+        retiredCacheStats = retiredCacheStats.plus(previousCache.stats());
+        targetCache = createCache(settings);
+        previousCache.invalidateAll();
+    }
+
+    public synchronized CacheStats cacheStats() {
+        return retiredCacheStats.plus(targetCache.stats());
+    }
+
+    public long estimatedCacheSize() {
+        return targetCache.estimatedSize();
+    }
+
+    private static Cache<UUID, TargetCache> createCache(RuntimeSettings.CacheSettings settings) {
+        return Caffeine.newBuilder()
+                .maximumSize(settings.maximumSize())
+                .expireAfterWrite(settings.expireAfterWrite())
+                .recordStats()
+                .build();
+    }
 
     public Mob findClosestMob(ITrainingBot bot, double maxRange) {
         if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null || maxRange <= 0.0D) {
@@ -32,10 +64,7 @@ public class TargetingService {
         double closestDistanceSq = maxRange * maxRange;
         Mob closest = null;
         for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
-            if (!(entity instanceof Mob mob)
-                    || !mob.isValid()
-                    || mob.isDead()
-                    || mob.isInvulnerable()) {
+            if (!(entity instanceof Mob mob) || !mob.isValid() || mob.isDead() || mob.isInvulnerable()) {
                 continue;
             }
             double distanceSq = mob.getLocation().distanceSquared(center);
@@ -47,19 +76,14 @@ public class TargetingService {
         return closest;
     }
 
-    private final Map<UUID, TargetCache> targetCache = new ConcurrentHashMap<>();
-    private static final long GLOBAL_CACHE_TIME = 250;
-
     private static class TargetCache {
         Player player;
-        long time;
         UUID excluded;
         UUID center;
         double maxRange;
 
-        TargetCache(Player player, long time, UUID excluded, UUID center, double maxRange) {
+        TargetCache(Player player, UUID excluded, UUID center, double maxRange) {
             this.player = player;
-            this.time = time;
             this.excluded = excluded;
             this.center = center;
             this.maxRange = maxRange;
@@ -96,37 +120,28 @@ public class TargetingService {
         return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, Set.of());
     }
 
-    public Player findClosestPlayerNearPlayer(ITrainingBot bot,
-                                              Player centerPlayer,
-                                              double maxRange,
-                                              UUID excludedPlayer) {
+    public Player findClosestPlayerNearPlayer(
+            ITrainingBot bot, Player centerPlayer, double maxRange, UUID excludedPlayer) {
         return findClosestPlayerNearPlayer(bot, centerPlayer, maxRange, excludedPlayer, Set.of());
     }
 
-    public Player findClosestPlayerNearPlayer(ITrainingBot bot,
-                                              Player centerPlayer,
-                                              double maxRange,
-                                              UUID excludedPlayer,
-                                              Set<UUID> allowedTargets) {
+    public Player findClosestPlayerNearPlayer(
+            ITrainingBot bot, Player centerPlayer, double maxRange, UUID excludedPlayer, Set<UUID> allowedTargets) {
         if (centerPlayer == null || !centerPlayer.isOnline() || centerPlayer.isDead()) {
-            targetCache.remove(bot.asPlayer().getUUID());
+            targetCache.invalidate(bot.asPlayer().getUUID());
             return null;
         }
 
         UUID botUUID = bot.asPlayer().getUUID();
         UUID centerUUID = centerPlayer.getUniqueId();
-        long currentTime = System.currentTimeMillis();
         boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
 
-        TargetCache cached = targetCache.get(botUUID);
-        if (!useAllowedTargetsFilter
-                && cached != null
-                && (currentTime - cached.time) < GLOBAL_CACHE_TIME
-                && cached.isValid(bot, excludedPlayer, centerUUID, maxRange)) {
+        TargetCache cached = targetCache.getIfPresent(botUUID);
+        if (!useAllowedTargetsFilter && cached != null && cached.isValid(bot, excludedPlayer, centerUUID, maxRange)) {
             if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
                 return cached.player;
             }
-            targetCache.remove(botUUID);
+            targetCache.invalidate(botUUID);
         }
 
         double closestDistanceSq = maxRange * maxRange;
@@ -171,51 +186,48 @@ public class TargetingService {
 
         if (closestPlayer != null) {
             if (!useAllowedTargetsFilter) {
-                targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, centerUUID, maxRange));
+                targetCache.put(botUUID, new TargetCache(closestPlayer, excludedPlayer, centerUUID, maxRange));
             }
         } else {
-            targetCache.remove(botUUID);
+            targetCache.invalidate(botUUID);
         }
 
         return closestPlayer;
     }
 
-    private Player findClosestPlayerNearBot(ITrainingBot bot,
-                                            double maxRange,
-                                            UUID excludedPlayer,
-                                            Set<UUID> allowedTargets) {
+    private Player findClosestPlayerNearBot(
+            ITrainingBot bot, double maxRange, UUID excludedPlayer, Set<UUID> allowedTargets) {
         return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, allowedTargets, null);
     }
 
-    private Player findClosestPlayerNearBot(ITrainingBot bot,
-                                            double maxRange,
-                                            UUID excludedPlayer,
-                                            Set<UUID> allowedTargets,
-                                            Predicate<Player> candidateFilter) {
+    private Player findClosestPlayerNearBot(
+            ITrainingBot bot,
+            double maxRange,
+            UUID excludedPlayer,
+            Set<UUID> allowedTargets,
+            Predicate<Player> candidateFilter) {
         if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
             return null;
         }
 
         UUID botUUID = bot.asPlayer().getUUID();
-        long currentTime = System.currentTimeMillis();
         boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
         boolean useDynamicFilter = candidateFilter != null;
 
-        TargetCache cached = targetCache.get(botUUID);
+        TargetCache cached = targetCache.getIfPresent(botUUID);
         if (!useAllowedTargetsFilter
                 && !useDynamicFilter
                 && cached != null
-                && (currentTime - cached.time) < GLOBAL_CACHE_TIME
                 && cached.isValid(bot, excludedPlayer, botUUID, maxRange)) {
             if (canTargetManagedBot(bot, cached.player.getUniqueId())) {
                 return cached.player;
             }
-            targetCache.remove(botUUID);
+            targetCache.invalidate(botUUID);
         }
 
         org.bukkit.World centerWorld = bot.asPlayer().level().getWorld();
         if (centerWorld == null) {
-            targetCache.remove(botUUID);
+            targetCache.invalidate(botUUID);
             return null;
         }
 
@@ -263,21 +275,21 @@ public class TargetingService {
 
         if (closestPlayer != null) {
             if (!useAllowedTargetsFilter && !useDynamicFilter) {
-                targetCache.put(botUUID, new TargetCache(closestPlayer, currentTime, excludedPlayer, botUUID, maxRange));
+                targetCache.put(botUUID, new TargetCache(closestPlayer, excludedPlayer, botUUID, maxRange));
             }
         } else {
-            targetCache.remove(botUUID);
+            targetCache.invalidate(botUUID);
         }
 
         return closestPlayer;
     }
 
     public void invalidateCache(UUID botUUID) {
-        targetCache.remove(botUUID);
+        targetCache.invalidate(botUUID);
     }
 
     public void clearCache() {
-        targetCache.clear();
+        targetCache.invalidateAll();
     }
 
     private boolean canTargetManagedBot(ITrainingBot bot, UUID candidateUUID) {
@@ -299,12 +311,15 @@ public class TargetingService {
             }
         }
 
-        BotOptions options = bot == null || bot.getBrainController() == null ? null : bot.getBrainController().getBotOptions();
+        BotOptions options = bot == null || bot.getBrainController() == null
+                ? null
+                : bot.getBrainController().getBotOptions();
         if (options == null || !options.isAttackBots()) {
             return new ArrayList<>(candidates.values());
         }
 
-        for (ITrainingBot managedBot : options.getTraining().getBotRegistry().getAllBots().values()) {
+        for (ITrainingBot managedBot :
+                options.getTraining().getBotRegistry().getAllBots().values()) {
             if (managedBot == null || managedBot.asPlayer() == null) {
                 continue;
             }
@@ -341,7 +356,9 @@ public class TargetingService {
         if (player.isOnline()) {
             return true;
         }
-        BotOptions options = bot == null || bot.getBrainController() == null ? null : bot.getBrainController().getBotOptions();
+        BotOptions options = bot == null || bot.getBrainController() == null
+                ? null
+                : bot.getBrainController().getBotOptions();
         return options != null
                 && options.isAttackBots()
                 && options.getTraining().getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null;

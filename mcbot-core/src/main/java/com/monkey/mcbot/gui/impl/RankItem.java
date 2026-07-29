@@ -1,10 +1,16 @@
 package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
+import com.monkey.mcbot.event.BotSettingEvents;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -14,12 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-
-import java.util.List;
-import java.util.UUID;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-import com.monkey.mcbot.api.event.state.BotSettingKey;
-import com.monkey.mcbot.event.BotSettingEvents;
 
 public class RankItem extends AbstractItem {
 
@@ -39,7 +39,8 @@ public class RankItem extends AbstractItem {
 
         ItemBuilder builder = new ItemBuilder(rankMaterial);
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.rank-button.name")));
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
+        builder.setItemFlags(
+                List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
 
         var loreLines = training.getLangStringList("gui.rank-button.lore");
         List<String> ranks = options.getAllowedRanks().stream()
@@ -60,30 +61,35 @@ public class RankItem extends AbstractItem {
     }
 
     private Material getRankMaterial(BotRank rank) {
-        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase();
+        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase(Locale.ROOT);
         String materialName = training.getLangString(configPath);
 
         if (materialName != null) {
             try {
-                return Material.valueOf(materialName.toUpperCase());
+                return Material.valueOf(materialName.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
-                training.getLogger().warning("Invalid material '" + materialName + "' for rank " + rank.name() + " in config. Using fallback");
+                training.getLogger()
+                        .warning("Invalid material '" + materialName + "' for rank " + rank.name()
+                                + " in config. Using fallback");
             }
         }
 
         String defaultMaterial = training.getLangString("gui.rank-button.material", "DIAMOND_SWORD");
         try {
-            return Material.valueOf(defaultMaterial.toUpperCase());
+            return Material.valueOf(defaultMaterial.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            training.getLogger().warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
+            training.getLogger()
+                    .warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
             return Material.DIAMOND_SWORD;
         }
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleClick(
+            @NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableRank()) {
-            String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -98,8 +104,14 @@ public class RankItem extends AbstractItem {
         }
 
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                BotSettingKey.RANK, currentRank, newRank, BotRank.class);
+        var proposed = BotSettingEvents.propose(
+                training,
+                managedOwnerUUID,
+                BotEventSource.GUI,
+                BotSettingKey.RANK,
+                currentRank,
+                newRank,
+                BotRank.class);
         if (proposed.isEmpty()) return;
         newRank = proposed.get();
         options.setRank(newRank);

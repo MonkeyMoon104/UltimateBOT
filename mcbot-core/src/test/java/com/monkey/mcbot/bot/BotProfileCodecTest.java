@@ -1,20 +1,18 @@
 package com.monkey.mcbot.bot;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.Test;
 
 class BotProfileCodecTest {
 
     @Test
     void sanitizesColorsSymbolsAndLengthForMinecraftProfiles() {
-        assertEquals("Long_Bot_Name_12", BotProfileCodec.sanitizeName("§aLong Bot Name 123456"));
-        assertEquals("CrystalBot", BotProfileCodec.sanitizeName("&c"));
-        assertEquals("CrystalBot", BotProfileCodec.sanitizeName(null));
+        assertThat(BotProfileCodec.sanitizeName("§aLong Bot Name 123456")).isEqualTo("Long_Bot_Name_12");
+        assertThat(BotProfileCodec.sanitizeName("&c")).isEqualTo("CrystalBot");
+        assertThat(BotProfileCodec.sanitizeName(null)).isEqualTo("CrystalBot");
     }
 
     @Test
@@ -23,7 +21,7 @@ class BotProfileCodecTest {
         String encoded = BotProfileCodec.textureValueFromUrl(url);
         String decoded = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
 
-        assertEquals("{\"textures\":{\"SKIN\":{\"url\":\"" + url + "\"}}}", decoded);
-        assertNull(BotProfileCodec.textureValueFromUrl(" "));
+        assertThat(decoded).isEqualTo("{\"textures\":{\"SKIN\":{\"url\":\"" + url + "\"}}}");
+        assertThat(BotProfileCodec.textureValueFromUrl(" ")).isNull();
     }
 }

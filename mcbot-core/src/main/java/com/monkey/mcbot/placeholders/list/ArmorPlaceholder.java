@@ -9,11 +9,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class ArmorPlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public ArmorPlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 

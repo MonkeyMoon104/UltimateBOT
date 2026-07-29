@@ -8,11 +8,9 @@ import org.bukkit.entity.Player;
 
 public class LocationPlaceholder implements IBotPlaceholder {
 
-    private final MinecraftBot plugin;
     private final PlaceholderHelper helper;
 
     public LocationPlaceholder(MinecraftBot plugin) {
-        this.plugin = plugin;
         this.helper = new PlaceholderHelper(plugin);
     }
 
@@ -26,8 +24,7 @@ public class LocationPlaceholder implements IBotPlaceholder {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
         if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
             var loc = bot.asPlayer().getBukkitEntity().getLocation();
-            return String.format("⚬ X:%d Y:%d Z:%d",
-                    loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            return String.format("⚬ X:%d Y:%d Z:%d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         }
         return "⚬ X:0 Y:0 Z:0";
     }

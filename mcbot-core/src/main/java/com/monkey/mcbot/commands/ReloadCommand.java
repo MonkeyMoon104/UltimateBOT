@@ -2,14 +2,14 @@ package com.monkey.mcbot.commands;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ReloadCommand implements CommandExecutor, TabCompleter {
 
@@ -33,7 +33,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String option = args[0].toLowerCase();
+        String option = args[0].toLowerCase(Locale.ROOT);
 
         switch (option) {
             case "config" -> {
@@ -53,7 +53,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-all")));
             }
             default ->
-                    sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-invalid-option")));
+                sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-invalid-option")));
         }
 
         return true;
@@ -81,7 +81,7 @@ public class ReloadCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             List<String> completions = new ArrayList<>();
-            String toComplete = args[0].toLowerCase();
+            String toComplete = args[0].toLowerCase(Locale.ROOT);
             for (String option : OPTIONS) {
                 if (option.startsWith(toComplete)) {
                     completions.add(option);

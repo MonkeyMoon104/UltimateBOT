@@ -1,25 +1,22 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal;
 
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.logging.MinecraftBotLogging;
+import com.monkey.mcbot.api.event.combat.BotExplosionType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.combat.BotExplosionContext;
-import com.monkey.mcbot.api.event.combat.BotExplosionType;
+import com.monkey.mcbot.logging.MinecraftBotLogging;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class CrystalAttacker {
     private final Player bot;
-    private final Level level;
     private Vec3 cachedBotPosition;
     private boolean positionUpdatedThisTick = false;
 
-    public CrystalAttacker(Player bot, Level level) {
+    public CrystalAttacker(Player bot) {
         this.bot = bot;
-        this.level = level;
     }
 
     public void updateBotPosition() {
@@ -41,14 +38,20 @@ public class CrystalAttacker {
 
         try {
             ITrainingBot trainingBot = bot instanceof ITrainingBot value ? value : null;
-            return BotExplosionContext.execute(trainingBot, BotExplosionType.END_CRYSTAL,
-                    crystal.getBukkitEntity().getLocation(), shouldDamageBlocks(), ignored -> {
-                bot.attack(crystal);
-                bot.swing(InteractionHand.MAIN_HAND);
-                return true;
-            }, false);
+            return BotExplosionContext.execute(
+                    trainingBot,
+                    BotExplosionType.END_CRYSTAL,
+                    crystal.getBukkitEntity().getLocation(),
+                    shouldDamageBlocks(),
+                    ignored -> {
+                        bot.attack(crystal);
+                        bot.swing(InteractionHand.MAIN_HAND);
+                        return true;
+                    },
+                    false);
         } catch (Exception e) {
-            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Crystal attack failed -> " + e.getMessage());
+            MinecraftBotLogging.warn(
+                    MinecraftBot.getInstance().getLogger(), "Combat", "Crystal attack failed -> " + e.getMessage());
             return false;
         }
     }

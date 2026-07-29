@@ -5,13 +5,12 @@ import com.monkey.mcbot.api.MinecraftBotAPI;
 import com.monkey.mcbot.api.model.BotMode;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.nms.INMSBridge;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 public final class MinecraftBotLogging {
 
@@ -33,33 +32,37 @@ public final class MinecraftBotLogging {
 
     private static final int INTERNAL_CONTROLLER_COUNT = 15;
 
-    private MinecraftBotLogging() {
-    }
+    private MinecraftBotLogging() {}
 
     public static StartupSession beginBootstrap(MinecraftBot plugin) {
         return new StartupSession(plugin);
     }
 
     public static void schedulePostEnableDiagnostics(MinecraftBot plugin, StartupSession session) {
-        plugin.getWrapperManager().active().runSyncLater(() ->
-                info(
-                        plugin.getLogger(),
-                        "Boot",
-                        "Warmup checkpoint -> online=" + Bukkit.getOnlinePlayers().size()
-                                + " | worlds=" + Bukkit.getWorlds().size()
-                                + " | activeBots=" + safeBotCount(plugin)
-                                + " | placeholders=" + session.placeholderCount()
-                ), WARMUP_REPORT_DELAY_TICKS);
+        plugin.getWrapperManager()
+                .active()
+                .runSyncLater(
+                        () -> info(
+                                plugin.getLogger(),
+                                "Boot",
+                                "Warmup checkpoint -> online="
+                                        + Bukkit.getOnlinePlayers().size()
+                                        + " | worlds=" + Bukkit.getWorlds().size()
+                                        + " | activeBots=" + safeBotCount(plugin)
+                                        + " | placeholders=" + session.placeholderCount()),
+                        WARMUP_REPORT_DELAY_TICKS);
 
-        plugin.getWrapperManager().active().runSyncLater(() ->
-                info(
-                        plugin.getLogger(),
-                        "Boot",
-                        "Startup stable -> memory=" + formatMemorySnapshot()
-                                + " | commands=" + session.commandCount()
-                                + " | listeners=" + session.listenerStateCountSummary()
-                                + " | playerOptions=" + safePlayerOptionCount(plugin)
-                ), STABLE_REPORT_DELAY_TICKS);
+        plugin.getWrapperManager()
+                .active()
+                .runSyncLater(
+                        () -> info(
+                                plugin.getLogger(),
+                                "Boot",
+                                "Startup stable -> memory=" + formatMemorySnapshot()
+                                        + " | commands=" + session.commandCount()
+                                        + " | listeners=" + session.listenerStateCountSummary()
+                                        + " | playerOptions=" + safePlayerOptionCount(plugin)),
+                        STABLE_REPORT_DELAY_TICKS);
     }
 
     public static String catalogSummary() {
@@ -72,7 +75,8 @@ public final class MinecraftBotLogging {
         return "count=" + INTERNAL_CONTROLLER_COUNT + " | names=hidden";
     }
 
-    public static void logNmsInitStart(Logger logger, String minecraftVersion, String className, String supportedVersions) {
+    public static void logNmsInitStart(
+            Logger logger, String minecraftVersion, String className, String supportedVersions) {
         info(logger, "NMS", "Minecraft -> " + minecraftVersion);
         detail(logger, "NMS", "Bridge -> " + className.substring(className.lastIndexOf('.') + 1));
         detail(logger, "NMS", "Supported -> " + supportedVersions);
@@ -95,11 +99,7 @@ public final class MinecraftBotLogging {
         success(
                 logger,
                 "API",
-                "Public API registered -> manager="
-                        + apiManagerSummary()
-                        + " | registry="
-                        + apiRegistrySummary()
-        );
+                "Public API registered -> manager=" + apiManagerSummary() + " | registry=" + apiRegistrySummary());
     }
 
     public static String apiManagerSummary() {
@@ -145,9 +145,9 @@ public final class MinecraftBotLogging {
 
     private static void emit(Logger logger, Level level, String module, String messageColor, String message) {
         String line = format(module, moduleColor(module), message, messageColor);
-        if (level == Level.INFO) {
+        if (Level.INFO.equals(level)) {
             logger.info(line);
-        } else if (level == Level.WARNING) {
+        } else if (Level.WARNING.equals(level)) {
             logger.warning(line);
         } else {
             logger.log(level, line);
@@ -172,24 +172,17 @@ public final class MinecraftBotLogging {
         };
     }
 
-    private static String joinNames(Enum<?>[] values) {
-        return java.util.Arrays.stream(values)
-                .map(Enum::name)
-                .collect(Collectors.joining(", "));
-    }
-
     private static String joinOrNone(Collection<String> values) {
         if (values == null || values.isEmpty()) {
             return "none";
         }
-        return values.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining(", "));
+        return values.stream().filter(Objects::nonNull).collect(Collectors.joining(", "));
     }
 
     private static String formatWorldSummary() {
         List<World> worlds = Bukkit.getWorlds();
-        return worlds.size() + " -> " + joinOrNone(worlds.stream().map(World::getName).toList());
+        return worlds.size() + " -> "
+                + joinOrNone(worlds.stream().map(World::getName).toList());
     }
 
     private static String formatMemorySnapshot() {
@@ -241,7 +234,6 @@ public final class MinecraftBotLogging {
         private List<String> registeredPlaceholders = List.of();
         private boolean placeholderPresent;
         private boolean placeholderRegistered;
-        private boolean apiPublished;
 
         private StartupSession(MinecraftBot plugin) {
             this.plugin = plugin;
@@ -252,12 +244,16 @@ public final class MinecraftBotLogging {
                     logger,
                     "Boot",
                     WHITE,
-                    plugin.getPluginMeta().getName() + " v" + plugin.getPluginMeta().getVersion(),
+                    plugin.getPluginMeta().getName() + " v"
+                            + plugin.getPluginMeta().getVersion(),
                     "Authors: " + joinOrNone(plugin.getPluginMeta().getAuthors()),
-                    "Starting up..."
-            );
+                    "Starting up...");
             MinecraftBotLogging.detail(logger, "Boot", "Server -> " + Bukkit.getName() + " | " + Bukkit.getVersion());
-            MinecraftBotLogging.detail(logger, "Boot", "Minecraft -> " + Bukkit.getMinecraftVersion() + " | Java -> " + System.getProperty("java.version"));
+            MinecraftBotLogging.detail(
+                    logger,
+                    "Boot",
+                    "Minecraft -> " + Bukkit.getMinecraftVersion() + " | Java -> "
+                            + System.getProperty("java.version"));
             MinecraftBotLogging.detail(logger, "Boot", "Worlds -> " + formatWorldSummary());
             MinecraftBotLogging.detail(logger, "Boot", "Memory -> " + formatMemorySnapshot());
         }
@@ -265,7 +261,7 @@ public final class MinecraftBotLogging {
         public void beginPhase(int phase, String module, String title) {
             this.currentModule = module;
             this.currentContext = module + " :: " + title;
-            this.currentPhase = new PhaseSnapshot(phase, module, title, System.nanoTime());
+            this.currentPhase = new PhaseSnapshot(phase, System.nanoTime());
 
             separator(logger, moduleColor(module), '-');
             info(logger, module, "[" + String.format(Locale.ROOT, "%02d", phase) + "/" + STARTUP_PHASES + "] " + title);
@@ -297,16 +293,11 @@ public final class MinecraftBotLogging {
             this.disabledListeners = List.copyOf(disabledListeners);
         }
 
-        public void markPlaceholders(boolean placeholderPresent,
-                                     boolean placeholderRegistered,
-                                     List<String> placeholderKeys) {
+        public void markPlaceholders(
+                boolean placeholderPresent, boolean placeholderRegistered, List<String> placeholderKeys) {
             this.placeholderPresent = placeholderPresent;
             this.placeholderRegistered = placeholderRegistered;
             this.registeredPlaceholders = List.copyOf(placeholderKeys);
-        }
-
-        public void markApiPublished() {
-            this.apiPublished = true;
         }
 
         public void completePhase(String summary) {
@@ -314,9 +305,10 @@ public final class MinecraftBotLogging {
                 return;
             }
 
-            currentPhase.complete(System.nanoTime(), summary);
+            currentPhase.complete(System.nanoTime());
             phases.add(currentPhase);
-            MinecraftBotLogging.detail(logger, currentModule, "Done in " + formatDuration(currentPhase.durationNanos()) + " | " + summary);
+            MinecraftBotLogging.detail(
+                    logger, currentModule, "Done in " + formatDuration(currentPhase.durationNanos()) + " | " + summary);
             currentPhase = null;
         }
 
@@ -330,22 +322,25 @@ public final class MinecraftBotLogging {
                     plugin.getPluginMeta().getName() + " enabled",
                     "Startup time: " + formatDuration(totalDuration),
                     "NMS: " + nmsBridgeName + " | supported: " + nmsSupportedVersions,
-                    "Commands: " + commandCount() + " | listeners: " + listenerStateCountSummary() + " | placeholders: " + placeholderCount()
-            );
+                    "Commands: " + commandCount() + " | listeners: " + listenerStateCountSummary() + " | placeholders: "
+                            + placeholderCount());
             MinecraftBotLogging.detail(logger, "Boot", "Command list -> " + joinOrNone(registeredCommands));
             MinecraftBotLogging.detail(logger, "Boot", "Listener list -> " + listenerStateCountSummary());
             if (!disabledListeners.isEmpty()) {
                 MinecraftBotLogging.detail(logger, "Boot", "Listener fallback -> " + joinOrNone(disabledListeners));
             }
-            MinecraftBotLogging.detail(logger, "Boot", "Placeholder state -> present=" + placeholderPresent + " registered=" + placeholderRegistered);
-            MinecraftBotLogging.detail(logger, "Boot", "Phase timings -> " + phases.stream()
-                    .map(phase -> String.format(
-                            Locale.ROOT,
-                            "%02d=%s",
-                            phase.index,
-                            formatDuration(phase.durationNanos())
-                    ))
-                    .collect(Collectors.joining(" | ")));
+            MinecraftBotLogging.detail(
+                    logger,
+                    "Boot",
+                    "Placeholder state -> present=" + placeholderPresent + " registered=" + placeholderRegistered);
+            MinecraftBotLogging.detail(
+                    logger,
+                    "Boot",
+                    "Phase timings -> "
+                            + phases.stream()
+                                    .map(phase -> String.format(
+                                            Locale.ROOT, "%02d=%s", phase.index, formatDuration(phase.durationNanos())))
+                                    .collect(Collectors.joining(" | ")));
         }
 
         public void fail(Throwable error) {
@@ -355,8 +350,7 @@ public final class MinecraftBotLogging {
                     RED,
                     plugin.getPluginMeta().getName() + " failed to start",
                     "Context: " + currentContext,
-                    "Elapsed: " + formatDuration(System.nanoTime() - startedAtNanos)
-            );
+                    "Elapsed: " + formatDuration(System.nanoTime() - startedAtNanos));
             error(logger, "Boot", "Startup exception -> " + safeMessage(error), error);
         }
 
@@ -400,22 +394,16 @@ public final class MinecraftBotLogging {
     private static final class PhaseSnapshot {
 
         private final int index;
-        private final String module;
-        private final String title;
         private final long startedAtNanos;
         private long completedAtNanos;
-        private String summary = "done";
 
-        private PhaseSnapshot(int index, String module, String title, long startedAtNanos) {
+        private PhaseSnapshot(int index, long startedAtNanos) {
             this.index = index;
-            this.module = module;
-            this.title = title;
             this.startedAtNanos = startedAtNanos;
         }
 
-        private void complete(long completedAtNanos, String summary) {
+        private void complete(long completedAtNanos) {
             this.completedAtNanos = completedAtNanos;
-            this.summary = summary;
         }
 
         private long durationNanos() {

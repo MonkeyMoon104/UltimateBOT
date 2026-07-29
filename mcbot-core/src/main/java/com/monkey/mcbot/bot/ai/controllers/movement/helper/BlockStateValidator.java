@@ -1,51 +1,39 @@
 package com.monkey.mcbot.bot.ai.controllers.movement.helper;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
+import com.monkey.mcbot.config.RuntimeSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class BlockStateValidator implements IBlockStateValidator {
-    private static final long CACHE_CLEAN_INTERVAL = 5000;
-    private static final int MAX_CACHE_SIZE = 1000;
-
     private final Level level;
-    private final Map<BlockPos, Boolean> blockStateCache = new HashMap<>();
-    private long lastCacheClean = 0;
+    private volatile Cache<BlockPos, Boolean> blockStateCache;
 
-    public BlockStateValidator(Level level) {
+    public BlockStateValidator(Level level, RuntimeSettings.CacheSettings settings) {
         this.level = level;
+        this.blockStateCache = createCache(settings);
+    }
+
+    public void reconfigure(RuntimeSettings.CacheSettings settings) {
+        Cache<BlockPos, Boolean> previousCache = blockStateCache;
+        blockStateCache = createCache(settings);
+        previousCache.invalidateAll();
+    }
+
+    private static Cache<BlockPos, Boolean> createCache(RuntimeSettings.CacheSettings settings) {
+        return Caffeine.newBuilder()
+                .maximumSize(settings.maximumSize())
+                .expireAfterWrite(settings.expireAfterWrite())
+                .recordStats()
+                .build();
     }
 
     @Override
     public boolean isPositionPassableCached(BlockPos pos) {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastCacheClean > CACHE_CLEAN_INTERVAL) {
-            cleanCache();
-            lastCacheClean = currentTime;
-        }
-
-        Boolean cached = blockStateCache.get(pos);
-        if (cached != null) {
-            return cached;
-        }
-
-        if (blockStateCache.size() >= MAX_CACHE_SIZE) {
-            blockStateCache.clear();
-        }
-
-        boolean result = isPositionPassable(pos);
-        blockStateCache.put(pos, result);
-        return result;
-    }
-
-    private void cleanCache() {
-        if (blockStateCache.size() > MAX_CACHE_SIZE / 2) {
-            blockStateCache.clear();
-        }
+        return blockStateCache.get(pos.immutable(), this::isPositionPassable);
     }
 
     @Override
@@ -70,20 +58,16 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public void clearCache() {
-        blockStateCache.clear();
-        lastCacheClean = System.currentTimeMillis();
+        blockStateCache.invalidateAll();
     }
 
     @Override
     public void forceCacheClean() {
-        if (blockStateCache.size() > 0) {
-            blockStateCache.clear();
-            lastCacheClean = System.currentTimeMillis();
-        }
+        blockStateCache.cleanUp();
     }
 
     @Override
     public int getCacheSize() {
-        return blockStateCache.size();
+        return Math.toIntExact(blockStateCache.estimatedSize());
     }
 }

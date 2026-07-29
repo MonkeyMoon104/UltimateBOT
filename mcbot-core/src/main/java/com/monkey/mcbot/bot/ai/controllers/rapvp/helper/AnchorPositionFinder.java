@@ -2,13 +2,12 @@ package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.combat.ExplosionDamageEstimator;
 import com.monkey.mcbot.bot.ai.rank.configs.RAPVPConfig;
+import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Optional;
 
 public class AnchorPositionFinder {
 
@@ -55,7 +54,8 @@ public class AnchorPositionFinder {
                 for (int dy = downY; dy <= upY; dy++) {
                     BlockPos check = targetPos.offset(dx, dy, dz);
 
-                    if (check.equals(bot.blockPosition()) || check.equals(bot.blockPosition().below())) continue;
+                    if (check.equals(bot.blockPosition())
+                            || check.equals(bot.blockPosition().below())) continue;
 
                     BlockState state = level.getBlockState(check);
                     BlockState below = level.getBlockState(check.below());
@@ -89,7 +89,8 @@ public class AnchorPositionFinder {
                     }
 
                     double distanceToBot = Math.sqrt(distSq);
-                    double score = evaluateAnchorScore(anchorPos, predictedTargetPos, currentTargetPos, botPosition, target, distanceToBot);
+                    double score = evaluateAnchorScore(
+                            anchorPos, predictedTargetPos, currentTargetPos, botPosition, target, distanceToBot);
                     if (score <= 0.0D) {
                         continue;
                     }
@@ -146,7 +147,7 @@ public class AnchorPositionFinder {
         return currentPos;
     }
 
-    private boolean isLethalPosition(Vec3 anchorPos, Vec3 predictedTargetPos, Vec3 botPos, Player target) {
+    private boolean isLethalPosition(Vec3 anchorPos, Vec3 predictedTargetPos, Vec3 botPos) {
         double distanceToTarget = anchorPos.distanceTo(predictedTargetPos);
         if (distanceToTarget > 2.5) return false;
 
@@ -200,18 +201,18 @@ public class AnchorPositionFinder {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         return level.clip(context).getType() != net.minecraft.world.phys.HitResult.Type.BLOCK;
     }
 
-    private double evaluateAnchorScore(Vec3 anchorPos,
-                                       Vec3 predictedTargetPos,
-                                       Vec3 currentTargetPos,
-                                       Vec3 botPos,
-                                       Player target,
-                                       double distanceToBot) {
+    private double evaluateAnchorScore(
+            Vec3 anchorPos,
+            Vec3 predictedTargetPos,
+            Vec3 currentTargetPos,
+            Vec3 botPos,
+            Player target,
+            double distanceToBot) {
         double targetDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorPos, target);
         double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorPos, bot);
         if (targetDamage < 1.0D) {
@@ -226,7 +227,7 @@ public class AnchorPositionFinder {
         double distanceToCurrentTarget = anchorPos.distanceTo(currentTargetPos);
 
         boolean oppositeSide = isOnOppositeSideOfTarget(botPos, predictedTargetPos, anchorPos);
-        boolean lethal = isLethalPosition(anchorPos, predictedTargetPos, botPos, target);
+        boolean lethal = isLethalPosition(anchorPos, predictedTargetPos, botPos);
         boolean trapping = isTrappingPosition(anchorPos, predictedTargetPos, currentTargetPos);
 
         double score = (targetDamage * 3.4D) - (selfDamage * 2.9D);
@@ -261,8 +262,7 @@ public class AnchorPositionFinder {
                 end,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
         return level.clip(context).getType() == net.minecraft.world.phys.HitResult.Type.MISS;
     }
 

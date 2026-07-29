@@ -5,6 +5,15 @@ import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.AttackExecutor;
 import com.monkey.mcbot.wrapper.WrapperTask;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -22,14 +31,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-
 public final class BotGuardCompatibilityListener implements Listener {
 
     private static final List<String> DEFAULT_CLASS_PREFIXES = List.of("com.monkey.mcbot.");
@@ -40,6 +41,7 @@ public final class BotGuardCompatibilityListener implements Listener {
     private final java.util.Set<UUID> discoveredBots = ConcurrentHashMap.newKeySet();
     private final java.util.Set<UUID> luckPermsQueued = ConcurrentHashMap.newKeySet();
     private final java.util.Set<UUID> luckPermsLoaded = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, CompletableFuture<?>> luckPermsLoads = new ConcurrentHashMap<>();
 
     private WrapperTask scannerTask;
     private boolean scannerRunning;
@@ -75,7 +77,8 @@ public final class BotGuardCompatibilityListener implements Listener {
         this.debug = config.getBoolean("bot.guard.debug", false);
         this.scanIntervalTicks = Math.max(5L, config.getLong("bot.guard.scanner.interval-ticks", 20L));
         this.npcMetadataKey = nonBlank(config.getString("bot.guard.compatibility.npc-metadata-key"), "NPC");
-        this.ownMetadataKey = nonBlank(config.getString("bot.guard.compatibility.own-metadata-key"), "MinecraftBotGuard");
+        this.ownMetadataKey =
+                nonBlank(config.getString("bot.guard.compatibility.own-metadata-key"), "MinecraftBotGuard");
         this.classPrefixes = readList(config, "bot.guard.detection.class-prefixes", DEFAULT_CLASS_PREFIXES, true);
         this.classContains = readList(config, "bot.guard.detection.class-contains", DEFAULT_CLASS_CONTAINS, true);
         this.exactNames = readList(config, "bot.guard.detection.exact-names", defaultExactNames(config), false);
@@ -130,6 +133,7 @@ public final class BotGuardCompatibilityListener implements Listener {
         discoveredBots.remove(uuid);
         luckPermsLoaded.remove(uuid);
         luckPermsQueued.remove(uuid);
+        luckPermsLoads.remove(uuid);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -251,8 +255,7 @@ public final class BotGuardCompatibilityListener implements Listener {
         }
         entity.setMetadata(
                 AttackExecutor.BOT_FIRE_ASPECT_METADATA,
-                new FixedMetadataValue(plugin, System.currentTimeMillis() + 5500L)
-        );
+                new FixedMetadataValue(plugin, System.currentTimeMillis() + 5500L));
     }
 
     private boolean hasActiveBotFireAspect(Entity entity) {
@@ -261,7 +264,7 @@ public final class BotGuardCompatibilityListener implements Listener {
         }
         long now = System.currentTimeMillis();
         for (MetadataValue value : entity.getMetadata(AttackExecutor.BOT_FIRE_ASPECT_METADATA)) {
-            if (value.getOwningPlugin() == plugin && value.asLong() > now) {
+            if (Objects.equals(value.getOwningPlugin(), plugin) && value.asLong() > now) {
                 return true;
             }
         }
@@ -293,7 +296,9 @@ public final class BotGuardCompatibilityListener implements Listener {
 
         UUID entityUuid = entity.getUniqueId();
         for (ITrainingBot bot : registry.getAllBots().values()) {
-            if (bot != null && bot.asPlayer() != null && entityUuid.equals(bot.asPlayer().getUUID())) {
+            if (bot != null
+                    && bot.asPlayer() != null
+                    && entityUuid.equals(bot.asPlayer().getUUID())) {
                 return true;
             }
         }
@@ -324,8 +329,9 @@ public final class BotGuardCompatibilityListener implements Listener {
                 return;
             }
 
-            loadFuture.whenComplete((ignored, error) -> {
+            CompletableFuture<?> completion = loadFuture.whenComplete((ignored, error) -> {
                 luckPermsQueued.remove(uuid);
+                luckPermsLoads.remove(uuid);
                 if (error == null) {
                     luckPermsLoaded.add(uuid);
                     debug("LuckPerms user preloaded for " + entityName + " (" + uuid + ")");
@@ -333,18 +339,24 @@ public final class BotGuardCompatibilityListener implements Listener {
                 }
                 debug("LuckPerms preload failed for " + entityName + " (" + uuid + "): " + error.getMessage());
             });
+            luckPermsLoads.put(uuid, completion);
+            if (completion.isDone()) {
+                luckPermsLoads.remove(uuid, completion);
+            }
         } catch (ReflectiveOperationException | LinkageError | IllegalStateException error) {
             luckPermsQueued.remove(uuid);
             debug("LuckPerms preload unavailable for " + entityName + " (" + uuid + "): " + error.getMessage());
         }
     }
 
-    private CompletableFuture<?> loadLuckPermsUser(Plugin luckPermsPlugin, UUID uuid) throws ReflectiveOperationException {
+    private CompletableFuture<?> loadLuckPermsUser(Plugin luckPermsPlugin, UUID uuid)
+            throws ReflectiveOperationException {
         ClassLoader luckPermsClassLoader = luckPermsPlugin.getClass().getClassLoader();
         Class<?> providerClass = Class.forName("net.luckperms.api.LuckPermsProvider", true, luckPermsClassLoader);
         Object luckPerms = providerClass.getMethod("get").invoke(null);
         Object userManager = luckPerms.getClass().getMethod("getUserManager").invoke(luckPerms);
-        Object loadFuture = userManager.getClass().getMethod("loadUser", UUID.class).invoke(userManager, uuid);
+        Object loadFuture =
+                userManager.getClass().getMethod("loadUser", UUID.class).invoke(userManager, uuid);
         return loadFuture instanceof CompletableFuture<?> completableFuture ? completableFuture : null;
     }
 
@@ -383,13 +395,17 @@ public final class BotGuardCompatibilityListener implements Listener {
             return;
         }
 
-        scannerTask = plugin.getWrapperManager().active().runSyncLater(() -> {
-            if (!scannerRunning) {
-                return;
-            }
-            scanAllEntities();
-            scheduleNextScan(scanIntervalTicks);
-        }, delayTicks);
+        scannerTask = plugin.getWrapperManager()
+                .active()
+                .runSyncLater(
+                        () -> {
+                            if (!scannerRunning) {
+                                return;
+                            }
+                            scanAllEntities();
+                            scheduleNextScan(scanIntervalTicks);
+                        },
+                        delayTicks);
     }
 
     private void scanAllEntities() {
@@ -422,7 +438,9 @@ public final class BotGuardCompatibilityListener implements Listener {
         names.add("MinecraftBot");
 
         String configuredName = config.getString("bot.name");
-        if (configuredName != null && !configuredName.isBlank() && names.stream().noneMatch(configuredName::equalsIgnoreCase)) {
+        if (configuredName != null
+                && !configuredName.isBlank()
+                && names.stream().noneMatch(configuredName::equalsIgnoreCase)) {
             names.add(configuredName.trim());
         }
         return names;

@@ -8,8 +8,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class BotInventoryController {
 
-    private final Player bot;
-    private final ISlotManager slotManager;
+    private final SlotManager slotManager;
     private final IResourceReplenisher resourceReplenisher;
     private final IEquipmentBroadcaster equipmentBroadcaster;
     private final IItemChecker itemChecker;
@@ -26,12 +25,12 @@ public class BotInventoryController {
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
-        this.bot = bot;
         this.resourceReplenisher = new ResourceReplenisher();
         this.equipmentBroadcaster = new EquipmentBroadcaster();
         this.slotManager = new SlotManager(bot, resourceReplenisher, equipmentBroadcaster);
         this.itemChecker = new ItemChecker();
-        this.itemManager = new ItemManager(bot, ((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher, equipmentBroadcaster, slotManager);
+        this.itemManager = new ItemManager(
+                bot, slotManager.getHotbarSlots(), resourceReplenisher, equipmentBroadcaster, slotManager);
     }
 
     public void switchToSlot(int slot) {
@@ -83,7 +82,7 @@ public class BotInventoryController {
     }
 
     public boolean hasEnderpearls() {
-        return itemChecker.hasEnderpearls(((SlotManager) slotManager).getHotbarSlots(), resourceReplenisher.hasInfiniteResources());
+        return itemChecker.hasEnderpearls(slotManager.getHotbarSlots(), resourceReplenisher.hasInfiniteResources());
     }
 
     public void addEnderpearls(int count) {
@@ -99,27 +98,27 @@ public class BotInventoryController {
     }
 
     public boolean isHoldingSword() {
-        return itemChecker.isHoldingSword(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingSword(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public boolean isHoldingEnderpearl() {
-        return itemChecker.isHoldingEnderpearl(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingEnderpearl(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public boolean isHoldingObsidian() {
-        return itemChecker.isHoldingObsidian(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingObsidian(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public boolean isHoldingCrystal() {
-        return itemChecker.isHoldingCrystal(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingCrystal(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public boolean isHoldingAnchor() {
-        return itemChecker.isHoldingAnchor(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingAnchor(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public boolean isHoldingGlow() {
-        return itemChecker.isHoldingGlow(slotManager.getCurrentSlot(), ((SlotManager) slotManager).getHotbarSlots());
+        return itemChecker.isHoldingGlow(slotManager.getCurrentSlot(), slotManager.getHotbarSlots());
     }
 
     public void updateTotemSlot(ItemStack totemStack) {
@@ -131,17 +130,17 @@ public class BotInventoryController {
     }
 
     public int getItemCount(Item item) {
-        return itemChecker.getItemCount(((SlotManager) slotManager).getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
+        return itemChecker.getItemCount(slotManager.getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
     }
 
     public boolean hasItem(Item item) {
-        return itemChecker.hasItem(((SlotManager) slotManager).getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
+        return itemChecker.hasItem(slotManager.getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
     }
 
     public void setInfiniteResources(boolean infinite) {
         resourceReplenisher.setInfiniteResources(infinite);
         if (infinite) {
-            resourceReplenisher.replenishAllItems(((SlotManager) slotManager).getHotbarSlots());
+            resourceReplenisher.replenishAllItems(slotManager.getHotbarSlots());
         }
     }
 
@@ -151,7 +150,7 @@ public class BotInventoryController {
 
     public void tick() {
         if (resourceReplenisher.hasInfiniteResources()) {
-            resourceReplenisher.replenishAllItems(((SlotManager) slotManager).getHotbarSlots());
+            resourceReplenisher.replenishAllItems(slotManager.getHotbarSlots());
         }
     }
 }

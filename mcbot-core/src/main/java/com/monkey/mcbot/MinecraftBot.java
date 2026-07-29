@@ -8,19 +8,22 @@ import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
 import com.monkey.mcbot.commands.*;
+import com.monkey.mcbot.config.ConfigurateRuntimeSettingsLoader;
+import com.monkey.mcbot.config.RuntimeSettings;
+import com.monkey.mcbot.event.BotEventDispatcher;
 import com.monkey.mcbot.integration.api.CoreBotManagerAdapter;
 import com.monkey.mcbot.integration.api.CoreBotRegistryAdapter;
 import com.monkey.mcbot.integration.worldguard.WorldGuardPvpService;
 import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
-import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
 import com.monkey.mcbot.listener.BotExplosionListener;
+import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
 import com.monkey.mcbot.listener.BotRuntimeEventListener;
-import com.monkey.mcbot.event.BotEventDispatcher;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
+import com.monkey.mcbot.metrics.BotMetrics;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
 import com.monkey.mcbot.placeholders.PlaceholderRegistration;
@@ -29,6 +32,11 @@ import com.monkey.mcbot.update.UpdateManager;
 import com.monkey.mcbot.update.UpdateStartupResult;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
 import com.monkey.mcbot.wrapper.WrapperManager;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Supplier;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.command.CommandExecutor;
@@ -39,12 +47,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 public final class MinecraftBot extends JavaPlugin {
 
@@ -63,6 +65,9 @@ public final class MinecraftBot extends JavaPlugin {
     private WorldGuardPvpService worldGuardPvpService;
     private RemoteApiServer remoteApiServer;
     private BotEventDispatcher botEventDispatcher;
+    private BotMetrics botMetrics;
+    private ConfigurateRuntimeSettingsLoader runtimeSettingsLoader;
+    private RuntimeSettings runtimeSettings = RuntimeSettings.defaults();
     private static MinecraftBot instance;
 
     @Override
@@ -74,17 +79,20 @@ public final class MinecraftBot extends JavaPlugin {
         try {
             startup.beginPhase(1, "Boot", "Configuration");
             saveDefaultConfig();
+            this.runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
+                    getDataFolder().toPath().resolve("config.yml"), getLogger());
+            this.runtimeSettings = runtimeSettingsLoader.load();
             reloadLanguageConfiguration();
             startup.ready("Config", "default file verified");
-            startup.detail("Path", getDataFolder().toPath().resolve("config.yml").toString());
+            startup.detail(
+                    "Path", getDataFolder().toPath().resolve("config.yml").toString());
             startup.detail("Language", languageManager.getActiveLanguageFileName());
             startup.detail(
                     "Profile",
                     getConfig().getString("bot.name", "CrystalBot")
                             + " | default totems=" + getConfig().getInt("bot.default-totem-count")
                             + ", normal max=" + getConfig().getInt("bot.max-totem-normal")
-                            + ", event max=" + getConfig().getInt("bot.max-totem-event")
-            );
+                            + ", event max=" + getConfig().getInt("bot.max-totem-event"));
             startup.completePhase("config ready");
 
             startup.beginPhase(2, "License", "Validation");
@@ -115,21 +123,36 @@ public final class MinecraftBot extends JavaPlugin {
 
             startup.beginPhase(4, "NMS", "Compatibility");
             NMSBridgeManager.init(getLogger());
-            startup.markNmsBridge(NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
+            startup.markNmsBridge(
+                    NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
             startup.detail("Catalog", MinecraftBotLogging.catalogSummary());
             startup.detail("Controllers", MinecraftBotLogging.controllerSummary());
             startup.completePhase("server compatibility resolved");
 
             startup.beginPhase(5, "Core", "Runtime");
-            this.targetingService = new TargetingService();
+            this.targetingService = new TargetingService(runtimeSettings.targetCache());
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
-            this.botEventDispatcher = new BotEventDispatcher(this);
+            this.botMetrics = new BotMetrics(
+                    getConfig().getBoolean("observability.enabled", true),
+                    getConfig().getBoolean("observability.prometheus-endpoint-enabled", true),
+                    getPluginMeta().getVersion(),
+                    getServer().getMinecraftVersion(),
+                    botRegistry,
+                    targetingService);
+            this.botEventDispatcher = new BotEventDispatcher(this, botMetrics);
             this.worldGuardPvpService = new WorldGuardPvpService(this);
             this.botManager = new BotManager(this);
             startup.ready("Runtime", "services created");
-            startup.detail("Services", "TargetingService, PlayerOptions, BotRegistry, BotManager, WrapperManager, WorldGuardPvpService");
+            startup.detail(
+                    "Services",
+                    "TargetingService, PlayerOptions, BotRegistry, BotManager, BotMetrics, WrapperManager, WorldGuardPvpService");
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
+            startup.detail(
+                    "Observability",
+                    botMetrics.isEnabled()
+                            ? "Micrometer enabled | prometheus=" + botMetrics.isPrometheusEndpointEnabled()
+                            : "disabled");
             startup.detail("Wrappers", wrapperManager.describeActiveWrapper());
             startup.completePhase("runtime core created");
 
@@ -137,8 +160,7 @@ public final class MinecraftBot extends JavaPlugin {
             MinecraftBotAPI api = new MinecraftBotAPI(
                     this,
                     new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
-                    new CoreBotRegistryAdapter(botRegistry)
-            );
+                    new CoreBotRegistryAdapter(botRegistry));
             startup.ready("API", "adapters wired");
             startup.detail("Manager", MinecraftBotLogging.apiManagerSummary());
             startup.detail("Registry", MinecraftBotLogging.apiRegistrySummary());
@@ -159,11 +181,11 @@ public final class MinecraftBot extends JavaPlugin {
             List<String> registeredListeners = new ArrayList<>();
             List<String> disabledListeners = new ArrayList<>();
             this.botGuardCompatibilityListener = new BotGuardCompatibilityListener(this);
-            registerListener(startup, registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
+            registerListener(registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
             botGuardCompatibilityListener.startScanner();
-            registerListener(startup, registeredListeners, "bot explosion events", new BotExplosionListener());
-            registerListener(startup, registeredListeners, "bot runtime events", new BotRuntimeEventListener(this));
-            registerListener(startup, registeredListeners, "required", new PlayerCheckListener(this));
+            registerListener(registeredListeners, "bot explosion events", new BotExplosionListener());
+            registerListener(registeredListeners, "bot runtime events", new BotRuntimeEventListener(this));
+            registerListener(registeredListeners, "required", new PlayerCheckListener(this));
             registerOptionalListener(
                     startup,
                     registeredListeners,
@@ -171,8 +193,7 @@ public final class MinecraftBot extends JavaPlugin {
                     "optional integration",
                     this::isCombatLogXListenerAvailable,
                     "CombatLogX dependency unavailable",
-                    () -> new PlayerTagListener(this)
-            );
+                    () -> new PlayerTagListener(this));
             startup.markListeners(registeredListeners, disabledListeners);
             startup.ready("Hooks", "registrations completed");
             startup.detail("Commands", joinOrNone(registeredCommands));
@@ -210,7 +231,6 @@ public final class MinecraftBot extends JavaPlugin {
 
             startup.beginPhase(9, "Boot", "Finalize");
             MinecraftBotAPI.register(api);
-            startup.markApiPublished();
             MinecraftBotLogging.logApiRegistered(getLogger(), api);
             getServer().getPluginManager().callEvent(new MinecraftBotReadyEvent(api));
             startup.ready("Event", MinecraftBotReadyEvent.class.getSimpleName() + " fired");
@@ -219,7 +239,8 @@ public final class MinecraftBot extends JavaPlugin {
 
             try {
                 Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
-                metrics.addCustomChart(new SimplePie("plugin_version", () -> getPluginMeta().getVersion()));
+                metrics.addCustomChart(
+                        new SimplePie("plugin_version", () -> getPluginMeta().getVersion()));
                 startup.ready("bStats", "metrics enabled");
             } catch (Throwable metricsError) {
                 startup.warn("bStats", "metrics init failed -> " + formatListenerError(metricsError));
@@ -269,6 +290,10 @@ public final class MinecraftBot extends JavaPlugin {
         return targetingService;
     }
 
+    public RuntimeSettings getRuntimeSettings() {
+        return runtimeSettings;
+    }
+
     public PlayerOptions getPlayerOptions() {
         return playerOptions;
     }
@@ -279,6 +304,10 @@ public final class MinecraftBot extends JavaPlugin {
 
     public BotEventDispatcher getBotEventDispatcher() {
         return botEventDispatcher;
+    }
+
+    public BotMetrics getBotMetrics() {
+        return botMetrics;
     }
 
     public WrapperManager getWrapperManager() {
@@ -303,6 +332,14 @@ public final class MinecraftBot extends JavaPlugin {
 
     public void reloadPluginConfiguration() {
         reloadConfig();
+        if (runtimeSettingsLoader == null) {
+            runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
+                    getDataFolder().toPath().resolve("config.yml"), getLogger());
+        }
+        runtimeSettings = runtimeSettingsLoader.load();
+        if (targetingService != null) {
+            targetingService.reconfigure(runtimeSettings.targetCache());
+        }
         reloadLanguageConfiguration();
         if (botGuardCompatibilityListener != null) {
             botGuardCompatibilityListener.reloadLocalConfig();
@@ -346,18 +383,20 @@ public final class MinecraftBot extends JavaPlugin {
         return languageManager.getActiveLanguageConfiguration();
     }
 
-    private void registerCommand(MinecraftBotLogging.StartupSession startup,
-                                 List<String> registeredCommands,
-                                 String name,
-                                 CommandExecutor executor) {
+    private void registerCommand(
+            MinecraftBotLogging.StartupSession startup,
+            List<String> registeredCommands,
+            String name,
+            CommandExecutor executor) {
         registerCommand(startup, registeredCommands, name, executor, null);
     }
 
-    private void registerCommand(MinecraftBotLogging.StartupSession startup,
-                                 List<String> registeredCommands,
-                                 String name,
-                                 CommandExecutor executor,
-                                 TabCompleter tabCompleter) {
+    private void registerCommand(
+            MinecraftBotLogging.StartupSession startup,
+            List<String> registeredCommands,
+            String name,
+            CommandExecutor executor,
+            TabCompleter tabCompleter) {
         PluginCommand command = getCommand(name);
         if (command == null) {
             startup.warn("Command /" + name, "missing from plugin.yml");
@@ -372,21 +411,19 @@ public final class MinecraftBot extends JavaPlugin {
         registeredCommands.add(name);
     }
 
-    private void registerListener(MinecraftBotLogging.StartupSession startup,
-                                  List<String> registeredListeners,
-                                  String label,
-                                  Listener listener) {
+    private void registerListener(List<String> registeredListeners, String label, Listener listener) {
         getServer().getPluginManager().registerEvents(listener, this);
         registeredListeners.add(label);
     }
 
-    private void registerOptionalListener(MinecraftBotLogging.StartupSession startup,
-                                          List<String> registeredListeners,
-                                          List<String> disabledListeners,
-                                          String label,
-                                          Supplier<Boolean> availabilityCheck,
-                                          String unavailableReason,
-                                          Supplier<? extends Listener> listenerSupplier) {
+    private void registerOptionalListener(
+            MinecraftBotLogging.StartupSession startup,
+            List<String> registeredListeners,
+            List<String> disabledListeners,
+            String label,
+            Supplier<Boolean> availabilityCheck,
+            String unavailableReason,
+            Supplier<? extends Listener> listenerSupplier) {
         if (!availabilityCheck.get()) {
             disabledListeners.add(label + " -> " + unavailableReason);
             startup.warn("Listener " + label, "disabled -> " + unavailableReason);
@@ -394,7 +431,7 @@ public final class MinecraftBot extends JavaPlugin {
         }
 
         try {
-            registerListener(startup, registeredListeners, label, listenerSupplier.get());
+            registerListener(registeredListeners, label, listenerSupplier.get());
         } catch (Throwable error) {
             String reason = "registration failed: " + formatListenerError(error);
             disabledListeners.add(label + " -> " + reason);
@@ -463,6 +500,10 @@ public final class MinecraftBot extends JavaPlugin {
             botEventDispatcher.clear();
             botEventDispatcher = null;
         }
+        if (botMetrics != null) {
+            botMetrics.close();
+            botMetrics = null;
+        }
         if (playerOptions != null) {
             playerOptions.clear();
             playerOptions = null;
@@ -482,6 +523,7 @@ public final class MinecraftBot extends JavaPlugin {
         for (ITrainingBot bot : botRegistry.getAllBots().values()) {
             if (bot != null && bot.getBotAI() != null) {
                 bot.getBotAI().getInventoryController().setInfiniteResources(infiniteResources);
+                bot.getBotAI().getMovementController().reconfigureBlockStateCache(runtimeSettings.blockStateCache());
             }
         }
     }

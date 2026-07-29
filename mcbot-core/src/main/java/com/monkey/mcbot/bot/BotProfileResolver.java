@@ -4,21 +4,16 @@ import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.api.model.BotSkinSource;
 import com.monkey.mcbot.placeholders.PlaceholderApiSupport;
+import java.util.Locale;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import java.util.Locale;
-import java.util.UUID;
-
 /** Resolves the protocol-safe name and skin profile used by a spawned bot. */
 final class BotProfileResolver {
 
-    GameProfile resolve(FileConfiguration config,
-                        Player owner,
-                        Player target,
-                        UUID botUUID,
-                        BotOptions options) {
+    GameProfile resolve(FileConfiguration config, Player owner, Player target, UUID botUUID, BotOptions options) {
         String template = resolveNameTemplate(config, options);
         String botName = resolveName(template, owner, target, options);
         return resolveProfile(owner, botUUID, botName, options);
@@ -40,20 +35,23 @@ final class BotProfileResolver {
         String firstOwnerName = firstOwner == null ? owner.getName() : firstOwner.getName();
         String ownersCount = options == null
                 ? "1"
-                : String.valueOf(Math.max(1, options.getTeamOwnerUUIDs().isEmpty()
-                        ? 1
-                        : options.getTeamOwnerUUIDs().size()));
+                : String.valueOf(Math.max(
+                        1,
+                        options.getTeamOwnerUUIDs().isEmpty()
+                                ? 1
+                                : options.getTeamOwnerUUIDs().size()));
 
-        String replaced = template
-                .replace("%player%", owner.getName())
+        String replaced = template.replace("%player%", owner.getName())
                 .replace("%owner%", owner.getName())
                 .replace("%owner_name%", owner.getName())
                 .replace("%target%", target == null ? owner.getName() : target.getName())
                 .replace("%first_owner%", firstOwnerName)
                 .replace("%owners_count%", ownersCount)
-                .replace("%mode%", options == null
-                        ? BotType.SINGLE.name().toLowerCase(Locale.ROOT)
-                        : options.getBotType().name().toLowerCase(Locale.ROOT));
+                .replace(
+                        "%mode%",
+                        options == null
+                                ? BotType.SINGLE.name().toLowerCase(Locale.ROOT)
+                                : options.getBotType().name().toLowerCase(Locale.ROOT));
 
         return BotProfileCodec.sanitizeName(PlaceholderApiSupport.apply(owner, replaced));
     }
@@ -72,25 +70,18 @@ final class BotProfileResolver {
         return switch (source) {
             case RANDOM -> BotFactory.createRandomProfile(botUUID, botName);
             case OWNER -> BotFactory.createProfile(owner, botUUID, botName);
-            case FIRST_TEAM_OWNER -> profileFromPlayerOrOwner(
-                    resolveFirstTeamOwner(options), owner, botUUID, botName
-            );
-            case PLAYER_REFERENCE -> profileFromPlayerOrOwner(
-                    resolvePlayerReference(skin.playerReference()), owner, botUUID, botName
-            );
-            case TEXTURE_VALUE -> BotFactory.createProfileWithTexture(
-                    botUUID, botName, skin.textureValue(), skin.textureSignature()
-            );
-            case TEXTURE_URL -> BotFactory.createProfileWithTexture(
-                    botUUID, botName, BotProfileCodec.textureValueFromUrl(skin.textureUrl()), null
-            );
+            case FIRST_TEAM_OWNER -> profileFromPlayerOrOwner(resolveFirstTeamOwner(options), owner, botUUID, botName);
+            case PLAYER_REFERENCE ->
+                profileFromPlayerOrOwner(resolvePlayerReference(skin.playerReference()), owner, botUUID, botName);
+            case TEXTURE_VALUE ->
+                BotFactory.createProfileWithTexture(botUUID, botName, skin.textureValue(), skin.textureSignature());
+            case TEXTURE_URL ->
+                BotFactory.createProfileWithTexture(
+                        botUUID, botName, BotProfileCodec.textureValueFromUrl(skin.textureUrl()), null);
         };
     }
 
-    private GameProfile profileFromPlayerOrOwner(Player candidate,
-                                                 Player owner,
-                                                 UUID botUUID,
-                                                 String botName) {
+    private GameProfile profileFromPlayerOrOwner(Player candidate, Player owner, UUID botUUID, String botName) {
         Player source = candidate != null && candidate.isOnline() ? candidate : owner;
         return BotFactory.createProfile(source, botUUID, botName);
     }
@@ -123,11 +114,11 @@ final class BotProfileResolver {
             if (byUuid != null && byUuid.isOnline()) {
                 return byUuid;
             }
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException invalidUuid) {
+            // A non-UUID reference is valid here and is resolved as a player name below.
         }
 
         Player fuzzy = Bukkit.getPlayer(reference);
         return fuzzy != null && fuzzy.isOnline() ? fuzzy : null;
     }
-
 }

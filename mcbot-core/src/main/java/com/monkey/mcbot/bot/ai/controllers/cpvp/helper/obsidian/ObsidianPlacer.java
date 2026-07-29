@@ -31,7 +31,7 @@ public class ObsidianPlacer {
     public boolean placeObsidianAt(BlockPos pos) {
         try {
             ItemStack obsidianStack = inventoryController.getCurrentItem();
-            if (obsidianStack.getItem() != Items.OBSIDIAN) return false;
+            if (!Items.OBSIDIAN.equals(obsidianStack.getItem())) return false;
 
             Direction bestFace = findBestPlacementFace(pos);
             if (bestFace == null) return false;
@@ -39,14 +39,10 @@ public class ObsidianPlacer {
             BlockPos adjacentPos = pos.relative(bestFace.getOpposite());
 
             BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5),
-                    bestFace,
-                    adjacentPos,
-                    false
-            );
+                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5), bestFace, adjacentPos, false);
 
-            InteractionResult result = NMSBridgeManager.get()
-                    .useItemOnBlock(bot, obsidianStack, hitResult, InteractionHand.MAIN_HAND);
+            InteractionResult result =
+                    NMSBridgeManager.get().useItemOnBlock(bot, obsidianStack, hitResult, InteractionHand.MAIN_HAND);
 
             if (result.consumesAction()) {
                 bot.swing(InteractionHand.MAIN_HAND);
@@ -57,7 +53,8 @@ public class ObsidianPlacer {
             }
 
         } catch (Exception e) {
-            MinecraftBotLogging.warn(MinecraftBot.getInstance().getLogger(), "Combat", "Obsidian placement failed -> " + e.getMessage());
+            MinecraftBotLogging.warn(
+                    MinecraftBot.getInstance().getLogger(), "Combat", "Obsidian placement failed -> " + e.getMessage());
         }
 
         return false;
@@ -88,11 +85,10 @@ public class ObsidianPlacer {
                 targetPos,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS ||
-                result.getBlockPos().equals(pos);
+        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
+                || result.getBlockPos().equals(pos);
     }
 }

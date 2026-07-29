@@ -34,10 +34,10 @@ public class TotemTrackerService {
             skipNextTotemTracking = true;
         }
 
-        if (!skipNextTotemTracking &&
-                !combatStateChanged &&
-                previousEquippedTotems > currentEquippedTotems &&
-                totemCount > 0) {
+        if (!skipNextTotemTracking
+                && !combatStateChanged
+                && previousEquippedTotems > currentEquippedTotems
+                && totemCount > 0) {
 
             int consumedTotems = previousEquippedTotems - currentEquippedTotems;
             if (totemCount != -1) {
@@ -47,17 +47,27 @@ public class TotemTrackerService {
                     options.setTotems(totemCount);
 
                     if (bot.getTargetPlayer() != null) {
-                        bot.getPlugin().getBotManager()
+                        bot.getPlugin()
+                                .getBotManager()
                                 .updateTotem(bot.getTargetPlayer().getUniqueId(), totemCount);
                     }
                 }
-                java.util.UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                java.util.UUID ownerUUID = bot.getPlugin()
+                        .getBotRegistry()
+                        .getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
                 if (ownerUUID != null) {
-                    com.monkey.mcbot.api.model.BotSnapshot snapshot = bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
+                    com.monkey.mcbot.api.model.BotSnapshot snapshot =
+                            bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
                     if (snapshot != null) {
-                        bot.getPlugin().getBotEventDispatcher().publish(new com.monkey.mcbot.api.event.combat.BotTotemUseEvent(
-                                bot.getPlugin().getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
-                                snapshot, consumedTotems, totemCount));
+                        bot.getPlugin()
+                                .getBotEventDispatcher()
+                                .publish(new com.monkey.mcbot.api.event.combat.BotTotemUseEvent(
+                                        bot.getPlugin()
+                                                .getBotEventDispatcher()
+                                                .nextSequence(bot.asPlayer().getUUID()),
+                                        snapshot,
+                                        consumedTotems,
+                                        totemCount));
                     }
                 }
             }
@@ -71,12 +81,13 @@ public class TotemTrackerService {
     }
 
     private boolean isTotem(ItemStack itemStack) {
-        return itemStack != null
-                && !itemStack.isEmpty()
-                && itemStack.getItem() == Items.TOTEM_OF_UNDYING;
+        return itemStack != null && !itemStack.isEmpty() && Items.TOTEM_OF_UNDYING.equals(itemStack.getItem());
     }
 
-    public int getTotemCount() { return totemCount; }
+    public int getTotemCount() {
+        return totemCount;
+    }
+
     public void setTotemCount(int count) {
         this.totemCount = count;
         this.skipNextTotemTracking = true;
