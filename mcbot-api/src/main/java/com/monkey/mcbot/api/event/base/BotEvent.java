@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.base;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
 import org.bukkit.event.Event;

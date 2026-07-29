@@ -1,9 +1,9 @@
 package com.monkey.mcbot.event;
 
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.event.BotEventSource;
-import com.monkey.mcbot.api.event.BotSettingKey;
-import com.monkey.mcbot.api.event.BotSettingsChangeEvent;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
+import com.monkey.mcbot.api.event.state.BotSettingsChangeEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 

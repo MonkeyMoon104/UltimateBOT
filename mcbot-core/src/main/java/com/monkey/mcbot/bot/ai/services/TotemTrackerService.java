@@ -55,7 +55,7 @@ public class TotemTrackerService {
                 if (ownerUUID != null) {
                     com.monkey.mcbot.api.model.BotSnapshot snapshot = bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
                     if (snapshot != null) {
-                        bot.getPlugin().getBotEventDispatcher().publish(new com.monkey.mcbot.api.event.BotTotemUseEvent(
+                        bot.getPlugin().getBotEventDispatcher().publish(new com.monkey.mcbot.api.event.combat.BotTotemUseEvent(
                                 bot.getPlugin().getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
                                 snapshot, consumedTotems, totemCount));
                     }

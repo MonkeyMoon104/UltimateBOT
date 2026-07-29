@@ -1,7 +1,7 @@
 package com.monkey.mcbot.listener;
 
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.event.BotKillPlayerEvent;
+import com.monkey.mcbot.api.event.combat.BotKillPlayerEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
@@ -26,7 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Map;
 import java.util.UUID;
-import com.monkey.mcbot.api.event.BotDespawnReason;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 
 public class PlayerCheckListener implements Listener {
 

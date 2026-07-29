@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.lifecycle;
 
 import com.monkey.mcbot.api.MinecraftBotAPI;
 import org.bukkit.event.Event;

@@ -11,8 +11,8 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManage
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.api.event.BotAttackEvent;
-import com.monkey.mcbot.api.event.BotAttackType;
+import com.monkey.mcbot.api.event.combat.BotAttackEvent;
+import com.monkey.mcbot.api.event.combat.BotAttackType;
 import com.monkey.mcbot.api.model.BotSnapshot;
 
 public class BotAttackController {

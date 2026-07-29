@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.bus;
 
 /** A removable EventBus listener registration. */
 public interface BotEventSubscription extends AutoCloseable {

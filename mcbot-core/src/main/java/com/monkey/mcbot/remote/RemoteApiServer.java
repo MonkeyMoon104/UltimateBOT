@@ -10,7 +10,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
 import com.monkey.mcbot.event.BotEventSourceContext;
-import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.base.BotEventSource;
 
 import java.io.IOException;
 import java.io.InputStream;

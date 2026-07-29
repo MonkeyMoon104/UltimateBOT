@@ -4,7 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.combat.BotExplosionContext;
-import com.monkey.mcbot.api.event.BotExplosionType;
+import com.monkey.mcbot.api.event.combat.BotExplosionType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;

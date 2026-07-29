@@ -1,7 +1,7 @@
 package com.monkey.mcbot.event;
 
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.event.BotEvent;
+import com.monkey.mcbot.api.event.base.BotEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.integration.api.BotSnapshotMapper;

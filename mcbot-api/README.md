@@ -20,10 +20,21 @@ This module intentionally contains no GUI logic, no runtime AI implementation an
 ### Events and EventBus
 - `MinecraftBotReadyEvent`
 - lifecycle: spawn, despawn and death
-- combat: target, attack, damage, kill, explosion and totem use
+- combat: attack, damage, kill, explosion and totem use
+- state: target and runtime setting changes
 - actions: heal and teleport
-- cancellable runtime setting changes
 - `MinecraftBotAPI.getEventBus()` for functional subscriptions
+
+Event contracts are organized by responsibility instead of sharing one flat package:
+
+| Package | Contents |
+| --- | --- |
+| `api.event.base` | `BotEvent`, source metadata and shared contracts |
+| `api.event.bus` | event bus and subscription types |
+| `api.event.lifecycle` | readiness, spawn, despawn and death |
+| `api.event.combat` | attacks, damage, kills, explosions and totems |
+| `api.event.state` | target and setting changes |
+| `api.event.action` | healing and teleportation |
 
 ### Service Interfaces
 - `IBotManager`
@@ -97,6 +108,9 @@ timestamp, owner UUID, bot UUID, source and immutable snapshot. Developers may u
 normal Bukkit listeners or the functional EventBus; both receive the same event instance.
 
 ```java
+import com.monkey.mcbot.api.event.bus.BotEventSubscription;
+import com.monkey.mcbot.api.event.combat.BotExplosionEvent;
+
 BotEventSubscription subscription = MinecraftBotAPI.get().getEventBus().subscribe(
         this,
         BotExplosionEvent.class,
@@ -320,7 +334,7 @@ These helpers are online-player oriented. They should not be treated as offline-
 ## Example Integration
 ```java
 import com.monkey.mcbot.api.MinecraftBotAPI;
-import com.monkey.mcbot.api.event.MinecraftBotReadyEvent;
+import com.monkey.mcbot.api.event.lifecycle.MinecraftBotReadyEvent;
 import com.monkey.mcbot.api.model.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

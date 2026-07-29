@@ -1,4 +1,7 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.lifecycle;
+
+import com.monkey.mcbot.api.event.base.BotEvent;
+import com.monkey.mcbot.api.event.base.BotEventSource;
 
 import org.bukkit.Location;
 import org.bukkit.event.Cancellable;

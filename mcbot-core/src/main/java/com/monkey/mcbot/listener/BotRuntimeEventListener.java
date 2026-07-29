@@ -1,7 +1,10 @@
 package com.monkey.mcbot.listener;
 
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.event.*;
+import com.monkey.mcbot.api.event.action.BotHealEvent;
+import com.monkey.mcbot.api.event.action.BotTeleportEvent;
+import com.monkey.mcbot.api.event.combat.BotDamageEvent;
+import com.monkey.mcbot.api.event.combat.BotKillEntityEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.event.BotEventDispatcher;

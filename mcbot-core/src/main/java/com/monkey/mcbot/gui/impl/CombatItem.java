@@ -17,8 +17,8 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.List;
 import java.util.UUID;
-import com.monkey.mcbot.api.event.BotEventSource;
-import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.event.BotSettingEvents;
 
 public class CombatItem extends AbstractItem {

@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.lifecycle;
 
 /** Reason why a managed bot left the runtime registry. */
 public enum BotDespawnReason {

@@ -1,6 +1,6 @@
 package com.monkey.mcbot.event;
 
-import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.base.BotEventSource;
 import java.util.concurrent.Callable;
 
 /** Propagates the origin of synchronous API operations without changing public manager signatures. */

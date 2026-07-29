@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.combat;
 
 /** High-level combat action performed by a bot. */
 public enum BotAttackType {

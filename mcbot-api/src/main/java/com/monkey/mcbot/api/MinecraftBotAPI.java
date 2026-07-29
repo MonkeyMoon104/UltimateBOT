@@ -2,7 +2,7 @@ package com.monkey.mcbot.api;
 
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.managers.IBotRegistry;
-import com.monkey.mcbot.api.event.BotEventBus;
+import com.monkey.mcbot.api.event.bus.BotEventBus;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;

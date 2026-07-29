@@ -14,8 +14,8 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.UUID;
-import com.monkey.mcbot.api.event.BotEventSource;
-import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.event.BotSettingEvents;
 
 public class TotemItem extends AbstractItem {

@@ -14,7 +14,7 @@ import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
-import com.monkey.mcbot.api.event.BotTargetChangeEvent;
+import com.monkey.mcbot.api.event.state.BotTargetChangeEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 
 import java.util.ArrayList;

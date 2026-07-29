@@ -3,7 +3,7 @@ package com.monkey.mcbot.bot;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
-import com.monkey.mcbot.api.event.BotDespawnReason;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;

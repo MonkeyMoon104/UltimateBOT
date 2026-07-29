@@ -1,8 +1,8 @@
 package com.monkey.mcbot;
 
 import com.monkey.mcbot.api.MinecraftBotAPI;
-import com.monkey.mcbot.api.event.MinecraftBotReadyEvent;
-import com.monkey.mcbot.api.event.BotDespawnReason;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
+import com.monkey.mcbot.api.event.lifecycle.MinecraftBotReadyEvent;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;

@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.combat;
 
-import com.monkey.mcbot.api.event.BotExplosionEvent;
-import com.monkey.mcbot.api.event.BotExplosionType;
+import com.monkey.mcbot.api.event.combat.BotExplosionEvent;
+import com.monkey.mcbot.api.event.combat.BotExplosionType;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.Location;

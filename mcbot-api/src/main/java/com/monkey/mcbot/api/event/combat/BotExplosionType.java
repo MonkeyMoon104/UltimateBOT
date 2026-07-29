@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.combat;
 
 /** Explosion source controlled by a bot. */
 public enum BotExplosionType {

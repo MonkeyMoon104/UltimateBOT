@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.base;
 
 /** Identifies the component that caused a bot event. */
 public enum BotEventSource {

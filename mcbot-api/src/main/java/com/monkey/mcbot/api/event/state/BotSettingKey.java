@@ -1,4 +1,4 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.state;
 
 /** Runtime bot settings that may be changed through GUI, commands or APIs. */
 public enum BotSettingKey {

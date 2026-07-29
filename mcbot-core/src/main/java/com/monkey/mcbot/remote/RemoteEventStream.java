@@ -2,7 +2,21 @@ package com.monkey.mcbot.remote;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.event.*;
+import com.monkey.mcbot.api.event.action.BotHealEvent;
+import com.monkey.mcbot.api.event.action.BotTeleportEvent;
+import com.monkey.mcbot.api.event.base.BotEvent;
+import com.monkey.mcbot.api.event.combat.BotAttackEvent;
+import com.monkey.mcbot.api.event.combat.BotDamageEvent;
+import com.monkey.mcbot.api.event.combat.BotExplosionEvent;
+import com.monkey.mcbot.api.event.combat.BotKillEntityEvent;
+import com.monkey.mcbot.api.event.combat.BotTotemUseEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDeathEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnPrepareEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotSpawnEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotSpawnPrepareEvent;
+import com.monkey.mcbot.api.event.state.BotSettingsChangeEvent;
+import com.monkey.mcbot.api.event.state.BotTargetChangeEvent;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;

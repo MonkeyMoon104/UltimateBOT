@@ -1,4 +1,6 @@
-package com.monkey.mcbot.api.event;
+package com.monkey.mcbot.api.event.bus;
+
+import com.monkey.mcbot.api.event.base.BotEvent;
 
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventPriority;

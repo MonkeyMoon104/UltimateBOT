@@ -12,10 +12,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
-import com.monkey.mcbot.api.event.BotDeathEvent;
-import com.monkey.mcbot.api.event.BotDespawnEvent;
-import com.monkey.mcbot.api.event.BotDespawnReason;
-import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.lifecycle.BotDeathEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.mcbot.api.model.BotSnapshot;
 
 public class BotDeathService {

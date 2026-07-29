@@ -4,7 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.combat.BotExplosionContext;
-import com.monkey.mcbot.api.event.BotExplosionType;
+import com.monkey.mcbot.api.event.combat.BotExplosionType;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
