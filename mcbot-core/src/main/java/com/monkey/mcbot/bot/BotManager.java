@@ -3,6 +3,7 @@ package com.monkey.mcbot.bot;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
+import com.monkey.mcbot.api.event.BotDespawnReason;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -25,35 +26,47 @@ public class BotManager {
         this.lookup = new BotLookup(registry);
     }
 
-    public void spawn(Player viewer,
+    public boolean spawn(Player viewer,
                       Player target,
                       Map<EquipmentSlot, ItemStack> armorMap,
                       Map<EquipmentSlot, Boolean> blastProtectionMap,
                       boolean follow,
                       int totem,
                       BotOptions botOptions) {
-        spawner.spawn(viewer, target, armorMap, blastProtectionMap, follow, totem, botOptions);
+        return spawner.spawn(viewer, target, armorMap, blastProtectionMap, follow, totem, botOptions);
     }
 
-    public void spawn(Player viewer,
+    public boolean spawn(Player viewer,
                       Map<EquipmentSlot, ItemStack> armorMap,
                       Map<EquipmentSlot, Boolean> blastProtectionMap,
                       boolean follow,
                       int totem,
                       BotOptions botOptions) {
-        spawner.spawn(viewer, viewer, armorMap, blastProtectionMap, follow, totem, botOptions);
+        return spawner.spawn(viewer, viewer, armorMap, blastProtectionMap, follow, totem, botOptions);
     }
 
-    public void despawn(Player owner) {
-        spawner.despawn(owner);
+    public boolean despawn(Player owner) {
+        return spawner.despawn(owner);
     }
 
-    public void despawnByOwnerUUID(UUID ownerUUID) {
-        spawner.despawnByOwnerUUID(ownerUUID);
+    public boolean despawn(Player owner, BotDespawnReason reason) {
+        return spawner.despawn(owner, reason);
+    }
+
+    public boolean despawnByOwnerUUID(UUID ownerUUID) {
+        return spawner.despawnByOwnerUUID(ownerUUID);
+    }
+
+    public boolean despawnByOwnerUUID(UUID ownerUUID, BotDespawnReason reason) {
+        return spawner.despawnByOwnerUUID(ownerUUID, reason);
     }
 
     public void despawnAll() {
         spawner.despawnAll();
+    }
+
+    public void despawnAll(BotDespawnReason reason) {
+        spawner.despawnAll(reason);
     }
 
     public void despawnBotInWorld(Player owner, org.bukkit.World fromWorld) {

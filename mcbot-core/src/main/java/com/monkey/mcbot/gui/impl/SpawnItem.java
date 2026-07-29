@@ -69,7 +69,7 @@ public class SpawnItem extends AbstractItem {
 
         if (status) {
             UUID managedOwnerUUID = resolveManagedOwnerUUID();
-            training.getBotManager().despawnByOwnerUUID(managedOwnerUUID);
+            if (!training.getBotManager().despawnByOwnerUUID(managedOwnerUUID)) return;
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
@@ -99,7 +99,9 @@ public class SpawnItem extends AbstractItem {
         if (window != null) window.close();
 
         boolean follow = options.isFollow();
-        training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
+        boolean spawned = training.getBotManager().spawn(
+                player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
+        if (!spawned) return;
         String msg = training.getLangString("messages.spawn-bot", "&aBot spawned with the selected settings!");
         player.sendMessage(ChatColorUtils.translate(msg));
 

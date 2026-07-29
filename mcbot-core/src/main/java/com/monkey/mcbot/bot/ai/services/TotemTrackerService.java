@@ -51,6 +51,15 @@ public class TotemTrackerService {
                                 .updateTotem(bot.getTargetPlayer().getUniqueId(), totemCount);
                     }
                 }
+                java.util.UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                if (ownerUUID != null) {
+                    com.monkey.mcbot.api.model.BotSnapshot snapshot = bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
+                    if (snapshot != null) {
+                        bot.getPlugin().getBotEventDispatcher().publish(new com.monkey.mcbot.api.event.BotTotemUseEvent(
+                                bot.getPlugin().getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
+                                snapshot, consumedTotems, totemCount));
+                    }
+                }
             }
         }
 

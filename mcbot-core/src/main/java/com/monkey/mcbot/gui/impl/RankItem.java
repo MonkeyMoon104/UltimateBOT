@@ -17,6 +17,9 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.List;
 import java.util.UUID;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.event.BotSettingEvents;
 
 public class RankItem extends AbstractItem {
 
@@ -94,9 +97,14 @@ public class RankItem extends AbstractItem {
             newRank = options.nextAllowedRank(currentRank, false);
         }
 
+        UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
+        var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                BotSettingKey.RANK, currentRank, newRank, BotRank.class);
+        if (proposed.isEmpty()) return;
+        newRank = proposed.get();
         options.setRank(newRank);
 
-        training.getBotManager().setBotRank(resolveManagedOwnerUUID(player), newRank);
+        training.getBotManager().setBotRank(managedOwnerUUID, newRank);
 
         player.sendMessage(ChatColorUtils.translate("&aRank set to &e" + newRank.getSelectedName()));
         notifyWindows();

@@ -12,6 +12,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
+import com.monkey.mcbot.api.event.BotDeathEvent;
+import com.monkey.mcbot.api.event.BotDespawnEvent;
+import com.monkey.mcbot.api.event.BotDespawnReason;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.model.BotSnapshot;
 
 public class BotDeathService {
 
@@ -35,6 +40,15 @@ public class BotDeathService {
         boolean isEventBot = options != null && options.getBotType() == BotType.EVENT;
 
         Player owner = getOwnerPlayer(options);
+        UUID ownerUUID = options != null ? options.getOwnerUUID() : plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+        BotSnapshot deathSnapshot = ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
+        if (deathSnapshot != null) {
+            org.bukkit.entity.Entity killer = cause == null || cause.getEntity() == null
+                    ? null : cause.getEntity().getBukkitEntity();
+            plugin.getBotEventDispatcher().publish(new BotDeathEvent(
+                    plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
+                    deathSnapshot, cause == null ? "unknown" : cause.typeHolder().getRegisteredName(), killer));
+        }
 
         if (isEventBot) {
             if (isKillMessageEnabled(options) && bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
@@ -71,6 +85,12 @@ public class BotDeathService {
         NMSBridgeManager.get().removeFromProfileCache(bot.asPlayer().getUUID());
         plugin.forgetCompatibilityBot(bot.asPlayer().getUUID());
         plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
+        if (deathSnapshot != null) {
+            plugin.getBotEventDispatcher().publish(new BotDespawnEvent(
+                    plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()), deathSnapshot,
+                    BotEventSource.SYSTEM, BotDespawnReason.BOT_DEATH));
+            plugin.getBotEventDispatcher().forget(bot.asPlayer().getUUID());
+        }
     }
 
     private Player getOwnerPlayer(BotOptions options) {

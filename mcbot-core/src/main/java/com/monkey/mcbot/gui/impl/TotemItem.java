@@ -14,6 +14,9 @@ import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.UUID;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.event.BotSettingEvents;
 
 public class TotemItem extends AbstractItem {
 
@@ -56,15 +59,17 @@ public class TotemItem extends AbstractItem {
         int minTotem = options.getMinTotemCount();
         int currentTotem = options.getTotems();
 
-        if (clickType.isLeftClick() && currentTotem < maxTotem) {
-            options.setTotems(currentTotem + 1);
-        }
-
-        if (clickType.isRightClick() && currentTotem > minTotem) {
-            options.setTotems(currentTotem - 1);
-        }
-
-        training.getBotManager().updateTotem(resolveManagedOwnerUUID(player), options.getTotems());
+        int nextTotem = currentTotem;
+        if (clickType.isLeftClick() && currentTotem < maxTotem) nextTotem++;
+        if (clickType.isRightClick() && currentTotem > minTotem) nextTotem--;
+        if (nextTotem == currentTotem) return;
+        UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
+        var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                BotSettingKey.TOTEM_COUNT, currentTotem, nextTotem, Integer.class);
+        if (training.getBotRegistry().getBot(managedOwnerUUID) != null && proposed.isEmpty()) return;
+        if (proposed.isPresent()) nextTotem = proposed.get();
+        options.setTotems(nextTotem);
+        training.getBotManager().updateTotem(managedOwnerUUID, nextTotem);
 
         notifyWindows();
     }

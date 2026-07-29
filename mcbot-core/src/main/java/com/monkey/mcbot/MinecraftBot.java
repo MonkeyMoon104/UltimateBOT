@@ -2,6 +2,7 @@ package com.monkey.mcbot;
 
 import com.monkey.mcbot.api.MinecraftBotAPI;
 import com.monkey.mcbot.api.event.MinecraftBotReadyEvent;
+import com.monkey.mcbot.api.event.BotDespawnReason;
 import com.monkey.mcbot.bot.BotManager;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
@@ -15,6 +16,8 @@ import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
 import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
 import com.monkey.mcbot.listener.BotExplosionListener;
+import com.monkey.mcbot.listener.BotRuntimeEventListener;
+import com.monkey.mcbot.event.BotEventDispatcher;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
@@ -59,6 +62,7 @@ public final class MinecraftBot extends JavaPlugin {
     private BotGuardCompatibilityListener botGuardCompatibilityListener;
     private WorldGuardPvpService worldGuardPvpService;
     private RemoteApiServer remoteApiServer;
+    private BotEventDispatcher botEventDispatcher;
     private static MinecraftBot instance;
 
     @Override
@@ -120,6 +124,7 @@ public final class MinecraftBot extends JavaPlugin {
             this.targetingService = new TargetingService();
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
+            this.botEventDispatcher = new BotEventDispatcher(this);
             this.worldGuardPvpService = new WorldGuardPvpService(this);
             this.botManager = new BotManager(this);
             startup.ready("Runtime", "services created");
@@ -156,7 +161,8 @@ public final class MinecraftBot extends JavaPlugin {
             this.botGuardCompatibilityListener = new BotGuardCompatibilityListener(this);
             registerListener(startup, registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
             botGuardCompatibilityListener.startScanner();
-            registerListener(startup, registeredListeners, "bot explosion protection", new BotExplosionListener());
+            registerListener(startup, registeredListeners, "bot explosion events", new BotExplosionListener());
+            registerListener(startup, registeredListeners, "bot runtime events", new BotRuntimeEventListener(this));
             registerListener(startup, registeredListeners, "required", new PlayerCheckListener(this));
             registerOptionalListener(
                     startup,
@@ -269,6 +275,10 @@ public final class MinecraftBot extends JavaPlugin {
 
     public static MinecraftBot getInstance() {
         return instance;
+    }
+
+    public BotEventDispatcher getBotEventDispatcher() {
+        return botEventDispatcher;
     }
 
     public WrapperManager getWrapperManager() {
@@ -442,12 +452,16 @@ public final class MinecraftBot extends JavaPlugin {
             placeholderCoordinator = null;
         }
         if (botManager != null) {
-            botManager.despawnAll();
+            botManager.despawnAll(BotDespawnReason.PLUGIN_DISABLE);
             botManager = null;
         }
         if (botRegistry != null) {
             botRegistry.clear();
             botRegistry = null;
+        }
+        if (botEventDispatcher != null) {
+            botEventDispatcher.clear();
+            botEventDispatcher = null;
         }
         if (playerOptions != null) {
             playerOptions.clear();

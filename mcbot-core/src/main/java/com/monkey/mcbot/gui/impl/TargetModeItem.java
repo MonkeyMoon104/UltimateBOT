@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.event.BotSettingEvents;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -39,6 +42,12 @@ public class TargetModeItem extends AbstractItem {
             return;
         }
         BotTargetMode next = options.getTargetMode().next();
+        java.util.UUID ownerUUID = plugin.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        if (ownerUUID == null) ownerUUID = player.getUniqueId();
+        var proposed = BotSettingEvents.propose(plugin, ownerUUID, BotEventSource.GUI,
+                BotSettingKey.TARGET_MODE, options.getTargetMode(), next, BotTargetMode.class);
+        if (plugin.getBotRegistry().getBot(ownerUUID) != null && proposed.isEmpty()) return;
+        if (proposed.isPresent()) next = proposed.get();
         options.setTargetMode(next);
         player.sendMessage(ChatColorUtils.translate("&aAttack mode: &e" + label(next)));
         notifyWindows();

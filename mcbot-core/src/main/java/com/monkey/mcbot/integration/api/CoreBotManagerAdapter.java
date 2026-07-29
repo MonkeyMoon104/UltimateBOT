@@ -2,10 +2,14 @@ package com.monkey.mcbot.integration.api;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.managers.IBotManager;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
 import com.monkey.mcbot.api.model.*;
 import com.monkey.mcbot.bot.*;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import com.monkey.mcbot.event.BotSettingEvents;
+import com.monkey.mcbot.event.BotEventSourceContext;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -139,7 +143,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         BotOptions options = optionsFactory.create(
                 botType, primaryOwnerUUID, targetUUID, targetUUIDs, teamOwners, settings
         );
-        botManager.spawn(
+        boolean spawned = botManager.spawn(
                 ownerPlayer,
                 targetPlayer,
                 options.getArmor(),
@@ -148,6 +152,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.getTotems(),
                 options
         );
+
+        if (!spawned) {
+            return spawnFailure("Bot spawn was cancelled by an event listener.");
+        }
 
         cacheOptions(options, primaryOwnerUUID, teamOwners);
 
@@ -272,8 +280,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        options.setTotems(totemCount);
-        botManager.updateTotem(managedOwner, totemCount);
+        Optional<Integer> proposed = proposedChange(managedOwner, BotSettingKey.TOTEM_COUNT,
+                options.getTotems(), totemCount, Integer.class);
+        if (proposed.isEmpty()) return false;
+        options.setTotems(proposed.get());
+        botManager.updateTotem(managedOwner, proposed.get());
         return true;
     }
 
@@ -294,8 +305,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        options.setFollow(follow);
-        botManager.updateFollow(managedOwner, follow);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.FOLLOW,
+                options.isFollow(), follow, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setFollow(proposed.get());
+        botManager.updateFollow(managedOwner, proposed.get());
         return true;
     }
 
@@ -316,9 +330,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        options.setCombat(combat);
-        botManager.updateCombat(managedOwner, combat);
-        if (combat) {
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.COMBAT,
+                options.isCombat(), combat, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setCombat(proposed.get());
+        botManager.updateCombat(managedOwner, proposed.get());
+        if (proposed.get()) {
             botManager.switchBotToSword(managedOwner);
         }
         return true;
@@ -371,8 +388,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (!options.isRankAllowed(coreRank)) {
             return false;
         }
-        options.setRank(coreRank);
-        botManager.setBotRank(managedOwner, coreRank);
+        Optional<com.monkey.mcbot.bot.ai.rank.BotRank> proposed = proposedChange(
+                managedOwner, BotSettingKey.RANK, options.getRank(), coreRank,
+                com.monkey.mcbot.bot.ai.rank.BotRank.class);
+        if (proposed.isEmpty() || !options.isRankAllowed(proposed.get())) return false;
+        options.setRank(proposed.get());
+        botManager.setBotRank(managedOwner, proposed.get());
         return true;
     }
 
@@ -451,7 +472,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null) {
             return false;
         }
-        options.setAttackBots(attackBots);
+        Optional<Boolean> proposed = proposedChange(resolveManagedOwner(ownerUUID), BotSettingKey.ATTACK_BOTS,
+                options.isAttackBots(), attackBots, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setAttackBots(proposed.get());
         return true;
     }
 
@@ -467,7 +491,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || targetMode == null) {
             return false;
         }
-        options.setTargetMode(targetMode);
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<com.monkey.mcbot.api.model.BotTargetMode> proposed = proposedChange(
+                managedOwner, BotSettingKey.TARGET_MODE, options.getTargetMode(), targetMode,
+                com.monkey.mcbot.api.model.BotTargetMode.class);
+        if (proposed.isEmpty()) return false;
+        options.setTargetMode(proposed.get());
         return true;
     }
 
@@ -527,6 +556,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (crystalPvp && !options.isExplosions()) {
             return false;
         }
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.CRYSTAL_PVP,
+                options.isCrystalPvp(), crystalPvp, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        crystalPvp = proposed.get();
         options.setCrystalPvp(crystalPvp);
         bot.getBotAI().getCPVPController().setEnabled(crystalPvp);
         bot.getBotAI().getInventoryController().setItem(
@@ -555,6 +589,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.EXPLOSIONS,
+                options.isExplosions(), explosions, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        explosions = proposed.get();
         options.setExplosions(explosions);
         if (!explosions) {
             options.setCrystalPvp(false);
@@ -577,7 +616,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null) {
             return false;
         }
-        options.setExplosionBlockDamage(explosionBlockDamage);
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.EXPLOSION_BLOCK_DAMAGE,
+                options.isExplosionBlockDamage(), explosionBlockDamage, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setExplosionBlockDamage(proposed.get());
         return true;
     }
 
@@ -597,8 +640,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null) {
             return false;
         }
-        options.setEnderPearls(enderPearls);
-        bot.getBotAI().getEnderpearlController().setEnabled(enderPearls);
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.ENDER_PEARLS,
+                options.isEnderPearls(), enderPearls, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setEnderPearls(proposed.get());
+        bot.getBotAI().getEnderpearlController().setEnabled(proposed.get());
         return true;
     }
 
@@ -618,8 +665,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null) {
             return false;
         }
-        options.setHealing(healing);
-        if (!healing) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        Optional<Boolean> proposed = proposedChange(managedOwner, BotSettingKey.HEALING,
+                options.isHealing(), healing, Boolean.class);
+        if (proposed.isEmpty()) return false;
+        options.setHealing(proposed.get());
+        if (!proposed.get()) {
             bot.getBotAI().getHealController().resetHealState();
         }
         return true;
@@ -669,7 +720,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 ? bot.getBrainController().getBotOptions()
                 : null;
 
-        botManager.despawnByOwnerUUID(managedOwner);
+        if (!botManager.despawnByOwnerUUID(managedOwner)) {
+            return false;
+        }
         removeCachedOptions(managedOwner, options);
         return true;
     }
@@ -737,6 +790,12 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return null;
         }
         return botManager.getBotSafe(ownerUUID);
+    }
+
+    private <T> Optional<T> proposedChange(UUID ownerUUID, BotSettingKey key,
+                                           T oldValue, T newValue, Class<T> valueType) {
+        return BotSettingEvents.propose(plugin, ownerUUID, BotEventSourceContext.currentOr(BotEventSource.API),
+                key, oldValue, newValue, valueType);
     }
 
     private BotOptions getLiveOptions(UUID ownerUUID) {

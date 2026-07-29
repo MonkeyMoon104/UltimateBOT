@@ -14,6 +14,8 @@ import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import com.monkey.mcbot.api.event.BotTargetChangeEvent;
+import com.monkey.mcbot.api.model.BotSnapshot;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -117,6 +119,16 @@ public class BotBrainController {
         updateTargetByType();
 
         LivingEntity selectedTarget = selectActiveTarget();
+        if (!sameTarget(activeTarget, selectedTarget)) {
+            UUID ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+            BotSnapshot snapshot = ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
+            if (snapshot != null) {
+                BotTargetChangeEvent event = plugin.getBotEventDispatcher().publish(new BotTargetChangeEvent(
+                        plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
+                        snapshot, activeTarget, selectedTarget));
+                selectedTarget = event.isCancelled() ? activeTarget : event.getNewTarget();
+            }
+        }
         activeTarget = selectedTarget;
         if (selectedTarget == null) {
             if (shouldFollowPlayerAnchor()) {
@@ -140,6 +152,11 @@ public class BotBrainController {
         } else {
             botAI.tickIdle();
         }
+    }
+
+    private boolean sameTarget(LivingEntity first, LivingEntity second) {
+        if (first == second) return true;
+        return first != null && second != null && first.getUniqueId().equals(second.getUniqueId());
     }
 
     private LivingEntity selectActiveTarget() {

@@ -4,6 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.combat.BotExplosionContext;
+import com.monkey.mcbot.api.event.BotExplosionType;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
@@ -74,11 +75,15 @@ public class AnchorExploder {
                     false
             );
 
-            return BotExplosionContext.execute(shouldDamageBlocks(), () -> {
+            ITrainingBot trainingBot = bot instanceof ITrainingBot value ? value : null;
+            org.bukkit.Location location = new org.bukkit.Location(
+                    bot.level().getWorld(), anchorPos.getX() + 0.5D, anchorPos.getY() + 0.5D, anchorPos.getZ() + 0.5D);
+            return BotExplosionContext.execute(trainingBot, BotExplosionType.RESPAWN_ANCHOR,
+                    location, shouldDamageBlocks(), ignored -> {
                 InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
                 bot.swing(InteractionHand.MAIN_HAND);
                 return result.consumesAction();
-            });
+            }, false);
         } catch (Exception e) {
             return false;
         }
@@ -87,7 +92,11 @@ public class AnchorExploder {
     private boolean tryManualExplosion(BlockPos anchorPos) {
         try {
             boolean blockDamage = shouldDamageBlocks();
-            return BotExplosionContext.execute(blockDamage, () -> {
+            ITrainingBot trainingBot = bot instanceof ITrainingBot value ? value : null;
+            org.bukkit.Location location = new org.bukkit.Location(
+                    bot.level().getWorld(), anchorPos.getX() + 0.5D, anchorPos.getY() + 0.5D, anchorPos.getZ() + 0.5D);
+            return BotExplosionContext.execute(trainingBot, BotExplosionType.RESPAWN_ANCHOR,
+                    location, blockDamage, resolvedBlockDamage -> {
                 bot.level().removeBlock(anchorPos, false);
                 NMSBridgeManager.get().explode(
                         bot.level(),
@@ -96,11 +105,11 @@ public class AnchorExploder {
                         anchorPos.getY() + 0.5,
                         anchorPos.getZ() + 0.5,
                         3.5F,
-                        blockDamage
+                        resolvedBlockDamage
                 );
                 bot.swing(InteractionHand.MAIN_HAND);
                 return true;
-            });
+            }, false);
 
         } catch (Exception e) {
             MinecraftBot.getInstance().getLogger().warning("Error during manual explosion: " + e.getMessage());

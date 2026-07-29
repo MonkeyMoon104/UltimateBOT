@@ -1,5 +1,13 @@
 package com.monkey.mcbot.bot.ai.controllers.combat;
 
+import com.monkey.mcbot.api.event.BotExplosionEvent;
+import com.monkey.mcbot.api.event.BotExplosionType;
+import com.monkey.mcbot.api.model.BotSnapshot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
+import org.bukkit.Location;
+
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -27,6 +35,29 @@ public final class BotExplosionContext {
                 BLOCK_PROTECTION_DEPTH.set(remaining);
             }
         }
+    }
+
+    /** Runs a bot explosion after exposing its mutable policy to API listeners. */
+    public static <T> T execute(ITrainingBot bot, BotExplosionType type, Location location,
+                                boolean blockDamage, Function<Boolean, T> action, T cancelledResult) {
+        boolean resolvedBlockDamage = blockDamage;
+        if (bot != null && bot.getPlugin() != null) {
+            UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+            BotSnapshot snapshot = ownerUUID == null ? null
+                    : bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
+            if (snapshot != null) {
+                BotExplosionEvent event = bot.getPlugin().getBotEventDispatcher().publish(new BotExplosionEvent(
+                        bot.getPlugin().getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
+                        snapshot, type, location, blockDamage));
+                if (event.isCancelled()) {
+                    return cancelledResult;
+                }
+                resolvedBlockDamage = event.isBlockDamage();
+            }
+        }
+
+        boolean finalBlockDamage = resolvedBlockDamage;
+        return execute(finalBlockDamage, () -> action.apply(finalBlockDamage));
     }
 
     public static boolean isBlockDamageSuppressed() {

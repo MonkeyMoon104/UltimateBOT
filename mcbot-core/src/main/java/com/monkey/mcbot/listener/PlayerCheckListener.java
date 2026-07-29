@@ -26,6 +26,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Map;
 import java.util.UUID;
+import com.monkey.mcbot.api.event.BotDespawnReason;
 
 public class PlayerCheckListener implements Listener {
 
@@ -59,7 +60,7 @@ public class PlayerCheckListener implements Listener {
         Player player = event.getPlayer();
 
         if (botManager.isBotSpawned(player.getUniqueId())) {
-            botManager.despawn(player);
+            botManager.despawn(player, BotDespawnReason.OWNER_QUIT);
         }
 
         playerOptions.remove(player.getUniqueId());
@@ -98,7 +99,7 @@ public class PlayerCheckListener implements Listener {
                     && options.getBotType() == BotType.EVENT;
 
             if (!isEventBot && (options == null || !options.isStayAfterOwnerDeath())) {
-                botManager.despawn(player);
+                botManager.despawn(player, BotDespawnReason.OWNER_DEATH);
                 String despawnMsg = plugin.getLangString("messages.despawn-bot", "&cBot despawned!");
                 player.sendMessage(ChatColorUtils.translate(despawnMsg));
                 playerOptions.remove(player.getUniqueId());

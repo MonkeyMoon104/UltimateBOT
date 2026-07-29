@@ -17,6 +17,9 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 
 import java.util.List;
 import java.util.UUID;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.event.BotSettingEvents;
 
 public class CombatItem extends AbstractItem {
 
@@ -67,6 +70,10 @@ public class CombatItem extends AbstractItem {
                 return;
             }
 
+            var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                    BotSettingKey.COMBAT, oldStatus, newStatus, Boolean.class);
+            if (proposed.isEmpty()) return;
+            newStatus = proposed.get();
             options.setCombat(newStatus);
             training.getBotManager().updateCombat(managedOwnerUUID, newStatus);
 
@@ -98,6 +105,10 @@ public class CombatItem extends AbstractItem {
 
             BotRank currentRank = options.getRank();
             BotRank newRank = options.nextAllowedRank(currentRank, true);
+            var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                    BotSettingKey.RANK, currentRank, newRank, BotRank.class);
+            if (proposed.isEmpty()) return;
+            newRank = proposed.get();
             options.setRank(newRank);
 
             training.getBotManager().setBotRank(managedOwnerUUID, newRank);

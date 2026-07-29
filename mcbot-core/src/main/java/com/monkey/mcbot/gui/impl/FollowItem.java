@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
+import com.monkey.mcbot.api.event.BotEventSource;
+import com.monkey.mcbot.api.event.BotSettingKey;
+import com.monkey.mcbot.event.BotSettingEvents;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -66,14 +69,25 @@ public class FollowItem extends AbstractItem {
             return;
         }
 
-        options.setFollow(newFollowStatus);
-
         var managedOwnerUUID = resolveManagedOwnerUUID(player);
+        var proposedFollow = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                BotSettingKey.FOLLOW, oldFollowStatus, newFollowStatus, Boolean.class);
+        if (proposedFollow.isEmpty()) return;
+        newFollowStatus = proposedFollow.get();
+
+        java.util.Optional<Boolean> proposedCombat = java.util.Optional.empty();
+        if (!newFollowStatus && combatStatus) {
+            proposedCombat = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
+                    BotSettingKey.COMBAT, true, false, Boolean.class);
+            if (proposedCombat.isEmpty()) return;
+        }
+
+        options.setFollow(newFollowStatus);
         training.getBotManager().updateFollow(managedOwnerUUID, newFollowStatus);
 
         if (!newFollowStatus && combatStatus) {
-            options.setCombat(false);
-            training.getBotManager().updateCombat(managedOwnerUUID, false);
+            options.setCombat(proposedCombat.get());
+            training.getBotManager().updateCombat(managedOwnerUUID, proposedCombat.get());
 
             if (combatItem != null) {
                 combatItem.notifyWindows();
