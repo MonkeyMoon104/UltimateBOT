@@ -30,7 +30,7 @@ public interface INMSBridge {
 
     boolean actuallyHurt(Player bot, ServerLevel level, DamageSource source, float amount, EntityDamageEvent event);
 
-    void explode(Level level, Player cause, double x, double y, double z, float power);
+    void explode(Level level, Player cause, double x, double y, double z, float power, boolean blockDamage);
 
     void playSound(Level level, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch);
 

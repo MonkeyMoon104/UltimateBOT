@@ -2,6 +2,8 @@ package com.monkey.mcbot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.bot.ai.controllers.combat.BotExplosionContext;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import net.minecraft.core.BlockPos;
@@ -72,36 +74,45 @@ public class AnchorExploder {
                     false
             );
 
-            InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
-            bot.swing(InteractionHand.MAIN_HAND);
-
-            return result.consumesAction();
+            return BotExplosionContext.execute(shouldDamageBlocks(), () -> {
+                InteractionResult result = anchorState.useWithoutItem(bot.level(), bot, hitResult);
+                bot.swing(InteractionHand.MAIN_HAND);
+                return result.consumesAction();
+            });
         } catch (Exception e) {
             return false;
         }
     }
 
     private boolean tryManualExplosion(BlockPos anchorPos) {
-        System.out.println("FALLBACK -> USING MANUAL ANCHOR EXPLOSION");
         try {
-            bot.level().removeBlock(anchorPos, false);
-
-            NMSBridgeManager.get().explode(
-                    bot.level(),
-                    bot,
-                    anchorPos.getX() + 0.5,
-                    anchorPos.getY() + 0.5,
-                    anchorPos.getZ() + 0.5,
-                    3.5F
-            );
-
-            bot.swing(InteractionHand.MAIN_HAND);
-            return true;
+            boolean blockDamage = shouldDamageBlocks();
+            return BotExplosionContext.execute(blockDamage, () -> {
+                bot.level().removeBlock(anchorPos, false);
+                NMSBridgeManager.get().explode(
+                        bot.level(),
+                        bot,
+                        anchorPos.getX() + 0.5,
+                        anchorPos.getY() + 0.5,
+                        anchorPos.getZ() + 0.5,
+                        3.5F,
+                        blockDamage
+                );
+                bot.swing(InteractionHand.MAIN_HAND);
+                return true;
+            });
 
         } catch (Exception e) {
             MinecraftBot.getInstance().getLogger().warning("Error during manual explosion: " + e.getMessage());
             return false;
         }
+    }
+
+    private boolean shouldDamageBlocks() {
+        if (!(bot instanceof ITrainingBot trainingBot) || trainingBot.getBrainController() == null) {
+            return false;
+        }
+        return trainingBot.getBrainController().getBotOptions().isExplosionBlockDamage();
     }
 
     private boolean hasLineOfSight(BlockPos pos) {

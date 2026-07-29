@@ -14,6 +14,7 @@ import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
 import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
+import com.monkey.mcbot.listener.BotExplosionListener;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
@@ -155,6 +156,7 @@ public final class MinecraftBot extends JavaPlugin {
             this.botGuardCompatibilityListener = new BotGuardCompatibilityListener(this);
             registerListener(startup, registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
             botGuardCompatibilityListener.startScanner();
+            registerListener(startup, registeredListeners, "bot explosion protection", new BotExplosionListener());
             registerListener(startup, registeredListeners, "required", new PlayerCheckListener(this));
             registerOptionalListener(
                     startup,

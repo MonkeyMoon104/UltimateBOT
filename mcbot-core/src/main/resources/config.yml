@@ -25,6 +25,8 @@ bot:
   combat:
     infinite-resources: true
     healing: true
+    # Keep entity damage/knockback while deciding independently whether bot explosions break terrain.
+    explosion-block-damage: false
 
   guard:
     enabled: true

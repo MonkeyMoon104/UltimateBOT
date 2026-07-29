@@ -57,6 +57,7 @@ public class BotOptions {
     private long idleReturnDelayMs = 8000L;
     private boolean crystalPvp = true;
     private boolean explosions = true;
+    private boolean explosionBlockDamage = false;
     private boolean enderPearls = true;
     private boolean healing = true;
     private boolean killMessageEnabled = true;
@@ -67,6 +68,7 @@ public class BotOptions {
         this.training = Objects.requireNonNull(training, "training");
         this.armor = Objects.requireNonNull(armor, "armor");
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
+        this.explosionBlockDamage = training.getConfig().getBoolean("bot.combat.explosion-block-damage", false);
         this.totems = clampTotemCount(this.totems);
         clampCurrentArmor();
     }
@@ -272,6 +274,14 @@ public class BotOptions {
         if (!explosions) {
             this.crystalPvp = false;
         }
+    }
+
+    public boolean isExplosionBlockDamage() {
+        return explosionBlockDamage;
+    }
+
+    public void setExplosionBlockDamage(boolean explosionBlockDamage) {
+        this.explosionBlockDamage = explosionBlockDamage;
     }
 
     public boolean isEnderPearls() {

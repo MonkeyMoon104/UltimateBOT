@@ -58,8 +58,8 @@ public class NMSBridge_v26_1 implements INMSBridge {
     }
 
     @Override
-    public void explode(Level level, Player cause, double x, double y, double z, float power) {
-        level.explode(cause, x, y, z, power, Level.ExplosionInteraction.NONE);
+    public void explode(Level level, Player cause, double x, double y, double z, float power, boolean blockDamage) {
+        level.explode(cause, x, y, z, power, blockDamage ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
     }
 
     @Override
