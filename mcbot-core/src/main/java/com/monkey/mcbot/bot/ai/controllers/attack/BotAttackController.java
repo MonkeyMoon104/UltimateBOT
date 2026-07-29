@@ -9,6 +9,7 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 public class BotAttackController {
 
@@ -28,7 +29,7 @@ public class BotAttackController {
         this.attackStrategy = new AttackStrategy(jumpAttackManager, attackExecutor, cooldownManager);
     }
 
-    public void handleAttack(Player target) {
+    public void handleAttack(LivingEntity target) {
         if (!cooldownManager.canAttack()) {
             cooldownManager.tick();
             return;
@@ -37,7 +38,7 @@ public class BotAttackController {
         attackStrategy.executeAttack(bot, target);
     }
 
-    public void performNormalAttack(Player target) {
+    public void performNormalAttack(LivingEntity target) {
         attackExecutor.performNormalAttack(bot, target);
         cooldownManager.setRandomCooldown(20, 11);
     }

@@ -25,12 +25,14 @@ import com.monkey.mcbot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 
 import java.util.Random;
 
@@ -110,18 +112,18 @@ public class BotAI {
                 combatStateManager, combatDataManager);
     }
 
-    public void tick(org.bukkit.entity.Player targetBukkitPlayer) {
+    public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
         tick(targetBukkitPlayer, true);
     }
 
-    public void tick(org.bukkit.entity.Player targetBukkitPlayer, boolean allowCombat) {
+    public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer, boolean allowCombat) {
         syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
         if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
         lastSeenTargetTime = System.currentTimeMillis();
         idleDestination = null;
 
-        Player target = resolveNmsTarget(targetBukkitPlayer);
+        LivingEntity target = resolveNmsTarget(targetBukkitPlayer);
         if (target == null) {
             tickIdle();
             return;
@@ -133,7 +135,12 @@ public class BotAI {
         boolean isCurrentlyHealing = options.isHealing() && healController.isHealing();
         boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
 
-        combatDataManager.updateCombatData(target, combatEnabled);
+        if (!(target instanceof Player playerTarget)) {
+            tickMobTarget(target, combatEnabled);
+            return;
+        }
+
+        combatDataManager.updateCombatData(playerTarget, combatEnabled);
 
         if (combatStateManager instanceof CombatStateManager) {
             ((CombatStateManager) combatStateManager).updateDamageData(
@@ -143,25 +150,25 @@ public class BotAI {
         }
 
         if (combatEnabled) {
-            if (shouldForceVerticalTeleport(target) && canForceVerticalTeleport()) {
-                boolean teleported = teleportController.teleportSafeNear(targetBukkitPlayer)
-                        || teleportController.teleportBeside(targetBukkitPlayer);
+            if (shouldForceVerticalTeleport(playerTarget) && canForceVerticalTeleport()) {
+                boolean teleported = teleportController.teleportSafeNear((org.bukkit.entity.Player) targetBukkitPlayer)
+                        || teleportController.teleportBeside((org.bukkit.entity.Player) targetBukkitPlayer);
                 if (teleported) {
                     lastForcedVerticalTeleportTime = System.currentTimeMillis();
                     if (pathfindingManager.isUsingPathfinding()) {
                         pathfindingManager.setUsingPathfinding(false);
                         movementController.clearPath();
                     }
-                    rotationController.updateRotation(target);
+                    rotationController.updateRotation(playerTarget);
                 }
             }
 
-            if (options.isEnderPearls() && enderpearlController.checkAndPerformAutoTeleport(targetBukkitPlayer)) {
+            if (options.isEnderPearls() && enderpearlController.checkAndPerformAutoTeleport((org.bukkit.entity.Player) targetBukkitPlayer)) {
                 if (pathfindingManager.isUsingPathfinding()) {
                     pathfindingManager.setUsingPathfinding(false);
                     movementController.clearPath();
                 }
-                rotationController.updateRotation(target);
+                rotationController.updateRotation(playerTarget);
             }
             if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
                 if (movementController.followPath()) {
@@ -174,24 +181,24 @@ public class BotAI {
                     pathfindingManager.setUsingPathfinding(false);
                 }
             } else {
-                pathfindingManager.checkForStuck(target);
+                pathfindingManager.checkForStuck(playerTarget);
                 enderpearlController.tick();
 
                 if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
-                    combatStateManager.updateCombatState(target);
-                    combatStrategyExecutor.executeCombatStrategy(target);
+                    combatStateManager.updateCombatState(playerTarget);
+                    combatStrategyExecutor.executeCombatStrategy(playerTarget);
                 } else if (isCurrentlyHealing) {
-                    combatStateManager.updateCombatState(target);
-                    executeHealingMovement(target);
+                    combatStateManager.updateCombatState(playerTarget);
+                    executeHealingMovement(playerTarget);
                 } else {
-                    combatStrategyExecutor.basicFollowBehavior(target);
+                    combatStrategyExecutor.basicFollowBehavior(playerTarget);
                 }
             }
         } else {
             if (!isCurrentlyHealing) {
-                noobMovementController.moveTowards(target, 2.5);
+                noobMovementController.moveTowards(playerTarget, 2.5);
             } else {
-                executeHealingMovement(target);
+                executeHealingMovement(playerTarget);
             }
         }
 
@@ -284,7 +291,10 @@ public class BotAI {
                 && !teleportController.isTeleporting();
     }
 
-    private Player resolveNmsTarget(org.bukkit.entity.Player targetBukkitPlayer) {
+    private LivingEntity resolveNmsTarget(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
+        if (targetBukkitPlayer instanceof CraftLivingEntity craftLivingEntity) {
+            return craftLivingEntity.getHandle();
+        }
         if (targetBukkitPlayer instanceof CraftPlayer craftPlayer) {
             return craftPlayer.getHandle();
         }
@@ -296,6 +306,30 @@ public class BotAI {
             }
         }
         return null;
+    }
+
+    private void tickMobTarget(LivingEntity target, boolean combatEnabled) {
+        rotationController.updateRotation(target);
+        if (!combatEnabled) {
+            movementController.stopMovement();
+            return;
+        }
+
+        if (!options.isHealing() && healController.isHealing()) {
+            healController.resetHealState();
+        }
+        if (options.isHealing() && healController.isHealing()) {
+            Vec3 away = bot.position().subtract(target.position());
+            if (away.horizontalDistanceSqr() > 0.001D) {
+                movementController.moveToPosition(bot.position().add(away.normalize().scale(5.0D)));
+            }
+            return;
+        }
+        combatStrategyExecutor.executeMeleeCombat(target);
+        if (pathfindingManager instanceof PathfindingManager manager) {
+            manager.updateLastBotPosition();
+            manager.updateLastActionTime();
+        }
     }
 
     private void syncExplosiveCombat() {

@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -41,7 +42,7 @@ import java.util.UUID;
 public class NMSBridge_v1_21_4 implements INMSBridge {
 
     @Override
-    public void hurtEntity(Player target, ServerLevel level, DamageSource source, float amount) {
+    public void hurtEntity(LivingEntity target, ServerLevel level, DamageSource source, float amount) {
         target.hurtServer(level, source, amount);
     }
 

@@ -2,6 +2,7 @@ package com.monkey.mcbot.bot.ai.controllers.rotation.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class RotationCalculator implements IRotationCalculator {
@@ -10,7 +11,7 @@ public class RotationCalculator implements IRotationCalculator {
     private static final float MIN_PITCH = -90f;
 
     @Override
-    public float[] calculateRotationToTarget(Player bot, Player target) {
+    public float[] calculateRotationToTarget(Player bot, LivingEntity target) {
         double dx = target.getX() - bot.getX();
         double dy = target.getEyeY() - bot.getEyeY();
         double dz = target.getZ() - bot.getZ();

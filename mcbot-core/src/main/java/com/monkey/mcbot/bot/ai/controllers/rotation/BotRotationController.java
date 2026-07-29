@@ -9,6 +9,7 @@ import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationApplie
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public class BotRotationController {
@@ -29,12 +30,12 @@ public class BotRotationController {
         this.rotationGetter = new RotationGetter();
     }
 
-    public void updateRotation(Player target) {
+    public void updateRotation(LivingEntity target) {
         float[] rotation = rotationCalculator.calculateRotationToTarget(bot, target);
         rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }
 
-    public void setInstantRotation(Player target) {
+    public void setInstantRotation(LivingEntity target) {
         updateRotation(target);
     }
 

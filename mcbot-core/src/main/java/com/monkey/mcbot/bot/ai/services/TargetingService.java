@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.ai.ITrainingBot;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Mob;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,6 +17,35 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class TargetingService {
+
+    public Mob findClosestMob(ITrainingBot bot, double maxRange) {
+        if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null || maxRange <= 0.0D) {
+            return null;
+        }
+
+        org.bukkit.World world = bot.asPlayer().level().getWorld();
+        if (world == null) {
+            return null;
+        }
+
+        org.bukkit.Location center = bot.asPlayer().getBukkitEntity().getLocation();
+        double closestDistanceSq = maxRange * maxRange;
+        Mob closest = null;
+        for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
+            if (!(entity instanceof Mob mob)
+                    || !mob.isValid()
+                    || mob.isDead()
+                    || mob.isInvulnerable()) {
+                continue;
+            }
+            double distanceSq = mob.getLocation().distanceSquared(center);
+            if (distanceSq < closestDistanceSq) {
+                closestDistanceSq = distanceSq;
+                closest = mob;
+            }
+        }
+        return closest;
+    }
 
     private final Map<UUID, TargetCache> targetCache = new ConcurrentHashMap<>();
     private static final long GLOBAL_CACHE_TIME = 250;

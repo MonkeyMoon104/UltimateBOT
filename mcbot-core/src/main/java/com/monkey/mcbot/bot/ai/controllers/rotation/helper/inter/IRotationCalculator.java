@@ -1,11 +1,12 @@
 package com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public interface IRotationCalculator {
 
-    float[] calculateRotationToTarget(Player bot, Player target);
+    float[] calculateRotationToTarget(Player bot, LivingEntity target);
 
     float[] calculateRotationToPosition(Player bot, double x, double y, double z);
 

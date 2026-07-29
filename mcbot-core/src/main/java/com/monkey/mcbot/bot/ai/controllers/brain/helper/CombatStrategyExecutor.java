@@ -15,6 +15,7 @@ import com.monkey.mcbot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.mcbot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
@@ -60,6 +61,11 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             return;
         }
         double distance = bot.distanceTo(target);
+
+        if (isManagedBotTarget(target)) {
+            executeMeleeCombat(target);
+            return;
+        }
 
         boolean actionExecuted = false;
 
@@ -398,5 +404,48 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         float healthPercent = bot.getHealth() / bot.getMaxHealth();
         return healthPercent > 0.14f;
+    }
+
+    private boolean isManagedBotTarget(Player target) {
+        return target instanceof ITrainingBot;
+    }
+
+    @Override
+    public void executeMeleeCombat(LivingEntity target) {
+        double distance = bot.distanceTo(target);
+        if (!inventoryController.isHoldingSword()) {
+            inventoryController.switchToSword();
+        }
+
+        if (distance <= 3.5D) {
+            maybeBoostMeleeTempo(isHyperAggressiveRank());
+            attackController.handleAttack(target);
+        }
+
+        if (distance > 1.45D) {
+            moveDirectlyIntoMelee(target, 1.25D);
+        } else {
+            movementController.stopMovement();
+        }
+
+        if (distance <= 3.5D) {
+            maybeBoostMeleeTempo(isHyperAggressiveRank());
+            attackController.handleAttack(target);
+        }
+    }
+
+    private void moveDirectlyIntoMelee(LivingEntity target, double targetDistance) {
+        Vec3 botPos = bot.position();
+        Vec3 targetPos = target.position();
+        Vec3 toTarget = targetPos.subtract(botPos);
+        double horizontalDistance = Math.hypot(toTarget.x, toTarget.z);
+        if (horizontalDistance <= targetDistance) {
+            movementController.stopMovement();
+            return;
+        }
+
+        Vec3 horizontalDirection = new Vec3(toTarget.x / horizontalDistance, 0, toTarget.z / horizontalDistance);
+        Vec3 destination = targetPos.subtract(horizontalDirection.scale(targetDistance));
+        movementController.moveToPosition(destination);
     }
 }

@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 public class JumpAttackManager implements IJumpAttackManager {
 
@@ -21,7 +22,7 @@ public class JumpAttackManager implements IJumpAttackManager {
     }
 
     @Override
-    public void handleJumpAttack(Player bot, Player target) {
+    public void handleJumpAttack(Player bot, LivingEntity target) {
         jumpTicks++;
 
         if (jumpTicks >= JUMP_ATTACK_DELAY && !bot.onGround()) {

@@ -3,6 +3,7 @@ package com.monkey.mcbot.bot.ai.controllers.brain;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
+import com.monkey.mcbot.api.model.BotTargetMode;
 import com.monkey.mcbot.bot.ai.BotAI;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
@@ -11,6 +12,8 @@ import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mob;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -41,6 +44,7 @@ public class BotBrainController {
     private final BotAI botAI;
     private final MinecraftBot plugin;
     private org.bukkit.entity.Player targetPlayer;
+    private LivingEntity activeTarget;
     private final org.bukkit.entity.Player ownerPlayer;
     private final BotOptions botOptions;
     private boolean follow;
@@ -112,31 +116,75 @@ public class BotBrainController {
     public void onTick() {
         updateTargetByType();
 
-        if (!isTargetAvailable(targetPlayer)) {
+        LivingEntity selectedTarget = selectActiveTarget();
+        activeTarget = selectedTarget;
+        if (selectedTarget == null) {
+            if (shouldFollowPlayerAnchor()) {
+                botAI.tick(targetPlayer, false);
+                return;
+            }
             botAI.tickIdle();
             return;
         }
 
-        Player target = getNMSTarget();
-        if (target == null) {
-            botAI.tickIdle();
-            return;
-        }
+        boolean playerTarget = selectedTarget instanceof org.bukkit.entity.Player;
+        boolean allowCombat = playerTarget ? shouldUseCombatOnCurrentTarget() : combat;
 
-        boolean allowCombat = shouldUseCombatOnCurrentTarget();
-
-        botAI.getRotationController().updateRotation(target);
-
-        if (watchOnlyMode) {
+        if (playerTarget && watchOnlyMode) {
             botAI.getMovementController().clearPath();
             return;
         }
 
         if (follow || allowCombat) {
-            botAI.tick(targetPlayer, allowCombat);
+            botAI.tick(selectedTarget, allowCombat);
         } else {
             botAI.tickIdle();
         }
+    }
+
+    private LivingEntity selectActiveTarget() {
+        BotTargetMode mode = botOptions.getTargetMode();
+        boolean playerSelectable = mode.allowsPlayers()
+                && isTargetAvailable(targetPlayer)
+                && (!combat || shouldUseCombatOnCurrentTarget());
+        org.bukkit.entity.Player player = playerSelectable
+                ? targetPlayer
+                : null;
+        Mob mob = mode.allowsMobs() && combat
+                ? targetingService.findClosestMob(bot, getMobTargetRange())
+                : null;
+
+        if (player == null) {
+            return mob;
+        }
+        if (mob == null) {
+            return player;
+        }
+        return distanceSquaredFromBot(mob) < distanceSquaredFromBot(player) ? mob : player;
+    }
+
+    private boolean shouldFollowPlayerAnchor() {
+        if (!follow || !isTargetAvailable(targetPlayer)) {
+            return false;
+        }
+        BotType type = botOptions.getBotType();
+        return type == BotType.SINGLE || type == BotType.ALLY || type == BotType.TEAM_ALLY;
+    }
+
+    private double getMobTargetRange() {
+        return switch (botOptions.getBotType()) {
+            case EVENT -> eventTargetRange;
+            case ALLY -> allyRange;
+            case TEAM_ALLY -> teamAllyRange;
+            default -> botOptions.getAutoTargetRange();
+        };
+    }
+
+    private double distanceSquaredFromBot(LivingEntity entity) {
+        double dx = entity.getX() - bot.asPlayer().getX();
+        double dy = entity.getY() - bot.asPlayer().getY();
+        double dz = entity.getZ() - bot.asPlayer().getZ();
+        return dx * dx + dy * dy + dz * dz;
     }
 
     private boolean shouldUseCombatOnCurrentTarget() {
@@ -561,6 +609,10 @@ public class BotBrainController {
 
     public org.bukkit.entity.Player getTargetPlayer() {
         return targetPlayer;
+    }
+
+    public LivingEntity getActiveTarget() {
+        return activeTarget;
     }
 
     public void setFollow(boolean follow) {

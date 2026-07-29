@@ -6,6 +6,7 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 
 public class AttackStrategy implements IAttackStrategy {
 
@@ -20,7 +21,7 @@ public class AttackStrategy implements IAttackStrategy {
     }
 
     @Override
-    public void executeAttack(Player bot, Player target) {
+    public void executeAttack(Player bot, LivingEntity target) {
         if (jumpAttackManager.isInJumpAttack()) {
             jumpAttackManager.handleJumpAttack(bot, target);
             return;

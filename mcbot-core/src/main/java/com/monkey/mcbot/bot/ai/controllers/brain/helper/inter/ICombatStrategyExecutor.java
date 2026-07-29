@@ -1,10 +1,13 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public interface ICombatStrategyExecutor {
     void executeCombatStrategy(Player target);
+
+    void executeMeleeCombat(LivingEntity target);
     boolean executeAggressive(Player target, double distance);
     boolean executeDefensive(Player target, double distance);
     boolean executeRepositioning(Player target, double distance);
