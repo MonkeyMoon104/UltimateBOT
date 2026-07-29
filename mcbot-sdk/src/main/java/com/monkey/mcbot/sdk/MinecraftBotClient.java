@@ -35,6 +35,7 @@ public final class MinecraftBotClient implements AutoCloseable {
     private final String token;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
+    private final MinecraftBotEventBus eventBus;
 
     private MinecraftBotClient(Builder builder) {
         this.baseUri = normalizeBaseUri(builder.baseUri);
@@ -47,6 +48,7 @@ public final class MinecraftBotClient implements AutoCloseable {
         this.httpClient = builder.httpClient == null
                 ? HttpClient.newBuilder().connectTimeout(builder.timeout).build()
                 : builder.httpClient;
+        this.eventBus = new MinecraftBotEventBus(this.baseUri, this.token, this.httpClient, this.objectMapper);
     }
 
     public static Builder builder() {
@@ -55,6 +57,11 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     public BotOperationResponse health() {
         return send("GET", "/health", null, BotOperationResponse.class);
+    }
+
+    /** Returns the reconnecting remote event bus. */
+    public MinecraftBotEventBus events() {
+        return eventBus;
     }
 
     public List<BotSnapshotResponse> listBots() {
@@ -209,6 +216,7 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     @Override
     public void close() {
+        eventBus.close();
         httpClient.close();
     }
 

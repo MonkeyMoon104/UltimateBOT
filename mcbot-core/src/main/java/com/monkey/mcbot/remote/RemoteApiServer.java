@@ -9,6 +9,8 @@ import com.monkey.mcbot.api.model.*;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import org.bukkit.Bukkit;
+import com.monkey.mcbot.event.BotEventSourceContext;
+import com.monkey.mcbot.api.event.BotEventSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +31,13 @@ public final class RemoteApiServer {
     private HttpServer server;
     private String token;
     private String basePath;
+    private RemoteEventStream eventStream;
 
     public RemoteApiServer(MinecraftBot plugin, MinecraftBotAPI api) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.api = Objects.requireNonNull(api, "api");
         this.objectMapper = new ObjectMapper()
+                .findAndRegisterModules()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -54,17 +58,26 @@ public final class RemoteApiServer {
 
         try {
             server = HttpServer.create(new InetSocketAddress(host, port), 0);
+            eventStream = new RemoteEventStream(plugin, objectMapper);
             server.createContext(basePath, this::handle);
             server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
             server.start();
             plugin.getLogger().info("Remote API started on http://" + host + ":" + port + basePath);
         } catch (IOException ex) {
+            if (eventStream != null) {
+                eventStream.close();
+                eventStream = null;
+            }
             plugin.getLogger().warning("Remote API failed to start: " + ex.getMessage());
             server = null;
         }
     }
 
     public void stop() {
+        if (eventStream != null) {
+            eventStream.close();
+            eventStream = null;
+        }
         if (server != null) {
             server.stop(0);
             server = null;
@@ -84,6 +97,15 @@ public final class RemoteApiServer {
 
             if ("GET".equals(method) && "/health".equals(relativePath)) {
                 writeJson(exchange, 200, RemoteOperationResponse.success("MinecraftBot remote API is online.", null));
+                return;
+            }
+
+            if ("GET".equals(method) && "/events".equals(relativePath)) {
+                try {
+                    eventStream.handle(exchange);
+                } catch (IOException disconnected) {
+                    // Normal when an SSE client disconnects or the server stops.
+                }
                 return;
             }
 
@@ -311,13 +333,14 @@ public final class RemoteApiServer {
     private <T> T runSync(java.util.concurrent.Callable<T> callable) {
         if (Bukkit.isPrimaryThread()) {
             try {
-                return callable.call();
+                return BotEventSourceContext.call(BotEventSource.REMOTE_API, callable);
             } catch (Exception ex) {
                 throw new IllegalStateException(ex);
             }
         }
         try {
-            return Bukkit.getScheduler().callSyncMethod(plugin, callable).get();
+            return Bukkit.getScheduler().callSyncMethod(plugin,
+                    () -> BotEventSourceContext.call(BotEventSource.REMOTE_API, callable)).get();
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
