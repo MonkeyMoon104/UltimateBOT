@@ -3,6 +3,7 @@ package com.monkey.mcbot.listener;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.bot.ai.controllers.attack.helper.AttackExecutor;
 import com.monkey.mcbot.wrapper.WrapperTask;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -153,6 +154,10 @@ public final class BotGuardCompatibilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     public void onCombustByEntity(EntityCombustByEntityEvent event) {
+        if (isTrainingBot(event.getEntity()) && event.getCombuster() instanceof org.bukkit.entity.Player) {
+            markBotFireAspect(event.getEntity());
+            return;
+        }
         protectFromCombust(event.getEntity(), event);
     }
 
@@ -164,6 +169,10 @@ public final class BotGuardCompatibilityListener implements Listener {
 
         Entity entity = event.getEntity();
         if (!isTrainingBot(entity)) {
+            return;
+        }
+
+        if (hasActiveBotFireAspect(entity)) {
             return;
         }
 
@@ -182,6 +191,10 @@ public final class BotGuardCompatibilityListener implements Listener {
 
     private void protectFromCombust(Entity entity, EntityCombustEvent event) {
         if (!enabled || !isTrainingBot(entity)) {
+            return;
+        }
+
+        if (hasActiveBotFireAspect(entity)) {
             return;
         }
 
@@ -229,6 +242,30 @@ public final class BotGuardCompatibilityListener implements Listener {
             }
         }
 
+        return false;
+    }
+
+    private void markBotFireAspect(Entity entity) {
+        if (entity == null) {
+            return;
+        }
+        entity.setMetadata(
+                AttackExecutor.BOT_FIRE_ASPECT_METADATA,
+                new FixedMetadataValue(plugin, System.currentTimeMillis() + 5500L)
+        );
+    }
+
+    private boolean hasActiveBotFireAspect(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        long now = System.currentTimeMillis();
+        for (MetadataValue value : entity.getMetadata(AttackExecutor.BOT_FIRE_ASPECT_METADATA)) {
+            if (value.getOwningPlugin() == plugin && value.asLong() > now) {
+                return true;
+            }
+        }
+        entity.removeMetadata(AttackExecutor.BOT_FIRE_ASPECT_METADATA, plugin);
         return false;
     }
 

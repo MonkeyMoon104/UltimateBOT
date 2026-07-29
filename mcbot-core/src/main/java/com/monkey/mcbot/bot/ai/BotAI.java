@@ -24,8 +24,11 @@ import com.monkey.mcbot.bot.ai.controllers.teleport.BotTeleportController;
 import com.monkey.mcbot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
@@ -71,9 +74,14 @@ public class BotAI {
     private long lastSeenTargetTime = System.currentTimeMillis();
     private long lastIdleDestinationTime = 0L;
     private Vec3 idleDestination;
+    private boolean sustainFoodSlotActive = false;
+    private boolean eatingSustainFood = false;
+    private int sustainFoodTicks = 0;
     private static final long FORCED_VERTICAL_TELEPORT_COOLDOWN_MS = 3000L;
     private static final long IDLE_DESTINATION_RETRY_MS = 3500L;
     private static final double IDLE_DESTINATION_REACHED_DISTANCE = 1.6D;
+    private static final int SUSTAIN_FOOD_DURATION_TICKS = 32;
+    private static final int SUSTAIN_FOOD_TRIGGER_LEVEL = 6;
 
     public BotAI(Player bot, MinecraftBot plugin, BotOptions options) {
         this.bot = bot;
@@ -120,6 +128,9 @@ public class BotAI {
         syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
         if (targetBukkitPlayer == null || targetBukkitPlayer.isDead()) return;
+        if (handleSustainFood()) {
+            return;
+        }
         lastSeenTargetTime = System.currentTimeMillis();
         idleDestination = null;
 
@@ -211,6 +222,9 @@ public class BotAI {
     public void tickIdle() {
         syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
+        if (handleSustainFood()) {
+            return;
+        }
 
         if (!options.isIdleWander()) {
             idleDestination = null;
@@ -343,6 +357,76 @@ public class BotAI {
         inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
         inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
         inventoryController.setItem(BotInventoryController.GLOW_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
+    }
+
+    private boolean handleSustainFood() {
+        syncSustainFoodSlot();
+
+        if (options.isHealing()) {
+            eatingSustainFood = false;
+            sustainFoodTicks = 0;
+            return false;
+        }
+
+        if (bot.isUsingItem() && bot.getUseItem().getItem() == Items.GOLDEN_APPLE) {
+            bot.releaseUsingItem();
+            eatingSustainFood = false;
+            sustainFoodTicks = 0;
+            inventoryController.switchToSword();
+            return false;
+        }
+
+        if (eatingSustainFood) {
+            sustainFoodTicks++;
+            if (sustainFoodTicks >= SUSTAIN_FOOD_DURATION_TICKS || !bot.isUsingItem()) {
+                applySustainFood();
+                eatingSustainFood = false;
+                sustainFoodTicks = 0;
+                inventoryController.switchToSword();
+                return false;
+            }
+            return true;
+        }
+
+        if (bot.getFoodData().getFoodLevel() > SUSTAIN_FOOD_TRIGGER_LEVEL) {
+            return false;
+        }
+
+        inventoryController.switchToSlot(BotInventoryController.GOLDEN_APPLE_SLOT);
+        try {
+            bot.startUsingItem(InteractionHand.MAIN_HAND);
+        } catch (Exception ignored) {
+            applySustainFood();
+            inventoryController.switchToSword();
+            return false;
+        }
+        eatingSustainFood = true;
+        sustainFoodTicks = 0;
+        return true;
+    }
+
+    private void syncSustainFoodSlot() {
+        if (options.isHealing()) {
+            if (sustainFoodSlotActive) {
+                inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.GOLDEN_APPLE, 64));
+                sustainFoodSlotActive = false;
+            }
+            return;
+        }
+
+        if (!sustainFoodSlotActive) {
+            inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.COOKED_BEEF, 64));
+            sustainFoodSlotActive = true;
+        }
+    }
+
+    private void applySustainFood() {
+        if (bot.getFoodData().getFoodLevel() >= 20) {
+            bot.releaseUsingItem();
+            return;
+        }
+        bot.getFoodData().eat(8, 0.8F);
+        bot.releaseUsingItem();
     }
 
     private boolean shouldForceVerticalTeleport(Player target) {
