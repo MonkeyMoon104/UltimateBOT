@@ -32,6 +32,7 @@ import java.util.UUID;
  * @param idleReturnDelayMs delay before returning to spawn
  * @param crystalPvp whether crystal PvP logic is enabled
  * @param explosions whether explosive combat is enabled
+ * @param explosionBlockDamage whether bot explosions may destroy terrain
  * @param enderPearls whether ender pearl logic is enabled
  * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
@@ -63,6 +64,7 @@ public record BotSnapshotResponse(
         long idleReturnDelayMs,
         boolean crystalPvp,
         boolean explosions,
+        boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
         boolean killMessageEnabled

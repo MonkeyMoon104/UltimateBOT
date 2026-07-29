@@ -52,6 +52,7 @@ final class ApiBotOptionsFactory {
         options.setIdleReturnDelayMs(settings.idleReturnDelayMs());
         options.setCrystalPvp(settings.crystalPvp());
         options.setExplosions(settings.explosions());
+        options.setExplosionBlockDamage(settings.explosionBlockDamage());
         options.setEnderPearls(settings.enderPearls());
         options.setHealing(settings.healing());
         options.setKillMessageEnabled(settings.killMessageEnabled());

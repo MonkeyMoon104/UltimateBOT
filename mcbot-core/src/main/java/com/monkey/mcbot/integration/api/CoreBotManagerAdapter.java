@@ -572,6 +572,22 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
+    public boolean updateExplosionBlockDamage(UUID ownerUUID, boolean explosionBlockDamage) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null) {
+            return false;
+        }
+        options.setExplosionBlockDamage(explosionBlockDamage);
+        return true;
+    }
+
+    @Override
+    public boolean updateExplosionBlockDamageByBotUUID(UUID botUUID, boolean explosionBlockDamage) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateExplosionBlockDamage(ownerUUID, explosionBlockDamage);
+    }
+
+    @Override
     public boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls) {
         ITrainingBot bot = getLiveBot(resolveManagedOwner(ownerUUID));
         if (bot == null || bot.getBrainController() == null) {

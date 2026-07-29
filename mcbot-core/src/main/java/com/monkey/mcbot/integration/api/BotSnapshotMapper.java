@@ -43,6 +43,7 @@ public final class BotSnapshotMapper {
         long idleReturnDelayMs = 8000L;
         boolean crystalPvp = true;
         boolean explosions = true;
+        boolean explosionBlockDamage = false;
         boolean enderPearls = true;
         boolean healing = true;
         boolean killMessageEnabled = true;
@@ -71,6 +72,7 @@ public final class BotSnapshotMapper {
                 idleReturnDelayMs = options.getIdleReturnDelayMs();
                 crystalPvp = options.isCrystalPvp();
                 explosions = options.isExplosions();
+                explosionBlockDamage = options.isExplosionBlockDamage();
                 enderPearls = options.isEnderPearls();
                 healing = options.isHealing();
                 killMessageEnabled = options.isKillMessageEnabled();
@@ -109,6 +111,7 @@ public final class BotSnapshotMapper {
                 idleReturnDelayMs,
                 crystalPvp,
                 explosions,
+                explosionBlockDamage,
                 enderPearls,
                 healing,
                 killMessageEnabled

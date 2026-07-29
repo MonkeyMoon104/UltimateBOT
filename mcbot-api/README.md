@@ -266,6 +266,8 @@ The current core implementation returns `false` from update methods when:
 
 Use `BotSettings.explosions(false)` or `IBotManager.updateExplosions(ownerUUID, false)` to disable all bot-driven explosive combat. This also disables Crystal PvP and Respawn Anchor PvP and clears the explosive inventory slots.
 
+Explosion terrain damage is independent from explosion entity damage. By default, bot crystals and respawn anchors keep their explosion, damage and knockback but preserve blocks. Use `BotSettings.explosionBlockDamage(true)` or `IBotManager.updateExplosionBlockDamage(ownerUUID, true)` when bot explosions should also destroy terrain. Do not cancel Bukkit explosion events to protect blocks: cancellation removes the explosion action; clear the event block list instead.
+
 Examples:
 - enabling combat fails if follow is currently disabled
 - setting an out-of-range totem count fails

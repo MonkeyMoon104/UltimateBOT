@@ -97,6 +97,14 @@ public final class MinecraftBotClient implements AutoCloseable {
         return toggle(Objects.requireNonNull(botUUID, "botUUID"), "explosions", enabled);
     }
 
+    public BotOperationResponse updateExplosionBlockDamage(UUID ownerUUID, boolean enabled) {
+        return toggle(ownerUUID, "explosion-block-damage", enabled);
+    }
+
+    public BotOperationResponse updateExplosionBlockDamageByBotUUID(UUID botUUID, boolean enabled) {
+        return toggle(Objects.requireNonNull(botUUID, "botUUID"), "explosion-block-damage", enabled);
+    }
+
     public BotOperationResponse updateEnderPearls(UUID ownerUUID, boolean enabled) {
         return toggle(ownerUUID, "ender-pearls", enabled);
     }

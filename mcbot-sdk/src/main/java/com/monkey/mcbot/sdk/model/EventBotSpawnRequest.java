@@ -34,6 +34,7 @@ import java.util.UUID;
  * @param idleReturnDelayMs delay before returning to spawn
  * @param crystalPvp whether crystal PvP logic is enabled
  * @param explosions whether explosive combat is enabled
+ * @param explosionBlockDamage whether bot explosions may destroy terrain
  * @param enderPearls whether ender pearl logic is enabled
  * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
@@ -68,6 +69,7 @@ public record EventBotSpawnRequest(
         long idleReturnDelayMs,
         boolean crystalPvp,
         boolean explosions,
+        boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
         boolean killMessageEnabled,
@@ -125,6 +127,7 @@ public record EventBotSpawnRequest(
         private long idleReturnDelayMs = 8000L;
         private boolean crystalPvp = true;
         private boolean explosions = true;
+        private boolean explosionBlockDamage = false;
         private boolean enderPearls = true;
         private boolean healing = true;
         private boolean killMessageEnabled = true;
@@ -170,6 +173,7 @@ public record EventBotSpawnRequest(
         public Builder idleReturnDelayMs(long idleReturnDelayMs) { this.idleReturnDelayMs = idleReturnDelayMs; return this; }
         public Builder crystalPvp(boolean crystalPvp) { this.crystalPvp = crystalPvp; return this; }
         public Builder explosions(boolean explosions) { this.explosions = explosions; return this; }
+        public Builder explosionBlockDamage(boolean explosionBlockDamage) { this.explosionBlockDamage = explosionBlockDamage; return this; }
         public Builder enderPearls(boolean enderPearls) { this.enderPearls = enderPearls; return this; }
         public Builder healing(boolean healing) { this.healing = healing; return this; }
         public Builder disableHealing() { this.healing = false; return this; }
@@ -215,6 +219,7 @@ public record EventBotSpawnRequest(
                     idleReturnDelayMs,
                     crystalPvp,
                     explosions,
+                    explosionBlockDamage,
                     enderPearls,
                     healing,
                     killMessageEnabled,

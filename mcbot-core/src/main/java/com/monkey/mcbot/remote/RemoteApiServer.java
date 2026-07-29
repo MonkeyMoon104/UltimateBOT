@@ -189,6 +189,7 @@ public final class RemoteApiServer {
         boolean updated = switch (parts[2]) {
             case "crystal-pvp" -> runSync(() -> ownerUUID != null ? manager.updateCrystalPvp(ownerUUID, enabled) : manager.updateCrystalPvpByBotUUID(requestedUUID, enabled));
             case "explosions" -> runSync(() -> ownerUUID != null ? manager.updateExplosions(ownerUUID, enabled) : manager.updateExplosionsByBotUUID(requestedUUID, enabled));
+            case "explosion-block-damage" -> runSync(() -> ownerUUID != null ? manager.updateExplosionBlockDamage(ownerUUID, enabled) : manager.updateExplosionBlockDamageByBotUUID(requestedUUID, enabled));
             case "ender-pearls" -> runSync(() -> ownerUUID != null ? manager.updateEnderPearls(ownerUUID, enabled) : manager.updateEnderPearlsByBotUUID(requestedUUID, enabled));
             case "healing" -> runSync(() -> ownerUUID != null ? manager.updateHealing(ownerUUID, enabled) : manager.updateHealingByBotUUID(requestedUUID, enabled));
             case "attack-bots" -> runSync(() -> ownerUUID != null ? manager.updateAttackBots(ownerUUID, enabled) : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
@@ -245,6 +246,7 @@ public final class RemoteApiServer {
                 .idleReturnDelayMs(defaultLong(safe.idleReturnDelayMs, 8000L))
                 .crystalPvp(defaultBoolean(safe.crystalPvp, true))
                 .explosions(defaultBoolean(safe.explosions, true))
+                .explosionBlockDamage(defaultBoolean(safe.explosionBlockDamage, false))
                 .enderPearls(defaultBoolean(safe.enderPearls, true))
                 .healing(defaultBoolean(safe.healing, plugin.getConfig().getBoolean("bot.combat.healing", true)));
 
@@ -413,6 +415,7 @@ public final class RemoteApiServer {
         public Long idleReturnDelayMs;
         public Boolean crystalPvp;
         public Boolean explosions;
+        public Boolean explosionBlockDamage;
         public Boolean enderPearls;
         public Boolean healing;
         public Boolean killMessageEnabled;

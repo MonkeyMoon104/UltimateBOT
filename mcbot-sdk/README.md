@@ -38,8 +38,8 @@ MinecraftBotClient client = MinecraftBotClient.builder()
 BotOperationResponse spawn = client.spawnEventBot(EventBotSpawnRequest.builder()
         .botNameTemplate("EventBot")
         .autoTarget(true)
-        .explosions(false)
-        .crystalPvp(false)
+        .explosions(true)
+        .explosionBlockDamage(false)
         .build());
 
 UUID botId = spawn.snapshot().ownerUUID();
@@ -56,4 +56,5 @@ client.remove(botId);
 - `removeAll()`
 - `updateCrystalPvp(UUID ownerUUID, boolean enabled)`
 - `updateExplosions(UUID ownerUUID, boolean enabled)`
+- `updateExplosionBlockDamage(UUID ownerUUID, boolean enabled)`
 - `updateEnderPearls(UUID ownerUUID, boolean enabled)`

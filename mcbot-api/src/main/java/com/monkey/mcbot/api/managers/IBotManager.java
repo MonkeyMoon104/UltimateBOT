@@ -208,6 +208,14 @@ public interface IBotManager {
         return false;
     }
 
+    default boolean updateExplosionBlockDamage(UUID ownerUUID, boolean explosionBlockDamage) {
+        return false;
+    }
+
+    default boolean updateExplosionBlockDamageByBotUUID(UUID botUUID, boolean explosionBlockDamage) {
+        return false;
+    }
+
     boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);
 
     default boolean updateEnderPearlsByBotUUID(UUID botUUID, boolean enderPearls) {

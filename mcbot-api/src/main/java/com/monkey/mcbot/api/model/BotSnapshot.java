@@ -22,6 +22,7 @@ import java.util.UUID;
  * @param source origin of bot creation (core/api)
  * @param attackBots whether this bot can target other managed bots
  * @param targetMode categories of living entities this bot may attack
+ * @param explosionBlockDamage whether bot explosions may destroy terrain
  */
 public record BotSnapshot(
         UUID ownerUUID,
@@ -50,6 +51,7 @@ public record BotSnapshot(
         long idleReturnDelayMs,
         boolean crystalPvp,
         boolean explosions,
+        boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
         boolean killMessageEnabled

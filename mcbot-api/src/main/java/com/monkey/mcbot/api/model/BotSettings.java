@@ -56,6 +56,7 @@ public final class BotSettings {
     private final long idleReturnDelayMs;
     private final boolean crystalPvp;
     private final boolean explosions;
+    private final boolean explosionBlockDamage;
     private final boolean enderPearls;
     private final boolean healing;
     private final boolean killMessageEnabled;
@@ -99,6 +100,7 @@ public final class BotSettings {
         this.idleReturnDelayMs = builder.idleReturnDelayMs;
         this.crystalPvp = builder.crystalPvp;
         this.explosions = builder.explosions;
+        this.explosionBlockDamage = builder.explosionBlockDamage;
         this.enderPearls = builder.enderPearls;
         this.healing = builder.healing;
         this.killMessageEnabled = builder.killMessageEnabled;
@@ -357,6 +359,10 @@ public final class BotSettings {
 
     public boolean explosions() {
         return explosions;
+    }
+
+    public boolean explosionBlockDamage() {
+        return explosionBlockDamage;
     }
 
     public boolean enderPearls() {
@@ -761,6 +767,8 @@ public final class BotSettings {
 
         BuildStep explosions(boolean explosions);
 
+        BuildStep explosionBlockDamage(boolean explosionBlockDamage);
+
         BuildStep enderPearls(boolean enderPearls);
 
         BuildStep healing(boolean healing);
@@ -837,6 +845,7 @@ public final class BotSettings {
         private long idleReturnDelayMs = 8000L;
         private boolean crystalPvp = true;
         private boolean explosions = true;
+        private boolean explosionBlockDamage = false;
         private boolean enderPearls = true;
         private boolean healing = true;
         private boolean killMessageEnabled = true;
@@ -1105,6 +1114,12 @@ public final class BotSettings {
         @Override
         public BuildStep explosions(boolean explosions) {
             this.explosions = explosions;
+            return this;
+        }
+
+        @Override
+        public BuildStep explosionBlockDamage(boolean explosionBlockDamage) {
+            this.explosionBlockDamage = explosionBlockDamage;
             return this;
         }
 
