@@ -2,13 +2,12 @@ package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.fakeplayer.FakeOfflinePlayer;
-
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import org.jspecify.annotations.Nullable;
 
 public class BotRegistry {
 
@@ -34,14 +33,17 @@ public class BotRegistry {
         }
         for (Map.Entry<UUID, ITrainingBot> entry : spawnedBots.entrySet()) {
             ITrainingBot bot = entry.getValue();
-            if (bot != null && bot.asPlayer() != null && botUUID.equals(bot.asPlayer().getUUID())) {
+            if (bot != null
+                    && bot.asPlayer() != null
+                    && botUUID.equals(bot.asPlayer().getUUID())) {
                 return entry.getKey();
             }
         }
         return null;
     }
 
-    public ITrainingBot computeIfPresent(UUID playerUUID, BiFunction<UUID, ITrainingBot, ITrainingBot> remappingFunction) {
+    public ITrainingBot computeIfPresent(
+            UUID playerUUID, BiFunction<UUID, ITrainingBot, ITrainingBot> remappingFunction) {
         return spawnedBots.computeIfPresent(playerUUID, remappingFunction);
     }
 
@@ -50,7 +52,9 @@ public class BotRegistry {
     }
 
     public void removeBotByUUID(UUID botUUID) {
-        spawnedBots.entrySet().removeIf(entry -> entry.getValue().asPlayer().getUUID().equals(botUUID));
+        spawnedBots
+                .entrySet()
+                .removeIf(entry -> entry.getValue().asPlayer().getUUID().equals(botUUID));
     }
 
     public Map<UUID, ITrainingBot> getAllBots() {

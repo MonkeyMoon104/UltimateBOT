@@ -1,17 +1,15 @@
 package com.monkey.mcbot.api.event.bus;
 
 import com.monkey.mcbot.api.event.base.BotEvent;
-
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.UUID;
 
 /**
  * Typed subscription facade backed by Bukkit's event system.
@@ -45,31 +43,31 @@ public final class BotEventBus {
             Class<E> eventType,
             EventPriority priority,
             boolean ignoreCancelled,
-            Consumer<? super E> consumer
-    ) {
+            Consumer<? super E> consumer) {
         Objects.requireNonNull(owner, "owner");
         Objects.requireNonNull(eventType, "eventType");
         Objects.requireNonNull(priority, "priority");
         Objects.requireNonNull(consumer, "consumer");
 
-        Listener listener = new Listener() { };
-        owner.getServer().getPluginManager().registerEvent(
-                eventType,
-                listener,
-                priority,
-                (registered, event) -> {
-                    if (!eventType.isInstance(event)) {
-                        return;
-                    }
-                    try {
-                        consumer.accept(eventType.cast(event));
-                    } catch (RuntimeException exception) {
-                        throw new EventException(exception);
-                    }
-                },
-                owner,
-                ignoreCancelled
-        );
+        Listener listener = new Listener() {};
+        owner.getServer()
+                .getPluginManager()
+                .registerEvent(
+                        eventType,
+                        listener,
+                        priority,
+                        (registered, event) -> {
+                            if (!eventType.isInstance(event)) {
+                                return;
+                            }
+                            try {
+                                consumer.accept(eventType.cast(event));
+                            } catch (RuntimeException exception) {
+                                throw new EventException(exception);
+                            }
+                        },
+                        owner,
+                        ignoreCancelled);
 
         AtomicBoolean active = new AtomicBoolean(true);
         return new BotEventSubscription() {

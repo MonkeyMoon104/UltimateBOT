@@ -1,22 +1,21 @@
 package com.monkey.mcbot.bot.ai.services;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.lifecycle.BotDeathEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
+import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import java.util.UUID;
 import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-
-import java.util.UUID;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-import com.monkey.mcbot.api.event.lifecycle.BotDeathEvent;
-import com.monkey.mcbot.api.event.lifecycle.BotDespawnEvent;
-import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
-import com.monkey.mcbot.api.model.BotSnapshot;
 
 public class BotDeathService {
 
@@ -26,8 +25,12 @@ public class BotDeathService {
     private final String deadBotMessage;
     private final String deadBotEventMessage;
 
-    public BotDeathService(ITrainingBot bot, MinecraftBot plugin,
-                           PlayerOptions playerOptions, String deadBotMessage, String deadBotEventMessage) {
+    public BotDeathService(
+            ITrainingBot bot,
+            MinecraftBot plugin,
+            PlayerOptions playerOptions,
+            String deadBotMessage,
+            String deadBotEventMessage) {
         this.bot = bot;
         this.plugin = plugin;
         this.playerOptions = playerOptions;
@@ -36,22 +39,33 @@ public class BotDeathService {
     }
 
     public void handleDeath(DamageSource cause) {
-        BotOptions options = bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
+        BotOptions options =
+                bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
         boolean isEventBot = options != null && options.getBotType() == BotType.EVENT;
 
         Player owner = getOwnerPlayer(options);
-        UUID ownerUUID = options != null ? options.getOwnerUUID() : plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
-        BotSnapshot deathSnapshot = ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
+        UUID ownerUUID = options != null
+                ? options.getOwnerUUID()
+                : plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+        BotSnapshot deathSnapshot =
+                ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
         if (deathSnapshot != null) {
             org.bukkit.entity.Entity killer = cause == null || cause.getEntity() == null
-                    ? null : cause.getEntity().getBukkitEntity();
-            plugin.getBotEventDispatcher().publish(new BotDeathEvent(
-                    plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
-                    deathSnapshot, cause == null ? "unknown" : cause.typeHolder().getRegisteredName(), killer));
+                    ? null
+                    : cause.getEntity().getBukkitEntity();
+            plugin.getBotEventDispatcher()
+                    .publish(new BotDeathEvent(
+                            plugin.getBotEventDispatcher()
+                                    .nextSequence(bot.asPlayer().getUUID()),
+                            deathSnapshot,
+                            cause == null ? "unknown" : cause.typeHolder().getRegisteredName(),
+                            killer));
         }
 
         if (isEventBot) {
-            if (isKillMessageEnabled(options) && bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
+            if (isKillMessageEnabled(options)
+                    && bot.getTargetPlayer() != null
+                    && bot.getTargetPlayer().isOnline()) {
                 String targetName = bot.getTargetPlayer().getName();
                 String template = resolveKillMessage(options, deadBotEventMessage);
                 String translatedMsg = ChatColorUtils.translate(template.replace("{player}", targetName));
@@ -62,7 +76,8 @@ public class BotDeathService {
                 String message = ChatColorUtils.translate(resolveKillMessage(options, deadBotMessage));
                 if (owner != null && owner.isOnline()) {
                     owner.sendMessage(message);
-                } else if (bot.getTargetPlayer() != null && bot.getTargetPlayer().isOnline()) {
+                } else if (bot.getTargetPlayer() != null
+                        && bot.getTargetPlayer().isOnline()) {
                     bot.getTargetPlayer().sendMessage(message);
                 }
             }
@@ -86,9 +101,13 @@ public class BotDeathService {
         plugin.forgetCompatibilityBot(bot.asPlayer().getUUID());
         plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
         if (deathSnapshot != null) {
-            plugin.getBotEventDispatcher().publish(new BotDespawnEvent(
-                    plugin.getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()), deathSnapshot,
-                    BotEventSource.SYSTEM, BotDespawnReason.BOT_DEATH));
+            plugin.getBotEventDispatcher()
+                    .publish(new BotDespawnEvent(
+                            plugin.getBotEventDispatcher()
+                                    .nextSequence(bot.asPlayer().getUUID()),
+                            deathSnapshot,
+                            BotEventSource.SYSTEM,
+                            BotDespawnReason.BOT_DEATH));
             plugin.getBotEventDispatcher().forget(bot.asPlayer().getUUID());
         }
     }

@@ -3,6 +3,7 @@ package com.monkey.mcbot.gui.v26_1.tab;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -19,11 +20,10 @@ import xyz.xenondevs.invui.gui.Markers;
 import xyz.xenondevs.invui.gui.ScrollGui;
 import xyz.xenondevs.invui.item.*;
 
-import java.util.*;
-
 public class OwnersTab {
 
-    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
     private final BotGuiTabContext context;
 
     public OwnersTab(BotGuiTabContext context) {
@@ -40,12 +40,7 @@ public class OwnersTab {
 
         return ScrollGui.itemsBuilder()
                 .setStructure(
-                        "# # # # # # # #",
-                        "# o o o o o o u",
-                        "# o o o o o o #",
-                        "# o o o o o o d",
-                        "# # # # # # # #"
-                )
+                        "# # # # # # # #", "# o o o o o o u", "# o o o o o o #", "# o o o o o o d", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('o', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
                 .addIngredient('u', new ScrollUpItem())
@@ -95,10 +90,10 @@ public class OwnersTab {
         public ItemProvider getItemProvider(Player viewer) {
             ScrollGui<?> gui = getGui();
             String name = context.getTraining().getLangString("gui.owners-tab.scroll-up.name", "&aScroll up");
-            ItemBuilder builder = new ItemBuilder(Material.ARROW)
-                    .setLegacyName(ChatColorUtils.translate(name));
+            ItemBuilder builder = new ItemBuilder(Material.ARROW).setLegacyName(ChatColorUtils.translate(name));
             if (gui.getLine() <= 0) {
-                String cantScroll = context.getTraining().getLangString("gui.owners-tab.scroll-up.cant-scroll", "&7Already at the top");
+                String cantScroll = context.getTraining()
+                        .getLangString("gui.owners-tab.scroll-up.cant-scroll", "&7Already at the top");
                 builder.addLegacyLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -119,10 +114,10 @@ public class OwnersTab {
         public ItemProvider getItemProvider(Player viewer) {
             ScrollGui<?> gui = getGui();
             String name = context.getTraining().getLangString("gui.owners-tab.scroll-down.name", "&aScroll down");
-            ItemBuilder builder = new ItemBuilder(Material.ARROW)
-                    .setLegacyName(ChatColorUtils.translate(name));
+            ItemBuilder builder = new ItemBuilder(Material.ARROW).setLegacyName(ChatColorUtils.translate(name));
             if (gui.getLine() >= gui.getMaxLine()) {
-                String cantScroll = context.getTraining().getLangString("gui.owners-tab.scroll-down.cant-scroll", "&7Already at the bottom");
+                String cantScroll = context.getTraining()
+                        .getLangString("gui.owners-tab.scroll-down.cant-scroll", "&7Already at the bottom");
                 builder.addLegacyLoreLines(ChatColorUtils.translate(cantScroll));
             }
             return builder;
@@ -151,24 +146,20 @@ public class OwnersTab {
             SkullMeta meta = (SkullMeta) skull.getItemMeta();
 
             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(ownerUUID);
-            String playerName = offlinePlayer.getName() != null
-                    ? offlinePlayer.getName()
-                    : ownerUUID.toString();
+            String playerName = offlinePlayer.getName() != null ? offlinePlayer.getName() : ownerUUID.toString();
 
             if (meta != null) {
                 meta.setOwningPlayer(offlinePlayer);
 
                 String nameTemplate = context.getTraining().getLangString("gui.owners-tab.head.name", "&e%player%");
                 String name = ChatColorUtils.translate(
-                        nameTemplate.replace("%player%", playerName)
-                                .replace("%uuid%", ownerUUID.toString()));
+                        nameTemplate.replace("%player%", playerName).replace("%uuid%", ownerUUID.toString()));
                 meta.displayName(LEGACY_SECTION_SERIALIZER.deserialize(name));
 
                 List<String> loreLines = context.getTraining().getLangStringList("gui.owners-tab.head.lore");
                 List<? extends Component> lore = loreLines.stream()
                         .map(line -> ChatColorUtils.translate(
-                                line.replace("%player%", playerName)
-                                        .replace("%uuid%", ownerUUID.toString())))
+                                line.replace("%player%", playerName).replace("%uuid%", ownerUUID.toString())))
                         .map(LEGACY_SECTION_SERIALIZER::deserialize)
                         .toList();
                 meta.lore(lore);
@@ -179,7 +170,6 @@ public class OwnersTab {
         }
 
         @Override
-        public void handleClick(ClickType clickType, Player player, Click click) {
-        }
+        public void handleClick(ClickType clickType, Player player, Click click) {}
     }
 }

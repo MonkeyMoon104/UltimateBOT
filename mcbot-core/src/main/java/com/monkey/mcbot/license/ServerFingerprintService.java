@@ -1,13 +1,12 @@
 package com.monkey.mcbot.license;
 
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.*;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ServerFingerprintService {
 
@@ -15,7 +14,8 @@ public final class ServerFingerprintService {
         try {
             List<String> signals = new ArrayList<>();
             signals.addAll(baseSignals());
-            signals.add("path=" + safePath(plugin.getServer().getWorldContainer().toPath()));
+            signals.add(
+                    "path=" + safePath(plugin.getServer().getWorldContainer().toPath()));
             return sha256Hex(String.join("|", signals));
         } catch (Exception ex) {
             return sha256Hex(plugin.getDataFolder().getAbsolutePath());
@@ -81,7 +81,8 @@ public final class ServerFingerprintService {
     private String sha256Hex(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return bytesToHex(digest.digest(input.getBytes(StandardCharsets.UTF_8))).toLowerCase(Locale.ROOT);
+            return bytesToHex(digest.digest(input.getBytes(StandardCharsets.UTF_8)))
+                    .toLowerCase(Locale.ROOT);
         } catch (Exception ex) {
             throw new IllegalStateException("Unable to compute fingerprint hash", ex);
         }

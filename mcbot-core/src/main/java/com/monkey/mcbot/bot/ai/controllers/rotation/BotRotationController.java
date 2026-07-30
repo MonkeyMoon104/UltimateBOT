@@ -8,8 +8,8 @@ import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IAngleNormalize
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationApplier;
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public class BotRotationController {

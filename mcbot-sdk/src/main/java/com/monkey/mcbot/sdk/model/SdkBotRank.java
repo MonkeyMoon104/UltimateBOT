@@ -29,6 +29,12 @@ public enum SdkBotRank {
      */
     GOD;
 
+    public com.monkey.mcbot.common.model.BotRankTier toCommon() {
+        return this == NOOB
+                ? com.monkey.mcbot.common.model.BotRankTier.EASY
+                : com.monkey.mcbot.common.model.BotRankTier.valueOf(name());
+    }
+
     /**
      * Returns the API string value.
      *

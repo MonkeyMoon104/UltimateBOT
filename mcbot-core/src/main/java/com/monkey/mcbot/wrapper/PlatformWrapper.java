@@ -22,4 +22,3 @@ public interface PlatformWrapper {
 
     WrapperTask runAsyncRepeating(Runnable task, long delayTicks, long periodTicks);
 }
-

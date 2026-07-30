@@ -76,17 +76,10 @@ public class HealActionManager implements IHealActionManager {
         try {
             net.minecraft.world.effect.MobEffectInstance regeneration =
                     new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.REGENERATION,
-                            100,
-                            1
-                    );
+                            net.minecraft.world.effect.MobEffects.REGENERATION, 100, 1);
 
-            net.minecraft.world.effect.MobEffectInstance absorption =
-                    new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.ABSORPTION,
-                            2400,
-                            0
-                    );
+            net.minecraft.world.effect.MobEffectInstance absorption = new net.minecraft.world.effect.MobEffectInstance(
+                    net.minecraft.world.effect.MobEffects.ABSORPTION, 2400, 0);
 
             bot.addEffect(regeneration);
             bot.addEffect(absorption);

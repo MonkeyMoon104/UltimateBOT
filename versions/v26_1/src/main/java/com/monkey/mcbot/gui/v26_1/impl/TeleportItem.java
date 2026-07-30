@@ -4,6 +4,7 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,8 +13,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.UUID;
 
 public class TeleportItem extends AbstractItem {
 
@@ -57,5 +56,3 @@ public class TeleportItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-

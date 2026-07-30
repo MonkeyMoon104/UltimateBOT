@@ -5,7 +5,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.wrapper.WrapperTask;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -33,9 +32,8 @@ public final class LicenseManager {
 
     public LicenseManager(MinecraftBot plugin) {
         this.plugin = plugin;
-        ObjectMapper objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .findAndRegisterModules();
+        ObjectMapper objectMapper =
+                new ObjectMapper().registerModule(new JavaTimeModule()).findAndRegisterModules();
         this.installationIdStore = new InstallationIdStore();
         this.licenseStateStore = new LicenseStateStore(objectMapper);
         this.fingerprintService = new ServerFingerprintService();
@@ -49,7 +47,8 @@ public final class LicenseManager {
         }
 
         try {
-            this.installationId = installationIdStore.loadOrCreate(plugin.getDataFolder().toPath());
+            this.installationId =
+                    installationIdStore.loadOrCreate(plugin.getDataFolder().toPath());
             this.fingerprintHash = fingerprintService.computeInstallationFingerprint(plugin);
             this.hostFingerprint = fingerprintService.computeHostFingerprint(plugin);
             this.serverPort = fingerprintService.resolveServerPort(plugin);
@@ -61,8 +60,10 @@ public final class LicenseManager {
             licenseStateStore.saveSuccess(plugin.getDataFolder().toPath(), Instant.now());
             return LicenseStartupResult.allowed(false, "License valid");
         } catch (IOException ex) {
-            MinecraftBotLogging.warn(plugin.getLogger(), "License", "Validation request failed -> " + safeMessage(ex.getMessage()));
-            boolean graceAllowed = licenseStateStore.hasValidGrace(plugin.getDataFolder().toPath(), GRACE_PERIOD, Instant.now());
+            MinecraftBotLogging.warn(
+                    plugin.getLogger(), "License", "Validation request failed -> " + safeMessage(ex.getMessage()));
+            boolean graceAllowed =
+                    licenseStateStore.hasValidGrace(plugin.getDataFolder().toPath(), GRACE_PERIOD, Instant.now());
             if (!graceAllowed) {
                 return LicenseStartupResult.denied("LICENSE_SERVER_UNREACHABLE", "License server unreachable");
             }
@@ -75,8 +76,9 @@ public final class LicenseManager {
             return;
         }
 
-        heartbeatTask = plugin.getWrapperManager().active().runAsyncRepeating(this::runHeartbeatCheck,
-                HEARTBEAT_PERIOD_TICKS, HEARTBEAT_PERIOD_TICKS);
+        heartbeatTask = plugin.getWrapperManager()
+                .active()
+                .runAsyncRepeating(this::runHeartbeatCheck, HEARTBEAT_PERIOD_TICKS, HEARTBEAT_PERIOD_TICKS);
     }
 
     public void shutdown() {
@@ -91,16 +93,20 @@ public final class LicenseManager {
             LicenseValidationResponse response = licenseHttpClient.heartbeat(buildRequest());
             if (!response.allowed()) {
                 String reasonCode = requireReasonCode(response);
-                MinecraftBotLogging.warn(plugin.getLogger(), "License",
+                MinecraftBotLogging.warn(
+                        plugin.getLogger(),
+                        "License",
                         "Runtime validation denied -> " + reasonCode + " | " + safeMessage(response.message()));
                 disablePluginSync("License denied during runtime: " + reasonCode);
                 return;
             }
 
             licenseStateStore.saveSuccess(plugin.getDataFolder().toPath(), Instant.now());
-            MinecraftBotLogging.detail(plugin.getLogger(), "License", "Heartbeat ok -> status=" + safeMessage(response.status()));
+            MinecraftBotLogging.detail(
+                    plugin.getLogger(), "License", "Heartbeat ok -> status=" + safeMessage(response.status()));
         } catch (Exception ex) {
-            boolean graceAllowed = licenseStateStore.hasValidGrace(plugin.getDataFolder().toPath(), GRACE_PERIOD, Instant.now());
+            boolean graceAllowed =
+                    licenseStateStore.hasValidGrace(plugin.getDataFolder().toPath(), GRACE_PERIOD, Instant.now());
             if (graceAllowed) {
                 MinecraftBotLogging.warn(plugin.getLogger(), "License", "Heartbeat failed -> using remaining grace");
                 return;
@@ -126,8 +132,7 @@ public final class LicenseManager {
                 installationId,
                 fingerprintHash,
                 hostFingerprint,
-                serverPort
-        );
+                serverPort);
     }
 
     private String normalizeLicenseKey(String rawLicenseKey) {

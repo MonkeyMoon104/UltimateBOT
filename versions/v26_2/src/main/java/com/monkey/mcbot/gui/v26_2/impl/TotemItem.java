@@ -4,6 +4,8 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.Objects;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,8 +14,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.UUID;
 
 public class TotemItem extends AbstractItem {
 
@@ -29,15 +29,13 @@ public class TotemItem extends AbstractItem {
     public ItemProvider getItemProvider(Player viewer) {
         ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.totem-button.material")));
 
-        String unlimitedText = training.getLangString("gui.totem-button.unlimited-text");
-        String countLine = options.getTotems() == -1
-                ? unlimitedText
-                : String.valueOf(options.getTotems());
+        String unlimitedText = Objects.requireNonNull(
+                training.getLangString("gui.totem-button.unlimited-text"), "gui.totem-button.unlimited-text");
+        String countLine = options.getTotems() == -1 ? unlimitedText : String.valueOf(options.getTotems());
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.totem-button.name")));
         var loreLines = training.getLangStringList("gui.totem-button.lore");
 
         for (String line : loreLines) {
-            assert countLine != null;
             String replaced = line.replace("%count%", countLine);
             builder.addLegacyLoreLines(ChatColorUtils.translate(replaced));
         }
@@ -47,7 +45,8 @@ public class TotemItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (!options.isChangeableTotem()) {
-            String msg = training.getLangString("messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -77,7 +76,3 @@ public class TotemItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-
-
-

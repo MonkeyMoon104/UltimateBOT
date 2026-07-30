@@ -10,7 +10,12 @@ rootProject.name = "MinecraftBot"
 
 include("mcbot-api")
 include("mcbot-sdk")
+include("common")
 include("mcbot-core")
+
+include("addons")
+include("addons:metrics")
+include("addons:guard")
 
 include("versions:v1_21_4")
 include("versions:v1_21_5")
@@ -24,4 +29,3 @@ include("versions:v26_1")
 include("versions:v26_2")
 
 include("plugin")
-include("benchmarks")

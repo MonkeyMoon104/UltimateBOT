@@ -29,6 +29,12 @@ public enum SdkBotArmor {
      */
     NETHERITE;
 
+    public com.monkey.mcbot.common.model.BotArmorTier toCommon() {
+        return this == GOLD
+                ? com.monkey.mcbot.common.model.BotArmorTier.GOLDEN
+                : com.monkey.mcbot.common.model.BotArmorTier.valueOf(name());
+    }
+
     /**
      * Returns the API string value.
      *

@@ -50,7 +50,8 @@ public class FollowItem extends AbstractItem {
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
         if (!options.isChangeableFollow()) {
-            String msg = training.getLangString("messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -61,7 +62,8 @@ public class FollowItem extends AbstractItem {
         boolean newFollowStatus = !oldFollowStatus;
 
         if (!newFollowStatus && combatStatus && !options.isChangeableCombat()) {
-            String msg = training.getLangString("messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
+            String msg = training.getLangString(
+                    "messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -91,6 +93,3 @@ public class FollowItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-
-

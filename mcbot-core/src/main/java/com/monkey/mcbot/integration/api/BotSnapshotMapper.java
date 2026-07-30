@@ -3,18 +3,14 @@ package com.monkey.mcbot.integration.api;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.api.model.BotSource;
 import com.monkey.mcbot.api.model.BotTargetMode;
-import com.monkey.mcbot.bot.BotCreationSource;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import org.bukkit.entity.Player;
-
 import java.util.Set;
 import java.util.UUID;
 
 public final class BotSnapshotMapper {
 
-    private BotSnapshotMapper() {
-    }
+    private BotSnapshotMapper() {}
 
     public static BotSnapshot toSnapshot(UUID ownerUUID, ITrainingBot bot) {
         if (bot == null) {
@@ -57,9 +53,7 @@ public final class BotSnapshotMapper {
                 minTotemCount = options.getMinTotemCount();
                 maxTotemCount = options.getMaxTotemCount();
                 targetUUIDs = options.getTargetUUIDs();
-                source = options.getCreationSource() == BotCreationSource.API
-                        ? BotSource.API
-                        : BotSource.CORE;
+                source = BotSource.fromCommon(options.getCreationSource().toCommon());
                 autoTarget = options.isAutoTarget();
                 autoTargetRange = options.getAutoTargetRange();
                 attackBots = options.isAttackBots();
@@ -114,7 +108,6 @@ public final class BotSnapshotMapper {
                 explosionBlockDamage,
                 enderPearls,
                 healing,
-                killMessageEnabled
-        );
+                killMessageEnabled);
     }
 }

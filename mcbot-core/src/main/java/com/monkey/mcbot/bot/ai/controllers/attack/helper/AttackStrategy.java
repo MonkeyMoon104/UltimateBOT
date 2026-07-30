@@ -5,8 +5,8 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class AttackStrategy implements IAttackStrategy {
 
@@ -14,7 +14,8 @@ public class AttackStrategy implements IAttackStrategy {
     private final IAttackExecutor attackExecutor;
     private final ICooldownManager cooldownManager;
 
-    public AttackStrategy(IJumpAttackManager jumpAttackManager, IAttackExecutor attackExecutor, ICooldownManager cooldownManager) {
+    public AttackStrategy(
+            IJumpAttackManager jumpAttackManager, IAttackExecutor attackExecutor, ICooldownManager cooldownManager) {
         this.jumpAttackManager = jumpAttackManager;
         this.attackExecutor = attackExecutor;
         this.cooldownManager = cooldownManager;

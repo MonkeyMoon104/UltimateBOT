@@ -6,8 +6,11 @@
 -keep class com.monkey.mcbot.MinecraftBot { *; }
 
 -keep class com.monkey.mcbot.api.** { *; }
+-keep class com.monkey.mcbot.common.** { *; }
 
 -keep class com.monkey.mcbot.remote.** { *; }
+
+# Public SPI used by the optional metrics addon loaded from an isolated class loader.
 
 -keep class com.monkey.mcbot.nms.NMSBridge_v* { *; }
 
@@ -43,6 +46,14 @@
 -keep class com.fasterxml.jackson.** { *; }
 
 -keep class com.monkey.mcbot.libs.bstats.** { *; }
+
+# Caffeine selects generated cache and node implementations by their runtime class names.
+# Obfuscating this package breaks LocalCacheFactory/NodeFactory reflective lookups.
+-keep class com.monkey.mcbot.libs.caffeine.cache.** { *; }
+
+# Keep the shaded pathfinding engine stable for its extension interfaces and reflective smoke test.
+-keep class com.monkey.mcbot.libs.pathetic.** { *; }
+
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);

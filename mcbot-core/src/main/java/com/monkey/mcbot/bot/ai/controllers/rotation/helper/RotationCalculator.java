@@ -1,8 +1,8 @@
 package com.monkey.mcbot.bot.ai.controllers.rotation.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public class RotationCalculator implements IRotationCalculator {
@@ -44,6 +44,6 @@ public class RotationCalculator implements IRotationCalculator {
             targetPitch = Math.max(MIN_PITCH, Math.min(MAX_PITCH, targetPitch));
         }
 
-        return new float[]{targetYaw, targetPitch};
+        return new float[] {targetYaw, targetPitch};
     }
 }

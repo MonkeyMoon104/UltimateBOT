@@ -6,6 +6,7 @@ plugins {
 group = "com.monkey.mcbot"
 
 dependencies {
+    api(project(":common"))
     api(libs.jspecify)
     compileOnly(libs.paper.api)
     testImplementation(libs.archunit.junit5)

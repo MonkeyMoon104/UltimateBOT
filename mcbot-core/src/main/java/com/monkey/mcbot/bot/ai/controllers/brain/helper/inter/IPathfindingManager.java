@@ -1,16 +1,23 @@
 package com.monkey.mcbot.bot.ai.controllers.brain.helper.inter;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 public interface IPathfindingManager {
-    void checkForStuck(Player target);
-    void attemptPathfindingOrPearl(Player target);
+    void checkForStuck(LivingEntity target);
+
+    void attemptPathfindingOrPearl(LivingEntity target);
+
     boolean hasObstacleBetween(Vec3 start, Vec3 end);
-    Vec3 calculatePearlTargetAroundPlayer(Player target);
+
+    Vec3 calculatePearlTargetAroundPlayer(LivingEntity target);
+
     boolean isSafeLandingSpot(BlockPos pos);
-    void forceUnstuck(Player target);
+
+    void forceUnstuck(LivingEntity target);
+
     boolean isUsingPathfinding();
+
     void setUsingPathfinding(boolean using);
 }

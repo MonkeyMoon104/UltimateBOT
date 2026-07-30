@@ -6,6 +6,7 @@ import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -15,8 +16,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
 
@@ -105,16 +104,20 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
                 sendConfigured(
                         player,
                         "messages.team-ally.owner-has-active-bot",
-                        "%player%", ownerName == null ? ownerUUID.toString() : ownerName,
-                        "%bottype%", busyType.name().toLowerCase(Locale.ROOT)
-                );
+                        "%player%",
+                        ownerName == null ? ownerUUID.toString() : ownerName,
+                        "%bottype%",
+                        busyType.name().toLowerCase(Locale.ROOT));
                 return true;
             }
         }
 
         BotOptions options = plugin.getPlayerOptions().getOptions(player.getUniqueId());
         if (options == null) {
-            options = new BotOptions(plugin, com.monkey.mcbot.utils.armor.ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
+            options = new BotOptions(
+                    plugin,
+                    com.monkey.mcbot.utils.armor.ArmorCycle.getDefaultArmorFromConfig(
+                            plugin.getLanguageConfig(), plugin));
         }
 
         options.setBotType(BotType.TEAM_ALLY);
@@ -166,9 +169,10 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
                 sendConfigured(
                         player,
                         "messages.team-ally.owner-has-active-bot",
-                        "%player%", owner.getName(),
-                        "%bottype%", busyType.name().toLowerCase(Locale.ROOT)
-                );
+                        "%player%",
+                        owner.getName(),
+                        "%bottype%",
+                        busyType.name().toLowerCase(Locale.ROOT));
                 continue;
             }
 
@@ -259,9 +263,13 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
     private @Nullable BotType getOwnerBusyType(UUID ownerUUID, @Nullable UUID allowedTeamPrimaryOwner) {
         if (plugin.getBotManager().isBotSpawned(ownerUUID)) {
             ITrainingBot bot = plugin.getBotManager().getBotSafe(ownerUUID);
-            if (bot != null && bot.getBrainController() != null && bot.getBrainController().getBotOptions() != null) {
+            if (bot != null
+                    && bot.getBrainController() != null
+                    && bot.getBrainController().getBotOptions() != null) {
                 BotType type = bot.getBrainController().getBotOptions().getBotType();
-                if (type == BotType.TEAM_ALLY && allowedTeamPrimaryOwner != null && ownerUUID.equals(allowedTeamPrimaryOwner)) {
+                if (type == BotType.TEAM_ALLY
+                        && allowedTeamPrimaryOwner != null
+                        && ownerUUID.equals(allowedTeamPrimaryOwner)) {
                     return null;
                 }
                 return type;
@@ -293,7 +301,8 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
     }
 
     private ActiveTeamAlly findActiveTeamAlly(UUID ownerUUID) {
-        for (Map.Entry<UUID, ITrainingBot> entry : plugin.getBotRegistry().getAllBots().entrySet()) {
+        for (Map.Entry<UUID, ITrainingBot> entry :
+                plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot bot = entry.getValue();
             if (bot == null || bot.getBrainController() == null) {
                 continue;
@@ -313,7 +322,8 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+    public @Nullable List<String> onTabComplete(
+            @NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (!(sender instanceof Player player)) {
             return List.of();
         }
@@ -408,18 +418,14 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void sendConfigured(Player player,
-                                String path,
-                                String placeholderA,
-                                String valueA,
-                                String placeholderB,
-                                String valueB) {
+    private void sendConfigured(
+            Player player, String path, String placeholderA, String valueA, String placeholderB, String valueB) {
         String msg = plugin.getLangString(path);
         if (msg != null && !msg.isBlank()) {
-            player.sendMessage(ChatColorUtils.translate(msg.replace(placeholderA, valueA).replace(placeholderB, valueB)));
+            player.sendMessage(
+                    ChatColorUtils.translate(msg.replace(placeholderA, valueA).replace(placeholderB, valueB)));
         }
     }
 
-    private record ActiveTeamAlly(UUID registryOwner, BotOptions options) {
-    }
+    private record ActiveTeamAlly(UUID registryOwner, BotOptions options) {}
 }

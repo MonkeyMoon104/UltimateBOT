@@ -1,5 +1,9 @@
 package com.monkey.mcbot.bot.ai.controllers.attack;
 
+import com.monkey.mcbot.api.event.combat.BotAttackEvent;
+import com.monkey.mcbot.api.event.combat.BotAttackType;
+import com.monkey.mcbot.api.model.BotSnapshot;
+import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.AttackExecutor;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.AttackStrategy;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.CooldownManager;
@@ -8,12 +12,8 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
-import com.monkey.mcbot.bot.ai.ITrainingBot;
-import com.monkey.mcbot.api.event.combat.BotAttackEvent;
-import com.monkey.mcbot.api.event.combat.BotAttackType;
-import com.monkey.mcbot.api.model.BotSnapshot;
+import net.minecraft.world.entity.player.Player;
 
 public class BotAttackController {
 
@@ -64,8 +64,9 @@ public class BotAttackController {
         }
         BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, trainingBot);
         if (snapshot == null) return true;
-        BotAttackEvent event = plugin.getBotEventDispatcher().publish(new BotAttackEvent(
-                plugin.getBotEventDispatcher().nextSequence(bot.getUUID()), snapshot, bukkitTarget, type));
+        BotAttackEvent event = plugin.getBotEventDispatcher()
+                .publish(new BotAttackEvent(
+                        plugin.getBotEventDispatcher().nextSequence(bot.getUUID()), snapshot, bukkitTarget, type));
         return !event.isCancelled();
     }
 

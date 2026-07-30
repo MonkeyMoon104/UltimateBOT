@@ -2,13 +2,13 @@ package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
-import org.bukkit.inventory.EquipmentSlot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -39,16 +39,16 @@ public class TrimPatternSelectorItem extends AbstractItem {
 
         ItemBuilder builder = new ItemBuilder(material);
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString(
-                empty ? "gui.templates-button.template-empty-name" : "gui.templates-button.template-name",
-                empty ? "&fClick to change template" : "&eTemplate: &f%value%"
-        ).replace("%value%", ArmorTrimUtils.formatKey(selectedPattern))));
+                        empty ? "gui.templates-button.template-empty-name" : "gui.templates-button.template-name",
+                        empty ? "&fClick to change template" : "&eTemplate: &f%value%")
+                .replace("%value%", ArmorTrimUtils.formatKey(selectedPattern))));
 
         for (String line : training.getLangStringList("gui.templates-button.template-lore")) {
-            builder.addLoreLines(ChatColorUtils.translate(
-                    line.replace("%value%", empty
+            builder.addLoreLines(ChatColorUtils.translate(line.replace(
+                    "%value%",
+                    empty
                             ? training.getLangString("gui.templates-button.empty-value", "None")
-                            : ArmorTrimUtils.formatKey(selectedPattern))
-            ));
+                            : ArmorTrimUtils.formatKey(selectedPattern))));
         }
 
         return builder;

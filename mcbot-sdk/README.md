@@ -8,6 +8,8 @@ annotated with `@Nullable`.
 
 Use this artifact with `implementation` when you do not want to depend on Bukkit/Paper classloading or the in-server `mcbot-api` singleton.
 
+The SDK receives the dependency-free `common` contracts transitively and keeps its existing SDK-specific model names as compatibility façades.
+
 ## Gradle
 
 ```gradle

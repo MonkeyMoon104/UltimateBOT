@@ -1,23 +1,22 @@
 package com.monkey.mcbot.placeholders;
 
 import com.monkey.mcbot.MinecraftBot;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import java.lang.reflect.Method;
-import java.util.logging.Level;
 
 public final class PlaceholderApiSupport {
 
     private static final String PLACEHOLDER_API_PLUGIN = "PlaceholderAPI";
     private static final String PLACEHOLDER_API_CLASS = "me.clip.placeholderapi.PlaceholderAPI";
-    private static final String PLACEHOLDER_COORDINATOR_CLASS = "com.monkey.mcbot.placeholders.BotPlaceholderCoordinator";
+    private static final String PLACEHOLDER_COORDINATOR_CLASS =
+            "com.monkey.mcbot.placeholders.BotPlaceholderCoordinator";
 
     private static volatile Method setPlaceholdersMethod;
 
-    private PlaceholderApiSupport() {
-    }
+    private PlaceholderApiSupport() {}
 
     public static boolean isAvailable() {
         return Bukkit.getPluginManager().getPlugin(PLACEHOLDER_API_PLUGIN) != null && hasPlaceholderApiClass();
@@ -29,12 +28,10 @@ public final class PlaceholderApiSupport {
         }
 
         try {
-            Class<?> coordinatorClass = Class.forName(
-                    PLACEHOLDER_COORDINATOR_CLASS,
-                    true,
-                    PlaceholderApiSupport.class.getClassLoader()
-            );
-            Object instance = coordinatorClass.getConstructor(MinecraftBot.class).newInstance(plugin);
+            Class<?> coordinatorClass =
+                    Class.forName(PLACEHOLDER_COORDINATOR_CLASS, true, PlaceholderApiSupport.class.getClassLoader());
+            Object instance =
+                    coordinatorClass.getConstructor(MinecraftBot.class).newInstance(plugin);
             if (instance instanceof PlaceholderRegistration registration) {
                 return registration;
             }
@@ -76,11 +73,8 @@ public final class PlaceholderApiSupport {
             return cachedMethod;
         }
 
-        Class<?> placeholderApiClass = Class.forName(
-                PLACEHOLDER_API_CLASS,
-                true,
-                PlaceholderApiSupport.class.getClassLoader()
-        );
+        Class<?> placeholderApiClass =
+                Class.forName(PLACEHOLDER_API_CLASS, true, PlaceholderApiSupport.class.getClassLoader());
         Method resolvedMethod = placeholderApiClass.getMethod("setPlaceholders", OfflinePlayer.class, String.class);
         setPlaceholdersMethod = resolvedMethod;
         return resolvedMethod;

@@ -1,5 +1,6 @@
 package com.monkey.mcbot.wrapper;
 
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.lang.reflect.Method;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -31,8 +32,17 @@ public record WrapperTask(String backend, Object handle, Runnable cancelAction) 
     }
 
     private static void invokeCancel(Object taskHandle) {
+        if (taskHandle instanceof ScheduledTask scheduledTask) {
+            scheduledTask.cancel();
+            return;
+        }
+
         try {
             Method cancel = taskHandle.getClass().getMethod("cancel");
+            if (!cancel.canAccess(taskHandle) && !cancel.trySetAccessible()) {
+                throw new IllegalAccessException(
+                        "Cannot access cancel() on " + taskHandle.getClass().getName());
+            }
             cancel.invoke(taskHandle);
         } catch (ReflectiveOperationException cancelError) {
             LOGGER.log(System.Logger.Level.WARNING, "Failed to cancel reflective scheduler task", cancelError);

@@ -2,6 +2,7 @@ package com.monkey.mcbot.listener;
 
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.event.combat.BotKillPlayerEvent;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotBroadcaster;
 import com.monkey.mcbot.bot.BotManager;
@@ -12,6 +13,8 @@ import com.monkey.mcbot.bot.ai.fakeplayer.BotCraftPlayer;
 import com.monkey.mcbot.integration.api.BotSnapshotMapper;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import java.util.Map;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -24,21 +27,17 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.Map;
-import java.util.UUID;
-import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
-
 public class PlayerCheckListener implements Listener {
 
-    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
 
     private final MinecraftBot plugin;
     private final BotManager botManager;
     private final PlayerOptions playerOptions;
 
-    private record BotKillContext(UUID ownerUUID, ITrainingBot bot, BotOptions options) {
-    }
+    private record BotKillContext(UUID ownerUUID, ITrainingBot bot, BotOptions options) {}
 
     public PlayerCheckListener(MinecraftBot plugin) {
         this.plugin = plugin;
@@ -51,7 +50,8 @@ public class PlayerCheckListener implements Listener {
         Player player = event.getPlayer();
 
         plugin.getWrapperManager().active().runEntityLater(player, 15L, () -> {
-            BotBroadcaster.syncVisibleBotsForPlayer(player, plugin.getBotRegistry().getAllBots().values());
+            BotBroadcaster.syncVisibleBotsForPlayer(
+                    player, plugin.getBotRegistry().getAllBots().values());
         });
     }
 
@@ -127,7 +127,8 @@ public class PlayerCheckListener implements Listener {
 
         if (wasBotSpawned && currentDeathMessage != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
-            if (bot != null && currentDeathMessage.contains(bot.asPlayer().getName().getString())) {
+            if (bot != null
+                    && currentDeathMessage.contains(bot.asPlayer().getName().getString())) {
                 setBotDeathMessage(event, player, options);
             }
         }
@@ -152,10 +153,8 @@ public class PlayerCheckListener implements Listener {
         return deathMessage == null ? null : PLAIN_TEXT_SERIALIZER.serialize(deathMessage);
     }
 
-    private BotKillContext resolveBotKillContext(Player victim,
-                                                 Entity killer,
-                                                 boolean victimOwnsBot,
-                                                 String currentDeathMessage) {
+    private BotKillContext resolveBotKillContext(
+            Player victim, Entity killer, boolean victimOwnsBot, String currentDeathMessage) {
         UUID killerUUID = killer == null ? null : killer.getUniqueId();
         if (killerUUID != null) {
             BotKillContext direct = findBotByBotUUID(killerUUID);
@@ -169,7 +168,8 @@ public class PlayerCheckListener implements Listener {
                 && currentDeathMessage != null
                 && currentDeathMessage.contains("[Intentional Game Design]");
 
-        for (Map.Entry<UUID, ITrainingBot> entry : plugin.getBotRegistry().getAllBots().entrySet()) {
+        for (Map.Entry<UUID, ITrainingBot> entry :
+                plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot candidate = entry.getValue();
             if (candidate == null || candidate.getTargetPlayer() == null) {
                 continue;
@@ -202,9 +202,12 @@ public class PlayerCheckListener implements Listener {
         if (botUUID == null) {
             return null;
         }
-        for (Map.Entry<UUID, ITrainingBot> entry : plugin.getBotRegistry().getAllBots().entrySet()) {
+        for (Map.Entry<UUID, ITrainingBot> entry :
+                plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot candidate = entry.getValue();
-            if (candidate != null && candidate.asPlayer() != null && botUUID.equals(candidate.asPlayer().getUUID())) {
+            if (candidate != null
+                    && candidate.asPlayer() != null
+                    && botUUID.equals(candidate.asPlayer().getUUID())) {
                 return toKillContext(entry.getKey(), candidate);
             }
         }
@@ -223,11 +226,9 @@ public class PlayerCheckListener implements Listener {
             return;
         }
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(context.ownerUUID(), context.bot());
-        plugin.getServer().getPluginManager().callEvent(new BotKillPlayerEvent(
-                context.ownerUUID(),
-                context.bot().asPlayer().getUUID(),
-                victim,
-                snapshot
-        ));
+        plugin.getServer()
+                .getPluginManager()
+                .callEvent(new BotKillPlayerEvent(
+                        context.ownerUUID(), context.bot().asPlayer().getUUID(), victim, snapshot));
     }
 }

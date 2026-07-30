@@ -1,10 +1,9 @@
 package com.monkey.mcbot.api.event.lifecycle;
 
 import com.monkey.mcbot.api.MinecraftBotAPI;
+import java.util.Objects;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import java.util.Objects;
 
 /**
  * Bukkit event fired when the MinecraftBot API is fully initialized and registered.

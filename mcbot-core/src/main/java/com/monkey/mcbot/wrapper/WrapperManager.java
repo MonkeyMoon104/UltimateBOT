@@ -2,11 +2,10 @@ package com.monkey.mcbot.wrapper;
 
 import com.monkey.mcbot.wrapper.bukkit.BukkitWrapper;
 import com.monkey.mcbot.wrapper.folia.FoliaWrapper;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class WrapperManager {
 

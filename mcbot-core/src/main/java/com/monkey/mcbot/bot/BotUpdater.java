@@ -2,7 +2,6 @@ package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -15,14 +14,15 @@ public class BotUpdater {
         this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
-    public void updateArmor(UUID ownerUUID,
-                            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-                            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+    public void updateArmor(
+            UUID ownerUUID,
+            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
         BotEquipmentUtils.updateBotArmor(ownerUUID, armorMap, blastProtectionMap, registry);
     }
 
-    public void updateArmor(UUID ownerUUID,
-                            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+    public void updateArmor(
+            UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
         updateArmor(ownerUUID, armorMap, new HashMap<>());
     }
 
@@ -55,7 +55,8 @@ public class BotUpdater {
     public void updateInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
         ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
-            net.minecraft.world.item.ItemStack nmsItem = org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item);
+            net.minecraft.world.item.ItemStack nmsItem =
+                    org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item);
             bot.getBotAI().getInventoryController().setItem(slot, nmsItem);
         }
     }
@@ -97,5 +98,4 @@ public class BotUpdater {
         }
         return false;
     }
-
 }

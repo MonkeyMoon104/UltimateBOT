@@ -17,7 +17,13 @@ public class MovementPatternSelector implements IMovementPatternSelector {
     }
 
     @Override
-    public MovementPattern selectOptimalPattern(Player target, double targetDistance, Vec3 botPos, Vec3 targetPos, boolean isUnderFire, int consecutiveHits) {
+    public MovementPattern selectOptimalPattern(
+            Player target,
+            double targetDistance,
+            Vec3 botPos,
+            Vec3 targetPos,
+            boolean isUnderFire,
+            int consecutiveHits) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastPatternChange < MIN_PATTERN_DURATION) {
             return currentPattern;

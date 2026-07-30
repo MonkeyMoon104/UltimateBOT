@@ -1,11 +1,7 @@
 package com.monkey.mcbot.wrapper;
 
 public record WrapperCapabilities(
-        boolean foliaDetected,
-        boolean globalRegionScheduler,
-        boolean asyncScheduler,
-        boolean entityScheduler
-) {
+        boolean foliaDetected, boolean globalRegionScheduler, boolean asyncScheduler, boolean entityScheduler) {
 
     public String summary() {
         return "folia=" + foliaDetected
@@ -14,4 +10,3 @@ public record WrapperCapabilities(
                 + ", entity=" + entityScheduler;
     }
 }
-

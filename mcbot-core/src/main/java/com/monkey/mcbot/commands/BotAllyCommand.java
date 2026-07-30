@@ -5,13 +5,12 @@ import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class BotAllyCommand implements CommandExecutor {
 
@@ -72,8 +71,7 @@ public class BotAllyCommand implements CommandExecutor {
         if (activeType == BotType.SINGLE) {
             return plugin.getLangString(
                     "messages.cannot-open-botally-while-single",
-                    "&cYou already have a single bot spawned. Despawn it before using /botally."
-            );
+                    "&cYou already have a single bot spawned. Despawn it before using /botally.");
         }
 
         return "&cYou already have an active team ally bot. Despawn it before using /botally.";

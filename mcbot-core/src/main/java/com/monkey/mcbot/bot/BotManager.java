@@ -1,15 +1,14 @@
 package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
-import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
+import java.util.Map;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Map;
-import java.util.UUID;
 
 public class BotManager {
 
@@ -27,22 +26,24 @@ public class BotManager {
         this.lookup = new BotLookup(registry);
     }
 
-    public boolean spawn(Player viewer,
-                      Player target,
-                      Map<EquipmentSlot, ItemStack> armorMap,
-                      Map<EquipmentSlot, Boolean> blastProtectionMap,
-                      boolean follow,
-                      int totem,
-                      BotOptions botOptions) {
+    public boolean spawn(
+            Player viewer,
+            Player target,
+            Map<EquipmentSlot, ItemStack> armorMap,
+            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            boolean follow,
+            int totem,
+            BotOptions botOptions) {
         return spawner.spawn(viewer, target, armorMap, blastProtectionMap, follow, totem, botOptions);
     }
 
-    public boolean spawn(Player viewer,
-                      Map<EquipmentSlot, ItemStack> armorMap,
-                      Map<EquipmentSlot, Boolean> blastProtectionMap,
-                      boolean follow,
-                      int totem,
-                      BotOptions botOptions) {
+    public boolean spawn(
+            Player viewer,
+            Map<EquipmentSlot, ItemStack> armorMap,
+            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            boolean follow,
+            int totem,
+            BotOptions botOptions) {
         return spawner.spawn(viewer, viewer, armorMap, blastProtectionMap, follow, totem, botOptions);
     }
 
@@ -109,7 +110,6 @@ public class BotManager {
         return hasActiveTeamAlly(participantUUID) ? BotType.TEAM_ALLY : BotType.SINGLE;
     }
 
-
     public boolean isBotSpawned(UUID ownerUUID) {
         return lookup.isBotSpawned(ownerUUID);
     }
@@ -151,14 +151,15 @@ public class BotManager {
         return getTeamAllyBotByTeamOwner(teamOwnerUUID) != null;
     }
 
-    public void updateArmor(UUID ownerUUID,
-                            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-                            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+    public void updateArmor(
+            UUID ownerUUID,
+            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
         updater.updateArmor(ownerUUID, armorMap, blastProtectionMap);
     }
 
-    public void updateArmor(UUID ownerUUID,
-                            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+    public void updateArmor(
+            UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
         updater.updateArmor(ownerUUID, armorMap);
     }
 

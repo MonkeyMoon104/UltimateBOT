@@ -29,15 +29,16 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 botPos,
                 awayDirection,
-                new double[]{7.0D, 8.0D, 9.2D},
-                new double[]{0.4D, 0.9D, 1.3D},
+                new double[] {7.0D, 8.0D, 9.2D},
+                new double[] {0.4D, 0.9D, 1.3D},
                 8.6D,
                 12.5D,
                 false,
-                11.5D
-        );
+                11.5D);
 
-        return best != null ? best : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(8.0D))));
+        return best != null
+                ? best
+                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(8.0D))));
     }
 
     @Override
@@ -49,15 +50,16 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 botPos,
                 awayDirection,
-                new double[]{6.0D, 7.2D, 8.2D},
-                new double[]{0.9D, 1.3D, 1.7D},
+                new double[] {6.0D, 7.2D, 8.2D},
+                new double[] {0.9D, 1.3D, 1.7D},
                 7.0D,
                 10.5D,
                 false,
-                10.0D
-        );
+                10.0D);
 
-        return best != null ? best : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(7.0D))));
+        return best != null
+                ? best
+                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(7.0D))));
     }
 
     @Override
@@ -69,18 +71,19 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 targetPos,
                 aroundDirection,
-                new double[]{3.6D, 4.4D, 5.0D},
-                new double[]{-2.0D, -2.5D, -3.0D},
+                new double[] {3.6D, 4.4D, 5.0D},
+                new double[] {-2.0D, -2.5D, -3.0D},
                 4.4D,
                 6.4D,
                 true,
-                12.0D
-        );
+                12.0D);
 
         if (best != null) {
             return best;
         }
-        return fallbackSafePosition(bot, BlockPos.containing(targetPos.add(aroundDirection.scale(4.2D)).add(0.0D, -2.4D, 0.0D)));
+        return fallbackSafePosition(
+                bot,
+                BlockPos.containing(targetPos.add(aroundDirection.scale(4.2D)).add(0.0D, -2.4D, 0.0D)));
     }
 
     @Override
@@ -92,18 +95,20 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 predictedTarget,
                 aroundDirection,
-                new double[]{3.2D, 3.8D, 4.4D},
-                new double[]{-0.9D, -1.2D, -1.6D},
+                new double[] {3.2D, 3.8D, 4.4D},
+                new double[] {-0.9D, -1.2D, -1.6D},
                 3.7D,
                 5.3D,
                 true,
-                11.0D
-        );
+                11.0D);
 
         if (best != null) {
             return best;
         }
-        return fallbackSafePosition(bot, BlockPos.containing(predictedTarget.add(aroundDirection.scale(3.8D)).add(0.0D, -1.2D, 0.0D)));
+        return fallbackSafePosition(
+                bot,
+                BlockPos.containing(
+                        predictedTarget.add(aroundDirection.scale(3.8D)).add(0.0D, -1.2D, 0.0D)));
     }
 
     @Override
@@ -118,18 +123,20 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 predictedPos,
                 approachDirection,
-                new double[]{2.1D, 2.7D, 3.2D},
-                new double[]{0.0D, 0.4D, 0.7D},
+                new double[] {2.1D, 2.7D, 3.2D},
+                new double[] {0.0D, 0.4D, 0.7D},
                 2.8D,
                 4.8D,
                 false,
-                10.5D
-        );
+                10.5D);
 
         if (best != null) {
             return best;
         }
-        return fallbackSafePosition(bot, BlockPos.containing(predictedPos.add(approachDirection.scale(2.7D)).add(0.0D, 0.4D, 0.0D)));
+        return fallbackSafePosition(
+                bot,
+                BlockPos.containing(
+                        predictedPos.add(approachDirection.scale(2.7D)).add(0.0D, 0.4D, 0.0D)));
     }
 
     @Override
@@ -141,27 +148,29 @@ public class PositionCalculator implements IPositionCalculator {
                 target,
                 botPos,
                 awayDirection,
-                new double[]{8.0D, 9.5D, 11.0D},
-                new double[]{0.2D, 0.8D, 1.4D},
+                new double[] {8.0D, 9.5D, 11.0D},
+                new double[] {0.2D, 0.8D, 1.4D},
                 9.2D,
                 13.5D,
                 false,
-                13.0D
-        );
+                13.0D);
 
-        return best != null ? best : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(9.0D))));
+        return best != null
+                ? best
+                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(9.0D))));
     }
 
-    private Vec3 findBestCandidate(Player bot,
-                                   Player target,
-                                   Vec3 origin,
-                                   Vec3 baseDirection,
-                                   double[] distances,
-                                   double[] yOffsets,
-                                   double idealTargetDistance,
-                                   double maxTargetDistance,
-                                   boolean preferLowerThanTarget,
-                                   double maxBotDistance) {
+    private Vec3 findBestCandidate(
+            Player bot,
+            Player target,
+            Vec3 origin,
+            Vec3 baseDirection,
+            double[] distances,
+            double[] yOffsets,
+            double idealTargetDistance,
+            double maxTargetDistance,
+            boolean preferLowerThanTarget,
+            double maxBotDistance) {
         Vec3 best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
 
@@ -226,13 +235,8 @@ public class PositionCalculator implements IPositionCalculator {
 
     private boolean hasThrowPath(Player bot, Vec3 destination) {
         Vec3 eyes = bot.getEyePosition(1.0F);
-        ClipContext context = new ClipContext(
-                eyes,
-                destination,
-                ClipContext.Block.COLLIDER,
-                ClipContext.Fluid.NONE,
-                bot
-        );
+        ClipContext context =
+                new ClipContext(eyes, destination, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, bot);
 
         HitResult result = bot.level().clip(context);
         if (result.getType() == HitResult.Type.MISS) {
@@ -264,10 +268,6 @@ public class PositionCalculator implements IPositionCalculator {
     private Vec3 rotateVector(Vec3 vector, double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
-        return new Vec3(
-                vector.x * cos - vector.z * sin,
-                vector.y,
-                vector.x * sin + vector.z * cos
-        ).normalize();
+        return new Vec3(vector.x * cos - vector.z * sin, vector.y, vector.x * sin + vector.z * cos).normalize();
     }
 }

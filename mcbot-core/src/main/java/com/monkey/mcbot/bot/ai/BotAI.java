@@ -185,20 +185,13 @@ public class BotAI {
                 }
                 rotationController.updateRotation(playerTarget);
             }
-            if (pathfindingManager.isUsingPathfinding() && movementController.hasActivePath()) {
-                if (movementController.followPath()) {
-                    rotationController.lookAt(
-                            movementController.getCurrentPathPoint().x,
-                            movementController.getCurrentPathPoint().y,
-                            movementController.getCurrentPathPoint().z);
-                } else {
-                    pathfindingManager.setUsingPathfinding(false);
-                }
-            } else {
+            if (!followActivePath(playerTarget)) {
                 pathfindingManager.checkForStuck(playerTarget);
                 enderpearlController.tick();
 
-                if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
+                if (pathfindingManager.isUsingPathfinding()) {
+                    followActivePath(playerTarget);
+                } else if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
                     combatStateManager.updateCombatState(playerTarget);
                     combatStrategyExecutor.executeCombatStrategy(playerTarget);
                 } else if (isCurrentlyHealing) {
@@ -210,7 +203,14 @@ public class BotAI {
             }
         } else {
             if (!isCurrentlyHealing) {
-                noobMovementController.moveTowards(playerTarget, 2.5);
+                if (!followActivePath(playerTarget)) {
+                    pathfindingManager.checkForStuck(playerTarget);
+                    if (pathfindingManager.isUsingPathfinding()) {
+                        followActivePath(playerTarget);
+                    } else {
+                        noobMovementController.moveTowards(playerTarget, 2.5);
+                    }
+                }
             } else {
                 executeHealingMovement(playerTarget);
             }
@@ -218,8 +218,9 @@ public class BotAI {
 
         if (pathfindingManager instanceof PathfindingManager manager) {
             manager.updateLastBotPosition();
-            manager.updateLastActionTime();
         }
+
+        rotationController.updateRotation(playerTarget);
     }
 
     public void tickIdle() {
@@ -370,11 +371,37 @@ public class BotAI {
             }
             return;
         }
-        combatStrategyExecutor.executeMeleeCombat(target);
+        if (!followActivePath(target)) {
+            pathfindingManager.checkForStuck(target);
+            if (pathfindingManager.isUsingPathfinding()) {
+                followActivePath(target);
+            } else {
+                combatStrategyExecutor.executeMeleeCombat(target);
+            }
+        }
         if (pathfindingManager instanceof PathfindingManager manager) {
             manager.updateLastBotPosition();
-            manager.updateLastActionTime();
         }
+    }
+
+    private boolean followActivePath(LivingEntity target) {
+        if (!pathfindingManager.isUsingPathfinding() || !movementController.hasActivePath()) {
+            return false;
+        }
+
+        if (movementController.shouldRecalculatePath(target.position())
+                && !movementController.calculatePathTo(target.position())) {
+            pathfindingManager.setUsingPathfinding(false);
+            movementController.clearPath();
+            return false;
+        }
+
+        if (!movementController.followPath()) {
+            pathfindingManager.setUsingPathfinding(false);
+            return false;
+        }
+
+        return true;
     }
 
     private void syncExplosiveCombat() {

@@ -2,10 +2,9 @@ package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.EntityUtils;
+import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-
-import java.util.UUID;
 
 public class BotLookup {
 
@@ -29,7 +28,6 @@ public class BotLookup {
     public ITrainingBot getBotSafe(UUID ownerUUID) {
         return registry.getBot(ownerUUID);
     }
-
 
     public boolean isBotSpawned(UUID ownerUUID) {
         return registry.isBotSpawned(ownerUUID);

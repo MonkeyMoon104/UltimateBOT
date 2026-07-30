@@ -16,5 +16,13 @@ public enum BotArmorType {
     /** Diamond armor tier. */
     DIAMOND,
     /** Netherite armor tier. */
-    NETHERITE
+    NETHERITE;
+
+    public com.monkey.mcbot.common.model.BotArmorTier toCommon() {
+        return com.monkey.mcbot.common.model.BotArmorTier.valueOf(name());
+    }
+
+    public static BotArmorType fromCommon(com.monkey.mcbot.common.model.BotArmorTier armorTier) {
+        return valueOf(java.util.Objects.requireNonNull(armorTier, "armorTier").name());
+    }
 }

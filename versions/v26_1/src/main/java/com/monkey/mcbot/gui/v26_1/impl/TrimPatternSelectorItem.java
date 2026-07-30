@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -13,8 +14,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.UUID;
 
 public class TrimPatternSelectorItem extends AbstractItem {
 
@@ -41,16 +40,16 @@ public class TrimPatternSelectorItem extends AbstractItem {
 
         ItemBuilder builder = new ItemBuilder(material);
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString(
-                empty ? "gui.templates-button.template-empty-name" : "gui.templates-button.template-name",
-                empty ? "&fClick to change template" : "&eTemplate: &f%value%"
-        ).replace("%value%", ArmorTrimUtils.formatKey(selectedPattern))));
+                        empty ? "gui.templates-button.template-empty-name" : "gui.templates-button.template-name",
+                        empty ? "&fClick to change template" : "&eTemplate: &f%value%")
+                .replace("%value%", ArmorTrimUtils.formatKey(selectedPattern))));
 
         for (String line : training.getLangStringList("gui.templates-button.template-lore")) {
-            builder.addLegacyLoreLines(ChatColorUtils.translate(
-                    line.replace("%value%", empty
+            builder.addLegacyLoreLines(ChatColorUtils.translate(line.replace(
+                    "%value%",
+                    empty
                             ? training.getLangString("gui.templates-button.empty-value", "None")
-                            : ArmorTrimUtils.formatKey(selectedPattern))
-            ));
+                            : ArmorTrimUtils.formatKey(selectedPattern))));
         }
 
         return builder;

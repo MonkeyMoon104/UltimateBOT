@@ -1,8 +1,8 @@
 package com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter;
 
+import java.util.Map;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import java.util.Map;
 
 public interface IItemChecker {
 
@@ -17,6 +17,7 @@ public interface IItemChecker {
     boolean isHoldingAnchor(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
 
     boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
+
     boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots);
 
     boolean hasEnderpearls(Map<Integer, ItemStack> hotbarSlots, boolean infiniteResources);

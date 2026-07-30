@@ -26,10 +26,13 @@ public class TargetModeItem extends AbstractItem {
     public ItemProvider getItemProvider(Player viewer) {
         BotTargetMode mode = options.getTargetMode();
         return new ItemBuilder(material(mode))
-                .setLegacyName(ChatColorUtils.translate(plugin.getLangString("gui.target-mode-button.name", "&bAttack mode")))
-                .addLegacyLoreLines(ChatColorUtils.translate(plugin.getLangString("gui.target-mode-button.current", "&7Current: &e%mode%")
-                        .replace("%mode%", label(mode))))
-                .addLegacyLoreLines(ChatColorUtils.translate(plugin.getLangString("gui.target-mode-button.click", "&aClick to change")));
+                .setLegacyName(
+                        ChatColorUtils.translate(plugin.getLangString("gui.target-mode-button.name", "&bAttack mode")))
+                .addLegacyLoreLines(ChatColorUtils.translate(
+                        plugin.getLangString("gui.target-mode-button.current", "&7Current: &e%mode%")
+                                .replace("%mode%", label(mode))))
+                .addLegacyLoreLines(ChatColorUtils.translate(
+                        plugin.getLangString("gui.target-mode-button.click", "&aClick to change")));
     }
 
     @Override

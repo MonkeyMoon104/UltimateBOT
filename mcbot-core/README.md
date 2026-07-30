@@ -14,6 +14,8 @@ It contains:
 
 This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `plugin` module, which shadows `mcbot-core` together with the version-specific bridges under `versions/`.
 
+Platform-independent contracts shared by runtime modules live in `common`. That module contains only Java and JSpecify types and is protected by an architecture test that rejects Bukkit, Paper, Mojang and NMS dependencies.
+
 ## Key Capabilities
 - Four runtime bot modes: `SINGLE`, `EVENT`, `ALLY`, `TEAM_ALLY`
 - NMS-backed fake-player bots with version-specific bridge loading
@@ -31,8 +33,9 @@ This module is the implementation layer, not the final multi-version distributio
 - Java 21
 - Paper 1.21.4 through 1.21.11
 - Final packaged jar: `plugin/build/libs/MinecraftBot.jar`
-- Required runtime dependency: `PacketEvents 2.13.x`
+- External packet dependencies: none
 - Optional integrations: PlaceholderAPI, LuckPerms and WorldGuard
+- Optional observability runtime: downloaded automatically to `plugins/MinecraftBot/addon/MinecraftBot-Metrics.jar`
 
 Deployment note:
 - the current source also registers a CombatLogX `PlayerPreTagEvent` listener, so production deployments should keep a compatible CombatLogX runtime available, or guard/remove that hook in the release build
@@ -95,7 +98,7 @@ Core integration points include:
 - `BotPlaceholderCoordinator` for PlaceholderAPI
 - `CoreBotManagerAdapter` and `CoreBotRegistryAdapter` for public API exposure
 - `INMSBridge` and `NMSBridgeManager` for multi-version server support
-- `BotPacketGateway` for PacketEvents-backed client rendering
+- `INMSBridge` packet factories for native, version-specific client rendering
 
 ## Bot Modes
 ### `SINGLE`
@@ -294,6 +297,9 @@ The core cleans runtime state aggressively to avoid stale entities and stale own
 This repository is a multi-module build:
 - `mcbot-api` exposes the public contract
 - `mcbot-core` contains the runtime implementation
+- `common` contains the platform-independent contracts and shared Java utilities
+- `addons:metrics` produces the optional shaded Micrometer/Prometheus runtime
+- `addons:guard` produces the lightweight Paper compatibility guard
 - `versions:*` provide version-specific NMS bridges
 - `plugin` assembles the final distributable jar
 
@@ -307,6 +313,16 @@ Useful tasks:
 Expected production artifact:
 - `plugin/build/libs/MinecraftBot.jar`
 
+Optional addon artifacts:
+- `addons/metrics/build/libs/MinecraftBot-Metrics.jar`
+- `addons/guard/build/libs/MinecraftBot-Guard.jar`
+
+The metrics addon is disabled by default through `addons.metrics.enabled`, while the guard addon is enabled by
+default. On a full server restart,
+MinecraftBot creates the `addon` directory, downloads each enabled version-matched artifact from the release
+repository, verifies its embedded size and SHA-256, and loads it through an isolated class loader. `/mcbreload`
+intentionally does not install, enable or disable addons.
+
 ## Extension and Integration
 During startup, the core:
 1. builds a `MinecraftBotAPI` instance
@@ -317,7 +333,7 @@ Third-party integrations should consume the public API from `mcbot-api`, not int
 
 ## Operational Notes
 - This is a Paper-oriented, NMS-backed implementation module
-- PacketEvents is intentionally external and must be installed on the server
+- Bot rendering uses the native version-specific NMS bridges
 - PlaceholderAPI is part of the declared plugin dependency model
 - Player option state is runtime-only; the core does not persist it to a database
 - If you need a stable external integration surface, depend on `mcbot-api` instead of importing `mcbot-core`

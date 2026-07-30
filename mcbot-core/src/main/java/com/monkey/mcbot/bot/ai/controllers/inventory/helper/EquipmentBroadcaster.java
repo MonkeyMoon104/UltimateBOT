@@ -1,26 +1,30 @@
 package com.monkey.mcbot.bot.ai.controllers.inventory.helper;
 
+import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
-import com.monkey.mcbot.protocol.BotEquipment;
-import com.monkey.mcbot.protocol.PacketEventsBotPacketGateway;
-import net.minecraft.world.entity.player.Player;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.inventory.EquipmentSlot;
-
+import com.monkey.mcbot.nms.NMSBridgeManager;
+import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class EquipmentBroadcaster implements IEquipmentBroadcaster {
 
     @Override
     public void broadcastEquipmentChange(Player bot) {
-        List<BotEquipment> equipment = List.of(new BotEquipment(
-                EquipmentSlot.HAND,
-                CraftItemStack.asBukkitCopy(bot.getMainHandItem())
-        ));
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
+
+        ClientboundSetEquipmentPacket packet = NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
 
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
-            PacketEventsBotPacketGateway.get().sendEquipment(online, bot.getId(), equipment);
+            ServerPlayer handle = ((CraftPlayer) online).getHandle();
+            handle.connection.send(packet);
         }
     }
 }

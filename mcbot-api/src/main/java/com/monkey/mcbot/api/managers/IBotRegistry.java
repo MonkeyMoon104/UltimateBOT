@@ -1,7 +1,6 @@
 package com.monkey.mcbot.api.managers;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

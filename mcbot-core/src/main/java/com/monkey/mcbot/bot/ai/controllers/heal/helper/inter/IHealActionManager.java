@@ -13,5 +13,6 @@ public interface IHealActionManager {
     void resetHealAction();
 
     boolean canStartNewHeal();
+
     void applyGoldenAppleEffectsManually(Player bot);
 }

@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.equipment.ArmorTrimUtils;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -14,8 +15,6 @@ import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
 
-import java.util.UUID;
-
 public class TrimMaterialSelectorItem extends AbstractItem {
 
     private final MinecraftBot training;
@@ -23,7 +22,8 @@ public class TrimMaterialSelectorItem extends AbstractItem {
     private final EquipmentSlot slot;
     private final ArmorItem armorItem;
 
-    public TrimMaterialSelectorItem(MinecraftBot training, BotOptions options, EquipmentSlot slot, ArmorItem armorItem) {
+    public TrimMaterialSelectorItem(
+            MinecraftBot training, BotOptions options, EquipmentSlot slot, ArmorItem armorItem) {
         this.training = training;
         this.options = options;
         this.slot = slot;
@@ -41,16 +41,16 @@ public class TrimMaterialSelectorItem extends AbstractItem {
 
         ItemBuilder builder = new ItemBuilder(material);
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString(
-                empty ? "gui.templates-button.ore-empty-name" : "gui.templates-button.ore-name",
-                empty ? "&fClick to change ore" : "&eOre: &f%value%"
-        ).replace("%value%", ArmorTrimUtils.formatKey(selectedMaterial))));
+                        empty ? "gui.templates-button.ore-empty-name" : "gui.templates-button.ore-name",
+                        empty ? "&fClick to change ore" : "&eOre: &f%value%")
+                .replace("%value%", ArmorTrimUtils.formatKey(selectedMaterial))));
 
         for (String line : training.getLangStringList("gui.templates-button.ore-lore")) {
-            builder.addLegacyLoreLines(ChatColorUtils.translate(
-                    line.replace("%value%", empty
+            builder.addLegacyLoreLines(ChatColorUtils.translate(line.replace(
+                    "%value%",
+                    empty
                             ? training.getLangString("gui.templates-button.empty-value", "None")
-                            : ArmorTrimUtils.formatKey(selectedMaterial))
-            ));
+                            : ArmorTrimUtils.formatKey(selectedMaterial))));
         }
 
         return builder;
@@ -59,7 +59,8 @@ public class TrimMaterialSelectorItem extends AbstractItem {
     @Override
     public void handleClick(ClickType clickType, Player player, Click click) {
         boolean forward = !clickType.isRightClick();
-        options.setTrimMaterialKey(slot, ArmorTrimUtils.getNextTrimMaterialKey(options.getTrimMaterialKey(slot), forward));
+        options.setTrimMaterialKey(
+                slot, ArmorTrimUtils.getNextTrimMaterialKey(options.getTrimMaterialKey(slot), forward));
         training.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor(), options.getBlast());
         armorItem.notifyWindows();
         notifyWindows();

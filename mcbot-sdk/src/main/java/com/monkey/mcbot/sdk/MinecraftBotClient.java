@@ -6,11 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.sdk.model.BotOperationResponse;
 import com.monkey.mcbot.sdk.model.BotSnapshotResponse;
 import com.monkey.mcbot.sdk.model.EventBotSpawnRequest;
-import com.monkey.mcbot.sdk.model.ToggleRequest;
 import com.monkey.mcbot.sdk.model.SdkBotTargetMode;
 import com.monkey.mcbot.sdk.model.TargetModeRequest;
-import org.jspecify.annotations.Nullable;
-
+import com.monkey.mcbot.sdk.model.ToggleRequest;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,6 +18,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Java-only remote client for MinecraftBot servers with remote API enabled.
@@ -29,8 +28,7 @@ import java.util.UUID;
  */
 public final class MinecraftBotClient implements AutoCloseable {
 
-    private static final TypeReference<List<BotSnapshotResponse>> BOT_LIST_TYPE = new TypeReference<>() {
-    };
+    private static final TypeReference<List<BotSnapshotResponse>> BOT_LIST_TYPE = new TypeReference<>() {};
 
     private final URI baseUri;
     private final String token;
@@ -43,8 +41,8 @@ public final class MinecraftBotClient implements AutoCloseable {
         this.token = Objects.requireNonNull(builder.token, "token");
         this.objectMapper = builder.objectMapper == null
                 ? new ObjectMapper()
-                .findAndRegisterModules()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        .findAndRegisterModules()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 : builder.objectMapper;
         this.httpClient = builder.httpClient == null
                 ? HttpClient.newBuilder().connectTimeout(builder.timeout).build()
@@ -70,7 +68,11 @@ public final class MinecraftBotClient implements AutoCloseable {
     }
 
     public BotSnapshotResponse getBot(UUID ownerOrBotUUID) {
-        return send("GET", "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID"), null, BotSnapshotResponse.class);
+        return send(
+                "GET",
+                "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID"),
+                null,
+                BotSnapshotResponse.class);
     }
 
     public BotOperationResponse spawnEventBot(EventBotSpawnRequest request) {
@@ -78,7 +80,8 @@ public final class MinecraftBotClient implements AutoCloseable {
     }
 
     public BotOperationResponse remove(UUID ownerUUID) {
-        return send("DELETE", "/bots/" + Objects.requireNonNull(ownerUUID, "ownerUUID"), null, BotOperationResponse.class);
+        return send(
+                "DELETE", "/bots/" + Objects.requireNonNull(ownerUUID, "ownerUUID"), null, BotOperationResponse.class);
     }
 
     public BotOperationResponse removeByBotUUID(UUID botUUID) {
@@ -148,18 +151,23 @@ public final class MinecraftBotClient implements AutoCloseable {
     private BotOperationResponse targetMode(UUID ownerOrBotUUID, SdkBotTargetMode targetMode) {
         Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
         Objects.requireNonNull(targetMode, "targetMode");
-        return send("PATCH", "/bots/" + ownerOrBotUUID + "/target-mode",
-                new TargetModeRequest(targetMode), BotOperationResponse.class);
+        return send(
+                "PATCH",
+                "/bots/" + ownerOrBotUUID + "/target-mode",
+                new TargetModeRequest(targetMode),
+                BotOperationResponse.class);
     }
 
     private BotOperationResponse toggle(UUID ownerUUID, String field, boolean enabled) {
         Objects.requireNonNull(ownerUUID, "ownerUUID");
-        return send("PATCH", "/bots/" + ownerUUID + "/" + field, new ToggleRequest(enabled), BotOperationResponse.class);
+        return send(
+                "PATCH", "/bots/" + ownerUUID + "/" + field, new ToggleRequest(enabled), BotOperationResponse.class);
     }
 
     private <T> T send(String method, String path, @Nullable Object body, Class<T> responseType) {
         try {
-            HttpResponse<String> response = httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response =
+                    httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
             return decodeResponse(response, responseType);
         } catch (IOException ex) {
             throw new MinecraftBotClientException("Remote API request failed: " + ex.getMessage(), ex);
@@ -171,9 +179,11 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     private <T> T send(String method, String path, @Nullable Object body, TypeReference<T> responseType) {
         try {
-            HttpResponse<String> response = httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response =
+                    httpClient.send(buildRequest(method, path, body), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new MinecraftBotClientException("Remote API returned HTTP " + response.statusCode() + ": " + response.body());
+                throw new MinecraftBotClientException(
+                        "Remote API returned HTTP " + response.statusCode() + ": " + response.body());
             }
             return objectMapper.readValue(response.body(), responseType);
         } catch (IOException ex) {
@@ -200,7 +210,8 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     private <T> T decodeResponse(HttpResponse<String> response, Class<T> responseType) throws IOException {
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new MinecraftBotClientException("Remote API returned HTTP " + response.statusCode() + ": " + response.body());
+            throw new MinecraftBotClientException(
+                    "Remote API returned HTTP " + response.statusCode() + ": " + response.body());
         }
         return objectMapper.readValue(response.body(), responseType);
     }
@@ -228,8 +239,7 @@ public final class MinecraftBotClient implements AutoCloseable {
         private @Nullable HttpClient httpClient;
         private @Nullable ObjectMapper objectMapper;
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder baseUri(String baseUri) {
             this.baseUri = URI.create(Objects.requireNonNull(baseUri, "baseUri"));

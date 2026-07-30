@@ -42,7 +42,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.Nullable;
 
-/* Bukkit dictates deprecated and return-only generic compatibility signatures on Player. */
+/** Bukkit compatibility adapter for deprecated and return-only generic {@link org.bukkit.entity.Player} signatures. */
 @SuppressWarnings({"deprecation", "TypeParameterUnusedInFormals"})
 public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
 

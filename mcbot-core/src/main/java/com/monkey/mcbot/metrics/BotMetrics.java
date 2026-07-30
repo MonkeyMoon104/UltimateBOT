@@ -3,33 +3,32 @@ package com.monkey.mcbot.metrics;
 import com.monkey.mcbot.api.event.base.BotEvent;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.services.TargetingService;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.FunctionCounter;
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.Tags;
-import io.micrometer.core.instrument.Timer;
-import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
-import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
-import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
-import io.micrometer.core.instrument.binder.system.UptimeMetrics;
-import io.micrometer.prometheusmetrics.PrometheusConfig;
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
-import java.util.Locale;
+import com.monkey.mcbot.common.addon.AddonDefinition;
+import com.monkey.mcbot.common.addon.AddonLoader;
+import com.monkey.mcbot.common.addon.LoadedAddon;
+import com.monkey.mcbot.common.metrics.MetricsBackend;
+import com.monkey.mcbot.common.metrics.MetricsBackendContext;
+import com.monkey.mcbot.common.metrics.MetricsBackendFactory;
+import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.event.Cancellable;
+import org.jspecify.annotations.Nullable;
 
-/** Central low-cardinality instrumentation for the MinecraftBot runtime. */
+/** Lightweight facade that initializes Micrometer and Prometheus only when explicitly enabled at startup. */
 public final class BotMetrics implements AutoCloseable {
-    private static final String METRIC_PREFIX = "minecraftbot";
+    private static final AddonDefinition ADDON = new AddonDefinition(
+            "metrics",
+            "MinecraftBot metrics addon",
+            "MinecraftBot-Metrics.jar",
+            "META-INF/minecraftbot/addons/metrics.properties",
+            "mcbot.addons.metrics.url");
 
     private final boolean enabled;
     private final boolean prometheusEndpointEnabled;
-    private final PrometheusMeterRegistry registry;
-    private final Counter observerFailures;
-    private final JvmGcMetrics jvmGcMetrics;
+    private final MetricsBackend backend;
+    private final @Nullable LoadedAddon<MetricsBackend> loadedAddon;
 
     public BotMetrics(
             boolean enabled,
@@ -37,55 +36,49 @@ public final class BotMetrics implements AutoCloseable {
             String pluginVersion,
             String minecraftVersion,
             BotRegistry botRegistry,
-            TargetingService targetingService) {
-        this.enabled = enabled;
-        this.prometheusEndpointEnabled = enabled && prometheusEndpointEnabled;
-        this.registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
-        this.registry
-                .config()
-                .commonTags(Tags.of(
-                        "plugin_version", normalizedTag(pluginVersion),
-                        "minecraft_version", normalizedTag(minecraftVersion)));
+            TargetingService targetingService,
+            Path pluginDataDirectory,
+            ClassLoader pluginClassLoader,
+            Logger logger) {
+        Objects.requireNonNull(botRegistry, "botRegistry");
+        Objects.requireNonNull(targetingService, "targetingService");
+        Objects.requireNonNull(logger, "logger");
 
-        if (enabled) {
-            Gauge.builder(METRIC_PREFIX + ".bots.active", botRegistry, BotRegistry::size)
-                    .description("Currently active managed bots")
-                    .strongReference(true)
-                    .register(registry);
-            Gauge.builder(METRIC_PREFIX + ".cache.target.size", targetingService, TargetingService::estimatedCacheSize)
-                    .description("Current target cache entry count")
-                    .strongReference(true)
-                    .register(registry);
-            FunctionCounter.builder(
-                            METRIC_PREFIX + ".cache.target.hits", targetingService, service -> service.cacheStats()
-                                    .hitCount())
-                    .description("Cumulative target cache hits")
-                    .register(registry);
-            FunctionCounter.builder(
-                            METRIC_PREFIX + ".cache.target.misses", targetingService, service -> service.cacheStats()
-                                    .missCount())
-                    .description("Cumulative target cache misses")
-                    .register(registry);
-            FunctionCounter.builder(
-                            METRIC_PREFIX + ".cache.target.evictions", targetingService, service -> service.cacheStats()
-                                    .evictionCount())
-                    .description("Cumulative target cache evictions")
-                    .register(registry);
-
-            new ClassLoaderMetrics().bindTo(registry);
-            new JvmMemoryMetrics().bindTo(registry);
-            new JvmThreadMetrics().bindTo(registry);
-            new ProcessorMetrics().bindTo(registry);
-            new UptimeMetrics().bindTo(registry);
-            this.jvmGcMetrics = new JvmGcMetrics();
-            this.jvmGcMetrics.bindTo(registry);
-        } else {
-            this.jvmGcMetrics = null;
+        if (!enabled) {
+            this.enabled = false;
+            this.prometheusEndpointEnabled = false;
+            this.backend = MetricsBackend.NOOP;
+            this.loadedAddon = null;
+            return;
         }
 
-        this.observerFailures = Counter.builder(METRIC_PREFIX + ".events.observer.failures")
-                .description("Bot event observer callback failures")
-                .register(registry);
+        MetricsBackendContext context = new MetricsBackendContext(
+                prometheusEndpointEnabled,
+                pluginVersion,
+                minecraftVersion,
+                botRegistry::size,
+                targetingService::estimatedCacheSize,
+                () -> targetingService.cacheStats().hitCount(),
+                () -> targetingService.cacheStats().missCount(),
+                () -> targetingService.cacheStats().evictionCount());
+        LoadedAddon<MetricsBackend> loaded;
+        try {
+            loaded = new AddonLoader(pluginDataDirectory, pluginClassLoader, logger)
+                    .load(ADDON, MetricsBackendFactory.class, factory -> factory.create(context));
+        } catch (Exception | LinkageError error) {
+            logger.warning("Metrics addon unavailable; observability disabled -> " + error.getMessage());
+            logger.log(Level.FINE, "Metrics addon startup failure", error);
+            this.enabled = false;
+            this.prometheusEndpointEnabled = false;
+            this.backend = MetricsBackend.NOOP;
+            this.loadedAddon = null;
+            return;
+        }
+
+        this.enabled = true;
+        this.prometheusEndpointEnabled = prometheusEndpointEnabled;
+        this.loadedAddon = loaded;
+        this.backend = loaded.instance();
     }
 
     public boolean isEnabled() {
@@ -101,48 +94,29 @@ public final class BotMetrics implements AutoCloseable {
             return;
         }
         boolean cancelled = event instanceof Cancellable cancellable && cancellable.isCancelled();
-        Counter.builder(METRIC_PREFIX + ".events.published")
-                .description("Published bot events")
-                .tags("type", event.getClass().getSimpleName(), "cancelled", Boolean.toString(cancelled))
-                .register(registry)
-                .increment();
+        backend.recordEvent(event.getClass().getSimpleName(), cancelled);
     }
 
     public void recordObserverFailure() {
         if (enabled) {
-            observerFailures.increment();
+            backend.recordObserverFailure();
         }
     }
 
     public void recordRemoteRequest(String method, String route, int status, long durationNanos) {
-        if (!enabled) {
-            return;
+        if (enabled) {
+            backend.recordRemoteRequest(method, route, status, durationNanos);
         }
-        Timer.builder(METRIC_PREFIX + ".remote.requests")
-                .description("Remote API request duration")
-                .tags(
-                        "method", normalizedTag(method).toUpperCase(Locale.ROOT),
-                        "route", normalizedTag(route),
-                        "status", Integer.toString(status > 0 ? status : 500))
-                .publishPercentileHistogram()
-                .register(registry)
-                .record(Math.max(0L, durationNanos), TimeUnit.NANOSECONDS);
     }
 
     public String scrape() {
-        return prometheusEndpointEnabled ? registry.scrape() : "";
+        return prometheusEndpointEnabled ? backend.scrape() : "";
     }
 
     @Override
     public void close() {
-        if (jvmGcMetrics != null) {
-            jvmGcMetrics.close();
+        if (loadedAddon != null) {
+            loadedAddon.close();
         }
-        registry.close();
-    }
-
-    private static String normalizedTag(String value) {
-        String normalized = Objects.requireNonNullElse(value, "unknown").trim();
-        return normalized.isEmpty() ? "unknown" : normalized;
     }
 }

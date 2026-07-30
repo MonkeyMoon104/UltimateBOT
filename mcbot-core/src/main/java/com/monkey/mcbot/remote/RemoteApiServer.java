@@ -7,6 +7,7 @@ import com.monkey.mcbot.api.MinecraftBotAPI;
 import com.monkey.mcbot.api.event.base.BotEventSource;
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.model.*;
+import com.monkey.mcbot.common.util.EnumValues;
 import com.monkey.mcbot.event.BotEventSourceContext;
 import com.monkey.mcbot.metrics.BotMetrics;
 import com.sun.net.httpserver.HttpExchange;
@@ -220,7 +221,7 @@ public final class RemoteApiServer {
             TargetModePayload payload = readJson(exchange, TargetModePayload.class);
             com.monkey.mcbot.api.model.BotTargetMode mode = payload == null
                     ? null
-                    : enumValue(com.monkey.mcbot.api.model.BotTargetMode.class, payload.targetMode, null);
+                    : EnumValues.parse(com.monkey.mcbot.api.model.BotTargetMode.class, payload.targetMode, null);
             boolean updated = mode != null
                     && runSync(() -> ownerUUID != null
                             ? manager.updateTargetMode(ownerUUID, mode)
@@ -290,9 +291,9 @@ public final class RemoteApiServer {
                 .blastProtection(false, false, false, false)
                 .setChangeableBlast(defaultBoolean(safe.changeableBlast, true))
                 .armorValue(
-                        enumValue(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
-                        enumValue(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
-                .armor(enumValue(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
+                        EnumValues.parse(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
+                        EnumValues.parse(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
+                .armor(EnumValues.parse(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
                 .setChangeableArmor(defaultBoolean(safe.changeableArmor, true))
                 .totemValue(
                         defaultInt(safe.minTotemCount, -1),
@@ -300,9 +301,9 @@ public final class RemoteApiServer {
                 .totemCount(defaultInt(safe.totemCount, -1))
                 .setChangeableTotem(defaultBoolean(safe.changeableTotem, true))
                 .rankValue(
-                        enumValue(BotRank.class, safe.minRank, BotRank.EASY),
-                        enumValue(BotRank.class, safe.maxRank, BotRank.GOD))
-                .rank(enumValue(BotRank.class, safe.rank, BotRank.EASY))
+                        EnumValues.parse(BotRank.class, safe.minRank, BotRank.EASY),
+                        EnumValues.parse(BotRank.class, safe.maxRank, BotRank.GOD))
+                .rank(EnumValues.parse(BotRank.class, safe.rank, BotRank.EASY))
                 .setChangeableRank(defaultBoolean(safe.changeableRank, true));
 
         if (safe.spawnLocation != null) {
@@ -320,7 +321,7 @@ public final class RemoteApiServer {
                 .autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
-                .targetMode(enumValue(
+                .targetMode(EnumValues.parse(
                         com.monkey.mcbot.api.model.BotTargetMode.class,
                         safe.targetMode,
                         com.monkey.mcbot.api.model.BotTargetMode.PLAYERS))
@@ -469,17 +470,6 @@ public final class RemoteApiServer {
 
     private static double defaultDouble(Double value, double fallback) {
         return value == null ? fallback : value;
-    }
-
-    private static <E extends Enum<E>> E enumValue(Class<E> type, String value, E fallback) {
-        if (value == null || value.isBlank()) {
-            return fallback;
-        }
-        try {
-            return Enum.valueOf(type, value.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException ex) {
-            return fallback;
-        }
     }
 
     private record RemoteOperationResponse(

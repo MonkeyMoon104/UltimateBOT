@@ -6,6 +6,9 @@ import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import com.monkey.mcbot.utils.armor.PlayerOptions;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,10 +20,6 @@ import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.window.Window;
 import xyz.xenondevs.invui.window.WindowManager;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class SpawnItem extends AbstractItem {
 
@@ -52,7 +51,8 @@ public class SpawnItem extends AbstractItem {
                 ? training.getLangStringList("gui.despawn-button.lore")
                 : training.getLangStringList("gui.spawn-button.lore");
 
-        ItemBuilder builder = new ItemBuilder(mat);        builder.setLegacyName(ChatColorUtils.translate(name));
+        ItemBuilder builder = new ItemBuilder(mat);
+        builder.setLegacyName(ChatColorUtils.translate(name));
         for (String line : lore) {
             builder.addLegacyLoreLines(ChatColorUtils.translate(line));
         }
@@ -70,7 +70,8 @@ public class SpawnItem extends AbstractItem {
             Window window = WindowManager.getInstance().getOpenWindow(player);
             if (window != null) window.close();
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
-            player.sendMessage(ChatColorUtils.translate(training.getLangString("messages.despawn-bot", "&cBot removed!")));
+            player.sendMessage(
+                    ChatColorUtils.translate(training.getLangString("messages.despawn-bot", "&cBot removed!")));
             return;
         }
 
@@ -81,10 +82,10 @@ public class SpawnItem extends AbstractItem {
                 return;
             }
             training.getBotManager().despawnAll();
-            String msg = training.getLangString("messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event");
+            String msg = training.getLangString(
+                    "messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event");
             player.sendMessage(ChatColorUtils.translate(msg));
-        }
-        else {
+        } else {
             if (isBotEventActive()) {
                 String msg = training.getLangString("messages.cannot-spawn-normal-during-event");
                 player.sendMessage(ChatColorUtils.translate(msg));
@@ -96,7 +97,8 @@ public class SpawnItem extends AbstractItem {
         if (window != null) window.close();
 
         boolean follow = options.isFollow();
-        training.getBotManager().spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
+        training.getBotManager()
+                .spawn(player, options.getArmor(), options.getBlast(), follow, options.getTotems(), options);
         String msg = training.getLangString("messages.spawn-bot", "&aBot spawned with the selected settings!");
         player.sendMessage(ChatColorUtils.translate(msg));
 
@@ -132,8 +134,7 @@ public class SpawnItem extends AbstractItem {
     private void notifyTeamOwners(Player spawner) {
         String template = training.getLangString(
                 "messages.team-ally.team-spawned-notify",
-                "&aAllied bot spawned by %playerowner% for the team with these owners: %playerlist%"
-        );
+                "&aAllied bot spawned by %playerowner% for the team with these owners: %playerlist%");
 
         List<String> ownerNames = new ArrayList<>();
         for (UUID ownerUUID : options.getTeamOwnerUUIDs()) {
@@ -142,9 +143,7 @@ public class SpawnItem extends AbstractItem {
         }
 
         String ownerList = String.join(", ", ownerNames);
-        String message = template
-                .replace("%playerowner%", spawner.getName())
-                .replace("%playerlist%", ownerList);
+        String message = template.replace("%playerowner%", spawner.getName()).replace("%playerlist%", ownerList);
 
         for (UUID ownerUUID : options.getTeamOwnerUUIDs()) {
             Player owner = Bukkit.getPlayer(ownerUUID);
@@ -168,7 +167,3 @@ public class SpawnItem extends AbstractItem {
         return false;
     }
 }
-
-
-
-

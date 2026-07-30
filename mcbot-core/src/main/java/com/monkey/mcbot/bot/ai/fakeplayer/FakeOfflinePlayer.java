@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
-/* Bukkit dictates deprecated and return-only generic compatibility signatures on OfflinePlayer. */
+/** Bukkit compatibility adapter for deprecated and return-only generic {@link OfflinePlayer} signatures. */
 @SuppressWarnings({"deprecation", "TypeParameterUnusedInFormals"})
 public final class FakeOfflinePlayer implements OfflinePlayer {
 

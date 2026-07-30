@@ -4,11 +4,10 @@ import com.monkey.mcbot.api.event.combat.BotExplosionEvent;
 import com.monkey.mcbot.api.event.combat.BotExplosionType;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-import org.bukkit.Location;
-
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import org.bukkit.Location;
 
 /**
  * Marks the synchronous Bukkit explosion event fired by a bot combat action.
@@ -16,8 +15,7 @@ import java.util.function.Supplier;
 public final class BotExplosionContext {
     private static final ThreadLocal<Integer> BLOCK_PROTECTION_DEPTH = ThreadLocal.withInitial(() -> 0);
 
-    private BotExplosionContext() {
-    }
+    private BotExplosionContext() {}
 
     public static <T> T execute(boolean blockDamage, Supplier<T> action) {
         if (blockDamage) {
@@ -38,17 +36,32 @@ public final class BotExplosionContext {
     }
 
     /** Runs a bot explosion after exposing its mutable policy to API listeners. */
-    public static <T> T execute(ITrainingBot bot, BotExplosionType type, Location location,
-                                boolean blockDamage, Function<Boolean, T> action, T cancelledResult) {
+    public static <T> T execute(
+            ITrainingBot bot,
+            BotExplosionType type,
+            Location location,
+            boolean blockDamage,
+            Function<Boolean, T> action,
+            T cancelledResult) {
         boolean resolvedBlockDamage = blockDamage;
         if (bot != null && bot.getPlugin() != null) {
-            UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
-            BotSnapshot snapshot = ownerUUID == null ? null
+            UUID ownerUUID = bot.getPlugin()
+                    .getBotRegistry()
+                    .getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+            BotSnapshot snapshot = ownerUUID == null
+                    ? null
                     : bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
             if (snapshot != null) {
-                BotExplosionEvent event = bot.getPlugin().getBotEventDispatcher().publish(new BotExplosionEvent(
-                        bot.getPlugin().getBotEventDispatcher().nextSequence(bot.asPlayer().getUUID()),
-                        snapshot, type, location, blockDamage));
+                BotExplosionEvent event = bot.getPlugin()
+                        .getBotEventDispatcher()
+                        .publish(new BotExplosionEvent(
+                                bot.getPlugin()
+                                        .getBotEventDispatcher()
+                                        .nextSequence(bot.asPlayer().getUUID()),
+                                snapshot,
+                                type,
+                                location,
+                                blockDamage));
                 if (event.isCancelled()) {
                     return cancelledResult;
                 }

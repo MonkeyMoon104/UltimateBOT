@@ -2,6 +2,8 @@ package com.monkey.mcbot.bot.ai.controllers.movement;
 
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.*;
 import com.monkey.mcbot.bot.ai.controllers.movement.helper.interf.*;
+import com.monkey.mcbot.bot.ai.controllers.movement.pathfinding.MinecraftBotTraversalEnvironment;
+import com.monkey.mcbot.bot.ai.controllers.movement.pathfinding.PatheticPathfinder;
 import com.monkey.mcbot.config.RuntimeSettings;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -26,7 +28,7 @@ public class BotMovementController {
         this.blockValidator = new BlockStateValidator(level, blockCacheSettings);
         this.obstacleHandler = new ObstacleHandler(bot, level, blockValidator, 0.25, 0.42);
         this.movementExecutor = new MovementExecutor(bot, blockValidator, obstacleHandler);
-        this.pathfinder = new JumpPointSearchPathfinder(bot, blockValidator);
+        this.pathfinder = new PatheticPathfinder(bot, new MinecraftBotTraversalEnvironment(blockValidator));
         this.patternSelector = new MovementPatternSelector(obstacleHandler);
         this.combatStateManager = new CombatStateManager();
     }
@@ -105,10 +107,11 @@ public class BotMovementController {
         if (pathfinder.followPath()) {
             Vec3 currentPoint = pathfinder.getCurrentPathPoint();
             if (currentPoint != null) {
-                movementExecutor.moveToPosition(currentPoint);
+                movementExecutor.moveAlongPath(currentPoint);
             }
             return true;
         }
+        movementExecutor.resetPathSteering();
         return false;
     }
 
@@ -118,10 +121,19 @@ public class BotMovementController {
 
     public void clearPath() {
         pathfinder.clearPath();
+        movementExecutor.resetPathSteering();
     }
 
     public boolean shouldRecalculatePath() {
         return pathfinder.shouldRecalculatePath();
+    }
+
+    public boolean shouldRecalculatePath(Vec3 targetPos) {
+        return pathfinder.shouldRecalculatePath(targetPos);
+    }
+
+    public boolean isPathObstructed(Vec3 targetPos) {
+        return pathfinder.isPathObstructed(targetPos);
     }
 
     public Vec3 getCurrentPathPoint() {

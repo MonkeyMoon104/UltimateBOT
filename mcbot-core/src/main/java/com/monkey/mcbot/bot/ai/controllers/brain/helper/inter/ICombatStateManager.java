@@ -14,8 +14,12 @@ public interface ICombatStateManager {
     }
 
     void updateCombatState(Player target);
+
     CombatState getCurrentState();
+
     void onStateChange(Player target);
+
     boolean shouldAttemptAnchor(Player target, long currentTime);
+
     boolean shouldReposition(Player target, double distance);
 }

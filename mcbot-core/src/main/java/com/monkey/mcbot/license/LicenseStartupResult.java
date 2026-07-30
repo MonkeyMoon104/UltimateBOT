@@ -1,11 +1,6 @@
 package com.monkey.mcbot.license;
 
-public record LicenseStartupResult(
-        boolean allowed,
-        boolean graceMode,
-        String reasonCode,
-        String message
-) {
+public record LicenseStartupResult(boolean allowed, boolean graceMode, String reasonCode, String message) {
 
     public static LicenseStartupResult allowed(boolean graceMode, String message) {
         return new LicenseStartupResult(true, graceMode, null, message);

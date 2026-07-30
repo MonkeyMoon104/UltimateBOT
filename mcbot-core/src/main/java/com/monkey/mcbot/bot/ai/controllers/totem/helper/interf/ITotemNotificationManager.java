@@ -4,7 +4,10 @@ import com.monkey.mcbot.bot.ai.ITrainingBot;
 
 public interface ITotemNotificationManager {
     void sendTotemWarning(ITrainingBot trainingBot);
+
     boolean hasWarnedOutOfTotems();
+
     void setWarnedOutOfTotems(boolean warned);
+
     void resetWarning();
 }

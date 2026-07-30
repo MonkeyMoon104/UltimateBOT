@@ -14,9 +14,23 @@ public interface IPearlStrategyCalculator {
         COMBO_ESCAPE
     }
 
-    PearlStrategy determineOptimalStrategy(Player bot, Player target, boolean wasRecentlyDamaged, int damageComboCount, long comboStartTime, int repositionPearlCooldown, int aggressivePearlCooldown);
+    PearlStrategy determineOptimalStrategy(
+            Player bot,
+            Player target,
+            boolean wasRecentlyDamaged,
+            int damageComboCount,
+            long comboStartTime,
+            int repositionPearlCooldown,
+            int aggressivePearlCooldown);
 
-    boolean shouldUsePearlForStrategy(PearlStrategy strategy, Player bot, Player target, boolean wasRecentlyDamaged, long lastEmergencyPearl, int repositionPearlCooldown, int aggressivePearlCooldown);
+    boolean shouldUsePearlForStrategy(
+            PearlStrategy strategy,
+            Player bot,
+            Player target,
+            boolean wasRecentlyDamaged,
+            long lastEmergencyPearl,
+            int repositionPearlCooldown,
+            int aggressivePearlCooldown);
 
     Vec3 calculateTargetForStrategy(PearlStrategy strategy, Player bot, Player target, Vec3 predictedTargetMovement);
 }

@@ -1,5 +1,6 @@
 package com.monkey.mcbot.api.model;
 
+import com.monkey.mcbot.common.util.TextValues;
 import java.net.URI;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
@@ -28,10 +29,10 @@ public record BotSkin(
     public BotSkin {
         Objects.requireNonNull(source, "source");
 
-        playerReference = trimToNull(playerReference);
-        textureValue = trimToNull(textureValue);
-        textureSignature = trimToNull(textureSignature);
-        textureUrl = trimToNull(textureUrl);
+        playerReference = TextValues.trimToNull(playerReference);
+        textureValue = TextValues.trimToNull(textureValue);
+        textureSignature = TextValues.trimToNull(textureSignature);
+        textureUrl = TextValues.trimToNull(textureUrl);
 
         switch (source) {
             case RANDOM, OWNER, FIRST_TEAM_OWNER -> {
@@ -145,13 +146,5 @@ public record BotSkin(
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("textureUrl is not a valid URL", ex);
         }
-    }
-
-    private static @Nullable String trimToNull(@Nullable String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
     }
 }

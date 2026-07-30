@@ -1,7 +1,6 @@
 package com.monkey.mcbot.bot.ai.controllers.attack.helper;
 
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
-
 import java.util.Random;
 
 public class CooldownManager implements ICooldownManager {

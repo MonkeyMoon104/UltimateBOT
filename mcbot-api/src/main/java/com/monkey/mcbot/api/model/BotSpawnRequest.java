@@ -1,8 +1,7 @@
 package com.monkey.mcbot.api.model;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.*;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable spawn request used by {@code IBotManager.spawn(...)}.

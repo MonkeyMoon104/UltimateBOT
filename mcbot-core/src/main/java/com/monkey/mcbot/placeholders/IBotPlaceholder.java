@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 
 public interface IBotPlaceholder {
     String getIdentifier();
+
     String getValue(Player player);
 
     default String getDefaultValue() {

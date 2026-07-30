@@ -5,8 +5,7 @@ import java.util.Base64;
 
 final class BotProfileCodec {
 
-    private BotProfileCodec() {
-    }
+    private BotProfileCodec() {}
 
     static String sanitizeName(String candidate) {
         if (candidate == null || candidate.isBlank()) {

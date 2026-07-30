@@ -1,14 +1,13 @@
 package com.monkey.mcbot.api.managers;
 
 import com.monkey.mcbot.api.model.*;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Public service interface for creating, managing and removing MinecraftBot instances.
@@ -80,11 +79,12 @@ public interface IBotManager {
      * @param settings spawn settings; when null, implementation-defined defaults may be used
      * @return operation result with success flag and details
      */
-    BotOperationResult spawnByReferences(BotMode mode,
-                                         @Nullable String ownerReference,
-                                         @Nullable Collection<String> targetReferences,
-                                         @Nullable Collection<String> teamOwnerReferences,
-                                         @Nullable BotSettings settings);
+    BotOperationResult spawnByReferences(
+            BotMode mode,
+            @Nullable String ownerReference,
+            @Nullable Collection<String> targetReferences,
+            @Nullable Collection<String> teamOwnerReferences,
+            @Nullable BotSettings settings);
 
     /**
      * Parses a single player reference into an online UUID.
@@ -157,7 +157,8 @@ public interface IBotManager {
      */
     boolean updateRank(UUID ownerUUID, BotRank rank);
 
-    boolean updateArmor(UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
+    boolean updateArmor(
+            UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
 
     boolean updateEquipment(UUID ownerUUID, Map<Integer, ItemStack> equipment);
 
@@ -189,11 +190,12 @@ public interface IBotManager {
 
     boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
 
-    boolean updateIdleWander(UUID ownerUUID,
-                             boolean idleWander,
-                             double idleWanderRadius,
-                             double idleReturnDistance,
-                             long idleReturnDelayMs);
+    boolean updateIdleWander(
+            UUID ownerUUID,
+            boolean idleWander,
+            double idleWanderRadius,
+            double idleReturnDistance,
+            long idleReturnDelayMs);
 
     boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
 

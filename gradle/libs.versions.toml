@@ -1,6 +1,6 @@
 [versions]
 paperweight = "2.0.0-beta.21"
-shadow = "9.6.0"
+shadow = "9.6.1"
 api-publish = "1.0.1"
 bstats = "3.2.1"
 jackson = "2.22.1"
@@ -13,23 +13,21 @@ sirblobman-core = "2.9-SNAPSHOT"
 combatlogx-api = "11.6-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 proguard = "7.9.1"
-packetevents = "2.13.0"
-junit = "5.14.4"
-junit-platform = "1.14.4"
-jspecify = "1.0.0"
+junit = "6.1.2"
+junit-platform = "6.1.2"
+jspecify = "1.0.1"
 caffeine = "3.2.4"
+pathetic = "5.5.2"
 configurate = "4.2.0"
 mockito = "5.23.0"
 mockbukkit = "4.45.0"
 assertj = "3.27.7"
 errorprone = "2.50.0"
 errorprone-plugin = "5.1.0"
-spotless = "8.8.0"
+spotless = "8.9.0"
 archunit = "1.4.2"
 awaitility = "4.3.0"
 nullaway = "0.13.8"
-jmh = "1.37"
-jmh-plugin = "0.7.3"
 revapi-plugin = "1.8.0"
 micrometer = "1.17.0"
 paper-bundle-1_21_4 = "1.21.4-R0.1-SNAPSHOT"
@@ -56,11 +54,11 @@ sirblobman-core = { module = "com.github.sirblobman.api:core", version.ref = "si
 combatlogx-api = { module = "com.github.sirblobman.combatlogx:api", version.ref = "combatlogx-api" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 proguard-gradle = { module = "com.guardsquare:proguard-gradle", version.ref = "proguard" }
-packetevents-spigot = { module = "com.github.retrooper:packetevents-spigot", version.ref = "packetevents" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+pathetic-engine = { module = "de.bsommerfeld.pathetic:engine", version.ref = "pathetic" }
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockbukkit = { module = "org.mockbukkit.mockbukkit:mockbukkit-v1.21", version.ref = "mockbukkit" }
@@ -69,8 +67,6 @@ errorprone-core = { module = "com.google.errorprone:error_prone_core", version.r
 archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
-jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
-jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
 micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometer" }
 micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
 
@@ -80,5 +76,4 @@ shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 api-publish = { id = "it.monkeymoon104.api-publish", version.ref = "api-publish" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
-jmh = { id = "me.champeau.jmh", version.ref = "jmh-plugin" }
 revapi = { id = "org.revapi.revapi-gradle-plugin", version.ref = "revapi-plugin" }

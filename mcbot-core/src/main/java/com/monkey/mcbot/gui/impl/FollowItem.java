@@ -1,17 +1,17 @@
 package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
+import com.monkey.mcbot.event.BotSettingEvents;
 import com.monkey.mcbot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-import com.monkey.mcbot.api.event.state.BotSettingKey;
-import com.monkey.mcbot.event.BotSettingEvents;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
@@ -51,9 +51,11 @@ public class FollowItem extends AbstractItem {
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleClick(
+            @NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableFollow()) {
-            String msg = training.getLangString("messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.follow-locked", "&cFollow is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -64,21 +66,28 @@ public class FollowItem extends AbstractItem {
         boolean newFollowStatus = !oldFollowStatus;
 
         if (!newFollowStatus && combatStatus && !options.isChangeableCombat()) {
-            String msg = training.getLangString("messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
+            String msg = training.getLangString(
+                    "messages.follow-lock-combat", "&cYou cannot disable follow: combat is locked to ON.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
 
         var managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposedFollow = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                BotSettingKey.FOLLOW, oldFollowStatus, newFollowStatus, Boolean.class);
+        var proposedFollow = BotSettingEvents.propose(
+                training,
+                managedOwnerUUID,
+                BotEventSource.GUI,
+                BotSettingKey.FOLLOW,
+                oldFollowStatus,
+                newFollowStatus,
+                Boolean.class);
         if (proposedFollow.isEmpty()) return;
         newFollowStatus = proposedFollow.get();
 
         java.util.Optional<Boolean> proposedCombat = java.util.Optional.empty();
         if (!newFollowStatus && combatStatus) {
-            proposedCombat = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                    BotSettingKey.COMBAT, true, false, Boolean.class);
+            proposedCombat = BotSettingEvents.propose(
+                    training, managedOwnerUUID, BotEventSource.GUI, BotSettingKey.COMBAT, true, false, Boolean.class);
             if (proposedCombat.isEmpty()) return;
         }
 

@@ -1,9 +1,14 @@
 package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
+import com.monkey.mcbot.event.BotSettingEvents;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.Objects;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,11 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-
-import java.util.UUID;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-import com.monkey.mcbot.api.event.state.BotSettingKey;
-import com.monkey.mcbot.event.BotSettingEvents;
 
 public class TotemItem extends AbstractItem {
 
@@ -32,15 +32,13 @@ public class TotemItem extends AbstractItem {
     public ItemProvider getItemProvider() {
         ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.totem-button.material")));
 
-        String unlimitedText = training.getLangString("gui.totem-button.unlimited-text");
-        String countLine = options.getTotems() == -1
-                ? unlimitedText
-                : String.valueOf(options.getTotems());
+        String unlimitedText = Objects.requireNonNull(
+                training.getLangString("gui.totem-button.unlimited-text"), "gui.totem-button.unlimited-text");
+        String countLine = options.getTotems() == -1 ? unlimitedText : String.valueOf(options.getTotems());
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.totem-button.name")));
         var loreLines = training.getLangStringList("gui.totem-button.lore");
 
         for (String line : loreLines) {
-            assert countLine != null;
             String replaced = line.replace("%count%", countLine);
             builder.addLoreLines(ChatColorUtils.translate(replaced));
         }
@@ -48,9 +46,11 @@ public class TotemItem extends AbstractItem {
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleClick(
+            @NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         if (!options.isChangeableTotem()) {
-            String msg = training.getLangString("messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
+            String msg = training.getLangString(
+                    "messages.totem-locked", "&cTotems are locked: they cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
@@ -64,8 +64,14 @@ public class TotemItem extends AbstractItem {
         if (clickType.isRightClick() && currentTotem > minTotem) nextTotem--;
         if (nextTotem == currentTotem) return;
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                BotSettingKey.TOTEM_COUNT, currentTotem, nextTotem, Integer.class);
+        var proposed = BotSettingEvents.propose(
+                training,
+                managedOwnerUUID,
+                BotEventSource.GUI,
+                BotSettingKey.TOTEM_COUNT,
+                currentTotem,
+                nextTotem,
+                Integer.class);
         if (training.getBotRegistry().getBot(managedOwnerUUID) != null && proposed.isEmpty()) return;
         if (proposed.isPresent()) nextTotem = proposed.get();
         options.setTotems(nextTotem);

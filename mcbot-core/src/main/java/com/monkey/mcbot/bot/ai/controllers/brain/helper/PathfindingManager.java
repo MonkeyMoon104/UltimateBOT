@@ -4,6 +4,7 @@ import com.monkey.mcbot.bot.ai.controllers.brain.helper.inter.IPathfindingManage
 import com.monkey.mcbot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.mcbot.bot.ai.controllers.movement.BotMovementController;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -17,17 +18,17 @@ public class PathfindingManager implements IPathfindingManager {
     private final BotMovementController movementController;
     private final BotEnderpearlController enderpearlController;
 
-    private long lastActionTime = 0;
     private Vec3 lastBotPosition;
     private int stuckCounter = 0;
-    private static final long MAX_STUCK_TIME = 1500;
     private static final double MIN_MOVEMENT_THRESHOLD = 0.1;
 
     private long lastPathfindingAttempt = 0;
-    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 2200;
+    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 750;
+    private static final int BLOCKED_PATH_CONFIRMATION_TICKS = 2;
     private long lastStuckPearlAttempt = 0;
     private static final long STUCK_PEARL_COOLDOWN = 1200;
     private boolean usingPathfinding = false;
+    private int blockedPathCounter;
 
     public PathfindingManager(
             Player bot,
@@ -42,8 +43,7 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     @Override
-    public void checkForStuck(Player target) {
-        long currentTime = System.currentTimeMillis();
+    public void checkForStuck(LivingEntity target) {
         Vec3 currentPos = bot.position();
 
         double movementDistance = currentPos.distanceTo(lastBotPosition);
@@ -52,32 +52,37 @@ public class PathfindingManager implements IPathfindingManager {
             stuckCounter++;
         } else {
             stuckCounter = 0;
-            usingPathfinding = false;
-            movementController.clearPath();
         }
 
-        if (stuckCounter > 30 || (currentTime - lastActionTime > MAX_STUCK_TIME)) {
-            if (!usingPathfinding || movementController.shouldRecalculatePath()) {
-                attemptPathfindingOrPearl(target);
-            } else {
-                movementController.followPath();
-            }
+        boolean directPathBlocked = movementController.isPathObstructed(target.position());
+        blockedPathCounter = directPathBlocked ? blockedPathCounter + 1 : 0;
+
+        if (blockedPathCounter >= BLOCKED_PATH_CONFIRMATION_TICKS) {
+            attemptPathfinding(target, false);
+            blockedPathCounter = 0;
+            return;
+        }
+
+        if (stuckCounter > 20) {
+            attemptPathfinding(target, true);
 
             stuckCounter = 0;
-            lastActionTime = currentTime;
         }
     }
 
     @Override
-    public void attemptPathfindingOrPearl(Player target) {
+    public void attemptPathfindingOrPearl(LivingEntity target) {
+        attemptPathfinding(target, true);
+    }
+
+    private void attemptPathfinding(LivingEntity target, boolean allowRecovery) {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastPathfindingAttempt < PATHFINDING_ATTEMPT_COOLDOWN) {
-            if (shouldAttemptStuckPearl(target, currentTime)) {
+            if (allowRecovery && shouldAttemptStuckPearl(target, currentTime)) {
                 if (tryUnstuckPearl(target, currentTime)) {
                     return;
                 }
             }
-            forceUnstuck(target);
             return;
         }
 
@@ -89,7 +94,8 @@ public class PathfindingManager implements IPathfindingManager {
             return;
         }
 
-        if (enderpearlController.canUseEnderpearl()
+        if (allowRecovery
+                && enderpearlController.canUseEnderpearl()
                 && bot.distanceTo(target) > 4.0
                 && hasObstacleBetween(bot.position(), target.position())) {
 
@@ -98,7 +104,9 @@ public class PathfindingManager implements IPathfindingManager {
             }
         }
 
-        forceUnstuck(target);
+        if (allowRecovery) {
+            forceUnstuck(target);
+        }
     }
 
     @Override
@@ -121,7 +129,7 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     @Override
-    public Vec3 calculatePearlTargetAroundPlayer(Player target) {
+    public Vec3 calculatePearlTargetAroundPlayer(LivingEntity target) {
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
         double baseAngle = Math.atan2(botPos.z - targetPos.z, botPos.x - targetPos.x);
@@ -175,25 +183,30 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     @Override
-    public void forceUnstuck(Player target) {
+    public void forceUnstuck(LivingEntity target) {
         double distance = bot.distanceTo(target);
+        Vec3 botPos = bot.position();
+        Vec3 toTarget = target.position().subtract(botPos);
+        if (toTarget.horizontalDistanceSqr() < 1.0E-5D) {
+            toTarget = bot.getLookAngle();
+        }
+        Vec3 horizontalDirection = new Vec3(toTarget.x, 0.0D, toTarget.z).normalize();
 
         if (distance <= 1.0) {
-            movementController.moveAwayFrom(target, 3.0);
+            movementController.moveToPosition(botPos.subtract(horizontalDirection.scale(3.0D)));
         } else if (distance >= 10.0) {
-            movementController.moveTowards(target, 3.0);
+            movementController.moveToPosition(botPos.add(horizontalDirection.scale(3.0D)));
         } else {
             Vec3 strafeDirection = getStrafeDirection(target);
             if (isFacingSolidWall()) {
                 strafeDirection = strafeDirection.scale(-1.0D);
             }
-            Vec3 botPos = bot.position();
             Vec3 newPos = botPos.add(strafeDirection.scale(2.0));
             movementController.moveToPosition(newPos);
         }
     }
 
-    private Vec3 getStrafeDirection(Player target) {
+    private Vec3 getStrafeDirection(LivingEntity target) {
         Vec3 toTarget = target.position().subtract(bot.position()).normalize();
         return new Vec3(-toTarget.z, 0, toTarget.x);
     }
@@ -212,11 +225,7 @@ public class PathfindingManager implements IPathfindingManager {
         this.lastBotPosition = bot.position();
     }
 
-    public void updateLastActionTime() {
-        this.lastActionTime = System.currentTimeMillis();
-    }
-
-    private boolean shouldAttemptStuckPearl(Player target, long currentTime) {
+    private boolean shouldAttemptStuckPearl(LivingEntity target, long currentTime) {
         if (!enderpearlController.canUseEnderpearl()) {
             return false;
         }
@@ -232,7 +241,7 @@ public class PathfindingManager implements IPathfindingManager {
         return hasObstacleBetween(bot.position(), target.position()) || isFacingSolidWall() || stuckCounter > 18;
     }
 
-    private boolean tryUnstuckPearl(Player target, long currentTime) {
+    private boolean tryUnstuckPearl(LivingEntity target, long currentTime) {
         Vec3 pearlTarget = calculatePearlTargetAroundPlayer(target);
         if (pearlTarget == null) {
             return false;
@@ -247,7 +256,7 @@ public class PathfindingManager implements IPathfindingManager {
         return false;
     }
 
-    private Vec3 calculatePearlSideStepTarget(Player target) {
+    private Vec3 calculatePearlSideStepTarget(LivingEntity target) {
         Vec3 botPos = bot.position();
         Vec3 toTarget = target.position().subtract(botPos);
         if (toTarget.lengthSqr() < 1.0E-5D) {

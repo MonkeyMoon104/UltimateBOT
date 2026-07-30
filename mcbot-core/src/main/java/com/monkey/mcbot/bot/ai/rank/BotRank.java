@@ -24,5 +24,4 @@ public enum BotRank {
     public String getDisplayName() {
         return ChatColorUtils.translate(displayName);
     }
-
 }

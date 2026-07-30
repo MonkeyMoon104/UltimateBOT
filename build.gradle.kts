@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.shadow) apply false
     alias(libs.plugins.errorprone) apply false
     alias(libs.plugins.spotless)
-    alias(libs.plugins.jmh) apply false
     alias(libs.plugins.revapi) apply false
 }
 
@@ -23,8 +22,6 @@ repositories {
 }
 
 spotless {
-    ratchetFrom("origin/mcbot")
-
     kotlinGradle {
         target("*.gradle.kts")
         ktlint()
@@ -70,7 +67,9 @@ subprojects {
         options.release.set(21)
         options.compilerArgs.addAll(listOf("-parameters", "-Xlint:all", "-Xlint:-processing", "-Werror"))
         options.errorprone {
+            allSuggestionsAsWarnings.set(true)
             check("NullAway", CheckSeverity.ERROR)
+            check("RequireExplicitNullMarking", CheckSeverity.OFF)
             option("NullAway:OnlyNullMarked", "true")
             option("NullAway:JSpecifyMode", "true")
         }
@@ -82,8 +81,6 @@ subprojects {
     }
 
     extensions.configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-        ratchetFrom("origin/mcbot")
-
         java {
             target("src/**/*.java")
             palantirJavaFormat()

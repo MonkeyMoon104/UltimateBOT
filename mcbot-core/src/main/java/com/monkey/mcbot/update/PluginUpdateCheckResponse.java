@@ -10,6 +10,4 @@ public record PluginUpdateCheckResponse(
         @JsonProperty("currentVersion") String currentVersion,
         @JsonProperty("latestVersion") String latestVersion,
         @JsonProperty("downloadUrl") String downloadUrl,
-        @JsonProperty("message") String message
-) {
-}
+        @JsonProperty("message") String message) {}

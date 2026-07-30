@@ -14,8 +14,7 @@ public record BotOperationResponse(
         boolean success,
         @Nullable String message,
         @Nullable BotSnapshotResponse snapshot,
-        @Nullable Integer removedCount
-) {
+        @Nullable Integer removedCount) {
     /**
      * Returns {@code true} when the response contains a bot snapshot.
      *
@@ -41,7 +40,8 @@ public record BotOperationResponse(
      */
     public BotOperationResponse requireSuccess() {
         if (!success) {
-            throw new IllegalStateException(message == null || message.isBlank() ? "Remote API operation failed" : message);
+            throw new IllegalStateException(
+                    message == null || message.isBlank() ? "Remote API operation failed" : message);
         }
         return this;
     }

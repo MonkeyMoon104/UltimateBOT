@@ -15,6 +15,7 @@ val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 dependencies {
     implementation(project(":mcbot-api"))
+    implementation(project(":common"))
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_4").get().requiredVersion)
 
     implementation(libs.bstats.bukkit)
@@ -22,14 +23,12 @@ dependencies {
     implementation(libs.jackson.datatype.jsr310)
     implementation(libs.invui.v1)
     implementation(libs.caffeine)
+    implementation(libs.pathetic.engine)
     implementation(libs.configurate.yaml)
-    implementation(libs.micrometer.core)
-    implementation(libs.micrometer.registry.prometheus)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.sirblobman.core)
     compileOnly(libs.combatlogx.api)
-    compileOnly(libs.packetevents.spigot)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockbukkit)

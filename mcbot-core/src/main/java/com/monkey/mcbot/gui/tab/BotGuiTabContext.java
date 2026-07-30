@@ -4,12 +4,11 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
-
-import java.util.UUID;
 
 public class BotGuiTabContext {
 
@@ -73,6 +72,7 @@ public class BotGuiTabContext {
     }
 
     public SimpleItem createBorderItem(Material borderMaterial, String borderName) {
-        return new SimpleItem(new ItemBuilder(borderMaterial).setDisplayName(borderName).get(String.valueOf(1)));
+        return new SimpleItem(
+                new ItemBuilder(borderMaterial).setDisplayName(borderName).get(String.valueOf(1)));
     }
 }

@@ -771,7 +771,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
             }
 
             BotSource currentSource =
-                    options.getCreationSource() == BotCreationSource.API ? BotSource.API : BotSource.CORE;
+                    BotSource.fromCommon(options.getCreationSource().toCommon());
             if (currentSource == source && remove(entry.getKey())) {
                 removed++;
             }
@@ -1019,11 +1019,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     private static BotType toCoreType(BotMode mode) {
-        return switch (mode) {
-            case SINGLE -> BotType.SINGLE;
-            case EVENT -> BotType.EVENT;
-            case ALLY -> BotType.ALLY;
-            case TEAM_ALLY -> BotType.TEAM_ALLY;
-        };
+        return BotType.fromCommon(mode.toCommon());
     }
 }

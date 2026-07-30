@@ -1,13 +1,12 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class ObsidianPositionFinder {
 
@@ -19,10 +18,12 @@ public class ObsidianPositionFinder {
         this.level = level;
     }
 
-    public List<BlockPos> findBestObsidianPositions(Player target, int maxPositions,
-                                                    Map<BlockPos, Long> recentPlacements,
-                                                    long positionCooldownMs,
-                                                    double maxPlacementDistance) {
+    public List<BlockPos> findBestObsidianPositions(
+            Player target,
+            int maxPositions,
+            Map<BlockPos, Long> recentPlacements,
+            long positionCooldownMs,
+            double maxPlacementDistance) {
 
         cleanupRecentPlacements(recentPlacements, positionCooldownMs);
 
@@ -71,7 +72,8 @@ public class ObsidianPositionFinder {
     private boolean isValidObsidianPosition(BlockPos pos, Player target, double maxPlacementDistance) {
         if (!level.getBlockState(pos).isAir()) return false;
         if (!level.getBlockState(pos.below()).isSolidRender()) return false;
-        if (!level.getBlockState(pos.above()).isAir() || !level.getBlockState(pos.above(2)).isAir()) return false;
+        if (!level.getBlockState(pos.above()).isAir()
+                || !level.getBlockState(pos.above(2)).isAir()) return false;
 
         double distanceToBot = bot.position().distanceTo(Vec3.atCenterOf(pos));
         double distanceToTarget = target.position().distanceTo(Vec3.atCenterOf(pos));
@@ -127,8 +129,7 @@ public class ObsidianPositionFinder {
                 end,
                 net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot
-        );
+                bot);
 
         net.minecraft.world.phys.BlockHitResult result = level.clip(context);
         return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS;

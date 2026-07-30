@@ -41,24 +41,77 @@ public class CPVPConfig {
         this.minAttackScore = builder.minAttackScore;
     }
 
-    public double getMaxCrystalDistance() { return maxCrystalDistance; }
-    public double getMinCrystalDistance() { return minCrystalDistance; }
-    public double getCrystalAttackRange() { return crystalAttackRange; }
-    public double getOptimalDamageRange() { return optimalDamageRange; }
-    public int getObsidianPlaceCooldownTicks() { return obsidianPlaceCooldownTicks; }
-    public int getCrystalPlaceCooldownTicks() { return crystalPlaceCooldownTicks; }
-    public int getAttackCooldownTicks() { return attackCooldownTicks; }
-    public int getObsidianPreparationTime() { return obsidianPreparationTime; }
-    public int getCrystalPreparationTime() { return crystalPreparationTime; }
-    public int getAttackPreparationTime() { return attackPreparationTime; }
-    public long getPositionCooldownMs() { return positionCooldownMs; }
-    public long getObsidianCacheMs() { return obsidianCacheMs; }
-    public long getFullScanIntervalMs() { return fullScanIntervalMs; }
-    public long getPositionCacheMs() { return positionCacheMs; }
-    public int getMaxCrystalsPerPosition() { return maxCrystalsPerPosition; }
-    public int getMaxPositionsToCheck() { return maxPositionsToCheck; }
-    public double getMinCrystalScore() { return minCrystalScore; }
-    public double getMinAttackScore() { return minAttackScore; }
+    public double getMaxCrystalDistance() {
+        return maxCrystalDistance;
+    }
+
+    public double getMinCrystalDistance() {
+        return minCrystalDistance;
+    }
+
+    public double getCrystalAttackRange() {
+        return crystalAttackRange;
+    }
+
+    public double getOptimalDamageRange() {
+        return optimalDamageRange;
+    }
+
+    public int getObsidianPlaceCooldownTicks() {
+        return obsidianPlaceCooldownTicks;
+    }
+
+    public int getCrystalPlaceCooldownTicks() {
+        return crystalPlaceCooldownTicks;
+    }
+
+    public int getAttackCooldownTicks() {
+        return attackCooldownTicks;
+    }
+
+    public int getObsidianPreparationTime() {
+        return obsidianPreparationTime;
+    }
+
+    public int getCrystalPreparationTime() {
+        return crystalPreparationTime;
+    }
+
+    public int getAttackPreparationTime() {
+        return attackPreparationTime;
+    }
+
+    public long getPositionCooldownMs() {
+        return positionCooldownMs;
+    }
+
+    public long getObsidianCacheMs() {
+        return obsidianCacheMs;
+    }
+
+    public long getFullScanIntervalMs() {
+        return fullScanIntervalMs;
+    }
+
+    public long getPositionCacheMs() {
+        return positionCacheMs;
+    }
+
+    public int getMaxCrystalsPerPosition() {
+        return maxCrystalsPerPosition;
+    }
+
+    public int getMaxPositionsToCheck() {
+        return maxPositionsToCheck;
+    }
+
+    public double getMinCrystalScore() {
+        return minCrystalScore;
+    }
+
+    public double getMinAttackScore() {
+        return minAttackScore;
+    }
 
     public static class Builder {
         private double maxCrystalDistance = 10.0;
@@ -80,25 +133,98 @@ public class CPVPConfig {
         private double minCrystalScore = 5.0;
         private double minAttackScore = 0.3;
 
-        public Builder maxCrystalDistance(double val) { this.maxCrystalDistance = val; return this; }
-        public Builder minCrystalDistance(double val) { this.minCrystalDistance = val; return this; }
-        public Builder crystalAttackRange(double val) { this.crystalAttackRange = val; return this; }
-        public Builder optimalDamageRange(double val) { this.optimalDamageRange = val; return this; }
-        public Builder obsidianPlaceCooldownTicks(int val) { this.obsidianPlaceCooldownTicks = val; return this; }
-        public Builder crystalPlaceCooldownTicks(int val) { this.crystalPlaceCooldownTicks = val; return this; }
-        public Builder attackCooldownTicks(int val) { this.attackCooldownTicks = val; return this; }
-        public Builder obsidianPreparationTime(int val) { this.obsidianPreparationTime = val; return this; }
-        public Builder crystalPreparationTime(int val) { this.crystalPreparationTime = val; return this; }
-        public Builder attackPreparationTime(int val) { this.attackPreparationTime = val; return this; }
-        public Builder positionCooldownMs(long val) { this.positionCooldownMs = val; return this; }
-        public Builder obsidianCacheMs(long val) { this.obsidianCacheMs = val; return this; }
-        public Builder fullScanIntervalMs(long val) { this.fullScanIntervalMs = val; return this; }
-        public Builder positionCacheMs(long val) { this.positionCacheMs = val; return this; }
-        public Builder maxCrystalsPerPosition(int val) { this.maxCrystalsPerPosition = val; return this; }
-        public Builder maxPositionsToCheck(int val) { this.maxPositionsToCheck = val; return this; }
-        public Builder minCrystalScore(double val) { this.minCrystalScore = val; return this; }
-        public Builder minAttackScore(double val) { this.minAttackScore = val; return this; }
+        public Builder maxCrystalDistance(double val) {
+            this.maxCrystalDistance = val;
+            return this;
+        }
 
-        public CPVPConfig build() { return new CPVPConfig(this); }
+        public Builder minCrystalDistance(double val) {
+            this.minCrystalDistance = val;
+            return this;
+        }
+
+        public Builder crystalAttackRange(double val) {
+            this.crystalAttackRange = val;
+            return this;
+        }
+
+        public Builder optimalDamageRange(double val) {
+            this.optimalDamageRange = val;
+            return this;
+        }
+
+        public Builder obsidianPlaceCooldownTicks(int val) {
+            this.obsidianPlaceCooldownTicks = val;
+            return this;
+        }
+
+        public Builder crystalPlaceCooldownTicks(int val) {
+            this.crystalPlaceCooldownTicks = val;
+            return this;
+        }
+
+        public Builder attackCooldownTicks(int val) {
+            this.attackCooldownTicks = val;
+            return this;
+        }
+
+        public Builder obsidianPreparationTime(int val) {
+            this.obsidianPreparationTime = val;
+            return this;
+        }
+
+        public Builder crystalPreparationTime(int val) {
+            this.crystalPreparationTime = val;
+            return this;
+        }
+
+        public Builder attackPreparationTime(int val) {
+            this.attackPreparationTime = val;
+            return this;
+        }
+
+        public Builder positionCooldownMs(long val) {
+            this.positionCooldownMs = val;
+            return this;
+        }
+
+        public Builder obsidianCacheMs(long val) {
+            this.obsidianCacheMs = val;
+            return this;
+        }
+
+        public Builder fullScanIntervalMs(long val) {
+            this.fullScanIntervalMs = val;
+            return this;
+        }
+
+        public Builder positionCacheMs(long val) {
+            this.positionCacheMs = val;
+            return this;
+        }
+
+        public Builder maxCrystalsPerPosition(int val) {
+            this.maxCrystalsPerPosition = val;
+            return this;
+        }
+
+        public Builder maxPositionsToCheck(int val) {
+            this.maxPositionsToCheck = val;
+            return this;
+        }
+
+        public Builder minCrystalScore(double val) {
+            this.minCrystalScore = val;
+            return this;
+        }
+
+        public Builder minAttackScore(double val) {
+            this.minAttackScore = val;
+            return this;
+        }
+
+        public CPVPConfig build() {
+            return new CPVPConfig(this);
+        }
     }
 }

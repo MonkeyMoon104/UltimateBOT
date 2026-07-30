@@ -4,18 +4,17 @@ import com.monkey.mcbot.wrapper.PlatformWrapper;
 import com.monkey.mcbot.wrapper.WrapperCapabilities;
 import com.monkey.mcbot.wrapper.WrapperTask;
 import com.monkey.mcbot.wrapper.WrapperType;
+import java.lang.reflect.Method;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-
-import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.logging.Level;
 
 public final class FoliaWrapper implements PlatformWrapper {
 
@@ -42,12 +41,16 @@ public final class FoliaWrapper implements PlatformWrapper {
         this.asyncScheduler = invokeNoArgs(server, "getAsyncScheduler");
         this.entitySchedulerGetter = findMethod(Entity.class, "getScheduler", 0);
 
-        this.globalRunMethod = globalRegionScheduler == null ? null : findMethod(globalRegionScheduler.getClass(), "run", 2);
-        this.globalRunDelayedMethod = globalRegionScheduler == null ? null : findMethod(globalRegionScheduler.getClass(), "runDelayed", 3);
+        this.globalRunMethod =
+                globalRegionScheduler == null ? null : findMethod(globalRegionScheduler.getClass(), "run", 2);
+        this.globalRunDelayedMethod =
+                globalRegionScheduler == null ? null : findMethod(globalRegionScheduler.getClass(), "runDelayed", 3);
 
         this.asyncRunNowMethod = asyncScheduler == null ? null : findMethod(asyncScheduler.getClass(), "runNow", 2);
-        this.asyncRunDelayedMethod = asyncScheduler == null ? null : findMethod(asyncScheduler.getClass(), "runDelayed", 4);
-        this.asyncRunAtFixedRateMethod = asyncScheduler == null ? null : findMethod(asyncScheduler.getClass(), "runAtFixedRate", 5);
+        this.asyncRunDelayedMethod =
+                asyncScheduler == null ? null : findMethod(asyncScheduler.getClass(), "runDelayed", 4);
+        this.asyncRunAtFixedRateMethod =
+                asyncScheduler == null ? null : findMethod(asyncScheduler.getClass(), "runAtFixedRate", 5);
 
         Method resolvedEntityRun = null;
         Method resolvedEntityRunDelayed = null;
@@ -59,10 +62,13 @@ public final class FoliaWrapper implements PlatformWrapper {
         this.entityRunMethod = resolvedEntityRun;
         this.entityRunDelayedMethod = resolvedEntityRunDelayed;
 
-        boolean foliaDetected = globalRegionScheduler != null || asyncScheduler != null || entitySchedulerGetter != null;
+        boolean foliaDetected =
+                globalRegionScheduler != null || asyncScheduler != null || entitySchedulerGetter != null;
         boolean hasGlobal = globalRunMethod != null || globalRunDelayedMethod != null;
-        boolean hasAsync = asyncRunNowMethod != null || asyncRunDelayedMethod != null || asyncRunAtFixedRateMethod != null;
-        boolean hasEntity = entitySchedulerGetter != null && (entityRunMethod != null || entityRunDelayedMethod != null);
+        boolean hasAsync =
+                asyncRunNowMethod != null || asyncRunDelayedMethod != null || asyncRunAtFixedRateMethod != null;
+        boolean hasEntity =
+                entitySchedulerGetter != null && (entityRunMethod != null || entityRunDelayedMethod != null);
 
         this.capabilities = new WrapperCapabilities(foliaDetected, hasGlobal, hasAsync, hasEntity);
     }
@@ -100,7 +106,8 @@ public final class FoliaWrapper implements PlatformWrapper {
         }
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        return WrapperTask.bukkit("bukkit-sync-later", scheduler.runTaskLater(plugin, wrap(task), Math.max(1L, delayTicks)));
+        return WrapperTask.bukkit(
+                "bukkit-sync-later", scheduler.runTaskLater(plugin, wrap(task), Math.max(1L, delayTicks)));
     }
 
     @Override
@@ -115,14 +122,15 @@ public final class FoliaWrapper implements PlatformWrapper {
                 Object entityScheduler = entitySchedulerGetter.invoke(player);
                 if (entityScheduler != null) {
                     Consumer<Object> taskConsumer = ignored -> wrap(task).run();
-                    Runnable retired = () -> { };
+                    Runnable retired = () -> {};
 
                     if (delayTicks <= 0L && entityRunMethod != null) {
                         Object handle = entityRunMethod.invoke(entityScheduler, plugin, taskConsumer, retired);
                         return WrapperTask.reflective("folia-entity-run", handle);
                     }
                     if (entityRunDelayedMethod != null) {
-                        Object handle = entityRunDelayedMethod.invoke(entityScheduler, plugin, taskConsumer, retired, Math.max(1L, delayTicks));
+                        Object handle = entityRunDelayedMethod.invoke(
+                                entityScheduler, plugin, taskConsumer, retired, Math.max(1L, delayTicks));
                         return WrapperTask.reflective("folia-entity-delayed", handle);
                     }
                 }
@@ -138,7 +146,8 @@ public final class FoliaWrapper implements PlatformWrapper {
     public WrapperTask runAsync(Runnable task) {
         if (capabilities.asyncScheduler() && asyncRunNowMethod != null) {
             try {
-                Object handle = asyncRunNowMethod.invoke(asyncScheduler, plugin, (Consumer<Object>) ignored -> wrap(task).run());
+                Object handle = asyncRunNowMethod.invoke(asyncScheduler, plugin, (Consumer<Object>)
+                        ignored -> wrap(task).run());
                 return WrapperTask.reflective("folia-async-run", handle);
             } catch (Exception ex) {
                 logWrapperFailure("async scheduler runNow", ex);
@@ -161,14 +170,17 @@ public final class FoliaWrapper implements PlatformWrapper {
         }
 
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        return WrapperTask.bukkit("bukkit-async-later", scheduler.runTaskLaterAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks)));
+        return WrapperTask.bukkit(
+                "bukkit-async-later",
+                scheduler.runTaskLaterAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks)));
     }
 
     @Override
     public WrapperTask runAsyncRepeating(Runnable task, long delayTicks, long periodTicks) {
         if (capabilities.asyncScheduler() && asyncRunAtFixedRateMethod != null) {
             try {
-                Object handle = invokeAsyncMethod(asyncRunAtFixedRateMethod, task, delayTicks, Math.max(1L, periodTicks));
+                Object handle =
+                        invokeAsyncMethod(asyncRunAtFixedRateMethod, task, delayTicks, Math.max(1L, periodTicks));
                 return WrapperTask.reflective("folia-async-repeating", handle);
             } catch (Exception ex) {
                 logWrapperFailure("async scheduler runAtFixedRate", ex);
@@ -178,8 +190,8 @@ public final class FoliaWrapper implements PlatformWrapper {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         return WrapperTask.bukkit(
                 "bukkit-async-repeating",
-                scheduler.runTaskTimerAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks), Math.max(1L, periodTicks))
-        );
+                scheduler.runTaskTimerAsynchronously(
+                        plugin, wrap(task), Math.max(1L, delayTicks), Math.max(1L, periodTicks)));
     }
 
     private WrapperTask runGlobal(Runnable task, long delayTicks) {
@@ -190,7 +202,8 @@ public final class FoliaWrapper implements PlatformWrapper {
                 return WrapperTask.reflective("folia-global-run", handle);
             }
             if (globalRunDelayedMethod != null) {
-                Object handle = globalRunDelayedMethod.invoke(globalRegionScheduler, plugin, taskConsumer, Math.max(1L, delayTicks));
+                Object handle = globalRunDelayedMethod.invoke(
+                        globalRegionScheduler, plugin, taskConsumer, Math.max(1L, delayTicks));
                 return WrapperTask.reflective("folia-global-delayed", handle);
             }
         } catch (Exception ex) {
@@ -215,7 +228,7 @@ public final class FoliaWrapper implements PlatformWrapper {
                 continue;
             }
             if (parameterType == Runnable.class) {
-                args[i] = (Runnable) () -> { };
+                args[i] = (Runnable) () -> {};
                 continue;
             }
 
@@ -292,4 +305,3 @@ public final class FoliaWrapper implements PlatformWrapper {
         return null;
     }
 }
-

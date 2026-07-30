@@ -1,8 +1,7 @@
 package com.monkey.mcbot.api.model;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Standard result object for bot operations.
@@ -12,10 +11,7 @@ import java.util.Optional;
  * @param snapshot optional bot snapshot associated with the operation
  */
 public record BotOperationResult(
-        boolean success,
-        String message,
-        @Nullable BotSnapshot snapshot
-) {
+        boolean success, String message, @Nullable BotSnapshot snapshot) {
     /**
      * Creates a successful operation result.
      *

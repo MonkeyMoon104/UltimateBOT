@@ -10,17 +10,22 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockStateValidator implements IBlockStateValidator {
     private final Level level;
-    private volatile Cache<BlockPos, Boolean> blockStateCache;
+    private volatile Cache<BlockPos, Boolean> standablePositionCache;
+    private volatile Cache<BlockPos, Boolean> bodySpaceCache;
 
     public BlockStateValidator(Level level, RuntimeSettings.CacheSettings settings) {
         this.level = level;
-        this.blockStateCache = createCache(settings);
+        this.standablePositionCache = createCache(settings);
+        this.bodySpaceCache = createCache(settings);
     }
 
     public void reconfigure(RuntimeSettings.CacheSettings settings) {
-        Cache<BlockPos, Boolean> previousCache = blockStateCache;
-        blockStateCache = createCache(settings);
-        previousCache.invalidateAll();
+        Cache<BlockPos, Boolean> previousStandableCache = standablePositionCache;
+        Cache<BlockPos, Boolean> previousBodySpaceCache = bodySpaceCache;
+        standablePositionCache = createCache(settings);
+        bodySpaceCache = createCache(settings);
+        previousStandableCache.invalidateAll();
+        previousBodySpaceCache.invalidateAll();
     }
 
     private static Cache<BlockPos, Boolean> createCache(RuntimeSettings.CacheSettings settings) {
@@ -33,7 +38,7 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public boolean isPositionPassableCached(BlockPos pos) {
-        return blockStateCache.get(pos.immutable(), this::isPositionPassable);
+        return standablePositionCache.get(pos.immutable(), this::isPositionPassable);
     }
 
     @Override
@@ -43,14 +48,32 @@ public class BlockStateValidator implements IBlockStateValidator {
                 return false;
             }
 
-            BlockState current = level.getBlockState(pos);
-            BlockState above = level.getBlockState(pos.above());
             BlockState below = level.getBlockState(pos.below());
+            return isBodySpaceClearCached(pos)
+                    && !below.getCollisionShape(level, pos.below()).isEmpty();
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
-            boolean canStandOn = !below.isAir();
-            boolean canPassThrough = current.isAir() && above.isAir();
+    @Override
+    public boolean isBodySpaceClearCached(BlockPos pos) {
+        return bodySpaceCache.get(pos.immutable(), this::isBodySpaceClear);
+    }
 
-            return canPassThrough && canStandOn;
+    @Override
+    public boolean isBodySpaceClear(BlockPos pos) {
+        try {
+            if (pos.getY() < -64 || pos.getY() > 318) {
+                return false;
+            }
+
+            BlockState feet = level.getBlockState(pos);
+            BlockState head = level.getBlockState(pos.above());
+            return feet.getCollisionShape(level, pos).isEmpty()
+                    && head.getCollisionShape(level, pos.above()).isEmpty()
+                    && feet.getFluidState().isEmpty()
+                    && head.getFluidState().isEmpty();
         } catch (Exception e) {
             return false;
         }
@@ -58,16 +81,18 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public void clearCache() {
-        blockStateCache.invalidateAll();
+        standablePositionCache.invalidateAll();
+        bodySpaceCache.invalidateAll();
     }
 
     @Override
     public void forceCacheClean() {
-        blockStateCache.cleanUp();
+        standablePositionCache.cleanUp();
+        bodySpaceCache.cleanUp();
     }
 
     @Override
     public int getCacheSize() {
-        return Math.toIntExact(blockStateCache.estimatedSize());
+        return Math.toIntExact(standablePositionCache.estimatedSize() + bodySpaceCache.estimatedSize());
     }
 }

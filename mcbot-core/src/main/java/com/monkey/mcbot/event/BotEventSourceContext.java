@@ -6,7 +6,8 @@ import java.util.concurrent.Callable;
 /** Propagates the origin of synchronous API operations without changing public manager signatures. */
 public final class BotEventSourceContext {
     private static final ThreadLocal<BotEventSource> CURRENT = new ThreadLocal<>();
-    private BotEventSourceContext() { }
+
+    private BotEventSourceContext() {}
 
     public static BotEventSource currentOr(BotEventSource fallback) {
         BotEventSource current = CURRENT.get();
@@ -16,9 +17,11 @@ public final class BotEventSourceContext {
     public static <T> T call(BotEventSource source, Callable<T> action) throws Exception {
         BotEventSource previous = CURRENT.get();
         CURRENT.set(source);
-        try { return action.call(); }
-        finally {
-            if (previous == null) CURRENT.remove(); else CURRENT.set(previous);
+        try {
+            return action.call();
+        } finally {
+            if (previous == null) CURRENT.remove();
+            else CURRENT.set(previous);
         }
     }
 }

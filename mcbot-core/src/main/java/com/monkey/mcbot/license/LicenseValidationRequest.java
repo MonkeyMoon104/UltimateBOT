@@ -9,6 +9,4 @@ public record LicenseValidationRequest(
         @JsonProperty("installationId") String installationId,
         @JsonProperty("fingerprintHash") String fingerprintHash,
         @JsonProperty("hostFingerprint") String hostFingerprint,
-        @JsonProperty("serverPort") Integer serverPort
-) {
-}
+        @JsonProperty("serverPort") Integer serverPort) {}

@@ -1,7 +1,6 @@
 package com.monkey.mcbot.update;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -18,20 +17,17 @@ public final class UpdateCheckHttpClient {
 
     public UpdateCheckHttpClient(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(3))
-                .build();
+        this.httpClient =
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
 
         String baseUrl = System.getProperty(
                 "mcbot.update.base-url",
-                System.getenv().getOrDefault(
-                        "MCBOT_UPDATE_BASE_URL",
-                        System.getProperty(
-                                "mcbot.license.base-url",
-                                System.getenv().getOrDefault("MCBOT_LICENSE_BASE_URL", DEFAULT_BASE_URL)
-                        )
-                )
-        );
+                System.getenv()
+                        .getOrDefault(
+                                "MCBOT_UPDATE_BASE_URL",
+                                System.getProperty(
+                                        "mcbot.license.base-url",
+                                        System.getenv().getOrDefault("MCBOT_LICENSE_BASE_URL", DEFAULT_BASE_URL))));
         this.checkUri = URI.create(baseUrl + "/api/v1/plugin/updates/check");
     }
 

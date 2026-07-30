@@ -4,11 +4,11 @@ import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroa
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
+import java.util.Map;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import java.util.Map;
 
 public class ItemManager implements IItemManager {
 
@@ -21,7 +21,12 @@ public class ItemManager implements IItemManager {
     private final IEquipmentBroadcaster equipmentBroadcaster;
     private final ISlotManager slotManager;
 
-    public ItemManager(Player bot, Map<Integer, ItemStack> hotbarSlots, IResourceReplenisher resourceReplenisher, IEquipmentBroadcaster equipmentBroadcaster, ISlotManager slotManager) {
+    public ItemManager(
+            Player bot,
+            Map<Integer, ItemStack> hotbarSlots,
+            IResourceReplenisher resourceReplenisher,
+            IEquipmentBroadcaster equipmentBroadcaster,
+            ISlotManager slotManager) {
         this.bot = bot;
         this.hotbarSlots = hotbarSlots;
         this.resourceReplenisher = resourceReplenisher;

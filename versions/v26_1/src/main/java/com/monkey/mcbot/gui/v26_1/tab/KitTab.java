@@ -22,21 +22,18 @@ public class KitTab {
 
         Gui gui = Gui.builder()
                 .setStructure(
-                        "# r . . . . # #",
-                        "# . . t . . # #",
-                        "# . s g f . # #",
-                        "# c . . m . # #",
-                        "# # # # # # # #"
-                )
+                        "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . . m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('r', new RankItem(context.getTraining(), options))
                 .addIngredient('t', new TotemItem(options, context.getTraining()))
                 .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(context.getTraining(), context.getViewer(), options))
-                .addIngredient('g', context.hasManagedBotSpawned()
-                        ? new TeleportItem(context.getTraining())
-                        : Item.simple(new ItemStack(Material.AIR)))
+                .addIngredient(
+                        'g',
+                        context.hasManagedBotSpawned()
+                                ? new TeleportItem(context.getTraining())
+                                : Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();

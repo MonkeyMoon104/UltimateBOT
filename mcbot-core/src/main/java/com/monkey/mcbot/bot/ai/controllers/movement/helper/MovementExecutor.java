@@ -20,6 +20,7 @@ public class MovementExecutor implements IMovementExecutor {
     private boolean strafeClockwise = true;
     private int zigZagDirection = 1;
     private int zigZagCounter = 0;
+    private final PathSteering pathSteering = new PathSteering();
 
     public MovementExecutor(Player bot, IBlockStateValidator blockValidator, IObstacleHandler obstacleHandler) {
         this.bot = bot;
@@ -260,9 +261,33 @@ public class MovementExecutor implements IMovementExecutor {
         }
     }
 
+    public void moveAlongPath(Vec3 targetPos) {
+        Vec3 botPos = bot.position();
+        Vec3 delta = targetPos.subtract(botPos);
+        double horizontalDistance = delta.horizontalDistance();
+        if (horizontalDistance < 0.05D) {
+            stopMovement();
+            return;
+        }
+
+        Vec3 direction = pathSteering.update(bot.getDeltaMovement(), delta);
+        double waypointSpeed = Math.min(movementSpeed, Math.max(0.12D, horizontalDistance * 0.45D));
+        double verticalVelocity = bot.getDeltaMovement().y;
+        if (bot.onGround() && targetPos.y > botPos.y + 0.35D) {
+            verticalVelocity = Math.max(verticalVelocity, jumpVelocity);
+        }
+
+        bot.setDeltaMovement(direction.x * waypointSpeed, verticalVelocity, direction.z * waypointSpeed);
+    }
+
+    public void resetPathSteering() {
+        pathSteering.reset();
+    }
+
     @Override
     public void stopMovement() {
         bot.setDeltaMovement(0, bot.getDeltaMovement().y, 0);
+        pathSteering.reset();
     }
 
     @Override

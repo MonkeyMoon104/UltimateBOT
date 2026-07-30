@@ -8,6 +8,7 @@ import com.monkey.mcbot.api.event.combat.BotKillEntityEvent;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.event.BotEventDispatcher;
+import java.util.UUID;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -18,8 +19,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-
-import java.util.UUID;
 
 /** Bridges relevant Bukkit runtime actions to stable MinecraftBot API events. */
 public final class BotRuntimeEventListener implements Listener {
@@ -37,8 +36,11 @@ public final class BotRuntimeEventListener implements Listener {
         if (context == null) return;
         Entity damager = event instanceof EntityDamageByEntityEvent byEntity ? byEntity.getDamager() : null;
         BotDamageEvent botEvent = new BotDamageEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot,
-                damager, event.getCause().name(), event.getDamage());
+                dispatcher.nextSequence(context.snapshot.botUUID()),
+                context.snapshot,
+                damager,
+                event.getCause().name(),
+                event.getDamage());
         botEvent.setCancelled(event.isCancelled());
         dispatcher.publish(botEvent);
         if (botEvent.isCancelled()) {
@@ -55,8 +57,8 @@ public final class BotRuntimeEventListener implements Listener {
         if (killer == null) return;
         BotContext context = findBot(killer.getUniqueId());
         if (context == null) return;
-        dispatcher.publish(new BotKillEntityEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot, victim));
+        dispatcher.publish(
+                new BotKillEntityEvent(dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot, victim));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -64,8 +66,10 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getEntity().getUniqueId());
         if (context == null) return;
         BotHealEvent botEvent = dispatcher.publish(new BotHealEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot,
-                event.getRegainReason().name(), event.getAmount()));
+                dispatcher.nextSequence(context.snapshot.botUUID()),
+                context.snapshot,
+                event.getRegainReason().name(),
+                event.getAmount()));
         if (botEvent.isCancelled()) {
             event.setCancelled(true);
         } else {
@@ -78,8 +82,11 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getPlayer().getUniqueId());
         if (context == null || event.getTo() == null) return;
         BotTeleportEvent botEvent = dispatcher.publish(new BotTeleportEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot,
-                event.getFrom(), event.getTo(), event.getCause().name()));
+                dispatcher.nextSequence(context.snapshot.botUUID()),
+                context.snapshot,
+                event.getFrom(),
+                event.getTo(),
+                event.getCause().name()));
         if (botEvent.isCancelled()) {
             event.setCancelled(true);
         } else {
@@ -95,5 +102,5 @@ public final class BotRuntimeEventListener implements Listener {
         return snapshot == null ? null : new BotContext(snapshot);
     }
 
-    private record BotContext(BotSnapshot snapshot) { }
+    private record BotContext(BotSnapshot snapshot) {}
 }

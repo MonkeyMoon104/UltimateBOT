@@ -1,24 +1,16 @@
 package com.monkey.mcbot.api.model;
 
+import java.util.Objects;
+import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Immutable API-safe spawn location payload.
  */
 public record BotLocation(
-        @Nullable String worldName,
-        @Nullable UUID worldUUID,
-        double x,
-        double y,
-        double z,
-        float yaw,
-        float pitch
-) {
+        @Nullable String worldName, @Nullable UUID worldUUID, double x, double y, double z, float yaw, float pitch) {
     public BotLocation {
         if ((worldName == null || worldName.isBlank()) && worldUUID == null) {
             throw new IllegalArgumentException("worldName or worldUUID is required");
@@ -35,7 +27,6 @@ public record BotLocation(
                 location.getY(),
                 location.getZ(),
                 location.getYaw(),
-                location.getPitch()
-        );
+                location.getPitch());
     }
 }

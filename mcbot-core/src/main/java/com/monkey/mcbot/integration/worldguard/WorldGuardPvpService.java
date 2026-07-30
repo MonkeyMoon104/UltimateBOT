@@ -32,10 +32,12 @@ public final class WorldGuardPvpService {
         }
 
         try {
-            RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+            RegionQuery query =
+                    WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
             return query.testState(BukkitAdapter.adapt(location), null, Flags.PVP);
         } catch (Throwable error) {
-            MinecraftBotLogging.warn(plugin.getLogger(), "WorldGuard", "Failed to check PvP flag: " + error.getMessage());
+            MinecraftBotLogging.warn(
+                    plugin.getLogger(), "WorldGuard", "Failed to check PvP flag: " + error.getMessage());
             return true;
         }
     }

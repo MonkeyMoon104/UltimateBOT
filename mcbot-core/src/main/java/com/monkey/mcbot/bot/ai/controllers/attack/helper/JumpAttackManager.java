@@ -4,8 +4,8 @@ import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class JumpAttackManager implements IJumpAttackManager {
 

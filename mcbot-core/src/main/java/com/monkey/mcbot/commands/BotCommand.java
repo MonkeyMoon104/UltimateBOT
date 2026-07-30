@@ -5,13 +5,12 @@ import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class BotCommand implements CommandExecutor {
 
@@ -43,8 +42,7 @@ public class BotCommand implements CommandExecutor {
         if (isEventBotActive()) {
             String msg = plugin.getLangString(
                     "messages.event-bot-active-block-normal",
-                    "&cX An event bot is active! You cannot spawn normal bots during an event."
-            );
+                    "&cX An event bot is active! You cannot spawn normal bots during an event.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return true;
         }
@@ -75,8 +73,7 @@ public class BotCommand implements CommandExecutor {
         if (activeType == BotType.ALLY) {
             return plugin.getLangString(
                     "messages.cannot-open-bot-while-ally",
-                    "&cYou already have an ally bot spawned. Despawn it before using /bot."
-            );
+                    "&cYou already have an ally bot spawned. Despawn it before using /bot.");
         }
 
         return "&cYou already have an active team ally bot. Despawn it before using /bot.";

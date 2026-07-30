@@ -20,12 +20,7 @@ public class RankTab {
 
         return Gui.normal()
                 .setStructure(
-                        "# # # # # # # #",
-                        "# . . r . . . #",
-                        "# . . . . . . #",
-                        "# . . . . . . #",
-                        "# # # # # # # #"
-                )
+                        "# # # # # # # #", "# . . r . . . #", "# . . . . . . #", "# . . . . . . #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('r', new RankItem(context.getTraining(), options))

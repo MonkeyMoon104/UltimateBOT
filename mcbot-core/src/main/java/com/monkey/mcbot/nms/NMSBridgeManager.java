@@ -1,13 +1,14 @@
 package com.monkey.mcbot.nms;
 
 import com.monkey.mcbot.logging.MinecraftBotLogging;
-import org.bukkit.Bukkit;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 
 public class NMSBridgeManager {
 
     private static INMSBridge instance;
-    private static final String SUPPORTED_VERSIONS = "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.x, 26.2.x";
+    private static final String SUPPORTED_VERSIONS =
+            "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.x, 26.2.x";
 
     public static void init() {
         init(Bukkit.getLogger());
@@ -16,22 +17,21 @@ public class NMSBridgeManager {
     public static void init(Logger logger) {
         String version = Bukkit.getMinecraftVersion();
 
-        String className = switch (version) {
-            case "1.21.4" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_4";
-            case "1.21.5" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_5";
-            case "1.21.6" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_6";
-            case "1.21.7" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_7";
-            case "1.21.8" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_8";
-            case "1.21.9" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_9";
-            case "1.21.10" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_10";
-            case "1.21.11" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_11";
-            default -> resolveV26Bridge(version);
-        };
+        String className =
+                switch (version) {
+                    case "1.21.4" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_4";
+                    case "1.21.5" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_5";
+                    case "1.21.6" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_6";
+                    case "1.21.7" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_7";
+                    case "1.21.8" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_8";
+                    case "1.21.9" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_9";
+                    case "1.21.10" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_10";
+                    case "1.21.11" -> "com.monkey.mcbot.nms.NMSBridge_v1_21_11";
+                    default -> resolveV26Bridge(version);
+                };
         if (className == null) {
             MinecraftBotLogging.logNmsUnsupportedVersion(logger, version, SUPPORTED_VERSIONS);
-            throw new RuntimeException(
-                    "[MinecraftBot] Unsupported Minecraft version: " + version
-            );
+            throw new RuntimeException("[MinecraftBot] Unsupported Minecraft version: " + version);
         }
         MinecraftBotLogging.logNmsInitStart(logger, version, className, SUPPORTED_VERSIONS);
 
@@ -64,9 +64,7 @@ public class NMSBridgeManager {
 
     public static INMSBridge get() {
         if (instance == null) {
-            throw new RuntimeException(
-                    "[MinecraftBot] NMSBridgeManager is not initialized. Call init() in onEnable."
-            );
+            throw new RuntimeException("[MinecraftBot] NMSBridgeManager is not initialized. Call init() in onEnable.");
         }
         return instance;
     }

@@ -4,13 +4,12 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.util.List;
 
 public class BotEventCommand implements CommandExecutor {
 
@@ -53,8 +52,7 @@ public class BotEventCommand implements CommandExecutor {
         if (activeType == BotType.SINGLE) {
             return plugin.getLangString(
                     "messages.must-despawn-normal-bot",
-                    "&cX You already have a normal bot spawned! Despawn it before managing the event bot."
-            );
+                    "&cX You already have a normal bot spawned! Despawn it before managing the event bot.");
         }
 
         if (activeType == BotType.ALLY) {

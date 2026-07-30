@@ -1,13 +1,12 @@
 package com.monkey.mcbot.api;
 
+import com.monkey.mcbot.api.event.bus.BotEventBus;
 import com.monkey.mcbot.api.managers.IBotManager;
 import com.monkey.mcbot.api.managers.IBotRegistry;
-import com.monkey.mcbot.api.event.bus.BotEventBus;
-import org.jspecify.annotations.Nullable;
-import org.bukkit.plugin.Plugin;
-
 import java.util.Objects;
 import java.util.logging.Logger;
+import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Main public entry point for the MinecraftBot API.

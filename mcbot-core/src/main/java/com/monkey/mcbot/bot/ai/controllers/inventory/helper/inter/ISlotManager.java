@@ -27,6 +27,7 @@ public interface ISlotManager {
     void switchToAnchor();
 
     void switchToGlow();
+
     void switchToGoldenApple();
 
     void switchToEmptySlot();

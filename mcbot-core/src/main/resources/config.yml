@@ -14,11 +14,16 @@ remote-api:
   base-path: "/mcbot/api/v1"
   token: "change-me"
 
-observability:
-  # Internal Micrometer metrics. Changes require a plugin restart.
-  enabled: true
-  # Exposes authenticated Prometheus data at <remote-api.base-path>/metrics.
-  prometheus-endpoint-enabled: true
+addons:
+  metrics:
+    # Downloads MinecraftBot-Metrics.jar automatically on the next full server restart.
+    enabled: false
+    # Exposes authenticated Prometheus data at <remote-api.base-path>/metrics when the addon is enabled.
+    prometheus-endpoint-enabled: false
+  # Downloads MinecraftBot-Guard.jar automatically on the next full server restart.
+  # Detection and protection rules are intentionally hardcoded by the addon.
+  guard:
+    enabled: true
 
 performance:
   caches:
@@ -44,29 +49,6 @@ bot:
     healing: true
     # Keep entity damage/knockback while deciding independently whether bot explosions break terrain.
     explosion-block-damage: false
-
-  guard:
-    enabled: true
-    detection:
-      class-prefixes:
-        - "com.monkey.mcbot."
-      class-contains:
-        - "mcbot"
-      exact-names:
-        - "MinecraftBot"
-      name-prefixes: []
-    compatibility:
-      mark-as-npc-for-vault: true
-      npc-metadata-key: "NPC"
-      own-metadata-key: "MinecraftBotGuard"
-      preload-luckperms-users: true
-    protection:
-      clear-fire-ticks: true
-      cancel-combust-events: true
-      cancel-fire-damage: true
-    scanner:
-      interval-ticks: 20
-    debug: false
 
   event:
     range: 32

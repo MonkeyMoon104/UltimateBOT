@@ -1,12 +1,11 @@
 package com.monkey.mcbot.api.event.base;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
-import org.jspecify.annotations.Nullable;
-import org.bukkit.event.Event;
-
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
+import org.bukkit.event.Event;
+import org.jspecify.annotations.Nullable;
 
 /** Common immutable context shared by every MinecraftBot event. */
 public abstract class BotEvent extends Event {
@@ -19,8 +18,12 @@ public abstract class BotEvent extends Event {
     private final BotEventSource source;
     private final @Nullable BotSnapshot botSnapshot;
 
-    protected BotEvent(long sequence, UUID ownerUUID, UUID botUUID,
-                       @Nullable BotEventSource source, @Nullable BotSnapshot botSnapshot) {
+    protected BotEvent(
+            long sequence,
+            UUID ownerUUID,
+            UUID botUUID,
+            @Nullable BotEventSource source,
+            @Nullable BotSnapshot botSnapshot) {
         this.eventId = UUID.randomUUID();
         this.sequence = sequence;
         this.occurredAt = Instant.now();
@@ -30,11 +33,31 @@ public abstract class BotEvent extends Event {
         this.botSnapshot = botSnapshot;
     }
 
-    public final UUID getEventId() { return eventId; }
-    public final long getSequence() { return sequence; }
-    public final Instant getOccurredAt() { return occurredAt; }
-    public final UUID getOwnerUUID() { return ownerUUID; }
-    public final UUID getBotUUID() { return botUUID; }
-    public final BotEventSource getSource() { return source; }
-    public final @Nullable BotSnapshot getBotSnapshot() { return botSnapshot; }
+    public final UUID getEventId() {
+        return eventId;
+    }
+
+    public final long getSequence() {
+        return sequence;
+    }
+
+    public final Instant getOccurredAt() {
+        return occurredAt;
+    }
+
+    public final UUID getOwnerUUID() {
+        return ownerUUID;
+    }
+
+    public final UUID getBotUUID() {
+        return botUUID;
+    }
+
+    public final BotEventSource getSource() {
+        return source;
+    }
+
+    public final @Nullable BotSnapshot getBotSnapshot() {
+        return botSnapshot;
+    }
 }

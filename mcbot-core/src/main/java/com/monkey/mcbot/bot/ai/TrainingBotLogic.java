@@ -21,13 +21,14 @@ public class TrainingBotLogic {
     private final BotDeathService deathHandler;
     private final BotEquipmentService equipmentHandler;
 
-    public TrainingBotLogic(ITrainingBot bot,
-                            MinecraftBot plugin,
-                            org.bukkit.entity.Player targetPlayer,
-                            boolean follow,
-                            BotOptions botOptions,
-                            String deadBotMessage,
-                            String deadBotEventMessage) {
+    public TrainingBotLogic(
+            ITrainingBot bot,
+            MinecraftBot plugin,
+            org.bukkit.entity.Player targetPlayer,
+            boolean follow,
+            BotOptions botOptions,
+            String deadBotMessage,
+            String deadBotEventMessage) {
 
         java.util.Objects.requireNonNull(plugin, "plugin");
         java.util.Objects.requireNonNull(botOptions, "botOptions");
@@ -65,8 +66,7 @@ public class TrainingBotLogic {
         deathHandler.handleDeath(cause);
     }
 
-    public boolean onActuallyHurt(ServerLevel level, DamageSource source,
-                                  float amount, EntityDamageEvent event) {
+    public boolean onActuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
 
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
@@ -78,9 +78,9 @@ public class TrainingBotLogic {
             org.bukkit.entity.Player currentTarget = bot.getTargetPlayer();
 
             net.minecraft.world.entity.Entity attacker = source.getEntity();
-            if (attacker instanceof Player nmsPlayer &&
-                    currentTarget != null &&
-                    nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
+            if (attacker instanceof Player nmsPlayer
+                    && currentTarget != null
+                    && nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
                 if (!fireOrLavaDamage) {
                     if (source.isCritical()) {
                         brainController.getBotAI().getEnderpearlController().onDamageReceived();
@@ -105,9 +105,10 @@ public class TrainingBotLogic {
 
             if (currentTarget != null
                     && brainController.getBotAI().getMovementController().isStuckInPlace()) {
-                brainController.getBotAI().getMovementController().forceUnstick(
-                        ((CraftPlayer) currentTarget).getHandle()
-                );
+                brainController
+                        .getBotAI()
+                        .getMovementController()
+                        .forceUnstick(((CraftPlayer) currentTarget).getHandle());
             }
         }
 

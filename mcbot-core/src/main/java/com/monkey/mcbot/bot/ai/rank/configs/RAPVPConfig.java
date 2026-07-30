@@ -15,11 +15,25 @@ public class RAPVPConfig {
         this.anchorSearchCooldownMillis = builder.anchorSearchCooldownMillis;
     }
 
-    public int getMaxDistance() { return maxDistance; }
-    public int getPredictionTicks() { return predictionTicks; }
-    public double getMinMovement() { return minMovement; }
-    public double getMinSafeDistance() { return minSafeDistance; }
-    public long getAnchorSearchCooldownMillis() { return anchorSearchCooldownMillis; }
+    public int getMaxDistance() {
+        return maxDistance;
+    }
+
+    public int getPredictionTicks() {
+        return predictionTicks;
+    }
+
+    public double getMinMovement() {
+        return minMovement;
+    }
+
+    public double getMinSafeDistance() {
+        return minSafeDistance;
+    }
+
+    public long getAnchorSearchCooldownMillis() {
+        return anchorSearchCooldownMillis;
+    }
 
     public static class Builder {
         private int maxDistance = 12;
@@ -28,12 +42,33 @@ public class RAPVPConfig {
         private double minSafeDistance = 4.0;
         private long anchorSearchCooldownMillis = 500L;
 
-        public Builder maxDistance(int val) { this.maxDistance = val; return this; }
-        public Builder predictionTicks(int val) { this.predictionTicks = val; return this; }
-        public Builder minMovement(double val) { this.minMovement = val; return this; }
-        public Builder minSafeDistance(double val) { this.minSafeDistance = val; return this; }
-        public Builder anchorSearchCooldownMillis(long val) { this.anchorSearchCooldownMillis = val; return this; }
+        public Builder maxDistance(int val) {
+            this.maxDistance = val;
+            return this;
+        }
 
-        public RAPVPConfig build() { return new RAPVPConfig(this); }
+        public Builder predictionTicks(int val) {
+            this.predictionTicks = val;
+            return this;
+        }
+
+        public Builder minMovement(double val) {
+            this.minMovement = val;
+            return this;
+        }
+
+        public Builder minSafeDistance(double val) {
+            this.minSafeDistance = val;
+            return this;
+        }
+
+        public Builder anchorSearchCooldownMillis(long val) {
+            this.anchorSearchCooldownMillis = val;
+            return this;
+        }
+
+        public RAPVPConfig build() {
+            return new RAPVPConfig(this);
+        }
     }
 }

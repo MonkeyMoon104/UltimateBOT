@@ -1,10 +1,15 @@
 package com.monkey.mcbot.gui.impl;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.event.base.BotEventSource;
+import com.monkey.mcbot.api.event.state.BotSettingKey;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
+import com.monkey.mcbot.event.BotSettingEvents;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.List;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -14,12 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.AbstractItem;
-
-import java.util.List;
-import java.util.UUID;
-import com.monkey.mcbot.api.event.base.BotEventSource;
-import com.monkey.mcbot.api.event.state.BotSettingKey;
-import com.monkey.mcbot.event.BotSettingEvents;
 
 public class CombatItem extends AbstractItem {
 
@@ -42,8 +41,7 @@ public class CombatItem extends AbstractItem {
         var loreLines = training.getLangStringList("gui.combat-button.lore");
 
         for (String line : loreLines) {
-            String processedLine = line
-                    .replace("%type%", status ? "ON" : "OFF")
+            String processedLine = line.replace("%type%", status ? "ON" : "OFF")
                     .replace("%rank%", options.getRank().name());
             builder.addLoreLines(ChatColorUtils.translate(processedLine));
         }
@@ -51,12 +49,14 @@ public class CombatItem extends AbstractItem {
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleClick(
+            @NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
 
         if (clickType.isLeftClick()) {
             if (!options.isChangeableCombat()) {
-                String msg = training.getLangString("messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString(
+                        "messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -65,13 +65,20 @@ public class CombatItem extends AbstractItem {
             boolean newStatus = !oldStatus;
 
             if (newStatus && !options.isFollow()) {
-                String msg = training.getLangString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
+                String msg = training.getLangString(
+                        "messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
 
-            var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                    BotSettingKey.COMBAT, oldStatus, newStatus, Boolean.class);
+            var proposed = BotSettingEvents.propose(
+                    training,
+                    managedOwnerUUID,
+                    BotEventSource.GUI,
+                    BotSettingKey.COMBAT,
+                    oldStatus,
+                    newStatus,
+                    Boolean.class);
             if (proposed.isEmpty()) return;
             newStatus = proposed.get();
             options.setCombat(newStatus);
@@ -98,15 +105,22 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isRightClick()) {
             if (!options.isChangeableRank()) {
-                String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString(
+                        "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
 
             BotRank currentRank = options.getRank();
             BotRank newRank = options.nextAllowedRank(currentRank, true);
-            var proposed = BotSettingEvents.propose(training, managedOwnerUUID, BotEventSource.GUI,
-                    BotSettingKey.RANK, currentRank, newRank, BotRank.class);
+            var proposed = BotSettingEvents.propose(
+                    training,
+                    managedOwnerUUID,
+                    BotEventSource.GUI,
+                    BotSettingKey.RANK,
+                    currentRank,
+                    newRank,
+                    BotRank.class);
             if (proposed.isEmpty()) return;
             newRank = proposed.get();
             options.setRank(newRank);

@@ -2,7 +2,6 @@ package com.monkey.mcbot.license;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.time.Instant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,6 +13,4 @@ public record LicenseValidationResponse(
         @JsonProperty("expiresAt") Instant expiresAt,
         @JsonProperty("maxServers") Integer maxServers,
         @JsonProperty("message") String message,
-        @JsonProperty("graceUntil") Instant graceUntil
-) {
-}
+        @JsonProperty("graceUntil") Instant graceUntil) {}

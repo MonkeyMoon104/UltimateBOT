@@ -1,7 +1,6 @@
 package com.monkey.mcbot.utils.armor;
 
 import com.monkey.mcbot.bot.BotOptions;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,5 +28,4 @@ public class PlayerOptions {
     public int size() {
         return this.options.size();
     }
-
 }

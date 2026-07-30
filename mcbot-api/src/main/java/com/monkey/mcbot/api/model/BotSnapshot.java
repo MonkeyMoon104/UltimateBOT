@@ -1,5 +1,6 @@
 package com.monkey.mcbot.api.model;
 
+import com.monkey.mcbot.common.util.TextValues;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -58,10 +59,10 @@ public record BotSnapshot(
         boolean healing,
         boolean killMessageEnabled) {
     public BotSnapshot {
-        botType = botType == null || botType.isBlank() ? "UNKNOWN" : botType;
-        botRank = botRank == null || botRank.isBlank() ? "UNKNOWN" : botRank;
-        minBotRank = minBotRank == null || minBotRank.isBlank() ? "EASY" : minBotRank;
-        maxBotRank = maxBotRank == null || maxBotRank.isBlank() ? "GOD" : maxBotRank;
+        botType = TextValues.orElseIfBlank(botType, "UNKNOWN");
+        botRank = TextValues.orElseIfBlank(botRank, "UNKNOWN");
+        minBotRank = TextValues.orElseIfBlank(minBotRank, "EASY");
+        maxBotRank = TextValues.orElseIfBlank(maxBotRank, "GOD");
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
         source = source == null ? BotSource.CORE : source;
         targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;

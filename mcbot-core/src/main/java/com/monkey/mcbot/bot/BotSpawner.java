@@ -2,21 +2,23 @@ package com.monkey.mcbot.bot;
 
 import com.mojang.authlib.GameProfile;
 import com.monkey.mcbot.MinecraftBot;
-import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.event.base.BotEventSource;
 import com.monkey.mcbot.api.event.lifecycle.BotDespawnEvent;
 import com.monkey.mcbot.api.event.lifecycle.BotDespawnPrepareEvent;
 import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.mcbot.api.event.lifecycle.BotSpawnEvent;
 import com.monkey.mcbot.api.event.lifecycle.BotSpawnPrepareEvent;
+import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.model.BotSnapshot;
-import com.monkey.mcbot.integration.api.BotSnapshotMapper;
-import com.monkey.mcbot.event.BotEventSourceContext;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import com.monkey.mcbot.event.BotEventSourceContext;
+import com.monkey.mcbot.integration.api.BotSnapshotMapper;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
 import com.monkey.mcbot.utils.equipment.BotEquipmentUtils;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,9 +33,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Map;
-import java.util.UUID;
-
 public class BotSpawner {
 
     private final MinecraftBot plugin;
@@ -45,13 +44,14 @@ public class BotSpawner {
         this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
-    public boolean spawn(Player viewer,
-                      Player target,
-                      Map<EquipmentSlot, ItemStack> armorMap,
-                      Map<EquipmentSlot, Boolean> blastProtectionMap,
-                      boolean follow,
-                      int totem,
-                      BotOptions botOptions) {
+    public boolean spawn(
+            Player viewer,
+            Player target,
+            Map<EquipmentSlot, ItemStack> armorMap,
+            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            boolean follow,
+            int totem,
+            BotOptions botOptions) {
 
         if (viewer == null || !viewer.isOnline()) {
             return false;
@@ -63,22 +63,26 @@ public class BotSpawner {
 
         UUID botUUID = UUID.randomUUID();
         botOptions.setOwnerUUID(registryOwnerUUID);
-        if (botOptions.getBotType() == BotType.TEAM_ALLY && botOptions.getTeamOwnerUUIDs().isEmpty()) {
+        if (botOptions.getBotType() == BotType.TEAM_ALLY
+                && botOptions.getTeamOwnerUUIDs().isEmpty()) {
             botOptions.addTeamOwner(registryOwnerUUID);
         }
 
         FileConfiguration config = plugin.getConfig();
-        GameProfile profile = profileResolver.resolve(
-                config, registryOwner, resolvedTarget, botUUID, botOptions
-        );
+        GameProfile profile = profileResolver.resolve(config, registryOwner, resolvedTarget, botUUID, botOptions);
 
         Location spawnLocation = resolveSpawnLocation(registryOwner, botOptions);
         BotEventSource spawnSource = BotEventSourceContext.currentOr(
                 botOptions != null && botOptions.getCreationSource() == BotCreationSource.API
-                        ? BotEventSource.API : BotEventSource.GUI);
-        BotSpawnPrepareEvent prepareEvent = plugin.getBotEventDispatcher().publish(new BotSpawnPrepareEvent(
-                plugin.getBotEventDispatcher().nextSequence(botUUID), registryOwnerUUID, botUUID,
-                spawnSource, spawnLocation));
+                        ? BotEventSource.API
+                        : BotEventSource.GUI);
+        BotSpawnPrepareEvent prepareEvent = plugin.getBotEventDispatcher()
+                .publish(new BotSpawnPrepareEvent(
+                        plugin.getBotEventDispatcher().nextSequence(botUUID),
+                        registryOwnerUUID,
+                        botUUID,
+                        spawnSource,
+                        spawnLocation));
         if (prepareEvent.isCancelled()) {
             plugin.getBotEventDispatcher().forget(botUUID);
             return false;
@@ -91,18 +95,18 @@ public class BotSpawner {
         ServerLevel world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
         BlockPos spawnPos = BlockPos.containing(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
 
-        ITrainingBot bot = NMSBridgeManager.get().createTrainingBot(
-                world,
-                spawnPos,
-                0,
-                profile,
-                resolvedTarget,
-                follow,
-                plugin,
-                plugin.getLangString("messages.dead-bot-msg", "You have killed the bot!"),
-                plugin.getLangString("messages.dead-bot-event-msg"),
-                botOptions
-        );
+        ITrainingBot bot = NMSBridgeManager.get()
+                .createTrainingBot(
+                        world,
+                        spawnPos,
+                        0,
+                        profile,
+                        resolvedTarget,
+                        follow,
+                        plugin,
+                        plugin.getLangString("messages.dead-bot-msg", "You have killed the bot!"),
+                        plugin.getLangString("messages.dead-bot-event-msg"),
+                        botOptions);
 
         bot.setTotemCount(totem);
         NMSBridgeManager.get().addToProfileCache(bot.asPlayer());
@@ -118,10 +122,11 @@ public class BotSpawner {
         if (botOptions == null || botOptions.isEnderPearls()) {
             bot.getBotAI().getInventoryController().addEnderpearls(16);
         } else {
-            bot.getBotAI().getInventoryController().setItem(
-                    com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
-                    net.minecraft.world.item.ItemStack.EMPTY
-            );
+            bot.getBotAI()
+                    .getInventoryController()
+                    .setItem(
+                            com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
+                            net.minecraft.world.item.ItemStack.EMPTY);
         }
 
         if (botOptions == null || botOptions.isCombat()) {
@@ -136,13 +141,15 @@ public class BotSpawner {
         }
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(registryOwnerUUID, bot);
         if (snapshot != null) {
-            plugin.getBotEventDispatcher().publish(new BotSpawnEvent(
-                    plugin.getBotEventDispatcher().nextSequence(botUUID), snapshot,
-                    BotEventSourceContext.currentOr(
-                            botOptions != null && botOptions.getCreationSource() == BotCreationSource.API
-                                    ? BotEventSource.API : BotEventSource.GUI),
-                    bot.asPlayer().getBukkitEntity()
-            ));
+            plugin.getBotEventDispatcher()
+                    .publish(new BotSpawnEvent(
+                            plugin.getBotEventDispatcher().nextSequence(botUUID),
+                            snapshot,
+                            BotEventSourceContext.currentOr(
+                                    botOptions != null && botOptions.getCreationSource() == BotCreationSource.API
+                                            ? BotEventSource.API
+                                            : BotEventSource.GUI),
+                            bot.asPlayer().getBukkitEntity()));
         }
         return true;
     }
@@ -158,18 +165,21 @@ public class BotSpawner {
     }
 
     private void clearExplosiveItems(ITrainingBot bot) {
-        bot.getBotAI().getInventoryController().setItem(
-                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                net.minecraft.world.item.ItemStack.EMPTY
-        );
-        bot.getBotAI().getInventoryController().setItem(
-                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
-                net.minecraft.world.item.ItemStack.EMPTY
-        );
-        bot.getBotAI().getInventoryController().setItem(
-                com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
-                net.minecraft.world.item.ItemStack.EMPTY
-        );
+        bot.getBotAI()
+                .getInventoryController()
+                .setItem(
+                        com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
+                        net.minecraft.world.item.ItemStack.EMPTY);
+        bot.getBotAI()
+                .getInventoryController()
+                .setItem(
+                        com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
+                        net.minecraft.world.item.ItemStack.EMPTY);
+        bot.getBotAI()
+                .getInventoryController()
+                .setItem(
+                        com.monkey.mcbot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
+                        net.minecraft.world.item.ItemStack.EMPTY);
     }
 
     private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {
@@ -186,8 +196,7 @@ public class BotSpawner {
                         apiLocation.y(),
                         apiLocation.z(),
                         apiLocation.yaw(),
-                        apiLocation.pitch()
-                );
+                        apiLocation.pitch());
             }
         }
 
@@ -201,11 +210,13 @@ public class BotSpawner {
             return;
         }
 
-        for (Map.Entry<Integer, ItemStack> entry : botOptions.getEquipmentContents().entrySet()) {
+        for (Map.Entry<Integer, ItemStack> entry :
+                botOptions.getEquipmentContents().entrySet()) {
             if (entry.getKey() == null || entry.getValue() == null) {
                 continue;
             }
-            net.minecraft.world.item.ItemStack nmsItem = org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(entry.getValue());
+            net.minecraft.world.item.ItemStack nmsItem =
+                    org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(entry.getValue());
             bot.getBotAI().getInventoryController().setItem(entry.getKey(), nmsItem);
         }
     }
@@ -256,7 +267,6 @@ public class BotSpawner {
 
         return viewer;
     }
-
 
     public boolean despawn(Player owner) {
         return despawn(owner, BotDespawnReason.MANUAL);
@@ -319,7 +329,9 @@ public class BotSpawner {
             if (owner != null && owner.isOnline()) {
                 despawn(owner, reason);
             } else {
-                UUID botUUID = bot != null && bot.asPlayer() != null ? bot.asPlayer().getUUID() : registry.getBotUUID(ownerUUID);
+                UUID botUUID = bot != null && bot.asPlayer() != null
+                        ? bot.asPlayer().getUUID()
+                        : registry.getBotUUID(ownerUUID);
                 if (!allowDespawn(ownerUUID, reason)) return;
                 boolean removed = botUUID != null && EntityUtils.removeEntityInLoadedWorlds(botUUID);
                 cleanupDespawnState(ownerUUID, botUUID, removed, reason);
@@ -346,7 +358,10 @@ public class BotSpawner {
         ITrainingBot bot = registry.getBot(ownerUUID);
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(ownerUUID, bot);
         if (!removed && botUUID != null) {
-            MinecraftBotLogging.warn(plugin.getLogger(), "Bot", "Despawn cleanup could not find entity " + botUUID + " for owner " + ownerUUID);
+            MinecraftBotLogging.warn(
+                    plugin.getLogger(),
+                    "Bot",
+                    "Despawn cleanup could not find entity " + botUUID + " for owner " + ownerUUID);
         }
 
         if (botUUID != null) {
@@ -357,11 +372,15 @@ public class BotSpawner {
         registry.removeBot(ownerUUID);
         if (snapshot != null) {
             BotEventSource source = BotEventSourceContext.currentOr(BotEventSource.GUI);
-            plugin.getBotEventDispatcher().publish(new BotDespawnEvent(
-                    plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()), snapshot,
-                    source, reason == BotDespawnReason.MANUAL
-                            && (source == BotEventSource.API || source == BotEventSource.REMOTE_API)
-                            ? BotDespawnReason.API_REQUEST : reason));
+            plugin.getBotEventDispatcher()
+                    .publish(new BotDespawnEvent(
+                            plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()),
+                            snapshot,
+                            source,
+                            reason == BotDespawnReason.MANUAL
+                                            && (source == BotEventSource.API || source == BotEventSource.REMOTE_API)
+                                    ? BotDespawnReason.API_REQUEST
+                                    : reason));
             plugin.getBotEventDispatcher().forget(snapshot.botUUID());
         }
     }
@@ -369,14 +388,16 @@ public class BotSpawner {
     private boolean allowDespawn(UUID ownerUUID, BotDespawnReason requestedReason) {
         BotEventSource source = BotEventSourceContext.currentOr(BotEventSource.GUI);
         BotDespawnReason reason = requestedReason == BotDespawnReason.MANUAL
-                && (source == BotEventSource.API || source == BotEventSource.REMOTE_API)
-                ? BotDespawnReason.API_REQUEST : requestedReason;
+                        && (source == BotEventSource.API || source == BotEventSource.REMOTE_API)
+                ? BotDespawnReason.API_REQUEST
+                : requestedReason;
         if (reason != BotDespawnReason.MANUAL && reason != BotDespawnReason.API_REQUEST) return true;
         ITrainingBot bot = registry.getBot(ownerUUID);
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(ownerUUID, bot);
         if (snapshot == null) return true;
-        BotDespawnPrepareEvent event = plugin.getBotEventDispatcher().publish(new BotDespawnPrepareEvent(
-                plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()), snapshot, source, reason));
+        BotDespawnPrepareEvent event = plugin.getBotEventDispatcher()
+                .publish(new BotDespawnPrepareEvent(
+                        plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()), snapshot, source, reason));
         return !event.isCancelled();
     }
 }

@@ -1,7 +1,6 @@
 package com.monkey.mcbot.remote;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
-
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -18,5 +17,4 @@ public record RemoteBotEvent(
         UUID botUUID,
         String source,
         BotSnapshot snapshot,
-        Map<String, Object> payload
-) { }
+        Map<String, Object> payload) {}

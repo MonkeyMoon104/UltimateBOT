@@ -1,7 +1,7 @@
 package com.monkey.mcbot.bot.ai.controllers.inventory.helper.inter;
 
-import net.minecraft.world.item.ItemStack;
 import java.util.Map;
+import net.minecraft.world.item.ItemStack;
 
 public interface IResourceReplenisher {
 

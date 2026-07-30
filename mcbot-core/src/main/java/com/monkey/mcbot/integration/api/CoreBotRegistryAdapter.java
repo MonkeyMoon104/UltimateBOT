@@ -4,7 +4,6 @@ import com.monkey.mcbot.api.managers.IBotRegistry;
 import com.monkey.mcbot.api.model.BotSnapshot;
 import com.monkey.mcbot.bot.BotRegistry;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
-
 import java.util.*;
 
 public final class CoreBotRegistryAdapter implements IBotRegistry {

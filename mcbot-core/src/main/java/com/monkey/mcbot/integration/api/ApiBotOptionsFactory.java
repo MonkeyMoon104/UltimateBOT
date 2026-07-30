@@ -10,7 +10,6 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.utils.armor.ArmorCycle;
 import com.monkey.mcbot.utils.armor.ArmorTier;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -24,16 +23,15 @@ final class ApiBotOptionsFactory {
         this.plugin = plugin;
     }
 
-    BotOptions create(BotType type,
-                      UUID ownerUUID,
-                      UUID targetUUID,
-                      Set<UUID> targetUUIDs,
-                      Set<UUID> teamOwners,
-                      BotSettings settings) {
-        BotOptions options = new BotOptions(
-                plugin,
-                ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin)
-        );
+    BotOptions create(
+            BotType type,
+            UUID ownerUUID,
+            UUID targetUUID,
+            Set<UUID> targetUUIDs,
+            Set<UUID> teamOwners,
+            BotSettings settings) {
+        BotOptions options =
+                new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
         options.setBotType(type);
         options.setCreationSource(BotCreationSource.API);
         options.setOwnerUUID(ownerUUID);
@@ -84,21 +82,20 @@ final class ApiBotOptionsFactory {
     }
 
     private static void copyTrimSettings(BotOptions options, BotSettings settings) {
-        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry
-                : settings.armorTrimPatternKeys().entrySet()) {
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry :
+                settings.armorTrimPatternKeys().entrySet()) {
             options.setTrimPatternKey(entry.getKey(), entry.getValue());
         }
-        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry
-                : settings.armorTrimMaterialKeys().entrySet()) {
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry :
+                settings.armorTrimMaterialKeys().entrySet()) {
             options.setTrimMaterialKey(entry.getKey(), entry.getValue());
         }
     }
 
     static com.monkey.mcbot.bot.ai.rank.BotRank toCoreRank(BotRank rank) {
-        if (rank == null) {
-            return com.monkey.mcbot.bot.ai.rank.BotRank.EASY;
-        }
-        return switch (rank) {
+        com.monkey.mcbot.common.model.BotRankTier common =
+                rank == null ? com.monkey.mcbot.common.model.BotRankTier.EASY : rank.toCommon();
+        return switch (common) {
             case EASY -> com.monkey.mcbot.bot.ai.rank.BotRank.EASY;
             case NORMAL -> com.monkey.mcbot.bot.ai.rank.BotRank.NORMAL;
             case MEDIUM -> com.monkey.mcbot.bot.ai.rank.BotRank.MEDIUM;
@@ -108,10 +105,9 @@ final class ApiBotOptionsFactory {
     }
 
     private static ArmorTier toCoreArmor(BotArmorType armorType) {
-        if (armorType == null) {
-            return ArmorTier.LEATHER;
-        }
-        return switch (armorType) {
+        com.monkey.mcbot.common.model.BotArmorTier common =
+                armorType == null ? com.monkey.mcbot.common.model.BotArmorTier.LEATHER : armorType.toCommon();
+        return switch (common) {
             case LEATHER -> ArmorTier.LEATHER;
             case IRON -> ArmorTier.IRON;
             case GOLDEN -> ArmorTier.GOLDEN;

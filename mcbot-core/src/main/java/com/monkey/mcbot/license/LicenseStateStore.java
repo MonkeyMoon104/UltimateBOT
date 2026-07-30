@@ -1,7 +1,6 @@
 package com.monkey.mcbot.license;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -25,7 +24,8 @@ public final class LicenseStateStore {
             if (!Files.exists(file)) {
                 return Optional.empty();
             }
-            return Optional.of(objectMapper.readValue(Files.readString(file, StandardCharsets.UTF_8), LicenseState.class));
+            return Optional.of(
+                    objectMapper.readValue(Files.readString(file, StandardCharsets.UTF_8), LicenseState.class));
         } catch (Exception ignored) {
             return Optional.empty();
         }
@@ -37,8 +37,7 @@ public final class LicenseStateStore {
         Files.writeString(
                 file,
                 objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new LicenseState(timestamp)),
-                StandardCharsets.UTF_8
-        );
+                StandardCharsets.UTF_8);
     }
 
     public boolean hasValidGrace(Path dataDirectory, Duration gracePeriod, Instant now) {

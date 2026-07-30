@@ -5,6 +5,7 @@ import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.rank.BotRank;
 import com.monkey.mcbot.utils.ChatColorUtils;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -13,8 +14,6 @@ import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
-
-import java.util.UUID;
 
 public class CombatItem extends AbstractItem {
 
@@ -35,8 +34,7 @@ public class CombatItem extends AbstractItem {
         var loreLines = training.getLangStringList("gui.combat-button.lore");
 
         for (String line : loreLines) {
-            String processedLine = line
-                    .replace("%type%", status ? "ON" : "OFF")
+            String processedLine = line.replace("%type%", status ? "ON" : "OFF")
                     .replace("%rank%", options.getRank().name());
             builder.addLegacyLoreLines(ChatColorUtils.translate(processedLine));
         }
@@ -49,7 +47,8 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isLeftClick()) {
             if (!options.isChangeableCombat()) {
-                String msg = training.getLangString("messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString(
+                        "messages.combat-locked", "&cCombat is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -58,7 +57,8 @@ public class CombatItem extends AbstractItem {
             boolean newStatus = !oldStatus;
 
             if (newStatus && !options.isFollow()) {
-                String msg = training.getLangString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
+                String msg = training.getLangString(
+                        "messages.combat-need-follow", "&cFollow must be ON to enable bot combat");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -87,7 +87,8 @@ public class CombatItem extends AbstractItem {
 
         if (clickType.isRightClick()) {
             if (!options.isChangeableRank()) {
-                String msg = training.getLangString("messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+                String msg = training.getLangString(
+                        "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
@@ -112,7 +113,3 @@ public class CombatItem extends AbstractItem {
         return teamOwnerUUID == null ? player.getUniqueId() : teamOwnerUUID;
     }
 }
-
-
-
-

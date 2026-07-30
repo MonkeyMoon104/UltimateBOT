@@ -7,6 +7,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":common"))
     api(libs.jackson.databind)
     api(libs.jackson.datatype.jsr310)
     api(libs.jspecify)

@@ -1,14 +1,13 @@
 package com.monkey.mcbot.bot.ai.controllers.cpvp.helper.crystal;
 
 import com.monkey.mcbot.bot.ai.controllers.combat.ExplosionDamageEstimator;
+import java.util.Map;
+import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.Map;
-import java.util.Set;
 
 public class CrystalPositionEvaluator {
 
@@ -20,10 +19,12 @@ public class CrystalPositionEvaluator {
         this.level = level;
     }
 
-    public double calculateCrystalScore(BlockPos crystalPos, Player target,
-                                        Map<BlockPos, Integer> crystalCountAtPosition,
-                                        double optimalDamageRange,
-                                        double minCrystalDistance) {
+    public double calculateCrystalScore(
+            BlockPos crystalPos,
+            Player target,
+            Map<BlockPos, Integer> crystalCountAtPosition,
+            double optimalDamageRange,
+            double minCrystalDistance) {
         Vec3 explosionPos = Vec3.atCenterOf(crystalPos.above());
 
         double targetDamage = ExplosionDamageEstimator.estimateCrystalDamage(level, explosionPos, target);
@@ -44,10 +45,7 @@ public class CrystalPositionEvaluator {
         int priorPlacementsAtPos = crystalCountAtPosition.getOrDefault(crystalPos, 0);
         double repetitionPenalty = Math.min(6, priorPlacementsAtPos) * 1.1D;
 
-        double score = (targetDamage * 3.2D)
-                - (selfDamage * 2.6D)
-                - distancePenalty
-                - repetitionPenalty;
+        double score = (targetDamage * 3.2D) - (selfDamage * 2.6D) - distancePenalty - repetitionPenalty;
 
         if (targetDamage > target.getHealth()) {
             score += 4.0D;
@@ -59,11 +57,13 @@ public class CrystalPositionEvaluator {
         return Math.max(0.0D, score);
     }
 
-    public double evaluateCrystalForAttack(EndCrystal crystal, Player target,
-                                           Set<EndCrystal> myPlacedCrystals,
-                                           double crystalAttackRange,
-                                           double minCrystalDistance,
-                                           double optimalDamageRange) {
+    public double evaluateCrystalForAttack(
+            EndCrystal crystal,
+            Player target,
+            Set<EndCrystal> myPlacedCrystals,
+            double crystalAttackRange,
+            double minCrystalDistance,
+            double optimalDamageRange) {
         Vec3 crystalPos = crystal.position();
         double distanceToBot = crystalPos.distanceTo(bot.position());
         if (distanceToBot > crystalAttackRange) {
@@ -86,11 +86,7 @@ public class CrystalPositionEvaluator {
         double targetProximityBonus = Math.max(0.0D, 4.0D - distanceToTarget) * 0.6D;
         double ownershipBonus = myPlacedCrystals.contains(crystal) ? 1.5D : 0.0D;
 
-        double score = (targetDamage * 3.0D)
-                - (selfDamage * 2.8D)
-                + rangeBonus
-                + targetProximityBonus
-                + ownershipBonus;
+        double score = (targetDamage * 3.0D) - (selfDamage * 2.8D) + rangeBonus + targetProximityBonus + ownershipBonus;
 
         if (targetDamage > target.getHealth()) {
             score += 3.5D;

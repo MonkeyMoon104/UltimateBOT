@@ -26,8 +26,11 @@ public class CombatDataManager implements ICombatDataManager {
     private Vec3 targetVelocity = Vec3.ZERO;
     private long lastPositionUpdate = 0;
 
-    public CombatDataManager(Player bot, BotEnderpearlController enderpearlController,
-                             BotRAPVPController rapvpController, BotCPVPController cpvpController) {
+    public CombatDataManager(
+            Player bot,
+            BotEnderpearlController enderpearlController,
+            BotRAPVPController rapvpController,
+            BotCPVPController cpvpController) {
         this.bot = bot;
         this.enderpearlController = enderpearlController;
         this.rapvpController = rapvpController;
@@ -52,7 +55,9 @@ public class CombatDataManager implements ICombatDataManager {
 
         Vec3 currentTargetPos = target.position();
         if (lastTargetPosition != null && currentTime - lastPositionUpdate > 50) {
-            targetVelocity = currentTargetPos.subtract(lastTargetPosition).scale(20.0 / (currentTime - lastPositionUpdate) * 1000);
+            targetVelocity = currentTargetPos
+                    .subtract(lastTargetPosition)
+                    .scale(20.0 / (currentTime - lastPositionUpdate) * 1000);
         }
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
@@ -80,8 +85,7 @@ public class CombatDataManager implements ICombatDataManager {
                 if (forceCrystalFollowup) {
                     cpvpController.tick(target);
                 }
-            }
-            else {
+            } else {
                 cpvpController.tick(target);
                 if (!cpvpController.isDoingCrystalAction()) {
                     rapvpController.tick();

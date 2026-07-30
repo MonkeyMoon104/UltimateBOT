@@ -1,5 +1,6 @@
 package com.monkey.mcbot;
 
+import com.monkey.mcbot.addon.GuardAddonManager;
 import com.monkey.mcbot.api.MinecraftBotAPI;
 import com.monkey.mcbot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.mcbot.api.event.lifecycle.MinecraftBotReadyEvent;
@@ -18,7 +19,6 @@ import com.monkey.mcbot.lang.LanguageManager;
 import com.monkey.mcbot.license.LicenseManager;
 import com.monkey.mcbot.license.LicenseStartupResult;
 import com.monkey.mcbot.listener.BotExplosionListener;
-import com.monkey.mcbot.listener.BotGuardCompatibilityListener;
 import com.monkey.mcbot.listener.BotRuntimeEventListener;
 import com.monkey.mcbot.listener.PlayerCheckListener;
 import com.monkey.mcbot.listener.PlayerTagListener;
@@ -61,7 +61,7 @@ public final class MinecraftBot extends JavaPlugin {
     private UpdateManager updateManager;
     private LanguageManager languageManager;
     private WrapperManager wrapperManager;
-    private BotGuardCompatibilityListener botGuardCompatibilityListener;
+    private GuardAddonManager guardAddonManager;
     private WorldGuardPvpService worldGuardPvpService;
     private RemoteApiServer remoteApiServer;
     private BotEventDispatcher botEventDispatcher;
@@ -134,12 +134,15 @@ public final class MinecraftBot extends JavaPlugin {
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
             this.botMetrics = new BotMetrics(
-                    getConfig().getBoolean("observability.enabled", true),
-                    getConfig().getBoolean("observability.prometheus-endpoint-enabled", true),
+                    getConfig().getBoolean("addons.metrics.enabled", false),
+                    getConfig().getBoolean("addons.metrics.prometheus-endpoint-enabled", false),
                     getPluginMeta().getVersion(),
                     getServer().getMinecraftVersion(),
                     botRegistry,
-                    targetingService);
+                    targetingService,
+                    getDataFolder().toPath(),
+                    getClassLoader(),
+                    getLogger());
             this.botEventDispatcher = new BotEventDispatcher(this, botMetrics);
             this.worldGuardPvpService = new WorldGuardPvpService(this);
             this.botManager = new BotManager(this);
@@ -180,9 +183,16 @@ public final class MinecraftBot extends JavaPlugin {
 
             List<String> registeredListeners = new ArrayList<>();
             List<String> disabledListeners = new ArrayList<>();
-            this.botGuardCompatibilityListener = new BotGuardCompatibilityListener(this);
-            registerListener(registeredListeners, "bot guard compatibility", botGuardCompatibilityListener);
-            botGuardCompatibilityListener.startScanner();
+            if (getConfig().getBoolean("addons.guard.enabled", true)) {
+                this.guardAddonManager = new GuardAddonManager(this, botRegistry);
+                if (guardAddonManager.load()) {
+                    registeredListeners.add("guard addon");
+                } else {
+                    disabledListeners.add("guard addon -> unavailable");
+                }
+            } else {
+                disabledListeners.add("guard addon -> disabled in config");
+            }
             registerListener(registeredListeners, "bot explosion events", new BotExplosionListener());
             registerListener(registeredListeners, "bot runtime events", new BotRuntimeEventListener(this));
             registerListener(registeredListeners, "required", new PlayerCheckListener(this));
@@ -319,14 +329,14 @@ public final class MinecraftBot extends JavaPlugin {
     }
 
     public void markCompatibilityBot(Entity entity) {
-        if (botGuardCompatibilityListener != null) {
-            botGuardCompatibilityListener.markBot(entity);
+        if (guardAddonManager != null) {
+            guardAddonManager.markBot(entity);
         }
     }
 
     public void forgetCompatibilityBot(UUID entityUUID) {
-        if (botGuardCompatibilityListener != null) {
-            botGuardCompatibilityListener.forgetBot(entityUUID);
+        if (guardAddonManager != null) {
+            guardAddonManager.forgetBot(entityUUID);
         }
     }
 
@@ -341,10 +351,6 @@ public final class MinecraftBot extends JavaPlugin {
             targetingService.reconfigure(runtimeSettings.targetCache());
         }
         reloadLanguageConfiguration();
-        if (botGuardCompatibilityListener != null) {
-            botGuardCompatibilityListener.reloadLocalConfig();
-            botGuardCompatibilityListener.startScanner();
-        }
         applyRuntimeBotConfiguration();
     }
 
@@ -467,9 +473,9 @@ public final class MinecraftBot extends JavaPlugin {
             remoteApiServer = null;
         }
 
-        if (botGuardCompatibilityListener != null) {
-            botGuardCompatibilityListener.stopScanner();
-            botGuardCompatibilityListener = null;
+        if (guardAddonManager != null) {
+            guardAddonManager.close();
+            guardAddonManager = null;
         }
 
         if (updateManager != null) {

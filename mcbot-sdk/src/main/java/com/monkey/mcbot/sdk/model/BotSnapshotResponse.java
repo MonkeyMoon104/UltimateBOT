@@ -1,9 +1,9 @@
 package com.monkey.mcbot.sdk.model;
 
-import org.jspecify.annotations.Nullable;
-
+import com.monkey.mcbot.common.util.TextValues;
 import java.util.Set;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Immutable snapshot of a bot returned by the remote API.
@@ -69,15 +69,14 @@ public record BotSnapshotResponse(
         boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
-        boolean killMessageEnabled
-) {
+        boolean killMessageEnabled) {
     public BotSnapshotResponse {
-        botType = botType == null || botType.isBlank() ? "UNKNOWN" : botType;
-        botRank = botRank == null || botRank.isBlank() ? "UNKNOWN" : botRank;
-        minBotRank = minBotRank == null || minBotRank.isBlank() ? "EASY" : minBotRank;
-        maxBotRank = maxBotRank == null || maxBotRank.isBlank() ? "GOD" : maxBotRank;
+        botType = TextValues.orElseIfBlank(botType, "UNKNOWN");
+        botRank = TextValues.orElseIfBlank(botRank, "UNKNOWN");
+        minBotRank = TextValues.orElseIfBlank(minBotRank, "EASY");
+        maxBotRank = TextValues.orElseIfBlank(maxBotRank, "GOD");
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
-        source = source == null || source.isBlank() ? "CORE" : source;
+        source = TextValues.orElseIfBlank(source, "CORE");
         targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode;
     }
 
@@ -125,5 +124,4 @@ public record BotSnapshotResponse(
     public boolean usesRankRange() {
         return !botRank.equalsIgnoreCase(minBotRank) || !botRank.equalsIgnoreCase(maxBotRank);
     }
-
 }

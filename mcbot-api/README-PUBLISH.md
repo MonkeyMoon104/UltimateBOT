@@ -2,7 +2,7 @@
 
 Questa e l'unica guida da seguire per:
 
-- aggiornare `mcbot-api` e `mcbot-sdk`
+- aggiornare `common`, `mcbot-api` e `mcbot-sdk`
 - pubblicare una nuova versione API/SDK
 - aggiornare le Javadocs su GitHub Pages
 - evitare il problema della pagina docs che mostra ancora la versione vecchia
@@ -26,7 +26,7 @@ Non mettere versioni hardcoded in `plugin.yml`, nei `build.gradle.kts` dei modul
 La release API e la pubblicazione docs sono due cose diverse:
 
 - `mcbot.version=X.Y.Z` decide la versione reale generata da Gradle.
-- Il tag `vX.Y.Z` deve combaciare con `mcbot.version` e pubblica l'API tramite GitHub Actions.
+- Il tag `vX.Y.Z` deve combaciare con `mcbot.version` e pubblica common, API e SDK tramite GitHub Actions.
 - Il submodule `docs` pubblica le Javadocs su GitHub Pages.
 
 Le Javadocs vanno rigenerate dopo aver cambiato `mcbot.version`, cosi il titolo mostra subito la versione corretta.

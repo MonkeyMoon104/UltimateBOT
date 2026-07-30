@@ -14,8 +14,7 @@ public final class ExplosionDamageEstimator {
     private static final double ANCHOR_POWER = 5.0D;
     private static final int EXPOSURE_SAMPLES_PER_AXIS = 3;
 
-    private ExplosionDamageEstimator() {
-    }
+    private ExplosionDamageEstimator() {}
 
     public static double estimateCrystalDamage(Level level, Vec3 explosionPos, Player entity) {
         return estimateExplosionDamage(level, explosionPos, entity, CRYSTAL_POWER);
@@ -25,7 +24,8 @@ public final class ExplosionDamageEstimator {
         return estimateExplosionDamage(level, explosionPos, entity, ANCHOR_POWER);
     }
 
-    private static double estimateExplosionDamage(Level level, Vec3 explosionPos, Player entity, double explosionPower) {
+    private static double estimateExplosionDamage(
+            Level level, Vec3 explosionPos, Player entity, double explosionPower) {
         double maxRadius = explosionPower * 2.0D;
         double distance = explosionPos.distanceTo(entity.position());
         if (distance > maxRadius) {
@@ -56,12 +56,7 @@ public final class ExplosionDamageEstimator {
                     Vec3 samplePoint = new Vec3(sampleX, sampleY, sampleZ);
 
                     ClipContext context = new ClipContext(
-                            samplePoint,
-                            explosionPos,
-                            ClipContext.Block.COLLIDER,
-                            ClipContext.Fluid.NONE,
-                            entity
-                    );
+                            samplePoint, explosionPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
 
                     HitResult result = level.clip(context);
                     if (result.getType() == HitResult.Type.MISS) {

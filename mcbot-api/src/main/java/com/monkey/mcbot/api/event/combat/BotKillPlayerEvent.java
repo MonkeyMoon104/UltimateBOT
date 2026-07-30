@@ -1,12 +1,11 @@
 package com.monkey.mcbot.api.event.combat;
 
 import com.monkey.mcbot.api.model.BotSnapshot;
+import java.util.Objects;
+import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-
-import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Bukkit event fired when a MinecraftBot kills a player.

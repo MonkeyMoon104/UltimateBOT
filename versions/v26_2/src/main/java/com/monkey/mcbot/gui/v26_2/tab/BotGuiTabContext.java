@@ -4,12 +4,11 @@ import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.bot.BotOptions;
 import com.monkey.mcbot.bot.BotType;
 import com.monkey.mcbot.bot.ai.ITrainingBot;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.xenondevs.invui.item.Item;
 import xyz.xenondevs.invui.item.ItemBuilder;
-
-import java.util.UUID;
 
 public class BotGuiTabContext {
 
@@ -76,4 +75,3 @@ public class BotGuiTabContext {
         return Item.simple(new ItemBuilder(borderMaterial).setLegacyName(borderName));
     }
 }
-

@@ -45,7 +45,9 @@ public class TotemStrategyHandler implements ITotemStrategyHandler {
                 inventoryManager.equipTotem(EquipmentSlot.OFFHAND);
             } else if (equipmentState.getEquippedTotems() == 2) {
                 inventoryManager.removeTotem(EquipmentSlot.MAINHAND);
-            } else if (equipmentState.getEquippedTotems() == 1 && !equipmentState.hasOffhandTotem() && equipmentState.hasMainhandTotem()) {
+            } else if (equipmentState.getEquippedTotems() == 1
+                    && !equipmentState.hasOffhandTotem()
+                    && equipmentState.hasMainhandTotem()) {
                 inventoryManager.equipTotem(EquipmentSlot.OFFHAND);
                 inventoryManager.removeTotem(EquipmentSlot.MAINHAND);
             }

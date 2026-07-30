@@ -4,12 +4,11 @@ import com.monkey.mcbot.wrapper.PlatformWrapper;
 import com.monkey.mcbot.wrapper.WrapperCapabilities;
 import com.monkey.mcbot.wrapper.WrapperTask;
 import com.monkey.mcbot.wrapper.WrapperType;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-
-import java.util.logging.Level;
 
 public final class BukkitWrapper implements PlatformWrapper {
 
@@ -40,7 +39,8 @@ public final class BukkitWrapper implements PlatformWrapper {
     @Override
     public WrapperTask runSyncLater(Runnable task, long delayTicks) {
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        return WrapperTask.bukkit("bukkit-sync-later", scheduler.runTaskLater(plugin, wrap(task), Math.max(1L, delayTicks)));
+        return WrapperTask.bukkit(
+                "bukkit-sync-later", scheduler.runTaskLater(plugin, wrap(task), Math.max(1L, delayTicks)));
     }
 
     @Override
@@ -62,7 +62,9 @@ public final class BukkitWrapper implements PlatformWrapper {
     @Override
     public WrapperTask runAsyncLater(Runnable task, long delayTicks) {
         BukkitScheduler scheduler = Bukkit.getScheduler();
-        return WrapperTask.bukkit("bukkit-async-later", scheduler.runTaskLaterAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks)));
+        return WrapperTask.bukkit(
+                "bukkit-async-later",
+                scheduler.runTaskLaterAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks)));
     }
 
     @Override
@@ -70,8 +72,8 @@ public final class BukkitWrapper implements PlatformWrapper {
         BukkitScheduler scheduler = Bukkit.getScheduler();
         return WrapperTask.bukkit(
                 "bukkit-async-repeating",
-                scheduler.runTaskTimerAsynchronously(plugin, wrap(task), Math.max(1L, delayTicks), Math.max(1L, periodTicks))
-        );
+                scheduler.runTaskTimerAsynchronously(
+                        plugin, wrap(task), Math.max(1L, delayTicks), Math.max(1L, periodTicks)));
     }
 
     private Runnable wrap(Runnable delegate) {
@@ -79,7 +81,8 @@ public final class BukkitWrapper implements PlatformWrapper {
             try {
                 delegate.run();
             } catch (Throwable error) {
-                plugin.getLogger().log(Level.WARNING, "[Wrapper/Bukkit] scheduled task failed: " + error.getMessage(), error);
+                plugin.getLogger()
+                        .log(Level.WARNING, "[Wrapper/Bukkit] scheduled task failed: " + error.getMessage(), error);
             }
         };
     }

@@ -11,5 +11,13 @@ public enum BotMode {
     /** Single-owner ally mode. */
     ALLY,
     /** Multi-owner ally mode with shared ownership. */
-    TEAM_ALLY
+    TEAM_ALLY;
+
+    public com.monkey.mcbot.common.model.BotMode toCommon() {
+        return com.monkey.mcbot.common.model.BotMode.valueOf(name());
+    }
+
+    public static BotMode fromCommon(com.monkey.mcbot.common.model.BotMode mode) {
+        return valueOf(java.util.Objects.requireNonNull(mode, "mode").name());
+    }
 }

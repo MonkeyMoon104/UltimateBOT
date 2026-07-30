@@ -8,12 +8,7 @@ package com.monkey.mcbot.api.model;
  * @param chest {@code true} to enable blast protection on chestplate
  * @param head {@code true} to enable blast protection on helmet
  */
-public record BotBlastProtection(
-        boolean feet,
-        boolean legs,
-        boolean chest,
-        boolean head
-) {
+public record BotBlastProtection(boolean feet, boolean legs, boolean chest, boolean head) {
     /**
      * Creates a profile where all armor pieces share the same state.
      *
@@ -33,11 +28,13 @@ public record BotBlastProtection(
      * @param helmetBlastEnabled helmet blast state
      * @return blast profile
      */
-    public static BotBlastProtection of(boolean bootsBlastEnabled,
-                                        boolean leggingsBlastEnabled,
-                                        boolean chestplateBlastEnabled,
-                                        boolean helmetBlastEnabled) {
-        return new BotBlastProtection(bootsBlastEnabled, leggingsBlastEnabled, chestplateBlastEnabled, helmetBlastEnabled);
+    public static BotBlastProtection of(
+            boolean bootsBlastEnabled,
+            boolean leggingsBlastEnabled,
+            boolean chestplateBlastEnabled,
+            boolean helmetBlastEnabled) {
+        return new BotBlastProtection(
+                bootsBlastEnabled, leggingsBlastEnabled, chestplateBlastEnabled, helmetBlastEnabled);
     }
 
     /**
@@ -52,16 +49,13 @@ public record BotBlastProtection(
      * @return blast profile
      * @throws IllegalArgumentException if any value is not {@code 0} or {@code 1}
      */
-    public static BotBlastProtection of(int bootsBlastEnabled,
-                                        int leggingsBlastEnabled,
-                                        int chestplateBlastEnabled,
-                                        int helmetBlastEnabled) {
+    public static BotBlastProtection of(
+            int bootsBlastEnabled, int leggingsBlastEnabled, int chestplateBlastEnabled, int helmetBlastEnabled) {
         return new BotBlastProtection(
                 parseBinary(bootsBlastEnabled, "boots"),
                 parseBinary(leggingsBlastEnabled, "leggings"),
                 parseBinary(chestplateBlastEnabled, "chestplate"),
-                parseBinary(helmetBlastEnabled, "helmet")
-        );
+                parseBinary(helmetBlastEnabled, "helmet"));
     }
 
     /**

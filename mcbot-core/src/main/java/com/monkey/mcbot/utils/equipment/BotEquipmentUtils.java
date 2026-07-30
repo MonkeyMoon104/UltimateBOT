@@ -1,26 +1,30 @@
 package com.monkey.mcbot.utils.equipment;
 
-import com.monkey.mcbot.protocol.BotEquipment;
+import com.mojang.datafixers.util.Pair;
 import com.monkey.mcbot.bot.BotRegistry;
-import com.monkey.mcbot.protocol.PacketEventsBotPacketGateway;
+import com.monkey.mcbot.nms.NMSBridgeManager;
 import com.monkey.mcbot.utils.EntityUtils;
+import java.util.*;
+import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
-
 public class BotEquipmentUtils {
-    public static void applyEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-                                      Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+    public static void applyEquipment(
+            LivingEntity bot,
+            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
         for (var entry : armorMap.entrySet()) {
             EquipmentSlot slot = EquipmentConverter.toNMSSlot(entry.getKey());
             if (slot != null) {
@@ -53,9 +57,11 @@ public class BotEquipmentUtils {
         }
     }
 
-    public static void broadcastEquipment(LivingEntity bot, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-                                          Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
-        List<BotEquipment> equipmentList = new ArrayList<>();
+    public static void broadcastEquipment(
+            LivingEntity bot,
+            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
 
         for (var entry : armorMap.entrySet()) {
             EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(entry.getKey());
@@ -65,18 +71,48 @@ public class BotEquipmentUtils {
                 boolean hasBlastProtection = blastProtectionMap.getOrDefault(entry.getKey(), false);
                 applyArmorEnchants(bukkitItem, hasBlastProtection);
 
-                equipmentList.add(new BotEquipment(entry.getKey(), bukkitItem));
+                ItemStack nmsItem = CraftItemStack.asNMSCopy(bukkitItem);
+                equipmentList.add(Pair.of(nmsSlot, nmsItem));
             }
         }
 
         if (!equipmentList.isEmpty()) {
+            ClientboundSetEquipmentPacket equipmentPacket =
+                    NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
+
             for (Player online : Bukkit.getOnlinePlayers()) {
-                PacketEventsBotPacketGateway.get().sendEquipment(online, bot.getId(), equipmentList);
+                ServerPlayer handle = ((CraftPlayer) online).getHandle();
+                handle.connection.send(equipmentPacket);
             }
         }
     }
 
-    public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(UUID playerUUID, BotRegistry botRegistry) {
+    public static void sendCurrentEquipmentToViewer(LivingEntity bot, Player viewer) {
+        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
+
+        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
+
+        for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
+            EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(slot);
+            if (nmsSlot == null) {
+                continue;
+            }
+            equipmentList.add(Pair.of(nmsSlot, bot.getItemBySlot(nmsSlot)));
+        }
+
+        if (equipmentList.isEmpty()) {
+            return;
+        }
+
+        ClientboundSetEquipmentPacket equipmentPacket =
+                NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
+
+        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+        handle.connection.send(equipmentPacket);
+    }
+
+    public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(
+            UUID playerUUID, BotRegistry botRegistry) {
         UUID botUUID = botRegistry.getBotUUID(playerUUID);
         if (botUUID == null) return null;
 
@@ -86,7 +122,8 @@ public class BotEquipmentUtils {
         LivingEntity botEntity = EntityUtils.findBotAsLivingEntity(world, botUUID);
         if (botEntity == null) return null;
 
-        Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor = new EnumMap<>(org.bukkit.inventory.EquipmentSlot.class);
+        Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor =
+                new EnumMap<>(org.bukkit.inventory.EquipmentSlot.class);
 
         for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
             EquipmentSlot nmsSlot = EquipmentConverter.toNMSSlot(slot);
@@ -108,8 +145,11 @@ public class BotEquipmentUtils {
         return armor;
     }
 
-    public static void updateBotArmor(UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-                                      Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap, BotRegistry botRegistry) {
+    public static void updateBotArmor(
+            UUID ownerUUID,
+            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
+            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap,
+            BotRegistry botRegistry) {
         UUID botUUID = botRegistry.getBotUUID(ownerUUID);
         if (botUUID == null) return;
 
@@ -121,6 +161,5 @@ public class BotEquipmentUtils {
 
         applyEquipment(botEntity, armorMap, blastProtectionMap);
         broadcastEquipment(botEntity, armorMap, blastProtectionMap);
-
     }
 }

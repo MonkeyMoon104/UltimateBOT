@@ -2,6 +2,7 @@ package com.monkey.mcbot.bot.ai.controllers.attack.helper;
 
 import com.monkey.mcbot.bot.ai.ITrainingBot;
 import com.monkey.mcbot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
+import com.monkey.mcbot.common.guard.GuardMetadata;
 import com.monkey.mcbot.nms.NMSBridgeManager;
 import java.util.Objects;
 import net.minecraft.world.InteractionHand;
@@ -14,7 +15,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 public class AttackExecutor implements IAttackExecutor {
     private static final System.Logger LOGGER = System.getLogger(AttackExecutor.class.getName());
 
-    public static final String BOT_FIRE_ASPECT_METADATA = "MinecraftBotFireAspectUntil";
+    public static final String BOT_FIRE_ASPECT_METADATA = GuardMetadata.FIRE_ASPECT_UNTIL;
     private static final int FIRE_ASPECT_SECONDS = 4;
     private static final long FIRE_ASPECT_METADATA_MS = 5500L;
     private static final String BOT_LAVA_DAMAGE_COOLDOWN_METADATA = "MinecraftBotLavaDamageCooldownUntil";

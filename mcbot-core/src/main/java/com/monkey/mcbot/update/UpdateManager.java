@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.logging.MinecraftBotLogging;
 import com.monkey.mcbot.wrapper.WrapperTask;
+import java.io.IOException;
+import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -15,13 +17,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.io.IOException;
-import java.util.Collection;
-
 public final class UpdateManager implements Listener {
 
     private static final String PRODUCT_CODE = "minecraftbot";
-    private static final String DEFAULT_DOWNLOAD_URL = "https://builtbybit.com/resources/minecraftbot-pvp-practice-bots.100308/";
+    private static final String DEFAULT_DOWNLOAD_URL =
+            "https://builtbybit.com/resources/minecraftbot-pvp-practice-bots.100308/";
 
     private final MinecraftBot plugin;
     private final UpdateCheckHttpClient updateHttpClient;
@@ -42,9 +42,8 @@ public final class UpdateManager implements Listener {
         ConfigurationSection periodicSection = plugin.getConfig().getConfigurationSection("updates.periodic-broadcast");
         this.periodicBroadcastEnabled = periodicSection == null || periodicSection.getBoolean("enabled", true);
 
-        long intervalMinutes = periodicSection == null
-                ? 30L
-                : Math.max(1L, periodicSection.getLong("interval-minutes", 30L));
+        long intervalMinutes =
+                periodicSection == null ? 30L : Math.max(1L, periodicSection.getLong("interval-minutes", 30L));
         this.periodicIntervalTicks = intervalMinutes * 60L * 20L;
     }
 
@@ -54,11 +53,13 @@ public final class UpdateManager implements Listener {
             this.lastUpdateState = toState(response);
 
             if (response.updateAvailable()) {
-                return new UpdateStartupResult(false, true,
-                        "New version available -> current=" + response.currentVersion() + ", latest=" + response.latestVersion());
+                return new UpdateStartupResult(
+                        false,
+                        true,
+                        "New version available -> current=" + response.currentVersion() + ", latest="
+                                + response.latestVersion());
             }
-            return new UpdateStartupResult(false, false,
-                    "Up to date -> current=" + response.currentVersion());
+            return new UpdateStartupResult(false, false, "Up to date -> current=" + response.currentVersion());
         } catch (IOException ex) {
             return new UpdateStartupResult(true, false, "Update check failed -> " + safeMessage(ex.getMessage()));
         }
@@ -71,11 +72,9 @@ public final class UpdateManager implements Listener {
             return;
         }
 
-        periodicTask = plugin.getWrapperManager().active().runAsyncRepeating(
-                this::runPeriodicCheck,
-                periodicIntervalTicks,
-                periodicIntervalTicks
-        );
+        periodicTask = plugin.getWrapperManager()
+                .active()
+                .runAsyncRepeating(this::runPeriodicCheck, periodicIntervalTicks, periodicIntervalTicks);
     }
 
     public void shutdown() {
@@ -92,7 +91,9 @@ public final class UpdateManager implements Listener {
             return;
         }
 
-        plugin.getWrapperManager().active().runEntityLater(player, joinNotifyDelayTicks, () -> notifyPlayerIfUpdateAvailable(player));
+        plugin.getWrapperManager()
+                .active()
+                .runEntityLater(player, joinNotifyDelayTicks, () -> notifyPlayerIfUpdateAvailable(player));
     }
 
     private void notifyPlayerIfUpdateAvailable(Player player) {
@@ -118,7 +119,8 @@ public final class UpdateManager implements Listener {
 
             plugin.getWrapperManager().active().runSync(() -> broadcastToAdmins(state));
         } catch (IOException ex) {
-            MinecraftBotLogging.warn(plugin.getLogger(), "Update", "Periodic check failed -> " + safeMessage(ex.getMessage()));
+            MinecraftBotLogging.warn(
+                    plugin.getLogger(), "Update", "Periodic check failed -> " + safeMessage(ex.getMessage()));
         }
     }
 
@@ -133,9 +135,7 @@ public final class UpdateManager implements Listener {
 
     private PluginUpdateCheckResponse checkRemote() throws IOException {
         return updateHttpClient.check(new PluginUpdateCheckRequest(
-                PRODUCT_CODE,
-                plugin.getPluginMeta().getVersion()
-        ));
+                PRODUCT_CODE, plugin.getPluginMeta().getVersion()));
     }
 
     private UpdateState toState(PluginUpdateCheckResponse response) {
@@ -148,8 +148,7 @@ public final class UpdateManager implements Listener {
                 safeMessage(response.currentVersion()),
                 safeMessage(response.latestVersion()),
                 url,
-                safeMessage(response.message())
-        );
+                safeMessage(response.message()));
     }
 
     private Component buildUpdateMessage(UpdateState state) {
