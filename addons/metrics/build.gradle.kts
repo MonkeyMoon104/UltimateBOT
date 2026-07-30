@@ -42,11 +42,14 @@ tasks.named("assemble") {
     dependsOn(metricsJar)
 }
 
-publishing {
-    publications.named<MavenPublication>("mavenJava") {
+afterEvaluate {
+    publishing.publications.named<MavenPublication>("mavenJava") {
         artifactId = "minecraftbot-metrics"
         version = releaseVersion.get()
+        artifacts.clear()
         artifact(metricsJar)
+        artifact(tasks.named("sourcesJar"))
+        artifact(tasks.named("javadocJar"))
         pom.packaging = "jar"
     }
 }
