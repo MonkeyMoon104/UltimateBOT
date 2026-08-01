@@ -12,16 +12,20 @@ import org.jspecify.annotations.Nullable;
 public final class BotSpawnRequest {
 
     private final BotMode mode;
+    private final @Nullable UUID botUUID;
     private final @Nullable UUID ownerUUID;
     private final Set<UUID> targetUUIDs;
     private final Set<UUID> teamOwnerUUIDs;
+    private final Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots;
     private final BotSettings settings;
 
     private BotSpawnRequest(Builder builder) {
         this.mode = builder.mode;
+        this.botUUID = builder.botUUID;
         this.ownerUUID = builder.ownerUUID;
         this.targetUUIDs = Set.copyOf(builder.targetUUIDs);
         this.teamOwnerUUIDs = Set.copyOf(builder.teamOwnerUUIDs);
+        this.equipmentSlots = Map.copyOf(builder.equipmentSlots);
         this.settings = Objects.requireNonNull(builder.settings, "settings");
     }
 
@@ -42,6 +46,15 @@ public final class BotSpawnRequest {
      */
     public BotMode mode() {
         return mode;
+    }
+
+    /**
+     * Returns the requested bot entity UUID.
+     *
+     * @return requested UUID, or {@code null} to generate one automatically
+     */
+    public @Nullable UUID botUUID() {
+        return botUUID;
     }
 
     /**
@@ -80,6 +93,11 @@ public final class BotSpawnRequest {
         return teamOwnerUUIDs;
     }
 
+    /** Returns immutable persistent equipment-slot settings. */
+    public Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots() {
+        return equipmentSlots;
+    }
+
     /**
      * Returns spawn settings.
      *
@@ -94,9 +112,12 @@ public final class BotSpawnRequest {
      */
     public static final class Builder {
         private final BotMode mode;
+        private @Nullable UUID botUUID;
         private @Nullable UUID ownerUUID;
         private final Set<UUID> targetUUIDs = new LinkedHashSet<>();
         private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
+        private final Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots =
+                new EnumMap<>(BotEquipmentSlot.class);
         private @Nullable BotSettings settings;
 
         /**
@@ -106,6 +127,12 @@ public final class BotSpawnRequest {
          */
         private Builder(BotMode mode) {
             this.mode = Objects.requireNonNull(mode, "mode");
+        }
+
+        /** Sets a specific bot UUID, or {@code null} to use automatic generation. */
+        public Builder botUUID(@Nullable UUID botUUID) {
+            this.botUUID = botUUID;
+            return this;
         }
 
         /**
@@ -199,6 +226,42 @@ public final class BotSpawnRequest {
             return this;
         }
 
+        /** Configures one persistent equipment slot. */
+        public Builder equipmentSlot(BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+            BotEquipmentSlot requiredSlot = Objects.requireNonNull(slot, "slot");
+            BotEquipmentSlotSetting requiredSetting = Objects.requireNonNull(setting, "setting");
+            if (requiredSetting.mode() == BotEquipmentSlotMode.DEFAULT) {
+                equipmentSlots.remove(requiredSlot);
+            } else {
+                equipmentSlots.put(requiredSlot, requiredSetting);
+            }
+            return this;
+        }
+
+        /** Keeps one equipment slot empty. */
+        public Builder emptyEquipmentSlot(BotEquipmentSlot slot) {
+            return equipmentSlot(slot, BotEquipmentSlotSetting.empty());
+        }
+
+        /** Keeps the supplied item in one equipment slot. */
+        public Builder equipmentItem(BotEquipmentSlot slot, org.bukkit.inventory.ItemStack item) {
+            return equipmentSlot(slot, BotEquipmentSlotSetting.item(item));
+        }
+
+        /** Restores MinecraftBot's default behavior for one equipment slot. */
+        public Builder defaultEquipmentSlot(BotEquipmentSlot slot) {
+            return equipmentSlot(slot, BotEquipmentSlotSetting.defaultSlot());
+        }
+
+        /** Replaces all persistent equipment-slot settings. */
+        public Builder equipmentSlots(@Nullable Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots) {
+            this.equipmentSlots.clear();
+            if (equipmentSlots != null) {
+                equipmentSlots.forEach(this::equipmentSlot);
+            }
+            return this;
+        }
+
         /**
          * Sets required bot settings.
          *
@@ -221,6 +284,9 @@ public final class BotSpawnRequest {
          * @throws IllegalArgumentException when required data is missing or invalid for the mode
          */
         public BotSpawnRequest build() {
+            if (botUUID != null && botUUID.equals(new UUID(0L, 0L))) {
+                throw new IllegalArgumentException("botUUID cannot be the nil UUID");
+            }
             if ((mode == BotMode.SINGLE || mode == BotMode.ALLY) && ownerUUID == null) {
                 throw new IllegalArgumentException("ownerUUID is required for single and ally bot modes");
             }

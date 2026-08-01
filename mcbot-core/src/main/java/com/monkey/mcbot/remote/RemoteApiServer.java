@@ -170,8 +170,10 @@ public final class RemoteApiServer {
         }
         BotSettings settings = buildSettings(payload);
         BotSpawnRequest request = BotSpawnRequest.builder(BotMode.EVENT)
+                .botUUID(payload.botUUID)
                 .owner(payload.ownerUUID)
                 .targets(payload.targetUUIDs == null ? List.of() : payload.targetUUIDs)
+                .equipmentSlots(toEquipmentSettings(payload.equipmentSlots))
                 .settings(settings)
                 .build();
         BotOperationResult result = runSync(() -> api.getBotManager().spawn(request));
@@ -209,6 +211,29 @@ public final class RemoteApiServer {
                     removed ? 200 : 404,
                     new RemoteOperationResponse(
                             removed, removed ? "Bot removed." : "Bot not found.", null, removed ? 1 : 0));
+            return;
+        }
+
+        if ("PUT".equals(method) && parts.length == 4 && "equipment".equals(parts[2])) {
+            BotEquipmentSlot slot = EnumValues.parse(BotEquipmentSlot.class, parts[3], null);
+            EquipmentSlotPayload payload = readJson(exchange, EquipmentSlotPayload.class);
+            BotEquipmentSlotSetting setting = toEquipmentSetting(payload);
+            boolean updated = slot != null
+                    && setting != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateEquipmentSlot(ownerUUID, slot, setting)
+                            : manager.updateEquipmentSlotByBotUUID(requestedUUID, slot, setting));
+            BotSnapshot snapshot = runSync(() -> ownerUUID != null
+                    ? manager.getBot(ownerUUID).orElse(null)
+                    : manager.getBotByBotUUID(requestedUUID).orElse(null));
+            writeJson(
+                    exchange,
+                    updated ? 200 : 400,
+                    new RemoteOperationResponse(
+                            updated,
+                            updated ? "Equipment slot updated." : "Invalid equipment slot setting.",
+                            snapshot,
+                            null));
             return;
         }
 
@@ -346,6 +371,47 @@ public final class RemoteApiServer {
         return buildStep.build();
     }
 
+    private Map<BotEquipmentSlot, BotEquipmentSlotSetting> toEquipmentSettings(
+            Map<String, EquipmentSlotPayload> payloads) {
+        if (payloads == null || payloads.isEmpty()) {
+            return Map.of();
+        }
+        EnumMap<BotEquipmentSlot, BotEquipmentSlotSetting> settings = new EnumMap<>(BotEquipmentSlot.class);
+        for (Map.Entry<String, EquipmentSlotPayload> entry : payloads.entrySet()) {
+            BotEquipmentSlot slot = EnumValues.parse(BotEquipmentSlot.class, entry.getKey(), null);
+            BotEquipmentSlotSetting setting = toEquipmentSetting(entry.getValue());
+            if (slot == null || setting == null) {
+                throw new IllegalArgumentException("Invalid equipment slot setting: " + entry.getKey());
+            }
+            if (setting.mode() != BotEquipmentSlotMode.DEFAULT) {
+                settings.put(slot, setting);
+            }
+        }
+        return Map.copyOf(settings);
+    }
+
+    private BotEquipmentSlotSetting toEquipmentSetting(EquipmentSlotPayload payload) {
+        if (payload == null) {
+            return null;
+        }
+        BotEquipmentSlotMode mode = EnumValues.parse(BotEquipmentSlotMode.class, payload.mode, null);
+        if (mode == null) {
+            return null;
+        }
+        return switch (mode) {
+            case DEFAULT -> BotEquipmentSlotSetting.defaultSlot();
+            case EMPTY -> BotEquipmentSlotSetting.empty();
+            case ITEM -> {
+                org.bukkit.Material material = org.bukkit.Material.matchMaterial(defaultString(payload.material, ""));
+                int amount = defaultInt(payload.amount, 1);
+                if (material == null || material.isAir() || amount < 1 || amount > material.getMaxStackSize()) {
+                    throw new IllegalArgumentException("ITEM mode requires a valid material and stack amount");
+                }
+                yield BotEquipmentSlotSetting.item(new org.bukkit.inventory.ItemStack(material, amount));
+            }
+        };
+    }
+
     private UUID resolveOwnerUUID(IBotManager manager, UUID requestedUUID) {
         if (requestedUUID == null) {
             return null;
@@ -436,6 +502,7 @@ public final class RemoteApiServer {
                 return "/bots/{bot}";
             }
             return switch (parts[2]) {
+                case "equipment" -> "/bots/{bot}/equipment/{slot}";
                 case "target-mode",
                         "crystal-pvp",
                         "explosions",
@@ -493,6 +560,7 @@ public final class RemoteApiServer {
 
     public static final class EventBotSpawnPayload {
         public UUID ownerUUID;
+        public UUID botUUID;
         public List<UUID> targetUUIDs;
         public String botNameTemplate;
         public String botSkin;
@@ -531,6 +599,13 @@ public final class RemoteApiServer {
         public Boolean healing;
         public Boolean killMessageEnabled;
         public String killMessage;
+        public Map<String, EquipmentSlotPayload> equipmentSlots;
+    }
+
+    public static final class EquipmentSlotPayload {
+        public String mode;
+        public String material;
+        public Integer amount;
     }
 
     public static final class TargetModePayload {

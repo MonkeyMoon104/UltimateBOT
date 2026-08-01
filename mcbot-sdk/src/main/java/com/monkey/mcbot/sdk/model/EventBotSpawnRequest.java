@@ -1,6 +1,7 @@
 package com.monkey.mcbot.sdk.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
@@ -9,6 +10,7 @@ import org.jspecify.annotations.Nullable;
  * Request body used to spawn one remote event bot.
  *
  * @param ownerUUID optional owner UUID for owner-bound use cases
+ * @param botUUID optional explicit bot UUID; {@code null} generates one automatically
  * @param targetUUIDs explicit target players for independent/event bots
  * @param botNameTemplate bot display name or name template
  * @param botSkin skin mode or player/texture reference
@@ -41,9 +43,11 @@ import org.jspecify.annotations.Nullable;
  * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
  * @param killMessage custom kill message, or null for default
+ * @param equipmentSlots equipment-slot overrides kept active while the bot is running
  */
 public record EventBotSpawnRequest(
         @Nullable UUID ownerUUID,
+        @Nullable UUID botUUID,
         List<UUID> targetUUIDs,
         String botNameTemplate,
         String botSkin,
@@ -75,9 +79,11 @@ public record EventBotSpawnRequest(
         boolean enderPearls,
         boolean healing,
         boolean killMessageEnabled,
-        @Nullable String killMessage) {
+        @Nullable String killMessage,
+        Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
     public EventBotSpawnRequest {
         targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs);
+        equipmentSlots = equipmentSlots == null ? Map.of() : Map.copyOf(equipmentSlots);
         Objects.requireNonNull(botNameTemplate, "botNameTemplate");
         Objects.requireNonNull(botSkin, "botSkin");
         Objects.requireNonNull(armor, "armor");
@@ -87,6 +93,85 @@ public record EventBotSpawnRequest(
         Objects.requireNonNull(minRank, "minRank");
         Objects.requireNonNull(maxRank, "maxRank");
         Objects.requireNonNull(targetMode, "targetMode");
+    }
+
+    /**
+     * Creates a spawn request using the pre-1.5.0 component set.
+     *
+     * <p>This overload preserves binary compatibility for integrations compiled against older SDK
+     * releases. The bot UUID is generated automatically and all equipment slots use their normal
+     * bot behavior.
+     */
+    public EventBotSpawnRequest(
+            @Nullable UUID ownerUUID,
+            List<UUID> targetUUIDs,
+            String botNameTemplate,
+            String botSkin,
+            boolean follow,
+            boolean combat,
+            String armor,
+            String minArmor,
+            String maxArmor,
+            int totemCount,
+            int minTotemCount,
+            int maxTotemCount,
+            String rank,
+            String minRank,
+            String maxRank,
+            @Nullable BotLocationRequest spawnLocation,
+            boolean autoTarget,
+            double autoTargetRange,
+            boolean attackBots,
+            SdkBotTargetMode targetMode,
+            boolean respectWorldGuardPvp,
+            boolean stayAfterOwnerDeath,
+            boolean idleWander,
+            double idleWanderRadius,
+            double idleReturnDistance,
+            long idleReturnDelayMs,
+            boolean crystalPvp,
+            boolean explosions,
+            boolean explosionBlockDamage,
+            boolean enderPearls,
+            boolean healing,
+            boolean killMessageEnabled,
+            @Nullable String killMessage) {
+        this(
+                ownerUUID,
+                null,
+                targetUUIDs,
+                botNameTemplate,
+                botSkin,
+                follow,
+                combat,
+                armor,
+                minArmor,
+                maxArmor,
+                totemCount,
+                minTotemCount,
+                maxTotemCount,
+                rank,
+                minRank,
+                maxRank,
+                spawnLocation,
+                autoTarget,
+                autoTargetRange,
+                attackBots,
+                targetMode,
+                respectWorldGuardPvp,
+                stayAfterOwnerDeath,
+                idleWander,
+                idleWanderRadius,
+                idleReturnDistance,
+                idleReturnDelayMs,
+                crystalPvp,
+                explosions,
+                explosionBlockDamage,
+                enderPearls,
+                healing,
+                killMessageEnabled,
+                killMessage,
+                Map.of());
     }
 
     public static Builder builder() {
@@ -114,6 +199,7 @@ public record EventBotSpawnRequest(
 
     public static final class Builder {
         private @Nullable UUID ownerUUID;
+        private @Nullable UUID botUUID;
         private List<UUID> targetUUIDs = List.of();
         private String botNameTemplate = "MinecraftBot";
         private String botSkin = "RANDOM";
@@ -146,11 +232,18 @@ public record EventBotSpawnRequest(
         private boolean healing = true;
         private boolean killMessageEnabled = true;
         private @Nullable String killMessage;
+        private Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots = Map.of();
 
         private Builder() {}
 
         public Builder ownerUUID(@Nullable UUID ownerUUID) {
             this.ownerUUID = ownerUUID;
+            return this;
+        }
+
+        /** Sets a specific bot UUID, or {@code null} to generate one automatically. */
+        public Builder botUUID(@Nullable UUID botUUID) {
+            this.botUUID = botUUID;
             return this;
         }
 
@@ -331,6 +424,37 @@ public record EventBotSpawnRequest(
             return this;
         }
 
+        public Builder equipmentSlots(@Nullable Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
+            this.equipmentSlots = equipmentSlots == null ? Map.of() : Map.copyOf(equipmentSlots);
+            return this;
+        }
+
+        public Builder equipmentSlot(SdkBotEquipmentSlot slot, BotEquipmentSlotRequest setting) {
+            java.util.EnumMap<SdkBotEquipmentSlot, BotEquipmentSlotRequest> updated =
+                    new java.util.EnumMap<>(SdkBotEquipmentSlot.class);
+            updated.putAll(equipmentSlots);
+            BotEquipmentSlotRequest requiredSetting = Objects.requireNonNull(setting, "setting");
+            if (requiredSetting.mode() == SdkBotEquipmentSlotMode.DEFAULT) {
+                updated.remove(Objects.requireNonNull(slot, "slot"));
+            } else {
+                updated.put(Objects.requireNonNull(slot, "slot"), requiredSetting);
+            }
+            this.equipmentSlots = Map.copyOf(updated);
+            return this;
+        }
+
+        public Builder emptyEquipmentSlot(SdkBotEquipmentSlot slot) {
+            return equipmentSlot(slot, BotEquipmentSlotRequest.empty());
+        }
+
+        public Builder equipmentItem(SdkBotEquipmentSlot slot, String material, int amount) {
+            return equipmentSlot(slot, BotEquipmentSlotRequest.item(material, amount));
+        }
+
+        public Builder defaultEquipmentSlot(SdkBotEquipmentSlot slot) {
+            return equipmentSlot(slot, BotEquipmentSlotRequest.defaultSlot());
+        }
+
         public Builder disableExplosiveCombat() {
             this.crystalPvp = false;
             this.explosions = false;
@@ -353,6 +477,7 @@ public record EventBotSpawnRequest(
         public EventBotSpawnRequest build() {
             return new EventBotSpawnRequest(
                     ownerUUID,
+                    botUUID,
                     targetUUIDs,
                     botNameTemplate,
                     botSkin,
@@ -384,7 +509,8 @@ public record EventBotSpawnRequest(
                     enderPearls,
                     healing,
                     killMessageEnabled,
-                    killMessage);
+                    killMessage,
+                    equipmentSlots);
         }
     }
 }

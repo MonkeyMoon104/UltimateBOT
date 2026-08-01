@@ -20,6 +20,7 @@ public class TrainingBotLogic {
     private final TotemTrackerService totemTracker;
     private final BotDeathService deathHandler;
     private final BotEquipmentService equipmentHandler;
+    private final BotOptions botOptions;
 
     public TrainingBotLogic(
             ITrainingBot bot,
@@ -35,6 +36,7 @@ public class TrainingBotLogic {
         PlayerOptions playerOptions = plugin.getPlayerOptions();
 
         this.bot = java.util.Objects.requireNonNull(bot, "bot");
+        this.botOptions = botOptions;
         this.brainController = new BotBrainController(bot, plugin, targetPlayer, follow, botOptions);
         this.totemTracker = new TotemTrackerService(bot);
         this.deathHandler = new BotDeathService(bot, plugin, playerOptions, deadBotMessage, deadBotEventMessage);
@@ -42,6 +44,14 @@ public class TrainingBotLogic {
     }
 
     public void onTick() {
+        try {
+            onTickInternal();
+        } finally {
+            com.monkey.mcbot.bot.BotEquipmentPolicy.enforce(bot, botOptions);
+        }
+    }
+
+    private void onTickInternal() {
         if (bot.isCombat()) {
             if (brainController.getBotAI().getHealController().isHealing()) {
                 brainController.getBotAI().getHealController().updateHealAction();

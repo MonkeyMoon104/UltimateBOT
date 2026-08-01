@@ -3,9 +3,11 @@ package com.monkey.mcbot.sdk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.mcbot.sdk.model.BotEquipmentSlotRequest;
 import com.monkey.mcbot.sdk.model.BotOperationResponse;
 import com.monkey.mcbot.sdk.model.BotSnapshotResponse;
 import com.monkey.mcbot.sdk.model.EventBotSpawnRequest;
+import com.monkey.mcbot.sdk.model.SdkBotEquipmentSlot;
 import com.monkey.mcbot.sdk.model.SdkBotTargetMode;
 import com.monkey.mcbot.sdk.model.TargetModeRequest;
 import com.monkey.mcbot.sdk.model.ToggleRequest;
@@ -77,6 +79,18 @@ public final class MinecraftBotClient implements AutoCloseable {
 
     public BotOperationResponse spawnEventBot(EventBotSpawnRequest request) {
         return send("POST", "/bots/event", Objects.requireNonNull(request, "request"), BotOperationResponse.class);
+    }
+
+    /** Updates a persistent equipment slot using either an owner UUID or bot UUID. */
+    public BotOperationResponse updateEquipmentSlot(
+            UUID ownerOrBotUUID, SdkBotEquipmentSlot slot, BotEquipmentSlotRequest setting) {
+        return send(
+                "PUT",
+                "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID")
+                        + "/equipment/"
+                        + Objects.requireNonNull(slot, "slot").name(),
+                Objects.requireNonNull(setting, "setting"),
+                BotOperationResponse.class);
     }
 
     public BotOperationResponse remove(UUID ownerUUID) {

@@ -61,7 +61,10 @@ public class BotSpawner {
         UUID registryOwnerUUID = resolveRegistryOwnerUUID(registryOwner, botOptions);
         Player resolvedTarget = resolveTargetPlayer(registryOwner, target, botOptions);
 
-        UUID botUUID = UUID.randomUUID();
+        UUID botUUID = botOptions.getRequestedBotUUID() == null ? UUID.randomUUID() : botOptions.getRequestedBotUUID();
+        if (!isBotUUIDAvailable(botUUID)) {
+            return false;
+        }
         botOptions.setOwnerUUID(registryOwnerUUID);
         if (botOptions.getBotType() == BotType.TEAM_ALLY
                 && botOptions.getTeamOwnerUUIDs().isEmpty()) {
@@ -139,6 +142,7 @@ public class BotSpawner {
             bot.getBotAI().getCPVPController().setEnabled(false);
             clearExplosiveItems(bot);
         }
+        BotEquipmentPolicy.enforce(bot, botOptions);
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(registryOwnerUUID, bot);
         if (snapshot != null) {
             plugin.getBotEventDispatcher()
@@ -152,6 +156,14 @@ public class BotSpawner {
                             bot.asPlayer().getBukkitEntity()));
         }
         return true;
+    }
+
+    private boolean isBotUUIDAvailable(UUID botUUID) {
+        return botUUID != null
+                && !botUUID.equals(new UUID(0L, 0L))
+                && registry.getOwnerUUIDByBotUUID(botUUID) == null
+                && org.bukkit.Bukkit.getPlayer(botUUID) == null
+                && org.bukkit.Bukkit.getEntity(botUUID) == null;
     }
 
     private UUID resolveRegistryOwnerUUID(Player registryOwner, BotOptions botOptions) {

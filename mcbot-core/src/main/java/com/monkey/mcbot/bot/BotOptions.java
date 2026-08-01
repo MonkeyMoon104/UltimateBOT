@@ -1,6 +1,9 @@
 package com.monkey.mcbot.bot;
 
 import com.monkey.mcbot.MinecraftBot;
+import com.monkey.mcbot.api.model.BotEquipmentSlot;
+import com.monkey.mcbot.api.model.BotEquipmentSlotMode;
+import com.monkey.mcbot.api.model.BotEquipmentSlotSetting;
 import com.monkey.mcbot.api.model.BotLocation;
 import com.monkey.mcbot.api.model.BotSkin;
 import com.monkey.mcbot.api.model.BotTargetMode;
@@ -29,6 +32,7 @@ public final class BotOptions {
     private BotRank rank = BotRank.EASY;
     private BotType botType = BotType.SINGLE;
     private BotCreationSource creationSource = BotCreationSource.CORE;
+    private UUID requestedBotUUID;
     private UUID ownerUUID;
     private UUID preferredTargetUUID;
     private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
@@ -62,6 +66,8 @@ public final class BotOptions {
     private boolean killMessageEnabled = true;
     private String customKillMessage;
     private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
+    private final Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlotSettings =
+            new EnumMap<>(BotEquipmentSlot.class);
 
     public BotOptions(MinecraftBot training, Map<EquipmentSlot, ItemStack> armor) {
         this.training = Objects.requireNonNull(training, "training");
@@ -95,6 +101,14 @@ public final class BotOptions {
 
     public UUID getOwnerUUID() {
         return ownerUUID;
+    }
+
+    public UUID getRequestedBotUUID() {
+        return requestedBotUUID;
+    }
+
+    public void setRequestedBotUUID(UUID requestedBotUUID) {
+        this.requestedBotUUID = requestedBotUUID;
     }
 
     public void setOwnerUUID(UUID ownerUUID) {
@@ -327,6 +341,27 @@ public final class BotOptions {
                     this.equipmentContents.put(entry.getKey(), entry.getValue().clone());
                 }
             }
+        }
+    }
+
+    public Map<BotEquipmentSlot, BotEquipmentSlotSetting> getEquipmentSlotSettings() {
+        return Collections.unmodifiableMap(equipmentSlotSettings);
+    }
+
+    public void setEquipmentSlotSettings(Map<BotEquipmentSlot, BotEquipmentSlotSetting> settings) {
+        equipmentSlotSettings.clear();
+        if (settings != null) {
+            settings.forEach(this::setEquipmentSlotSetting);
+        }
+    }
+
+    public void setEquipmentSlotSetting(BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+        BotEquipmentSlot requiredSlot = Objects.requireNonNull(slot, "slot");
+        BotEquipmentSlotSetting requiredSetting = Objects.requireNonNull(setting, "setting");
+        if (requiredSetting.mode() == BotEquipmentSlotMode.DEFAULT) {
+            equipmentSlotSettings.remove(requiredSlot);
+        } else {
+            equipmentSlotSettings.put(requiredSlot, requiredSetting);
         }
     }
 

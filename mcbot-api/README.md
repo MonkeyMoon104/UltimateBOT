@@ -1,5 +1,24 @@
 # MinecraftBot API Module
 
+## Custom bot UUID and equipment slots
+
+Spawn requests can optionally assign a stable bot UUID and keep individual equipment slots fixed to an item or
+empty. When `botUUID(...)` is omitted, MinecraftBot continues to generate a random UUID.
+
+```java
+BotSpawnRequest request = BotSpawnRequest.builder(BotMode.SINGLE)
+        .owner(owner.getUniqueId())
+        .botUUID(UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420001"))
+        .emptyEquipmentSlot(BotEquipmentSlot.MAIN_HAND)
+        .emptyEquipmentSlot(BotEquipmentSlot.OFF_HAND)
+        .equipmentItem(BotEquipmentSlot.HEAD, new ItemStack(Material.DIAMOND_HELMET))
+        .settings(settings)
+        .build();
+```
+
+Use `defaultEquipmentSlot(...)` or `BotEquipmentSlotSetting.defaultSlot()` to return a runtime slot to normal AI
+management. Custom UUIDs are rejected when already assigned to an active bot, player, or loaded entity.
+
 ## Overview
 `mcbot-api` is the public integration contract for MinecraftBot.
 

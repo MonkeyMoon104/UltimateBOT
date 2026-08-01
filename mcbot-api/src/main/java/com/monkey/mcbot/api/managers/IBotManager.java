@@ -164,6 +164,16 @@ public interface IBotManager {
 
     boolean updateEquipmentSlot(UUID ownerUUID, int slot, ItemStack item);
 
+    /** Applies or removes a persistent equipment-slot setting. */
+    default boolean updateEquipmentSlot(UUID ownerUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+        return false;
+    }
+
+    /** Applies or removes a persistent equipment-slot setting using the bot UUID. */
+    default boolean updateEquipmentSlotByBotUUID(UUID botUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+        return false;
+    }
+
     boolean updateAutoTarget(UUID ownerUUID, boolean autoTarget, double range);
 
     default boolean updateAutoTargetByBotUUID(UUID botUUID, boolean autoTarget, double range) {

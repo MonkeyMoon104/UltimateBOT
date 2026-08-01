@@ -1,5 +1,23 @@
 # mcbot-sdk
 
+## Custom bot UUID and equipment slots
+
+Remote event bots can use a caller-provided UUID and persistent equipment settings:
+
+```java
+EventBotSpawnRequest request = EventBotSpawnRequest.independent()
+        .botUUID(UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420001"))
+        .emptyEquipmentSlot(SdkBotEquipmentSlot.MAIN_HAND)
+        .emptyEquipmentSlot(SdkBotEquipmentSlot.OFF_HAND)
+        .equipmentItem(SdkBotEquipmentSlot.HEAD, "DIAMOND_HELMET", 1)
+        .build();
+
+client.spawnEventBot(request);
+```
+
+Slots can also be changed at runtime with `updateEquipmentSlot(...)`. `DEFAULT` returns control to the normal bot
+AI, `ITEM` keeps the configured material equipped, and `EMPTY` keeps the slot empty.
+
 `mcbot-sdk` is the Java-only remote client for MinecraftBot.
 
 The SDK publishes JSpecify nullability contracts. Public parameters and return values are

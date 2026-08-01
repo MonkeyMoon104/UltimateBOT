@@ -3,6 +3,8 @@ package com.monkey.mcbot.integration.api;
 import com.monkey.mcbot.MinecraftBot;
 import com.monkey.mcbot.api.model.BotArmorType;
 import com.monkey.mcbot.api.model.BotBlastProtection;
+import com.monkey.mcbot.api.model.BotEquipmentSlot;
+import com.monkey.mcbot.api.model.BotEquipmentSlotSetting;
 import com.monkey.mcbot.api.model.BotRank;
 import com.monkey.mcbot.api.model.BotSettings;
 import com.monkey.mcbot.bot.BotCreationSource;
@@ -29,11 +31,15 @@ final class ApiBotOptionsFactory {
             UUID targetUUID,
             Set<UUID> targetUUIDs,
             Set<UUID> teamOwners,
+            UUID requestedBotUUID,
+            Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots,
             BotSettings settings) {
         BotOptions options =
                 new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
         options.setBotType(type);
         options.setCreationSource(BotCreationSource.API);
+        options.setRequestedBotUUID(requestedBotUUID);
+        options.setEquipmentSlotSettings(equipmentSlots);
         options.setOwnerUUID(ownerUUID);
         options.setBotNameTemplate(settings.botNameTemplate());
         options.setBotSkin(settings.botSkin());

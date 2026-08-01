@@ -140,8 +140,20 @@ public final class CoreBotManagerAdapter implements IBotManager {
             targetUUID = primaryOwnerUUID;
         }
 
-        BotOptions options =
-                optionsFactory.create(botType, primaryOwnerUUID, targetUUID, targetUUIDs, teamOwners, settings);
+        String uuidValidationError = validateRequestedBotUUID(request.botUUID());
+        if (uuidValidationError != null) {
+            return spawnFailure(uuidValidationError);
+        }
+
+        BotOptions options = optionsFactory.create(
+                botType,
+                primaryOwnerUUID,
+                targetUUID,
+                targetUUIDs,
+                teamOwners,
+                request.botUUID(),
+                request.equipmentSlots(),
+                settings);
         boolean spawned = botManager.spawn(
                 ownerPlayer,
                 targetPlayer,
@@ -159,6 +171,22 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         BotSnapshot snapshot = getBot(primaryOwnerUUID).orElse(null);
         return BotOperationResult.success("Bot spawned successfully.", snapshot);
+    }
+
+    private String validateRequestedBotUUID(UUID requestedBotUUID) {
+        if (requestedBotUUID == null) {
+            return null;
+        }
+        if (requestedBotUUID.equals(new UUID(0L, 0L))) {
+            return "Bot UUID cannot be the nil UUID.";
+        }
+        if (botRegistry.getOwnerUUIDByBotUUID(requestedBotUUID) != null) {
+            return "Bot UUID is already assigned to an active MinecraftBot.";
+        }
+        if (Bukkit.getPlayer(requestedBotUUID) != null || Bukkit.getEntity(requestedBotUUID) != null) {
+            return "Bot UUID is already used by a loaded player or entity.";
+        }
+        return null;
     }
 
     @Override
@@ -452,6 +480,32 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.getEquipmentContents().put(slot, item.clone());
         botManager.updateBotInventorySlot(managedOwner, slot, item);
         return true;
+    }
+
+    @Override
+    public boolean updateEquipmentSlot(UUID ownerUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        ITrainingBot bot = getLiveBot(managedOwner);
+        if (bot == null || bot.getBrainController() == null || slot == null || setting == null) {
+            return false;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return false;
+        }
+        options.setEquipmentSlotSetting(slot, setting);
+        if (setting.mode() == BotEquipmentSlotMode.DEFAULT) {
+            BotEquipmentPolicy.restoreDefault(bot, options, slot);
+        } else {
+            BotEquipmentPolicy.enforce(bot, options);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean updateEquipmentSlotByBotUUID(UUID botUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateEquipmentSlot(ownerUUID, slot, setting);
     }
 
     @Override
