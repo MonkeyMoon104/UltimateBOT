@@ -26,5 +26,5 @@ tasks.named<Test>("test") {
 revapi {
     oldGroup.set("com.monkey.mcbot")
     oldName.set("mcbot-sdk")
-    oldVersions.set(listOf("1.3.2"))
+    oldVersions.set(listOf("1.4.1"))
 }
