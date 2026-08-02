@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.sdk.model.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.EventBotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.SdkBotEquipmentSlot;
@@ -44,5 +46,18 @@ class EventBotEquipmentRequestTest {
         assertThatThrownBy(() -> BotEquipmentSlotRequest.item(" ", 1))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("material");
+    }
+
+    @Test
+    void serializesCombatModeAndCustomTuning() throws Exception {
+        EventBotSpawnRequest request = EventBotSpawnRequest.builder()
+                .combatMode(CombatMode.WATER)
+                .combatTuning(CombatTuning.builder().attackRange(3.8D).build())
+                .build();
+
+        String json = new ObjectMapper().writeValueAsString(request);
+
+        assertThat(json).contains("\"combatMode\":\"WATER\"");
+        assertThat(json).contains("\"attackRange\":3.8");
     }
 }
