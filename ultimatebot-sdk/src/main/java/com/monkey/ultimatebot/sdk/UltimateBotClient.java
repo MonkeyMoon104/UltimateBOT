@@ -182,6 +182,11 @@ public final class UltimateBotClient implements AutoCloseable {
                 BotOperationResponse.class);
     }
 
+    public BotOperationResponse resetCombatTuning(UUID ownerOrBotUUID) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        return send("DELETE", "/bots/" + ownerOrBotUUID + "/combat-tuning", null, BotOperationResponse.class);
+    }
+
     private BotOperationResponse combatMode(UUID ownerOrBotUUID, CombatMode combatMode) {
         Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
         return send(

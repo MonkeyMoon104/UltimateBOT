@@ -239,6 +239,14 @@ public final class RemoteApiServer {
             return;
         }
 
+        if ("DELETE".equals(method) && parts.length == 3 && "combat-tuning".equals(parts[2])) {
+            boolean updated = runSync(() -> ownerUUID != null
+                    ? manager.resetCombatTuning(ownerUUID)
+                    : manager.resetCombatTuningByBotUUID(requestedUUID));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Combat tuning reset failed.");
+            return;
+        }
+
         if (!"PATCH".equals(method) || parts.length != 3) {
             writeJson(exchange, 404, RemoteOperationResponse.failure("Endpoint not found."));
             return;
