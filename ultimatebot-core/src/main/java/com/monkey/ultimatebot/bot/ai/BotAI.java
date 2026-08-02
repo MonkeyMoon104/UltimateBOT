@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot.ai;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.behavior.FollowBehaviorController;
 import com.monkey.ultimatebot.bot.ai.behavior.IdleBehaviorController;
 import com.monkey.ultimatebot.bot.ai.behavior.SustainFoodController;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
@@ -65,6 +66,7 @@ public class BotAI {
     private final CombatModeEngine combatModeEngine;
     private final IdleBehaviorController idleBehaviorController;
     private final SustainFoodController sustainFoodController;
+    private final FollowBehaviorController followBehaviorController;
     private final BotOptions options;
     private final UltimateBot plugin;
     private long lastForcedVerticalTeleportTime = 0L;
@@ -123,6 +125,8 @@ public class BotAI {
         this.idleBehaviorController =
                 new IdleBehaviorController(bot, options, plugin, movementController, rotationController);
         this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);
+        this.followBehaviorController =
+                new FollowBehaviorController(bot, movementController, noobMovementController, pathfindingManager);
     }
 
     public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
@@ -164,6 +168,7 @@ public class BotAI {
         }
 
         if (combatEnabled) {
+            followBehaviorController.reset();
             if (shouldForceVerticalTeleport(playerTarget) && canForceVerticalTeleport()) {
                 boolean teleported = teleportController.teleportSafeNear((org.bukkit.entity.Player) targetBukkitPlayer)
                         || teleportController.teleportBeside((org.bukkit.entity.Player) targetBukkitPlayer);
@@ -205,15 +210,9 @@ public class BotAI {
         } else {
             combatModeEngine.suspend();
             if (!isCurrentlyHealing) {
-                if (!followActivePath(playerTarget)) {
-                    pathfindingManager.checkForStuck(playerTarget);
-                    if (pathfindingManager.isUsingPathfinding()) {
-                        followActivePath(playerTarget);
-                    } else {
-                        noobMovementController.moveTowards(playerTarget, 2.5);
-                    }
-                }
+                followBehaviorController.tick(playerTarget);
             } else {
+                followBehaviorController.reset();
                 executeHealingMovement(playerTarget);
             }
         }
