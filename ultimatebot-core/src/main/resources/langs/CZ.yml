@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow je uzamčen: pro tohoto bota ho nelze upravit.'
   follow-lock-combat: '&cNemůžeš vypnout follow: boj je uzamčen na ZAPNUTO.'
   totem-locked: '&cTotemy jsou uzamčeny: pro tohoto bota je nelze upravit.'
-  rank-locked: '&cRank je uzamčen: pro tohoto bota ho nelze upravit.'
+  difficulty-locked: '&cDifficulty je uzamčen: pro tohoto bota ho nelze upravit.'
   ally:
     pre-range-alert: '&e%player% se přibližuje, sleduje se pozice...'
     range-alert: '&c%player% byl rozpoznán jako hrozba, zahajuje se bombardování'
@@ -67,10 +67,10 @@ gui:
     tab-1:
       selected:
         material: GLOWSTONE_DUST
-        name: '&eRank &7(vybráno)'
+        name: '&eDifficulty &7(vybráno)'
       unselected:
         material: GUNPOWDER
-        name: '&7Rank'
+        name: '&7Difficulty'
     tab-2:
       selected:
         material: DRAGON_HEAD
@@ -179,10 +179,10 @@ gui:
     - '&7Stav: &e%type%'
     - ''
     - '&eKlikni pro přepnutí boje'
-  rank-button:
-    name: '&bRank'
+  difficulty-button:
+    name: '&bDifficulty'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
-    - '&eKlikni pro zvýšení/snížení ranku'
+    - '&eKlikni pro zvýšení/snížení difficultyu'

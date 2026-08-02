@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 
@@ -49,8 +49,8 @@ public class CombatStateManager implements ICombatStateManager {
         int botY = bot.blockPosition().getY();
         int targetY = target.blockPosition().getY();
         int yDiff = targetY - botY;
-        BotRank rank = cpvpController.getRank();
-        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         boolean comboWindow = rapvpController.getState() == RAPVPState.WAITING_EXPLOSION
                 || rapvpController.hadRecentAnchorExplosion(hyperAggressive ? 1500L : 1200L);
         if (comboWindow) {
@@ -103,8 +103,8 @@ public class CombatStateManager implements ICombatStateManager {
     }
 
     private boolean shouldAttemptCombat(double distance) {
-        BotRank rank = cpvpController.getRank();
-        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         double maxDistance = hyperAggressive ? 16.0 : 12.0;
         float minHealth = hyperAggressive ? 0.12f : 0.3f;
         return distance > 0.7 && distance < maxDistance && bot.getHealth() / bot.getMaxHealth() > minHealth;
@@ -132,8 +132,8 @@ public class CombatStateManager implements ICombatStateManager {
         if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
         if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
 
-        BotRank rank = cpvpController.getRank();
-        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         double distance = bot.distanceTo(target);
         double maxDistance = hyperAggressive ? 11.0 : 8.0;
         return distance > 1.0 && distance < maxDistance && (target.onGround() || hyperAggressive);
@@ -141,8 +141,8 @@ public class CombatStateManager implements ICombatStateManager {
 
     @Override
     public boolean shouldReposition(Player target, double distance) {
-        BotRank rank = cpvpController.getRank();
-        boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         net.minecraft.world.phys.Vec3 botPos = bot.position();
         net.minecraft.world.phys.Vec3 targetPos = target.position();
         double yDiff = botPos.y - targetPos.y;
@@ -156,12 +156,12 @@ public class CombatStateManager implements ICombatStateManager {
     }
 
     private long getAnchorAttemptCooldown() {
-        BotRank rank = cpvpController.getRank();
-        if (rank == null) {
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        if (difficulty == null) {
             return 8000L;
         }
 
-        return switch (rank) {
+        return switch (difficulty) {
             case EASY -> 8000L;
             case NORMAL -> 5200L;
             case MEDIUM -> 3200L;

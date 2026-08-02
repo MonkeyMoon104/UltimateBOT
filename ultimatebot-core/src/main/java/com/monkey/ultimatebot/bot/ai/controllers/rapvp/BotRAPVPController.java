@@ -5,9 +5,9 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlControl
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.*;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
-import com.monkey.ultimatebot.bot.ai.rank.RankCoordinator;
-import com.monkey.ultimatebot.bot.ai.rank.configs.RAPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +32,7 @@ public class BotRAPVPController {
 
     private BlockPos anchorPos = null;
     private Player currentTarget = null;
-    private BotRank rank;
+    private DifficultyLevel difficulty;
     private RAPVPConfig config;
     private int failedExplosionAttempts = 0;
     private long lastAnchorExplosionTime = 0L;
@@ -67,7 +67,7 @@ public class BotRAPVPController {
             return;
         }
 
-        int actionCycles = getActionCyclesForRank();
+        int actionCycles = getActionCyclesForDifficulty();
         for (int i = 0; i < actionCycles; i++) {
             if (!enabled || currentTarget == null || !currentTarget.isAlive()) {
                 break;
@@ -93,7 +93,7 @@ public class BotRAPVPController {
 
         Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(currentTarget);
         if (posOpt.isEmpty()) {
-            if (!isHyperAggressiveRank()
+            if (!isHyperAggressiveDifficulty()
                     && pearlController.canUseEnderpearl()
                     && bot.distanceTo(currentTarget) > 10.0D) {
                 pearlController.tryUseEnderpearl(currentTarget);
@@ -175,7 +175,7 @@ public class BotRAPVPController {
                 anchorPos = null;
             } else {
                 failedExplosionAttempts++;
-                int retryLimit = isHyperAggressiveRank() ? 3 : 4;
+                int retryLimit = isHyperAggressiveDifficulty() ? 3 : 4;
                 if (failedExplosionAttempts >= retryLimit) {
                     failedExplosionAttempts = 0;
                     state = RAPVPState.PLACING_ANCHOR;
@@ -210,15 +210,15 @@ public class BotRAPVPController {
         return anchorPos;
     }
 
-    public void setRank(BotRank rank) {
-        this.rank = rank;
-        this.config = RankCoordinator.buildRAPVPConfig(rank);
+    public void setDifficulty(DifficultyLevel difficulty) {
+        this.difficulty = difficulty;
+        this.config = DifficultyProfileFactory.buildRAPVPConfig(difficulty);
 
         this.positionFinder.setConfig(config);
     }
 
-    public BotRank getRank() {
-        return rank;
+    public DifficultyLevel getDifficulty() {
+        return difficulty;
     }
 
     public RAPVPConfig getConfig() {
@@ -232,15 +232,15 @@ public class BotRAPVPController {
         return System.currentTimeMillis() - lastAnchorExplosionTime <= windowMs;
     }
 
-    private boolean isHyperAggressiveRank() {
-        return rank == BotRank.GOD || rank == BotRank.HARD;
+    private boolean isHyperAggressiveDifficulty() {
+        return difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
     }
 
-    private int getActionCyclesForRank() {
-        if (rank == BotRank.GOD) {
+    private int getActionCyclesForDifficulty() {
+        if (difficulty == DifficultyLevel.GOD) {
             return 2;
         }
-        if (rank == BotRank.HARD) {
+        if (difficulty == DifficultyLevel.HARD) {
             return 2;
         }
         return 1;
@@ -252,9 +252,9 @@ public class BotRAPVPController {
         }
 
         BlockPos targetPos = currentTarget.blockPosition();
-        int horizontalRadius = Math.max(3, Math.min(config.getMaxDistance(), isHyperAggressiveRank() ? 5 : 7));
-        int verticalRadius = isHyperAggressiveRank() ? 4 : 3;
-        double maxTargetDistance = isHyperAggressiveRank() ? 4.0D : 5.0D;
+        int horizontalRadius = Math.max(3, Math.min(config.getMaxDistance(), isHyperAggressiveDifficulty() ? 5 : 7));
+        int verticalRadius = isHyperAggressiveDifficulty() ? 4 : 3;
+        double maxTargetDistance = isHyperAggressiveDifficulty() ? 4.0D : 5.0D;
 
         BlockPos bestPos = null;
         double bestScore = Double.NEGATIVE_INFINITY;

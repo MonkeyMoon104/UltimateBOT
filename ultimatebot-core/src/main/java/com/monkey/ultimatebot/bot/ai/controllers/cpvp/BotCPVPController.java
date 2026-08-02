@@ -8,9 +8,9 @@ import com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPl
 import com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianPositionFinder;
 import com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian.ObsidianScanner;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
-import com.monkey.ultimatebot.bot.ai.rank.RankCoordinator;
-import com.monkey.ultimatebot.bot.ai.rank.configs.CPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.core.BlockPos;
@@ -32,7 +32,7 @@ public class BotCPVPController {
     private final CrystalPositionEvaluator crystalPositionEvaluator;
     private final ObsidianScanner obsidianScanner;
     private final CrystalManager crystalManager;
-    private BotRank rank;
+    private DifficultyLevel difficulty;
     private CPVPConfig config;
 
     private int obsidianPlaceCooldown = 0;
@@ -522,16 +522,16 @@ public class BotCPVPController {
         return false;
     }
 
-    public void setRank(BotRank rank) {
-        this.rank = rank;
-        this.config = RankCoordinator.buildCPVPConfig(rank);
+    public void setDifficulty(DifficultyLevel difficulty) {
+        this.difficulty = difficulty;
+        this.config = DifficultyProfileFactory.buildCPVPConfig(difficulty);
 
         this.obsidianScanner.setConfig(config);
         this.crystalManager.setConfig(config);
     }
 
-    public BotRank getRank() {
-        return rank;
+    public DifficultyLevel getDifficulty() {
+        return difficulty;
     }
 
     public CPVPConfig getConfig() {
@@ -597,33 +597,33 @@ public class BotCPVPController {
     }
 
     private int getCrystalAttackBurstAttempts() {
-        if (rank == BotRank.GOD) return 4;
-        if (rank == BotRank.HARD) return 3;
-        if (rank == BotRank.MEDIUM) return 2;
-        if (rank == BotRank.NORMAL) return 2;
+        if (difficulty == DifficultyLevel.GOD) return 4;
+        if (difficulty == DifficultyLevel.HARD) return 3;
+        if (difficulty == DifficultyLevel.MEDIUM) return 2;
+        if (difficulty == DifficultyLevel.NORMAL) return 2;
         return 1;
     }
 
     private int getCrystalPlacementBurstAttempts() {
-        if (rank == BotRank.GOD) return 3;
-        if (rank == BotRank.HARD) return 3;
-        if (rank == BotRank.MEDIUM) return 2;
-        if (rank == BotRank.NORMAL) return 2;
+        if (difficulty == DifficultyLevel.GOD) return 3;
+        if (difficulty == DifficultyLevel.HARD) return 3;
+        if (difficulty == DifficultyLevel.MEDIUM) return 2;
+        if (difficulty == DifficultyLevel.NORMAL) return 2;
         return 1;
     }
 
     private int getCrystalActionCyclesPerTick() {
-        if (rank == BotRank.GOD) return 2;
-        if (rank == BotRank.HARD) return 2;
-        if (rank == BotRank.MEDIUM) return 2;
+        if (difficulty == DifficultyLevel.GOD) return 2;
+        if (difficulty == DifficultyLevel.HARD) return 2;
+        if (difficulty == DifficultyLevel.MEDIUM) return 2;
         return 1;
     }
 
     private long getCrystalPositionReuseDelayMs() {
-        if (rank == BotRank.GOD) return 300L;
-        if (rank == BotRank.HARD) return 380L;
-        if (rank == BotRank.MEDIUM) return 550L;
-        if (rank == BotRank.NORMAL) return 700L;
+        if (difficulty == DifficultyLevel.GOD) return 300L;
+        if (difficulty == DifficultyLevel.HARD) return 380L;
+        if (difficulty == DifficultyLevel.MEDIUM) return 550L;
+        if (difficulty == DifficultyLevel.NORMAL) return 700L;
         return 900L;
     }
 
@@ -673,23 +673,23 @@ public class BotCPVPController {
     }
 
     private double getStrongScoreOffset() {
-        if (rank == BotRank.GOD) return 0.9D;
-        if (rank == BotRank.HARD) return 1.1D;
-        if (rank == BotRank.MEDIUM) return 1.25D;
-        if (rank == BotRank.NORMAL) return 1.4D;
+        if (difficulty == DifficultyLevel.GOD) return 0.9D;
+        if (difficulty == DifficultyLevel.HARD) return 1.1D;
+        if (difficulty == DifficultyLevel.MEDIUM) return 1.25D;
+        if (difficulty == DifficultyLevel.NORMAL) return 1.4D;
         return 1.65D;
     }
 
     private int getDesiredStrongPositionCount() {
-        if (rank == BotRank.GOD) return 3;
-        if (rank == BotRank.HARD) return 2;
-        if (rank == BotRank.MEDIUM) return 2;
+        if (difficulty == DifficultyLevel.GOD) return 3;
+        if (difficulty == DifficultyLevel.HARD) return 2;
+        if (difficulty == DifficultyLevel.MEDIUM) return 2;
         return 1;
     }
 
     private void pruneObsidianCacheForTarget(Player target) {
         double maxUsefulTargetDistance =
-                switch (rank) {
+                switch (difficulty) {
                     case GOD -> 5.2D;
                     case HARD -> 5.8D;
                     case MEDIUM -> 6.3D;

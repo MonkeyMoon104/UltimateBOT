@@ -1,29 +1,29 @@
-package com.monkey.ultimatebot.gui.v26_1.tab;
+package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.gui.v26_1.impl.RankItem;
+import com.monkey.ultimatebot.gui.impl.DifficultyItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.Item;
+import xyz.xenondevs.invui.item.impl.SimpleItem;
 
-public class RankTab {
+public class DifficultyTab {
 
     private final BotGuiTabContext context;
 
-    public RankTab(BotGuiTabContext context) {
+    public DifficultyTab(BotGuiTabContext context) {
         this.context = context;
     }
 
     public Gui build(Material borderMaterial, String borderName) {
         BotOptions options = context.getOptions();
 
-        return Gui.builder()
+        return Gui.normal()
                 .setStructure(
                         "# # # # # # # #", "# . . r . . . #", "# . . . . . . #", "# . . . . . . #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
-                .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
-                .addIngredient('r', new RankItem(context.getTraining(), options))
+                .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
+                .addIngredient('r', new DifficultyItem(context.getTraining(), options))
                 .build();
     }
 }

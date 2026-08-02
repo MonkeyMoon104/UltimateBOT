@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
-import com.monkey.ultimatebot.bot.ai.rank.configs.CPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

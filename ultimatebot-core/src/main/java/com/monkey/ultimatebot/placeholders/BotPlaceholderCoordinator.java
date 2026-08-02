@@ -35,7 +35,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
             addPlaceholder(new HealthBarPlaceholder(plugin));
             addPlaceholder(new OnlineTimePlaceholder(plugin));
             addPlaceholder(new PercentageHealthPlaceholder(plugin));
-            addPlaceholder(new RankPlaceholder(plugin));
+            addPlaceholder(new DifficultyPlaceholder(plugin));
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Error while registering placeholders", e);
         }

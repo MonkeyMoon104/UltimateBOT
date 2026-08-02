@@ -12,9 +12,9 @@ import org.jspecify.annotations.Nullable;
  * @param ownerUUID owner UUID associated with this bot slot
  * @param botUUID runtime bot entity UUID, may be null when unavailable
  * @param botType bot type label
- * @param botRank current rank label
- * @param minBotRank minimum allowed rank label
- * @param maxBotRank maximum allowed rank label
+ * @param botDifficulty current difficulty label
+ * @param minDifficultyLevel minimum allowed difficulty label
+ * @param maxDifficultyLevel maximum allowed difficulty label
  * @param follow current follow state
  * @param combat current combat state
  * @param totemCount current totem count
@@ -31,9 +31,9 @@ public record BotSnapshot(
         UUID ownerUUID,
         @Nullable UUID botUUID,
         String botType,
-        String botRank,
-        String minBotRank,
-        String maxBotRank,
+        String botDifficulty,
+        String minDifficultyLevel,
+        String maxDifficultyLevel,
         boolean follow,
         boolean combat,
         int totemCount,
@@ -60,9 +60,9 @@ public record BotSnapshot(
         boolean killMessageEnabled) {
     public BotSnapshot {
         botType = TextValues.orElseIfBlank(botType, "UNKNOWN");
-        botRank = TextValues.orElseIfBlank(botRank, "UNKNOWN");
-        minBotRank = TextValues.orElseIfBlank(minBotRank, "EASY");
-        maxBotRank = TextValues.orElseIfBlank(maxBotRank, "GOD");
+        botDifficulty = TextValues.orElseIfBlank(botDifficulty, "UNKNOWN");
+        minDifficultyLevel = TextValues.orElseIfBlank(minDifficultyLevel, "EASY");
+        maxDifficultyLevel = TextValues.orElseIfBlank(maxDifficultyLevel, "GOD");
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
         source = source == null ? BotSource.CORE : source;
         targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;

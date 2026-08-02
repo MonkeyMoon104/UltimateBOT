@@ -149,13 +149,13 @@ public interface IBotManager {
     boolean updateBlastProtection(UUID ownerUUID, boolean blastProtection);
 
     /**
-     * Updates rank for a managed bot.
+     * Updates difficulty for a managed bot.
      *
      * @param ownerUUID owner UUID
-     * @param rank desired bot rank
+     * @param difficulty desired bot difficulty
      * @return {@code true} if update was applied
      */
-    boolean updateRank(UUID ownerUUID, BotRank rank);
+    boolean updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty);
 
     boolean updateArmor(
             UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);

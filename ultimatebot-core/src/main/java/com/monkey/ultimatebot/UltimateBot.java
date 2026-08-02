@@ -8,7 +8,9 @@ import com.monkey.ultimatebot.bot.BotManager;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
+import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
 import com.monkey.ultimatebot.commands.*;
+import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import com.monkey.ultimatebot.event.BotEventDispatcher;
@@ -35,6 +37,7 @@ import com.monkey.ultimatebot.wrapper.WrapperManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 import org.bstats.bukkit.Metrics;
@@ -67,7 +70,9 @@ public final class UltimateBot extends JavaPlugin {
     private BotEventDispatcher botEventDispatcher;
     private BotMetrics botMetrics;
     private ConfigurateRuntimeSettingsLoader runtimeSettingsLoader;
+    private CombatProfileLoader combatProfileLoader;
     private RuntimeSettings runtimeSettings = RuntimeSettings.defaults();
+    private CombatProfileCatalog combatProfileCatalog;
     private static UltimateBot instance;
 
     @Override
@@ -79,9 +84,15 @@ public final class UltimateBot extends JavaPlugin {
         try {
             startup.beginPhase(1, "Boot", "Configuration");
             saveDefaultConfig();
+            if (!getDataFolder().toPath().resolve("combat-modes.yml").toFile().isFile()) {
+                saveResource("combat-modes.yml", false);
+            }
             this.runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
                     getDataFolder().toPath().resolve("config.yml"), getLogger());
             this.runtimeSettings = runtimeSettingsLoader.load();
+            this.combatProfileLoader =
+                    new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
+            this.combatProfileCatalog = combatProfileLoader.load();
             reloadLanguageConfiguration();
             startup.ready("Config", "default file verified");
             startup.detail(
@@ -304,6 +315,10 @@ public final class UltimateBot extends JavaPlugin {
         return runtimeSettings;
     }
 
+    public CombatProfileCatalog getCombatProfileCatalog() {
+        return Objects.requireNonNull(combatProfileCatalog, "combatProfileCatalog is not initialized");
+    }
+
     public PlayerOptions getPlayerOptions() {
         return playerOptions;
     }
@@ -347,6 +362,11 @@ public final class UltimateBot extends JavaPlugin {
                     getDataFolder().toPath().resolve("config.yml"), getLogger());
         }
         runtimeSettings = runtimeSettingsLoader.load();
+        if (combatProfileLoader == null) {
+            combatProfileLoader =
+                    new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
+        }
+        combatProfileCatalog = combatProfileLoader.load();
         if (targetingService != null) {
             targetingService.reconfigure(runtimeSettings.targetCache());
         }
@@ -518,6 +538,9 @@ public final class UltimateBot extends JavaPlugin {
         worldGuardPvpService = null;
         languageManager = null;
         wrapperManager = null;
+        runtimeSettingsLoader = null;
+        combatProfileLoader = null;
+        combatProfileCatalog = null;
     }
 
     private void applyRuntimeBotConfiguration() {

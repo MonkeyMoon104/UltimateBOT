@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
-import com.monkey.ultimatebot.bot.ai.rank.configs.CPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

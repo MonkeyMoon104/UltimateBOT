@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow ist gesperrt: Es kann für diesen Bot nicht geändert werden.'
   follow-lock-combat: '&cDu kannst follow nicht deaktivieren: Kampf ist auf AN gesperrt.'
   totem-locked: '&cTotems sind gesperrt: Sie können für diesen Bot nicht geändert werden.'
-  rank-locked: '&cRang ist gesperrt: Er kann für diesen Bot nicht geändert werden.'
+  difficulty-locked: '&cRang ist gesperrt: Er kann für diesen Bot nicht geändert werden.'
   ally:
     pre-range-alert: '&e%player% kommt näher, Position wird überwacht...'
     range-alert: '&c%player% als Bedrohung erkannt, Bombenaktion wird gestartet'
@@ -179,10 +179,10 @@ gui:
     - '&7Status: &e%type%'
     - ''
     - '&eKlicken, um Kampf umzuschalten'
-  rank-button:
+  difficulty-button:
     name: '&bRang'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eKlicken, um den Rang zu erhöhen/verringern'

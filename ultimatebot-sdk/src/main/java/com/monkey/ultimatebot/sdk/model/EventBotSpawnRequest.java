@@ -22,9 +22,9 @@ import org.jspecify.annotations.Nullable;
  * @param totemCount selected totem count, or negative for random range
  * @param minTotemCount minimum random totem count
  * @param maxTotemCount maximum random totem count
- * @param rank selected rank profile
- * @param minRank minimum random rank profile
- * @param maxRank maximum random rank profile
+ * @param difficulty selected difficulty profile
+ * @param minDifficulty minimum random difficulty profile
+ * @param maxDifficulty maximum random difficulty profile
  * @param spawnLocation optional explicit spawn position
  * @param autoTarget whether automatic target acquisition is enabled
  * @param autoTargetRange target acquisition range
@@ -59,9 +59,9 @@ public record EventBotSpawnRequest(
         int totemCount,
         int minTotemCount,
         int maxTotemCount,
-        String rank,
-        String minRank,
-        String maxRank,
+        String difficulty,
+        String minDifficulty,
+        String maxDifficulty,
         @Nullable BotLocationRequest spawnLocation,
         boolean autoTarget,
         double autoTargetRange,
@@ -89,9 +89,9 @@ public record EventBotSpawnRequest(
         Objects.requireNonNull(armor, "armor");
         Objects.requireNonNull(minArmor, "minArmor");
         Objects.requireNonNull(maxArmor, "maxArmor");
-        Objects.requireNonNull(rank, "rank");
-        Objects.requireNonNull(minRank, "minRank");
-        Objects.requireNonNull(maxRank, "maxRank");
+        Objects.requireNonNull(difficulty, "difficulty");
+        Objects.requireNonNull(minDifficulty, "minDifficulty");
+        Objects.requireNonNull(maxDifficulty, "maxDifficulty");
         Objects.requireNonNull(targetMode, "targetMode");
     }
 
@@ -115,9 +115,9 @@ public record EventBotSpawnRequest(
             int totemCount,
             int minTotemCount,
             int maxTotemCount,
-            String rank,
-            String minRank,
-            String maxRank,
+            String difficulty,
+            String minDifficulty,
+            String maxDifficulty,
             @Nullable BotLocationRequest spawnLocation,
             boolean autoTarget,
             double autoTargetRange,
@@ -150,9 +150,9 @@ public record EventBotSpawnRequest(
                 totemCount,
                 minTotemCount,
                 maxTotemCount,
-                rank,
-                minRank,
-                maxRank,
+                difficulty,
+                minDifficulty,
+                maxDifficulty,
                 spawnLocation,
                 autoTarget,
                 autoTargetRange,
@@ -211,9 +211,9 @@ public record EventBotSpawnRequest(
         private int totemCount = -1;
         private int minTotemCount = -1;
         private int maxTotemCount = 74;
-        private String rank = "EASY";
-        private String minRank = "EASY";
-        private String maxRank = "GOD";
+        private String difficulty = "EASY";
+        private String minDifficulty = "EASY";
+        private String maxDifficulty = "GOD";
         private @Nullable BotLocationRequest spawnLocation;
         private boolean autoTarget = true;
         private double autoTargetRange = 16.0D;
@@ -305,25 +305,27 @@ public record EventBotSpawnRequest(
             return this;
         }
 
-        public Builder rank(String rank) {
-            this.rank = Objects.requireNonNull(rank, "rank");
+        public Builder difficulty(String difficulty) {
+            this.difficulty = Objects.requireNonNull(difficulty, "difficulty");
             return this;
         }
 
-        public Builder rank(SdkBotRank rank) {
-            this.rank = Objects.requireNonNull(rank, "rank").apiValue();
+        public Builder difficulty(SdkDifficultyLevel difficulty) {
+            this.difficulty = Objects.requireNonNull(difficulty, "difficulty").apiValue();
             return this;
         }
 
-        public Builder rankRange(String minRank, String maxRank) {
-            this.minRank = Objects.requireNonNull(minRank, "minRank");
-            this.maxRank = Objects.requireNonNull(maxRank, "maxRank");
+        public Builder difficultyRange(String minDifficulty, String maxDifficulty) {
+            this.minDifficulty = Objects.requireNonNull(minDifficulty, "minDifficulty");
+            this.maxDifficulty = Objects.requireNonNull(maxDifficulty, "maxDifficulty");
             return this;
         }
 
-        public Builder rankRange(SdkBotRank minRank, SdkBotRank maxRank) {
-            this.minRank = Objects.requireNonNull(minRank, "minRank").apiValue();
-            this.maxRank = Objects.requireNonNull(maxRank, "maxRank").apiValue();
+        public Builder difficultyRange(SdkDifficultyLevel minDifficulty, SdkDifficultyLevel maxDifficulty) {
+            this.minDifficulty =
+                    Objects.requireNonNull(minDifficulty, "minDifficulty").apiValue();
+            this.maxDifficulty =
+                    Objects.requireNonNull(maxDifficulty, "maxDifficulty").apiValue();
             return this;
         }
 
@@ -489,9 +491,9 @@ public record EventBotSpawnRequest(
                     totemCount,
                     minTotemCount,
                     maxTotemCount,
-                    rank,
-                    minRank,
-                    maxRank,
+                    difficulty,
+                    minDifficulty,
+                    maxDifficulty,
                     spawnLocation,
                     autoTarget,
                     autoTargetRange,

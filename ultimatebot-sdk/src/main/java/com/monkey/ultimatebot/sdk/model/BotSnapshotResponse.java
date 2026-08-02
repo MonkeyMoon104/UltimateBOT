@@ -11,9 +11,9 @@ import org.jspecify.annotations.Nullable;
  * @param ownerUUID primary owner UUID when the bot has one
  * @param botUUID spawned bot entity UUID
  * @param botType selected armor/combat type
- * @param botRank selected rank profile
- * @param minBotRank minimum random rank profile
- * @param maxBotRank maximum random rank profile
+ * @param botDifficulty selected difficulty profile
+ * @param minDifficultyLevel minimum random difficulty profile
+ * @param maxDifficultyLevel maximum random difficulty profile
  * @param follow whether follow mode is active
  * @param combat whether combat mode is active
  * @param totemCount selected totem count
@@ -43,9 +43,9 @@ public record BotSnapshotResponse(
         @Nullable UUID ownerUUID,
         @Nullable UUID botUUID,
         String botType,
-        String botRank,
-        String minBotRank,
-        String maxBotRank,
+        String botDifficulty,
+        String minDifficultyLevel,
+        String maxDifficultyLevel,
         boolean follow,
         boolean combat,
         int totemCount,
@@ -72,9 +72,9 @@ public record BotSnapshotResponse(
         boolean killMessageEnabled) {
     public BotSnapshotResponse {
         botType = TextValues.orElseIfBlank(botType, "UNKNOWN");
-        botRank = TextValues.orElseIfBlank(botRank, "UNKNOWN");
-        minBotRank = TextValues.orElseIfBlank(minBotRank, "EASY");
-        maxBotRank = TextValues.orElseIfBlank(maxBotRank, "GOD");
+        botDifficulty = TextValues.orElseIfBlank(botDifficulty, "UNKNOWN");
+        minDifficultyLevel = TextValues.orElseIfBlank(minDifficultyLevel, "EASY");
+        maxDifficultyLevel = TextValues.orElseIfBlank(maxDifficultyLevel, "GOD");
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
         source = TextValues.orElseIfBlank(source, "CORE");
         targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode;
@@ -117,11 +117,12 @@ public record BotSnapshotResponse(
     }
 
     /**
-     * Returns whether rank selection uses a random range.
+     * Returns whether difficulty selection uses a random range.
      *
-     * @return whether min and max rank differ from the selected rank
+     * @return whether min and max difficulty differ from the selected difficulty
      */
-    public boolean usesRankRange() {
-        return !botRank.equalsIgnoreCase(minBotRank) || !botRank.equalsIgnoreCase(maxBotRank);
+    public boolean usesDifficultyRange() {
+        return !botDifficulty.equalsIgnoreCase(minDifficultyLevel)
+                || !botDifficulty.equalsIgnoreCase(maxDifficultyLevel);
     }
 }

@@ -5,8 +5,8 @@ import com.monkey.ultimatebot.api.model.BotArmorType;
 import com.monkey.ultimatebot.api.model.BotBlastProtection;
 import com.monkey.ultimatebot.api.model.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.BotEquipmentSlotSetting;
-import com.monkey.ultimatebot.api.model.BotRank;
 import com.monkey.ultimatebot.api.model.BotSettings;
+import com.monkey.ultimatebot.api.model.DifficultyLevel;
 import com.monkey.ultimatebot.bot.BotCreationSource;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
@@ -71,7 +71,7 @@ final class ApiBotOptionsFactory {
         options.setChangeableBlast(settings.changeableBlast());
         options.setChangeableArmor(settings.changeableArmor());
         options.setChangeableTotem(settings.changeableTotem());
-        options.setChangeableRank(settings.changeableRank());
+        options.setChangeableDifficulty(settings.changeableDifficulty());
 
         BotBlastProtection blast = settings.blastProtectionProfile();
         options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
@@ -80,8 +80,9 @@ final class ApiBotOptionsFactory {
         options.getArmor().putAll(settings.armorContents());
         copyTrimSettings(options, settings);
         options.setEquipmentContents(settings.equipmentContents());
-        options.setRankRange(toCoreRank(settings.minRank()), toCoreRank(settings.maxRank()));
-        options.setRank(toCoreRank(settings.rank()));
+        options.setDifficultyRange(
+                toCoreDifficulty(settings.minDifficulty()), toCoreDifficulty(settings.maxDifficulty()));
+        options.setDifficulty(toCoreDifficulty(settings.difficulty()));
         options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
         options.setTotems(settings.totemCount());
         return options;
@@ -98,15 +99,15 @@ final class ApiBotOptionsFactory {
         }
     }
 
-    static com.monkey.ultimatebot.bot.ai.rank.BotRank toCoreRank(BotRank rank) {
-        com.monkey.ultimatebot.common.model.BotRankTier common =
-                rank == null ? com.monkey.ultimatebot.common.model.BotRankTier.EASY : rank.toCommon();
+    static com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel toCoreDifficulty(DifficultyLevel difficulty) {
+        com.monkey.ultimatebot.common.model.DifficultyTier common =
+                difficulty == null ? com.monkey.ultimatebot.common.model.DifficultyTier.EASY : difficulty.toCommon();
         return switch (common) {
-            case EASY -> com.monkey.ultimatebot.bot.ai.rank.BotRank.EASY;
-            case NORMAL -> com.monkey.ultimatebot.bot.ai.rank.BotRank.NORMAL;
-            case MEDIUM -> com.monkey.ultimatebot.bot.ai.rank.BotRank.MEDIUM;
-            case HARD -> com.monkey.ultimatebot.bot.ai.rank.BotRank.HARD;
-            case GOD -> com.monkey.ultimatebot.bot.ai.rank.BotRank.GOD;
+            case EASY -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.EASY;
+            case NORMAL -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.NORMAL;
+            case MEDIUM -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.MEDIUM;
+            case HARD -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.HARD;
+            case GOD -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.GOD;
         };
     }
 

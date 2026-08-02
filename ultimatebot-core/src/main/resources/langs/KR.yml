@@ -28,7 +28,7 @@ messages:
   follow-locked: '&c추적이 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
   follow-lock-combat: '&c추적을 비활성화할 수 없습니다: 전투가 켜짐으로 잠겨 있습니다.'
   totem-locked: '&c토템이 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
-  rank-locked: '&c랭크가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
+  difficulty-locked: '&c랭크가 잠겨 있습니다: 이 봇에서는 수정할 수 없습니다.'
   ally:
     pre-range-alert: '&e%player% 님이 가까워지고 있습니다. 위치를 확인하는 중...'
     range-alert: '&c%player% 님이 위협으로 감지되었습니다. 폭격 동작을 시작합니다'
@@ -179,10 +179,10 @@ gui:
     - '&7상태: &e%type%'
     - ''
     - '&e클릭하여 전투 전환'
-  rank-button:
+  difficulty-button:
     name: '&b랭크'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&e클릭하여 랭크를 올리거나 내리기'

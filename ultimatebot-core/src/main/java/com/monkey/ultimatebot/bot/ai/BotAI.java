@@ -22,7 +22,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.BotTeleportController;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -103,10 +103,10 @@ public class BotAI {
         this.enderpearlController.setEnabled(options.isEnderPearls());
         this.cpvpController = new BotCPVPController(bot, inventoryController);
         this.cpvpController.setEnabled(options.isCrystalPvp());
-        this.cpvpController.setRank(options.getRank());
+        this.cpvpController.setDifficulty(options.getDifficulty());
         this.rapvpController =
                 new BotRAPVPController(bot, inventoryController, rotationController, enderpearlController);
-        this.rapvpController.setRank(options.getRank());
+        this.rapvpController.setDifficulty(options.getDifficulty());
 
         this.combatStateManager = new CombatStateManager(bot, inventoryController, cpvpController, rapvpController);
         this.combatDataManager = new CombatDataManager(bot, enderpearlController, rapvpController, cpvpController);
@@ -281,14 +281,14 @@ public class BotAI {
         totemController.manageTotem();
     }
 
-    public void setRank(BotRank rank) {
-        options.setRank(rank);
-        this.rapvpController.setRank(rank);
-        this.cpvpController.setRank(rank);
+    public void setDifficulty(DifficultyLevel difficulty) {
+        options.setDifficulty(difficulty);
+        this.rapvpController.setDifficulty(difficulty);
+        this.cpvpController.setDifficulty(difficulty);
     }
 
-    public BotRank getRank() {
-        return options.getRank();
+    public DifficultyLevel getDifficulty() {
+        return options.getDifficulty();
     }
 
     public BotMovementController getMovementController() {

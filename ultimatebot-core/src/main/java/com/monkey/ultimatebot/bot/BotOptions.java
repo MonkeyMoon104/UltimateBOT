@@ -7,13 +7,17 @@ import com.monkey.ultimatebot.api.model.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.BotLocation;
 import com.monkey.ultimatebot.api.model.BotSkin;
 import com.monkey.ultimatebot.api.model.BotTargetMode;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import java.util.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public final class BotOptions {
 
@@ -28,8 +32,11 @@ public final class BotOptions {
     private boolean changeableBlast = true;
     private boolean changeableArmor = true;
     private boolean changeableTotem = true;
-    private boolean changeableRank = true;
-    private BotRank rank = BotRank.EASY;
+    private boolean changeableDifficulty = true;
+    private DifficultyLevel difficulty = DifficultyLevel.EASY;
+    private boolean changeableCombatMode = true;
+    private CombatMode combatMode = CombatMode.SWORD;
+    private @Nullable CombatTuning customCombatTuning;
     private BotType botType = BotType.SINGLE;
     private BotCreationSource creationSource = BotCreationSource.CORE;
     private UUID requestedBotUUID;
@@ -41,8 +48,8 @@ public final class BotOptions {
     private BotSkin botSkin = BotSkin.owner();
     private int minTotemCount = -1;
     private Integer maxTotemCountOverride;
-    private BotRank minRank = BotRank.EASY;
-    private BotRank maxRank = BotRank.GOD;
+    private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
+    private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
     private ArmorTier minArmorTier = ArmorTier.LEATHER;
     private ArmorTier maxArmorTier = ArmorTier.NETHERITE;
     private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
@@ -394,61 +401,106 @@ public final class BotOptions {
         return ownerUUID != null && teamOwnerUUIDs.contains(ownerUUID);
     }
 
-    public BotRank getRank() {
-        return rank;
+    public DifficultyLevel getDifficulty() {
+        return difficulty;
     }
 
-    public void setRank(BotRank rank) {
-        this.rank = clampRank(rank == null ? BotRank.EASY : rank);
+    public CombatMode getCombatMode() {
+        return combatMode;
     }
 
-    public BotRank getMinRank() {
-        return minRank;
+    public void setCombatMode(CombatMode combatMode) {
+        CombatMode requiredMode = Objects.requireNonNull(combatMode, "combatMode");
+        if (!training.getCombatProfileCatalog().configuration(requiredMode).enabled()) {
+            throw new IllegalArgumentException("Combat mode is disabled: " + requiredMode);
+        }
+        this.combatMode = requiredMode;
+        this.customCombatTuning = null;
     }
 
-    public BotRank getMaxRank() {
-        return maxRank;
+    public CombatMode nextCombatMode(boolean forward) {
+        List<CombatMode> enabledModes = training.getCombatProfileCatalog().enabledModes();
+        if (enabledModes.isEmpty()) {
+            throw new IllegalStateException("No combat modes are enabled");
+        }
+        int currentIndex = enabledModes.indexOf(combatMode);
+        if (currentIndex < 0) {
+            return enabledModes.get(0);
+        }
+        int offset = forward ? 1 : -1;
+        return enabledModes.get(Math.floorMod(currentIndex + offset, enabledModes.size()));
     }
 
-    public void setRankRange(BotRank minRank, BotRank maxRank) {
-        validateRankRange(minRank, maxRank);
-        this.minRank = minRank;
-        this.maxRank = maxRank;
-        this.rank = clampRank(this.rank);
+    public CombatTuning getCombatTuning() {
+        return customCombatTuning != null
+                ? customCombatTuning
+                : training.getCombatProfileCatalog().resolve(combatMode, DifficultyTier.valueOf(difficulty.name()));
     }
 
-    public boolean isRankAllowed(BotRank rank) {
-        if (rank == null) {
+    public @Nullable CombatTuning getCustomCombatTuning() {
+        return customCombatTuning;
+    }
+
+    public void setCustomCombatTuning(@Nullable CombatTuning customCombatTuning) {
+        this.customCombatTuning = customCombatTuning;
+    }
+
+    public void resetCombatTuning() {
+        customCombatTuning = null;
+    }
+
+    public void setDifficulty(DifficultyLevel difficulty) {
+        this.difficulty = clampDifficulty(difficulty == null ? DifficultyLevel.EASY : difficulty);
+        this.customCombatTuning = null;
+    }
+
+    public DifficultyLevel getMinDifficulty() {
+        return minDifficulty;
+    }
+
+    public DifficultyLevel getMaxDifficulty() {
+        return maxDifficulty;
+    }
+
+    public void setDifficultyRange(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
+        validateDifficultyRange(minDifficulty, maxDifficulty);
+        this.minDifficulty = minDifficulty;
+        this.maxDifficulty = maxDifficulty;
+        this.difficulty = clampDifficulty(this.difficulty);
+    }
+
+    public boolean isDifficultyAllowed(DifficultyLevel difficulty) {
+        if (difficulty == null) {
             return false;
         }
-        return rank.compareTo(minRank) >= 0 && rank.compareTo(maxRank) <= 0;
+        return difficulty.compareTo(minDifficulty) >= 0 && difficulty.compareTo(maxDifficulty) <= 0;
     }
 
-    public BotRank nextAllowedRank(BotRank current, boolean forward) {
-        List<BotRank> allowedRanks = getAllowedRanks();
-        if (allowedRanks.isEmpty()) {
-            return BotRank.EASY;
+    public DifficultyLevel nextAllowedDifficulty(DifficultyLevel current, boolean forward) {
+        List<DifficultyLevel> allowedDifficulties = getAllowedDifficulties();
+        if (allowedDifficulties.isEmpty()) {
+            return DifficultyLevel.EASY;
         }
 
-        BotRank base = current == null ? allowedRanks.get(0) : current;
-        int index = allowedRanks.indexOf(base);
+        DifficultyLevel base = current == null ? allowedDifficulties.get(0) : current;
+        int index = allowedDifficulties.indexOf(base);
         if (index < 0) {
-            return allowedRanks.get(0);
+            return allowedDifficulties.get(0);
         }
 
         int nextIndex;
         if (forward) {
-            nextIndex = (index + 1) % allowedRanks.size();
+            nextIndex = (index + 1) % allowedDifficulties.size();
         } else {
-            nextIndex = (index - 1 + allowedRanks.size()) % allowedRanks.size();
+            nextIndex = (index - 1 + allowedDifficulties.size()) % allowedDifficulties.size();
         }
-        return allowedRanks.get(nextIndex);
+        return allowedDifficulties.get(nextIndex);
     }
 
-    public List<BotRank> getAllowedRanks() {
-        List<BotRank> allowed = new ArrayList<>();
-        for (BotRank value : BotRank.values()) {
-            if (isRankAllowed(value)) {
+    public List<DifficultyLevel> getAllowedDifficulties() {
+        List<DifficultyLevel> allowed = new ArrayList<>();
+        for (DifficultyLevel value : DifficultyLevel.values()) {
+            if (isDifficultyAllowed(value)) {
                 allowed.add(value);
             }
         }
@@ -578,12 +630,20 @@ public final class BotOptions {
         this.changeableTotem = changeableTotem;
     }
 
-    public boolean isChangeableRank() {
-        return changeableRank;
+    public boolean isChangeableDifficulty() {
+        return changeableDifficulty;
     }
 
-    public void setChangeableRank(boolean changeableRank) {
-        this.changeableRank = changeableRank;
+    public boolean isChangeableCombatMode() {
+        return changeableCombatMode;
+    }
+
+    public void setChangeableCombatMode(boolean changeableCombatMode) {
+        this.changeableCombatMode = changeableCombatMode;
+    }
+
+    public void setChangeableDifficulty(boolean changeableDifficulty) {
+        this.changeableDifficulty = changeableDifficulty;
     }
 
     public BotCreationSource getCreationSource() {
@@ -744,12 +804,12 @@ public final class BotOptions {
         }
     }
 
-    private static void validateRankRange(BotRank minRank, BotRank maxRank) {
-        if (minRank == null || maxRank == null) {
-            throw new IllegalArgumentException("rank bounds cannot be null");
+    private static void validateDifficultyRange(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
+        if (minDifficulty == null || maxDifficulty == null) {
+            throw new IllegalArgumentException("difficulty bounds cannot be null");
         }
-        if (minRank.compareTo(maxRank) > 0) {
-            throw new IllegalArgumentException("min rank cannot be greater than max rank");
+        if (minDifficulty.compareTo(maxDifficulty) > 0) {
+            throw new IllegalArgumentException("min difficulty cannot be greater than max difficulty");
         }
     }
 
@@ -772,12 +832,12 @@ public final class BotOptions {
         throw new IllegalArgumentException(fieldName + " blast value must be 0 or 1");
     }
 
-    private BotRank clampRank(BotRank candidate) {
-        if (candidate.compareTo(minRank) < 0) {
-            return minRank;
+    private DifficultyLevel clampDifficulty(DifficultyLevel candidate) {
+        if (candidate.compareTo(minDifficulty) < 0) {
+            return minDifficulty;
         }
-        if (candidate.compareTo(maxRank) > 0) {
-            return maxRank;
+        if (candidate.compareTo(maxDifficulty) > 0) {
+            return maxDifficulty;
         }
         return candidate;
     }

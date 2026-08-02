@@ -73,7 +73,7 @@ Event contracts are organized by responsibility instead of sharing one flat pack
 - `BotSkinSource`
 - `BotBlastProtection`
 - `BotArmorType`
-- `BotRank`
+- `DifficultyLevel`
 - `BotSnapshot`
 - `BotSource`
 - `BotOperationResult`
@@ -171,7 +171,7 @@ the underlying action continues.
 - `updateFollow(UUID ownerUUID, boolean follow)`
 - `updateCombat(UUID ownerUUID, boolean combat)`
 - `updateBlastProtection(UUID ownerUUID, boolean blastProtection)`
-- `updateRank(UUID ownerUUID, BotRank rank)`
+- `updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty)`
 
 ### Removal
 - `remove(UUID ownerUUID)`
@@ -217,13 +217,13 @@ The payload controls:
 - skin source
 - armor default and allowed range
 - totem default and allowed range
-- rank default and allowed range
+- difficulty default and allowed range
 
 Important validation rules:
 - `combat=true` requires `follow=true`
 - default armor must stay inside the configured armor range
 - default totem count must stay inside the configured totem range
-- default rank must stay inside the configured rank range
+- default difficulty must stay inside the configured difficulty range
 - `combat` cannot be changeable when follow is permanently fixed to `false`
 - follow cannot be changeable while combat is permanently fixed to `true`
 
@@ -315,8 +315,8 @@ Exposes a read-only view of:
 - owner UUID
 - bot UUID
 - bot type
-- current rank
-- min and max rank
+- current difficulty
+- min and max difficulty
 - follow state
 - combat state
 - current and allowed totem counts
@@ -341,7 +341,7 @@ Explosion terrain damage is independent from explosion entity damage. By default
 Examples:
 - enabling combat fails if follow is currently disabled
 - setting an out-of-range totem count fails
-- rank changes fail if the requested rank is outside the configured min/max window
+- difficulty changes fail if the requested difficulty is outside the configured min/max window
 
 Note:
 - `updateBlastProtection(...)` is a global toggle at API level; it does not expose per-slot blast edits
@@ -402,9 +402,9 @@ public final class ExamplePlugin extends JavaPlugin implements Listener {
                 .totemValue(0, 32)
                 .totemCount(16)
                 .setChangeableTotem(true)
-                .rankValue(BotRank.NORMAL, BotRank.GOD)
-                .rank(BotRank.HARD)
-                .setChangeableRank(true)
+                .difficultyValue(DifficultyLevel.NORMAL, DifficultyLevel.GOD)
+                .difficulty(DifficultyLevel.HARD)
+                .setChangeableDifficulty(true)
                 .explosions(false)
                 .crystalPvp(false)
                 .build();

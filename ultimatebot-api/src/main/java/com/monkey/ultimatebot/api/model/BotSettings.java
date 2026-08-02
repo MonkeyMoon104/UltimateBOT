@@ -31,7 +31,7 @@ public final class BotSettings {
     private final boolean changeableBlast;
     private final boolean changeableArmor;
     private final boolean changeableTotem;
-    private final boolean changeableRank;
+    private final boolean changeableDifficulty;
     private final String botNameTemplate;
     private final BotSkin botSkin;
     private final BotArmorType armorType;
@@ -40,9 +40,9 @@ public final class BotSettings {
     private final int totemCount;
     private final int minTotemCount;
     private final int maxTotemCount;
-    private final BotRank rank;
-    private final BotRank minRank;
-    private final BotRank maxRank;
+    private final DifficultyLevel difficulty;
+    private final DifficultyLevel minDifficulty;
+    private final DifficultyLevel maxDifficulty;
     private final @Nullable BotLocation spawnLocation;
     private final boolean autoTarget;
     private final double autoTargetRange;
@@ -75,7 +75,7 @@ public final class BotSettings {
         this.changeableBlast = builder.changeableBlast;
         this.changeableArmor = builder.changeableArmor;
         this.changeableTotem = builder.changeableTotem;
-        this.changeableRank = builder.changeableRank;
+        this.changeableDifficulty = builder.changeableDifficulty;
         this.botNameTemplate = builder.botNameTemplate;
         this.botSkin = builder.botSkin;
         this.armorType = builder.armorType;
@@ -84,9 +84,9 @@ public final class BotSettings {
         this.totemCount = builder.totemCount;
         this.minTotemCount = builder.minTotemCount;
         this.maxTotemCount = builder.maxTotemCount;
-        this.rank = builder.rank;
-        this.minRank = builder.minRank;
-        this.maxRank = builder.maxRank;
+        this.difficulty = builder.difficulty;
+        this.minDifficulty = builder.minDifficulty;
+        this.maxDifficulty = builder.maxDifficulty;
         this.spawnLocation = builder.spawnLocation;
         this.autoTarget = builder.autoTarget;
         this.autoTargetRange = builder.autoTargetRange;
@@ -202,12 +202,12 @@ public final class BotSettings {
     }
 
     /**
-     * Returns whether bot rank can be changed at runtime by users.
+     * Returns whether bot difficulty can be changed at runtime by users.
      *
-     * @return rank mutability flag
+     * @return difficulty mutability flag
      */
-    public boolean changeableRank() {
-        return changeableRank;
+    public boolean changeableDifficulty() {
+        return changeableDifficulty;
     }
 
     /**
@@ -283,30 +283,30 @@ public final class BotSettings {
     }
 
     /**
-     * Returns default bot rank.
+     * Returns default bot difficulty.
      *
-     * @return default rank
+     * @return default difficulty
      */
-    public BotRank rank() {
-        return rank;
+    public DifficultyLevel difficulty() {
+        return difficulty;
     }
 
     /**
-     * Returns minimum allowed bot rank.
+     * Returns minimum allowed bot difficulty.
      *
-     * @return min rank
+     * @return min difficulty
      */
-    public BotRank minRank() {
-        return minRank;
+    public DifficultyLevel minDifficulty() {
+        return minDifficulty;
     }
 
     /**
-     * Returns maximum allowed bot rank.
+     * Returns maximum allowed bot difficulty.
      *
-     * @return max rank
+     * @return max difficulty
      */
-    public BotRank maxRank() {
-        return maxRank;
+    public DifficultyLevel maxDifficulty() {
+        return maxDifficulty;
     }
 
     public @Nullable BotLocation spawnLocation() {
@@ -687,49 +687,49 @@ public final class BotSettings {
          * Sets whether totem count can be changed later.
          *
          * @param totemChangeable totem changeability
-         * @return next step (rank range)
+         * @return next step (difficulty range)
          */
-        RankRangeStep setChangeableTotem(boolean totemChangeable);
+        DifficultyRangeStep setChangeableTotem(boolean totemChangeable);
     }
 
     /**
-     * Step 15: configure allowed rank range.
+     * Step 15: configure allowed difficulty range.
      */
-    public interface RankRangeStep {
+    public interface DifficultyRangeStep {
         /**
-         * Sets minimum and maximum allowed rank.
+         * Sets minimum and maximum allowed difficulty.
          *
-         * @param minRank minimum rank
-         * @param maxRank maximum rank
-         * @return next step (default rank)
+         * @param minDifficulty minimum difficulty
+         * @param maxDifficulty maximum difficulty
+         * @return next step (default difficulty)
          */
-        RankStep rankValue(BotRank minRank, BotRank maxRank);
+        DifficultyStep difficultyValue(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty);
     }
 
     /**
-     * Step 16: configure default rank.
+     * Step 16: configure default difficulty.
      */
-    public interface RankStep {
+    public interface DifficultyStep {
         /**
-         * Sets default rank.
+         * Sets default difficulty.
          *
-         * @param defaultRank default rank
-         * @return next step (rank mutability)
+         * @param defaultDifficulty default difficulty
+         * @return next step (difficulty mutability)
          */
-        ChangeableRankStep rank(BotRank defaultRank);
+        ChangeableDifficultyStep difficulty(DifficultyLevel defaultDifficulty);
     }
 
     /**
-     * Step 17: configure rank mutability.
+     * Step 17: configure difficulty mutability.
      */
-    public interface ChangeableRankStep {
+    public interface ChangeableDifficultyStep {
         /**
-         * Sets whether rank can be changed later.
+         * Sets whether difficulty can be changed later.
          *
-         * @param rankChangeable rank changeability
+         * @param difficultyChangeable difficulty changeability
          * @return final build step
          */
-        BuildStep setChangeableRank(boolean rankChangeable);
+        BuildStep setChangeableDifficulty(boolean difficultyChangeable);
     }
 
     /**
@@ -804,9 +804,9 @@ public final class BotSettings {
                     TotemRangeStep,
                     TotemStep,
                     ChangeableTotemStep,
-                    RankRangeStep,
-                    RankStep,
-                    ChangeableRankStep,
+                    DifficultyRangeStep,
+                    DifficultyStep,
+                    ChangeableDifficultyStep,
                     BuildStep {
         private boolean follow;
         private boolean combat;
@@ -816,7 +816,7 @@ public final class BotSettings {
         private boolean changeableBlast;
         private boolean changeableArmor;
         private boolean changeableTotem;
-        private boolean changeableRank;
+        private boolean changeableDifficulty;
         private String botNameTemplate = "";
         private BotSkin botSkin = BotSkin.random();
         private BotArmorType armorType = BotArmorType.LEATHER;
@@ -825,9 +825,9 @@ public final class BotSettings {
         private int totemCount;
         private int minTotemCount;
         private int maxTotemCount;
-        private BotRank rank = BotRank.EASY;
-        private BotRank minRank = BotRank.EASY;
-        private BotRank maxRank = BotRank.GOD;
+        private DifficultyLevel difficulty = DifficultyLevel.EASY;
+        private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
+        private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
         private @Nullable BotLocation spawnLocation;
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
@@ -1002,27 +1002,27 @@ public final class BotSettings {
         }
 
         @Override
-        public RankRangeStep setChangeableTotem(boolean totemChangeable) {
+        public DifficultyRangeStep setChangeableTotem(boolean totemChangeable) {
             this.changeableTotem = totemChangeable;
             return this;
         }
 
         @Override
-        public RankStep rankValue(BotRank minRank, BotRank maxRank) {
-            this.minRank = Objects.requireNonNull(minRank, "minRank");
-            this.maxRank = Objects.requireNonNull(maxRank, "maxRank");
+        public DifficultyStep difficultyValue(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
+            this.minDifficulty = Objects.requireNonNull(minDifficulty, "minDifficulty");
+            this.maxDifficulty = Objects.requireNonNull(maxDifficulty, "maxDifficulty");
             return this;
         }
 
         @Override
-        public ChangeableRankStep rank(BotRank defaultRank) {
-            this.rank = Objects.requireNonNull(defaultRank, "defaultRank");
+        public ChangeableDifficultyStep difficulty(DifficultyLevel defaultDifficulty) {
+            this.difficulty = Objects.requireNonNull(defaultDifficulty, "defaultDifficulty");
             return this;
         }
 
         @Override
-        public BuildStep setChangeableRank(boolean rankChangeable) {
-            this.changeableRank = rankChangeable;
+        public BuildStep setChangeableDifficulty(boolean difficultyChangeable) {
+            this.changeableDifficulty = difficultyChangeable;
             return this;
         }
 
@@ -1180,16 +1180,16 @@ public final class BotSettings {
             Objects.requireNonNull(armorType, "armorType");
             Objects.requireNonNull(minArmorType, "minArmorType");
             Objects.requireNonNull(maxArmorType, "maxArmorType");
-            Objects.requireNonNull(rank, "rank");
-            Objects.requireNonNull(minRank, "minRank");
-            Objects.requireNonNull(maxRank, "maxRank");
+            Objects.requireNonNull(difficulty, "difficulty");
+            Objects.requireNonNull(minDifficulty, "minDifficulty");
+            Objects.requireNonNull(maxDifficulty, "maxDifficulty");
             Objects.requireNonNull(botSkin, "botSkin");
             if (botNameTemplate == null || botNameTemplate.isBlank()) {
                 throw new IllegalArgumentException("botNameTemplate cannot be blank");
             }
             validateArmorRange(minArmorType, maxArmorType);
             validateTotemRange(minTotemCount, maxTotemCount);
-            validateRankRange(minRank, maxRank);
+            validateDifficultyRange(minDifficulty, maxDifficulty);
 
             if (armorType.compareTo(minArmorType) < 0 || armorType.compareTo(maxArmorType) > 0) {
                 throw new IllegalArgumentException(
@@ -1203,8 +1203,9 @@ public final class BotSettings {
                 }
             }
 
-            if (rank.compareTo(minRank) < 0 || rank.compareTo(maxRank) > 0) {
-                throw new IllegalArgumentException("rank must be within range [" + minRank + ", " + maxRank + "]");
+            if (difficulty.compareTo(minDifficulty) < 0 || difficulty.compareTo(maxDifficulty) > 0) {
+                throw new IllegalArgumentException(
+                        "difficulty must be within range [" + minDifficulty + ", " + maxDifficulty + "]");
             }
 
             if (combat && !follow) {
@@ -1256,9 +1257,9 @@ public final class BotSettings {
             }
         }
 
-        private static void validateRankRange(BotRank min, BotRank max) {
+        private static void validateDifficultyRange(DifficultyLevel min, DifficultyLevel max) {
             if (min.compareTo(max) > 0) {
-                throw new IllegalArgumentException("min rank cannot be greater than max rank");
+                throw new IllegalArgumentException("min difficulty cannot be greater than max difficulty");
             }
         }
     }

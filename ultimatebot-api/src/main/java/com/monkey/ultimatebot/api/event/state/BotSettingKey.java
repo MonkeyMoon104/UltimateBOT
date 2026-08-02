@@ -5,7 +5,7 @@ public enum BotSettingKey {
     FOLLOW,
     COMBAT,
     TOTEM_COUNT,
-    RANK,
+    DIFFICULTY,
     ARMOR,
     AUTO_TARGET,
     ATTACK_BOTS,

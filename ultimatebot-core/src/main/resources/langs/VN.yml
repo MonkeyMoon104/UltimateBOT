@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow đã bị khóa: không thể chỉnh sửa cho bot này.'
   follow-lock-combat: '&cBạn không thể tắt follow: chiến đấu đang bị khóa ở trạng thái BẬT.'
   totem-locked: '&cTotem đã bị khóa: không thể chỉnh sửa cho bot này.'
-  rank-locked: '&cCấp bậc đã bị khóa: không thể chỉnh sửa cho bot này.'
+  difficulty-locked: '&cCấp bậc đã bị khóa: không thể chỉnh sửa cho bot này.'
   ally:
     pre-range-alert: '&e%player% đang đến gần, đang theo dõi vị trí...'
     range-alert: '&c%player% được phát hiện là mối đe dọa, bắt đầu hành động ném bom'
@@ -179,10 +179,10 @@ gui:
     - '&7Trạng thái: &e%type%'
     - ''
     - '&eNhấp để bật/tắt combat'
-  rank-button:
+  difficulty-button:
     name: '&bCấp bậc'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eNhấp để tăng/giảm cấp bậc'

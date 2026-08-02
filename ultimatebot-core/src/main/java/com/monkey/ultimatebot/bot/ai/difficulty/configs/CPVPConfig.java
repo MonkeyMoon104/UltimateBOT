@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.bot.ai.rank.configs;
+package com.monkey.ultimatebot.bot.ai.difficulty.configs;
 
 public class CPVPConfig {
     private final double maxCrystalDistance;

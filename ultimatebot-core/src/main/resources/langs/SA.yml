@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow مقفل: لا يمكن تعديله لهذا البوت.'
   follow-lock-combat: '&cلا يمكنك تعطيل follow: القتال مقفل على وضع التشغيل.'
   totem-locked: '&cالتوتِمات مقفلة: لا يمكن تعديلها لهذا البوت.'
-  rank-locked: '&cالرتبة مقفلة: لا يمكن تعديلها لهذا البوت.'
+  difficulty-locked: '&cالرتبة مقفلة: لا يمكن تعديلها لهذا البوت.'
   ally:
     pre-range-alert: '&e%player% يقترب، تتم مراقبة الموقع...'
     range-alert: '&cتم اكتشاف %player% كتهديد، بدء عملية القصف'
@@ -179,10 +179,10 @@ gui:
     - '&7الحالة: &e%type%'
     - ''
     - '&eانقر لتبديل القتال'
-  rank-button:
+  difficulty-button:
     name: '&bالرتبة'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eانقر لزيادة/خفض الرتبة'

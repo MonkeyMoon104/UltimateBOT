@@ -6,7 +6,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
@@ -66,8 +66,8 @@ public class CombatDataManager implements ICombatDataManager {
             int botY = bot.blockPosition().getY();
             int targetY = target.blockPosition().getY();
             int yDiff = targetY - botY;
-            BotRank rank = cpvpController.getRank();
-            boolean hyperAggressive = rank == BotRank.GOD || rank == BotRank.HARD;
+            DifficultyLevel difficulty = cpvpController.getDifficulty();
+            boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
             boolean forceCrystalFollowup = rapvpController.getState() == RAPVPState.WAITING_EXPLOSION
                     || rapvpController.hadRecentAnchorExplosion(hyperAggressive ? 1400L : 1200L);
 

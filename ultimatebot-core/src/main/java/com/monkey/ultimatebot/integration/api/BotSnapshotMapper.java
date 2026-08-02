@@ -20,9 +20,9 @@ public final class BotSnapshotMapper {
         UUID botUUID = bot.asPlayer() != null ? bot.asPlayer().getUUID() : null;
 
         String botType = "UNKNOWN";
-        String botRank = "UNKNOWN";
-        String minBotRank = "EASY";
-        String maxBotRank = "GOD";
+        String botDifficulty = "UNKNOWN";
+        String minDifficultyLevel = "EASY";
+        String maxDifficultyLevel = "GOD";
         int minTotemCount = -1;
         int maxTotemCount = -1;
         Set<UUID> targetUUIDs = Set.of();
@@ -47,9 +47,9 @@ public final class BotSnapshotMapper {
             BotOptions options = bot.getBrainController().getBotOptions();
             if (options != null && options.getBotType() != null) {
                 botType = options.getBotType().name();
-                botRank = options.getRank().name();
-                minBotRank = options.getMinRank().name();
-                maxBotRank = options.getMaxRank().name();
+                botDifficulty = options.getDifficulty().name();
+                minDifficultyLevel = options.getMinDifficulty().name();
+                maxDifficultyLevel = options.getMaxDifficulty().name();
                 minTotemCount = options.getMinTotemCount();
                 maxTotemCount = options.getMaxTotemCount();
                 targetUUIDs = options.getTargetUUIDs();
@@ -82,9 +82,9 @@ public final class BotSnapshotMapper {
                 ownerUUID,
                 botUUID,
                 botType,
-                botRank,
-                minBotRank,
-                maxBotRank,
+                botDifficulty,
+                minDifficultyLevel,
+                maxDifficultyLevel,
                 bot.isFollow(),
                 bot.isCombat(),
                 bot.getTotemCount(),

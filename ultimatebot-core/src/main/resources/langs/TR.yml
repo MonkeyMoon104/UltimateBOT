@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow kilitli: bu bot için değiştirilemez.'
   follow-lock-combat: '&cFollow''u devre dışı bırakamazsın: savaş AÇIK olarak kilitli.'
   totem-locked: '&cTotemler kilitli: bu bot için değiştirilemez.'
-  rank-locked: '&cRütbe kilitli: bu bot için değiştirilemez.'
+  difficulty-locked: '&cRütbe kilitli: bu bot için değiştirilemez.'
   ally:
     pre-range-alert: '&e%player% yaklaşıyor, konum izleniyor...'
     range-alert: '&c%player% tehdit olarak algılandı, bombalama eylemi başlatılıyor'
@@ -179,10 +179,10 @@ gui:
     - '&7Durum: &e%type%'
     - ''
     - '&eSavaşı değiştirmek için tıkla'
-  rank-button:
+  difficulty-button:
     name: '&bRütbe'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eRütbeyi artırmak/azaltmak için tıkla'

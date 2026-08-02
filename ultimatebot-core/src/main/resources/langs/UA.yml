@@ -36,7 +36,7 @@ messages:
   follow-locked: '&cFollow заблоковано: його не можна змінювати для цього бота.'
   follow-lock-combat: '&cВи не можете вимкнути follow: бій заблокований у стані УВІМК.'
   totem-locked: '&cТотеми заблоковані: їх не можна змінювати для цього бота.'
-  rank-locked: '&cРанг заблокований: його не можна змінювати для цього бота.'
+  difficulty-locked: '&cРанг заблокований: його не можна змінювати для цього бота.'
   ally:
     pre-range-alert: '&e%player% наближається, відстеження позиції...'
     range-alert: '&c%player% виявлено як загрозу, починається бомбова атака'
@@ -193,10 +193,10 @@ gui:
     - '&7Статус: &e%type%'
     - ''
     - '&eНатисніть, щоб перемкнути бій'
-  rank-button:
+  difficulty-button:
     name: '&bРанг'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -204,6 +204,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eНатисніть, щоб підвищити/знизити ранг'

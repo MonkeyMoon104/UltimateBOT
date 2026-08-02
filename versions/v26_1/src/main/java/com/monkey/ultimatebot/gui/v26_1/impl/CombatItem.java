@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.gui.v26_1.impl;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.UUID;
 import org.bukkit.Material;
@@ -35,7 +35,7 @@ public class CombatItem extends AbstractItem {
 
         for (String line : loreLines) {
             String processedLine = line.replace("%type%", status ? "ON" : "OFF")
-                    .replace("%rank%", options.getRank().name());
+                    .replace("%difficulty%", options.getDifficulty().name());
             builder.addLegacyLoreLines(ChatColorUtils.translate(processedLine));
         }
         return builder;
@@ -86,20 +86,20 @@ public class CombatItem extends AbstractItem {
         }
 
         if (clickType.isRightClick()) {
-            if (!options.isChangeableRank()) {
+            if (!options.isChangeableDifficulty()) {
                 String msg = training.getLangString(
-                        "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+                        "messages.difficulty-locked", "&cDifficulty is locked: it cannot be modified for this bot.");
                 player.sendMessage(ChatColorUtils.translate(msg));
                 return;
             }
 
-            BotRank currentRank = options.getRank();
-            BotRank newRank = options.nextAllowedRank(currentRank, true);
-            options.setRank(newRank);
+            DifficultyLevel currentDifficulty = options.getDifficulty();
+            DifficultyLevel newDifficulty = options.nextAllowedDifficulty(currentDifficulty, true);
+            options.setDifficulty(newDifficulty);
 
-            training.getBotManager().setBotRank(managedOwnerUUID, newRank);
+            training.getBotManager().setDifficultyLevel(managedOwnerUUID, newDifficulty);
 
-            player.sendMessage(ChatColorUtils.translate("&aRank set to &e" + newRank.name()));
+            player.sendMessage(ChatColorUtils.translate("&aDifficulty set to &e" + newDifficulty.name()));
         }
 
         notifyWindows();

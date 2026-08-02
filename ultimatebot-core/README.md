@@ -19,8 +19,8 @@ Platform-independent contracts shared by runtime modules live in `common`. That 
 ## Key Capabilities
 - Four runtime bot modes: `SINGLE`, `EVENT`, `ALLY`, `TEAM_ALLY`
 - NMS-backed fake-player bots with version-specific bridge loading
-- GUI-driven runtime configuration for armor, blast protection, totems, follow, combat and rank
-- Rank-based behavior scaling from `EASY` to `GOD`
+- GUI-driven runtime configuration for armor, blast protection, totems, follow, combat and difficulty
+- Difficulty-based behavior scaling from `EASY` to `GOD`
 - Combat state machine with aggressive, defensive, repositioning, crystal-setup, anchor-setup and retreat logic
 - Dedicated Crystal PvP and Respawn Anchor PvP controllers
 - Auto-heal, totem management, enderpearl logic and safe recovery teleports
@@ -79,7 +79,7 @@ The player-facing interface is built with InvUI and exposed by `NewBotGUI`.
 
 The GUI is organized into four tabs:
 - `KitTab`
-- `RankTab`
+- `DifficultyTab`
 - `OwnersTab`
 - `TargetsTab`
 
@@ -89,7 +89,7 @@ Runtime actions available through GUI items include:
 - increasing or decreasing totems
 - toggling follow
 - toggling combat
-- cycling rank
+- cycling difficulty
 - spawning or despawning the managed bot
 - teleporting the active bot back to the player position
 
@@ -140,15 +140,15 @@ The core behavior is not a single attack loop. The source currently includes:
 - follow mode with non-combat chasing when combat is disabled
 - safe recovery teleports for ally and team-ally bots
 
-## Rank System
-Available ranks:
+## Difficulty System
+Available difficulties:
 - `EASY`
 - `NORMAL`
 - `MEDIUM`
 - `HARD`
 - `GOD`
 
-Ranks are not cosmetic labels. They tune concrete combat parameters, including:
+Difficulties are not cosmetic labels. They tune concrete combat parameters, including:
 - crystal distance windows
 - crystal and obsidian preparation timings
 - attack cooldowns
@@ -225,11 +225,11 @@ Registered placeholder keys:
 - `health_percentage`
 - `location`
 - `online_time`
-- `rank`
+- `difficulty`
 - `status`
 - `totems`
 
-These placeholders expose live bot telemetry such as status, current rank, health, distance, online time and totem count for the player requesting the placeholder.
+These placeholders expose live bot telemetry such as status, current difficulty, health, distance, online time and totem count for the player requesting the placeholder.
 
 ## Configuration Map
 The default configuration lives in `src/main/resources/config.yml`.
@@ -267,7 +267,7 @@ Contains the inventory UI configuration for:
 - tab border and tab selectors
 - owners and targets tab heads
 - armor display and blast-state text
-- follow, spawn, despawn, teleport, combat, totem and rank items
+- follow, spawn, despawn, teleport, combat, totem and difficulty items
 
 ## Lifecycle and Cleanup Rules
 The core cleans runtime state aggressively to avoid stale entities and stale owner mappings:

@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow 已锁定：无法为此机器人修改。'
   follow-lock-combat: '&c你不能关闭 follow：战斗已锁定为开启。'
   totem-locked: '&c图腾已锁定：无法为此机器人修改。'
-  rank-locked: '&c等级已锁定：无法为此机器人修改。'
+  difficulty-locked: '&c等级已锁定：无法为此机器人修改。'
   ally:
     pre-range-alert: '&e%player% 正在靠近，正在监控位置……'
     range-alert: '&c检测到 %player% 为威胁，开始轰炸行动'
@@ -179,10 +179,10 @@ gui:
     - '&7状态：&e%type%'
     - ''
     - '&e点击切换战斗'
-  rank-button:
+  difficulty-button:
     name: '&b等级'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&e点击提高/降低等级'

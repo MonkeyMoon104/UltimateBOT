@@ -392,8 +392,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
-    public boolean updateRank(UUID ownerUUID, BotRank rank) {
-        if (rank == null) {
+    public boolean updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty) {
+        if (difficulty == null) {
             return false;
         }
 
@@ -408,23 +408,24 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
 
-        if (!options.isChangeableRank()) {
+        if (!options.isChangeableDifficulty()) {
             return false;
         }
 
-        com.monkey.ultimatebot.bot.ai.rank.BotRank coreRank = ApiBotOptionsFactory.toCoreRank(rank);
-        if (!options.isRankAllowed(coreRank)) {
+        com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel coreDifficulty =
+                ApiBotOptionsFactory.toCoreDifficulty(difficulty);
+        if (!options.isDifficultyAllowed(coreDifficulty)) {
             return false;
         }
-        Optional<com.monkey.ultimatebot.bot.ai.rank.BotRank> proposed = proposedChange(
+        Optional<com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel> proposed = proposedChange(
                 managedOwner,
-                BotSettingKey.RANK,
-                options.getRank(),
-                coreRank,
-                com.monkey.ultimatebot.bot.ai.rank.BotRank.class);
-        if (proposed.isEmpty() || !options.isRankAllowed(proposed.get())) return false;
-        options.setRank(proposed.get());
-        botManager.setBotRank(managedOwner, proposed.get());
+                BotSettingKey.DIFFICULTY,
+                options.getDifficulty(),
+                coreDifficulty,
+                com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.class);
+        if (proposed.isEmpty() || !options.isDifficultyAllowed(proposed.get())) return false;
+        options.setDifficulty(proposed.get());
+        botManager.setDifficultyLevel(managedOwner, proposed.get());
         return true;
     }
 
@@ -1037,9 +1038,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .totemValue(-1, Integer.MAX_VALUE)
                 .totemCount(-1)
                 .setChangeableTotem(true)
-                .rankValue(BotRank.EASY, BotRank.GOD)
-                .rank(BotRank.EASY)
-                .setChangeableRank(true)
+                .difficultyValue(DifficultyLevel.EASY, DifficultyLevel.GOD)
+                .difficulty(DifficultyLevel.EASY)
+                .setChangeableDifficulty(true)
                 .healing(plugin.getConfig().getBoolean("bot.combat.healing", true))
                 .build();
     }

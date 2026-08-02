@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.bot;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -220,10 +220,10 @@ public class BotManager {
         return updater.getEpearlSlot(ownerUUID);
     }
 
-    public void setBotRank(UUID uuid, BotRank rank) {
+    public void setDifficultyLevel(UUID uuid, DifficultyLevel difficulty) {
         var bot = getBot(uuid);
         if (bot == null) return;
 
-        bot.getBotAI().setRank(rank);
+        bot.getBotAI().setDifficulty(difficulty);
     }
 }

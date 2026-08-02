@@ -1,9 +1,9 @@
-package com.monkey.ultimatebot.gui.v26_1.impl;
+package com.monkey.ultimatebot.gui.v26_2.impl;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;
 import java.util.Locale;
@@ -17,44 +17,47 @@ import xyz.xenondevs.invui.item.AbstractItem;
 import xyz.xenondevs.invui.item.ItemBuilder;
 import xyz.xenondevs.invui.item.ItemProvider;
 
-public class RankItem extends AbstractItem {
+public class DifficultyItem extends AbstractItem {
 
     private final UltimateBot training;
     private final BotOptions options;
 
-    public RankItem(UltimateBot training, BotOptions options) {
+    public DifficultyItem(UltimateBot training, BotOptions options) {
         this.training = training;
         this.options = options;
     }
 
     @Override
     public ItemProvider getItemProvider(Player viewer) {
-        BotRank currentRank = options.getRank();
+        DifficultyLevel currentDifficulty = options.getDifficulty();
 
-        Material rankMaterial = getRankMaterial(currentRank);
+        Material difficultyMaterial = getDifficultyMaterial(currentDifficulty);
 
-        ItemBuilder builder = new ItemBuilder(rankMaterial);
-        builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.rank-button.name")));
-        var loreLines = training.getLangStringList("gui.rank-button.lore");
-        List<String> ranks = options.getAllowedRanks().stream()
-                .map(botRank -> botRank == options.getRank() ? botRank.getSelectedName() : botRank.getDisplayName())
+        ItemBuilder builder = new ItemBuilder(difficultyMaterial);
+        builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.difficulty-button.name")));
+        var loreLines = training.getLangStringList("gui.difficulty-button.lore");
+        List<String> difficulties = options.getAllowedDifficulties().stream()
+                .map(botDifficulty -> botDifficulty == options.getDifficulty()
+                        ? botDifficulty.getSelectedName()
+                        : botDifficulty.getDisplayName())
                 .toList();
 
         for (String line : loreLines) {
-            if (line.contains("%ranks%")) {
-                for (String rank : ranks) {
-                    builder.addLegacyLoreLines(ChatColorUtils.translate("- " + rank));
+            if (line.contains("%difficulties%")) {
+                for (String difficulty : difficulties) {
+                    builder.addLegacyLoreLines(ChatColorUtils.translate("- " + difficulty));
                 }
             } else {
-                String processedLine = line.replace("%ranks%", "");
+                String processedLine = line.replace("%difficulties%", "");
                 builder.addLegacyLoreLines(ChatColorUtils.translate(processedLine));
             }
         }
         return builder;
     }
 
-    private Material getRankMaterial(BotRank rank) {
-        String configPath = "gui.rank-button.ranks-mat." + rank.name().toLowerCase(Locale.ROOT);
+    private Material getDifficultyMaterial(DifficultyLevel difficulty) {
+        String configPath =
+                "gui.difficulty-button.difficulties-mat." + difficulty.name().toLowerCase(Locale.ROOT);
         String materialName = training.getLangString(configPath);
 
         if (materialName != null) {
@@ -62,12 +65,12 @@ public class RankItem extends AbstractItem {
                 return Material.valueOf(materialName.toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 training.getLogger()
-                        .warning("Invalid material '" + materialName + "' for rank " + rank.name()
+                        .warning("Invalid material '" + materialName + "' for difficulty " + difficulty.name()
                                 + " in config. Using fallback");
             }
         }
 
-        String defaultMaterial = training.getLangString("gui.rank-button.material", "DIAMOND_SWORD");
+        String defaultMaterial = training.getLangString("gui.difficulty-button.material", "DIAMOND_SWORD");
         try {
             return Material.valueOf(defaultMaterial.toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
@@ -79,27 +82,27 @@ public class RankItem extends AbstractItem {
 
     @Override
     public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull Click click) {
-        if (!options.isChangeableRank()) {
+        if (!options.isChangeableDifficulty()) {
             String msg = training.getLangString(
-                    "messages.rank-locked", "&cRank is locked: it cannot be modified for this bot.");
+                    "messages.difficulty-locked", "&cDifficulty is locked: it cannot be modified for this bot.");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
         }
 
-        BotRank currentRank = options.getRank();
-        BotRank newRank = currentRank;
+        DifficultyLevel currentDifficulty = options.getDifficulty();
+        DifficultyLevel newDifficulty = currentDifficulty;
 
         if (clickType == ClickType.LEFT) {
-            newRank = options.nextAllowedRank(currentRank, true);
+            newDifficulty = options.nextAllowedDifficulty(currentDifficulty, true);
         } else if (clickType == ClickType.RIGHT) {
-            newRank = options.nextAllowedRank(currentRank, false);
+            newDifficulty = options.nextAllowedDifficulty(currentDifficulty, false);
         }
 
-        options.setRank(newRank);
+        options.setDifficulty(newDifficulty);
 
-        training.getBotManager().setBotRank(resolveManagedOwnerUUID(player), newRank);
+        training.getBotManager().setDifficultyLevel(resolveManagedOwnerUUID(player), newDifficulty);
 
-        player.sendMessage(ChatColorUtils.translate("&aRank set to &e" + newRank.getSelectedName()));
+        player.sendMessage(ChatColorUtils.translate("&aDifficulty set to &e" + newDifficulty.getSelectedName()));
         notifyWindows();
     }
 

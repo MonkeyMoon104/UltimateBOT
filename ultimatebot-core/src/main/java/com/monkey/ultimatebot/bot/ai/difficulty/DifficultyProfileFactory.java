@@ -1,12 +1,12 @@
-package com.monkey.ultimatebot.bot.ai.rank;
+package com.monkey.ultimatebot.bot.ai.difficulty;
 
-import com.monkey.ultimatebot.bot.ai.rank.configs.CPVPConfig;
-import com.monkey.ultimatebot.bot.ai.rank.configs.RAPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 
-public class RankCoordinator {
+public class DifficultyProfileFactory {
 
-    public static RAPVPConfig buildRAPVPConfig(BotRank rank) {
-        return switch (rank) {
+    public static RAPVPConfig buildRAPVPConfig(DifficultyLevel difficulty) {
+        return switch (difficulty) {
             case EASY ->
                 new RAPVPConfig.Builder()
                         .maxDistance(4)
@@ -51,8 +51,8 @@ public class RankCoordinator {
         };
     }
 
-    public static CPVPConfig buildCPVPConfig(BotRank rank) {
-        return switch (rank) {
+    public static CPVPConfig buildCPVPConfig(DifficultyLevel difficulty) {
+        return switch (difficulty) {
             case EASY ->
                 new CPVPConfig.Builder()
                         .maxCrystalDistance(4.3)

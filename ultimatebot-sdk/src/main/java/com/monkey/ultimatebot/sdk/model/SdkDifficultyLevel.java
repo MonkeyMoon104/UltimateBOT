@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.sdk.model;
 
 /**
- * Type-safe rank values accepted by the remote API.
+ * Type-safe difficulty values accepted by the remote API.
  */
-public enum SdkBotRank {
+public enum SdkDifficultyLevel {
     /**
      * Entry-level behavior profile.
      */
@@ -29,10 +29,10 @@ public enum SdkBotRank {
      */
     GOD;
 
-    public com.monkey.ultimatebot.common.model.BotRankTier toCommon() {
+    public com.monkey.ultimatebot.common.model.DifficultyTier toCommon() {
         return this == NOOB
-                ? com.monkey.ultimatebot.common.model.BotRankTier.EASY
-                : com.monkey.ultimatebot.common.model.BotRankTier.valueOf(name());
+                ? com.monkey.ultimatebot.common.model.DifficultyTier.EASY
+                : com.monkey.ultimatebot.common.model.DifficultyTier.valueOf(name());
     }
 
     /**

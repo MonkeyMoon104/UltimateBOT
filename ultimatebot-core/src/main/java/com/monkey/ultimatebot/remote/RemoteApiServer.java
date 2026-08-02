@@ -324,11 +324,11 @@ public final class RemoteApiServer {
                         defaultInt(safe.maxTotemCount, plugin.getConfig().getInt("bot.max-totem-event", 74)))
                 .totemCount(defaultInt(safe.totemCount, -1))
                 .setChangeableTotem(defaultBoolean(safe.changeableTotem, true))
-                .rankValue(
-                        EnumValues.parse(BotRank.class, safe.minRank, BotRank.EASY),
-                        EnumValues.parse(BotRank.class, safe.maxRank, BotRank.GOD))
-                .rank(EnumValues.parse(BotRank.class, safe.rank, BotRank.EASY))
-                .setChangeableRank(defaultBoolean(safe.changeableRank, true));
+                .difficultyValue(
+                        EnumValues.parse(DifficultyLevel.class, safe.minDifficulty, DifficultyLevel.EASY),
+                        EnumValues.parse(DifficultyLevel.class, safe.maxDifficulty, DifficultyLevel.GOD))
+                .difficulty(EnumValues.parse(DifficultyLevel.class, safe.difficulty, DifficultyLevel.EASY))
+                .setChangeableDifficulty(defaultBoolean(safe.changeableDifficulty, true));
 
         if (safe.spawnLocation != null) {
             buildStep.spawnLocation(new BotLocation(
@@ -570,16 +570,16 @@ public final class RemoteApiServer {
         public Boolean changeableBlast;
         public Boolean changeableArmor;
         public Boolean changeableTotem;
-        public Boolean changeableRank;
+        public Boolean changeableDifficulty;
         public String armor;
         public String minArmor;
         public String maxArmor;
         public Integer totemCount;
         public Integer minTotemCount;
         public Integer maxTotemCount;
-        public String rank;
-        public String minRank;
-        public String maxRank;
+        public String difficulty;
+        public String minDifficulty;
+        public String maxDifficulty;
         public RemoteLocationPayload spawnLocation;
         public Boolean autoTarget;
         public Double autoTargetRange;

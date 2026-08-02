@@ -1,0 +1,163 @@
+difficulty-defaults:
+  easy:
+    attack-range: 2.7
+    attack-cooldown-ticks: 18
+    reaction-ticks: 14
+    movement-speed: 0.22
+    strafe-strength: 0.20
+    aim-accuracy: 0.55
+    aggression: 0.30
+    retreat-health-ratio: 0.35
+    healing-health-ratio: 0.70
+    special-action-cooldown-ticks: 60
+    pearl-trigger-distance: 18.0
+    max-actions-per-tick: 1
+    defensive-chance: 0.25
+    sprint-reset-chance: 0.15
+  normal:
+    attack-range: 3.0
+    attack-cooldown-ticks: 13
+    reaction-ticks: 9
+    movement-speed: 0.29
+    strafe-strength: 0.38
+    aim-accuracy: 0.72
+    aggression: 0.48
+    retreat-health-ratio: 0.27
+    healing-health-ratio: 0.62
+    special-action-cooldown-ticks: 40
+    pearl-trigger-distance: 15.0
+    max-actions-per-tick: 2
+    defensive-chance: 0.35
+    sprint-reset-chance: 0.38
+  medium:
+    attack-range: 3.2
+    attack-cooldown-ticks: 9
+    reaction-ticks: 6
+    movement-speed: 0.34
+    strafe-strength: 0.56
+    aim-accuracy: 0.84
+    aggression: 0.62
+    retreat-health-ratio: 0.21
+    healing-health-ratio: 0.55
+    special-action-cooldown-ticks: 25
+    pearl-trigger-distance: 12.0
+    max-actions-per-tick: 2
+    defensive-chance: 0.48
+    sprint-reset-chance: 0.58
+  hard:
+    attack-range: 3.35
+    attack-cooldown-ticks: 6
+    reaction-ticks: 3
+    movement-speed: 0.39
+    strafe-strength: 0.75
+    aim-accuracy: 0.93
+    aggression: 0.78
+    retreat-health-ratio: 0.16
+    healing-health-ratio: 0.48
+    special-action-cooldown-ticks: 14
+    pearl-trigger-distance: 10.0
+    max-actions-per-tick: 3
+    defensive-chance: 0.64
+    sprint-reset-chance: 0.78
+  god:
+    attack-range: 3.5
+    attack-cooldown-ticks: 3
+    reaction-ticks: 1
+    movement-speed: 0.44
+    strafe-strength: 0.92
+    aim-accuracy: 0.99
+    aggression: 0.94
+    retreat-health-ratio: 0.10
+    healing-health-ratio: 0.42
+    special-action-cooldown-ticks: 5
+    pearl-trigger-distance: 8.0
+    max-actions-per-tick: 4
+    defensive-chance: 0.82
+    sprint-reset-chance: 0.94
+
+combat-modes:
+  sword:
+    enabled: true
+    icon: DIAMOND_SWORD
+    difficulties: {}
+  uhc:
+    enabled: true
+    icon: GOLDEN_APPLE
+    difficulties:
+      easy:
+        special-action-cooldown-ticks: 100
+      god:
+        special-action-cooldown-ticks: 8
+  cart:
+    enabled: true
+    icon: TNT_MINECART
+    difficulties:
+      easy:
+        aggression: 0.20
+        special-action-cooldown-ticks: 120
+      god:
+        aggression: 0.88
+        special-action-cooldown-ticks: 12
+  crystal:
+    enabled: true
+    icon: END_CRYSTAL
+    difficulties:
+      easy:
+        max-actions-per-tick: 1
+        special-action-cooldown-ticks: 80
+      god:
+        max-actions-per-tick: 6
+        special-action-cooldown-ticks: 1
+  mace:
+    enabled: true
+    icon: MACE
+    difficulties:
+      easy:
+        attack-cooldown-ticks: 24
+      god:
+        attack-cooldown-ticks: 4
+        aggression: 0.98
+  water:
+    enabled: true
+    icon: WATER_BUCKET
+    difficulties:
+      easy:
+        movement-speed: 0.18
+      god:
+        movement-speed: 0.48
+        reaction-ticks: 0
+  axe-shield:
+    enabled: true
+    icon: DIAMOND_AXE
+    difficulties:
+      easy:
+        defensive-chance: 0.18
+      god:
+        defensive-chance: 0.95
+  netherite-pot:
+    enabled: true
+    icon: SPLASH_POTION
+    difficulties:
+      easy:
+        healing-health-ratio: 0.78
+      god:
+        healing-health-ratio: 0.52
+        special-action-cooldown-ticks: 4
+  smp:
+    enabled: true
+    icon: NETHERITE_CHESTPLATE
+    difficulties:
+      easy:
+        aggression: 0.26
+      god:
+        aggression: 0.90
+        defensive-chance: 0.88
+  trident:
+    enabled: true
+    icon: TRIDENT
+    difficulties:
+      easy:
+        aim-accuracy: 0.42
+      god:
+        aim-accuracy: 0.99
+        special-action-cooldown-ticks: 3

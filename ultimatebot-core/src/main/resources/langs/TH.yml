@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
   follow-lock-combat: '&cคุณไม่สามารถปิด follow ได้: การต่อสู้ถูกล็อกเป็นเปิด'
   totem-locked: '&cโทเท็มถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
-  rank-locked: '&cแรงก์ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  difficulty-locked: '&cแรงก์ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
   ally:
     pre-range-alert: '&e%player% กำลังเข้ามาใกล้ กำลังติดตามตำแหน่ง...'
     range-alert: '&cตรวจพบว่า %player% เป็นภัยคุกคาม กำลังเริ่มการทิ้งระเบิด'
@@ -179,10 +179,10 @@ gui:
     - '&7สถานะ: &e%type%'
     - ''
     - '&eคลิกเพื่อสลับการต่อสู้'
-  rank-button:
+  difficulty-button:
     name: '&bแรงก์'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eคลิกเพื่อเพิ่ม/ลดแรงก์'

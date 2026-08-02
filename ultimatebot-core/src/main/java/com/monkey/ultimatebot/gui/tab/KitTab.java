@@ -25,7 +25,7 @@ public class KitTab {
                         "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . . m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
-                .addIngredient('r', new RankItem(context.getTraining(), options))
+                .addIngredient('r', new DifficultyItem(context.getTraining(), options))
                 .addIngredient('t', new TotemItem(options, context.getTraining()))
                 .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(context.getTraining(), context.getViewer(), options))

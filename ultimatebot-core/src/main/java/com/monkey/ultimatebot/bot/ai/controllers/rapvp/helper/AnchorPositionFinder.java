@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
-import com.monkey.ultimatebot.bot.ai.rank.configs.RAPVPConfig;
+import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

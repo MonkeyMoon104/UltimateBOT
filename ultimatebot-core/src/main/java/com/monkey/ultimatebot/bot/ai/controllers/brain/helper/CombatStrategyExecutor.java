@@ -13,7 +13,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.MovementPattern;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import java.util.Random;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -101,7 +101,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
     @Override
     public boolean executeAggressive(Player target, double distance) {
-        boolean hyperAggressive = isHyperAggressiveRank();
+        boolean hyperAggressive = isHyperAggressiveDifficulty();
 
         if (distance <= 3.5 && ((ITrainingBot) bot).isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
@@ -150,7 +150,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeDefensive(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
-        boolean hyperAggressive = isHyperAggressiveRank();
+        boolean hyperAggressive = isHyperAggressiveDifficulty();
 
         if (shouldForceAnchorBreakout(target, distance)) {
             if (!rapvpController.isActive()) {
@@ -215,7 +215,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeRepositioning(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
-        boolean hyperAggressive = isHyperAggressiveRank();
+        boolean hyperAggressive = isHyperAggressiveDifficulty();
         Vec3 targetPos = target.position();
         Vec3 botPos = bot.position();
 
@@ -279,7 +279,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         movementController.forceMovementPattern(MovementPattern.CRYSTAL_SPAM);
         movementController.moveToTarget(target, 4.6);
 
-        boolean hyperAggressive = isHyperAggressiveRank();
+        boolean hyperAggressive = isHyperAggressiveDifficulty();
         double yDiff = bot.position().y - target.position().y;
         if (hyperAggressive
                 && enderpearlController.canUseEnderpearl()
@@ -295,7 +295,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
     @Override
     public boolean executeRetreating(Player target, double distance) {
         if (!((ITrainingBot) bot).isCombat()) return false;
-        boolean hyperAggressive = isHyperAggressiveRank();
+        boolean hyperAggressive = isHyperAggressiveDifficulty();
 
         if (distance <= 3.2) {
             maybeBoostMeleeTempo(hyperAggressive);
@@ -353,9 +353,9 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         this.repositionTimer = value;
     }
 
-    private boolean isHyperAggressiveRank() {
-        BotRank rank = cpvpController.getRank();
-        return rank == BotRank.GOD || rank == BotRank.HARD;
+    private boolean isHyperAggressiveDifficulty() {
+        DifficultyLevel difficulty = cpvpController.getDifficulty();
+        return difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
     }
 
     private void maybeBoostMeleeTempo(boolean hyperAggressive) {
@@ -412,7 +412,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         }
 
         if (distance <= 3.5D) {
-            maybeBoostMeleeTempo(isHyperAggressiveRank());
+            maybeBoostMeleeTempo(isHyperAggressiveDifficulty());
             attackController.handleAttack(target);
         }
 
@@ -423,7 +423,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         }
 
         if (distance <= 3.5D) {
-            maybeBoostMeleeTempo(isHyperAggressiveRank());
+            maybeBoostMeleeTempo(isHyperAggressiveDifficulty());
             attackController.handleAttack(target);
         }
     }

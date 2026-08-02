@@ -28,7 +28,7 @@ messages:
   follow-locked: '&cFollow はロックされています: このボットでは変更できません。'
   follow-lock-combat: '&cFollow を無効にできません: 戦闘が ON に固定されています。'
   totem-locked: '&cトーテムはロックされています: このボットでは変更できません。'
-  rank-locked: '&cランクはロックされています: このボットでは変更できません。'
+  difficulty-locked: '&cランクはロックされています: このボットでは変更できません。'
   ally:
     pre-range-alert: '&e%player% が近づいています。位置を監視中...'
     range-alert: '&c%player% を脅威として検知しました。爆撃アクションを開始します'
@@ -179,10 +179,10 @@ gui:
     - '&7状態: &e%type%'
     - ''
     - '&eクリックして戦闘を切り替え'
-  rank-button:
+  difficulty-button:
     name: '&bランク'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -190,6 +190,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eクリックしてランクを上げ/下げ'

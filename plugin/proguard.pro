@@ -27,7 +27,7 @@
 -keepclassmembernames class com.monkey.ultimatebot.bot.ai.TrainingBot_v* { *; }
 -keepclassmembernames class com.monkey.ultimatebot.bot.ai.TrainingBot_v26_* { *; }
 -keepclassmembernames class com.monkey.ultimatebot.bot.ai.fakeplayer.** { *; }
--keepclassmembernames class com.monkey.ultimatebot.bot.ai.rank.** { *; }
+-keepclassmembernames class com.monkey.ultimatebot.bot.ai.difficulty.** { *; }
 -keepclassmembernames class com.monkey.ultimatebot.bot.ai.services.** { *; }
 -keepclassmembernames class com.monkey.ultimatebot.bot.ai.controllers.** { *; }
 

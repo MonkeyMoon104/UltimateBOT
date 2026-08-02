@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.bot.ai.rank.configs;
+package com.monkey.ultimatebot.bot.ai.difficulty.configs;
 
 public class RAPVPConfig {
     private final int maxDistance;

@@ -31,7 +31,7 @@ messages:
   follow-locked: '&cFollow נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
   follow-lock-combat: '&cאי אפשר לכבות follow: הקרב נעול על פעיל.'
   totem-locked: '&cהטוטמים נעולים: אי אפשר לשנות אותם עבור הבוט הזה.'
-  rank-locked: '&cהראנק נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
+  difficulty-locked: '&cהראנק נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
   ally:
     pre-range-alert: '&e%player% מתקרב, עוקב אחרי המיקום...'
     range-alert: '&c%player% זוהה כאיום, מתחיל פעולת הפצצה'
@@ -183,10 +183,10 @@ gui:
     - '&7סטטוס: &e%type%'
     - ''
     - '&eלחץ כדי להחליף קרב'
-  rank-button:
+  difficulty-button:
     name: '&bראנק'
     material: DIAMOND_SWORD
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -194,6 +194,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
     - ''
-    - '%ranks%'
+    - '%difficulties%'
     - ''
     - '&eלחץ כדי להעלות/להוריד את הראנק'

@@ -28,7 +28,7 @@ messages:
   follow-locked: "&cIl seguimento è bloccato: non può essere modificato per questo bot."
   follow-lock-combat: "&cNon puoi disabilitare il seguimento: il combattimento è bloccato su ATTIVO."
   totem-locked: "&cI totem sono bloccati: non possono essere modificati per questo bot."
-  rank-locked: "&cIl rango è bloccato: non può essere modificato per questo bot."
+  difficulty-locked: "&cIl rango è bloccato: non può essere modificato per questo bot."
 
   ally:
     pre-range-alert: "&e%player% si sta avvicinando, monitoraggio posizione in corso..."
@@ -227,10 +227,10 @@ gui:
     mobs: "Mob"
     both: "Giocatori + mob"
 
-  rank-button:
+  difficulty-button:
     name: "&bRango"
     material: "DIAMOND_SWORD"
-    ranks-mat:
+    difficulties-mat:
       easy: SMALL_AMETHYST_BUD
       normal: SMALL_AMETHYST_BUD
       medium: MEDIUM_AMETHYST_BUD
@@ -238,6 +238,6 @@ gui:
       god: AMETHYST_CLUSTER
     lore:
       - ""
-      - "%ranks%"
+      - "%difficulties%"
       - ""
       - "&eClicca per aumentare/diminuire il rango"

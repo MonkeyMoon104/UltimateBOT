@@ -2,22 +2,22 @@ package com.monkey.ultimatebot.placeholders.list;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.bot.ai.rank.BotRank;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.placeholders.IBotPlaceholder;
 import com.monkey.ultimatebot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
 
-public class RankPlaceholder implements IBotPlaceholder {
+public class DifficultyPlaceholder implements IBotPlaceholder {
 
     private final PlaceholderHelper helper;
 
-    public RankPlaceholder(UltimateBot plugin) {
+    public DifficultyPlaceholder(UltimateBot plugin) {
         this.helper = new PlaceholderHelper(plugin);
     }
 
     @Override
     public String getIdentifier() {
-        return "rank";
+        return "difficulty";
     }
 
     @Override
@@ -25,10 +25,10 @@ public class RankPlaceholder implements IBotPlaceholder {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
         if (bot == null) return "● Offline";
 
-        BotRank rank = bot.getBotAI().getRank();
-        if (rank == null) return "○ Unknown Rank";
+        DifficultyLevel difficulty = bot.getBotAI().getDifficulty();
+        if (difficulty == null) return "○ Unknown Difficulty";
 
-        return switch (rank) {
+        return switch (difficulty) {
             case EASY -> "● Easy";
             case NORMAL -> "◈ Normal";
             case MEDIUM -> "⚔ Medium";
