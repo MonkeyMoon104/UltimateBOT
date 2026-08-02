@@ -32,6 +32,8 @@ public class BotCPVPController {
     private final CrystalPositionEvaluator crystalPositionEvaluator;
     private final ObsidianScanner obsidianScanner;
     private final CrystalManager crystalManager;
+    private final CrystalCombatPolicy combatPolicy;
+    private final CrystalTargetPlanner targetPlanner;
     private DifficultyLevel difficulty;
     private CPVPConfig config;
 
@@ -73,6 +75,8 @@ public class BotCPVPController {
         this.crystalPositionEvaluator = new CrystalPositionEvaluator(bot, level);
         this.obsidianScanner = new ObsidianScanner(level);
         this.crystalManager = new CrystalManager();
+        this.combatPolicy = new CrystalCombatPolicy();
+        this.targetPlanner = new CrystalTargetPlanner(bot, crystalManager, crystalPositionEvaluator);
     }
 
     public void tick(Player target) {
@@ -90,7 +94,7 @@ public class BotCPVPController {
         queuedCrystalPlacements.removeIf(pos -> !isStillValidCrystalPlacement(pos));
         crystalRecentUsage
                 .entrySet()
-                .removeIf(entry -> currentTime() - entry.getValue() > getCrystalPositionReuseDelayMs());
+                .removeIf(entry -> currentTime() - entry.getValue() > combatPolicy.positionReuseDelayMs());
         crystalAttacker.updateBotPosition();
 
         long currentTime = System.currentTimeMillis();
@@ -100,13 +104,13 @@ public class BotCPVPController {
             lastFullScan = currentTime;
         }
 
-        pruneObsidianCacheForTarget(target);
+        targetPlanner.pruneObsidianCache(target, obsidianCache, combatPolicy);
 
         handleObsidianPreparation();
         handleCrystalPreparation();
         handleAttackPreparation();
 
-        int actionCycles = getCrystalActionCyclesPerTick();
+        int actionCycles = combatPolicy.actionCyclesPerTick();
         for (int i = 0; i < actionCycles; i++) {
             if (isPreparingObsidian || isPreparingCrystal || isPreparingAttack) {
                 break;
@@ -192,12 +196,12 @@ public class BotCPVPController {
         if (isPreparingObsidian || isPreparingCrystal || isPreparingAttack) return;
         if (attackCooldown > 0) return;
 
-        List<EndCrystal> candidates = collectCrystalAttackCandidates(target);
+        List<EndCrystal> candidates = targetPlanner.collectAttackCandidates(target, myPlacedCrystals, config);
         if (candidates.isEmpty()) {
             return;
         }
 
-        int maxAttacks = getCrystalAttackBurstAttempts();
+        int maxAttacks = combatPolicy.attackBurstAttempts();
         int performed = 0;
 
         for (EndCrystal crystal : candidates) {
@@ -289,7 +293,7 @@ public class BotCPVPController {
             return;
         }
 
-        int maxPlacements = getCrystalPlacementBurstAttempts();
+        int maxPlacements = combatPolicy.placementBurstAttempts();
         for (int i = 0; i < maxPlacements; i++) {
             if (isPreparingObsidian || isPreparingCrystal || isPreparingAttack) {
                 break;
@@ -432,7 +436,7 @@ public class BotCPVPController {
 
         for (int i = 0; i < maxCandidates && queuedCrystalPlacements.size() < maxQueued; i++) {
             BlockPos pos = validObsidianPositions.get(i);
-            if (isCrystalPositionCoolingDown(pos, now)) {
+            if (targetPlanner.isCoolingDown(pos, crystalRecentUsage, combatPolicy, now)) {
                 continue;
             }
             double score = crystalPositionEvaluator.calculateCrystalScore(
@@ -449,7 +453,7 @@ public class BotCPVPController {
 
         if (queuedCrystalPlacements.isEmpty() && !validObsidianPositions.isEmpty()) {
             for (BlockPos pos : validObsidianPositions) {
-                if (!isCrystalPositionCoolingDown(pos, now)) {
+                if (!targetPlanner.isCoolingDown(pos, crystalRecentUsage, combatPolicy, now)) {
                     queuedCrystalPlacements.addLast(pos);
                     break;
                 }
@@ -525,6 +529,7 @@ public class BotCPVPController {
     public void setDifficulty(DifficultyLevel difficulty) {
         this.difficulty = difficulty;
         this.config = DifficultyProfileFactory.buildCPVPConfig(difficulty);
+        this.combatPolicy.setDifficulty(difficulty);
 
         this.obsidianScanner.setConfig(config);
         this.crystalManager.setConfig(config);
@@ -576,149 +581,12 @@ public class BotCPVPController {
         crystalRecentUsage.clear();
     }
 
-    private List<EndCrystal> collectCrystalAttackCandidates(Player target) {
-        Set<EndCrystal> unique = new LinkedHashSet<>();
-        for (EndCrystal crystal : myPlacedCrystals) {
-            if (crystal != null && crystal.isAlive()) {
-                unique.add(crystal);
-            }
-        }
-        for (EndCrystal crystal : crystalManager.findNearbyCrystals(bot, level, config.getCrystalAttackRange())) {
-            if (crystal != null && crystal.isAlive()) {
-                unique.add(crystal);
-            }
-        }
-
-        List<EndCrystal> candidates = new ArrayList<>(unique);
-        candidates.sort((c1, c2) -> {
-            double s1 = crystalPositionEvaluator.evaluateCrystalForAttack(
-                    c1,
-                    target,
-                    myPlacedCrystals,
-                    config.getCrystalAttackRange(),
-                    config.getMinCrystalDistance(),
-                    config.getOptimalDamageRange());
-            double s2 = crystalPositionEvaluator.evaluateCrystalForAttack(
-                    c2,
-                    target,
-                    myPlacedCrystals,
-                    config.getCrystalAttackRange(),
-                    config.getMinCrystalDistance(),
-                    config.getOptimalDamageRange());
-            return Double.compare(s2, s1);
-        });
-        return candidates;
-    }
-
-    private int getCrystalAttackBurstAttempts() {
-        if (difficulty == DifficultyLevel.GOD) return 4;
-        if (difficulty == DifficultyLevel.HARD) return 3;
-        if (difficulty == DifficultyLevel.MEDIUM) return 2;
-        if (difficulty == DifficultyLevel.NORMAL) return 2;
-        return 1;
-    }
-
-    private int getCrystalPlacementBurstAttempts() {
-        if (difficulty == DifficultyLevel.GOD) return 3;
-        if (difficulty == DifficultyLevel.HARD) return 3;
-        if (difficulty == DifficultyLevel.MEDIUM) return 2;
-        if (difficulty == DifficultyLevel.NORMAL) return 2;
-        return 1;
-    }
-
-    private int getCrystalActionCyclesPerTick() {
-        if (difficulty == DifficultyLevel.GOD) return 2;
-        if (difficulty == DifficultyLevel.HARD) return 2;
-        if (difficulty == DifficultyLevel.MEDIUM) return 2;
-        return 1;
-    }
-
-    private long getCrystalPositionReuseDelayMs() {
-        if (difficulty == DifficultyLevel.GOD) return 300L;
-        if (difficulty == DifficultyLevel.HARD) return 380L;
-        if (difficulty == DifficultyLevel.MEDIUM) return 550L;
-        if (difficulty == DifficultyLevel.NORMAL) return 700L;
-        return 900L;
-    }
-
-    private boolean isCrystalPositionCoolingDown(BlockPos pos, long now) {
-        Long lastUsed = crystalRecentUsage.get(pos);
-        if (lastUsed == null) {
-            return false;
-        }
-        return now - lastUsed < getCrystalPositionReuseDelayMs();
-    }
-
     private boolean shouldForceNewObsidianPlacement(Player target) {
         if (!hasObsidian() || !canPlaceObsidian()) {
             return false;
         }
-
-        List<BlockPos> validObsidianPositions = crystalManager.getValidCrystalPositions(
-                obsidianCache, target, bot, level, config.getMaxCrystalDistance());
-        if (validObsidianPositions.isEmpty()) {
-            return true;
-        }
-
-        long now = currentTime();
-        int strongPositions = 0;
-        double strongThreshold = config.getMinCrystalScore() + getStrongScoreOffset();
-
-        for (BlockPos pos : validObsidianPositions) {
-            if (isCrystalPositionCoolingDown(pos, now)) {
-                continue;
-            }
-
-            double score = crystalPositionEvaluator.calculateCrystalScore(
-                    pos,
-                    target,
-                    crystalCountAtPosition,
-                    config.getOptimalDamageRange(),
-                    config.getMinCrystalDistance());
-            if (score >= strongThreshold) {
-                strongPositions++;
-                if (strongPositions >= getDesiredStrongPositionCount()) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private double getStrongScoreOffset() {
-        if (difficulty == DifficultyLevel.GOD) return 0.9D;
-        if (difficulty == DifficultyLevel.HARD) return 1.1D;
-        if (difficulty == DifficultyLevel.MEDIUM) return 1.25D;
-        if (difficulty == DifficultyLevel.NORMAL) return 1.4D;
-        return 1.65D;
-    }
-
-    private int getDesiredStrongPositionCount() {
-        if (difficulty == DifficultyLevel.GOD) return 3;
-        if (difficulty == DifficultyLevel.HARD) return 2;
-        if (difficulty == DifficultyLevel.MEDIUM) return 2;
-        return 1;
-    }
-
-    private void pruneObsidianCacheForTarget(Player target) {
-        double maxUsefulTargetDistance =
-                switch (difficulty) {
-                    case GOD -> 5.2D;
-                    case HARD -> 5.8D;
-                    case MEDIUM -> 6.3D;
-                    case NORMAL -> 6.6D;
-                    default -> 6.9D;
-                };
-        long now = currentTime();
-        obsidianCache.entrySet().removeIf(entry -> {
-            BlockPos pos = entry.getKey();
-            double distanceToTarget = target.position().distanceTo(net.minecraft.world.phys.Vec3.atCenterOf(pos));
-            if (distanceToTarget <= maxUsefulTargetDistance) {
-                return false;
-            }
-            return now - entry.getValue() > 500L;
-        });
+        return targetPlanner.shouldForceObsidianPlacement(
+                target, obsidianCache, crystalCountAtPosition, crystalRecentUsage, config, combatPolicy);
     }
 
     private long currentTime() {

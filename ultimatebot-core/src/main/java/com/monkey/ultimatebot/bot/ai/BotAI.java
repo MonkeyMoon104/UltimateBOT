@@ -1,8 +1,9 @@
 package com.monkey.ultimatebot.bot.ai;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.model.BotLocation;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.behavior.IdleBehaviorController;
+import com.monkey.ultimatebot.bot.ai.behavior.SustainFoodController;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.CombatDataManager;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.CombatStateManager;
@@ -25,18 +26,11 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
@@ -69,21 +63,12 @@ public class BotAI {
     private final IPathfindingManager pathfindingManager;
     private final ICombatStrategyExecutor combatStrategyExecutor;
     private final CombatModeEngine combatModeEngine;
+    private final IdleBehaviorController idleBehaviorController;
+    private final SustainFoodController sustainFoodController;
     private final BotOptions options;
     private final UltimateBot plugin;
-    private final Random idleRandom = new Random();
     private long lastForcedVerticalTeleportTime = 0L;
-    private long lastSeenTargetTime = System.currentTimeMillis();
-    private long lastIdleDestinationTime = 0L;
-    private Vec3 idleDestination;
-    private boolean sustainFoodSlotActive = false;
-    private boolean eatingSustainFood = false;
-    private int sustainFoodTicks = 0;
     private static final long FORCED_VERTICAL_TELEPORT_COOLDOWN_MS = 3000L;
-    private static final long IDLE_DESTINATION_RETRY_MS = 3500L;
-    private static final double IDLE_DESTINATION_REACHED_DISTANCE = 1.6D;
-    private static final int SUSTAIN_FOOD_DURATION_TICKS = 32;
-    private static final int SUSTAIN_FOOD_TRIGGER_LEVEL = 6;
 
     public BotAI(Player bot, UltimateBot plugin, BotOptions options) {
         this.bot = java.util.Objects.requireNonNull(bot, "bot");
@@ -135,6 +120,9 @@ public class BotAI {
                 cpvpController,
                 rapvpController,
                 combatStrategyExecutor);
+        this.idleBehaviorController =
+                new IdleBehaviorController(bot, options, plugin, movementController, rotationController);
+        this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);
     }
 
     public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
@@ -148,8 +136,7 @@ public class BotAI {
         if (handleSustainFood()) {
             return;
         }
-        lastSeenTargetTime = System.currentTimeMillis();
-        idleDestination = null;
+        idleBehaviorController.recordTargetSeen();
 
         LivingEntity target = resolveNmsTarget(targetBukkitPlayer);
         if (target == null) {
@@ -245,38 +232,7 @@ public class BotAI {
             return;
         }
 
-        if (!options.isIdleWander()) {
-            idleDestination = null;
-            movementController.stopMovement();
-            return;
-        }
-
-        Vec3 spawn = resolveSpawnPosition();
-        if (spawn == null) {
-            return;
-        }
-
-        long now = System.currentTimeMillis();
-        double distanceFromSpawn = bot.position().distanceTo(spawn);
-        boolean shouldReturn = distanceFromSpawn > options.getIdleReturnDistance()
-                || now - lastSeenTargetTime >= options.getIdleReturnDelayMs();
-
-        if (shouldReturn && distanceFromSpawn > IDLE_DESTINATION_REACHED_DISTANCE) {
-            idleDestination = spawn;
-            moveIdleTo(spawn);
-            return;
-        }
-
-        if (idleDestination == null
-                || bot.position().distanceTo(idleDestination) <= IDLE_DESTINATION_REACHED_DISTANCE
-                || now - lastIdleDestinationTime >= IDLE_DESTINATION_RETRY_MS) {
-            idleDestination = findIdleDestination(spawn);
-            lastIdleDestinationTime = now;
-        }
-
-        if (idleDestination != null) {
-            moveIdleTo(idleDestination);
-        }
+        idleBehaviorController.tick();
     }
 
     private void executeHealingMovement(Player target) {
@@ -438,74 +394,7 @@ public class BotAI {
     }
 
     private boolean handleSustainFood() {
-        syncSustainFoodSlot();
-
-        if (options.isHealing()) {
-            eatingSustainFood = false;
-            sustainFoodTicks = 0;
-            return false;
-        }
-
-        if (bot.isUsingItem() && Items.GOLDEN_APPLE.equals(bot.getUseItem().getItem())) {
-            bot.releaseUsingItem();
-            eatingSustainFood = false;
-            sustainFoodTicks = 0;
-            inventoryController.switchToSword();
-            return false;
-        }
-
-        if (eatingSustainFood) {
-            sustainFoodTicks++;
-            if (sustainFoodTicks >= SUSTAIN_FOOD_DURATION_TICKS || !bot.isUsingItem()) {
-                applySustainFood();
-                eatingSustainFood = false;
-                sustainFoodTicks = 0;
-                inventoryController.switchToSword();
-                return false;
-            }
-            return true;
-        }
-
-        if (bot.getFoodData().getFoodLevel() > SUSTAIN_FOOD_TRIGGER_LEVEL) {
-            return false;
-        }
-
-        inventoryController.switchToSlot(BotInventoryController.GOLDEN_APPLE_SLOT);
-        try {
-            bot.startUsingItem(InteractionHand.MAIN_HAND);
-        } catch (Exception ignored) {
-            applySustainFood();
-            inventoryController.switchToSword();
-            return false;
-        }
-        eatingSustainFood = true;
-        sustainFoodTicks = 0;
-        return true;
-    }
-
-    private void syncSustainFoodSlot() {
-        if (options.isHealing()) {
-            if (sustainFoodSlotActive) {
-                inventoryController.setItem(
-                        BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.GOLDEN_APPLE, 64));
-                sustainFoodSlotActive = false;
-            }
-            return;
-        }
-
-        if (!sustainFoodSlotActive) {
-            inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.COOKED_BEEF, 64));
-            sustainFoodSlotActive = true;
-        }
-    }
-
-    private void applySustainFood() {
-        if (bot.getFoodData().getFoodLevel() >= 20) {
-            bot.releaseUsingItem();
-            return;
-        }
-        bot.getFoodData().eat(8, 0.8F);
-        bot.releaseUsingItem();
+        return sustainFoodController.tick();
     }
 
     private boolean shouldForceVerticalTeleport(Player target) {
@@ -545,81 +434,10 @@ public class BotAI {
         return false;
     }
 
-    private void moveIdleTo(Vec3 destination) {
-        movementController.moveToPosition(destination);
-        rotationController.lookAt(destination.x, destination.y, destination.z);
-    }
-
-    private Vec3 findIdleDestination(Vec3 spawn) {
-        double radius = options.getIdleWanderRadius();
-        for (int attempt = 0; attempt < 12; attempt++) {
-            double angle = idleRandom.nextDouble() * Math.PI * 2.0D;
-            double distance = 2.0D + idleRandom.nextDouble() * Math.max(1.0D, radius - 2.0D);
-            int x = (int) Math.floor(spawn.x + Math.cos(angle) * distance);
-            int z = (int) Math.floor(spawn.z + Math.sin(angle) * distance);
-            int y = findSafeY(x, (int) Math.round(spawn.y), z);
-            if (y == Integer.MIN_VALUE) {
-                continue;
-            }
-
-            Vec3 candidate = new Vec3(x + 0.5D, y, z + 0.5D);
-            if (isPvpAllowed(candidate)) {
-                return candidate;
-            }
-        }
-        return spawn;
-    }
-
-    private int findSafeY(int x, int baseY, int z) {
-        World world = bot.getBukkitEntity().getWorld();
-        int minBuildHeight = world == null ? -64 : world.getMinHeight();
-        int maxBuildHeight = world == null ? 320 : world.getMaxHeight();
-        int minY = Math.max(minBuildHeight, baseY - 6);
-        int maxY = Math.min(maxBuildHeight - 2, baseY + 6);
-        for (int y = maxY; y >= minY; y--) {
-            BlockPos feet = new BlockPos(x, y, z);
-            BlockPos head = feet.above();
-            BlockPos ground = feet.below();
-            if (!level.getBlockState(ground).isSolidRender()) {
-                continue;
-            }
-            if (level.getBlockState(feet).isSolidRender()
-                    || level.getBlockState(head).isSolidRender()) {
-                continue;
-            }
-            return y;
-        }
-        return Integer.MIN_VALUE;
-    }
-
-    private Vec3 resolveSpawnPosition() {
-        BotLocation spawn = options.getSpawnLocation();
-        if (spawn == null) {
-            return null;
-        }
-        return new Vec3(spawn.x(), spawn.y(), spawn.z());
-    }
-
-    private boolean isPvpAllowed(Vec3 position) {
-        if (!options.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
-            return true;
-        }
-
-        World world = bot.getBukkitEntity().getWorld();
-        if (world == null) {
-            BotLocation spawn = options.getSpawnLocation();
-            world = spawn == null || spawn.worldUUID() == null ? null : Bukkit.getWorld(spawn.worldUUID());
-        }
-        if (world == null) {
-            return false;
-        }
-
-        Location location = new Location(world, position.x, position.y, position.z);
-        return plugin.getWorldGuardPvpService().isPvpAllowed(location);
-    }
-
     public void close() {
         combatModeEngine.close();
+        idleBehaviorController.close();
+        sustainFoodController.close();
         movementController.clearPath();
         movementController.clearCache();
         healController.resetHealState();
