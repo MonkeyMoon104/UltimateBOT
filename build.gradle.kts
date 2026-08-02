@@ -1,6 +1,7 @@
 import io.papermc.paperweight.tasks.JavaLauncherTask
 import net.ltgt.gradle.errorprone.CheckSeverity
 import net.ltgt.gradle.errorprone.errorprone
+import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 
@@ -73,6 +74,10 @@ subprojects {
             option("NullAway:OnlyNullMarked", "true")
             option("NullAway:JSpecifyMode", "true")
         }
+    }
+
+    tasks.withType<Test>().configureEach {
+        jvmArgs("--enable-native-access=ALL-UNNAMED", "-Xshare:off")
     }
 
     dependencies {
