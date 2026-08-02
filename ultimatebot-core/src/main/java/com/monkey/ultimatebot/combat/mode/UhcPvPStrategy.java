@@ -133,6 +133,10 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
                 if (context.inventory().consumeItem(WEB_SLOT)
                         && context.placeTemporaryBlock(targetLocation, Material.COBWEB)) {
                     secondaryLocation = targetLocation;
+                    if (target.getBukkitEntity() instanceof org.bukkit.entity.LivingEntity livingTarget) {
+                        livingTarget.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                                org.bukkit.potion.PotionEffectType.SLOWNESS, 30, 3, false, false, false));
+                    }
                 }
             } else if (context.inventory().consumeItem(LAVA_SLOT)) {
                 target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), 80));

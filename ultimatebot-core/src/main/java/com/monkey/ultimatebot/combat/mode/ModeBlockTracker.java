@@ -1,18 +1,18 @@
 package com.monkey.ultimatebot.combat.mode;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.Nullable;
 
 final class ModeBlockTracker implements AutoCloseable {
-    private final Map<BlockKey, TrackedBlock> blocks = new HashMap<>();
+    private final Set<BlockKey> blocks = new HashSet<>();
 
     boolean place(Location location, Material material) {
         Objects.requireNonNull(location, "location");
@@ -21,43 +21,34 @@ final class ModeBlockTracker implements AutoCloseable {
         if (!block.isPassable() || block.isLiquid()) {
             return false;
         }
-        BlockKey key = BlockKey.from(block);
-        blocks.computeIfAbsent(key, ignored -> new TrackedBlock(block.getState(), checkedMaterial));
-        block.setType(checkedMaterial, false);
+        blocks.add(BlockKey.from(block));
+        broadcast(block.getLocation(), checkedMaterial.createBlockData());
         return true;
     }
 
     void restore(Location location) {
         Objects.requireNonNull(location, "location");
         Block block = location.getBlock();
-        BlockKey key = BlockKey.from(block);
-        TrackedBlock tracked = blocks.remove(key);
-        if (tracked != null) {
-            tracked.restore(block);
+        if (blocks.remove(BlockKey.from(block))) {
+            broadcast(block.getLocation(), block.getBlockData());
         }
     }
 
     @Override
     public void close() {
-        for (Map.Entry<BlockKey, TrackedBlock> entry : Map.copyOf(blocks).entrySet()) {
-            Block block = entry.getKey().block();
+        for (BlockKey key : Set.copyOf(blocks)) {
+            Block block = key.block();
             if (block != null) {
-                entry.getValue().restore(block);
+                broadcast(block.getLocation(), block.getBlockData());
             }
         }
         blocks.clear();
     }
 
-    private record TrackedBlock(BlockState original, Material placedMaterial) {
-        private TrackedBlock {
-            Objects.requireNonNull(original, "original");
-            Objects.requireNonNull(placedMaterial, "placedMaterial");
-        }
-
-        void restore(Block current) {
-            if (current.getType() == placedMaterial) {
-                original.update(true, false);
-            }
+    private static void broadcast(Location location, BlockData blockData) {
+        World world = Objects.requireNonNull(location.getWorld(), "location world");
+        for (org.bukkit.entity.Player viewer : world.getPlayers()) {
+            viewer.sendBlockChange(location, blockData);
         }
     }
 
@@ -68,10 +59,7 @@ final class ModeBlockTracker implements AutoCloseable {
 
         @Nullable Block block() {
             World world = org.bukkit.Bukkit.getWorld(worldId);
-            if (world == null) {
-                return null;
-            }
-            return world.getBlockAt(x, y, z);
+            return world == null ? null : world.getBlockAt(x, y, z);
         }
     }
 }

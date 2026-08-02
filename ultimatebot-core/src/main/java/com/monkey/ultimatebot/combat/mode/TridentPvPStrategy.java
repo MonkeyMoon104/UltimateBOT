@@ -139,6 +139,10 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
             if (context.inventory().consumeItem(WEB_SLOT)
                     && context.placeTemporaryBlock(targetBlock, Material.COBWEB)) {
                 trapLocation = targetBlock;
+                if (target.getBukkitEntity() instanceof org.bukkit.entity.LivingEntity livingTarget) {
+                    livingTarget.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                            org.bukkit.potion.PotionEffectType.SLOWNESS, 25, 3, false, false, false));
+                }
             }
             Location adjacent = targetBlock.clone().add(1.0D, 0.0D, 0.0D);
             if (context.inventory().consumeItem(SPONGE_SLOT)
