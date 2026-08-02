@@ -2,42 +2,124 @@ package com.monkey.ultimatebot.combat.mode;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import java.util.Objects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
-import org.bukkit.Location;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
+    private static final int FIRST_POTION_SLOT = BotInventoryController.ENDERPEARL_SLOT;
+    private static final int SECOND_POTION_SLOT = BotInventoryController.TOTEM_SLOT;
+
+    private Phase phase = Phase.TRADE;
+    private int phaseTicks;
+
     NetheritePotPvPStrategy() {
         super(
                 CombatMode.NETHERITE_POT,
                 ModeKit.builder()
                         .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_SWORD)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Items.SPLASH_POTION, 64)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.ENDER_PEARL, 16)
+                        .slot(FIRST_POTION_SLOT, Items.SPLASH_POTION, 64)
+                        .slot(SECOND_POTION_SLOT, Items.SPLASH_POTION, 64)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, Items.ENDER_PEARL, 16)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .equipment(EquipmentSlot.OFFHAND, Items.TOTEM_OF_UNDYING)
+                        .netheriteArmor()
                         .build());
     }
 
     @Override
+    public void enter(CombatModeContext context) {
+        super.enter(context);
+        transitionTo(Phase.TRADE);
+    }
+
+    @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
-        context.aimAt(target);
-        if (context.healthRatio() <= context.tuning().healingHealthRatio()
-                && specialActionReady()
-                && context.inventory().consumeItem(BotInventoryController.ENDERPEARL_SLOT)) {
-            org.bukkit.entity.Player player = context.bukkitBot();
-            Location location = Objects.requireNonNull(player.getLocation(), "bot location");
-            context.inventory().switchToSlot(BotInventoryController.ENDERPEARL_SLOT);
-            player.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_HEALTH, 1, 1, false, false, false));
-            player.getWorld().spawnParticle(Particle.INSTANT_EFFECT, location, 18, 0.4D, 0.5D, 0.4D, 0.1D);
-            player.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.0F);
-            delaySpecialAction(context);
-            context.retreat(target, 4.5D);
+        context.motion().aimAt(target);
+        phaseTicks++;
+        switch (phase) {
+            case TRADE -> trade(context, target);
+            case CREATE_DISTANCE -> createDistance(context, target);
+            case FIRST_SPLASH -> splash(context, FIRST_POTION_SLOT, Phase.SECOND_SPLASH);
+            case SECOND_SPLASH -> splash(context, SECOND_POTION_SLOT, Phase.REENTER);
+            case EAT_GAPPLE -> eatGapple(context);
+            case REENTER -> reenter(context, target);
+        }
+    }
+
+    private void trade(CombatModeContext context, LivingEntity target) {
+        if (ModeCombatPolicy.shouldUsePotions(
+                context.actions().healthRatio(), context.tuning().healingHealthRatio(), specialActionReady())) {
+            transitionTo(Phase.CREATE_DISTANCE);
             return;
         }
-        meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
+        if (context.actions().healthRatio() <= 0.78D
+                && context.random().nextDouble() < 0.025D
+                && specialActionReady()) {
+            transitionTo(Phase.EAT_GAPPLE);
+            return;
+        }
+        double distance = context.motion().distanceTo(target);
+        if (distance <= context.tuning().attackRange()) {
+            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+        }
+        if (distance > 2.4D) {
+            context.motion().approach(target, 1.8D);
+        } else if (phaseTicks % 7 == 0) {
+            context.motion().strafe(target, 1.45D);
+        }
+    }
+
+    private void createDistance(CombatModeContext context, LivingEntity target) {
+        if (context.motion().distanceTo(target) <= context.tuning().attackRange() && phaseTicks == 1) {
+            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+        }
+        context.motion().retreat(target, 5.0D);
+        if (context.motion().distanceTo(target) >= 4.0D || phaseTicks >= 8) {
+            transitionTo(Phase.FIRST_SPLASH);
+        }
+    }
+
+    private void splash(CombatModeContext context, int slot, Phase nextPhase) {
+        if (phaseTicks == 1 && context.inventory().consumeItem(slot)) {
+            context.inventory().switchToSlot(slot);
+            context.actions().applyInstantHealth(1);
+        }
+        if (phaseTicks >= 2) {
+            transitionTo(nextPhase);
+        }
+    }
+
+    private void eatGapple(CombatModeContext context) {
+        if (phaseTicks == 1) {
+            context.actions().consumeGoldenApple(BotInventoryController.GOLDEN_APPLE_SLOT);
+            delaySpecialAction(context);
+        }
+        if (phaseTicks >= 5) {
+            transitionTo(Phase.REENTER);
+        }
+    }
+
+    private void reenter(CombatModeContext context, LivingEntity target) {
+        context.motion().approach(target, 1.8D);
+        if (phaseTicks >= 7
+                || context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+            delaySpecialAction(context);
+            transitionTo(Phase.TRADE);
+        }
+    }
+
+    private void transitionTo(Phase nextPhase) {
+        phase = nextPhase;
+        phaseTicks = 0;
+    }
+
+    private enum Phase {
+        TRADE,
+        CREATE_DISTANCE,
+        FIRST_SPLASH,
+        SECOND_SPLASH,
+        EAT_GAPPLE,
+        REENTER
     }
 }

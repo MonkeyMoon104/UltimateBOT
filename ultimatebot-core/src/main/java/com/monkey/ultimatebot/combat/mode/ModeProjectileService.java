@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Location;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Trident;
 import org.bukkit.entity.WindCharge;
 import org.bukkit.util.Vector;
@@ -34,6 +35,23 @@ final class ModeProjectileService {
 
     void fireWindCharge(LivingEntity target, double accuracy) {
         tracker.track(shooter.launchProjectile(WindCharge.class, velocity(target, accuracy, 1.6D)));
+    }
+
+    void fireEnderPearlAwayFrom(LivingEntity target) {
+        Location shooterLocation = Objects.requireNonNull(shooter.getLocation(), "shooter location");
+        Location targetLocation =
+                Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
+        Vector away =
+                shooterLocation.toVector().subtract(targetLocation.toVector()).setY(0.0D);
+        if (away.lengthSquared() < 0.001D) {
+            away = shooterLocation.getDirection().multiply(-1.0D).setY(0.0D);
+        }
+        tracker.track(shooter.launchProjectile(
+                EnderPearl.class, away.normalize().multiply(1.45D).setY(0.48D)));
+    }
+
+    void launchSelfWindCharge() {
+        tracker.track(shooter.launchProjectile(WindCharge.class, new Vector(0.0D, -1.35D, 0.0D)));
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {

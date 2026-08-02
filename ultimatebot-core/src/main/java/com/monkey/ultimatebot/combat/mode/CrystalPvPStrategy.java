@@ -38,17 +38,17 @@ final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
 
     @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
-        context.aimAt(target);
+        context.motion().aimAt(target);
         context.crystal().setEnabled(context.options().isExplosions());
         if (target instanceof Player playerTarget) {
             context.legacyCombat(playerTarget);
             return;
         }
         if (tickMobCrystal(context)) {
-            context.retreat(target, 5.0D);
+            context.motion().retreat(target, 5.0D);
             return;
         }
-        double distance = context.distanceTo(target);
+        double distance = context.motion().distanceTo(target);
         if (context.options().isExplosions()
                 && distance <= 6.0D
                 && specialActionReady()

@@ -12,24 +12,25 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.Material;
 
 final class CombatModeContext implements AutoCloseable {
     private final Player bot;
     private final org.bukkit.entity.Player bukkitBot;
     private final BotOptions options;
     private final BotMovementController movement;
-    private final BotRotationController rotation;
-    private final BotAttackController attack;
     private final BotInventoryController inventory;
     private final BotCPVPController crystal;
     private final BotRAPVPController anchor;
     private final ICombatStrategyExecutor legacyCombat;
     private final ModeInventorySession inventorySession;
     private final ModeEntityTracker entities;
+    private final ModeBlockTracker blocks;
     private final ModeProjectileService projectiles;
+    private final ModeMotionService motion;
+    private final ModeCombatActions actions;
     private final RandomGenerator random;
 
     CombatModeContext(
@@ -49,17 +50,18 @@ final class CombatModeContext implements AutoCloseable {
         this.bukkitBot = player;
         this.options = Objects.requireNonNull(options, "options");
         this.movement = Objects.requireNonNull(movement, "movement");
-        this.rotation = Objects.requireNonNull(rotation, "rotation");
-        this.attack = Objects.requireNonNull(attack, "attack");
         this.inventory = Objects.requireNonNull(inventory, "inventory");
         this.crystal = Objects.requireNonNull(crystal, "crystal");
         this.anchor = Objects.requireNonNull(anchor, "anchor");
         this.legacyCombat = Objects.requireNonNull(legacyCombat, "legacyCombat");
         this.inventorySession = new ModeInventorySession(inventory);
         this.entities = new ModeEntityTracker();
+        this.blocks = new ModeBlockTracker();
         this.random = new SplittableRandom(
                 bot.getUUID().getMostSignificantBits() ^ bot.getUUID().getLeastSignificantBits());
         this.projectiles = new ModeProjectileService(bukkitBot, entities, random);
+        this.motion = new ModeMotionService(bot, movement, rotation, this::tuning, random);
+        this.actions = new ModeCombatActions(bot, bukkitBot, attack, inventory, this::tuning);
     }
 
     CombatTuning tuning() {
@@ -102,8 +104,12 @@ final class CombatModeContext implements AutoCloseable {
         return entities;
     }
 
-    void clearTransientEntities() {
-        entities.close();
+    ModeMotionService motion() {
+        return motion;
+    }
+
+    ModeCombatActions actions() {
+        return actions;
     }
 
     RandomGenerator random() {
@@ -114,75 +120,32 @@ final class CombatModeContext implements AutoCloseable {
         inventorySession.apply(kit);
     }
 
-    void aimAt(LivingEntity target) {
-        rotation.updateRotation(target);
+    void clearTransientState() {
+        entities.close();
+        blocks.close();
     }
 
-    double distanceTo(LivingEntity target) {
-        return bot.distanceTo(target);
+    boolean placeTemporaryBlock(Location location, Material material) {
+        return blocks.place(location, material);
     }
 
-    double healthRatio() {
-        return bot.getHealth() / bot.getMaxHealth();
-    }
-
-    void approach(LivingEntity target, double desiredDistance) {
-        moveRelativeTo(target, desiredDistance, false);
-    }
-
-    void retreat(LivingEntity target, double desiredDistance) {
-        moveRelativeTo(target, desiredDistance, true);
-    }
-
-    void strafe(LivingEntity target, double strength) {
-        Vec3 direction = target.position().subtract(bot.position()).normalize();
-        double side = random.nextBoolean() ? 1.0D : -1.0D;
-        movement.moveToPosition(bot.position().add(new Vec3(-direction.z, 0.0D, direction.x).scale(strength * side)));
-    }
-
-    void attack(LivingEntity target, int slot) {
-        if (inventory.getCurrentSlot() != slot) {
-            inventory.switchToSlot(slot);
-        }
-        attack.handleAttack(target);
-        if (attack.getAttackCooldown() > tuning().attackCooldownTicks()) {
-            attack.setAttackCooldown(tuning().attackCooldownTicks());
-        }
+    void restoreTemporaryBlock(Location location) {
+        blocks.restore(location);
     }
 
     void legacyCombat(Player target) {
         legacyCombat.executeCombatStrategy(target);
     }
 
-    private void moveRelativeTo(LivingEntity target, double desiredDistance, boolean away) {
-        Vec3 delta = target.position().subtract(bot.position());
-        double horizontalDistance = Math.hypot(delta.x, delta.z);
-        if (horizontalDistance < 0.001D) {
-            movement.stopMovement();
-            return;
-        }
-        double direction = away ? -1.0D : 1.0D;
-        double travel = away
-                ? Math.max(1.0D, desiredDistance - horizontalDistance)
-                : Math.max(0.0D, horizontalDistance - desiredDistance);
-        Vec3 destination = bot.position()
-                .add(
-                        delta.x / horizontalDistance * travel * direction,
-                        0.0D,
-                        delta.z / horizontalDistance * travel * direction);
-        movement.setMovementSpeed(tuning().movementSpeed());
-        movement.moveToPosition(destination);
-    }
-
     @Override
     public void close() {
-        if (bot.isUsingItem()) {
-            bot.releaseUsingItem();
-        }
+        actions.releaseUseItem();
         anchor.disable();
         crystal.setEnabled(false);
         entities.close();
+        blocks.close();
         inventorySession.close();
         movement.resetCombatState();
+        motion.setSwimming(false);
     }
 }

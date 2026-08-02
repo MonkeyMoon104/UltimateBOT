@@ -6,6 +6,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 
 final class SwordPvPStrategy extends AbstractCombatModeStrategy {
+    private Phase phase = Phase.SPACING;
+    private int phaseTicks;
+
     SwordPvPStrategy() {
         super(
                 CombatMode.SWORD,
@@ -13,16 +16,111 @@ final class SwordPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.SWORD_SLOT, Items.DIAMOND_SWORD)
                         .slot(BotInventoryController.ENDERPEARL_SLOT, Items.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .diamondArmor()
                         .build());
     }
 
     @Override
+    public void enter(CombatModeContext context) {
+        super.enter(context);
+        transitionTo(Phase.SPACING);
+    }
+
+    @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
-        context.aimAt(target);
-        if (context.healthRatio() <= context.tuning().retreatHealthRatio()) {
-            context.retreat(target, 5.5D);
+        context.motion().aimAt(target);
+        phaseTicks++;
+        switch (phase) {
+            case SPACING -> spacing(context, target);
+            case INITIATE -> initiate(context, target);
+            case CRIT_TRADE -> critTrade(context, target);
+            case COMBO -> combo(context, target);
+            case DEFLECT -> deflect(context, target);
+            case RESET -> reset(context, target);
+        }
+    }
+
+    private void spacing(CombatModeContext context, LivingEntity target) {
+        if (context.actions().healthRatio() <= context.tuning().retreatHealthRatio()) {
+            transitionTo(Phase.DEFLECT);
             return;
         }
-        meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
+        double distance = context.motion().distanceTo(target);
+        if (distance > 3.15D) {
+            context.motion().approach(target, 2.75D);
+        } else if (distance < 2.25D) {
+            context.motion().retreat(target, 3.0D);
+        } else {
+            transitionTo(Phase.INITIATE);
+        }
+    }
+
+    private void initiate(CombatModeContext context, LivingEntity target) {
+        if (context.bot().onGround()) {
+            context.motion().propelTowards(target, 0.34D, 0.34D);
+        } else {
+            context.motion().steerVelocityTowards(target, 0.31D, context.bot().getDeltaMovement().y);
+        }
+        if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+            transitionTo(context.bot().getDeltaMovement().y < 0.0D ? Phase.CRIT_TRADE : Phase.COMBO);
+        } else if (phaseTicks >= 8) {
+            transitionTo(Phase.SPACING);
+        }
+    }
+
+    private void critTrade(CombatModeContext context, LivingEntity target) {
+        context.motion().steerVelocityTowards(target, 0.24D, context.bot().getDeltaMovement().y);
+        if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+        }
+        if (context.bot().onGround() || phaseTicks >= 6) {
+            transitionTo(Phase.COMBO);
+        }
+    }
+
+    private void combo(CombatModeContext context, LivingEntity target) {
+        context.motion()
+                .steerVelocityTowards(
+                        target,
+                        0.29D,
+                        context.bot().onGround() ? 0.0D : context.bot().getDeltaMovement().y);
+        if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+        }
+        if (context.movement().hasRecentDamage() || phaseTicks >= 13) {
+            transitionTo(Phase.DEFLECT);
+        }
+    }
+
+    private void deflect(CombatModeContext context, LivingEntity target) {
+        context.motion().retreat(target, 4.6D);
+        if (phaseTicks == 3 && context.bot().onGround()) {
+            context.motion().propelTowards(target, -0.25D, 0.28D);
+        }
+        if (phaseTicks >= 7) {
+            transitionTo(Phase.RESET);
+        }
+    }
+
+    private void reset(CombatModeContext context, LivingEntity target) {
+        context.motion().strafe(target, 1.25D);
+        if (phaseTicks >= 5) {
+            transitionTo(Phase.SPACING);
+        }
+    }
+
+    private void transitionTo(Phase nextPhase) {
+        phase = nextPhase;
+        phaseTicks = 0;
+    }
+
+    private enum Phase {
+        SPACING,
+        INITIATE,
+        CRIT_TRADE,
+        COMBO,
+        DEFLECT,
+        RESET
     }
 }

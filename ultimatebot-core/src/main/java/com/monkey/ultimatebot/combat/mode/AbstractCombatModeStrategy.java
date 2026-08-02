@@ -41,7 +41,8 @@ abstract class AbstractCombatModeStrategy implements CombatModeStrategy {
         }
         context.anchor().disable();
         context.crystal().setEnabled(false);
-        context.clearTransientEntities();
+        context.motion().setSwimming(false);
+        context.clearTransientState();
     }
 
     protected abstract void execute(CombatModeContext context, LivingEntity target);
@@ -50,19 +51,23 @@ abstract class AbstractCombatModeStrategy implements CombatModeStrategy {
         return tick >= nextSpecialActionTick;
     }
 
+    protected final long currentTick() {
+        return tick;
+    }
+
     protected final void delaySpecialAction(CombatModeContext context) {
         nextSpecialActionTick = tick + context.tuning().specialActionCooldownTicks();
     }
 
     protected final void meleeOrMove(CombatModeContext context, LivingEntity target, int weaponSlot) {
-        double distance = context.distanceTo(target);
+        double distance = context.motion().distanceTo(target);
         if (distance <= context.tuning().attackRange()) {
-            context.attack(target, weaponSlot);
+            context.actions().attack(target, weaponSlot);
         }
         if (distance > 1.7D) {
-            context.approach(target, 1.35D);
+            context.motion().approach(target, 1.35D);
         } else if (context.random().nextDouble() < context.tuning().strafeStrength()) {
-            context.strafe(target, 1.2D + context.tuning().strafeStrength());
+            context.motion().strafe(target, 1.2D + context.tuning().strafeStrength());
         }
     }
 }
