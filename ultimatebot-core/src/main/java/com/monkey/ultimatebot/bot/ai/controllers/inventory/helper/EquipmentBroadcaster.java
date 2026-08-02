@@ -5,12 +5,13 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipme
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 public class EquipmentBroadcaster implements IEquipmentBroadcaster {
@@ -34,9 +35,21 @@ public class EquipmentBroadcaster implements IEquipmentBroadcaster {
 
         ClientboundSetEquipmentPacket packet = NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
 
-        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+        for (org.bukkit.entity.Player online : bot.getBukkitEntity().getWorld().getPlayers()) {
             ServerPlayer handle = ((CraftPlayer) online).getHandle();
             handle.connection.send(packet);
+        }
+    }
+
+    @Override
+    public void broadcastMetadataChange(Player bot) {
+        List<SynchedEntityData.DataValue<?>> metadata = bot.getEntityData().packDirty();
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+        ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(bot.getId(), metadata);
+        for (org.bukkit.entity.Player online : bot.getBukkitEntity().getWorld().getPlayers()) {
+            ((CraftPlayer) online).getHandle().connection.send(packet);
         }
     }
 }

@@ -20,8 +20,8 @@ public class HealExecutor implements IHealExecutor {
         inventoryController.switchToGoldenApple();
 
         try {
-            bot.startUsingItem(InteractionHand.MAIN_HAND);
-        } catch (Exception e) {
+            inventoryController.startUsingItem(InteractionHand.MAIN_HAND);
+        } catch (IllegalStateException exception) {
             bot.swing(InteractionHand.MAIN_HAND);
         }
     }

@@ -65,10 +65,12 @@ public final class SlotManager implements ISlotManager {
         if (!hotbarSlots.containsKey(slot)) return;
 
         resourceReplenisher.replenishItem(hotbarSlots, slot);
+        ItemStack item = hotbarSlots.get(slot);
+        if (currentSlot == slot && ItemStack.matches(bot.getItemBySlot(EquipmentSlot.MAINHAND), item)) {
+            return;
+        }
 
         currentSlot = slot;
-        ItemStack item = hotbarSlots.get(slot);
-
         bot.setItemSlot(EquipmentSlot.MAINHAND, item);
 
         equipmentBroadcaster.broadcastEquipmentChange(bot);
@@ -77,12 +79,37 @@ public final class SlotManager implements ISlotManager {
     @Override
     public void setItem(int slot, ItemStack item) {
         if (slot >= 0 && slot <= 8) {
+            ItemStack current = hotbarSlots.getOrDefault(slot, ItemStack.EMPTY);
+            if (ItemStack.matches(current, item)) {
+                return;
+            }
             hotbarSlots.put(slot, item.copy());
 
             if (slot == currentSlot) {
                 bot.setItemSlot(EquipmentSlot.MAINHAND, item);
                 equipmentBroadcaster.broadcastEquipmentChange(bot);
             }
+        }
+    }
+
+    public void applyLoadout(Map<Integer, ItemStack> loadout, int selectedSlot) {
+        Map<Integer, ItemStack> checkedLoadout = java.util.Objects.requireNonNull(loadout, "loadout");
+        if (selectedSlot < 0 || selectedSlot > 8) {
+            throw new IllegalArgumentException("selectedSlot must be between 0 and 8");
+        }
+
+        for (int slot = 0; slot <= 8; slot++) {
+            ItemStack item = java.util.Objects.requireNonNull(
+                    checkedLoadout.getOrDefault(slot, ItemStack.EMPTY), "loadout item at slot " + slot);
+            hotbarSlots.put(slot, item.copy());
+        }
+
+        ItemStack selectedItem = hotbarSlots.get(selectedSlot);
+        boolean visualChange = !ItemStack.matches(bot.getItemBySlot(EquipmentSlot.MAINHAND), selectedItem);
+        currentSlot = selectedSlot;
+        if (visualChange) {
+            bot.setItemSlot(EquipmentSlot.MAINHAND, selectedItem);
+            equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }
 

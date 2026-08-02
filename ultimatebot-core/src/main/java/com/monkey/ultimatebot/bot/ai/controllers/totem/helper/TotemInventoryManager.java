@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
+import java.util.Objects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -8,9 +10,11 @@ import net.minecraft.world.item.Items;
 
 public class TotemInventoryManager implements ITotemInventoryManager {
     private final Player bot;
+    private final IEquipmentBroadcaster equipmentBroadcaster;
 
-    public TotemInventoryManager(Player bot) {
-        this.bot = bot;
+    public TotemInventoryManager(Player bot, IEquipmentBroadcaster equipmentBroadcaster) {
+        this.bot = Objects.requireNonNull(bot, "bot");
+        this.equipmentBroadcaster = Objects.requireNonNull(equipmentBroadcaster, "equipmentBroadcaster");
     }
 
     @Override
@@ -20,12 +24,16 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public void equipTotem(EquipmentSlot slot) {
-        bot.setItemSlot(slot, new ItemStack(Items.TOTEM_OF_UNDYING));
+        if (updateSlot(slot, new ItemStack(Items.TOTEM_OF_UNDYING))) {
+            equipmentBroadcaster.broadcastEquipmentChange(bot);
+        }
     }
 
     @Override
     public void removeTotem(EquipmentSlot slot) {
-        bot.setItemSlot(slot, ItemStack.EMPTY);
+        if (updateSlot(slot, ItemStack.EMPTY)) {
+            equipmentBroadcaster.broadcastEquipmentChange(bot);
+        }
     }
 
     @Override
@@ -40,14 +48,22 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     public void forceEquipTotems(int count) {
         count = Math.max(0, Math.min(2, count));
 
-        removeTotem(EquipmentSlot.OFFHAND);
-        removeTotem(EquipmentSlot.MAINHAND);
+        boolean changed =
+                updateSlot(EquipmentSlot.OFFHAND, count >= 1 ? new ItemStack(Items.TOTEM_OF_UNDYING) : ItemStack.EMPTY);
+        changed |= updateSlot(
+                EquipmentSlot.MAINHAND, count >= 2 ? new ItemStack(Items.TOTEM_OF_UNDYING) : ItemStack.EMPTY);
+        if (changed) {
+            equipmentBroadcaster.broadcastEquipmentChange(bot);
+        }
+    }
 
-        if (count >= 1) {
-            equipTotem(EquipmentSlot.OFFHAND);
+    private boolean updateSlot(EquipmentSlot slot, ItemStack item) {
+        EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+        ItemStack checkedItem = Objects.requireNonNull(item, "item");
+        if (ItemStack.matches(bot.getItemBySlot(checkedSlot), checkedItem)) {
+            return false;
         }
-        if (count >= 2) {
-            equipTotem(EquipmentSlot.MAINHAND);
-        }
+        bot.setItemSlot(checkedSlot, checkedItem.copy());
+        return true;
     }
 }

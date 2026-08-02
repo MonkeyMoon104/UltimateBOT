@@ -1,7 +1,17 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory;
 
-import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.*;
-import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.*;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.EquipmentBroadcaster;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ItemChecker;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ItemManager;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ResourceReplenisher;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.SlotManager;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
+import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import java.util.Map;
+import java.util.Objects;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -27,7 +37,7 @@ public class BotInventoryController {
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
-        this.bot = java.util.Objects.requireNonNull(bot, "bot");
+        this.bot = Objects.requireNonNull(bot, "bot");
         this.resourceReplenisher = new ResourceReplenisher();
         this.equipmentBroadcaster = new EquipmentBroadcaster();
         this.slotManager = new SlotManager(bot, resourceReplenisher, equipmentBroadcaster);
@@ -105,10 +115,53 @@ public class BotInventoryController {
     }
 
     public void setEquipment(EquipmentSlot slot, ItemStack item) {
-        bot.setItemSlot(
-                java.util.Objects.requireNonNull(slot, "slot"),
-                java.util.Objects.requireNonNull(item, "item").copy());
+        EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+        ItemStack checkedItem = Objects.requireNonNull(item, "item");
+        if (ItemStack.matches(bot.getItemBySlot(checkedSlot), checkedItem)) {
+            return;
+        }
+        bot.setItemSlot(checkedSlot, checkedItem.copy());
         equipmentBroadcaster.broadcastEquipmentChange(bot);
+    }
+
+    public void applyHotbarLoadout(Map<Integer, ItemStack> loadout, int selectedSlot) {
+        slotManager.applyLoadout(Objects.requireNonNull(loadout, "loadout"), selectedSlot);
+    }
+
+    public void applyEquipmentLoadout(Map<EquipmentSlot, ItemStack> loadout) {
+        Map<EquipmentSlot, ItemStack> checkedLoadout = Objects.requireNonNull(loadout, "loadout");
+        boolean changed = false;
+        for (Map.Entry<EquipmentSlot, ItemStack> entry : checkedLoadout.entrySet()) {
+            EquipmentSlot slot = Objects.requireNonNull(entry.getKey(), "equipment slot");
+            ItemStack item = Objects.requireNonNull(entry.getValue(), "equipment item");
+            if (!ItemStack.matches(bot.getItemBySlot(slot), item)) {
+                bot.setItemSlot(slot, item.copy());
+                changed = true;
+            }
+        }
+        if (changed) {
+            equipmentBroadcaster.broadcastEquipmentChange(bot);
+        }
+    }
+
+    public void startUsingItem(InteractionHand hand) {
+        InteractionHand checkedHand = Objects.requireNonNull(hand, "hand");
+        if (bot.isUsingItem() && bot.getUsedItemHand() == checkedHand) {
+            return;
+        }
+        if (bot.isUsingItem()) {
+            bot.releaseUsingItem();
+        }
+        bot.startUsingItem(checkedHand);
+        equipmentBroadcaster.broadcastMetadataChange(bot);
+    }
+
+    public void releaseUsingItem() {
+        if (!bot.isUsingItem()) {
+            return;
+        }
+        bot.releaseUsingItem();
+        equipmentBroadcaster.broadcastMetadataChange(bot);
     }
 
     public boolean isHoldingSword() {

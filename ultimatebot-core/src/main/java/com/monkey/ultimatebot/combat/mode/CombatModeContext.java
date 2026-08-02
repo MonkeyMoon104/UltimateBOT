@@ -117,7 +117,7 @@ final class CombatModeContext implements AutoCloseable {
     }
 
     void applyKit(ModeKit kit) {
-        inventorySession.apply(kit);
+        inventorySession.apply(kit, options);
     }
 
     void clearTransientState() {

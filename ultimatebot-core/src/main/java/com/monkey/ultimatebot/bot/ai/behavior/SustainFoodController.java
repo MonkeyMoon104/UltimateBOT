@@ -35,7 +35,7 @@ public final class SustainFoodController {
         }
 
         if (bot.isUsingItem() && Items.GOLDEN_APPLE.equals(bot.getUseItem().getItem())) {
-            bot.releaseUsingItem();
+            inventoryController.releaseUsingItem();
             resetEatingState();
             inventoryController.switchToSword();
             return false;
@@ -58,7 +58,7 @@ public final class SustainFoodController {
 
         inventoryController.switchToSlot(BotInventoryController.GOLDEN_APPLE_SLOT);
         try {
-            bot.startUsingItem(InteractionHand.MAIN_HAND);
+            inventoryController.startUsingItem(InteractionHand.MAIN_HAND);
         } catch (IllegalStateException ignored) {
             applyFood();
             inventoryController.switchToSword();
@@ -70,7 +70,7 @@ public final class SustainFoodController {
     }
 
     public void close() {
-        bot.releaseUsingItem();
+        inventoryController.releaseUsingItem();
         resetEatingState();
     }
 
@@ -93,7 +93,7 @@ public final class SustainFoodController {
         if (bot.getFoodData().getFoodLevel() < 20) {
             bot.getFoodData().eat(8, 0.8F);
         }
-        bot.releaseUsingItem();
+        inventoryController.releaseUsingItem();
     }
 
     private void resetEatingState() {
