@@ -22,6 +22,7 @@ public final class CombatModeEngine implements AutoCloseable {
     private final Map<CombatMode, CombatModeStrategy> strategies;
 
     private @Nullable CombatModeStrategy activeStrategy;
+    private boolean suspended;
     private boolean closed;
 
     public CombatModeEngine(
@@ -66,15 +67,27 @@ public final class CombatModeEngine implements AutoCloseable {
         if (!Objects.equals(activeStrategy, selectedStrategy)) {
             transitionTo(selectedStrategy);
         }
+        suspended = false;
         selectedStrategy.tick(context, target);
+    }
+
+    public void suspend() {
+        if (activeStrategy == null || suspended) {
+            return;
+        }
+        activeStrategy.exit(context);
+        suspended = true;
     }
 
     public void deactivate() {
         if (activeStrategy == null) {
             return;
         }
-        activeStrategy.exit(context);
+        if (!suspended) {
+            activeStrategy.exit(context);
+        }
         activeStrategy = null;
+        suspended = false;
     }
 
     private void transitionTo(CombatModeStrategy selectedStrategy) {

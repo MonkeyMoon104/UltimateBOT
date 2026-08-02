@@ -15,6 +15,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.TOTEM_SLOT, Items.WATER_BUCKET)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Items.COBBLESTONE, 64)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.EMPTY_SLOT, Items.ARROW, 64)
                         .build());
     }
 
@@ -22,7 +23,10 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.aimAt(target);
         double distance = context.distanceTo(target);
-        if (distance >= 5.0D && distance <= 28.0D && specialActionReady()) {
+        if (distance >= 5.0D
+                && distance <= 28.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.EMPTY_SLOT)) {
             context.inventory().switchToSlot(BotInventoryController.ENDERPEARL_SLOT);
             context.projectiles().fireArrow(target, context.tuning().aimAccuracy());
             delaySpecialAction(context);

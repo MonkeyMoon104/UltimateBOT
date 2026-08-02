@@ -12,6 +12,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -36,6 +37,7 @@ public class BotRAPVPController {
     private RAPVPConfig config;
     private int failedExplosionAttempts = 0;
     private long lastAnchorExplosionTime = 0L;
+    private boolean ownsAnchor;
 
     public BotRAPVPController(
             Player bot,
@@ -60,6 +62,7 @@ public class BotRAPVPController {
         this.currentTarget = target;
         this.failedExplosionAttempts = 0;
         this.lastAnchorExplosionTime = 0L;
+        this.ownsAnchor = false;
     }
 
     public void tick() {
@@ -85,6 +88,7 @@ public class BotRAPVPController {
         Optional<BlockPos> reusableAnchor = findReusableAnchorNearTarget();
         if (reusableAnchor.isPresent()) {
             anchorPos = reusableAnchor.get();
+            ownsAnchor = false;
             BlockState reusableState = bot.level().getBlockState(anchorPos);
             int charges = reusableState.getValue(RespawnAnchorBlock.CHARGE);
             state = charges > 0 ? RAPVPState.WAITING_EXPLOSION : RAPVPState.CHARGING_ANCHOR;
@@ -109,6 +113,7 @@ public class BotRAPVPController {
         }
 
         if (anchorPlacer.placeAnchor(anchorPos)) {
+            ownsAnchor = true;
             state = RAPVPState.CHARGING_ANCHOR;
             failedExplosionAttempts = 0;
         } else if (bot.level().getBlockState(anchorPos).getBlock() instanceof RespawnAnchorBlock) {
@@ -173,6 +178,7 @@ public class BotRAPVPController {
                 lastAnchorExplosionTime = System.currentTimeMillis();
                 state = RAPVPState.PLACING_ANCHOR;
                 anchorPos = null;
+                ownsAnchor = false;
             } else {
                 failedExplosionAttempts++;
                 int retryLimit = isHyperAggressiveDifficulty() ? 3 : 4;
@@ -180,22 +186,36 @@ public class BotRAPVPController {
                     failedExplosionAttempts = 0;
                     state = RAPVPState.PLACING_ANCHOR;
                     anchorPos = null;
+                    ownsAnchor = false;
                 }
             }
         } else {
             failedExplosionAttempts = 0;
             state = RAPVPState.PLACING_ANCHOR;
             anchorPos = null;
+            ownsAnchor = false;
         }
     }
 
     public void disable() {
+        removeOwnedAnchor();
         this.enabled = false;
         this.state = RAPVPState.IDLE;
         this.anchorPos = null;
         this.currentTarget = null;
         this.failedExplosionAttempts = 0;
         this.lastAnchorExplosionTime = 0L;
+    }
+
+    private void removeOwnedAnchor() {
+        if (!ownsAnchor || anchorPos == null) {
+            ownsAnchor = false;
+            return;
+        }
+        if (level.getBlockState(anchorPos).getBlock() instanceof RespawnAnchorBlock) {
+            level.setBlockAndUpdate(anchorPos, Blocks.AIR.defaultBlockState());
+        }
+        ownsAnchor = false;
     }
 
     public boolean isActive() {

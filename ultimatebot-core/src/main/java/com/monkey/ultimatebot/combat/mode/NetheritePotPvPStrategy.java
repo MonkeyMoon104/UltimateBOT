@@ -25,7 +25,9 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.aimAt(target);
-        if (context.healthRatio() <= context.tuning().healingHealthRatio() && specialActionReady()) {
+        if (context.healthRatio() <= context.tuning().healingHealthRatio()
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.ENDERPEARL_SLOT)) {
             org.bukkit.entity.Player player = context.bukkitBot();
             Location location = Objects.requireNonNull(player.getLocation(), "bot location");
             context.inventory().switchToSlot(BotInventoryController.ENDERPEARL_SLOT);

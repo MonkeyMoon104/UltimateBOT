@@ -216,7 +216,7 @@ public class BotAI {
                 }
             }
         } else {
-            combatModeEngine.deactivate();
+            combatModeEngine.suspend();
             if (!isCurrentlyHealing) {
                 if (!followActivePath(playerTarget)) {
                     pathfindingManager.checkForStuck(playerTarget);
@@ -371,7 +371,7 @@ public class BotAI {
     private void tickMobTarget(LivingEntity target, boolean combatEnabled) {
         rotationController.updateRotation(target);
         if (!combatEnabled) {
-            combatModeEngine.deactivate();
+            combatModeEngine.suspend();
             movementController.stopMovement();
             return;
         }

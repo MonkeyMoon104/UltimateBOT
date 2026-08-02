@@ -17,6 +17,7 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(AXE_SLOT, Items.NETHERITE_AXE)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Items.SHIELD)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.EMPTY_SLOT, Items.ARROW, 64)
                         .build());
     }
 
@@ -24,7 +25,10 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.aimAt(target);
         double distance = context.distanceTo(target);
-        if (distance >= 7.0D && distance <= 26.0D && specialActionReady()) {
+        if (distance >= 7.0D
+                && distance <= 26.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.EMPTY_SLOT)) {
             context.inventory().switchToSlot(BotInventoryController.ENDERPEARL_SLOT);
             context.projectiles().fireArrow(target, context.tuning().aimAccuracy());
             delaySpecialAction(context);

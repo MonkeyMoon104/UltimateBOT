@@ -129,6 +129,22 @@ public class BotInventoryController {
         itemManager.onItemUsed(slot);
     }
 
+    public boolean consumeItem(int slot) {
+        ItemStack stack = getItem(slot);
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+        if (!resourceReplenisher.hasInfiniteResources()) {
+            stack.shrink(1);
+            if (stack.isEmpty()) {
+                setItem(slot, ItemStack.EMPTY);
+            } else {
+                setItem(slot, stack);
+            }
+        }
+        return true;
+    }
+
     public int getItemCount(Item item) {
         return itemChecker.getItemCount(slotManager.getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
     }

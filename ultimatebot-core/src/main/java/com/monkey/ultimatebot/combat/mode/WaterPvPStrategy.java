@@ -23,7 +23,10 @@ final class WaterPvPStrategy extends AbstractCombatModeStrategy {
         context.aimAt(target);
         double distance = context.distanceTo(target);
         boolean inWater = context.bot().isEyeInFluid(FluidTags.WATER) || target.isEyeInFluid(FluidTags.WATER);
-        if (distance >= 4.0D && distance <= 24.0D && specialActionReady()) {
+        if (distance >= 4.0D
+                && distance <= 24.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.SWORD_SLOT)) {
             context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
             context.projectiles().fireTrident(target, context.tuning().aimAccuracy() + (inWater ? 0.05D : 0.0D));
             delaySpecialAction(context);

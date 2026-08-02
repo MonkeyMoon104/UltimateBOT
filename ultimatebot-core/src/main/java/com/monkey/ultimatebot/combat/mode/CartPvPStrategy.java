@@ -41,7 +41,10 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
             return;
         }
         double distance = context.distanceTo(target);
-        if (distance <= 6.0D && distance >= 2.0D && specialActionReady()) {
+        if (distance <= 6.0D
+                && distance >= 2.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.CRYSTAL_SLOT)) {
             Location location = target.getBukkitEntity().getLocation();
             ExplosiveMinecart cart =
                     context.entities().track(location.getWorld().spawn(location, ExplosiveMinecart.class));

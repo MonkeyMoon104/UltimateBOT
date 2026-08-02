@@ -541,7 +541,7 @@ public class BotCPVPController {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (!enabled) {
-            resetPendingActions();
+            clearRuntimeState();
         }
     }
 
@@ -560,6 +560,20 @@ public class BotCPVPController {
         pendingAttackCrystal = null;
         attackPreparationTicks = 0;
         queuedCrystalPlacements.clear();
+    }
+
+    private void clearRuntimeState() {
+        resetPendingActions();
+        myPlacedCrystals.removeIf(crystal -> {
+            if (crystal.isAlive()) {
+                crystal.discard();
+            }
+            return true;
+        });
+        recentPlacements.clear();
+        obsidianCache.clear();
+        crystalCountAtPosition.clear();
+        crystalRecentUsage.clear();
     }
 
     private List<EndCrystal> collectCrystalAttackCandidates(Player target) {

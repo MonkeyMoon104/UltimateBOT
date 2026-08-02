@@ -21,7 +21,10 @@ final class MacePvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.aimAt(target);
         double distance = context.distanceTo(target);
-        if (distance >= 4.0D && distance <= 12.0D && specialActionReady()) {
+        if (distance >= 4.0D
+                && distance <= 12.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.ENDERPEARL_SLOT)) {
             context.inventory().switchToSlot(BotInventoryController.ENDERPEARL_SLOT);
             context.projectiles().fireWindCharge(target, context.tuning().aimAccuracy());
             context.bot().setDeltaMovement(context.bot().getDeltaMovement().add(0.0D, 0.62D, 0.0D));

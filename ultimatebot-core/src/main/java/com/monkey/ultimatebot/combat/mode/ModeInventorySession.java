@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.combat.mode;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import net.minecraft.world.item.ItemStack;
@@ -48,6 +49,7 @@ final class ModeInventorySession implements AutoCloseable {
     @Override
     public void close() {
         restoreOriginalItems();
+        Arrays.fill(originalItems, ItemStack.EMPTY);
         captured = false;
     }
 }

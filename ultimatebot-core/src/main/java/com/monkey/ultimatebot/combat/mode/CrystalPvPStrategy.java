@@ -49,7 +49,10 @@ final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
             return;
         }
         double distance = context.distanceTo(target);
-        if (context.options().isExplosions() && distance <= 6.0D && specialActionReady()) {
+        if (context.options().isExplosions()
+                && distance <= 6.0D
+                && specialActionReady()
+                && context.inventory().consumeItem(BotInventoryController.CRYSTAL_SLOT)) {
             Location location = target.getBukkitEntity().getLocation().add(0.0D, 0.5D, 0.0D);
             EnderCrystal crystal = context.entities().track(location.getWorld().spawn(location, EnderCrystal.class));
             crystal.setShowingBottom(false);
