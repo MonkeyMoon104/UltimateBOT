@@ -5,6 +5,8 @@ import com.monkey.ultimatebot.api.model.BotSource;
 import com.monkey.ultimatebot.api.model.BotTargetMode;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,6 +25,9 @@ public final class BotSnapshotMapper {
         String botDifficulty = "UNKNOWN";
         String minDifficultyLevel = "EASY";
         String maxDifficultyLevel = "GOD";
+        CombatMode combatMode = CombatMode.SWORD;
+        CombatTuning combatTuning = CombatTuning.builder().build();
+        boolean customizedCombatTuning = false;
         int minTotemCount = -1;
         int maxTotemCount = -1;
         Set<UUID> targetUUIDs = Set.of();
@@ -50,6 +55,9 @@ public final class BotSnapshotMapper {
                 botDifficulty = options.getDifficulty().name();
                 minDifficultyLevel = options.getMinDifficulty().name();
                 maxDifficultyLevel = options.getMaxDifficulty().name();
+                combatMode = options.getCombatMode();
+                combatTuning = options.getCombatTuning();
+                customizedCombatTuning = options.getCustomCombatTuning() != null;
                 minTotemCount = options.getMinTotemCount();
                 maxTotemCount = options.getMaxTotemCount();
                 targetUUIDs = options.getTargetUUIDs();
@@ -85,6 +93,9 @@ public final class BotSnapshotMapper {
                 botDifficulty,
                 minDifficultyLevel,
                 maxDifficultyLevel,
+                combatMode,
+                combatTuning,
+                customizedCombatTuning,
                 bot.isFollow(),
                 bot.isCombat(),
                 bot.getTotemCount(),

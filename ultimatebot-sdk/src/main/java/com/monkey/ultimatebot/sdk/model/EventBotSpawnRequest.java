@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.sdk.model;
 
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -44,6 +46,8 @@ import org.jspecify.annotations.Nullable;
  * @param killMessageEnabled whether the built-in kill message is enabled
  * @param killMessage custom kill message, or null for default
  * @param equipmentSlots equipment-slot overrides kept active while the bot is running
+ * @param combatMode selected combat mode
+ * @param combatTuning optional tuning override for the selected mode and difficulty
  */
 public record EventBotSpawnRequest(
         @Nullable UUID ownerUUID,
@@ -80,7 +84,9 @@ public record EventBotSpawnRequest(
         boolean healing,
         boolean killMessageEnabled,
         @Nullable String killMessage,
-        Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
+        Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots,
+        CombatMode combatMode,
+        @Nullable CombatTuning combatTuning) {
     public EventBotSpawnRequest {
         targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs);
         equipmentSlots = equipmentSlots == null ? Map.of() : Map.copyOf(equipmentSlots);
@@ -93,6 +99,7 @@ public record EventBotSpawnRequest(
         Objects.requireNonNull(minDifficulty, "minDifficulty");
         Objects.requireNonNull(maxDifficulty, "maxDifficulty");
         Objects.requireNonNull(targetMode, "targetMode");
+        Objects.requireNonNull(combatMode, "combatMode");
     }
 
     /**
@@ -171,7 +178,9 @@ public record EventBotSpawnRequest(
                 healing,
                 killMessageEnabled,
                 killMessage,
-                Map.of());
+                Map.of(),
+                CombatMode.SWORD,
+                null);
     }
 
     public static Builder builder() {
@@ -233,6 +242,8 @@ public record EventBotSpawnRequest(
         private boolean killMessageEnabled = true;
         private @Nullable String killMessage;
         private Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots = Map.of();
+        private CombatMode combatMode = CombatMode.SWORD;
+        private @Nullable CombatTuning combatTuning;
 
         private Builder() {}
 
@@ -351,6 +362,16 @@ public record EventBotSpawnRequest(
 
         public Builder targetMode(SdkBotTargetMode targetMode) {
             this.targetMode = Objects.requireNonNull(targetMode, "targetMode");
+            return this;
+        }
+
+        public Builder combatMode(CombatMode combatMode) {
+            this.combatMode = Objects.requireNonNull(combatMode, "combatMode");
+            return this;
+        }
+
+        public Builder combatTuning(@Nullable CombatTuning combatTuning) {
+            this.combatTuning = combatTuning;
             return this;
         }
 
@@ -512,7 +533,9 @@ public record EventBotSpawnRequest(
                     healing,
                     killMessageEnabled,
                     killMessage,
-                    equipmentSlots);
+                    equipmentSlots,
+                    combatMode,
+                    combatTuning);
         }
     }
 }

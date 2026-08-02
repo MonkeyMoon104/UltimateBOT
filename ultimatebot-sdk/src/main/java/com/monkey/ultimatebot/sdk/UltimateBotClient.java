@@ -3,9 +3,12 @@ package com.monkey.ultimatebot.sdk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.sdk.model.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.BotOperationResponse;
 import com.monkey.ultimatebot.sdk.model.BotSnapshotResponse;
+import com.monkey.ultimatebot.sdk.model.CombatModeRequest;
 import com.monkey.ultimatebot.sdk.model.EventBotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.SdkBotEquipmentSlot;
 import com.monkey.ultimatebot.sdk.model.SdkBotTargetMode;
@@ -160,6 +163,32 @@ public final class UltimateBotClient implements AutoCloseable {
 
     public BotOperationResponse updateTargetModeByBotUUID(UUID botUUID, SdkBotTargetMode targetMode) {
         return targetMode(botUUID, targetMode);
+    }
+
+    public BotOperationResponse updateCombatMode(UUID ownerUUID, CombatMode combatMode) {
+        return combatMode(ownerUUID, combatMode);
+    }
+
+    public BotOperationResponse updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode) {
+        return combatMode(botUUID, combatMode);
+    }
+
+    public BotOperationResponse updateCombatTuning(UUID ownerOrBotUUID, CombatTuning combatTuning) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        return send(
+                "PATCH",
+                "/bots/" + ownerOrBotUUID + "/combat-tuning",
+                Objects.requireNonNull(combatTuning, "combatTuning"),
+                BotOperationResponse.class);
+    }
+
+    private BotOperationResponse combatMode(UUID ownerOrBotUUID, CombatMode combatMode) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        return send(
+                "PATCH",
+                "/bots/" + ownerOrBotUUID + "/combat-mode",
+                new CombatModeRequest(Objects.requireNonNull(combatMode, "combatMode")),
+                BotOperationResponse.class);
     }
 
     private BotOperationResponse targetMode(UUID ownerOrBotUUID, SdkBotTargetMode targetMode) {

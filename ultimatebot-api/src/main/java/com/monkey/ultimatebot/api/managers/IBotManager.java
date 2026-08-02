@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.api.managers;
 
 import com.monkey.ultimatebot.api.model.*;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -156,6 +158,36 @@ public interface IBotManager {
      * @return {@code true} if update was applied
      */
     boolean updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty);
+
+    /** Changes the active combat mode for an existing bot. */
+    default boolean updateCombatMode(UUID ownerUUID, CombatMode combatMode) {
+        return false;
+    }
+
+    /** Changes the active combat mode using the runtime bot UUID. */
+    default boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode) {
+        return false;
+    }
+
+    /** Overrides tuning for the bot's current combat mode and difficulty. */
+    default boolean updateCombatTuning(UUID ownerUUID, CombatTuning combatTuning) {
+        return false;
+    }
+
+    /** Overrides tuning using the runtime bot UUID. */
+    default boolean updateCombatTuningByBotUUID(UUID botUUID, CombatTuning combatTuning) {
+        return false;
+    }
+
+    /** Restores server tuning for the bot's current combat mode and difficulty. */
+    default boolean resetCombatTuning(UUID ownerUUID) {
+        return false;
+    }
+
+    /** Restores server tuning using the runtime bot UUID. */
+    default boolean resetCombatTuningByBotUUID(UUID botUUID) {
+        return false;
+    }
 
     boolean updateArmor(
             UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);

@@ -72,6 +72,7 @@ final class ApiBotOptionsFactory {
         options.setChangeableArmor(settings.changeableArmor());
         options.setChangeableTotem(settings.changeableTotem());
         options.setChangeableDifficulty(settings.changeableDifficulty());
+        options.setChangeableCombatMode(settings.changeableCombatMode());
 
         BotBlastProtection blast = settings.blastProtectionProfile();
         options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
@@ -83,6 +84,8 @@ final class ApiBotOptionsFactory {
         options.setDifficultyRange(
                 toCoreDifficulty(settings.minDifficulty()), toCoreDifficulty(settings.maxDifficulty()));
         options.setDifficulty(toCoreDifficulty(settings.difficulty()));
+        options.setCombatMode(settings.combatMode());
+        options.setCustomCombatTuning(settings.combatTuning());
         options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
         options.setTotems(settings.totemCount());
         return options;

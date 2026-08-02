@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.sdk.model;
 
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.util.TextValues;
 import java.util.Set;
 import java.util.UUID;
@@ -14,6 +16,9 @@ import org.jspecify.annotations.Nullable;
  * @param botDifficulty selected difficulty profile
  * @param minDifficultyLevel minimum random difficulty profile
  * @param maxDifficultyLevel maximum random difficulty profile
+ * @param combatMode selected combat mode
+ * @param combatTuning resolved combat tuning
+ * @param customizedCombatTuning whether the tuning is an override
  * @param follow whether follow mode is active
  * @param combat whether combat mode is active
  * @param totemCount selected totem count
@@ -46,6 +51,9 @@ public record BotSnapshotResponse(
         String botDifficulty,
         String minDifficultyLevel,
         String maxDifficultyLevel,
+        CombatMode combatMode,
+        CombatTuning combatTuning,
+        boolean customizedCombatTuning,
         boolean follow,
         boolean combat,
         int totemCount,
@@ -75,6 +83,8 @@ public record BotSnapshotResponse(
         botDifficulty = TextValues.orElseIfBlank(botDifficulty, "UNKNOWN");
         minDifficultyLevel = TextValues.orElseIfBlank(minDifficultyLevel, "EASY");
         maxDifficultyLevel = TextValues.orElseIfBlank(maxDifficultyLevel, "GOD");
+        combatMode = combatMode == null ? CombatMode.SWORD : combatMode;
+        combatTuning = combatTuning == null ? CombatTuning.builder().build() : combatTuning;
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
         source = TextValues.orElseIfBlank(source, "CORE");
         targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode;

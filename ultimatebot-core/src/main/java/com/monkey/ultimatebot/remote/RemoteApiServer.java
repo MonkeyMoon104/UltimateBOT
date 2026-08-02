@@ -7,6 +7,8 @@ import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.model.*;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.util.EnumValues;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.metrics.BotMetrics;
@@ -262,6 +264,27 @@ public final class RemoteApiServer {
             return;
         }
 
+        if ("combat-mode".equals(parts[2])) {
+            CombatModePayload payload = readJson(exchange, CombatModePayload.class);
+            CombatMode mode = payload == null ? null : EnumValues.parse(CombatMode.class, payload.combatMode, null);
+            boolean updated = mode != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateCombatMode(ownerUUID, mode)
+                            : manager.updateCombatModeByBotUUID(requestedUUID, mode));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid combat mode.");
+            return;
+        }
+
+        if ("combat-tuning".equals(parts[2])) {
+            CombatTuning tuning = readJson(exchange, CombatTuning.class);
+            boolean updated = tuning != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateCombatTuning(ownerUUID, tuning)
+                            : manager.updateCombatTuningByBotUUID(requestedUUID, tuning));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid combat tuning.");
+            return;
+        }
+
         TogglePayload payload = readJson(exchange, TogglePayload.class);
         boolean enabled = payload != null && Boolean.TRUE.equals(payload.enabled);
         boolean updated =
@@ -299,6 +322,23 @@ public final class RemoteApiServer {
                 exchange,
                 updated ? 200 : 400,
                 new RemoteOperationResponse(updated, updated ? "Bot updated." : "Bot update failed.", snapshot, null));
+    }
+
+    private void writeMutationResult(
+            HttpExchange exchange,
+            IBotManager manager,
+            UUID requestedUUID,
+            UUID ownerUUID,
+            boolean updated,
+            String failureMessage)
+            throws IOException {
+        BotSnapshot snapshot = runSync(() -> ownerUUID != null
+                ? manager.getBot(ownerUUID).orElse(null)
+                : manager.getBotByBotUUID(requestedUUID).orElse(null));
+        writeJson(
+                exchange,
+                updated ? 200 : 400,
+                new RemoteOperationResponse(updated, updated ? "Bot updated." : failureMessage, snapshot, null));
     }
 
     private BotSettings buildSettings(EventBotSpawnPayload payload) {
@@ -349,6 +389,9 @@ public final class RemoteApiServer {
                         com.monkey.ultimatebot.api.model.BotTargetMode.class,
                         safe.targetMode,
                         com.monkey.ultimatebot.api.model.BotTargetMode.PLAYERS))
+                .combatMode(EnumValues.parse(CombatMode.class, safe.combatMode, CombatMode.SWORD))
+                .combatTuning(safe.combatTuning)
+                .changeableCombatMode(defaultBoolean(safe.changeableCombatMode, true))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
                 .stayAfterOwnerDeath(defaultBoolean(safe.stayAfterOwnerDeath, false))
                 .idleWander(defaultBoolean(safe.idleWander, false))
@@ -571,6 +614,7 @@ public final class RemoteApiServer {
         public Boolean changeableArmor;
         public Boolean changeableTotem;
         public Boolean changeableDifficulty;
+        public Boolean changeableCombatMode;
         public String armor;
         public String minArmor;
         public String maxArmor;
@@ -580,6 +624,8 @@ public final class RemoteApiServer {
         public String difficulty;
         public String minDifficulty;
         public String maxDifficulty;
+        public String combatMode;
+        public CombatTuning combatTuning;
         public RemoteLocationPayload spawnLocation;
         public Boolean autoTarget;
         public Double autoTargetRange;
@@ -609,6 +655,10 @@ public final class RemoteApiServer {
 
     public static final class TargetModePayload {
         public String targetMode;
+    }
+
+    public static final class CombatModePayload {
+        public String combatMode;
     }
 
     public static final class RemoteLocationPayload {

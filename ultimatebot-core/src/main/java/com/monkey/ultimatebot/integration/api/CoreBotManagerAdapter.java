@@ -7,6 +7,8 @@ import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.model.*;
 import com.monkey.ultimatebot.bot.*;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
@@ -427,6 +429,69 @@ public final class CoreBotManagerAdapter implements IBotManager {
         options.setDifficulty(proposed.get());
         botManager.setDifficultyLevel(managedOwner, proposed.get());
         return true;
+    }
+
+    @Override
+    public boolean updateCombatMode(UUID ownerUUID, CombatMode combatMode) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null || combatMode == null || !options.isChangeableCombatMode()) {
+            return false;
+        }
+        if (!plugin.getCombatProfileCatalog().configuration(combatMode).enabled()) {
+            return false;
+        }
+        Optional<CombatMode> proposed = proposedChange(
+                managedOwner, BotSettingKey.COMBAT_MODE, options.getCombatMode(), combatMode, CombatMode.class);
+        if (proposed.isEmpty()) {
+            return false;
+        }
+        options.setCombatMode(proposed.get());
+        return true;
+    }
+
+    @Override
+    public boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateCombatMode(ownerUUID, combatMode);
+    }
+
+    @Override
+    public boolean updateCombatTuning(UUID ownerUUID, CombatTuning combatTuning) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null || combatTuning == null || !options.isChangeableCombatMode()) {
+            return false;
+        }
+        Optional<CombatTuning> proposed = proposedChange(
+                managedOwner, BotSettingKey.COMBAT_TUNING, options.getCombatTuning(), combatTuning, CombatTuning.class);
+        if (proposed.isEmpty()) {
+            return false;
+        }
+        options.setCustomCombatTuning(proposed.get());
+        return true;
+    }
+
+    @Override
+    public boolean updateCombatTuningByBotUUID(UUID botUUID, CombatTuning combatTuning) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && updateCombatTuning(ownerUUID, combatTuning);
+    }
+
+    @Override
+    public boolean resetCombatTuning(UUID ownerUUID) {
+        BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
+        if (options == null || !options.isChangeableCombatMode()) {
+            return false;
+        }
+        options.resetCombatTuning();
+        return true;
+    }
+
+    @Override
+    public boolean resetCombatTuningByBotUUID(UUID botUUID) {
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID != null && resetCombatTuning(ownerUUID);
     }
 
     @Override

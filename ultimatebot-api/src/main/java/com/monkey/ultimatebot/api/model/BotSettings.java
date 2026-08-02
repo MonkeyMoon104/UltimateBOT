@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.api.model;
 
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +34,7 @@ public final class BotSettings {
     private final boolean changeableArmor;
     private final boolean changeableTotem;
     private final boolean changeableDifficulty;
+    private final boolean changeableCombatMode;
     private final String botNameTemplate;
     private final BotSkin botSkin;
     private final BotArmorType armorType;
@@ -43,6 +46,8 @@ public final class BotSettings {
     private final DifficultyLevel difficulty;
     private final DifficultyLevel minDifficulty;
     private final DifficultyLevel maxDifficulty;
+    private final CombatMode combatMode;
+    private final @Nullable CombatTuning combatTuning;
     private final @Nullable BotLocation spawnLocation;
     private final boolean autoTarget;
     private final double autoTargetRange;
@@ -76,6 +81,7 @@ public final class BotSettings {
         this.changeableArmor = builder.changeableArmor;
         this.changeableTotem = builder.changeableTotem;
         this.changeableDifficulty = builder.changeableDifficulty;
+        this.changeableCombatMode = builder.changeableCombatMode;
         this.botNameTemplate = builder.botNameTemplate;
         this.botSkin = builder.botSkin;
         this.armorType = builder.armorType;
@@ -87,6 +93,8 @@ public final class BotSettings {
         this.difficulty = builder.difficulty;
         this.minDifficulty = builder.minDifficulty;
         this.maxDifficulty = builder.maxDifficulty;
+        this.combatMode = builder.combatMode;
+        this.combatTuning = builder.combatTuning;
         this.spawnLocation = builder.spawnLocation;
         this.autoTarget = builder.autoTarget;
         this.autoTargetRange = builder.autoTargetRange;
@@ -307,6 +315,21 @@ public final class BotSettings {
      */
     public DifficultyLevel maxDifficulty() {
         return maxDifficulty;
+    }
+
+    /** Returns the selected combat mode. */
+    public CombatMode combatMode() {
+        return combatMode;
+    }
+
+    /** Returns a custom tuning override, or {@code null} to use the server profile. */
+    public @Nullable CombatTuning combatTuning() {
+        return combatTuning;
+    }
+
+    /** Returns whether players may change the combat mode from the bot GUI. */
+    public boolean changeableCombatMode() {
+        return changeableCombatMode;
     }
 
     public @Nullable BotLocation spawnLocation() {
@@ -746,6 +769,12 @@ public final class BotSettings {
 
         BuildStep targetMode(BotTargetMode targetMode);
 
+        BuildStep combatMode(CombatMode combatMode);
+
+        BuildStep combatTuning(@Nullable CombatTuning combatTuning);
+
+        BuildStep changeableCombatMode(boolean changeableCombatMode);
+
         BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp);
 
         BuildStep stayAfterOwnerDeath(boolean stayAfterOwnerDeath);
@@ -817,6 +846,7 @@ public final class BotSettings {
         private boolean changeableArmor;
         private boolean changeableTotem;
         private boolean changeableDifficulty;
+        private boolean changeableCombatMode = true;
         private String botNameTemplate = "";
         private BotSkin botSkin = BotSkin.random();
         private BotArmorType armorType = BotArmorType.LEATHER;
@@ -828,6 +858,8 @@ public final class BotSettings {
         private DifficultyLevel difficulty = DifficultyLevel.EASY;
         private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
         private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
+        private CombatMode combatMode = CombatMode.SWORD;
+        private @Nullable CombatTuning combatTuning;
         private @Nullable BotLocation spawnLocation;
         private boolean autoTarget = false;
         private double autoTargetRange = 16.0D;
@@ -1057,6 +1089,24 @@ public final class BotSettings {
         }
 
         @Override
+        public BuildStep combatMode(CombatMode combatMode) {
+            this.combatMode = Objects.requireNonNull(combatMode, "combatMode");
+            return this;
+        }
+
+        @Override
+        public BuildStep combatTuning(@Nullable CombatTuning combatTuning) {
+            this.combatTuning = combatTuning;
+            return this;
+        }
+
+        @Override
+        public BuildStep changeableCombatMode(boolean changeableCombatMode) {
+            this.changeableCombatMode = changeableCombatMode;
+            return this;
+        }
+
+        @Override
         public BuildStep respectWorldGuardPvp(boolean respectWorldGuardPvp) {
             this.respectWorldGuardPvp = respectWorldGuardPvp;
             return this;
@@ -1183,6 +1233,7 @@ public final class BotSettings {
             Objects.requireNonNull(difficulty, "difficulty");
             Objects.requireNonNull(minDifficulty, "minDifficulty");
             Objects.requireNonNull(maxDifficulty, "maxDifficulty");
+            Objects.requireNonNull(combatMode, "combatMode");
             Objects.requireNonNull(botSkin, "botSkin");
             if (botNameTemplate == null || botNameTemplate.isBlank()) {
                 throw new IllegalArgumentException("botNameTemplate cannot be blank");
