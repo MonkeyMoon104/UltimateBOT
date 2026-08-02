@@ -18,7 +18,9 @@ final class ModeBlockTracker implements AutoCloseable {
         Objects.requireNonNull(location, "location");
         Material checkedMaterial = Objects.requireNonNull(material, "material");
         Block block = location.getBlock();
-        if (!block.isPassable() || block.isLiquid()) {
+        if (!block.isPassable()
+                || block.isLiquid()
+                || !block.getRelative(0, -1, 0).getType().isSolid()) {
             return false;
         }
         blocks.add(BlockKey.from(block));

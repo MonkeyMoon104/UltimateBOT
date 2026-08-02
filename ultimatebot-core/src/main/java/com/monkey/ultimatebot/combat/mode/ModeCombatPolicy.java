@@ -22,4 +22,8 @@ final class ModeCombatPolicy {
     static boolean shouldUsePotions(double healthRatio, double healingThreshold, boolean specialActionReady) {
         return healthRatio <= healingThreshold && specialActionReady;
     }
+
+    static double projectileSpread(double accuracy) {
+        return (1.0D - Math.clamp(accuracy, 0.0D, 1.0D)) * 0.24D;
+    }
 }

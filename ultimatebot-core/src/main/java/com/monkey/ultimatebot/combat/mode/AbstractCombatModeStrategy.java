@@ -36,9 +36,7 @@ abstract class AbstractCombatModeStrategy implements CombatModeStrategy {
 
     @Override
     public void exit(CombatModeContext context) {
-        if (context.bot().isUsingItem()) {
-            context.bot().releaseUsingItem();
-        }
+        context.actions().releaseUseItem();
         context.anchor().disable();
         context.crystal().setEnabled(false);
         context.motion().setSwimming(false);

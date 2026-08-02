@@ -17,6 +17,7 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
 
     private Phase phase = Phase.PREPARE_WATER;
     private int phaseTicks;
+    private @Nullable Location waterLocation;
     private @Nullable Location trapLocation;
     private @Nullable Location spongeLocation;
 
@@ -30,13 +31,13 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(WEB_SLOT, Items.COBWEB, 16)
                         .slot(SPONGE_SLOT, Items.SPONGE, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .diamondArmor()
                         .build());
     }
 
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
+        waterLocation = null;
         trapLocation = null;
         spongeLocation = null;
         transitionTo(Phase.PREPARE_WATER);
@@ -67,9 +68,12 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
             Location placement = Objects.requireNonNull(context.bukkitBot().getLocation(), "bot location")
                     .getBlock()
                     .getLocation();
-            context.placeTemporaryBlock(placement, Material.WATER);
+            if (context.placeTemporaryBlock(placement, Material.WATER)) {
+                waterLocation = placement;
+            }
         }
         if (phaseTicks >= 4) {
+            restoreWater(context);
             transitionTo(context.motion().isBotInWater() ? Phase.RIPTIDE : Phase.LOYALTY_THROW);
         }
     }
@@ -172,6 +176,13 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         if (spongeLocation != null) {
             context.restoreTemporaryBlock(spongeLocation);
             spongeLocation = null;
+        }
+    }
+
+    private void restoreWater(CombatModeContext context) {
+        if (waterLocation != null) {
+            context.restoreTemporaryBlock(waterLocation);
+            waterLocation = null;
         }
     }
 

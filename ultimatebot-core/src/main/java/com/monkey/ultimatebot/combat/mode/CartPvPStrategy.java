@@ -33,7 +33,6 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(RAIL_SLOT, Items.RAIL, 64)
                         .slot(CART_SLOT, Items.TNT_MINECART, 64)
                         .slot(ARROW_SLOT, Items.ARROW, 64)
-                        .netheriteArmor()
                         .build());
     }
 
@@ -77,7 +76,7 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                 context.bot().getY(),
                 target.getY(),
                 context.actions().targetHealthRatio(target),
-                currentTick() % 60L == 0L);
+                currentTick() >= Math.max(10L, context.tuning().reactionTicks() * 2L));
         if (opportunity && specialActionReady()) {
             transitionTo(Phase.FIRE_ARROW);
             return;

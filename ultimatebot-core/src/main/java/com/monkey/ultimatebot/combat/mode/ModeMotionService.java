@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -94,6 +95,27 @@ final class ModeMotionService {
 
     void setSwimming(boolean swimming) {
         bot.setSwimming(swimming);
+    }
+
+    boolean hasVerticalClearance(LivingEntity entity, int clearanceBlocks) {
+        double radius = Math.min(0.35D, entity.getBbWidth() * 0.45D);
+        double startY = entity.getY() + entity.getBbHeight() + 0.05D;
+        double[] offsets = {-radius, radius};
+        for (double xOffset : offsets) {
+            for (double zOffset : offsets) {
+                BlockPos start = BlockPos.containing(entity.getX() + xOffset, startY, entity.getZ() + zOffset);
+                for (int height = 0; height < clearanceBlocks; height++) {
+                    BlockPos position = start.above(height);
+                    if (!entity.level()
+                            .getBlockState(position)
+                            .getCollisionShape(entity.level(), position)
+                            .isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     private void moveRelativeTo(LivingEntity target, double desiredDistance, boolean away) {

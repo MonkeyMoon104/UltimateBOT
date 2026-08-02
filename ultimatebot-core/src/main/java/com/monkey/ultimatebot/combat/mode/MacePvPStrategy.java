@@ -19,7 +19,6 @@ final class MacePvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.ENDERPEARL_SLOT, Items.WIND_CHARGE, 64)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Items.COBWEB, 64)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .netheriteArmor()
                         .build());
     }
 
@@ -44,6 +43,18 @@ final class MacePvPStrategy extends AbstractCombatModeStrategy {
 
     private void approachLaunchWindow(CombatModeContext context, LivingEntity target) {
         double horizontalDistance = context.motion().horizontalDistanceTo(target);
+        if (!context.motion().hasVerticalClearance(target, 5)) {
+            if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+                context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+            } else {
+                context.motion().approach(target, 1.8D);
+            }
+            return;
+        }
+        if (!context.motion().hasVerticalClearance(context.bot(), 6)) {
+            context.motion().strafe(target, 2.2D);
+            return;
+        }
         if (horizontalDistance > 4.5D) {
             context.motion().approach(target, 3.4D);
             return;
@@ -64,6 +75,10 @@ final class MacePvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void ascendAboveTarget(CombatModeContext context, LivingEntity target) {
+        if (!context.motion().hasVerticalClearance(context.bot(), 2)) {
+            transitionTo(Phase.RECOVER);
+            return;
+        }
         double verticalVelocity = context.bot().getDeltaMovement().y;
         context.motion().steerVelocityTowards(target, 0.22D, verticalVelocity);
         if (context.motion().heightAbove(target) >= 3.0D && verticalVelocity <= 0.12D) {

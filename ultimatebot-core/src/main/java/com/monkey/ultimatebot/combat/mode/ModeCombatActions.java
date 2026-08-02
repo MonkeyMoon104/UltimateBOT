@@ -47,15 +47,23 @@ final class ModeCombatActions {
     }
 
     void defendWithOffhand() {
-        if (!bot.isUsingItem()) {
-            bot.startUsingItem(InteractionHand.OFF_HAND);
+        inventory.startUsingItem(InteractionHand.OFF_HAND);
+    }
+
+    void defendWithMainhand() {
+        inventory.startUsingItem(InteractionHand.MAIN_HAND);
+    }
+
+    boolean isIncomingAttackLikely(LivingEntity target) {
+        if (bot.distanceTo(target) > 3.6D) {
+            return false;
         }
+        return !(target instanceof Player player)
+                || (!player.isUsingItem() && player.getAttackStrengthScale(0.5F) >= 0.82F);
     }
 
     void releaseUseItem() {
-        if (bot.isUsingItem()) {
-            bot.releaseUsingItem();
-        }
+        inventory.releaseUsingItem();
     }
 
     void applyInstantHealth(int amplifier) {
@@ -63,6 +71,14 @@ final class ModeCombatActions {
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
         bukkitBot.getWorld().spawnParticle(Particle.INSTANT_EFFECT, location, 18, 0.4D, 0.5D, 0.4D, 0.1D);
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.0F);
+    }
+
+    void applyCombatBuffs() {
+        bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 1, false, false, false));
+        bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 3600, 0, false, false, false));
+        Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
+        bukkitBot.getWorld().spawnParticle(Particle.EFFECT, location, 24, 0.35D, 0.7D, 0.35D, 0.08D);
+        bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.15F);
     }
 
     void consumeGoldenApple(int slot) {

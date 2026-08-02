@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.impl.*;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;
@@ -10,9 +11,11 @@ import xyz.xenondevs.invui.item.impl.SimpleItem;
 public class KitTab {
 
     private final BotGuiTabContext context;
+    private final Runnable refreshModeDependents;
 
-    public KitTab(BotGuiTabContext context) {
-        this.context = context;
+    public KitTab(BotGuiTabContext context, Runnable refreshModeDependents) {
+        this.context = Objects.requireNonNull(context, "context");
+        this.refreshModeDependents = Objects.requireNonNull(refreshModeDependents, "refreshModeDependents");
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -35,7 +38,7 @@ public class KitTab {
                                 ? new TeleportItem(context.getTraining())
                                 : new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
-                .addIngredient('o', new CombatModeItem(context.getTraining(), options))
+                .addIngredient('o', new CombatModeItem(context.getTraining(), options, refreshModeDependents))
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
 

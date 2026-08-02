@@ -16,7 +16,6 @@ final class SwordPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.SWORD_SLOT, Items.DIAMOND_SWORD)
                         .slot(BotInventoryController.ENDERPEARL_SLOT, Items.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .diamondArmor()
                         .build());
     }
 

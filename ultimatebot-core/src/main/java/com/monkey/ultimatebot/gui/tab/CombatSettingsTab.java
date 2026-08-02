@@ -11,9 +11,11 @@ import xyz.xenondevs.invui.gui.Gui;
 
 public final class CombatSettingsTab {
     private final BotGuiTabContext context;
+    private final Runnable refreshModeDependents;
 
-    public CombatSettingsTab(BotGuiTabContext context) {
+    public CombatSettingsTab(BotGuiTabContext context, Runnable refreshModeDependents) {
         this.context = Objects.requireNonNull(context, "context");
+        this.refreshModeDependents = Objects.requireNonNull(refreshModeDependents, "refreshModeDependents");
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -22,7 +24,7 @@ public final class CombatSettingsTab {
                 .setStructure(
                         "# m d . . r . #", "# a b c e f g #", "# h i j k l n #", "# o p . . . . #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
-                .addIngredient('m', new CombatModeItem(context.getTraining(), options))
+                .addIngredient('m', new CombatModeItem(context.getTraining(), options, refreshModeDependents))
                 .addIngredient('d', new DifficultyItem(context.getTraining(), options))
                 .addIngredient('r', new ResetCombatTuningItem(options))
                 .addIngredient('a', tuning(CombatTuningProperty.ATTACK_RANGE))

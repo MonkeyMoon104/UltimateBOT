@@ -13,6 +13,7 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
 
     private Phase phase = Phase.PRESSURE;
     private int phaseTicks;
+    private long nextShieldTick;
 
     SmpPvPStrategy() {
         super(
@@ -24,13 +25,13 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(PEARL_SLOT, Items.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.ENCHANTED_GOLDEN_APPLE, 64)
                         .equipment(EquipmentSlot.OFFHAND, Items.TOTEM_OF_UNDYING)
-                        .netheriteArmor()
                         .build());
     }
 
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
+        nextShieldTick = 0L;
         transitionTo(Phase.PRESSURE);
     }
 
@@ -40,7 +41,7 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
         phaseTicks++;
         switch (phase) {
             case PRESSURE -> pressure(context, target);
-            case SHIELD_RESET -> shieldReset(context, target);
+            case SHIELD_DEFEND -> shieldDefend(context, target);
             case DISENGAGE -> disengage(context, target);
             case PEARL_ESCAPE -> pearlEscape(context, target);
             case HEAL -> heal(context);
@@ -54,29 +55,31 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
             transitionTo(Phase.DISENGAGE);
             return;
         }
-        if (context.movement().hasRecentDamage() && phaseTicks >= 6) {
-            transitionTo(Phase.SHIELD_RESET);
+        if (currentTick() >= nextShieldTick && context.actions().isIncomingAttackLikely(target)) {
+            transitionTo(Phase.SHIELD_DEFEND);
             return;
         }
         double distance = context.motion().distanceTo(target);
         if (distance <= context.tuning().attackRange()) {
-            context.actions()
-                    .attack(
-                            target,
-                            context.actions().isTargetBlocking(target) ? AXE_SLOT : BotInventoryController.SWORD_SLOT);
+            int weapon = context.actions().isTargetBlocking(target) ? AXE_SLOT : BotInventoryController.SWORD_SLOT;
+            context.actions().attack(target, weapon);
         } else {
             context.motion().approach(target, 1.75D);
         }
     }
 
-    private void shieldReset(CombatModeContext context, LivingEntity target) {
+    private void shieldDefend(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(SHIELD_SLOT);
-        if (!context.bot().isUsingItem()) {
-            context.bot().startUsingItem(net.minecraft.world.InteractionHand.MAIN_HAND);
+        context.actions().defendWithMainhand();
+        if (context.motion().distanceTo(target) > 2.8D) {
+            context.motion().approach(target, 2.3D);
+        } else {
+            context.motion().strafe(target, 0.75D);
         }
-        context.motion().retreat(target, 4.0D);
-        if (phaseTicks >= 7) {
+        boolean attackWindowOpened = phaseTicks >= 2 && !context.actions().isIncomingAttackLikely(target);
+        if (attackWindowOpened || phaseTicks >= 12) {
             context.actions().releaseUseItem();
+            nextShieldTick = currentTick() + Math.max(5L, context.tuning().reactionTicks());
             transitionTo(Phase.PRESSURE);
         }
     }
@@ -123,7 +126,7 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
 
     private enum Phase {
         PRESSURE,
-        SHIELD_RESET,
+        SHIELD_DEFEND,
         DISENGAGE,
         PEARL_ESCAPE,
         HEAL,

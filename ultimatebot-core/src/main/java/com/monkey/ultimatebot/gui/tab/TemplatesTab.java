@@ -4,6 +4,8 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.impl.ArmorItem;
 import com.monkey.ultimatebot.gui.impl.TrimMaterialSelectorItem;
 import com.monkey.ultimatebot.gui.impl.TrimPatternSelectorItem;
+import java.util.List;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -13,9 +15,10 @@ import xyz.xenondevs.invui.item.impl.SimpleItem;
 public class TemplatesTab {
 
     private final BotGuiTabContext context;
+    private List<ArmorItem> armorItems = List.of();
 
     public TemplatesTab(BotGuiTabContext context) {
-        this.context = context;
+        this.context = Objects.requireNonNull(context, "context");
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -28,6 +31,7 @@ public class TemplatesTab {
                 context.getTraining(), EquipmentSlot.LEGS, options.getArmor().get(EquipmentSlot.LEGS), options);
         ArmorItem bootsItem = new ArmorItem(
                 context.getTraining(), EquipmentSlot.FEET, options.getArmor().get(EquipmentSlot.FEET), options);
+        armorItems = List.of(helmetItem, chestItem, legsItem, bootsItem);
 
         Gui gui = Gui.normal()
                 .setStructure(
@@ -62,5 +66,9 @@ public class TemplatesTab {
                 .build();
 
         return gui;
+    }
+
+    public void refreshArmorItems() {
+        armorItems.forEach(ArmorItem::notifyWindows);
     }
 }

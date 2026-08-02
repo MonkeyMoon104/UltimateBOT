@@ -59,11 +59,13 @@ final class ModeProjectileService {
         org.bukkit.entity.Entity targetEntity = target.getBukkitEntity();
         Location destination = targetEntity.getLocation().add(0.0D, target.getBbHeight() * 0.65D, 0.0D);
         Vector direction = destination.toVector().subtract(origin.toVector()).normalize();
-        double spread = Math.max(0.0D, 1.0D - accuracy) * 0.24D;
-        direction.add(new Vector(
-                random.nextDouble(-spread, spread),
-                random.nextDouble(-spread * 0.5D, spread * 0.5D),
-                random.nextDouble(-spread, spread)));
+        double spread = ModeCombatPolicy.projectileSpread(accuracy);
+        if (spread > 0.0D) {
+            direction.add(new Vector(
+                    random.nextDouble(-spread, spread),
+                    random.nextDouble(-spread * 0.5D, spread * 0.5D),
+                    random.nextDouble(-spread, spread)));
+        }
         return direction.normalize().multiply(speed);
     }
 }

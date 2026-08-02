@@ -65,20 +65,6 @@ final class ModeKit {
             return this;
         }
 
-        Builder netheriteArmor() {
-            return equipment(EquipmentSlot.HEAD, net.minecraft.world.item.Items.NETHERITE_HELMET)
-                    .equipment(EquipmentSlot.CHEST, net.minecraft.world.item.Items.NETHERITE_CHESTPLATE)
-                    .equipment(EquipmentSlot.LEGS, net.minecraft.world.item.Items.NETHERITE_LEGGINGS)
-                    .equipment(EquipmentSlot.FEET, net.minecraft.world.item.Items.NETHERITE_BOOTS);
-        }
-
-        Builder diamondArmor() {
-            return equipment(EquipmentSlot.HEAD, net.minecraft.world.item.Items.DIAMOND_HELMET)
-                    .equipment(EquipmentSlot.CHEST, net.minecraft.world.item.Items.DIAMOND_CHESTPLATE)
-                    .equipment(EquipmentSlot.LEGS, net.minecraft.world.item.Items.DIAMOND_LEGGINGS)
-                    .equipment(EquipmentSlot.FEET, net.minecraft.world.item.Items.DIAMOND_BOOTS);
-        }
-
         ModeKit build() {
             return new ModeKit(slots, equipment);
         }

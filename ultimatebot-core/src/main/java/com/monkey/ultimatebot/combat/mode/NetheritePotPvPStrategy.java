@@ -10,7 +10,7 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private static final int FIRST_POTION_SLOT = BotInventoryController.ENDERPEARL_SLOT;
     private static final int SECOND_POTION_SLOT = BotInventoryController.TOTEM_SLOT;
 
-    private Phase phase = Phase.TRADE;
+    private Phase phase = Phase.PREBUFF;
     private int phaseTicks;
 
     NetheritePotPvPStrategy() {
@@ -23,14 +23,13 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Items.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
                         .equipment(EquipmentSlot.OFFHAND, Items.TOTEM_OF_UNDYING)
-                        .netheriteArmor()
                         .build());
     }
 
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
-        transitionTo(Phase.TRADE);
+        transitionTo(Phase.PREBUFF);
     }
 
     @Override
@@ -38,12 +37,23 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
         context.motion().aimAt(target);
         phaseTicks++;
         switch (phase) {
+            case PREBUFF -> prebuff(context);
             case TRADE -> trade(context, target);
             case CREATE_DISTANCE -> createDistance(context, target);
             case FIRST_SPLASH -> splash(context, FIRST_POTION_SLOT, Phase.SECOND_SPLASH);
             case SECOND_SPLASH -> splash(context, SECOND_POTION_SLOT, Phase.REENTER);
             case EAT_GAPPLE -> eatGapple(context);
             case REENTER -> reenter(context, target);
+        }
+    }
+
+    private void prebuff(CombatModeContext context) {
+        if (phaseTicks == 1 && context.inventory().consumeItem(FIRST_POTION_SLOT)) {
+            context.inventory().switchToSlot(FIRST_POTION_SLOT);
+            context.actions().applyCombatBuffs();
+        }
+        if (phaseTicks >= 5) {
+            transitionTo(Phase.TRADE);
         }
     }
 
@@ -115,6 +125,7 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private enum Phase {
+        PREBUFF,
         TRADE,
         CREATE_DISTANCE,
         FIRST_SPLASH,

@@ -35,7 +35,6 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
                         .slot(ARROW_SLOT, Items.ARROW, 64)
                         .equipment(EquipmentSlot.OFFHAND, Items.SHIELD)
-                        .diamondArmor()
                         .build());
     }
 

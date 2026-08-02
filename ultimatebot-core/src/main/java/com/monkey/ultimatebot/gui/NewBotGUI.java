@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.combat.mode.CombatModeLoadoutDefaults;
 import com.monkey.ultimatebot.gui.impl.BotTabItem;
 import com.monkey.ultimatebot.gui.tab.*;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
@@ -54,6 +55,7 @@ public class NewBotGUI {
         if (options == null) {
             options = new BotOptions(
                     training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
+            CombatModeLoadoutDefaults.applyArmor(options, options.getCombatMode());
         }
 
         options.setBotType(botType);
@@ -74,11 +76,13 @@ public class NewBotGUI {
         BotGuiTabContext tabContext = new BotGuiTabContext(player, training, options, botType);
         String translatedBorderName = ChatColorUtils.translate(borderName);
 
-        Gui tab0 = new KitTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab1 = new TemplatesTab(tabContext).build(borderMat, translatedBorderName);
+        TemplatesTab templatesTab = new TemplatesTab(tabContext);
+        Gui tab1 = templatesTab.build(borderMat, translatedBorderName);
+        Gui tab0 = new KitTab(tabContext, templatesTab::refreshArmorItems).build(borderMat, translatedBorderName);
         Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab4 = new CombatSettingsTab(tabContext).build(borderMat, translatedBorderName);
+        Gui tab4 = new CombatSettingsTab(tabContext, templatesTab::refreshArmorItems)
+                .build(borderMat, translatedBorderName);
 
         Gui tabGui = TabGui.normal()
                 .setStructure(
