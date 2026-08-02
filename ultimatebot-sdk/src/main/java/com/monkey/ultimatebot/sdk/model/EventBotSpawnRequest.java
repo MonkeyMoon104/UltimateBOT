@@ -103,7 +103,7 @@ public record EventBotSpawnRequest(
     }
 
     /**
-     * Creates a spawn request using the pre-1.5.0 component set.
+     * Creates a spawn request using the legacy component set.
      *
      * <p>This overload preserves binary compatibility for integrations compiled against older SDK
      * releases. The bot UUID is generated automatically and all equipment slots use their normal

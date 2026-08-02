@@ -47,7 +47,7 @@ class AddonLoaderTest {
     private static byte[] descriptor() throws Exception {
         String sha256 =
                 HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ADDON_BYTES));
-        return ("version=1.5.0\n"
+        return ("version=2.0.0\n"
                         + "url=https://example.invalid/Test-Addon.jar\n"
                         + "sha256="
                         + sha256

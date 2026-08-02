@@ -8,7 +8,7 @@ class MetricsBackendContextTest {
     @Test
     void exposesJavaOnlyRuntimeSuppliers() {
         MetricsBackendContext context =
-                new MetricsBackendContext(true, "1.5.0", "1.21.4", () -> 1, () -> 2L, () -> 3L, () -> 4L, () -> 5L);
+                new MetricsBackendContext(true, "2.0.0", "1.21.4", () -> 1, () -> 2L, () -> 3L, () -> 4L, () -> 5L);
 
         assertThat(context.activeBots().getAsInt()).isEqualTo(1);
         assertThat(context.targetCacheSize().getAsLong()).isEqualTo(2L);

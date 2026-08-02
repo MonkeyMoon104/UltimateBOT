@@ -11,7 +11,7 @@ class MicrometerMetricsBackendTest {
     @Test
     void exposesRuntimeEventCacheAndHttpMetrics() {
         MetricsBackendContext context =
-                new MetricsBackendContext(true, "1.5.0", "1.21.4", () -> 2, () -> 3L, () -> 5L, () -> 7L, () -> 11L);
+                new MetricsBackendContext(true, "2.0.0", "1.21.4", () -> 2, () -> 3L, () -> 5L, () -> 7L, () -> 11L);
 
         try (MetricsBackend metrics = new MicrometerMetricsBackendFactory().create(context)) {
             metrics.recordEvent("TestBotEvent", false);
