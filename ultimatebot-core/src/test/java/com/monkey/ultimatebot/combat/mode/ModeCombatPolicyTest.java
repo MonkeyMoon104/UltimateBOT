@@ -38,4 +38,12 @@ class ModeCombatPolicyTest {
         assertThat(ModeCombatPolicy.shouldUsePotions(0.6D, 0.5D, true)).isFalse();
         assertThat(ModeCombatPolicy.shouldUsePotions(0.4D, 0.5D, false)).isFalse();
     }
+
+    @Test
+    void projectileSpreadIsSafeAtPerfectAndOutOfRangeAccuracy() {
+        assertThat(ModeCombatPolicy.projectileSpread(1.0D)).isZero();
+        assertThat(ModeCombatPolicy.projectileSpread(1.5D)).isZero();
+        assertThat(ModeCombatPolicy.projectileSpread(0.5D)).isEqualTo(0.12D);
+        assertThat(ModeCombatPolicy.projectileSpread(-0.5D)).isEqualTo(0.24D);
+    }
 }
