@@ -107,6 +107,7 @@ val javaLoggingJmod = File(proguardJdkHome, "jmods/java.logging.jmod")
 
 evaluationDependsOn(":addons:metrics")
 evaluationDependsOn(":addons:guard")
+evaluationDependsOn(":ultimatebot-core")
 val metricsAddonJarTask = project(":addons:metrics").tasks.named<ShadowJar>("shadowJar")
 val guardAddonJarTask = project(":addons:guard").tasks.named<Jar>("jar")
 val metricsAddonDescriptorFile = layout.buildDirectory.file("generated/addons/metrics.properties")
@@ -188,16 +189,6 @@ val proguardLibraries = files(
     javaBaseJmod,
     javaLoggingJmod,
     externalClasspathFor(project(":ultimatebot-core")),
-    externalClasspathFor(project(":versions:v1_21_4")),
-    externalClasspathFor(project(":versions:v1_21_5")),
-    externalClasspathFor(project(":versions:v1_21_6")),
-    externalClasspathFor(project(":versions:v1_21_7")),
-    externalClasspathFor(project(":versions:v1_21_8")),
-    externalClasspathFor(project(":versions:v1_21_9")),
-    externalClasspathFor(project(":versions:v1_21_10")),
-    externalClasspathFor(project(":versions:v1_21_11")),
-    externalClasspathFor(project(":versions:v26_1")),
-    externalClasspathFor(project(":versions:v26_2")),
 )
 
 if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
