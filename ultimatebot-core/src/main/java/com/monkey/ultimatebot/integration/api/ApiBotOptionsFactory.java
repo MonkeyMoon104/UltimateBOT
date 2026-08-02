@@ -1,0 +1,124 @@
+package com.monkey.ultimatebot.integration.api;
+
+import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.api.model.BotArmorType;
+import com.monkey.ultimatebot.api.model.BotBlastProtection;
+import com.monkey.ultimatebot.api.model.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.BotRank;
+import com.monkey.ultimatebot.api.model.BotSettings;
+import com.monkey.ultimatebot.bot.BotCreationSource;
+import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.BotType;
+import com.monkey.ultimatebot.utils.armor.ArmorCycle;
+import com.monkey.ultimatebot.utils.armor.ArmorTier;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+/** Maps the public API settings model into the mutable runtime options model. */
+final class ApiBotOptionsFactory {
+
+    private final UltimateBot plugin;
+
+    ApiBotOptionsFactory(UltimateBot plugin) {
+        this.plugin = plugin;
+    }
+
+    BotOptions create(
+            BotType type,
+            UUID ownerUUID,
+            UUID targetUUID,
+            Set<UUID> targetUUIDs,
+            Set<UUID> teamOwners,
+            UUID requestedBotUUID,
+            Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots,
+            BotSettings settings) {
+        BotOptions options =
+                new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
+        options.setBotType(type);
+        options.setCreationSource(BotCreationSource.API);
+        options.setRequestedBotUUID(requestedBotUUID);
+        options.setEquipmentSlotSettings(equipmentSlots);
+        options.setOwnerUUID(ownerUUID);
+        options.setBotNameTemplate(settings.botNameTemplate());
+        options.setBotSkin(settings.botSkin());
+        options.setSpawnLocation(settings.spawnLocation());
+        options.setAutoTarget(settings.autoTarget());
+        options.setAutoTargetRange(settings.autoTargetRange());
+        options.setAttackBots(settings.attackBots());
+        options.setTargetMode(settings.targetMode());
+        options.setRespectWorldGuardPvp(settings.respectWorldGuardPvp());
+        options.setStayAfterOwnerDeath(settings.stayAfterOwnerDeath());
+        options.setIdleWander(settings.idleWander());
+        options.setIdleWanderRadius(settings.idleWanderRadius());
+        options.setIdleReturnDistance(settings.idleReturnDistance());
+        options.setIdleReturnDelayMs(settings.idleReturnDelayMs());
+        options.setCrystalPvp(settings.crystalPvp());
+        options.setExplosions(settings.explosions());
+        options.setExplosionBlockDamage(settings.explosionBlockDamage());
+        options.setEnderPearls(settings.enderPearls());
+        options.setHealing(settings.healing());
+        options.setKillMessageEnabled(settings.killMessageEnabled());
+        options.setCustomKillMessage(settings.killMessage());
+        options.setPreferredTargetUUID(targetUUID);
+        options.setTargetUUIDs(targetUUIDs);
+        options.setTeamOwnerUUIDs(teamOwners);
+        options.setFollow(settings.follow());
+        options.setCombat(settings.combat());
+        options.setChangeableFollow(settings.changeableFollow());
+        options.setChangeableCombat(settings.changeableCombat());
+        options.setChangeableBlast(settings.changeableBlast());
+        options.setChangeableArmor(settings.changeableArmor());
+        options.setChangeableTotem(settings.changeableTotem());
+        options.setChangeableRank(settings.changeableRank());
+
+        BotBlastProtection blast = settings.blastProtectionProfile();
+        options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
+        options.setArmorRange(toCoreArmor(settings.minArmorType()), toCoreArmor(settings.maxArmorType()));
+        options.setArmorType(toCoreArmor(settings.armorType()));
+        options.getArmor().putAll(settings.armorContents());
+        copyTrimSettings(options, settings);
+        options.setEquipmentContents(settings.equipmentContents());
+        options.setRankRange(toCoreRank(settings.minRank()), toCoreRank(settings.maxRank()));
+        options.setRank(toCoreRank(settings.rank()));
+        options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
+        options.setTotems(settings.totemCount());
+        return options;
+    }
+
+    private static void copyTrimSettings(BotOptions options, BotSettings settings) {
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry :
+                settings.armorTrimPatternKeys().entrySet()) {
+            options.setTrimPatternKey(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<org.bukkit.inventory.EquipmentSlot, String> entry :
+                settings.armorTrimMaterialKeys().entrySet()) {
+            options.setTrimMaterialKey(entry.getKey(), entry.getValue());
+        }
+    }
+
+    static com.monkey.ultimatebot.bot.ai.rank.BotRank toCoreRank(BotRank rank) {
+        com.monkey.ultimatebot.common.model.BotRankTier common =
+                rank == null ? com.monkey.ultimatebot.common.model.BotRankTier.EASY : rank.toCommon();
+        return switch (common) {
+            case EASY -> com.monkey.ultimatebot.bot.ai.rank.BotRank.EASY;
+            case NORMAL -> com.monkey.ultimatebot.bot.ai.rank.BotRank.NORMAL;
+            case MEDIUM -> com.monkey.ultimatebot.bot.ai.rank.BotRank.MEDIUM;
+            case HARD -> com.monkey.ultimatebot.bot.ai.rank.BotRank.HARD;
+            case GOD -> com.monkey.ultimatebot.bot.ai.rank.BotRank.GOD;
+        };
+    }
+
+    private static ArmorTier toCoreArmor(BotArmorType armorType) {
+        com.monkey.ultimatebot.common.model.BotArmorTier common =
+                armorType == null ? com.monkey.ultimatebot.common.model.BotArmorTier.LEATHER : armorType.toCommon();
+        return switch (common) {
+            case LEATHER -> ArmorTier.LEATHER;
+            case IRON -> ArmorTier.IRON;
+            case GOLDEN -> ArmorTier.GOLDEN;
+            case DIAMOND -> ArmorTier.DIAMOND;
+            case NETHERITE -> ArmorTier.NETHERITE;
+        };
+    }
+}

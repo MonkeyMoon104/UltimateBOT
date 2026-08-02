@@ -1,0 +1,243 @@
+messages:
+  spawn-bot: "&aBot generato con le impostazioni selezionate!"
+  totem-finish: "[%botname%] Ha esaurito i totem"
+  dead-bot-msg: "&aHai ucciso il bot!"
+  dead-bot-event-msg: "&c[&eEVENTO&c] &eIl bot è stato ucciso da &b{player}"
+  despawn-bot: "&cBot rimosso!"
+  save-changes: "&aModifiche salvate!"
+  reload-no-permission: "&cNon hai il permesso di usare questo comando"
+  reload-usage: "&eUso: /ultimatebotreload <config|bot|maps|all>"
+  reload-config: "&aConfigurazione ricaricata con successo"
+  reload-bot: "&aTutti i bot attivi sono stati rimossi"
+  reload-maps: "&aTutte le mappe dei giocatori sono state cancellate"
+  reload-all: "&aConfigurazione, bot e mappe sono stati ricaricati/cancellati"
+  reload-invalid-option: "&cOpzione non valida. Usa: config, bot, maps, all"
+  combat-need-follow: "&cIl seguimento deve essere ATTIVO per abilitare il combattimento del bot"
+  bot-blocked-world: "&cNon puoi usarlo qui!"
+  dead-bot-message: "{player} è stato ucciso dal suo Bot"
+  event-bot-already-active: "&cX C'è già un bot evento attivo! Rimuovilo prima"
+  all-normal-bots-despawned: "&eTutti i bot normali sono stati rimossi per l'evento"
+  cannot-spawn-normal-during-event: "&cX Non puoi generare un bot normale mentre un bot evento è attivo!"
+  event-bot-active-block-normal: "&cX Un bot evento è attivo! Non puoi generare bot normali durante un evento"
+  must-despawn-normal-bot: "&cX Hai già un bot normale generato! Rimuovilo prima di gestire il bot evento"
+  cannot-open-bot-while-ally: "&cHai già un bot alleato generato. Rimuovilo prima di usare /bot."
+  cannot-open-botally-while-single: "&cHai già un bot singolo generato. Rimuovilo prima di usare /botally."
+  armor-locked: "&cL'armatura è bloccata: non può essere modificata per questo bot."
+  blast-locked: "&cLa protezione dalle esplosioni è bloccata: non può essere modificata per questo bot."
+  combat-locked: "&cIl combattimento è bloccato: non può essere modificato per questo bot."
+  follow-locked: "&cIl seguimento è bloccato: non può essere modificato per questo bot."
+  follow-lock-combat: "&cNon puoi disabilitare il seguimento: il combattimento è bloccato su ATTIVO."
+  totem-locked: "&cI totem sono bloccati: non possono essere modificati per questo bot."
+  rank-locked: "&cIl rango è bloccato: non può essere modificato per questo bot."
+
+  ally:
+    pre-range-alert: "&e%player% si sta avvicinando, monitoraggio posizione in corso..."
+    range-alert: "&c%player% rilevato come minaccia, avvio azione di bombardamento"
+
+  team-ally:
+    pre-range-alert: "&e%player% si sta avvicinando al team, monitoraggio posizione in corso..."
+    range-alert: "&c%player% rilevato come minaccia per il team, avvio azione di bombardamento"
+    create-usage: "&eUso: /botteamally create <proprietario1> <proprietario2> [proprietario3 ...]"
+    create-min-owners: "&cDevi specificare almeno 2 proprietari validi e online."
+    gui-opened: "&aInterfaccia botteamally aperta con i proprietari selezionati."
+    blocked-by-single: "&cHai già un bot singolo generato. Rimuovilo prima di usare /botteamally."
+    blocked-by-ally: "&cHai già un bot alleato generato. Rimuovilo prima di usare /botteamally."
+    no-active-teamally: "&cNon hai un bot team alleato attivo."
+    addowners-usage: "&eUso: /botteamally addowners <giocatore1> [giocatore2 ...]"
+    removeowners-usage: "&eUso: /botteamally removeowners <giocatore1> [giocatore2 ...]"
+    invalid-owner: "&cGiocatore non valido/offline: &e%player%"
+    owner-already-present: "&e%player% &7è già un proprietario del bot team alleato."
+    owner-not-present: "&e%player% &7non è un proprietario del bot team alleato."
+    owner-added: "&aProprietario aggiunto: &e%player%"
+    owner-removed: "&aProprietario rimosso: &e%player%"
+    min-owners-reached: "&cNon puoi scendere sotto i 2 proprietari."
+    duplicate-owner: "&cProprietario duplicato nel comando: &e%player%"
+    owner-has-active-bot: "&c%player% ha già un bot attivo (%bottype%). Rimuovilo prima."
+    team-spawned-notify: "&aBot alleato generato da %playerowner% per il team con questi proprietari: &e%playerlist%"
+
+
+gui:
+
+  tab-border:
+    material: "BLACK_STAINED_GLASS_PANE"
+    name: " "
+
+  tab-item:
+    tab-0:
+      selected:
+        material: "SHIELD"
+        name: "&eKit &7(selezionato)"
+      unselected:
+        material: "SHIELD"
+        name: "&7Kit"
+    tab-1:
+      selected:
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&eTemplates &7(selezionato)"
+      unselected:
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&7Templates"
+    tab-2:
+      selected:
+        material: "DRAGON_HEAD"
+        name: "&eProprietari &7(selezionato)"
+      unselected:
+        material: "DRAGON_HEAD"
+        name: "&7Proprietari"
+    tab-3:
+      selected:
+        material: "TARGET"
+        name: "&eBersagli &7(selezionato)"
+      unselected:
+        material: "TARGET"
+        name: "&7Bersagli"
+
+  owners-tab:
+    head:
+      name: "&e%player%"
+      lore:
+        - "&7Proprietario del bot"
+        - ""
+        - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScorri su"
+      cant-scroll: "&7Sei già in cima"
+    scroll-down:
+      name: "&aScorri giù"
+      cant-scroll: "&7Sei già in fondo"
+
+  targets-tab:
+    head:
+      name: "&c%player%"
+      lore:
+        - "&7Bersaglio del bot"
+        - ""
+        - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScorri su"
+      cant-scroll: "&7Sei già in cima"
+    scroll-down:
+      name: "&aScorri giù"
+      cant-scroll: "&7Sei già in fondo"
+
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: "&aATTIVO"
+    blast-disabled-text: "&cDISATTIVO"
+    lore:
+      set-type:
+        - "&7Tipo: &e%type%"
+        - "&7Protezione esplosioni: %blast_state%"
+        - ""
+        - "&eClick sinistro: &7cambia il pezzo d'armatura"
+        - "&eClick destro: &7attiva/disattiva esplosioni"
+
+  templates-background:
+    lore:
+      - "&7Background della forgiatura"
+      - "&7Template: &e%template%"
+      - "&7Minerale: &e%ore%"
+
+  templates-button:
+    empty-value: "Nessuno"
+    template-empty-name: "&fClicca per cambiare template"
+    template-name: "&eTemplate: &f%value%"
+    template-lore:
+      - "&7Selezione attuale: &e%value%"
+      - ""
+      - "&eClick sinistro: &7template successivo"
+      - "&eClick destro: &7template precedente"
+    ore-empty-name: "&fClicca per cambiare minerale"
+    ore-name: "&eMinerale: &f%value%"
+    ore-lore:
+      - "&7Selezione attuale: &e%value%"
+      - ""
+      - "&eClick sinistro: &7minerale successivo"
+      - "&eClick destro: &7minerale precedente"
+
+  follow-button:
+    name: "&bAttiva/Disattiva Seguimento"
+    material: "LEAD"
+    lore:
+      - "&7Stato: &e%type%"
+      - ""
+      - "&eClicca per attivare/disattivare il seguimento"
+
+  spawn-button:
+    name: "&aGenera Bot"
+    material: "SPAWNER"
+    lore:
+      - "&7Genera il tuo bot di allenamento"
+      - "&7con la configurazione selezionata"
+      - ""
+      - "&eClicca per generare!"
+
+  despawn-button:
+    name: "&cRimuovi Bot"
+    material: "BARRIER"
+    lore:
+      - "&7Rimuovi il tuo bot di allenamento"
+      - "&7dal mondo"
+      - ""
+      - "&cClicca per rimuovere!"
+
+  save-button:
+    name: "&aSalva Modifiche"
+    material: "GREEN_WOOL"
+    lore:
+      - "&7Salva le impostazioni correnti"
+      - "&7nel bot attivo"
+      - ""
+      - "&aClicca per salvare!"
+
+  totem-button:
+    name: "&eContatore Totem"
+    material: "TOTEM_OF_UNDYING"
+    unlimited-text: "Illimitati"
+    lore:
+      - "&7Contatore attuale: &a%count%"
+      - ""
+      - "&eClick sinistro: &a+1"
+      - "&eClick destro: &c-1"
+      - "&7(-1 = Totem illimitati)"
+
+  teleport-button:
+    name: "&5Teletrasporta Bot"
+    material: "ENDER_PEARL"
+    lore:
+      - "&dTeletrasporta il bot alla tua posizione"
+
+  combat-button:
+    name: "&bAttiva/Disattiva Combattimento"
+    material: "NETHERITE_SWORD"
+    lore:
+      - "&7Stato: &e%type%"
+      - ""
+      - "&eClicca per attivare/disattivare il combattimento"
+
+  target-mode-button:
+    name: "&bModalità attacco"
+    current: "&7Attuale: &e%mode%"
+    click: "&aClicca per cambiare"
+    players: "Giocatori"
+    mobs: "Mob"
+    both: "Giocatori + mob"
+
+  rank-button:
+    name: "&bRango"
+    material: "DIAMOND_SWORD"
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+      - ""
+      - "%ranks%"
+      - ""
+      - "&eClicca per aumentare/diminuire il rango"

@@ -1,0 +1,209 @@
+messages:
+  spawn-bot: '&aБота створено з вибраними налаштуваннями!'
+  totem-finish: '[%botname%] Закінчилися тотеми'
+  dead-bot-msg: '&aВи вбили бота!'
+  dead-bot-event-msg: '&c[&eПОДІЯ&c] &eБота вбив &b{player}'
+  despawn-bot: '&cБота видалено!'
+  save-changes: '&aЗміни збережено!'
+  reload-no-permission: '&cУ вас немає дозволу на використання цієї команди'
+  reload-usage: '&eВикористання: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aКонфігурацію успішно перезавантажено'
+  reload-bot: '&aУсі активні боти були видалені'
+  reload-maps: '&aУсі карти гравців були очищені'
+  reload-all: '&aКонфігурацію, ботів і карти перезавантажено/очищено'
+  reload-invalid-option: '&cНевірний параметр. Використовуйте: config, bot, maps,
+    all'
+  combat-need-follow: '&cFollow має бути УВІМК, щоб увімкнути бій бота'
+  bot-blocked-world: '&cВи не можете використовувати це тут!'
+  dead-bot-message: '{player} був убитий своїм ботом'
+  event-bot-already-active: '&cX Уже є активний івентовий бот! Спочатку приберіть
+    його'
+  all-normal-bots-despawned: '&eУсі звичайні боти були прибрані для події'
+  cannot-spawn-normal-during-event: '&cX Ви не можете створити звичайного бота, поки
+    активний івентовий бот!'
+  event-bot-active-block-normal: '&cX Активний івентовий бот! Під час події не можна
+    створювати звичайних ботів'
+  must-despawn-normal-bot: '&cX У вас уже створений звичайний бот! Приберіть його
+    перед керуванням івентовим ботом'
+  cannot-open-bot-while-ally: '&cУ вас уже створений ally-бот. Приберіть його перед
+    використанням /bot.'
+  cannot-open-botally-while-single: '&cУ вас уже створений одиночний бот. Приберіть
+    його перед використанням /botally.'
+  armor-locked: '&cБроня заблокована: її не можна змінювати для цього бота.'
+  blast-locked: '&cЗахист від вибуху заблокований: його не можна змінювати для цього
+    бота.'
+  combat-locked: '&cБій заблокований: його не можна змінювати для цього бота.'
+  follow-locked: '&cFollow заблоковано: його не можна змінювати для цього бота.'
+  follow-lock-combat: '&cВи не можете вимкнути follow: бій заблокований у стані УВІМК.'
+  totem-locked: '&cТотеми заблоковані: їх не можна змінювати для цього бота.'
+  rank-locked: '&cРанг заблокований: його не можна змінювати для цього бота.'
+  ally:
+    pre-range-alert: '&e%player% наближається, відстеження позиції...'
+    range-alert: '&c%player% виявлено як загрозу, починається бомбова атака'
+  team-ally:
+    pre-range-alert: '&e%player% наближається до команди, відстеження позиції...'
+    range-alert: '&c%player% виявлено як загрозу для команди, починається бомбова
+      атака'
+    create-usage: '&eВикористання: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cВи повинні вказати щонайменше 2 дійсних онлайн-власників.'
+    gui-opened: '&aВідкрито GUI botteamally з вибраними власниками.'
+    blocked-by-single: '&cУ вас уже створений одиночний бот. Приберіть його перед
+      використанням /botteamally.'
+    blocked-by-ally: '&cУ вас уже створений ally-бот. Приберіть його перед використанням
+      /botteamally.'
+    no-active-teamally: '&cУ вас немає активного team ally бота.'
+    addowners-usage: '&eВикористання: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eВикористання: /botteamally removeowners <player1> [player2
+      ...]'
+    invalid-owner: '&cНедійсний/офлайн гравець: &e%player%'
+    owner-already-present: '&e%player% &7вже є власником team ally бота.'
+    owner-not-present: '&e%player% &7не є власником team ally бота.'
+    owner-added: '&aДодано власника: &e%player%'
+    owner-removed: '&aВидалено власника: &e%player%'
+    min-owners-reached: '&cНе можна опуститися нижче 2 власників.'
+    duplicate-owner: '&cДубльований власник у команді: &e%player%'
+    owner-has-active-bot: '&c%player% уже має активного бота (%bottype%). Спочатку
+      приберіть його.'
+    team-spawned-notify: '&aСоюзний бот для команди створений %playerowner% для цих
+      власників: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eКіт &7(вибрано)'
+      unselected:
+        material: SHIELD
+        name: '&7Кіт'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eРанг &7(вибрано)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Ранг'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eВласники &7(вибрано)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Власники'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eЦілі &7(вибрано)'
+      unselected:
+        material: TARGET
+        name: '&7Цілі'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Власник бота'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aПрокрутити вгору'
+      cant-scroll: '&7Ви вже на самому верху'
+    scroll-down:
+      name: '&aПрокрутити вниз'
+      cant-scroll: '&7Ви вже в самому низу'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Ціль бота'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aПрокрутити вгору'
+      cant-scroll: '&7Ви вже на самому верху'
+    scroll-down:
+      name: '&aПрокрутити вниз'
+      cant-scroll: '&7Ви вже в самому низу'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Тип: &e%type%'
+      - '&7Захист від вибуху: %blast_state%'
+      - ''
+      - '&eЛКМ: &7змінити частину броні'
+      - '&eПКМ: &7перемкнути blast'
+  follow-button:
+    name: '&bПеремкнути Follow'
+    material: LEAD
+    lore:
+    - '&7Статус: &e%type%'
+    - ''
+    - '&eНатисніть, щоб перемкнути follow'
+  spawn-button:
+    name: '&aСтворити бота'
+    material: SPAWNER
+    lore:
+    - '&7Створити тренувального бота'
+    - '&7з вибраною конфігурацією'
+    - ''
+    - '&eНатисніть, щоб створити!'
+  despawn-button:
+    name: '&cПрибрати бота'
+    material: BARRIER
+    lore:
+    - '&7Прибрати вашого тренувального бота'
+    - '&7зі світу'
+    - ''
+    - '&cНатисніть, щоб прибрати!'
+  save-button:
+    name: '&aЗберегти зміни'
+    material: GREEN_WOOL
+    lore:
+    - '&7Зберегти поточні налаштування'
+    - '&7для активного бота'
+    - ''
+    - '&aНатисніть, щоб зберегти!'
+  totem-button:
+    name: '&eКількість тотемів'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Безлімітно
+    lore:
+    - '&7Поточна кількість: &a%count%'
+    - ''
+    - '&eЛКМ: &a+1'
+    - '&eПКМ: &c-1'
+    - '&7(-1 = безлімітні тотеми)'
+  teleport-button:
+    name: '&5Телепортувати бота'
+    material: ENDER_PEARL
+    lore:
+    - '&dТелепортувати бота до вашого місця'
+  combat-button:
+    name: '&bПеремкнути бій'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Статус: &e%type%'
+    - ''
+    - '&eНатисніть, щоб перемкнути бій'
+  rank-button:
+    name: '&bРанг'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eНатисніть, щоб підвищити/знизити ранг'

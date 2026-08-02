@@ -1,8 +1,1 @@
-acceptedBreaks:
-  "1.3.2":
-    com.monkey.mcbot:mcbot-api:
-    - code: "java.method.abstractMethodAdded"
-      new: "method org.bukkit.event.HandlerList org.bukkit.event.Event::getHandlers()\
-        \ @ com.monkey.mcbot.api.event.base.BotEvent"
-      justification: "Inherited Bukkit Event contract; the published baseline POM\
-        \ omitted the provided Paper API, causing a support-class false positive."
+acceptedBreaks: {}

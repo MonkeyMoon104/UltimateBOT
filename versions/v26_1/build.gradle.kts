@@ -23,7 +23,7 @@ val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 dependencies {
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-26_1").get().requiredVersion)
-    compileOnly(project(":mcbot-core"))
-    compileOnly(project(":mcbot-api"))
+    compileOnly(project(":ultimatebot-core"))
+    compileOnly(project(":ultimatebot-api"))
     implementation(libsCatalog.findLibrary("invui-v2-1").get())
 }

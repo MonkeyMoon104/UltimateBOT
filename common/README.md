@@ -1,4 +1,4 @@
-# MinecraftBot Common
+# UltimateBot Common
 
 `common` is the platform-independent foundation shared by the plugin runtime, public API, remote SDK and optional addons.
 

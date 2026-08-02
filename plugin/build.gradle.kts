@@ -25,8 +25,8 @@ data class InvuiRetarget(val prefix: String, val invui: String, val inventoryacc
 
 fun retargetInvuiV2References(bytes: ByteArray, invuiTarget: String, inventoryAccessTarget: String): ByteArray {
     val binary = bytes.toString(Charsets.ISO_8859_1)
-        .replace("com/monkey/mcbot/libs/invui/v1/", invuiTarget)
-        .replace("com/monkey/mcbot/libs/inventoryaccess/v1/", inventoryAccessTarget)
+        .replace("com/monkey/ultimatebot/libs/invui/v1/", invuiTarget)
+        .replace("com/monkey/ultimatebot/libs/inventoryaccess/v1/", inventoryAccessTarget)
     return binary.toByteArray(Charsets.ISO_8859_1)
 }
 
@@ -95,8 +95,8 @@ val invuiV2_2Shade = configurations.create("invuiV2_2Shade") {
 }
 
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar")
-val obfuscatedJarFile = layout.buildDirectory.file("libs/MinecraftBot.jar")
-val legacyObfuscatedJarFile = layout.buildDirectory.file("libs/MinecraftBot-obf.jar")
+val obfuscatedJarFile = layout.buildDirectory.file("libs/UltimateBot.jar")
+val legacyObfuscatedJarFile = layout.buildDirectory.file("libs/UltimateBot-obf.jar")
 val proguardMappingFile = layout.buildDirectory.file("reports/proguard/mapping.txt")
 val javaToolchainService = extensions.getByType<JavaToolchainService>()
 val proguardJdkHome = javaToolchainService.launcherFor {
@@ -136,10 +136,10 @@ val generateMetricsAddonDescriptorTask = tasks.register("generateMetricsAddonDes
         descriptor.writeText(
             """
             version=$version
-            url=https://repo.monkeymoon104.it/releases/com/monkey/mcbot/minecraftbot-metrics/$version/minecraftbot-metrics-$version.jar
+            url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-metrics/$version/ultimatebot-metrics-$version.jar
             sha256=${HexFormat.of().formatHex(digest.digest())}
             size=${addonJar.length()}
-            factory-class=com.monkey.mcbot.metrics.addon.MicrometerMetricsBackendFactory
+            factory-class=com.monkey.ultimatebot.metrics.addon.MicrometerMetricsBackendFactory
             """.trimIndent() + "\n",
         )
     }
@@ -168,10 +168,10 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
         descriptor.writeText(
             """
             version=$version
-            url=https://repo.monkeymoon104.it/releases/com/monkey/mcbot/minecraftbot-guard/$version/minecraftbot-guard-$version.jar
+            url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-guard/$version/ultimatebot-guard-$version.jar
             sha256=${HexFormat.of().formatHex(digest.digest())}
             size=${addonJar.length()}
-            factory-class=com.monkey.mcbot.guard.addon.MinecraftBotGuardBackendFactory
+            factory-class=com.monkey.ultimatebot.guard.addon.UltimateBotGuardBackendFactory
             """.trimIndent() + "\n",
         )
     }
@@ -187,7 +187,7 @@ fun externalClasspathFor(dependencyProject: Project): FileCollection {
 val proguardLibraries = files(
     javaBaseJmod,
     javaLoggingJmod,
-    externalClasspathFor(project(":mcbot-core")),
+    externalClasspathFor(project(":ultimatebot-core")),
     externalClasspathFor(project(":versions:v1_21_4")),
     externalClasspathFor(project(":versions:v1_21_5")),
     externalClasspathFor(project(":versions:v1_21_6")),
@@ -205,7 +205,7 @@ if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
 }
 
 dependencies {
-    implementation(project(":mcbot-core"))
+    implementation(project(":ultimatebot-core"))
     implementation(project(path = ":versions:v1_21_4", configuration = "reobf"))
     implementation(project(path = ":versions:v1_21_5", configuration = "reobf"))
     implementation(project(path = ":versions:v1_21_6", configuration = "reobf"))
@@ -232,8 +232,8 @@ val relocateInvuiV2_1Task = tasks.register<ShadowJar>("relocateInvuiV2_1") {
     exclude("colors.bin")
     exclude("xyz/xenondevs/invui/util/ColorPalette.class")
     exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.a1")
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.mcbot.libs.inventoryaccess.a1")
+    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a1")
+    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a1")
 }
 
 val relocateInvuiV2_2Task = tasks.register<ShadowJar>("relocateInvuiV2_2") {
@@ -244,8 +244,8 @@ val relocateInvuiV2_2Task = tasks.register<ShadowJar>("relocateInvuiV2_2") {
     exclude("colors.bin")
     exclude("xyz/xenondevs/invui/util/ColorPalette.class")
     exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.a2")
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.mcbot.libs.inventoryaccess.a2")
+    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a2")
+    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a2")
 }
 
 tasks.named<ShadowJar>("shadowJar") {
@@ -255,15 +255,15 @@ tasks.named<ShadowJar>("shadowJar") {
         generateMetricsAddonDescriptorTask,
         generateGuardAddonDescriptorTask,
     )
-    archiveFileName.set("MinecraftBot-unobfuscated.jar")
+    archiveFileName.set("UltimateBot-unobfuscated.jar")
     mergeServiceFiles()
     exclude("colors.bin")
     exclude("xyz/xenondevs/invui/util/ColorPalette.class")
     exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    exclude("com/monkey/mcbot/libs/invui/a1/util/ColorPalette.class")
-    exclude("com/monkey/mcbot/libs/invui/a1/window/CartographyWindow*.class")
-    exclude("com/monkey/mcbot/libs/invui/a2/util/ColorPalette.class")
-    exclude("com/monkey/mcbot/libs/invui/a2/window/CartographyWindow*.class")
+    exclude("com/monkey/ultimatebot/libs/invui/a1/util/ColorPalette.class")
+    exclude("com/monkey/ultimatebot/libs/invui/a1/window/CartographyWindow*.class")
+    exclude("com/monkey/ultimatebot/libs/invui/a2/util/ColorPalette.class")
+    exclude("com/monkey/ultimatebot/libs/invui/a2/window/CartographyWindow*.class")
     from({
         zipTree(relocateInvuiV2_1Task.get().archiveFile.get().asFile)
     })
@@ -271,44 +271,44 @@ tasks.named<ShadowJar>("shadowJar") {
         zipTree(relocateInvuiV2_2Task.get().archiveFile.get().asFile)
     })
     from(metricsAddonDescriptorFile) {
-        into("META-INF/minecraftbot/addons")
+        into("META-INF/ultimatebot/addons")
     }
     from(guardAddonDescriptorFile) {
-        into("META-INF/minecraftbot/addons")
+        into("META-INF/ultimatebot/addons")
     }
-    relocate("org.bstats", "com.monkey.mcbot.libs.bstats")
-    relocate("com.fasterxml.jackson", "com.monkey.mcbot.libs.jackson")
-    relocate("com.github.benmanes.caffeine", "com.monkey.mcbot.libs.caffeine")
-    relocate("de.bsommerfeld.pathetic", "com.monkey.mcbot.libs.pathetic")
-    relocate("org.spongepowered.configurate", "com.monkey.mcbot.libs.configurate")
-    relocate("org.yaml.snakeyaml", "com.monkey.mcbot.libs.snakeyaml")
-    relocate("io.leangen.geantyref", "com.monkey.mcbot.libs.geantyref")
-    relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.v1") {
-        exclude("com/monkey/mcbot/gui/v26_1/**")
-        exclude("com/monkey/mcbot/gui/v26_2/**")
+    relocate("org.bstats", "com.monkey.ultimatebot.libs.bstats")
+    relocate("com.fasterxml.jackson", "com.monkey.ultimatebot.libs.jackson")
+    relocate("com.github.benmanes.caffeine", "com.monkey.ultimatebot.libs.caffeine")
+    relocate("de.bsommerfeld.pathetic", "com.monkey.ultimatebot.libs.pathetic")
+    relocate("org.spongepowered.configurate", "com.monkey.ultimatebot.libs.configurate")
+    relocate("org.yaml.snakeyaml", "com.monkey.ultimatebot.libs.snakeyaml")
+    relocate("io.leangen.geantyref", "com.monkey.ultimatebot.libs.geantyref")
+    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.v1") {
+        exclude("com/monkey/ultimatebot/gui/v26_1/**")
+        exclude("com/monkey/ultimatebot/gui/v26_2/**")
     }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.mcbot.libs.inventoryaccess.v1") {
-        exclude("com/monkey/mcbot/gui/v26_1/**")
-        exclude("com/monkey/mcbot/gui/v26_2/**")
+    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.v1") {
+        exclude("com/monkey/ultimatebot/gui/v26_1/**")
+        exclude("com/monkey/ultimatebot/gui/v26_2/**")
     }
-    relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.a1") {
-        include("com/monkey/mcbot/gui/v26_1/**")
+    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a1") {
+        include("com/monkey/ultimatebot/gui/v26_1/**")
     }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.mcbot.libs.inventoryaccess.a1") {
-        include("com/monkey/mcbot/gui/v26_1/**")
+    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a1") {
+        include("com/monkey/ultimatebot/gui/v26_1/**")
     }
-    relocate("xyz.xenondevs.invui", "com.monkey.mcbot.libs.invui.a2") {
-        include("com/monkey/mcbot/gui/v26_2/**")
+    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a2") {
+        include("com/monkey/ultimatebot/gui/v26_2/**")
     }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.mcbot.libs.inventoryaccess.a2") {
-        include("com/monkey/mcbot/gui/v26_2/**")
+    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a2") {
+        include("com/monkey/ultimatebot/gui/v26_2/**")
     }
     doLast {
         val jarFile = archiveFile.get().asFile
         val patchedJar = File(jarFile.parentFile, "${jarFile.name}.patched")
         val v26Retargets = listOf(
-            InvuiRetarget("com/monkey/mcbot/gui/v26_1/", "com/monkey/mcbot/libs/invui/a1/", "com/monkey/mcbot/libs/inventoryaccess/a1/"),
-            InvuiRetarget("com/monkey/mcbot/gui/v26_2/", "com/monkey/mcbot/libs/invui/a2/", "com/monkey/mcbot/libs/inventoryaccess/a2/"),
+            InvuiRetarget("com/monkey/ultimatebot/gui/v26_1/", "com/monkey/ultimatebot/libs/invui/a1/", "com/monkey/ultimatebot/libs/inventoryaccess/a1/"),
+            InvuiRetarget("com/monkey/ultimatebot/gui/v26_2/", "com/monkey/ultimatebot/libs/invui/a2/", "com/monkey/ultimatebot/libs/inventoryaccess/a2/"),
         )
         val maxClassMajor = 65
 
@@ -374,8 +374,8 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
         }
 
         URLClassLoader(arrayOf(pluginJar.toURI().toURL()), ClassLoader.getPlatformClassLoader()).use { loader ->
-            val caffeineClass = loader.loadClass("com.monkey.mcbot.libs.caffeine.cache.Caffeine")
-            val cacheClass = loader.loadClass("com.monkey.mcbot.libs.caffeine.cache.Cache")
+            val caffeineClass = loader.loadClass("com.monkey.ultimatebot.libs.caffeine.cache.Caffeine")
+            val cacheClass = loader.loadClass("com.monkey.ultimatebot.libs.caffeine.cache.Cache")
             val builder = caffeineClass.getMethod("newBuilder").invoke(null)
 
             caffeineClass.getMethod("maximumSize", Long::class.javaPrimitiveType).invoke(builder, 2_048L)
@@ -390,14 +390,14 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
             }
 
             val patheticFactoryClass =
-                loader.loadClass("com.monkey.mcbot.libs.pathetic.engine.factory.AStarPathfinderFactory")
+                loader.loadClass("com.monkey.ultimatebot.libs.pathetic.engine.factory.AStarPathfinderFactory")
             patheticFactoryClass.getConstructor().newInstance()
 
             val addonJar = metricsAddonJarTask.get().archiveFile.get().asFile
             URLClassLoader(arrayOf(addonJar.toURI().toURL()), loader).use { addonLoader ->
-                val backendInterface = loader.loadClass("com.monkey.mcbot.common.metrics.MetricsBackend")
-                val factoryInterface = loader.loadClass("com.monkey.mcbot.common.metrics.MetricsBackendFactory")
-                val contextClass = loader.loadClass("com.monkey.mcbot.common.metrics.MetricsBackendContext")
+                val backendInterface = loader.loadClass("com.monkey.ultimatebot.common.metrics.MetricsBackend")
+                val factoryInterface = loader.loadClass("com.monkey.ultimatebot.common.metrics.MetricsBackendFactory")
+                val contextClass = loader.loadClass("com.monkey.ultimatebot.common.metrics.MetricsBackendContext")
                 val context = contextClass
                     .getConstructor(
                         Boolean::class.javaPrimitiveType,
@@ -418,7 +418,7 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
                         LongSupplier { 4L },
                         LongSupplier { 5L },
                     )
-                val factoryClass = addonLoader.loadClass("com.monkey.mcbot.metrics.addon.MicrometerMetricsBackendFactory")
+                val factoryClass = addonLoader.loadClass("com.monkey.ultimatebot.metrics.addon.MicrometerMetricsBackendFactory")
                 check(factoryInterface.isAssignableFrom(factoryClass)) {
                     "Metrics addon factory does not implement the SPI from the obfuscated main jar"
                 }
@@ -434,7 +434,7 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
                             Long::class.javaPrimitiveType,
                         ).invoke(backend, "GET", "/verify", 200, 1_000_000L)
                     val scrape = backendInterface.getMethod("scrape").invoke(backend) as String
-                    check("minecraftbot_remote_requests_seconds_count" in scrape) {
+                    check("ultimatebot_remote_requests_seconds_count" in scrape) {
                         "Metrics addon scrape did not contain the verification request"
                     }
                 } finally {
@@ -444,9 +444,9 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
 
             val guardJar = guardAddonJarTask.get().archiveFile.get().asFile
             URLClassLoader(arrayOf(guardJar.toURI().toURL()), loader).use { guardLoader ->
-                val guardFactoryInterface = loader.loadClass("com.monkey.mcbot.common.guard.GuardBackendFactory")
+                val guardFactoryInterface = loader.loadClass("com.monkey.ultimatebot.common.guard.GuardBackendFactory")
                 val guardFactoryClass =
-                    guardLoader.loadClass("com.monkey.mcbot.guard.addon.MinecraftBotGuardBackendFactory")
+                    guardLoader.loadClass("com.monkey.ultimatebot.guard.addon.UltimateBotGuardBackendFactory")
                 check(guardFactoryInterface.isAssignableFrom(guardFactoryClass)) {
                     "Guard addon factory does not implement the SPI from the obfuscated main jar"
                 }

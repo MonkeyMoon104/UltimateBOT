@@ -20,11 +20,11 @@ tasks.test {
 }
 
 tasks.jar {
-    archiveFileName.set("MinecraftBot-Guard.jar")
+    archiveFileName.set("UltimateBot-Guard.jar")
 }
 
 publishing {
     publications.named<MavenPublication>("mavenJava") {
-        artifactId = "minecraftbot-guard"
+        artifactId = "ultimatebot-guard"
     }
 }

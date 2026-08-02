@@ -1,0 +1,229 @@
+package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
+import org.junit.jupiter.api.Test;
+
+class PatheticPathPlannerTest {
+    @Test
+    void routesAroundWideObstacleInsteadOfWalkingIntoIt() {
+        GridEnvironment environment = new GridEnvironment(-12, 12);
+        for (int x = 2; x <= 5; x++) {
+            for (int z = -1; z <= 1; z++) {
+                environment.block(x, z);
+            }
+        }
+
+        List<BlockPos> path =
+                new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), new BlockPos(8, 0, 0));
+
+        assertThat(path).isNotEmpty();
+        assertThat(path.getFirst()).isEqualTo(new BlockPos(0, 0, 0));
+        assertThat(path.getLast()).isEqualTo(new BlockPos(8, 0, 0));
+        assertThat(path).noneMatch(environment::isBlocked);
+        assertThat(path).anyMatch(position -> Math.abs(position.getZ()) >= 2);
+    }
+
+    @Test
+    void doesNotCutDiagonallyThroughBlockedCorners() {
+        GridEnvironment environment = new GridEnvironment(-8, 8);
+        environment.block(1, 0);
+        environment.block(0, 1);
+
+        List<BlockPos> path =
+                new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), new BlockPos(3, 0, 3));
+
+        assertThat(path).isNotEmpty();
+        assertThat(path).doesNotContain(new BlockPos(1, 0, 1));
+    }
+
+    @Test
+    void rejectsPartialFallbackWhenGoalIsCompletelyEnclosed() {
+        GridEnvironment environment = new GridEnvironment(-8, 8);
+        BlockPos target = new BlockPos(4, 0, 4);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx != 0 || dz != 0) {
+                    environment.block(target.getX() + dx, target.getZ() + dz);
+                }
+            }
+        }
+
+        List<BlockPos> path = new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), target);
+
+        assertThat(path).isEmpty();
+    }
+
+    @Test
+    void exitsDeadEndBeforeHeadingTowardsTarget() {
+        GridEnvironment environment = new GridEnvironment(-16, 16);
+
+        for (int x = -1; x <= 5; x++) {
+            environment.block(x, -1);
+            environment.block(x, 1);
+        }
+        for (int z = -1; z <= 1; z++) {
+            environment.block(5, z);
+        }
+
+        BlockPos start = new BlockPos(0, 0, 0);
+        BlockPos target = new BlockPos(9, 0, 0);
+        List<BlockPos> path = new PatheticPathPlanner(environment).findPath(start, target);
+
+        assertThat(path).isNotEmpty();
+        assertThat(path.getFirst()).isEqualTo(start);
+        assertThat(path.getLast()).isEqualTo(target);
+        assertThat(path).noneMatch(environment::isBlocked);
+        assertThat(path).anyMatch(position -> position.getX() <= -2);
+    }
+
+    @Test
+    void routesAroundTemporarilyFailedWaypoint() {
+        GridEnvironment environment = new GridEnvironment(-12, 12);
+        BlockPos failedWaypoint = new BlockPos(2, 0, 0);
+
+        List<BlockPos> path = new PatheticPathPlanner(environment)
+                .findPath(new BlockPos(0, 0, 0), new BlockPos(5, 0, 0), Set.of(failedWaypoint));
+
+        assertThat(path).isNotEmpty();
+        assertThat(path).doesNotContain(failedWaypoint);
+        assertThat(path.getLast()).isEqualTo(new BlockPos(5, 0, 0));
+        assertThat(path).anyMatch(position -> position.getZ() != 0);
+    }
+
+    @Test
+    void choosesAlternativeGoalWhenPreferredGoalPreviouslyFailed() {
+        GridEnvironment environment = new GridEnvironment(-12, 12);
+        PathGoalResolver resolver = new PathGoalResolver(environment);
+        BlockPos requestedGoal = new BlockPos(5, 0, 0);
+
+        BlockPos resolved =
+                resolver.resolve(new BlockPos(0, 0, 0), requestedGoal, candidate -> !candidate.equals(requestedGoal));
+
+        assertThat(resolved).isNotNull().isNotEqualTo(requestedGoal);
+        assertThat(Math.max(Math.abs(resolved.getX() - 5), Math.abs(resolved.getZ())))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void skipsOnlyConsecutivelyReachableWaypoints() {
+        List<Integer> path = List.of(0, 1, 2, 3, 4, 5);
+
+        int selected = PathWaypointSelector.furthestReachable(path, 1, 3, waypoint -> waypoint <= 3);
+
+        assertThat(selected).isEqualTo(3);
+    }
+
+    @Test
+    void doesNotSkipPastFirstUnsafeWaypoint() {
+        List<Integer> path = List.of(0, 1, 2, 3, 4);
+
+        int selected = PathWaypointSelector.furthestReachable(path, 1, 3, waypoint -> waypoint != 2);
+
+        assertThat(selected).isEqualTo(1);
+    }
+
+    @Test
+    void supportsOneBlockStepsAndControlledDrops() {
+        HeightMapEnvironment environment = new HeightMapEnvironment();
+        environment.setHeight(0, 0, 0);
+        environment.setHeight(1, 0, 1);
+        environment.setHeight(2, 0, 1);
+        environment.setHeight(3, 0, -2);
+
+        assertThat(environment.canTraverse(new BlockPos(0, 0, 0), new BlockPos(1, 1, 0)))
+                .isTrue();
+        assertThat(environment.canTraverse(new BlockPos(2, 1, 0), new BlockPos(3, -2, 0)))
+                .isTrue();
+        assertThat(environment.canTraverse(new BlockPos(0, 0, 0), new BlockPos(1, 2, 0)))
+                .isFalse();
+        assertThat(environment.canTraverse(new BlockPos(2, 1, 0), new BlockPos(3, -3, 0)))
+                .isFalse();
+    }
+
+    @Test
+    void projectsAirborneTargetOntoWalkableGround() {
+        GridEnvironment environment = new GridEnvironment(-16, 16);
+        PathGoalResolver resolver = new PathGoalResolver(environment);
+
+        BlockPos goal = resolver.resolve(new BlockPos(0, 0, 0), new BlockPos(8, 15, 0));
+
+        assertThat(goal).isEqualTo(new BlockPos(8, 0, 0));
+    }
+
+    @Test
+    void projectsAirborneTargetBesideBlockedTreeColumn() {
+        GridEnvironment environment = new GridEnvironment(-16, 16);
+        environment.block(8, 0);
+        PathGoalResolver resolver = new PathGoalResolver(environment);
+
+        BlockPos goal = resolver.resolve(new BlockPos(0, 0, 0), new BlockPos(8, 15, 0));
+
+        assertThat(goal).isNotNull();
+        assertThat(goal.getY()).isZero();
+        assertThat(environment.isBlocked(goal)).isFalse();
+        assertThat(Math.max(Math.abs(goal.getX() - 8), Math.abs(goal.getZ()))).isEqualTo(1);
+    }
+
+    private static final class GridEnvironment implements BotTraversalEnvironment {
+        private final int minimum;
+        private final int maximum;
+        private final Set<Long> blocked = new HashSet<>();
+
+        private GridEnvironment(int minimum, int maximum) {
+            this.minimum = minimum;
+            this.maximum = maximum;
+        }
+
+        private void block(int x, int z) {
+            blocked.add(BlockPos.asLong(x, 0, z));
+        }
+
+        private boolean isBlocked(BlockPos position) {
+            return blocked.contains(BlockPos.asLong(position.getX(), 0, position.getZ()));
+        }
+
+        @Override
+        public boolean canStandAt(BlockPos position) {
+            return position.getY() == 0
+                    && position.getX() >= minimum
+                    && position.getX() <= maximum
+                    && position.getZ() >= minimum
+                    && position.getZ() <= maximum
+                    && !isBlocked(position);
+        }
+
+        @Override
+        public boolean canOccupy(BlockPos position) {
+            return position.getX() >= minimum
+                    && position.getX() <= maximum
+                    && position.getZ() >= minimum
+                    && position.getZ() <= maximum
+                    && !isBlocked(position);
+        }
+    }
+
+    private static final class HeightMapEnvironment implements BotTraversalEnvironment {
+        private final java.util.Map<Long, Integer> heights = new java.util.HashMap<>();
+
+        private void setHeight(int x, int z, int feetY) {
+            heights.put(BlockPos.asLong(x, 0, z), feetY);
+        }
+
+        @Override
+        public boolean canStandAt(BlockPos position) {
+            return heights.getOrDefault(BlockPos.asLong(position.getX(), 0, position.getZ()), Integer.MIN_VALUE)
+                    == position.getY();
+        }
+
+        @Override
+        public boolean canOccupy(BlockPos position) {
+            Integer feetY = heights.get(BlockPos.asLong(position.getX(), 0, position.getZ()));
+            return feetY != null && position.getY() >= feetY;
+        }
+    }
+}

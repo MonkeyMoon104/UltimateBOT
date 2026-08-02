@@ -6,12 +6,12 @@ pluginManagement {
     }
 }
 
-rootProject.name = "MinecraftBot"
+rootProject.name = "UltimateBot"
 
-include("mcbot-api")
-include("mcbot-sdk")
+include("ultimatebot-api")
+include("ultimatebot-sdk")
 include("common")
-include("mcbot-core")
+include("ultimatebot-core")
 
 include("addons")
 include("addons:metrics")

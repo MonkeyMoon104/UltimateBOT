@@ -28,7 +28,7 @@ tasks.named<Jar>("jar") {
 }
 
 val metricsJar = tasks.named<ShadowJar>("shadowJar") {
-    archiveFileName.set("MinecraftBot-Metrics.jar")
+    archiveFileName.set("UltimateBot-Metrics.jar")
     archiveClassifier.set("")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     filesMatching(listOf("META-INF/services/**", "META-INF/*.kotlin_module")) {
@@ -44,7 +44,7 @@ tasks.named("assemble") {
 
 afterEvaluate {
     publishing.publications.named<MavenPublication>("mavenJava") {
-        artifactId = "minecraftbot-metrics"
+        artifactId = "ultimatebot-metrics"
         version = releaseVersion.get()
         artifacts.clear()
         artifact(metricsJar)

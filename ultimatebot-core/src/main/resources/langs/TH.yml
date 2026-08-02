@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aบอทถูกสร้างด้วยการตั้งค่าที่เลือกแล้ว!'
+  totem-finish: '[%botname%] โทเท็มหมดแล้ว'
+  dead-bot-msg: '&aคุณฆ่าบอทแล้ว!'
+  dead-bot-event-msg: '&c[&eอีเวนต์&c] &eบอทถูกฆ่าโดย &b{player}'
+  despawn-bot: '&cลบบอทแล้ว!'
+  save-changes: '&aบันทึกการเปลี่ยนแปลงแล้ว!'
+  reload-no-permission: '&cคุณไม่มีสิทธิ์ใช้คำสั่งนี้'
+  reload-usage: '&eการใช้งาน: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aโหลดคอนฟิกใหม่สำเร็จ'
+  reload-bot: '&aลบบอทที่กำลังใช้งานทั้งหมดแล้ว'
+  reload-maps: '&aล้างแผนที่ของผู้เล่นทั้งหมดแล้ว'
+  reload-all: '&aโหลด/ล้างคอนฟิก บอท และแผนที่ใหม่แล้ว'
+  reload-invalid-option: '&cตัวเลือกไม่ถูกต้อง ใช้: config, bot, maps, all'
+  combat-need-follow: '&cต้องเปิด Follow เพื่อเปิดใช้งานการต่อสู้ของบอท'
+  bot-blocked-world: '&cคุณใช้สิ่งนี้ที่นี่ไม่ได้!'
+  dead-bot-message: '{player} ถูกฆ่าโดย Bot ของตัวเอง'
+  event-bot-already-active: '&cX มีบอทอีเวนต์ที่กำลังใช้งานอยู่แล้ว! ลบมันก่อน'
+  all-normal-bots-despawned: '&eบอทปกติทั้งหมดถูกลบออกสำหรับอีเวนต์แล้ว'
+  cannot-spawn-normal-during-event: '&cX คุณไม่สามารถสร้างบอทปกติได้ในขณะที่บอทอีเวนต์กำลังทำงานอยู่!'
+  event-bot-active-block-normal: '&cX มีบอทอีเวนต์กำลังทำงานอยู่! คุณไม่สามารถสร้างบอทปกติระหว่างอีเวนต์ได้'
+  must-despawn-normal-bot: '&cX คุณมีบอทปกติที่ถูกสร้างอยู่แล้ว! ลบมันก่อนจัดการบอทอีเวนต์'
+  cannot-open-bot-while-ally: '&cคุณมีบอทพันธมิตรที่ถูกสร้างอยู่แล้ว ลบมันก่อนใช้ /bot'
+  cannot-open-botally-while-single: '&cคุณมีบอทเดี่ยวที่ถูกสร้างอยู่แล้ว ลบมันก่อนใช้ /botally'
+  armor-locked: '&cเกราะถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  blast-locked: '&cการป้องกันระเบิดถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  combat-locked: '&cการต่อสู้ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  follow-locked: '&cFollow ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  follow-lock-combat: '&cคุณไม่สามารถปิด follow ได้: การต่อสู้ถูกล็อกเป็นเปิด'
+  totem-locked: '&cโทเท็มถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  rank-locked: '&cแรงก์ถูกล็อกไว้: ไม่สามารถแก้ไขสำหรับบอทนี้ได้'
+  ally:
+    pre-range-alert: '&e%player% กำลังเข้ามาใกล้ กำลังติดตามตำแหน่ง...'
+    range-alert: '&cตรวจพบว่า %player% เป็นภัยคุกคาม กำลังเริ่มการทิ้งระเบิด'
+  team-ally:
+    pre-range-alert: '&e%player% กำลังเข้ามาใกล้ทีม กำลังติดตามตำแหน่ง...'
+    range-alert: '&cตรวจพบว่า %player% เป็นภัยคุกคามต่อทีม กำลังเริ่มการทิ้งระเบิด'
+    create-usage: '&eการใช้งาน: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cคุณต้องระบุเจ้าของออนไลน์ที่ถูกต้องอย่างน้อย 2 คน'
+    gui-opened: '&aเปิด GUI botteamally ด้วยเจ้าของที่เลือกแล้ว'
+    blocked-by-single: '&cคุณมีบอทเดี่ยวที่ถูกสร้างอยู่แล้ว ลบมันก่อนใช้ /botteamally'
+    blocked-by-ally: '&cคุณมีบอทพันธมิตรที่ถูกสร้างอยู่แล้ว ลบมันก่อนใช้ /botteamally'
+    no-active-teamally: '&cคุณไม่มีบอทพันธมิตรทีมที่กำลังใช้งานอยู่'
+    addowners-usage: '&eการใช้งาน: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eการใช้งาน: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cผู้เล่นไม่ถูกต้อง/ออฟไลน์: &e%player%'
+    owner-already-present: '&e%player% &7เป็นเจ้าของบอทพันธมิตรทีมอยู่แล้ว'
+    owner-not-present: '&e%player% &7ไม่ใช่เจ้าของบอทพันธมิตรทีม'
+    owner-added: '&aเพิ่มเจ้าของแล้ว: &e%player%'
+    owner-removed: '&aลบเจ้าของแล้ว: &e%player%'
+    min-owners-reached: '&cจำนวนเจ้าของต้องไม่น้อยกว่า 2 คน'
+    duplicate-owner: '&cมีเจ้าของซ้ำในคำสั่ง: &e%player%'
+    owner-has-active-bot: '&c%player% มีบอทที่กำลังใช้งานอยู่แล้ว (%bottype%) ลบมันก่อน'
+    team-spawned-notify: '&aบอทพันธมิตรถูกสร้างโดย %playerowner% สำหรับทีมที่มีเจ้าของเหล่านี้: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eคิท &7(เลือกอยู่)'
+      unselected:
+        material: SHIELD
+        name: '&7คิท'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eแรงก์ &7(เลือกอยู่)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7แรงก์'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eเจ้าของ &7(เลือกอยู่)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7เจ้าของ'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eเป้าหมาย &7(เลือกอยู่)'
+      unselected:
+        material: TARGET
+        name: '&7เป้าหมาย'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7เจ้าของบอท'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aเลื่อนขึ้น'
+      cant-scroll: '&7คุณอยู่บนสุดแล้ว'
+    scroll-down:
+      name: '&aเลื่อนลง'
+      cant-scroll: '&7คุณอยู่ล่างสุดแล้ว'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7เป้าหมายของบอท'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aเลื่อนขึ้น'
+      cant-scroll: '&7คุณอยู่บนสุดแล้ว'
+    scroll-down:
+      name: '&aเลื่อนลง'
+      cant-scroll: '&7คุณอยู่ล่างสุดแล้ว'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7ประเภท: &e%type%'
+      - '&7การป้องกันระเบิด: %blast_state%'
+      - ''
+      - '&eคลิกซ้าย: &7เปลี่ยนชิ้นส่วนเกราะ'
+      - '&eคลิกขวา: &7สลับ blast'
+  follow-button:
+    name: '&bสลับ Follow'
+    material: LEAD
+    lore:
+    - '&7สถานะ: &e%type%'
+    - ''
+    - '&eคลิกเพื่อสลับ follow'
+  spawn-button:
+    name: '&aสร้างบอท'
+    material: SPAWNER
+    lore:
+    - '&7สร้างบอทฝึกซ้อมของคุณ'
+    - '&7ด้วยการตั้งค่าที่เลือก'
+    - ''
+    - '&eคลิกเพื่อสร้าง!'
+  despawn-button:
+    name: '&cลบบอท'
+    material: BARRIER
+    lore:
+    - '&7ลบบอทฝึกซ้อมของคุณ'
+    - '&7ออกจากโลก'
+    - ''
+    - '&cคลิกเพื่อลบ!'
+  save-button:
+    name: '&aบันทึกการเปลี่ยนแปลง'
+    material: GREEN_WOOL
+    lore:
+    - '&7บันทึกการตั้งค่าปัจจุบัน'
+    - '&7ไปยังบอทที่กำลังใช้งาน'
+    - ''
+    - '&aคลิกเพื่อบันทึก!'
+  totem-button:
+    name: '&eจำนวนโทเท็ม'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: ไม่จำกัด
+    lore:
+    - '&7จำนวนปัจจุบัน: &a%count%'
+    - ''
+    - '&eคลิกซ้าย: &a+1'
+    - '&eคลิกขวา: &c-1'
+    - '&7(-1 = โทเท็มไม่จำกัด)'
+  teleport-button:
+    name: '&5เทเลพอร์ตบอท'
+    material: ENDER_PEARL
+    lore:
+    - '&dเทเลพอร์ตบอทมายังตำแหน่งของคุณ'
+  combat-button:
+    name: '&bสลับการต่อสู้'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7สถานะ: &e%type%'
+    - ''
+    - '&eคลิกเพื่อสลับการต่อสู้'
+  rank-button:
+    name: '&bแรงก์'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eคลิกเพื่อเพิ่ม/ลดแรงก์'

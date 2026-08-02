@@ -1,0 +1,243 @@
+messages:
+  spawn-bot: "&aBot spawned with the selected settings!"
+  totem-finish: "[%botname%] Ran out of totems"
+  dead-bot-msg: "&aYou killed the bot!"
+  dead-bot-event-msg: "&c[&eEVENT&c] &eThe bot was killed by &b{player}"
+  despawn-bot: "&cBot removed!"
+  save-changes: "&aChanges saved!"
+  reload-no-permission: "&cYou do not have permission to use this command"
+  reload-usage: "&eUsage: /ultimatebotreload <config|bot|maps|all>"
+  reload-config: "&aConfig reloaded successfully"
+  reload-bot: "&aAll active bots have been removed"
+  reload-maps: "&aAll player maps have been cleared"
+  reload-all: "&aConfig, bots, and maps have been reloaded/cleared"
+  reload-invalid-option: "&cInvalid option. Use: config, bot, maps, all"
+  combat-need-follow: "&cFollow must be ON to enable bot combat"
+  bot-blocked-world: "&cYou cannot use this here!"
+  dead-bot-message: "{player} was killed by their Bot"
+  event-bot-already-active: "&cX There is already an active event bot! Despawn it first"
+  all-normal-bots-despawned: "&eAll normal bots have been despawned for the event"
+  cannot-spawn-normal-during-event: "&cX You cannot spawn a normal bot while an event bot is active!"
+  event-bot-active-block-normal: "&cX An event bot is active! You cannot spawn normal bots during an event"
+  must-despawn-normal-bot: "&cX You already have a normal bot spawned! Despawn it before managing the event bot"
+  cannot-open-bot-while-ally: "&cYou already have an ally bot spawned. Despawn it before using /bot."
+  cannot-open-botally-while-single: "&cYou already have a single bot spawned. Despawn it before using /botally."
+  armor-locked: "&cArmor is locked: it cannot be modified for this bot."
+  blast-locked: "&cBlast protection is locked: it cannot be modified for this bot."
+  combat-locked: "&cCombat is locked: it cannot be modified for this bot."
+  follow-locked: "&cFollow is locked: it cannot be modified for this bot."
+  follow-lock-combat: "&cYou cannot disable follow: combat is locked to ON."
+  totem-locked: "&cTotems are locked: they cannot be modified for this bot."
+  rank-locked: "&cRank is locked: it cannot be modified for this bot."
+
+  ally:
+    pre-range-alert: "&e%player% is getting closer, monitoring position..."
+    range-alert: "&c%player% detected as a threat, starting bombing action"
+
+  team-ally:
+    pre-range-alert: "&e%player% is getting closer to the team, monitoring position..."
+    range-alert: "&c%player% detected as a threat to the team, starting bombing action"
+    create-usage: "&eUsage: /botteamally create <owner1> <owner2> [owner3 ...]"
+    create-min-owners: "&cYou must specify at least 2 valid online owners."
+    gui-opened: "&aOpened the botteamally GUI with the selected owners."
+    blocked-by-single: "&cYou already have a single bot spawned. Despawn it before using /botteamally."
+    blocked-by-ally: "&cYou already have an ally bot spawned. Despawn it before using /botteamally."
+    no-active-teamally: "&cYou do not have an active team ally bot."
+    addowners-usage: "&eUsage: /botteamally addowners <player1> [player2 ...]"
+    removeowners-usage: "&eUsage: /botteamally removeowners <player1> [player2 ...]"
+    invalid-owner: "&cInvalid/offline player: &e%player%"
+    owner-already-present: "&e%player% &7is already an owner of the team ally bot."
+    owner-not-present: "&e%player% &7is not an owner of the team ally bot."
+    owner-added: "&aAdded owner: &e%player%"
+    owner-removed: "&aRemoved owner: &e%player%"
+    min-owners-reached: "&cYou cannot go below 2 owners."
+    duplicate-owner: "&cDuplicate owner in command: &e%player%"
+    owner-has-active-bot: "&c%player% already has an active bot (%bottype%). Despawn it first."
+    team-spawned-notify: "&aAllied bot spawned by %playerowner% for the team with these owners: &e%playerlist%"
+
+
+gui:
+
+  tab-border:
+    material: "BLACK_STAINED_GLASS_PANE"
+    name: " "
+
+  tab-item:
+    tab-0:
+      selected:
+        material: "SHIELD"
+        name: "&eKit &7(selected)"
+      unselected:
+        material: "SHIELD"
+        name: "&7Kit"
+    tab-1:
+      selected:
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&eTemplates &7(selected)"
+      unselected:
+        material: "SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE"
+        name: "&7Templates"
+    tab-2:
+      selected:
+        material: "DRAGON_HEAD"
+        name: "&eOwners &7(selected)"
+      unselected:
+        material: "DRAGON_HEAD"
+        name: "&7Owners"
+    tab-3:
+      selected:
+        material: "TARGET"
+        name: "&eTargets &7(selected)"
+      unselected:
+        material: "TARGET"
+        name: "&7Targets"
+
+  owners-tab:
+    head:
+      name: "&e%player%"
+      lore:
+        - "&7Bot owner"
+        - ""
+        - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScroll up"
+      cant-scroll: "&7You are already at the top"
+    scroll-down:
+      name: "&aScroll down"
+      cant-scroll: "&7You are already at the bottom"
+
+  targets-tab:
+    head:
+      name: "&c%player%"
+      lore:
+        - "&7Bot target"
+        - ""
+        - "&8UUID: &7%uuid%"
+    scroll-up:
+      name: "&aScroll up"
+      cant-scroll: "&7You are already at the top"
+    scroll-down:
+      name: "&aScroll down"
+      cant-scroll: "&7You are already at the bottom"
+
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: "&aON"
+    blast-disabled-text: "&cOFF"
+    lore:
+      set-type:
+        - "&7Type: &e%type%"
+        - "&7Blast Protection: %blast_state%"
+        - ""
+        - "&eLeft click: &7change the armor piece"
+        - "&eRight click: &7toggle blast"
+
+  templates-background:
+    lore:
+      - "&7Smithing background preview"
+      - "&7Template: &e%template%"
+      - "&7Ore: &e%ore%"
+
+  templates-button:
+    empty-value: "None"
+    template-empty-name: "&fClick to change template"
+    template-name: "&eTemplate: &f%value%"
+    template-lore:
+      - "&7Current selection: &e%value%"
+      - ""
+      - "&eLeft click: &7next template"
+      - "&eRight click: &7previous template"
+    ore-empty-name: "&fClick to change ore"
+    ore-name: "&eOre: &f%value%"
+    ore-lore:
+      - "&7Current selection: &e%value%"
+      - ""
+      - "&eLeft click: &7next ore"
+      - "&eRight click: &7previous ore"
+
+  follow-button:
+    name: "&bToggle Follow"
+    material: "LEAD"
+    lore:
+      - "&7Status: &e%type%"
+      - ""
+      - "&eClick to toggle follow"
+
+  spawn-button:
+    name: "&aSpawn Bot"
+    material: "SPAWNER"
+    lore:
+      - "&7Spawn your practice bot"
+      - "&7with the selected configuration"
+      - ""
+      - "&eClick to spawn!"
+
+  despawn-button:
+    name: "&cRemove Bot"
+    material: "BARRIER"
+    lore:
+      - "&7Remove your practice bot"
+      - "&7from the world"
+      - ""
+      - "&cClick to remove!"
+
+  save-button:
+    name: "&aSave Changes"
+    material: "GREEN_WOOL"
+    lore:
+      - "&7Save the current settings"
+      - "&7to the active bot"
+      - ""
+      - "&aClick to save!"
+
+  totem-button:
+    name: "&eTotem Count"
+    material: "TOTEM_OF_UNDYING"
+    unlimited-text: "Unlimited"
+    lore:
+      - "&7Current count: &a%count%"
+      - ""
+      - "&eLeft click: &a+1"
+      - "&eRight click: &c-1"
+      - "&7(-1 = Unlimited totems)"
+
+  teleport-button:
+    name: "&5Teleport Bot"
+    material: "ENDER_PEARL"
+    lore:
+      - "&dTeleport the bot to your location"
+
+  combat-button:
+    name: "&bToggle Combat"
+    material: "NETHERITE_SWORD"
+    lore:
+      - "&7Status: &e%type%"
+      - ""
+      - "&eClick to toggle combat"
+
+  target-mode-button:
+    name: "&bAttack Mode"
+    current: "&7Current: &e%mode%"
+    click: "&aClick to change"
+    players: "Players"
+    mobs: "Mobs"
+    both: "Players + mobs"
+
+  rank-button:
+    name: "&bRank"
+    material: "DIAMOND_SWORD"
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+      - ""
+      - "%ranks%"
+      - ""
+      - "&eClick to increase/decrease the rank"

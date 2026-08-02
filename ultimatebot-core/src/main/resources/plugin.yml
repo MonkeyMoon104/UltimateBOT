@@ -1,0 +1,40 @@
+name: UltimateBot
+version: '${version}'
+main: com.monkey.ultimatebot.UltimateBot
+api-version: '1.21'
+folia-supported: true
+authors: [ MonkeyMoon104 ]
+description: Advanced, standalone PvP training bots
+softdepend:
+  - PlaceholderAPI
+  - LuckPerms
+  - WorldGuard
+
+commands:
+  bot:
+    description: Open the normal bot settings GUI
+    permission: ultimatebot.bot.use
+  botevent:
+    description: Open the event bot settings GUI
+    permission: admin.host.bot
+  botally:
+    description: Open the ally bot settings GUI
+    permission: ultimatebot.bot.use
+  botteamally:
+    description: Create and manage a team ally bot
+    permission: ultimatebot.bot.use
+  ultimatebotreload:
+    description: Reload configuration or remove bots/maps
+    usage: /ultimatebotreload <config|bot|maps|all>
+    permission: ultimatebot.admin.use
+
+permissions:
+  ultimatebot.admin.use:
+    description: Allows using the ultimatebotreload command
+    default: op
+  ultimatebot.bot.use:
+    description: Allows using the bot, botally and botteamally commands
+    default: true
+  admin.host.bot:
+    description: Allows creating an event bot
+    default: op

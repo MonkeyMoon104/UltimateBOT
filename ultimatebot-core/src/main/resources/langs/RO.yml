@@ -1,0 +1,209 @@
+messages:
+  spawn-bot: '&aBotul a fost spawnat cu setările selectate!'
+  totem-finish: '[%botname%] A rămas fără toteme'
+  dead-bot-msg: '&aAi omorât botul!'
+  dead-bot-event-msg: '&c[&eEVENT&c] &eBotul a fost omorât de &b{player}'
+  despawn-bot: '&cBot eliminat!'
+  save-changes: '&aSchimbările au fost salvate!'
+  reload-no-permission: '&cNu ai permisiunea să folosești această comandă'
+  reload-usage: '&eUtilizare: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aConfigurația a fost reîncărcată cu succes'
+  reload-bot: '&aToți boții activi au fost eliminați'
+  reload-maps: '&aToate hărțile jucătorilor au fost șterse'
+  reload-all: '&aConfigurația, boții și hărțile au fost reîncărcate/curățate'
+  reload-invalid-option: '&cOpțiune invalidă. Folosește: config, bot, maps, all'
+  combat-need-follow: '&cFollow trebuie să fie PORNIT pentru a activa lupta botului'
+  bot-blocked-world: '&cNu poți folosi asta aici!'
+  dead-bot-message: '{player} a fost omorât de propriul Bot'
+  event-bot-already-active: '&cX Există deja un bot de eveniment activ! Elimină-l
+    mai întâi'
+  all-normal-bots-despawned: '&eToți boții normali au fost eliminați pentru eveniment'
+  cannot-spawn-normal-during-event: '&cX Nu poți spawna un bot normal cât timp un
+    bot de eveniment este activ!'
+  event-bot-active-block-normal: '&cX Un bot de eveniment este activ! Nu poți spawna
+    boți normali în timpul unui eveniment'
+  must-despawn-normal-bot: '&cX Ai deja un bot normal spawnat! Elimină-l înainte să
+    gestionezi botul de eveniment'
+  cannot-open-bot-while-ally: '&cAi deja un ally bot spawnat. Elimină-l înainte să
+    folosești /bot.'
+  cannot-open-botally-while-single: '&cAi deja un bot single spawnat. Elimină-l înainte
+    să folosești /botally.'
+  armor-locked: '&cArmura este blocată: nu poate fi modificată pentru acest bot.'
+  blast-locked: '&cProtecția la explozie este blocată: nu poate fi modificată pentru
+    acest bot.'
+  combat-locked: '&cLupta este blocată: nu poate fi modificată pentru acest bot.'
+  follow-locked: '&cFollow este blocat: nu poate fi modificat pentru acest bot.'
+  follow-lock-combat: '&cNu poți dezactiva follow: lupta este blocată pe PORNIT.'
+  totem-locked: '&cTotemele sunt blocate: nu pot fi modificate pentru acest bot.'
+  rank-locked: '&cRank-ul este blocat: nu poate fi modificat pentru acest bot.'
+  ally:
+    pre-range-alert: '&e%player% se apropie, monitorizare poziție...'
+    range-alert: '&c%player% a fost detectat ca amenințare, se începe acțiunea de
+      bombardare'
+  team-ally:
+    pre-range-alert: '&e%player% se apropie de echipă, monitorizare poziție...'
+    range-alert: '&c%player% a fost detectat ca amenințare pentru echipă, se începe
+      acțiunea de bombardare'
+    create-usage: '&eUtilizare: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cTrebuie să specifici cel puțin 2 owneri online valizi.'
+    gui-opened: '&aGUI-ul botteamally a fost deschis cu ownerii selectați.'
+    blocked-by-single: '&cAi deja un bot single spawnat. Elimină-l înainte să folosești
+      /botteamally.'
+    blocked-by-ally: '&cAi deja un ally bot spawnat. Elimină-l înainte să folosești
+      /botteamally.'
+    no-active-teamally: '&cNu ai un team ally bot activ.'
+    addowners-usage: '&eUtilizare: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eUtilizare: /botteamally removeowners <player1> [player2
+      ...]'
+    invalid-owner: '&cJucător invalid/offline: &e%player%'
+    owner-already-present: '&e%player% &7este deja owner al team ally botului.'
+    owner-not-present: '&e%player% &7nu este owner al team ally botului.'
+    owner-added: '&aOwner adăugat: &e%player%'
+    owner-removed: '&aOwner eliminat: &e%player%'
+    min-owners-reached: '&cNu poți coborî sub 2 owneri.'
+    duplicate-owner: '&cOwner duplicat în comandă: &e%player%'
+    owner-has-active-bot: '&c%player% are deja un bot activ (%bottype%). Elimină-l
+      mai întâi.'
+    team-spawned-notify: '&aBot aliat spawnat de %playerowner% pentru echipă cu acești
+      owneri: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(selectat)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRank &7(selectat)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Rank'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eOwneri &7(selectat)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Owneri'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eȚinte &7(selectat)'
+      unselected:
+        material: TARGET
+        name: '&7Ținte'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Owner bot'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aDerulează în sus'
+      cant-scroll: '&7Ești deja sus'
+    scroll-down:
+      name: '&aDerulează în jos'
+      cant-scroll: '&7Ești deja jos'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Țintă bot'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aDerulează în sus'
+      cant-scroll: '&7Ești deja sus'
+    scroll-down:
+      name: '&aDerulează în jos'
+      cant-scroll: '&7Ești deja jos'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Tip: &e%type%'
+      - '&7Protecție la explozie: %blast_state%'
+      - ''
+      - '&eClick stânga: &7schimbă piesa de armură'
+      - '&eClick dreapta: &7comută blast'
+  follow-button:
+    name: '&bComută Follow'
+    material: LEAD
+    lore:
+    - '&7Stare: &e%type%'
+    - ''
+    - '&eClick pentru a comuta follow'
+  spawn-button:
+    name: '&aSpawnează Bot'
+    material: SPAWNER
+    lore:
+    - '&7Spawnează botul tău de antrenament'
+    - '&7cu configurația selectată'
+    - ''
+    - '&eClick pentru spawn!'
+  despawn-button:
+    name: '&cElimină Botul'
+    material: BARRIER
+    lore:
+    - '&7Elimină botul tău de antrenament'
+    - '&7din lume'
+    - ''
+    - '&cClick pentru eliminare!'
+  save-button:
+    name: '&aSalvează Schimbările'
+    material: GREEN_WOOL
+    lore:
+    - '&7Salvează setările curente'
+    - '&7pe botul activ'
+    - ''
+    - '&aClick pentru salvare!'
+  totem-button:
+    name: '&eNumăr Toteme'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Nelimitat
+    lore:
+    - '&7Număr curent: &a%count%'
+    - ''
+    - '&eClick stânga: &a+1'
+    - '&eClick dreapta: &c-1'
+    - '&7(-1 = Toteme nelimitate)'
+  teleport-button:
+    name: '&5Teleportează Botul'
+    material: ENDER_PEARL
+    lore:
+    - '&dTeleportează botul la locația ta'
+  combat-button:
+    name: '&bComută Lupta'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Stare: &e%type%'
+    - ''
+    - '&eClick pentru a comuta lupta'
+  rank-button:
+    name: '&bRank'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eClick pentru a crește/scădea rank-ul'

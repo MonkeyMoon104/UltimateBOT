@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aBot został zrespiony z wybranymi ustawieniami!'
+  totem-finish: '[%botname%] Skończyły się totemy'
+  dead-bot-msg: '&aZabiłeś bota!'
+  dead-bot-event-msg: '&c[&eWYDARZENIE&c] &eBot został zabity przez &b{player}'
+  despawn-bot: '&cBot usunięty!'
+  save-changes: '&aZmiany zapisane!'
+  reload-no-permission: '&cNie masz uprawnień do użycia tej komendy'
+  reload-usage: '&eUżycie: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aKonfiguracja została pomyślnie przeładowana'
+  reload-bot: '&aWszystkie aktywne boty zostały usunięte'
+  reload-maps: '&aWszystkie mapy graczy zostały wyczyszczone'
+  reload-all: '&aKonfiguracja, boty i mapy zostały przeładowane/wyczyszczone'
+  reload-invalid-option: '&cNieprawidłowa opcja. Użyj: config, bot, maps, all'
+  combat-need-follow: '&cFollow musi być WŁĄCZONY, aby włączyć walkę bota'
+  bot-blocked-world: '&cNie możesz tego tutaj użyć!'
+  dead-bot-message: '{player} został zabity przez swojego Bota'
+  event-bot-already-active: '&cX Aktywny bot eventowy już istnieje! Najpierw go usuń'
+  all-normal-bots-despawned: '&eWszystkie zwykłe boty zostały usunięte na potrzeby wydarzenia'
+  cannot-spawn-normal-during-event: '&cX Nie możesz zespawnować zwykłego bota, gdy aktywny jest bot eventowy!'
+  event-bot-active-block-normal: '&cX Bot eventowy jest aktywny! Nie możesz zespawnować zwykłych botów podczas wydarzenia'
+  must-despawn-normal-bot: '&cX Masz już zespawnowanego zwykłego bota! Usuń go przed zarządzaniem botem eventowym'
+  cannot-open-bot-while-ally: '&cMasz już zespawnowanego sojuszniczego bota. Usuń go przed użyciem /bot.'
+  cannot-open-botally-while-single: '&cMasz już zespawnowanego pojedynczego bota. Usuń go przed użyciem /botally.'
+  armor-locked: '&cPancerz jest zablokowany: nie można go zmienić dla tego bota.'
+  blast-locked: '&cOchrona przed wybuchem jest zablokowana: nie można jej zmienić dla tego bota.'
+  combat-locked: '&cWalka jest zablokowana: nie można jej zmienić dla tego bota.'
+  follow-locked: '&cFollow jest zablokowany: nie można go zmienić dla tego bota.'
+  follow-lock-combat: '&cNie możesz wyłączyć follow: walka jest zablokowana na WŁ.'
+  totem-locked: '&cTotemy są zablokowane: nie można ich zmienić dla tego bota.'
+  rank-locked: '&cRanga jest zablokowana: nie można jej zmienić dla tego bota.'
+  ally:
+    pre-range-alert: '&e%player% zbliża się, monitorowanie pozycji...'
+    range-alert: '&c%player% wykryty jako zagrożenie, rozpoczynanie bombardowania'
+  team-ally:
+    pre-range-alert: '&e%player% zbliża się do drużyny, monitorowanie pozycji...'
+    range-alert: '&c%player% wykryty jako zagrożenie dla drużyny, rozpoczynanie bombardowania'
+    create-usage: '&eUżycie: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cMusisz podać co najmniej 2 prawidłowych właścicieli online.'
+    gui-opened: '&aOtwarto GUI botteamally z wybranymi właścicielami.'
+    blocked-by-single: '&cMasz już zespawnowanego pojedynczego bota. Usuń go przed użyciem /botteamally.'
+    blocked-by-ally: '&cMasz już zespawnowanego sojuszniczego bota. Usuń go przed użyciem /botteamally.'
+    no-active-teamally: '&cNie masz aktywnego drużynowego sojuszniczego bota.'
+    addowners-usage: '&eUżycie: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eUżycie: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cNieprawidłowy/offline gracz: &e%player%'
+    owner-already-present: '&e%player% &7jest już właścicielem drużynowego sojuszniczego bota.'
+    owner-not-present: '&e%player% &7nie jest właścicielem drużynowego sojuszniczego bota.'
+    owner-added: '&aDodano właściciela: &e%player%'
+    owner-removed: '&aUsunięto właściciela: &e%player%'
+    min-owners-reached: '&cNie możesz zejść poniżej 2 właścicieli.'
+    duplicate-owner: '&cZduplikowany właściciel w komendzie: &e%player%'
+    owner-has-active-bot: '&c%player% ma już aktywnego bota (%bottype%). Najpierw go usuń.'
+    team-spawned-notify: '&aSojuszniczy bot zrespiony przez %playerowner% dla drużyny z tymi właścicielami: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(wybrano)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRanga &7(wybrano)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Ranga'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eWłaściciele &7(wybrano)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Właściciele'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eCele &7(wybrano)'
+      unselected:
+        material: TARGET
+        name: '&7Cele'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Właściciel bota'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aPrzewiń w górę'
+      cant-scroll: '&7Jesteś już na górze'
+    scroll-down:
+      name: '&aPrzewiń w dół'
+      cant-scroll: '&7Jesteś już na dole'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Cel bota'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aPrzewiń w górę'
+      cant-scroll: '&7Jesteś już na górze'
+    scroll-down:
+      name: '&aPrzewiń w dół'
+      cant-scroll: '&7Jesteś już na dole'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Typ: &e%type%'
+      - '&7Ochrona przed wybuchem: %blast_state%'
+      - ''
+      - '&eLewy przycisk: &7zmień element pancerza'
+      - '&ePrawy przycisk: &7przełącz blast'
+  follow-button:
+    name: '&bPrzełącz Follow'
+    material: LEAD
+    lore:
+    - '&7Status: &e%type%'
+    - ''
+    - '&eKliknij, aby przełączyć follow'
+  spawn-button:
+    name: '&aZresp bota'
+    material: SPAWNER
+    lore:
+    - '&7Zresp swojego treningowego bota'
+    - '&7z wybraną konfiguracją'
+    - ''
+    - '&eKliknij, aby zrespować!'
+  despawn-button:
+    name: '&cUsuń bota'
+    material: BARRIER
+    lore:
+    - '&7Usuń swojego treningowego bota'
+    - '&7ze świata'
+    - ''
+    - '&cKliknij, aby usunąć!'
+  save-button:
+    name: '&aZapisz zmiany'
+    material: GREEN_WOOL
+    lore:
+    - '&7Zapisz bieżące ustawienia'
+    - '&7dla aktywnego bota'
+    - ''
+    - '&aKliknij, aby zapisać!'
+  totem-button:
+    name: '&eLiczba totemów'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Bez limitu
+    lore:
+    - '&7Aktualna liczba: &a%count%'
+    - ''
+    - '&eLewy przycisk: &a+1'
+    - '&ePrawy przycisk: &c-1'
+    - '&7(-1 = Nielimitowane totemy)'
+  teleport-button:
+    name: '&5Teleportuj bota'
+    material: ENDER_PEARL
+    lore:
+    - '&dTeleportuje bota do twojej lokalizacji'
+  combat-button:
+    name: '&bPrzełącz walkę'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Status: &e%type%'
+    - ''
+    - '&eKliknij, aby przełączyć walkę'
+  rank-button:
+    name: '&bRanga'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eKliknij, aby zwiększyć/zmniejszyć rangę'

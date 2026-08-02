@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aBot byl vytvořen s vybraným nastavením!'
+  totem-finish: '[%botname%] Došly totemy'
+  dead-bot-msg: '&aZabil jsi bota!'
+  dead-bot-event-msg: '&c[&eUDÁLOST&c] &eBot byl zabit hráčem &b{player}'
+  despawn-bot: '&cBot odstraněn!'
+  save-changes: '&aZměny uloženy!'
+  reload-no-permission: '&cNemáš oprávnění použít tento příkaz'
+  reload-usage: '&ePoužití: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aKonfigurace byla úspěšně znovu načtena'
+  reload-bot: '&aVšichni aktivní boti byli odstraněni'
+  reload-maps: '&aVšechny mapy hráčů byly vyčištěny'
+  reload-all: '&aKonfigurace, boti a mapy byly znovu načteny/vyčištěny'
+  reload-invalid-option: '&cNeplatná volba. Použij: config, bot, maps, all'
+  combat-need-follow: '&cFollow musí být ZAPNUTÝ, aby bylo možné zapnout boj bota'
+  bot-blocked-world: '&cToto zde nemůžeš použít!'
+  dead-bot-message: '{player} byl zabit svým Botem'
+  event-bot-already-active: '&cX Už je aktivní eventový bot! Nejprve ho odstraň'
+  all-normal-bots-despawned: '&eVšichni normální boti byli pro událost odstraněni'
+  cannot-spawn-normal-during-event: '&cX Nemůžeš spawnout normálního bota, když je aktivní eventový bot!'
+  event-bot-active-block-normal: '&cX Je aktivní eventový bot! Během události nemůžeš spawnout normální boty'
+  must-despawn-normal-bot: '&cX Už máš spawnutého normálního bota! Odstraň ho před správou eventového bota'
+  cannot-open-bot-while-ally: '&cUž máš spawnutého ally bota. Odstraň ho před použitím /bot.'
+  cannot-open-botally-while-single: '&cUž máš spawnutého single bota. Odstraň ho před použitím /botally.'
+  armor-locked: '&cBrnění je uzamčeno: pro tohoto bota ho nelze upravit.'
+  blast-locked: '&cOchrana proti výbuchu je uzamčena: pro tohoto bota ji nelze upravit.'
+  combat-locked: '&cBoj je uzamčen: pro tohoto bota ho nelze upravit.'
+  follow-locked: '&cFollow je uzamčen: pro tohoto bota ho nelze upravit.'
+  follow-lock-combat: '&cNemůžeš vypnout follow: boj je uzamčen na ZAPNUTO.'
+  totem-locked: '&cTotemy jsou uzamčeny: pro tohoto bota je nelze upravit.'
+  rank-locked: '&cRank je uzamčen: pro tohoto bota ho nelze upravit.'
+  ally:
+    pre-range-alert: '&e%player% se přibližuje, sleduje se pozice...'
+    range-alert: '&c%player% byl rozpoznán jako hrozba, zahajuje se bombardování'
+  team-ally:
+    pre-range-alert: '&e%player% se přibližuje k týmu, sleduje se pozice...'
+    range-alert: '&c%player% byl rozpoznán jako hrozba pro tým, zahajuje se bombardování'
+    create-usage: '&ePoužití: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cMusíš zadat alespoň 2 platné online vlastníky.'
+    gui-opened: '&aOtevřeno GUI botteamally s vybranými vlastníky.'
+    blocked-by-single: '&cUž máš spawnutého single bota. Odstraň ho před použitím /botteamally.'
+    blocked-by-ally: '&cUž máš spawnutého ally bota. Odstraň ho před použitím /botteamally.'
+    no-active-teamally: '&cNemáš aktivního týmového ally bota.'
+    addowners-usage: '&ePoužití: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&ePoužití: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cNeplatný/offline hráč: &e%player%'
+    owner-already-present: '&e%player% &7už je vlastníkem týmového ally bota.'
+    owner-not-present: '&e%player% &7není vlastníkem týmového ally bota.'
+    owner-added: '&aVlastník přidán: &e%player%'
+    owner-removed: '&aVlastník odebrán: &e%player%'
+    min-owners-reached: '&cNemůžeš jít pod 2 vlastníky.'
+    duplicate-owner: '&cDuplicitní vlastník v příkazu: &e%player%'
+    owner-has-active-bot: '&c%player% už má aktivního bota (%bottype%). Nejprve ho odstraň.'
+    team-spawned-notify: '&aAlly bot byl spawnut hráčem %playerowner% pro tým s těmito vlastníky: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(vybráno)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRank &7(vybráno)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Rank'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eVlastníci &7(vybráno)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Vlastníci'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eCíle &7(vybráno)'
+      unselected:
+        material: TARGET
+        name: '&7Cíle'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Vlastník bota'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aPosunout nahoru'
+      cant-scroll: '&7Už jsi úplně nahoře'
+    scroll-down:
+      name: '&aPosunout dolů'
+      cant-scroll: '&7Už jsi úplně dole'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Cíl bota'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aPosunout nahoru'
+      cant-scroll: '&7Už jsi úplně nahoře'
+    scroll-down:
+      name: '&aPosunout dolů'
+      cant-scroll: '&7Už jsi úplně dole'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Typ: &e%type%'
+      - '&7Ochrana proti výbuchu: %blast_state%'
+      - ''
+      - '&eLevé tlačítko: &7změnit část brnění'
+      - '&ePravé tlačítko: &7přepnout blast'
+  follow-button:
+    name: '&bPřepnout Follow'
+    material: LEAD
+    lore:
+    - '&7Stav: &e%type%'
+    - ''
+    - '&eKlikni pro přepnutí follow'
+  spawn-button:
+    name: '&aSpawnout Bota'
+    material: SPAWNER
+    lore:
+    - '&7Spawnuj svého tréninkového bota'
+    - '&7s vybranou konfigurací'
+    - ''
+    - '&eKlikni pro spawn!'
+  despawn-button:
+    name: '&cOdstranit Bota'
+    material: BARRIER
+    lore:
+    - '&7Odstraň svého tréninkového bota'
+    - '&7ze světa'
+    - ''
+    - '&cKlikni pro odstranění!'
+  save-button:
+    name: '&aUložit změny'
+    material: GREEN_WOOL
+    lore:
+    - '&7Uloží aktuální nastavení'
+    - '&7pro aktivního bota'
+    - ''
+    - '&aKlikni pro uložení!'
+  totem-button:
+    name: '&ePočet totemů'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Neomezeně
+    lore:
+    - '&7Aktuální počet: &a%count%'
+    - ''
+    - '&eLevé tlačítko: &a+1'
+    - '&ePravé tlačítko: &c-1'
+    - '&7(-1 = Neomezené totemy)'
+  teleport-button:
+    name: '&5Teleportovat bota'
+    material: ENDER_PEARL
+    lore:
+    - '&dTeleportuje bota na tvoji pozici'
+  combat-button:
+    name: '&bPřepnout boj'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Stav: &e%type%'
+    - ''
+    - '&eKlikni pro přepnutí boje'
+  rank-button:
+    name: '&bRank'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eKlikni pro zvýšení/snížení ranku'

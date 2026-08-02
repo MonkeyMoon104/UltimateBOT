@@ -1,0 +1,195 @@
+messages:
+  spawn-bot: '&aA bot a kiválasztott beállításokkal lett létrehozva!'
+  totem-finish: '[%botname%] Elfogytak a totemek'
+  dead-bot-msg: '&aMegölted a botot!'
+  dead-bot-event-msg: '&c[&eESEMÉNY&c] &eA botot megölte: &b{player}'
+  despawn-bot: '&cBot eltávolítva!'
+  save-changes: '&aVáltozások mentve!'
+  reload-no-permission: '&cNincs jogosultságod a parancs használatához'
+  reload-usage: '&eHasználat: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aA konfiguráció sikeresen újratöltve'
+  reload-bot: '&aMinden aktív bot el lett távolítva'
+  reload-maps: '&aMinden játékostérkép törölve lett'
+  reload-all: '&aA konfiguráció, botok és térképek újratöltve/törölve lettek'
+  reload-invalid-option: '&cÉrvénytelen opció. Használd ezt: config, bot, maps, all'
+  combat-need-follow: '&cA Follownak BE kell lennie a bot harcának engedélyezéséhez'
+  bot-blocked-world: '&cEzt itt nem használhatod!'
+  dead-bot-message: '{player} a saját Botja által halt meg'
+  event-bot-already-active: '&cX Már van egy aktív eseménybot! Előbb távolítsd el'
+  all-normal-bots-despawned: '&eMinden normál bot el lett távolítva az eseményhez'
+  cannot-spawn-normal-during-event: '&cX Nem spawnolhatsz normál botot, amíg egy eseménybot aktív!'
+  event-bot-active-block-normal: '&cX Egy eseménybot aktív! Esemény közben nem spawnolhatsz normál botokat'
+  must-despawn-normal-bot: '&cX Már van egy normál botod! Távolítsd el, mielőtt az eseménybotot kezelnéd'
+  cannot-open-bot-while-ally: '&cMár van egy ally botod. Távolítsd el, mielőtt a /bot parancsot használnád.'
+  cannot-open-botally-while-single: '&cMár van egy single botod. Távolítsd el, mielőtt a /botally parancsot használnád.'
+  armor-locked: '&cA páncél zárolva van: ehhez a bothoz nem módosítható.'
+  blast-locked: '&cA robbanásvédelem zárolva van: ehhez a bothoz nem módosítható.'
+  combat-locked: '&cA harc zárolva van: ehhez a bothoz nem módosítható.'
+  follow-locked: '&cA Follow zárolva van: ehhez a bothoz nem módosítható.'
+  follow-lock-combat: '&cNem kapcsolhatod ki a followt: a harc BE állapotra van zárva.'
+  totem-locked: '&cA totemek zárolva vannak: ehhez a bothoz nem módosíthatók.'
+  rank-locked: '&cA rank zárolva van: ehhez a bothoz nem módosítható.'
+  ally:
+    pre-range-alert: '&e%player% közeledik, pozíció figyelése...'
+    range-alert: '&c%player% fenyegetésként észlelve, bombázási akció indítása'
+  team-ally:
+    pre-range-alert: '&e%player% közeledik a csapathoz, pozíció figyelése...'
+    range-alert: '&c%player% fenyegetésként észlelve a csapatra, bombázási akció indítása'
+    create-usage: '&eHasználat: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cLegalább 2 érvényes online tulajdonost kell megadnod.'
+    gui-opened: '&aA botteamally GUI megnyitva a kiválasztott tulajdonosokkal.'
+    blocked-by-single: '&cMár van egy single botod. Távolítsd el, mielőtt a /botteamally parancsot használnád.'
+    blocked-by-ally: '&cMár van egy ally botod. Távolítsd el, mielőtt a /botteamally parancsot használnád.'
+    no-active-teamally: '&cNincs aktív csapat ally botod.'
+    addowners-usage: '&eHasználat: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eHasználat: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cÉrvénytelen/offline játékos: &e%player%'
+    owner-already-present: '&e%player% &7már a csapat ally bot egyik tulajdonosa.'
+    owner-not-present: '&e%player% &7nem tulajdonosa a csapat ally botnak.'
+    owner-added: '&aTulajdonos hozzáadva: &e%player%'
+    owner-removed: '&aTulajdonos eltávolítva: &e%player%'
+    min-owners-reached: '&cNem mehetsz 2 tulajdonos alá.'
+    duplicate-owner: '&cDuplikált tulajdonos a parancsban: &e%player%'
+    owner-has-active-bot: '&c%player% már rendelkezik aktív bottal (%bottype%). Előbb távolítsd el.'
+    team-spawned-notify: '&aAlly bot spawnolva %playerowner% által a csapat számára ezekkel a tulajdonosokkal: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eKit &7(kiválasztva)'
+      unselected:
+        material: SHIELD
+        name: '&7Kit'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eRank &7(kiválasztva)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7Rank'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eTulajdonosok &7(kiválasztva)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7Tulajdonosok'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eCélpontok &7(kiválasztva)'
+      unselected:
+        material: TARGET
+        name: '&7Célpontok'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7Bot tulajdonos'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aGörgetés fel'
+      cant-scroll: '&7Már legfelül vagy'
+    scroll-down:
+      name: '&aGörgetés le'
+      cant-scroll: '&7Már legalul vagy'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7Bot célpont'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aGörgetés fel'
+      cant-scroll: '&7Már legfelül vagy'
+    scroll-down:
+      name: '&aGörgetés le'
+      cant-scroll: '&7Már legalul vagy'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7Típus: &e%type%'
+      - '&7Robbanásvédelem: %blast_state%'
+      - ''
+      - '&eBal klikk: &7páncéldarab cseréje'
+      - '&eJobb klikk: &7blast váltása'
+  follow-button:
+    name: '&bFollow váltása'
+    material: LEAD
+    lore:
+    - '&7Állapot: &e%type%'
+    - ''
+    - '&eKattints a follow váltásához'
+  spawn-button:
+    name: '&aBot spawnolása'
+    material: SPAWNER
+    lore:
+    - '&7Spawnold a gyakorló botodat'
+    - '&7a kiválasztott konfigurációval'
+    - ''
+    - '&eKattints a spawnoláshoz!'
+  despawn-button:
+    name: '&cBot eltávolítása'
+    material: BARRIER
+    lore:
+    - '&7Távolítsd el a gyakorló botodat'
+    - '&7a világból'
+    - ''
+    - '&cKattints az eltávolításhoz!'
+  save-button:
+    name: '&aVáltozások mentése'
+    material: GREEN_WOOL
+    lore:
+    - '&7Elmenti a jelenlegi beállításokat'
+    - '&7az aktív botra'
+    - ''
+    - '&aKattints a mentéshez!'
+  totem-button:
+    name: '&eTotemek száma'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: Korlátlan
+    lore:
+    - '&7Jelenlegi mennyiség: &a%count%'
+    - ''
+    - '&eBal klikk: &a+1'
+    - '&eJobb klikk: &c-1'
+    - '&7(-1 = Korlátlan totem)'
+  teleport-button:
+    name: '&5Bot teleportálása'
+    material: ENDER_PEARL
+    lore:
+    - '&dA botot a helyedre teleportálja'
+  combat-button:
+    name: '&bHarc váltása'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7Állapot: &e%type%'
+    - ''
+    - '&eKattints a harc váltásához'
+  rank-button:
+    name: '&bRank'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eKattints a rank növeléséhez/csökkentéséhez'

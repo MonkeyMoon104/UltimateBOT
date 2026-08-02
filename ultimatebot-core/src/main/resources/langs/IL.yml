@@ -1,0 +1,199 @@
+messages:
+  spawn-bot: '&aהבוט זומן עם ההגדרות שנבחרו!'
+  totem-finish: '[%botname%] נגמרו הטוטמים'
+  dead-bot-msg: '&aהרגת את הבוט!'
+  dead-bot-event-msg: '&c[&eEVENT&c] &eהבוט נהרג על ידי &b{player}'
+  despawn-bot: '&cהבוט הוסר!'
+  save-changes: '&aהשינויים נשמרו!'
+  reload-no-permission: '&cאין לך הרשאה להשתמש בפקודה הזו'
+  reload-usage: '&eשימוש: /ultimatebotreload <config|bot|maps|all>'
+  reload-config: '&aהקונפיג נטען מחדש בהצלחה'
+  reload-bot: '&aכל הבוטים הפעילים הוסרו'
+  reload-maps: '&aכל המפות של השחקנים נוקו'
+  reload-all: '&aהקונפיג, הבוטים והמפות נטענו מחדש/נוקו'
+  reload-invalid-option: '&cאפשרות לא תקינה. השתמש ב: config, bot, maps, all'
+  combat-need-follow: '&cFollow חייב להיות פעיל כדי לאפשר קרב לבוט'
+  bot-blocked-world: '&cאי אפשר להשתמש בזה כאן!'
+  dead-bot-message: '{player} נהרג על ידי הבוט שלו'
+  event-bot-already-active: '&cX כבר יש בוט אירוע פעיל! קודם תסיר אותו'
+  all-normal-bots-despawned: '&eכל הבוטים הרגילים הוסרו עבור האירוע'
+  cannot-spawn-normal-during-event: '&cX אי אפשר לזמן בוט רגיל בזמן שבוט אירוע פעיל!'
+  event-bot-active-block-normal: '&cX בוט אירוע פעיל! אי אפשר לזמן בוטים רגילים בזמן
+    אירוע'
+  must-despawn-normal-bot: '&cX כבר יש לך בוט רגיל פעיל! תסיר אותו לפני ניהול בוט
+    האירוע'
+  cannot-open-bot-while-ally: '&cכבר יש לך ally bot פעיל. תסיר אותו לפני שימוש ב-/bot.'
+  cannot-open-botally-while-single: '&cכבר יש לך single bot פעיל. תסיר אותו לפני שימוש
+    ב-/botally.'
+  armor-locked: '&cהשריון נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
+  blast-locked: '&cהגנת פיצוץ נעולה: אי אפשר לשנות אותה עבור הבוט הזה.'
+  combat-locked: '&cהקרב נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
+  follow-locked: '&cFollow נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
+  follow-lock-combat: '&cאי אפשר לכבות follow: הקרב נעול על פעיל.'
+  totem-locked: '&cהטוטמים נעולים: אי אפשר לשנות אותם עבור הבוט הזה.'
+  rank-locked: '&cהראנק נעול: אי אפשר לשנות אותו עבור הבוט הזה.'
+  ally:
+    pre-range-alert: '&e%player% מתקרב, עוקב אחרי המיקום...'
+    range-alert: '&c%player% זוהה כאיום, מתחיל פעולת הפצצה'
+  team-ally:
+    pre-range-alert: '&e%player% מתקרב לקבוצה, עוקב אחרי המיקום...'
+    range-alert: '&c%player% זוהה כאיום על הקבוצה, מתחיל פעולת הפצצה'
+    create-usage: '&eשימוש: /botteamally create <owner1> <owner2> [owner3 ...]'
+    create-min-owners: '&cחובה לציין לפחות 2 בעלים מחוברים ותקינים.'
+    gui-opened: '&aממשק botteamally נפתח עם הבעלים שנבחרו.'
+    blocked-by-single: '&cכבר יש לך single bot פעיל. תסיר אותו לפני שימוש ב-/botteamally.'
+    blocked-by-ally: '&cכבר יש לך ally bot פעיל. תסיר אותו לפני שימוש ב-/botteamally.'
+    no-active-teamally: '&cאין לך team ally bot פעיל.'
+    addowners-usage: '&eשימוש: /botteamally addowners <player1> [player2 ...]'
+    removeowners-usage: '&eשימוש: /botteamally removeowners <player1> [player2 ...]'
+    invalid-owner: '&cשחקן לא תקין/לא מחובר: &e%player%'
+    owner-already-present: '&e%player% &7כבר בעלים של ה-team ally bot.'
+    owner-not-present: '&e%player% &7אינו בעלים של ה-team ally bot.'
+    owner-added: '&aבעלים נוסף: &e%player%'
+    owner-removed: '&aבעלים הוסר: &e%player%'
+    min-owners-reached: '&cאי אפשר לרדת מתחת ל-2 בעלים.'
+    duplicate-owner: '&cבעלים כפול בפקודה: &e%player%'
+    owner-has-active-bot: '&cל-%player% כבר יש בוט פעיל (%bottype%). תסיר אותו קודם.'
+    team-spawned-notify: '&aבוט בעל ברית זומן על ידי %playerowner% עבור הקבוצה עם
+      הבעלים האלה: &e%playerlist%'
+gui:
+  tab-border:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ' '
+  tab-item:
+    tab-0:
+      selected:
+        material: SHIELD
+        name: '&eקיט &7(נבחר)'
+      unselected:
+        material: SHIELD
+        name: '&7קיט'
+    tab-1:
+      selected:
+        material: GLOWSTONE_DUST
+        name: '&eראנק &7(נבחר)'
+      unselected:
+        material: GUNPOWDER
+        name: '&7ראנק'
+    tab-2:
+      selected:
+        material: DRAGON_HEAD
+        name: '&eבעלים &7(נבחר)'
+      unselected:
+        material: DRAGON_HEAD
+        name: '&7בעלים'
+    tab-3:
+      selected:
+        material: TARGET
+        name: '&eמטרות &7(נבחר)'
+      unselected:
+        material: TARGET
+        name: '&7מטרות'
+  owners-tab:
+    head:
+      name: '&e%player%'
+      lore:
+      - '&7בעל הבוט'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aגלול למעלה'
+      cant-scroll: '&7אתה כבר למעלה'
+    scroll-down:
+      name: '&aגלול למטה'
+      cant-scroll: '&7אתה כבר למטה'
+  targets-tab:
+    head:
+      name: '&c%player%'
+      lore:
+      - '&7מטרת הבוט'
+      - ''
+      - '&8UUID: &7%uuid%'
+    scroll-up:
+      name: '&aגלול למעלה'
+      cant-scroll: '&7אתה כבר למעלה'
+    scroll-down:
+      name: '&aגלול למטה'
+      cant-scroll: '&7אתה כבר למטה'
+  default-armor:
+    helmet: NETHERITE
+    chestplate: NETHERITE
+    leggings: NETHERITE
+    boots: NETHERITE
+    no-armor: BARRIER
+    blast-enabled-text: '&aON'
+    blast-disabled-text: '&cOFF'
+    lore:
+      set-type:
+      - '&7סוג: &e%type%'
+      - '&7הגנת פיצוץ: %blast_state%'
+      - ''
+      - '&eקליק שמאלי: &7שנה את חלק השריון'
+      - '&eקליק ימני: &7החלף blast'
+  follow-button:
+    name: '&bהחלף Follow'
+    material: LEAD
+    lore:
+    - '&7סטטוס: &e%type%'
+    - ''
+    - '&eלחץ כדי להחליף follow'
+  spawn-button:
+    name: '&aזמן בוט'
+    material: SPAWNER
+    lore:
+    - '&7זמן את בוט האימון שלך'
+    - '&7עם ההגדרות שנבחרו'
+    - ''
+    - '&eלחץ כדי לזמן!'
+  despawn-button:
+    name: '&cהסר בוט'
+    material: BARRIER
+    lore:
+    - '&7הסר את בוט האימון שלך'
+    - '&7מהעולם'
+    - ''
+    - '&cלחץ כדי להסיר!'
+  save-button:
+    name: '&aשמור שינויים'
+    material: GREEN_WOOL
+    lore:
+    - '&7שמור את ההגדרות הנוכחיות'
+    - '&7לבוט הפעיל'
+    - ''
+    - '&aלחץ כדי לשמור!'
+  totem-button:
+    name: '&eכמות טוטמים'
+    material: TOTEM_OF_UNDYING
+    unlimited-text: ללא הגבלה
+    lore:
+    - '&7כמות נוכחית: &a%count%'
+    - ''
+    - '&eקליק שמאלי: &a+1'
+    - '&eקליק ימני: &c-1'
+    - '&7(-1 = טוטמים ללא הגבלה)'
+  teleport-button:
+    name: '&5שגר את הבוט'
+    material: ENDER_PEARL
+    lore:
+    - '&dשגר את הבוט למיקום שלך'
+  combat-button:
+    name: '&bהחלף קרב'
+    material: NETHERITE_SWORD
+    lore:
+    - '&7סטטוס: &e%type%'
+    - ''
+    - '&eלחץ כדי להחליף קרב'
+  rank-button:
+    name: '&bראנק'
+    material: DIAMOND_SWORD
+    ranks-mat:
+      easy: SMALL_AMETHYST_BUD
+      normal: SMALL_AMETHYST_BUD
+      medium: MEDIUM_AMETHYST_BUD
+      hard: LARGE_AMETHYST_BUD
+      god: AMETHYST_CLUSTER
+    lore:
+    - ''
+    - '%ranks%'
+    - ''
+    - '&eלחץ כדי להעלות/להוריד את הראנק'

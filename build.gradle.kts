@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.revapi) apply false
 }
 
-val resolvedProjectVersion = providers.gradleProperty("mcbot.version").get()
+val resolvedProjectVersion = providers.gradleProperty("ultimatebot.version").get()
 
 version = resolvedProjectVersion
 
@@ -41,7 +41,7 @@ subprojects {
     apply(plugin = "net.ltgt.errorprone")
     apply(plugin = "com.diffplug.spotless")
 
-    group = "com.monkey.mcbot"
+    group = "com.monkey.ultimatebot"
     version = resolvedProjectVersion
 
     repositories {
@@ -144,11 +144,11 @@ tasks.named("build") {
 
 tasks.register<Sync>("publishApiDocs") {
     group = "documentation"
-    description = "Generates mcbot-api Javadocs and copies them to docs/mcbot/."
+    description = "Generates ultimatebot-api Javadocs and copies them to docs/ultimatebot/."
 
-    dependsOn(":mcbot-api:javadoc")
-    from(project(":mcbot-api").layout.buildDirectory.dir("docs/javadoc"))
-    into(layout.projectDirectory.dir("docs/mcbot"))
+    dependsOn(":ultimatebot-api:javadoc")
+    from(project(":ultimatebot-api").layout.buildDirectory.dir("docs/javadoc"))
+    into(layout.projectDirectory.dir("docs/ultimatebot"))
 
     doLast {
         layout.projectDirectory
@@ -160,11 +160,11 @@ tasks.register<Sync>("publishApiDocs") {
 
 tasks.register<Sync>("publishSdkDocs") {
     group = "documentation"
-    description = "Generates mcbot-sdk Javadocs and copies them to docs/mcbot-sdk/."
+    description = "Generates ultimatebot-sdk Javadocs and copies them to docs/ultimatebot-sdk/."
 
-    dependsOn(":mcbot-sdk:javadoc")
-    from(project(":mcbot-sdk").layout.buildDirectory.dir("docs/javadoc"))
-    into(layout.projectDirectory.dir("docs/mcbot-sdk"))
+    dependsOn(":ultimatebot-sdk:javadoc")
+    from(project(":ultimatebot-sdk").layout.buildDirectory.dir("docs/javadoc"))
+    into(layout.projectDirectory.dir("docs/ultimatebot-sdk"))
 
     doLast {
         layout.projectDirectory
