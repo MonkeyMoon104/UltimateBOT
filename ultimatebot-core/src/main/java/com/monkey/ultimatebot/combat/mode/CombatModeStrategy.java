@@ -1,0 +1,14 @@
+package com.monkey.ultimatebot.combat.mode;
+
+import com.monkey.ultimatebot.common.model.CombatMode;
+import net.minecraft.world.entity.LivingEntity;
+
+interface CombatModeStrategy {
+    CombatMode mode();
+
+    void enter(CombatModeContext context);
+
+    void tick(CombatModeContext context, LivingEntity target);
+
+    void exit(CombatModeContext context);
+}

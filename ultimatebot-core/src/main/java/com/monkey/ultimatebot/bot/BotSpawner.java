@@ -291,6 +291,7 @@ public class BotSpawner {
         UUID botUUID = registry.getBotUUID(ownerUUID);
         if (botUUID == null) return false;
         if (!allowDespawn(ownerUUID, reason)) return false;
+        prepareBotDespawn(ownerUUID);
 
         ServerPlayer handle = ((CraftPlayer) owner).getHandle();
         ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
@@ -313,6 +314,7 @@ public class BotSpawner {
             return false;
         }
         if (!allowDespawn(ownerUUID, reason)) return false;
+        prepareBotDespawn(ownerUUID);
 
         ITrainingBot bot = registry.getBot(ownerUUID);
         if (bot != null && bot.asPlayer().level() instanceof ServerLevel world) {
@@ -345,6 +347,7 @@ public class BotSpawner {
                         ? bot.asPlayer().getUUID()
                         : registry.getBotUUID(ownerUUID);
                 if (!allowDespawn(ownerUUID, reason)) return;
+                prepareBotDespawn(ownerUUID);
                 boolean removed = botUUID != null && EntityUtils.removeEntityInLoadedWorlds(botUUID);
                 cleanupDespawnState(ownerUUID, botUUID, removed, reason);
             }
@@ -360,10 +363,18 @@ public class BotSpawner {
         UUID botUUID = registry.getBotUUID(ownerUUID);
         if (botUUID == null) return;
         if (!allowDespawn(ownerUUID, reason)) return;
+        prepareBotDespawn(ownerUUID);
 
         ServerLevel world = ((org.bukkit.craftbukkit.CraftWorld) fromWorld).getHandle();
         boolean removed = EntityUtils.removeEntity(world, botUUID);
         cleanupDespawnState(ownerUUID, botUUID, removed, reason);
+    }
+
+    private void prepareBotDespawn(UUID ownerUUID) {
+        ITrainingBot bot = registry.getBot(ownerUUID);
+        if (bot != null && bot.getBotAI() != null) {
+            bot.getBotAI().close();
+        }
     }
 
     private void cleanupDespawnState(UUID ownerUUID, UUID botUUID, boolean removed, BotDespawnReason reason) {

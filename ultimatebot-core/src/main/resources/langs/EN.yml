@@ -91,6 +91,13 @@ gui:
       unselected:
         material: "TARGET"
         name: "&7Targets"
+    tab-4:
+      selected:
+        material: "NETHERITE_SWORD"
+        name: "&eCombat Settings &7(selected)"
+      unselected:
+        material: "NETHERITE_SWORD"
+        name: "&7Combat Settings"
 
   owners-tab:
     head:

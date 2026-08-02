@@ -36,7 +36,8 @@ public final class BotOptions {
     private DifficultyLevel difficulty = DifficultyLevel.EASY;
     private boolean changeableCombatMode = true;
     private CombatMode combatMode = CombatMode.SWORD;
-    private @Nullable CombatTuning customCombatTuning;
+    private final Map<CombatMode, EnumMap<DifficultyLevel, CombatTuning>> customCombatTunings =
+            new EnumMap<>(CombatMode.class);
     private BotType botType = BotType.SINGLE;
     private BotCreationSource creationSource = BotCreationSource.CORE;
     private UUID requestedBotUUID;
@@ -415,7 +416,6 @@ public final class BotOptions {
             throw new IllegalArgumentException("Combat mode is disabled: " + requiredMode);
         }
         this.combatMode = requiredMode;
-        this.customCombatTuning = null;
     }
 
     public CombatMode nextCombatMode(boolean forward) {
@@ -432,26 +432,40 @@ public final class BotOptions {
     }
 
     public CombatTuning getCombatTuning() {
-        return customCombatTuning != null
-                ? customCombatTuning
+        CombatTuning customTuning = getCustomCombatTuning();
+        return customTuning != null
+                ? customTuning
                 : training.getCombatProfileCatalog().resolve(combatMode, DifficultyTier.valueOf(difficulty.name()));
     }
 
     public @Nullable CombatTuning getCustomCombatTuning() {
-        return customCombatTuning;
+        Map<DifficultyLevel, CombatTuning> modeTunings = customCombatTunings.get(combatMode);
+        return modeTunings == null ? null : modeTunings.get(difficulty);
     }
 
     public void setCustomCombatTuning(@Nullable CombatTuning customCombatTuning) {
-        this.customCombatTuning = customCombatTuning;
+        if (customCombatTuning == null) {
+            resetCombatTuning();
+            return;
+        }
+        customCombatTunings
+                .computeIfAbsent(combatMode, ignored -> new EnumMap<>(DifficultyLevel.class))
+                .put(difficulty, customCombatTuning);
     }
 
     public void resetCombatTuning() {
-        customCombatTuning = null;
+        Map<DifficultyLevel, CombatTuning> modeTunings = customCombatTunings.get(combatMode);
+        if (modeTunings == null) {
+            return;
+        }
+        modeTunings.remove(difficulty);
+        if (modeTunings.isEmpty()) {
+            customCombatTunings.remove(combatMode);
+        }
     }
 
     public void setDifficulty(DifficultyLevel difficulty) {
         this.difficulty = clampDifficulty(difficulty == null ? DifficultyLevel.EASY : difficulty);
-        this.customCombatTuning = null;
     }
 
     public DifficultyLevel getMinDifficulty() {

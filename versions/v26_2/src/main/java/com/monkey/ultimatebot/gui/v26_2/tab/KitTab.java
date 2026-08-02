@@ -22,7 +22,7 @@ public class KitTab {
 
         Gui gui = Gui.builder()
                 .setStructure(
-                        "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . . m . # #", "# # # # # # # #")
+                        "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . o m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('r', new DifficultyItem(context.getTraining(), options))
@@ -35,6 +35,7 @@ public class KitTab {
                                 ? new TeleportItem(context.getTraining())
                                 : Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
+                .addIngredient('o', new CombatModeItem(context.getTraining(), options))
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
 

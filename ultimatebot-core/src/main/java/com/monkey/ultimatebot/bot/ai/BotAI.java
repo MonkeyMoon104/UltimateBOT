@@ -23,6 +23,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.BotTeleportController;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
+import com.monkey.ultimatebot.common.model.CombatMode;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -66,6 +68,7 @@ public class BotAI {
     private final ICombatDataManager combatDataManager;
     private final IPathfindingManager pathfindingManager;
     private final ICombatStrategyExecutor combatStrategyExecutor;
+    private final CombatModeEngine combatModeEngine;
     private final BotOptions options;
     private final UltimateBot plugin;
     private final Random idleRandom = new Random();
@@ -122,6 +125,16 @@ public class BotAI {
                 rapvpController,
                 combatStateManager,
                 combatDataManager);
+        this.combatModeEngine = new CombatModeEngine(
+                bot,
+                options,
+                movementController,
+                rotationController,
+                attackController,
+                inventoryController,
+                cpvpController,
+                rapvpController,
+                combatStrategyExecutor);
     }
 
     public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
@@ -155,7 +168,8 @@ public class BotAI {
             return;
         }
 
-        combatDataManager.updateCombatData(playerTarget, combatEnabled);
+        combatDataManager.updateCombatData(
+                playerTarget, combatEnabled && options.getCombatMode() == CombatMode.CRYSTAL);
 
         if (combatStateManager instanceof CombatStateManager stateManager) {
             stateManager.updateDamageData(
@@ -193,7 +207,7 @@ public class BotAI {
                     followActivePath(playerTarget);
                 } else if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
                     combatStateManager.updateCombatState(playerTarget);
-                    combatStrategyExecutor.executeCombatStrategy(playerTarget);
+                    combatModeEngine.tick(playerTarget);
                 } else if (isCurrentlyHealing) {
                     combatStateManager.updateCombatState(playerTarget);
                     executeHealingMovement(playerTarget);
@@ -202,6 +216,7 @@ public class BotAI {
                 }
             }
         } else {
+            combatModeEngine.deactivate();
             if (!isCurrentlyHealing) {
                 if (!followActivePath(playerTarget)) {
                     pathfindingManager.checkForStuck(playerTarget);
@@ -356,6 +371,7 @@ public class BotAI {
     private void tickMobTarget(LivingEntity target, boolean combatEnabled) {
         rotationController.updateRotation(target);
         if (!combatEnabled) {
+            combatModeEngine.deactivate();
             movementController.stopMovement();
             return;
         }
@@ -376,7 +392,7 @@ public class BotAI {
             if (pathfindingManager.isUsingPathfinding()) {
                 followActivePath(target);
             } else {
-                combatStrategyExecutor.executeMeleeCombat(target);
+                combatModeEngine.tick(target);
             }
         }
         if (pathfindingManager instanceof PathfindingManager manager) {
@@ -406,7 +422,11 @@ public class BotAI {
 
     private void syncExplosiveCombat() {
         boolean explosionsEnabled = options.isExplosions();
-        cpvpController.setEnabled(explosionsEnabled && options.isCrystalPvp());
+        boolean crystalMode = options.getCombatMode() == CombatMode.CRYSTAL;
+        cpvpController.setEnabled(explosionsEnabled && crystalMode && options.isCrystalPvp());
+        if (!crystalMode) {
+            rapvpController.disable();
+        }
         if (explosionsEnabled) {
             return;
         }
@@ -596,5 +616,12 @@ public class BotAI {
 
         Location location = new Location(world, position.x, position.y, position.z);
         return plugin.getWorldGuardPvpService().isPvpAllowed(location);
+    }
+
+    public void close() {
+        combatModeEngine.close();
+        movementController.clearPath();
+        movementController.clearCache();
+        healController.resetHealState();
     }
 }

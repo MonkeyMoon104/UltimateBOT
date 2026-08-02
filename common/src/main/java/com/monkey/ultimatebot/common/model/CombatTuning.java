@@ -38,6 +38,25 @@ public record CombatTuning(
         return new Builder();
     }
 
+    /** Creates a builder initialized with every value from this tuning. */
+    public Builder toBuilder() {
+        return builder()
+                .attackRange(attackRange)
+                .attackCooldownTicks(attackCooldownTicks)
+                .reactionTicks(reactionTicks)
+                .movementSpeed(movementSpeed)
+                .strafeStrength(strafeStrength)
+                .aimAccuracy(aimAccuracy)
+                .aggression(aggression)
+                .retreatHealthRatio(retreatHealthRatio)
+                .healingHealthRatio(healingHealthRatio)
+                .specialActionCooldownTicks(specialActionCooldownTicks)
+                .pearlTriggerDistance(pearlTriggerDistance)
+                .maxActionsPerTick(maxActionsPerTick)
+                .defensiveChance(defensiveChance)
+                .sprintResetChance(sprintResetChance);
+    }
+
     private static void requireRatio(double value, String name) {
         requireRange(value, 0.0D, 1.0D, name);
     }

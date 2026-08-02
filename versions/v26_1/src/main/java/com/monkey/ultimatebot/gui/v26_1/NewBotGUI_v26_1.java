@@ -77,10 +77,11 @@ public class NewBotGUI_v26_1 {
         Gui tab1 = new TemplatesTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
+        Gui tab4 = new CombatSettingsTab(tabContext).build(borderMat, translatedBorderName);
 
         Gui tabGui = TabGui.builder()
                 .setStructure(
-                        ". . . 0 . 1 . . .",
+                        ". . 0 . 1 . 4 . .",
                         ". x x x x x x x x",
                         "2 x x x x x x x x",
                         ". x x x x x x x x",
@@ -92,7 +93,8 @@ public class NewBotGUI_v26_1 {
                 .addIngredient('1', new BotTabItem(1, training))
                 .addIngredient('2', new BotTabItem(2, training))
                 .addIngredient('3', new BotTabItem(3, training))
-                .setTabs(List.of(tab0, tab1, tab2, tab3))
+                .addIngredient('4', new BotTabItem(4, training))
+                .setTabs(List.of(tab0, tab1, tab2, tab3, tab4))
                 .build();
 
         BotOptions finalOptions = options;
