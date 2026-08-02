@@ -84,6 +84,11 @@ public class PlayerCheckListener implements Listener {
     @EventHandler
     public void onDead(PlayerDeathEvent event) {
         Player player = event.getPlayer();
+        if (plugin.getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null) {
+            event.getDrops().clear();
+            event.setDroppedExp(0);
+            event.setKeepInventory(true);
+        }
         boolean wasBotSpawned = botManager.isBotSpawned(player.getUniqueId());
         String currentDeathMessage = getDeathMessageText(event);
 
