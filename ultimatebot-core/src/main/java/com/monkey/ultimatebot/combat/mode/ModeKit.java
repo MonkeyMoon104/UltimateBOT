@@ -4,16 +4,21 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 final class ModeKit {
     private final Map<Integer, ItemStack> slots;
+    private final Map<EquipmentSlot, ItemStack> equipment;
 
-    private ModeKit(Map<Integer, ItemStack> slots) {
+    private ModeKit(Map<Integer, ItemStack> slots, Map<EquipmentSlot, ItemStack> equipment) {
         Map<Integer, ItemStack> copy = new HashMap<>();
         slots.forEach((slot, item) -> copy.put(slot, item.copy()));
         this.slots = Collections.unmodifiableMap(copy);
+        Map<EquipmentSlot, ItemStack> equipmentCopy = new java.util.EnumMap<>(EquipmentSlot.class);
+        equipment.forEach((slot, item) -> equipmentCopy.put(slot, item.copy()));
+        this.equipment = Collections.unmodifiableMap(equipmentCopy);
     }
 
     static Builder builder() {
@@ -26,8 +31,15 @@ final class ModeKit {
         return copy;
     }
 
+    Map<EquipmentSlot, ItemStack> equipment() {
+        Map<EquipmentSlot, ItemStack> copy = new java.util.EnumMap<>(EquipmentSlot.class);
+        equipment.forEach((slot, item) -> copy.put(slot, item.copy()));
+        return copy;
+    }
+
     static final class Builder {
         private final Map<Integer, ItemStack> slots = new HashMap<>();
+        private final Map<EquipmentSlot, ItemStack> equipment = new java.util.EnumMap<>(EquipmentSlot.class);
 
         Builder slot(int slot, Item item) {
             return slot(slot, item, 1);
@@ -44,8 +56,31 @@ final class ModeKit {
             return this;
         }
 
+        Builder equipment(EquipmentSlot slot, Item item) {
+            EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+            if (checkedSlot == EquipmentSlot.MAINHAND || checkedSlot == EquipmentSlot.BODY) {
+                throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
+            }
+            equipment.put(checkedSlot, new ItemStack(Objects.requireNonNull(item, "item")));
+            return this;
+        }
+
+        Builder netheriteArmor() {
+            return equipment(EquipmentSlot.HEAD, net.minecraft.world.item.Items.NETHERITE_HELMET)
+                    .equipment(EquipmentSlot.CHEST, net.minecraft.world.item.Items.NETHERITE_CHESTPLATE)
+                    .equipment(EquipmentSlot.LEGS, net.minecraft.world.item.Items.NETHERITE_LEGGINGS)
+                    .equipment(EquipmentSlot.FEET, net.minecraft.world.item.Items.NETHERITE_BOOTS);
+        }
+
+        Builder diamondArmor() {
+            return equipment(EquipmentSlot.HEAD, net.minecraft.world.item.Items.DIAMOND_HELMET)
+                    .equipment(EquipmentSlot.CHEST, net.minecraft.world.item.Items.DIAMOND_CHESTPLATE)
+                    .equipment(EquipmentSlot.LEGS, net.minecraft.world.item.Items.DIAMOND_LEGGINGS)
+                    .equipment(EquipmentSlot.FEET, net.minecraft.world.item.Items.DIAMOND_BOOTS);
+        }
+
         ModeKit build() {
-            return new ModeKit(slots);
+            return new ModeKit(slots, equipment);
         }
     }
 }

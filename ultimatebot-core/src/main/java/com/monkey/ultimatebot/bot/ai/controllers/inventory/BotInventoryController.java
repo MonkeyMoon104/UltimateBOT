@@ -2,12 +2,14 @@ package com.monkey.ultimatebot.bot.ai.controllers.inventory;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.*;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.*;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class BotInventoryController {
 
+    private final Player bot;
     private final SlotManager slotManager;
     private final IResourceReplenisher resourceReplenisher;
     private final IEquipmentBroadcaster equipmentBroadcaster;
@@ -25,6 +27,7 @@ public class BotInventoryController {
     public static final int EMPTY_SLOT = 8;
 
     public BotInventoryController(Player bot) {
+        this.bot = java.util.Objects.requireNonNull(bot, "bot");
         this.resourceReplenisher = new ResourceReplenisher();
         this.equipmentBroadcaster = new EquipmentBroadcaster();
         this.slotManager = new SlotManager(bot, resourceReplenisher, equipmentBroadcaster);
@@ -95,6 +98,17 @@ public class BotInventoryController {
 
     public ItemStack getItem(int slot) {
         return slotManager.getItem(slot);
+    }
+
+    public ItemStack getEquipment(EquipmentSlot slot) {
+        return bot.getItemBySlot(java.util.Objects.requireNonNull(slot, "slot"));
+    }
+
+    public void setEquipment(EquipmentSlot slot, ItemStack item) {
+        bot.setItemSlot(
+                java.util.Objects.requireNonNull(slot, "slot"),
+                java.util.Objects.requireNonNull(item, "item").copy());
+        equipmentBroadcaster.broadcastEquipmentChange(bot);
     }
 
     public boolean isHoldingSword() {

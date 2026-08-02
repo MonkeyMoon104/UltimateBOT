@@ -18,7 +18,19 @@ public class EquipmentBroadcaster implements IEquipmentBroadcaster {
     @Override
     public void broadcastEquipmentChange(Player bot) {
         List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
-        equipmentList.add(Pair.of(EquipmentSlot.MAINHAND, bot.getItemBySlot(EquipmentSlot.MAINHAND)));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.MAINHAND,
+                bot.getItemBySlot(EquipmentSlot.MAINHAND).copy()));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.OFFHAND, bot.getItemBySlot(EquipmentSlot.OFFHAND).copy()));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.HEAD, bot.getItemBySlot(EquipmentSlot.HEAD).copy()));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.CHEST, bot.getItemBySlot(EquipmentSlot.CHEST).copy()));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.LEGS, bot.getItemBySlot(EquipmentSlot.LEGS).copy()));
+        equipmentList.add(Pair.of(
+                EquipmentSlot.FEET, bot.getItemBySlot(EquipmentSlot.FEET).copy()));
 
         ClientboundSetEquipmentPacket packet = NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
 
