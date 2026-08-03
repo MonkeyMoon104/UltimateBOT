@@ -8,7 +8,7 @@ import net.minecraft.world.item.Items;
 
 final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.GUARD;
-    private int phaseTicks;
+    private int safeOpeningTicks;
 
     AxeShieldPvPStrategy() {
         super(
@@ -23,17 +23,17 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
+        safeOpeningTicks = 0;
         transitionTo(Phase.GUARD);
     }
 
     @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
+        context.actions().tickAttackCooldown();
         context.motion().aimAt(target);
-        phaseTicks++;
         switch (phase) {
             case GUARD -> guard(context, target);
             case AXE_STRIKE -> axeStrike(context, target);
-            case RECOVER -> recover(context, target);
         }
     }
 
@@ -42,41 +42,54 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         context.actions().defendWithOffhand();
         double distance = context.motion().distanceTo(target);
         if (distance > context.tuning().attackRange()) {
+            safeOpeningTicks = 0;
             context.motion().approach(target, 2.0D);
             return;
         }
-        boolean safeStrike = !context.actions().isIncomingAttackLikely(target);
-        if (context.actions().isTargetBlocking(target) || safeStrike || phaseTicks >= 12) {
-            context.actions().releaseUseItem();
+
+        boolean incomingAttack = context.actions().isIncomingAttackLikely(target);
+        if (incomingAttack) {
+            safeOpeningTicks = 0;
+            if (distance <= 2.6D) {
+                context.motion().retreat(target, 3.2D);
+            } else {
+                context.motion().strafe(target, 0.65D);
+            }
+            return;
+        }
+
+        safeOpeningTicks++;
+        if (ModeCombatPolicy.isSafeAxeOpening(
+                distance,
+                context.tuning().attackRange(),
+                false,
+                context.actions().canAttack(),
+                safeOpeningTicks)) {
             transitionTo(Phase.AXE_STRIKE);
         }
     }
 
     private void axeStrike(CombatModeContext context, LivingEntity target) {
-        context.actions().releaseUseItem();
-        if (context.motion().distanceTo(target) > context.tuning().attackRange()) {
-            context.motion().approach(target, 1.8D);
+        double distance = context.motion().distanceTo(target);
+        if (context.actions().isIncomingAttackLikely(target)
+                || distance > context.tuning().attackRange()
+                || !context.actions().canAttack()) {
+            safeOpeningTicks = 0;
+            transitionTo(Phase.GUARD);
             return;
         }
+        context.actions().releaseUseItem();
         context.actions().attack(target, BotInventoryController.SWORD_SLOT);
-        transitionTo(Phase.RECOVER);
-    }
-
-    private void recover(CombatModeContext context, LivingEntity target) {
-        context.motion().retreat(target, 3.4D);
-        if (phaseTicks >= Math.max(3, context.tuning().reactionTicks())) {
-            transitionTo(Phase.GUARD);
-        }
+        safeOpeningTicks = 0;
+        transitionTo(Phase.GUARD);
     }
 
     private void transitionTo(Phase nextPhase) {
         phase = nextPhase;
-        phaseTicks = 0;
     }
 
     private enum Phase {
         GUARD,
-        AXE_STRIKE,
-        RECOVER
+        AXE_STRIKE
     }
 }

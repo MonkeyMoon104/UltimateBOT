@@ -70,7 +70,7 @@ final class SmpPvPStrategy extends AbstractCombatModeStrategy {
 
     private void shieldDefend(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(SHIELD_SLOT);
-        context.actions().defendWithMainhand();
+        context.actions().useMainhandItem();
         if (context.motion().distanceTo(target) > 2.8D) {
             context.motion().approach(target, 2.3D);
         } else {

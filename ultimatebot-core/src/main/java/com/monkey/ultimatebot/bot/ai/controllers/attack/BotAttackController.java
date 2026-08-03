@@ -74,6 +74,12 @@ public class BotAttackController {
         return cooldownManager.canAttack();
     }
 
+    public void tickAttackCooldown() {
+        if (!cooldownManager.canAttack()) {
+            cooldownManager.tick();
+        }
+    }
+
     public void setAttackCooldown(int cooldown) {
         cooldownManager.setCooldown(cooldown);
     }

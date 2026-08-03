@@ -61,6 +61,8 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
         }
         switch (phase) {
             case MELEE -> melee(context, target);
+            case CREATE_DISTANCE -> createDistance(context, target);
+            case DRAW_BOW -> drawBow(context, target);
             case FIRE_ARROW -> fireArrow(context, target);
             case PLACE_RAIL -> placeRail(context, target);
             case PLACE_CART -> placeCart(context, target);
@@ -78,15 +80,47 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                 context.actions().targetHealthRatio(target),
                 currentTick() >= Math.max(10L, context.tuning().reactionTicks() * 2L));
         if (opportunity && specialActionReady()) {
-            transitionTo(Phase.FIRE_ARROW);
+            transitionTo(Phase.CREATE_DISTANCE);
             return;
         }
         meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
     }
 
+    private void createDistance(CombatModeContext context, LivingEntity target) {
+        double distance = context.motion().distanceTo(target);
+        if (distance < 5.5D && phaseTicks < 12) {
+            context.motion().retreat(target, 6.5D);
+            return;
+        }
+        context.inventory().switchToSlot(BOW_SLOT);
+        transitionTo(Phase.DRAW_BOW);
+    }
+
+    private void drawBow(CombatModeContext context, LivingEntity target) {
+        context.inventory().switchToSlot(BOW_SLOT);
+        context.actions().useMainhandItem();
+        double distance = context.motion().distanceTo(target);
+        if (distance < 5.0D) {
+            context.motion().retreat(target, 6.5D);
+        } else if (distance > 10.0D) {
+            context.motion().approach(target, 8.0D);
+        } else {
+            context.motion().strafe(target, 0.45D);
+        }
+        if (ModeCombatPolicy.isBowFullyDrawn(phaseTicks)) {
+            transitionTo(Phase.FIRE_ARROW);
+        }
+    }
+
     private void fireArrow(CombatModeContext context, LivingEntity target) {
-        if (phaseTicks == 1 && context.inventory().consumeItem(ARROW_SLOT)) {
-            context.inventory().switchToSlot(BOW_SLOT);
+        context.inventory().switchToSlot(BOW_SLOT);
+        if (phaseTicks == 1) {
+            context.actions().releaseUseItem();
+            if (!context.inventory().consumeItem(ARROW_SLOT)) {
+                delaySpecialAction(context);
+                transitionTo(Phase.RECOVER);
+                return;
+            }
             context.projectiles()
                     .fireArrow(target, Math.min(1.0D, context.tuning().aimAccuracy() + 0.08D));
         }
@@ -194,6 +228,8 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
 
     private enum Phase {
         MELEE,
+        CREATE_DISTANCE,
+        DRAW_BOW,
         FIRE_ARROW,
         PLACE_RAIL,
         PLACE_CART,

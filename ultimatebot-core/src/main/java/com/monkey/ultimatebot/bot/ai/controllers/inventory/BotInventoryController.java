@@ -146,7 +146,10 @@ public class BotInventoryController {
 
     public void startUsingItem(InteractionHand hand) {
         InteractionHand checkedHand = Objects.requireNonNull(hand, "hand");
-        if (bot.isUsingItem() && bot.getUsedItemHand() == checkedHand) {
+        ItemStack heldItem = bot.getItemInHand(checkedHand);
+        if (bot.isUsingItem()
+                && bot.getUsedItemHand() == checkedHand
+                && ItemStack.matches(bot.getUseItem(), heldItem)) {
             return;
         }
         if (bot.isUsingItem()) {

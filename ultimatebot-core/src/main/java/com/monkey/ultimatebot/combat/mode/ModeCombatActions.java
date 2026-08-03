@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -50,16 +51,40 @@ final class ModeCombatActions {
         inventory.startUsingItem(InteractionHand.OFF_HAND);
     }
 
-    void defendWithMainhand() {
+    void useMainhandItem() {
         inventory.startUsingItem(InteractionHand.MAIN_HAND);
     }
 
     boolean isIncomingAttackLikely(LivingEntity target) {
-        if (bot.distanceTo(target) > 3.6D) {
-            return false;
+        double distance = bot.distanceTo(target);
+        if (!(target instanceof Player player)) {
+            return distance <= 3.6D;
         }
-        return !(target instanceof Player player)
-                || (!player.isUsingItem() && player.getAttackStrengthScale(0.5F) >= 0.82F);
+
+        Vec3 towardBot = bot.position().subtract(player.position()).multiply(1.0D, 0.0D, 1.0D);
+        if (towardBot.lengthSqr() < 0.001D) {
+            return distance <= 3.2D && !player.isUsingItem();
+        }
+        Vec3 direction = towardBot.normalize();
+        double closingSpeed =
+                player.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D).dot(direction);
+        double facingDot =
+                player.getLookAngle().multiply(1.0D, 0.0D, 1.0D).normalize().dot(direction);
+        return ModeCombatPolicy.isIncomingPlayerAttack(
+                distance,
+                player.getAttackStrengthScale(0.5F),
+                player.isBlocking(),
+                player.isUsingItem(),
+                closingSpeed,
+                facingDot);
+    }
+
+    boolean canAttack() {
+        return attack.canAttack();
+    }
+
+    void tickAttackCooldown() {
+        attack.tickAttackCooldown();
     }
 
     void releaseUseItem() {
@@ -69,7 +94,7 @@ final class ModeCombatActions {
     void applyInstantHealth(int amplifier) {
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_HEALTH, 1, amplifier, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
-        bukkitBot.getWorld().spawnParticle(Particle.INSTANT_EFFECT, location, 18, 0.4D, 0.5D, 0.4D, 0.1D);
+        bukkitBot.getWorld().spawnParticle(Particle.HEART, location, 18, 0.4D, 0.5D, 0.4D, 0.1D);
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.0F);
     }
 
@@ -77,7 +102,7 @@ final class ModeCombatActions {
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 3600, 1, false, false, false));
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 3600, 0, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
-        bukkitBot.getWorld().spawnParticle(Particle.EFFECT, location, 24, 0.35D, 0.7D, 0.35D, 0.08D);
+        bukkitBot.getWorld().spawnParticle(Particle.WITCH, location, 24, 0.35D, 0.7D, 0.35D, 0.08D);
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.15F);
     }
 
