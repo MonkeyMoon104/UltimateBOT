@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacl
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
 public class ObstacleHandler implements IObstacleHandler {
@@ -32,6 +33,10 @@ public class ObstacleHandler implements IObstacleHandler {
             double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
         BlockPos immediate = BlockPos.containing(botX + dx * 0.7, botY, botZ + dz * 0.7);
         BlockPos immediateHead = immediate.above();
+        if (isCobweb(immediate) || isCobweb(immediateHead) || isCobweb(immediate.below())) {
+            handleHighObstacle(dx, dz);
+            return true;
+        }
         if (!blockValidator.isPositionPassableCached(immediate)) {
             if (bot.onGround() && blockValidator.isPositionPassableCached(immediateHead)) {
                 bot.setDeltaMovement(moveX * 1.15, jumpVelocity, moveZ * 1.15);
@@ -106,7 +111,14 @@ public class ObstacleHandler implements IObstacleHandler {
 
     private boolean isPathClearOptimized(double dx, double dz) {
         BlockPos checkPos = BlockPos.containing(bot.getX() + dx * 2, bot.getY(), bot.getZ() + dz * 2);
-        return blockValidator.isPositionPassableCached(checkPos);
+        return !isCobweb(checkPos)
+                && !isCobweb(checkPos.above())
+                && !isCobweb(checkPos.below())
+                && blockValidator.isPositionPassableCached(checkPos);
+    }
+
+    private boolean isCobweb(BlockPos position) {
+        return level.getBlockState(position).is(Blocks.COBWEB);
     }
 
     @Override

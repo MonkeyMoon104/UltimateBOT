@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockSt
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockStateValidator implements IBlockStateValidator {
@@ -38,6 +39,9 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public boolean isPositionPassableCached(BlockPos pos) {
+        if (containsCobweb(pos)) {
+            return false;
+        }
         return standablePositionCache.get(pos.immutable(), this::isPositionPassable);
     }
 
@@ -50,6 +54,7 @@ public class BlockStateValidator implements IBlockStateValidator {
 
             BlockState below = level.getBlockState(pos.below());
             return isBodySpaceClearCached(pos)
+                    && !below.is(Blocks.COBWEB)
                     && !below.getCollisionShape(level, pos.below()).isEmpty();
         } catch (Exception e) {
             return false;
@@ -58,6 +63,9 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public boolean isBodySpaceClearCached(BlockPos pos) {
+        if (containsCobweb(pos)) {
+            return false;
+        }
         return bodySpaceCache.get(pos.immutable(), this::isBodySpaceClear);
     }
 
@@ -70,7 +78,9 @@ public class BlockStateValidator implements IBlockStateValidator {
 
             BlockState feet = level.getBlockState(pos);
             BlockState head = level.getBlockState(pos.above());
-            return feet.getCollisionShape(level, pos).isEmpty()
+            return !feet.is(Blocks.COBWEB)
+                    && !head.is(Blocks.COBWEB)
+                    && feet.getCollisionShape(level, pos).isEmpty()
                     && head.getCollisionShape(level, pos.above()).isEmpty()
                     && feet.getFluidState().isEmpty()
                     && head.getFluidState().isEmpty();
@@ -94,5 +104,11 @@ public class BlockStateValidator implements IBlockStateValidator {
     @Override
     public int getCacheSize() {
         return Math.toIntExact(standablePositionCache.estimatedSize() + bodySpaceCache.estimatedSize());
+    }
+
+    private boolean containsCobweb(BlockPos position) {
+        return level.getBlockState(position).is(Blocks.COBWEB)
+                || level.getBlockState(position.above()).is(Blocks.COBWEB)
+                || level.getBlockState(position.below()).is(Blocks.COBWEB);
     }
 }

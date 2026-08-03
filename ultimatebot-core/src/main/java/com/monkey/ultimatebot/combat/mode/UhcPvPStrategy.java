@@ -12,6 +12,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     private static final int ARROW_SLOT = BotInventoryController.EMPTY_SLOT;
 
     private final UhcSecondaryController secondaryController = new UhcSecondaryController();
+    private final UhcWebPressureController webPressureController = new UhcWebPressureController();
     private Phase phase = Phase.PREGAP;
     private int phaseTicks;
 
@@ -35,12 +36,14 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     public void enter(CombatModeContext context) {
         super.enter(context);
         secondaryController.reset();
+        webPressureController.reset(context);
         transitionTo(Phase.PREGAP);
     }
 
     @Override
     public void exit(CombatModeContext context) {
         secondaryController.reset();
+        webPressureController.reset(context);
         super.exit(context);
     }
 
@@ -48,6 +51,25 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
+        if (breakRestrainingWeb(context)) {
+            webPressureController.reset(context);
+            return;
+        }
+        CobwebCombatAwareness.Containment containment = CobwebCombatAwareness.inspect(target);
+        if (containment.inside() && !containment.nearlyExiting()) {
+            if (phase != Phase.WEB_PRESSURE) {
+                secondaryController.reset();
+                transitionTo(Phase.WEB_PRESSURE);
+            }
+            webPressureController.tick(context, target);
+            return;
+        }
+        if (phase == Phase.WEB_PRESSURE) {
+            webPressureController.reset(context);
+            transitionTo(containment.nearlyExiting() && specialActionReady() ? Phase.SECONDARY : Phase.ENCOUNTER);
+        } else if (containment.nearlyExiting() && phase != Phase.SECONDARY && specialActionReady()) {
+            transitionTo(Phase.SECONDARY);
+        }
         switch (phase) {
             case PREGAP -> pregap(context);
             case ENCOUNTER -> encounter(context, target);
@@ -56,6 +78,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
             case CROSSBOW -> crossbow(context, target);
             case SECONDARY -> secondary(context, target);
             case HEAL -> heal(context);
+            case WEB_PRESSURE -> webPressureController.tick(context, target);
         }
     }
 
@@ -141,6 +164,14 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         }
     }
 
+    private boolean breakRestrainingWeb(CombatModeContext context) {
+        for (org.bukkit.Location web : CobwebCombatAwareness.occupiedWebs(context.bot())) {
+            context.motion().stop();
+            return context.breakCombatBlock(web, BotInventoryController.SWORD_SLOT);
+        }
+        return false;
+    }
+
     private void transitionTo(Phase nextPhase) {
         phase = nextPhase;
         phaseTicks = 0;
@@ -153,6 +184,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         DISENGAGE,
         CROSSBOW,
         SECONDARY,
-        HEAL
+        HEAL,
+        WEB_PRESSURE
     }
 }
