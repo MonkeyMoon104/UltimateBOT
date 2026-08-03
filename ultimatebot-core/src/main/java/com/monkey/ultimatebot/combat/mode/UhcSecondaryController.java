@@ -23,10 +23,10 @@ final class UhcSecondaryController {
             action = Action.NONE;
             return;
         }
-        action = containment.nearlyExiting() || context.random().nextDouble() < 0.7D ? Action.WEB : Action.LAVA;
+        action = containment.nearlyExiting() || context.random().nextDouble() < 0.82D ? Action.WEB : Action.LAVA;
         if (action == Action.WEB) {
             context.inventory().switchToSlot(WEB_SLOT);
-            targetWebCount = 3 + context.random().nextInt(3);
+            targetWebCount = 4 + context.random().nextInt(3);
         } else {
             placeLava(context, target);
         }
@@ -34,14 +34,17 @@ final class UhcSecondaryController {
 
     boolean tick(CombatModeContext context, LivingEntity target, int phaseTicks) {
         CobwebCombatAwareness.Containment containment = CobwebCombatAwareness.inspect(target);
-        if (action == Action.WEB && containment.inside() && !containment.nearlyExiting()) {
+        if (action == Action.WEB
+                && containment.inside()
+                && !containment.nearlyExiting()
+                && placedWebs.size() >= targetWebCount) {
             return true;
         }
-        if (action == Action.WEB && phaseTicks % 2 == 1 && phaseTicks <= 11 && placedWebs.size() < targetWebCount) {
+        if (action == Action.WEB && phaseTicks % 2 == 1 && phaseTicks <= 15 && placedWebs.size() < targetWebCount) {
             placeNextWeb(context, target);
         }
         return action == Action.NONE
-                || phaseTicks >= (action == Action.WEB ? 13 : 7)
+                || phaseTicks >= (action == Action.WEB ? 17 : 7)
                 || placedWebs.size() >= targetWebCount;
     }
 

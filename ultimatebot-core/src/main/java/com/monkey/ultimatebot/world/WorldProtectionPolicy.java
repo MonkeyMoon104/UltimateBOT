@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.world;
 
+import org.bukkit.Material;
+
 final class WorldProtectionPolicy {
     private WorldProtectionPolicy() {}
 
@@ -9,5 +11,9 @@ final class WorldProtectionPolicy {
 
     static boolean shouldRestoreOnShutdown(boolean antiDupe, boolean tracked, boolean materialMatches) {
         return antiDupe && tracked && materialMatches;
+    }
+
+    static boolean hasPlacementSupport(Material material, boolean supportedBelow) {
+        return material != Material.COBWEB || supportedBelow;
     }
 }

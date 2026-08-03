@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.world;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 
 class WorldProtectionPolicyTest {
@@ -22,5 +23,15 @@ class WorldProtectionPolicyTest {
                 .isFalse();
         assertThat(WorldProtectionPolicy.shouldRestoreOnShutdown(false, true, true))
                 .isFalse();
+    }
+
+    @Test
+    void cobwebsRequireSolidGroundOrAnotherCobwebBelow() {
+        assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.COBWEB, false))
+                .isFalse();
+        assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.COBWEB, true))
+                .isTrue();
+        assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.SPONGE, false))
+                .isTrue();
     }
 }

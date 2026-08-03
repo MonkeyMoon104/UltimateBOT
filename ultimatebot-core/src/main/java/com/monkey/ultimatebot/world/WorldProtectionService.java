@@ -34,10 +34,14 @@ public final class WorldProtectionService implements AutoCloseable {
         Objects.requireNonNull(location, "location");
         Objects.requireNonNull(material, "material");
         Block block = location.getBlock();
+        Material materialBelow =
+                block.getRelative(org.bukkit.block.BlockFace.DOWN).getType();
         return placements.size() < settings.maxActiveCombatBlocks()
                 && !placements.containsKey(WorldBlockKey.from(block))
                 && block.isPassable()
-                && !block.isLiquid();
+                && !block.isLiquid()
+                && WorldProtectionPolicy.hasPlacementSupport(
+                        material, materialBelow == Material.COBWEB || materialBelow.isSolid());
     }
 
     public synchronized boolean placeCombatBlock(

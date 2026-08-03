@@ -178,6 +178,13 @@ final class CombatModeContext implements AutoCloseable {
         return broken;
     }
 
+    void showBlockBreakProgress(Location location, float progress) {
+        Location checkedLocation = Objects.requireNonNull(location, "location");
+        for (org.bukkit.entity.Player viewer : checkedLocation.getWorld().getPlayers()) {
+            viewer.sendBlockDamage(checkedLocation, Math.clamp(progress, 0.0F, 1.0F), bukkitBot.getEntityId());
+        }
+    }
+
     void restoreCombatBlock(Location location) {
         worldProtection.restoreCombatBlock(location);
         invalidateMovementForWorldChange();

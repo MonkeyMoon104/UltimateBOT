@@ -13,6 +13,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
 
     private final UhcSecondaryController secondaryController = new UhcSecondaryController();
     private final UhcWebPressureController webPressureController = new UhcWebPressureController();
+    private final CombatBlockBreakSequence blockBreakSequence = new CombatBlockBreakSequence();
     private Phase phase = Phase.PREGAP;
     private int phaseTicks;
 
@@ -37,6 +38,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         super.enter(context);
         secondaryController.reset();
         webPressureController.reset(context);
+        blockBreakSequence.reset(context);
         transitionTo(Phase.PREGAP);
     }
 
@@ -44,6 +46,7 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     public void exit(CombatModeContext context) {
         secondaryController.reset();
         webPressureController.reset(context);
+        blockBreakSequence.reset(context);
         super.exit(context);
     }
 
@@ -165,10 +168,11 @@ final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private boolean breakRestrainingWeb(CombatModeContext context) {
-        for (org.bukkit.Location web : CobwebCombatAwareness.occupiedWebs(context.bot())) {
-            context.motion().stop();
-            return context.breakCombatBlock(web, BotInventoryController.SWORD_SLOT);
+        java.util.List<org.bukkit.Location> occupiedWebs = CobwebCombatAwareness.occupiedWebs(context.bot());
+        if (!occupiedWebs.isEmpty()) {
+            return blockBreakSequence.tick(context, occupiedWebs.getFirst(), BotInventoryController.SWORD_SLOT);
         }
+        blockBreakSequence.reset(context);
         return false;
     }
 
