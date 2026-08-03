@@ -4,25 +4,21 @@ import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
 
 public final class WorldProtectionService implements AutoCloseable {
     private final Plugin plugin;
-    private final Map<BlockKey, Placement> placements = new ConcurrentHashMap<>();
+    private final Map<WorldBlockKey, TrackedWorldBlock> placements = new ConcurrentHashMap<>();
     private volatile WorldProtectionSettings settings;
 
     public WorldProtectionService(Plugin plugin, WorldProtectionSettings settings) {
@@ -39,24 +35,36 @@ public final class WorldProtectionService implements AutoCloseable {
         Objects.requireNonNull(material, "material");
         Block block = location.getBlock();
         return placements.size() < settings.maxActiveCombatBlocks()
-                && !placements.containsKey(BlockKey.from(block))
+                && !placements.containsKey(WorldBlockKey.from(block))
                 && block.isPassable()
                 && !block.isLiquid();
     }
 
     public synchronized boolean placeCombatBlock(
             Location location, Material material, org.bukkit.entity.Player placer, BooleanSupplier inventoryCommit) {
+        return placeCombatBlock(location, material, material, placer, inventoryCommit);
+    }
+
+    public synchronized boolean placeCombatBlock(
+            Location location,
+            Material material,
+            Material placementItem,
+            org.bukkit.entity.Player placer,
+            BooleanSupplier inventoryCommit) {
+        Objects.requireNonNull(location, "location");
+        Objects.requireNonNull(material, "material");
+        Objects.requireNonNull(placementItem, "placementItem");
         Objects.requireNonNull(placer, "placer");
         Objects.requireNonNull(inventoryCommit, "inventoryCommit");
         if (!canPlaceCombatBlock(location, material)) {
             return false;
         }
         Block block = location.getBlock();
-        BlockKey key = BlockKey.from(block);
+        WorldBlockKey key = WorldBlockKey.from(block);
         BlockData originalData = block.getBlockData();
         BlockState replacedState = block.getState();
-        block.setType(material, true);
-        if (!placementAllowed(block, replacedState, material, placer)) {
+        block.setType(material, false);
+        if (!placementAllowed(block, replacedState, placementItem, placer)) {
             block.setBlockData(originalData, false);
             return false;
         }
@@ -74,26 +82,56 @@ public final class WorldProtectionService implements AutoCloseable {
             block.setBlockData(originalData, false);
             return false;
         }
-        Placement placement = new Placement(originalData, material, expiryTask);
+        TrackedWorldBlock placement = new TrackedWorldBlock(originalData, material, expiryTask);
         placements.put(key, placement);
         return true;
     }
 
+    public synchronized boolean breakCombatBlock(Location location, org.bukkit.entity.Player breaker, ItemStack tool) {
+        Objects.requireNonNull(location, "location");
+        Objects.requireNonNull(breaker, "breaker");
+        Objects.requireNonNull(tool, "tool");
+        Block block = location.getBlock();
+        if (block.getType().isAir()) {
+            return false;
+        }
+        boolean tracked = isTracked(block);
+        BlockData originalData =
+                tracked ? placements.get(WorldBlockKey.from(block)).originalData() : null;
+        WorldBlockEventDispatcher.BreakResult result = WorldBlockEventDispatcher.requestBreak(block, breaker);
+        if (result.cancelled()) {
+            return false;
+        }
+        if (WorldProtectionPolicy.shouldSuppressDrops(settings.antiDupe(), tracked)) {
+            block.setBlockData(Objects.requireNonNull(originalData, "tracked block data"), false);
+        } else if (result.dropItems()) {
+            block.breakNaturally(tool, true);
+        } else {
+            block.setType(Material.AIR, false);
+        }
+        forget(block);
+        return true;
+    }
+
+    public synchronized void restoreCombatBlock(Location location) {
+        Objects.requireNonNull(location, "location");
+        Block block = location.getBlock();
+        TrackedWorldBlock placement = placements.remove(WorldBlockKey.from(block));
+        if (placement == null) {
+            return;
+        }
+        placement.cancelExpiry();
+        if (block.getType() == placement.material()) {
+            block.setBlockData(placement.originalData(), false);
+        }
+    }
+
     private boolean placementAllowed(
-            Block block, BlockState replacedState, Material material, org.bukkit.entity.Player placer) {
+            Block block, BlockState replacedState, Material placementItem, org.bukkit.entity.Player placer) {
         if (!settings.respectProtectionPlugins()) {
             return true;
         }
-        BlockPlaceEvent event = new BlockPlaceEvent(
-                block,
-                replacedState,
-                block.getRelative(0, -1, 0),
-                new ItemStack(material),
-                placer,
-                true,
-                EquipmentSlot.HAND);
-        Bukkit.getPluginManager().callEvent(event);
-        return !event.isCancelled() && event.canBuild();
+        return WorldBlockEventDispatcher.placementAllowed(block, replacedState, placementItem, placer);
     }
 
     boolean isAntiDupeEnabled() {
@@ -101,17 +139,17 @@ public final class WorldProtectionService implements AutoCloseable {
     }
 
     boolean isTracked(Block block) {
-        return placements.containsKey(BlockKey.from(Objects.requireNonNull(block, "block")));
+        return placements.containsKey(WorldBlockKey.from(Objects.requireNonNull(block, "block")));
     }
 
     void forget(Block block) {
-        Placement placement = placements.remove(BlockKey.from(block));
+        TrackedWorldBlock placement = placements.remove(WorldBlockKey.from(block));
         if (placement != null) {
             placement.cancelExpiry();
         }
     }
 
-    private @Nullable ScheduledTask scheduleExpiry(BlockKey key, Location location) {
+    private @Nullable ScheduledTask scheduleExpiry(WorldBlockKey key, Location location) {
         int lifetimeSeconds = settings.combatBlockLifetimeSeconds();
         if (lifetimeSeconds == 0) {
             return null;
@@ -120,8 +158,8 @@ public final class WorldProtectionService implements AutoCloseable {
                 .runDelayed(plugin, location, ignored -> expire(key), Math.max(1L, lifetimeSeconds * 20L));
     }
 
-    private void expire(BlockKey key) {
-        Placement placement = placements.remove(key);
+    private void expire(WorldBlockKey key) {
+        TrackedWorldBlock placement = placements.remove(key);
         Block block = key.block();
         if (placement != null && block != null && block.getType() == placement.material()) {
             block.setBlockData(placement.originalData(), false);
@@ -130,8 +168,9 @@ public final class WorldProtectionService implements AutoCloseable {
 
     @Override
     public void close() {
-        for (Map.Entry<BlockKey, Placement> entry : Map.copyOf(placements).entrySet()) {
-            Placement placement = entry.getValue();
+        for (Map.Entry<WorldBlockKey, TrackedWorldBlock> entry :
+                Map.copyOf(placements).entrySet()) {
+            TrackedWorldBlock placement = entry.getValue();
             placement.cancelExpiry();
             Block block = entry.getKey().block();
             if (block != null
@@ -141,27 +180,5 @@ public final class WorldProtectionService implements AutoCloseable {
             }
         }
         placements.clear();
-    }
-
-    private record Placement(
-            BlockData originalData,
-            Material material,
-            @Nullable ScheduledTask expiryTask) {
-        private void cancelExpiry() {
-            if (expiryTask != null) {
-                expiryTask.cancel();
-            }
-        }
-    }
-
-    private record BlockKey(UUID worldUUID, int x, int y, int z) {
-        private static BlockKey from(Block block) {
-            return new BlockKey(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
-        }
-
-        private @Nullable Block block() {
-            World world = Bukkit.getWorld(worldUUID);
-            return world == null ? null : world.getBlockAt(x, y, z);
-        }
     }
 }

@@ -16,6 +16,7 @@ import java.util.random.RandomGenerator;
 import net.minecraft.world.entity.player.Player;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 
 final class CombatModeContext implements AutoCloseable {
     private final Player bot;
@@ -149,8 +150,37 @@ final class CombatModeContext implements AutoCloseable {
     }
 
     boolean placeCombatBlock(Location location, Material material, int inventorySlot) {
-        return worldProtection.placeCombatBlock(
+        boolean placed = worldProtection.placeCombatBlock(
                 location, material, bukkitBot, () -> inventory.consumeItem(inventorySlot));
+        if (placed) {
+            invalidateMovementForWorldChange();
+        }
+        return placed;
+    }
+
+    boolean placeCombatBlock(Location location, Material material, Material placementItem, int inventorySlot) {
+        boolean placed = worldProtection.placeCombatBlock(
+                location, material, placementItem, bukkitBot, () -> inventory.consumeItem(inventorySlot));
+        if (placed) {
+            invalidateMovementForWorldChange();
+        }
+        return placed;
+    }
+
+    boolean breakCombatBlock(Location location, int toolSlot) {
+        inventory.switchToSlot(toolSlot);
+        boolean broken = worldProtection.breakCombatBlock(
+                location, bukkitBot, CraftItemStack.asBukkitCopy(inventory.getItem(toolSlot)));
+        if (broken) {
+            actions.swingMainHand();
+            invalidateMovementForWorldChange();
+        }
+        return broken;
+    }
+
+    void restoreCombatBlock(Location location) {
+        worldProtection.restoreCombatBlock(location);
+        invalidateMovementForWorldChange();
     }
 
     void restoreTemporaryBlock(Location location) {
@@ -159,6 +189,11 @@ final class CombatModeContext implements AutoCloseable {
 
     void legacyCombat(Player target) {
         legacyCombat.executeCombatStrategy(target);
+    }
+
+    private void invalidateMovementForWorldChange() {
+        movement.clearCache();
+        movement.clearPath();
     }
 
     @Override

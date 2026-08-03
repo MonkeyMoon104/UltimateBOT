@@ -57,6 +57,10 @@ public final class WorldProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void preventFluidDrops(BlockFromToEvent event) {
+        if (protection.isTracked(event.getBlock())) {
+            event.setCancelled(true);
+            return;
+        }
         Block destination = event.getToBlock();
         if (WorldProtectionPolicy.shouldSuppressDrops(
                 protection.isAntiDupeEnabled(), protection.isTracked(destination))) {
