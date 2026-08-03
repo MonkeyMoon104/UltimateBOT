@@ -63,15 +63,20 @@ public final class CombatModeEngine implements AutoCloseable {
         if (closed) {
             throw new IllegalStateException("Combat mode engine is already closed");
         }
-        CombatModeStrategy selectedStrategy = strategies.get(options.getCombatMode());
-        if (selectedStrategy == null) {
-            throw new IllegalStateException("No strategy registered for " + options.getCombatMode());
-        }
+        CombatModeStrategy selectedStrategy = selectedStrategy();
         if (!Objects.equals(activeStrategy, selectedStrategy)) {
             transitionTo(selectedStrategy);
         }
         suspended = false;
         selectedStrategy.tick(context, target);
+    }
+
+    public boolean controlsNavigation(LivingEntity target) {
+        Objects.requireNonNull(target, "target");
+        if (closed) {
+            return false;
+        }
+        return selectedStrategy().controlsNavigation(context, target);
     }
 
     public void suspend() {
@@ -104,6 +109,14 @@ public final class CombatModeEngine implements AutoCloseable {
         deactivate();
         selectedStrategy.enter(context);
         activeStrategy = selectedStrategy;
+    }
+
+    private CombatModeStrategy selectedStrategy() {
+        CombatModeStrategy selectedStrategy = strategies.get(options.getCombatMode());
+        if (selectedStrategy == null) {
+            throw new IllegalStateException("No strategy registered for " + options.getCombatMode());
+        }
+        return selectedStrategy;
     }
 
     private static void register(EnumMap<CombatMode, CombatModeStrategy> strategies, CombatModeStrategy strategy) {

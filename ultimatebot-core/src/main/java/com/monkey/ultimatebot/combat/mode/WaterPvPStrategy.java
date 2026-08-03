@@ -8,6 +8,7 @@ import net.minecraft.world.item.Items;
 final class WaterPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.WAIT_FOR_WATER;
     private int phaseTicks;
+    private double strafeDirection;
 
     WaterPvPStrategy() {
         super(
@@ -22,7 +23,14 @@ final class WaterPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
+        strafeDirection = context.random().nextBoolean() ? 1.0D : -1.0D;
         transitionTo(Phase.WAIT_FOR_WATER);
+    }
+
+    @Override
+    public boolean controlsNavigation(CombatModeContext context, LivingEntity target) {
+        return ModeCombatPolicy.canFightInWater(
+                context.motion().isBotInWater(), context.motion().isTargetInWater(target));
     }
 
     @Override
@@ -51,8 +59,7 @@ final class WaterPvPStrategy extends AbstractCombatModeStrategy {
             transitionTo(Phase.SWORD_TRADE);
             return;
         }
-        double verticalSpeed = Math.clamp((target.getEyeY() - context.bot().getEyeY()) * 0.18D, -0.18D, 0.18D);
-        context.motion().steerVelocityTowards(target, 0.34D, verticalSpeed);
+        context.motion().swimTowards(target, 0.36D);
     }
 
     private void swordTrade(CombatModeContext context, LivingEntity target) {
@@ -61,18 +68,17 @@ final class WaterPvPStrategy extends AbstractCombatModeStrategy {
             transitionTo(Phase.SWIM_APPROACH);
             return;
         }
-        context.motion()
-                .steerVelocityTowards(
-                        target, 0.18D, Math.clamp((target.getY() - context.bot().getY()) * 0.12D, -0.12D, 0.12D));
-        context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+        context.motion().swimOrbit(target, 0.06D, 0.18D, strafeDirection);
+        context.actions().attackNormally(target, BotInventoryController.SWORD_SLOT);
         if (phaseTicks >= 12) {
             transitionTo(Phase.RECOVER);
         }
     }
 
     private void recover(CombatModeContext context, LivingEntity target) {
-        context.motion().steerVelocityTowards(target, -0.23D, 0.04D);
+        context.motion().swimOrbit(target, -0.16D, 0.18D, strafeDirection);
         if (phaseTicks >= 6) {
+            strafeDirection = context.random().nextBoolean() ? 1.0D : -1.0D;
             transitionTo(Phase.SWIM_APPROACH);
         }
     }

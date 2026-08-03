@@ -76,6 +76,21 @@ final class ModeMotionService {
         bot.hurtMarked = true;
     }
 
+    void swimTowards(LivingEntity target, double speed) {
+        applySwimmingVelocity(UnderwaterMotionPlanner.pursue(
+                bot.getEyePosition(), target.getEyePosition(), bot.getDeltaMovement(), speed));
+    }
+
+    void swimOrbit(LivingEntity target, double radialSpeed, double strafeSpeed, double strafeDirection) {
+        applySwimmingVelocity(UnderwaterMotionPlanner.orbit(
+                bot.getEyePosition(),
+                target.getEyePosition(),
+                bot.getDeltaMovement(),
+                radialSpeed,
+                strafeSpeed,
+                strafeDirection));
+    }
+
     void propelTowards(LivingEntity target, double horizontalSpeed, double verticalSpeed) {
         steerVelocityTowards(target, horizontalSpeed, verticalSpeed);
         movement.clearPath();
@@ -107,6 +122,7 @@ final class ModeMotionService {
     }
 
     void setSwimming(boolean swimming) {
+        bot.setSprinting(swimming);
         bot.setSwimming(swimming);
     }
 
@@ -149,5 +165,11 @@ final class ModeMotionService {
                         delta.z / horizontalDistance * travel * direction);
         movement.setMovementSpeed(tuning.get().movementSpeed());
         movement.moveToPosition(destination);
+    }
+
+    private void applySwimmingVelocity(Vec3 velocity) {
+        movement.clearPath();
+        bot.setDeltaMovement(velocity);
+        bot.hurtMarked = true;
     }
 }

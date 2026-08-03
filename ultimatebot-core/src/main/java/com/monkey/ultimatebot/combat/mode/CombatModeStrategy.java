@@ -11,4 +11,8 @@ interface CombatModeStrategy {
     void tick(CombatModeContext context, LivingEntity target);
 
     void exit(CombatModeContext context);
+
+    default boolean controlsNavigation(CombatModeContext context, LivingEntity target) {
+        return false;
+    }
 }

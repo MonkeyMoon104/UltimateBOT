@@ -135,4 +135,18 @@ final class ModeCombatActions {
             attack.setAttackCooldown(tuning.get().attackCooldownTicks());
         }
     }
+
+    void attackNormally(LivingEntity target, int slot) {
+        if (inventory.getCurrentSlot() != slot) {
+            inventory.switchToSlot(slot);
+        }
+        if (!attack.canAttack()) {
+            attack.tickAttackCooldown();
+            return;
+        }
+        attack.performNormalAttack(target);
+        if (attack.getAttackCooldown() > tuning.get().attackCooldownTicks()) {
+            attack.setAttackCooldown(tuning.get().attackCooldownTicks());
+        }
+    }
 }
