@@ -2,27 +2,19 @@ package com.monkey.ultimatebot.combat.mode;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import java.util.Objects;
-import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
-import org.jspecify.annotations.Nullable;
 
 final class CartPvPStrategy extends AbstractCombatModeStrategy {
     private static final int BOW_SLOT = BotInventoryController.ENDERPEARL_SLOT;
     private static final int RAIL_SLOT = BotInventoryController.OBSIDIAN_SLOT;
     private static final int CART_SLOT = BotInventoryController.CRYSTAL_SLOT;
     private static final int ARROW_SLOT = BotInventoryController.EMPTY_SLOT;
+    private static final int BOW_DRAW_TICKS = 12;
 
+    private final CartExplosiveSequence explosiveSequence = new CartExplosiveSequence();
     private Phase phase = Phase.MELEE;
     private int phaseTicks;
-    private @Nullable UUID activeCartId;
-    private @Nullable Location railLocation;
-    private int cartFuseTicks;
 
     CartPvPStrategy() {
         super(
@@ -39,34 +31,37 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
-        activeCartId = null;
-        railLocation = null;
-        cartFuseTicks = 0;
+        explosiveSequence.cleanup(context);
         transitionTo(Phase.MELEE);
+    }
+
+    @Override
+    public void exit(CombatModeContext context) {
+        explosiveSequence.cleanup(context);
+        super.exit(context);
     }
 
     @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        if (activeCartId != null) {
-            if (!isCartActive()) {
-                activeCartId = null;
-                restoreRail(context);
-                transitionTo(Phase.RECOVER);
-            } else if (--cartFuseTicks <= 0) {
-                detonateCart(context);
+        if (explosiveSequence.isActive()) {
+            CartExplosiveSequence.Status status = explosiveSequence.tick(context);
+            if (status != CartExplosiveSequence.Status.ACTIVE) {
                 transitionTo(Phase.RECOVER);
             }
         }
         switch (phase) {
             case MELEE -> melee(context, target);
             case CREATE_DISTANCE -> createDistance(context, target);
-            case DRAW_BOW -> drawBow(context, target);
-            case FIRE_ARROW -> fireArrow(context, target);
+            case DISTANCE_DRAW -> drawBow(context, target, Phase.DISTANCE_FIRE);
+            case DISTANCE_FIRE -> fireDistanceArrow(context, target);
             case PLACE_RAIL -> placeRail(context, target);
-            case PLACE_CART -> placeCart(context, target);
+            case PLACE_CART -> placeCart(context);
             case EVADE -> evade(context, target);
+            case IGNITION_DRAW -> drawBow(context, target, Phase.IGNITION_FIRE);
+            case IGNITION_FIRE -> fireCartArrow(context);
+            case WAIT_IMPACT -> waitForImpact(context, target);
             case RECOVER -> recover(context, target);
         }
     }
@@ -81,144 +76,105 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                 currentTick() >= Math.max(10L, context.tuning().reactionTicks() * 2L));
         if (opportunity && specialActionReady()) {
             transitionTo(Phase.CREATE_DISTANCE);
-            return;
+        } else {
+            meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
         }
-        meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
     }
 
     private void createDistance(CombatModeContext context, LivingEntity target) {
-        double distance = context.motion().distanceTo(target);
-        if (distance < 5.5D && phaseTicks < 12) {
+        if (context.motion().distanceTo(target) < 5.5D && phaseTicks < 12) {
             context.motion().retreat(target, 6.5D);
             return;
         }
-        context.inventory().switchToSlot(BOW_SLOT);
-        transitionTo(Phase.DRAW_BOW);
+        transitionTo(Phase.DISTANCE_DRAW);
     }
 
-    private void drawBow(CombatModeContext context, LivingEntity target) {
+    private void drawBow(CombatModeContext context, LivingEntity target, Phase releasePhase) {
         context.inventory().switchToSlot(BOW_SLOT);
-        context.actions().useMainhandItem();
-        double distance = context.motion().distanceTo(target);
-        if (distance < 5.0D) {
+        if (phaseTicks == 1) {
+            context.actions().useMainhandItem();
+        }
+        if (context.motion().distanceTo(target) < 5.0D) {
             context.motion().retreat(target, 6.5D);
-        } else if (distance > 10.0D) {
-            context.motion().approach(target, 8.0D);
         } else {
-            context.motion().strafe(target, 0.45D);
+            context.motion().strafe(target, 0.35D);
         }
-        if (ModeCombatPolicy.isBowFullyDrawn(phaseTicks)) {
-            transitionTo(Phase.FIRE_ARROW);
+        if (phaseTicks >= BOW_DRAW_TICKS) {
+            transitionTo(releasePhase);
         }
     }
 
-    private void fireArrow(CombatModeContext context, LivingEntity target) {
-        context.inventory().switchToSlot(BOW_SLOT);
+    private void fireDistanceArrow(CombatModeContext context, LivingEntity target) {
         if (phaseTicks == 1) {
             context.actions().releaseUseItem();
             if (!context.inventory().consumeItem(ARROW_SLOT)) {
-                delaySpecialAction(context);
-                transitionTo(Phase.RECOVER);
+                abort(context);
                 return;
             }
             context.projectiles()
                     .fireArrow(target, Math.min(1.0D, context.tuning().aimAccuracy() + 0.08D));
         }
-        if (phaseTicks >= 2) {
+        if (phaseTicks >= 3) {
             transitionTo(Phase.PLACE_RAIL);
         }
     }
 
     private void placeRail(CombatModeContext context, LivingEntity target) {
-        Location targetLocation =
-                Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
-        Location placement = targetLocation.getBlock().getLocation();
-        boolean supported = placement
-                .clone()
-                .subtract(0.0D, 1.0D, 0.0D)
-                .getBlock()
-                .getType()
-                .isSolid();
-        if (!supported
-                || !context.inventory().consumeItem(RAIL_SLOT)
-                || !context.placeTemporaryBlock(placement, Material.RAIL)) {
-            delaySpecialAction(context);
-            transitionTo(Phase.RECOVER);
+        if (!explosiveSequence.placeRail(context, target)) {
+            abort(context);
             return;
         }
-        railLocation = placement;
         transitionTo(Phase.PLACE_CART);
     }
 
-    private void placeCart(CombatModeContext context, LivingEntity target) {
-        Location placement = railLocation;
-        if (placement == null || !context.inventory().consumeItem(CART_SLOT)) {
-            restoreRail(context);
-            transitionTo(Phase.RECOVER);
+    private void placeCart(CombatModeContext context) {
+        if (!explosiveSequence.placeCart(context)) {
+            abort(context);
             return;
         }
-        Location spawnLocation = placement.clone().add(0.5D, 0.1D, 0.5D);
-        ExplosiveMinecart cart =
-                context.entities().track(spawnLocation.getWorld().spawn(spawnLocation, ExplosiveMinecart.class));
-        cart.setFuseTicks(-1);
-        cart.setVelocity(target.getBukkitEntity().getVelocity().multiply(0.25D));
-        activeCartId = cart.getUniqueId();
-        cartFuseTicks = 14;
         delaySpecialAction(context);
         transitionTo(Phase.EVADE);
     }
 
     private void evade(CombatModeContext context, LivingEntity target) {
         context.motion().retreat(target, 7.0D);
-        if (phaseTicks >= 22) {
-            if (activeCartId != null) {
-                context.entities().remove(activeCartId);
-                activeCartId = null;
+        if (context.motion().distanceTo(target) >= 6.0D || phaseTicks >= 10) {
+            transitionTo(Phase.IGNITION_DRAW);
+        }
+    }
+
+    private void fireCartArrow(CombatModeContext context) {
+        if (phaseTicks == 1) {
+            context.actions().releaseUseItem();
+            if (!context.inventory().consumeItem(ARROW_SLOT)
+                    || !explosiveSequence.fireIgnitionArrow(
+                            context, context.tuning().aimAccuracy())) {
+                abort(context);
+                return;
             }
-            restoreRail(context);
+        }
+        transitionTo(Phase.WAIT_IMPACT);
+    }
+
+    private void waitForImpact(CombatModeContext context, LivingEntity target) {
+        context.motion().retreat(target, 8.0D);
+        if (!explosiveSequence.isActive()) {
             transitionTo(Phase.RECOVER);
         }
     }
 
     private void recover(CombatModeContext context, LivingEntity target) {
-        context.motion().strafe(target, 1.8D);
+        context.motion().strafe(target, 1.2D);
         if (phaseTicks >= 8) {
             transitionTo(Phase.MELEE);
         }
     }
 
-    private boolean isCartActive() {
-        Entity entity = activeCartId == null ? null : org.bukkit.Bukkit.getEntity(activeCartId);
-        return entity != null && entity.isValid();
-    }
-
-    private void detonateCart(CombatModeContext context) {
-        UUID cartId = activeCartId;
-        if (cartId == null) {
-            return;
-        }
-        Entity entity = org.bukkit.Bukkit.getEntity(cartId);
-        activeCartId = null;
-        if (entity != null) {
-            Location explosionLocation = Objects.requireNonNull(entity.getLocation(), "cart location");
-            context.entities().remove(cartId);
-            explosionLocation
-                    .getWorld()
-                    .createExplosion(
-                            explosionLocation,
-                            4.0F,
-                            false,
-                            context.options().canExplosionDamageBlocks(),
-                            context.bukkitBot());
-        }
-        restoreRail(context);
-    }
-
-    private void restoreRail(CombatModeContext context) {
-        if (railLocation != null) {
-            context.restoreTemporaryBlock(railLocation);
-            railLocation = null;
-        }
+    private void abort(CombatModeContext context) {
+        context.actions().releaseUseItem();
+        explosiveSequence.cleanup(context);
+        delaySpecialAction(context);
+        transitionTo(Phase.RECOVER);
     }
 
     private void transitionTo(Phase nextPhase) {
@@ -229,11 +185,14 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
     private enum Phase {
         MELEE,
         CREATE_DISTANCE,
-        DRAW_BOW,
-        FIRE_ARROW,
+        DISTANCE_DRAW,
+        DISTANCE_FIRE,
         PLACE_RAIL,
         PLACE_CART,
         EVADE,
+        IGNITION_DRAW,
+        IGNITION_FIRE,
+        WAIT_IMPACT,
         RECOVER
     }
 }

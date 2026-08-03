@@ -27,10 +27,18 @@ final class ModeProjectileService {
         this.random = Objects.requireNonNull(random, "random");
     }
 
-    void fireArrow(LivingEntity target, double accuracy) {
+    Arrow fireArrow(LivingEntity target, double accuracy) {
         Arrow arrow = tracker.track(shooter.launchProjectile(Arrow.class, velocity(target, accuracy, 3.1D)));
         arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
         arrow.setCritical(accuracy >= 0.85D);
+        return arrow;
+    }
+
+    Arrow fireIgnitionArrow(org.bukkit.entity.Entity target, double accuracy) {
+        Arrow arrow = tracker.track(shooter.launchProjectile(Arrow.class, velocity(target, accuracy, 3.1D)));
+        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        arrow.setFireTicks(100);
+        return arrow;
     }
 
     void fireTrident(LivingEntity target, double accuracy) {
@@ -73,9 +81,17 @@ final class ModeProjectileService {
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {
-        Location origin = shooter.getEyeLocation();
         org.bukkit.entity.Entity targetEntity = target.getBukkitEntity();
-        Location destination = targetEntity.getLocation().add(0.0D, target.getBbHeight() * 0.65D, 0.0D);
+        return velocity(targetEntity, target.getBbHeight() * 0.65D, accuracy, speed);
+    }
+
+    private Vector velocity(org.bukkit.entity.Entity target, double accuracy, double speed) {
+        return velocity(target, target.getHeight() * 0.5D, accuracy, speed);
+    }
+
+    private Vector velocity(org.bukkit.entity.Entity target, double heightOffset, double accuracy, double speed) {
+        Location origin = shooter.getEyeLocation();
+        Location destination = target.getLocation().add(0.0D, heightOffset, 0.0D);
         Vector direction = destination.toVector().subtract(origin.toVector()).normalize();
         double spread = ModeCombatPolicy.projectileSpread(accuracy);
         if (spread > 0.0D) {
