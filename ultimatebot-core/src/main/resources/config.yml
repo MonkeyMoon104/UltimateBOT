@@ -36,6 +36,18 @@ performance:
       maximum-size: 1000
       expire-after-write-ms: 5000
 
+protection-world:
+  # Global ceiling for terrain destruction by bot explosions. Per-bot settings cannot override false.
+  block-damage: false
+  # Prevents drops and removes tracked bot blocks on shutdown. When false, they become normal server blocks.
+  anti-dupe: true
+  # Seconds before combat blocks are restored. Use 0 to keep them until broken or the configured limit is reached.
+  combat-block-lifetime-seconds: 0
+  # Hard limit that prevents combat blocks and their tracking data from growing without bounds.
+  max-active-combat-blocks: 2048
+  # Fires normal placement events so WorldGuard and other protection plugins can deny bot blocks.
+  respect-protection-plugins: true
+
 bot:
   name: "UltimateBot"
   default-totem-count: -1

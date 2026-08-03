@@ -82,7 +82,7 @@ final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
         context.entities().remove(crystalId);
         location.getWorld()
                 .createExplosion(
-                        location, 6.0F, false, context.options().isExplosionBlockDamage(), context.bukkitBot());
+                        location, 6.0F, false, context.options().canExplosionDamageBlocks(), context.bukkitBot());
         return true;
     }
 }

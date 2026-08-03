@@ -9,6 +9,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
@@ -25,6 +26,7 @@ final class CombatModeContext implements AutoCloseable {
     private final BotCPVPController crystal;
     private final BotRAPVPController anchor;
     private final ICombatStrategyExecutor legacyCombat;
+    private final WorldProtectionService worldProtection;
     private final ModeInventorySession inventorySession;
     private final ModeEntityTracker entities;
     private final ModeBlockTracker blocks;
@@ -43,7 +45,8 @@ final class CombatModeContext implements AutoCloseable {
             BotInventoryController inventory,
             BotCPVPController crystal,
             BotRAPVPController anchor,
-            ICombatStrategyExecutor legacyCombat) {
+            ICombatStrategyExecutor legacyCombat,
+            WorldProtectionService worldProtection) {
         this.bot = Objects.requireNonNull(bot, "bot");
         if (!(bot.getBukkitEntity() instanceof org.bukkit.entity.Player player)) {
             throw new IllegalArgumentException("Combat bot must expose a Bukkit player entity");
@@ -55,6 +58,7 @@ final class CombatModeContext implements AutoCloseable {
         this.crystal = Objects.requireNonNull(crystal, "crystal");
         this.anchor = Objects.requireNonNull(anchor, "anchor");
         this.legacyCombat = Objects.requireNonNull(legacyCombat, "legacyCombat");
+        this.worldProtection = Objects.requireNonNull(worldProtection, "worldProtection");
         this.inventorySession = new ModeInventorySession(inventory);
         this.entities = new ModeEntityTracker();
         this.blocks = new ModeBlockTracker();
@@ -138,6 +142,15 @@ final class CombatModeContext implements AutoCloseable {
 
     boolean canPlaceTemporaryBlock(Location location, Material material) {
         return blocks.canPlace(location, material);
+    }
+
+    boolean canPlaceCombatBlock(Location location, Material material) {
+        return worldProtection.canPlaceCombatBlock(location, material);
+    }
+
+    boolean placeCombatBlock(Location location, Material material, int inventorySlot) {
+        return worldProtection.placeCombatBlock(
+                location, material, bukkitBot, () -> inventory.consumeItem(inventorySlot));
     }
 
     void restoreTemporaryBlock(Location location) {

@@ -60,7 +60,7 @@ public class CrystalAttacker {
         if (!(bot instanceof ITrainingBot trainingBot) || trainingBot.getBrainController() == null) {
             return false;
         }
-        return trainingBot.getBrainController().getBotOptions().isExplosionBlockDamage();
+        return trainingBot.getBrainController().getBotOptions().canExplosionDamageBlocks();
     }
 
     public boolean canAttackCrystal(EndCrystal crystal, double crystalAttackRange) {

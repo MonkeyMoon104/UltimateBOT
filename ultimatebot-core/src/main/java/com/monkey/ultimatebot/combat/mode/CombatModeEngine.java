@@ -9,6 +9,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -35,10 +36,11 @@ public final class CombatModeEngine implements AutoCloseable {
             BotInventoryController inventory,
             BotCPVPController crystal,
             BotRAPVPController anchor,
-            ICombatStrategyExecutor legacyCombat) {
+            ICombatStrategyExecutor legacyCombat,
+            WorldProtectionService worldProtection) {
         this.options = Objects.requireNonNull(options, "options");
         this.context = new CombatModeContext(
-                bot, options, movement, rotation, attack, inventory, crystal, anchor, legacyCombat);
+                bot, options, movement, rotation, attack, inventory, crystal, anchor, legacyCombat, worldProtection);
         EnumMap<CombatMode, CombatModeStrategy> registeredStrategies = new EnumMap<>(CombatMode.class);
         register(registeredStrategies, new SwordPvPStrategy());
         register(registeredStrategies, new UhcPvPStrategy());

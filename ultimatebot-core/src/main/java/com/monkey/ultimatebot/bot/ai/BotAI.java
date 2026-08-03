@@ -123,7 +123,8 @@ public class BotAI {
                 inventoryController,
                 cpvpController,
                 rapvpController,
-                combatStrategyExecutor);
+                combatStrategyExecutor,
+                plugin.getWorldProtectionService());
         this.idleBehaviorController =
                 new IdleBehaviorController(bot, options, plugin, movementController, rotationController);
         this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);

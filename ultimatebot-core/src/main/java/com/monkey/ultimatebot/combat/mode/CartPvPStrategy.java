@@ -208,7 +208,7 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                             explosionLocation,
                             4.0F,
                             false,
-                            context.options().isExplosionBlockDamage(),
+                            context.options().canExplosionDamageBlocks(),
                             context.bukkitBot());
         }
         restoreRail(context);

@@ -31,11 +31,30 @@ public final class ConfigurateRuntimeSettingsLoader {
                     readCache(
                             root.node("performance", "caches", "block-state"),
                             defaults.blockStateCache(),
-                            "block-state"));
+                            "block-state"),
+                    readWorldProtection(root.node("protection-world"), defaults.worldProtection()));
         } catch (RuntimeException | ConfigurateException exception) {
-            logger.log(Level.WARNING, "Could not load typed performance settings; defaults will be used", exception);
+            logger.log(Level.WARNING, "Could not load typed runtime settings; defaults will be used", exception);
             return defaults;
         }
+    }
+
+    private RuntimeSettings.WorldProtectionSettings readWorldProtection(
+            ConfigurationNode node, RuntimeSettings.WorldProtectionSettings defaults) {
+        int lifetimeSeconds = nonNegativeOrDefault(
+                node.node("combat-block-lifetime-seconds").getInt(defaults.combatBlockLifetimeSeconds()),
+                defaults.combatBlockLifetimeSeconds(),
+                "combat-block-lifetime-seconds");
+        int maximumBlocks = positiveProtectionOrDefault(
+                node.node("max-active-combat-blocks").getInt(defaults.maxActiveCombatBlocks()),
+                defaults.maxActiveCombatBlocks(),
+                "max-active-combat-blocks");
+        return new RuntimeSettings.WorldProtectionSettings(
+                node.node("block-damage").getBoolean(defaults.blockDamage()),
+                node.node("anti-dupe").getBoolean(defaults.antiDupe()),
+                lifetimeSeconds,
+                maximumBlocks,
+                node.node("respect-protection-plugins").getBoolean(defaults.respectProtectionPlugins()));
     }
 
     private RuntimeSettings.CacheSettings readCache(
@@ -57,6 +76,22 @@ public final class ConfigurateRuntimeSettingsLoader {
             return value;
         }
         logger.warning("Invalid performance.caches." + path + " value " + value + "; using " + fallback);
+        return fallback;
+    }
+
+    private int nonNegativeOrDefault(int value, int fallback, String path) {
+        if (value >= 0) {
+            return value;
+        }
+        logger.warning("Invalid protection-world." + path + " value " + value + "; using " + fallback);
+        return fallback;
+    }
+
+    private int positiveProtectionOrDefault(int value, int fallback, String path) {
+        if (value > 0) {
+            return value;
+        }
+        logger.warning("Invalid protection-world." + path + " value " + value + "; using " + fallback);
         return fallback;
     }
 }

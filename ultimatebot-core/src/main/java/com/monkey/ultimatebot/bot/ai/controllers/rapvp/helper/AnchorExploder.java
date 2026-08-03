@@ -126,7 +126,7 @@ public class AnchorExploder {
         if (!(bot instanceof ITrainingBot trainingBot) || trainingBot.getBrainController() == null) {
             return false;
         }
-        return trainingBot.getBrainController().getBotOptions().isExplosionBlockDamage();
+        return trainingBot.getBrainController().getBotOptions().canExplosionDamageBlocks();
     }
 
     private boolean hasLineOfSight(BlockPos pos) {

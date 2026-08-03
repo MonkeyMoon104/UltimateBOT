@@ -33,6 +33,8 @@ import com.monkey.ultimatebot.remote.RemoteApiServer;
 import com.monkey.ultimatebot.update.UpdateManager;
 import com.monkey.ultimatebot.update.UpdateStartupResult;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
+import com.monkey.ultimatebot.world.WorldProtectionListener;
+import com.monkey.ultimatebot.world.WorldProtectionService;
 import com.monkey.ultimatebot.wrapper.WrapperManager;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +68,7 @@ public final class UltimateBot extends JavaPlugin {
     private WrapperManager wrapperManager;
     private GuardAddonManager guardAddonManager;
     private WorldGuardPvpService worldGuardPvpService;
+    private WorldProtectionService worldProtectionService;
     private RemoteApiServer remoteApiServer;
     private BotEventDispatcher botEventDispatcher;
     private BotMetrics botMetrics;
@@ -156,12 +159,19 @@ public final class UltimateBot extends JavaPlugin {
                     getLogger());
             this.botEventDispatcher = new BotEventDispatcher(this, botMetrics);
             this.worldGuardPvpService = new WorldGuardPvpService(this);
+            this.worldProtectionService = new WorldProtectionService(this, runtimeSettings.worldProtection());
             this.botManager = new BotManager(this);
             startup.ready("Runtime", "services created");
             startup.detail(
                     "Services",
-                    "TargetingService, PlayerOptions, BotRegistry, BotManager, BotMetrics, WrapperManager, WorldGuardPvpService");
+                    "TargetingService, PlayerOptions, BotRegistry, BotManager, BotMetrics, WrapperManager, WorldGuardPvpService, WorldProtectionService");
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
+            startup.detail(
+                    "World protection",
+                    "blockDamage=" + runtimeSettings.worldProtection().blockDamage()
+                            + " | antiDupe=" + runtimeSettings.worldProtection().antiDupe()
+                            + " | combatBlockLimit="
+                            + runtimeSettings.worldProtection().maxActiveCombatBlocks());
             startup.detail(
                     "Observability",
                     botMetrics.isEnabled()
@@ -205,6 +215,8 @@ public final class UltimateBot extends JavaPlugin {
                 disabledListeners.add("guard addon -> disabled in config");
             }
             registerListener(registeredListeners, "bot explosion events", new BotExplosionListener());
+            registerListener(
+                    registeredListeners, "world protection", new WorldProtectionListener(worldProtectionService));
             registerListener(registeredListeners, "bot runtime events", new BotRuntimeEventListener(this));
             registerListener(registeredListeners, "required", new PlayerCheckListener(this));
             registerOptionalListener(
@@ -343,6 +355,10 @@ public final class UltimateBot extends JavaPlugin {
         return worldGuardPvpService;
     }
 
+    public WorldProtectionService getWorldProtectionService() {
+        return Objects.requireNonNull(worldProtectionService, "worldProtectionService is not initialized");
+    }
+
     public void markCompatibilityBot(Entity entity) {
         if (guardAddonManager != null) {
             guardAddonManager.markBot(entity);
@@ -362,6 +378,9 @@ public final class UltimateBot extends JavaPlugin {
                     getDataFolder().toPath().resolve("config.yml"), getLogger());
         }
         runtimeSettings = runtimeSettingsLoader.load();
+        if (worldProtectionService != null) {
+            worldProtectionService.reconfigure(runtimeSettings.worldProtection());
+        }
         if (combatProfileLoader == null) {
             combatProfileLoader =
                     new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
@@ -517,6 +536,10 @@ public final class UltimateBot extends JavaPlugin {
         if (botManager != null) {
             botManager.despawnAll(BotDespawnReason.PLUGIN_DISABLE);
             botManager = null;
+        }
+        if (worldProtectionService != null) {
+            worldProtectionService.close();
+            worldProtectionService = null;
         }
         if (botRegistry != null) {
             botRegistry.clear();
