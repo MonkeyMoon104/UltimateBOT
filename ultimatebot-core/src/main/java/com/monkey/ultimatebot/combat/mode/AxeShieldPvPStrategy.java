@@ -10,7 +10,10 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.GUARD;
     private int safeOpeningTicks;
     private int guardMovementCooldownTicks;
+    private int shieldHoldTicks;
+    private int shieldRearmTicks;
     private boolean counterStrike;
+    private boolean shieldRaised;
 
     AxeShieldPvPStrategy() {
         super(
@@ -27,7 +30,10 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         super.enter(context);
         safeOpeningTicks = 0;
         guardMovementCooldownTicks = 0;
+        shieldHoldTicks = 0;
+        shieldRearmTicks = 0;
         counterStrike = false;
+        shieldRaised = false;
         transitionTo(Phase.GUARD);
     }
 
@@ -35,6 +41,9 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.actions().tickAttackCooldown();
         context.motion().aimAt(target);
+        if (shieldRearmTicks > 0) {
+            shieldRearmTicks--;
+        }
         switch (phase) {
             case GUARD -> guard(context, target);
             case AXE_STRIKE -> axeStrike(context, target);
@@ -43,24 +52,27 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
 
     private void guard(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
-        context.actions().defendWithOffhand();
         double distance = context.motion().distanceTo(target);
         if (guardMovementCooldownTicks > 0) {
             guardMovementCooldownTicks--;
         }
-        if (context.signals().consumeShieldImpact(target.getUUID())
-                && ModeCombatPolicy.shouldCounterShieldImpact(
-                        distance,
-                        context.tuning().attackRange(),
-                        context.actions().canAttack(),
-                        context.tuning().aggression(),
-                        context.random().nextDouble())) {
-            counterStrike = true;
-            transitionTo(Phase.AXE_STRIKE);
-            return;
+        if (context.signals().consumeShieldImpact(target.getUUID())) {
+            if (ModeCombatPolicy.shouldCounterShieldImpact(
+                    distance,
+                    context.tuning().attackRange(),
+                    context.actions().canAttack(),
+                    context.tuning().aggression(),
+                    context.random().nextDouble())) {
+                counterStrike = true;
+                lowerShield(context);
+                transitionTo(Phase.AXE_STRIKE);
+                return;
+            }
+            shieldHoldTicks = Math.max(shieldHoldTicks, 3);
         }
         if (distance > context.tuning().attackRange()) {
             safeOpeningTicks = 0;
+            lowerShield(context);
             context.motion().approach(target, 2.0D);
             return;
         }
@@ -68,6 +80,8 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         boolean incomingAttack = context.actions().isIncomingAttackLikely(target);
         if (incomingAttack) {
             safeOpeningTicks = 0;
+            raiseShield(context);
+            shieldHoldTicks = Math.max(shieldHoldTicks, 5);
             if (distance <= 1.9D && guardMovementCooldownTicks == 0) {
                 context.motion().retreat(target, 3.2D);
                 guardMovementCooldownTicks = 5;
@@ -77,6 +91,12 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
             return;
         }
 
+        if (shieldHoldTicks > 0) {
+            shieldHoldTicks--;
+            context.motion().stop();
+            return;
+        }
+        lowerShield(context);
         safeOpeningTicks++;
         if (ModeCombatPolicy.isSafeAxeOpening(
                 distance,
@@ -98,11 +118,28 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
             transitionTo(Phase.GUARD);
             return;
         }
-        context.actions().releaseUseItem();
+        lowerShield(context);
         context.actions().attack(target, BotInventoryController.SWORD_SLOT);
         safeOpeningTicks = 0;
         counterStrike = false;
         transitionTo(Phase.GUARD);
+    }
+
+    private void raiseShield(CombatModeContext context) {
+        if (shieldRaised || shieldRearmTicks > 0) {
+            return;
+        }
+        context.actions().defendWithOffhand();
+        shieldRaised = true;
+    }
+
+    private void lowerShield(CombatModeContext context) {
+        if (!shieldRaised) {
+            return;
+        }
+        context.actions().releaseUseItem();
+        shieldRaised = false;
+        shieldRearmTicks = 3;
     }
 
     private void transitionTo(Phase nextPhase) {

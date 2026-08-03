@@ -91,6 +91,10 @@ final class ModeCombatActions {
         inventory.releaseUsingItem();
     }
 
+    void swingMainHand() {
+        bukkitBot.swingMainHand();
+    }
+
     void applyInstantHealth(int amplifier) {
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.INSTANT_HEALTH, 1, amplifier, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
