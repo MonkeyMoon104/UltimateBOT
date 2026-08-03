@@ -35,7 +35,7 @@ final class ModeCombatPolicy {
         }
         boolean aimedItemUse = usingItem && distance <= 8.0D && facingDot >= 0.35D;
         boolean immediateSwing =
-                distance <= 3.55D && attackStrength >= 0.72D && closingSpeed >= 0.01D && facingDot >= 0.05D;
+                distance <= 3.55D && attackStrength >= 0.72D && closingSpeed >= -0.02D && facingDot >= 0.05D;
         boolean rushingAttack =
                 distance <= 4.8D && attackStrength >= 0.45D && closingSpeed >= 0.035D && facingDot >= 0.25D;
         return aimedItemUse || immediateSwing || rushingAttack;

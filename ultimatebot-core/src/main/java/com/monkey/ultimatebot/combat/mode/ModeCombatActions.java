@@ -51,6 +51,10 @@ final class ModeCombatActions {
         inventory.startUsingItem(InteractionHand.OFF_HAND);
     }
 
+    boolean isDefendingWithOffhand() {
+        return bot.isUsingItem() && bot.getUsedItemHand() == InteractionHand.OFF_HAND;
+    }
+
     void useMainhandItem() {
         inventory.startUsingItem(InteractionHand.MAIN_HAND);
     }

@@ -50,7 +50,7 @@ class ModeCombatPolicyTest {
     @Test
     void shieldThreatDetectsReadyAndRushingPlayers() {
         assertThat(ModeCombatPolicy.isIncomingPlayerAttack(3.2D, 0.9D, false, false, 0.0D, 0.8D))
-                .isFalse();
+                .isTrue();
         assertThat(ModeCombatPolicy.isIncomingPlayerAttack(3.2D, 0.9D, false, false, 0.02D, 0.8D))
                 .isTrue();
         assertThat(ModeCombatPolicy.isIncomingPlayerAttack(4.5D, 0.6D, false, false, 0.12D, 0.9D))
