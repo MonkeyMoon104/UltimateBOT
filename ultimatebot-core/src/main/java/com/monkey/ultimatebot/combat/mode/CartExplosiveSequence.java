@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.combat.mode;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,18 +27,23 @@ final class CartExplosiveSequence {
     boolean placeRail(CombatModeContext context, LivingEntity target) {
         Location targetLocation =
                 Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
-        org.bukkit.util.Vector prediction =
-                target.getBukkitEntity().getVelocity().clone().multiply(2.0D);
-        Location placement = targetLocation.clone().add(prediction).getBlock().getLocation();
-        if (!placement.clone().subtract(0.0D, 1.0D, 0.0D).getBlock().getType().isSolid()) {
-            return false;
-        }
         context.inventory().switchToSlot(RAIL_SLOT);
-        if (!context.placeCombatBlock(placement, Material.RAIL, RAIL_SLOT)) {
-            return false;
+        for (Location placement :
+                railCandidates(targetLocation, target.getBukkitEntity().getVelocity())) {
+            if (!placement
+                    .clone()
+                    .subtract(0.0D, 1.0D, 0.0D)
+                    .getBlock()
+                    .getType()
+                    .isSolid()) {
+                continue;
+            }
+            if (context.placeCombatBlock(placement, Material.RAIL, RAIL_SLOT)) {
+                railLocation = placement;
+                return true;
+            }
         }
-        railLocation = placement;
-        return true;
+        return false;
     }
 
     boolean placeCart(CombatModeContext context) {
@@ -92,6 +99,27 @@ final class CartExplosiveSequence {
 
     static boolean isArrowImpact(double distanceSquared) {
         return Double.isFinite(distanceSquared) && distanceSquared <= 1.8D;
+    }
+
+    static List<Location> railCandidates(Location targetLocation, org.bukkit.util.Vector targetVelocity) {
+        Objects.requireNonNull(targetLocation, "targetLocation");
+        org.bukkit.util.Vector horizontalVelocity =
+                Objects.requireNonNull(targetVelocity, "targetVelocity").clone().setY(0.0D);
+        if (horizontalVelocity.lengthSquared() > 0.36D) {
+            horizontalVelocity.normalize().multiply(0.6D);
+        }
+        LinkedHashMap<WebTrapPlanner.Position, Location> candidates = new LinkedHashMap<>();
+        for (double predictionTicks : new double[] {2.0D, 1.0D, 0.0D}) {
+            Location candidate =
+                    targetLocation.clone().add(horizontalVelocity.clone().multiply(predictionTicks));
+            candidate = new Location(
+                    Objects.requireNonNull(candidate.getWorld(), "candidate world"),
+                    candidate.getBlockX(),
+                    candidate.getBlockY(),
+                    candidate.getBlockZ());
+            candidates.putIfAbsent(WebTrapPlanner.Position.from(candidate), candidate);
+        }
+        return List.copyOf(candidates.values());
     }
 
     void cleanup(CombatModeContext context) {
