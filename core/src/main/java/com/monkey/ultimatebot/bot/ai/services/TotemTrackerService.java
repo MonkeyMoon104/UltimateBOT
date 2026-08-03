@@ -56,7 +56,7 @@ public class TotemTrackerService {
                         .getBotRegistry()
                         .getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
                 if (ownerUUID != null) {
-                    com.monkey.ultimatebot.api.model.BotSnapshot snapshot =
+                    com.monkey.ultimatebot.api.model.runtime.BotSnapshot snapshot =
                             bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
                     if (snapshot != null) {
                         bot.getPlugin()

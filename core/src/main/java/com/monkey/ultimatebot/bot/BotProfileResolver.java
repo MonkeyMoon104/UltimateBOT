@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot;
 
 import com.mojang.authlib.GameProfile;
-import com.monkey.ultimatebot.api.model.BotSkin;
-import com.monkey.ultimatebot.api.model.BotSkinSource;
+import com.monkey.ultimatebot.api.model.identity.BotSkin;
+import com.monkey.ultimatebot.api.model.identity.BotSkinSource;
 import com.monkey.ultimatebot.placeholders.PlaceholderApiSupport;
 import java.util.Locale;
 import java.util.UUID;

@@ -1,7 +1,20 @@
 package com.monkey.ultimatebot.placeholders;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.placeholders.list.*;
+import com.monkey.ultimatebot.placeholders.list.combat.ArmorPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.combat.CombatPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.combat.CombatStatePlaceholder;
+import com.monkey.ultimatebot.placeholders.list.combat.HealingPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.combat.TotemPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.configuration.DifficultyPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.configuration.FollowPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.DistancePlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.HealthBarPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.HealthPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.LocationPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.OnlineTimePlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.PercentageHealthPlaceholder;
+import com.monkey.ultimatebot.placeholders.list.status.StatusPlaceholder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;

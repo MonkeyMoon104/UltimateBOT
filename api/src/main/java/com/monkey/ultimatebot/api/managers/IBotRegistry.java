@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.api.managers;
 
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlot;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlotMode;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlotSetting;
-import com.monkey.ultimatebot.api.model.BotLocation;
-import com.monkey.ultimatebot.api.model.BotSkin;
-import com.monkey.ultimatebot.api.model.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
+import com.monkey.ultimatebot.api.model.identity.BotSkin;
+import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;

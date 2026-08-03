@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.api.event.combat;
 
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.entity.Player;

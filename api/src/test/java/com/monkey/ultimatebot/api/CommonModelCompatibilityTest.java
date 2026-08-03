@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.monkey.ultimatebot.api.model.BotMode;
-import com.monkey.ultimatebot.api.model.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.BotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
 import org.junit.jupiter.api.Test;
 
 class CommonModelCompatibilityTest {

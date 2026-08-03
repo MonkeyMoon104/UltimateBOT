@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.action.BotHealEvent;
 import com.monkey.ultimatebot.api.event.action.BotTeleportEvent;
 import com.monkey.ultimatebot.api.event.combat.BotDamageEvent;
 import com.monkey.ultimatebot.api.event.combat.BotKillEntityEvent;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.event.BotEventDispatcher;
 import java.util.UUID;

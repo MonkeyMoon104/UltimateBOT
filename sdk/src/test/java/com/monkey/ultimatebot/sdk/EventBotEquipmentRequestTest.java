@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.sdk.model.BotEquipmentSlotRequest;
-import com.monkey.ultimatebot.sdk.model.EventBotSpawnRequest;
-import com.monkey.ultimatebot.sdk.model.SdkBotEquipmentSlot;
+import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
+import com.monkey.ultimatebot.sdk.model.request.EventBotSpawnRequest;
+import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 

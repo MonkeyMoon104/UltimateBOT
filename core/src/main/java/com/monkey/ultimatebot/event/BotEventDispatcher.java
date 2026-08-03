@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.event;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEvent;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.integration.api.BotSnapshotMapper;
 import com.monkey.ultimatebot.metrics.BotMetrics;

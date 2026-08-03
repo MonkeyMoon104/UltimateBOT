@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.integration.api;
 
 import com.monkey.ultimatebot.api.managers.IBotRegistry;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.*;

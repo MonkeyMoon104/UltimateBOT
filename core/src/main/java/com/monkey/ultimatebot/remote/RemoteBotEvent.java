@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.remote;
 
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;

@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.bot.ai.controllers.brain;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.state.BotTargetChangeEvent;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
-import com.monkey.ultimatebot.api.model.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.BotAI;

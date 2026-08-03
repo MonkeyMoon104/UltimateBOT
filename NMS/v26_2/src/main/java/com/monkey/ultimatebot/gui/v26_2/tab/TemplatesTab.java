@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.gui.v26_2.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.gui.v26_2.impl.ArmorItem;
-import com.monkey.ultimatebot.gui.v26_2.impl.TrimMaterialSelectorItem;
-import com.monkey.ultimatebot.gui.v26_2.impl.TrimPatternSelectorItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.customization.ArmorItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.customization.TrimMaterialSelectorItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.customization.TrimPatternSelectorItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;

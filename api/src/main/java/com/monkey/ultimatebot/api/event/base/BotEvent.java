@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.api.event.base;
 
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;

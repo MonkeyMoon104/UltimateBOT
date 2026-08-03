@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.attack;
 
 import com.monkey.ultimatebot.api.event.combat.BotAttackEvent;
 import com.monkey.ultimatebot.api.event.combat.BotAttackType;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.AttackExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.AttackStrategy;

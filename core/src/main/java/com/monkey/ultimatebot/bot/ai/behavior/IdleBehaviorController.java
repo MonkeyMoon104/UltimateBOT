@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.behavior;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.model.BotLocation;
+import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;

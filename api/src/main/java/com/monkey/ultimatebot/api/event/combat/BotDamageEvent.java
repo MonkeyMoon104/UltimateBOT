@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.api.event.combat;
 
 import com.monkey.ultimatebot.api.event.base.BotEvent;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;

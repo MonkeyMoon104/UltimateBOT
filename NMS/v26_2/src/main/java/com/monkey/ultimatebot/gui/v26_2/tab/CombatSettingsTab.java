@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.gui.v26_2.tab;
 
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
-import com.monkey.ultimatebot.gui.v26_2.impl.CombatModeItem;
-import com.monkey.ultimatebot.gui.v26_2.impl.CombatTuningItem;
-import com.monkey.ultimatebot.gui.v26_2.impl.DifficultyItem;
-import com.monkey.ultimatebot.gui.v26_2.impl.ResetCombatTuningItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.CombatModeItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.CombatTuningItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.DifficultyItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.ResetCombatTuningItem;
 import java.util.Objects;
 import org.bukkit.Material;
 import xyz.xenondevs.invui.gui.Gui;

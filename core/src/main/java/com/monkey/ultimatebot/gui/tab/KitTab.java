@@ -1,7 +1,14 @@
 package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.gui.impl.*;
+import com.monkey.ultimatebot.gui.impl.action.SpawnItem;
+import com.monkey.ultimatebot.gui.impl.action.TeleportItem;
+import com.monkey.ultimatebot.gui.impl.settings.CombatItem;
+import com.monkey.ultimatebot.gui.impl.settings.CombatModeItem;
+import com.monkey.ultimatebot.gui.impl.settings.DifficultyItem;
+import com.monkey.ultimatebot.gui.impl.settings.FollowItem;
+import com.monkey.ultimatebot.gui.impl.settings.TargetModeItem;
+import com.monkey.ultimatebot.gui.impl.settings.TotemItem;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

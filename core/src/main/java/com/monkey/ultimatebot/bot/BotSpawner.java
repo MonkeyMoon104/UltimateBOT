@@ -8,8 +8,8 @@ import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnPrepareEvent;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.api.event.lifecycle.BotSpawnEvent;
 import com.monkey.ultimatebot.api.event.lifecycle.BotSpawnPrepareEvent;
-import com.monkey.ultimatebot.api.model.BotLocation;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotLocation;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.integration.api.BotSnapshotMapper;
@@ -196,7 +196,7 @@ public class BotSpawner {
 
     private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {
         if (botOptions != null && botOptions.getSpawnLocation() != null) {
-            com.monkey.ultimatebot.api.model.BotLocation apiLocation = botOptions.getSpawnLocation();
+            com.monkey.ultimatebot.api.model.runtime.BotLocation apiLocation = botOptions.getSpawnLocation();
             World world = apiLocation.worldUUID() == null ? null : Bukkit.getWorld(apiLocation.worldUUID());
             if (world == null && apiLocation.worldName() != null) {
                 world = Bukkit.getWorld(apiLocation.worldName());

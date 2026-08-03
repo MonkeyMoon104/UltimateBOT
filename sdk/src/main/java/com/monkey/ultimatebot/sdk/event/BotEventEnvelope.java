@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.sdk.event;
 
-import com.monkey.ultimatebot.sdk.model.BotSnapshotResponse;
+import com.monkey.ultimatebot.sdk.model.response.BotSnapshotResponse;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.LinkedHashMap;

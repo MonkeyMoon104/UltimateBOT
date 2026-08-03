@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.integration.api;
 
-import com.monkey.ultimatebot.api.model.BotSnapshot;
-import com.monkey.ultimatebot.api.model.BotSource;
-import com.monkey.ultimatebot.api.model.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
+import com.monkey.ultimatebot.api.model.identity.BotSource;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.common.model.CombatMode;

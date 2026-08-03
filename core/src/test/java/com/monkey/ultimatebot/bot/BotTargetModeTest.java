@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.monkey.ultimatebot.api.model.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
 import org.junit.jupiter.api.Test;
 
 class BotTargetModeTest {

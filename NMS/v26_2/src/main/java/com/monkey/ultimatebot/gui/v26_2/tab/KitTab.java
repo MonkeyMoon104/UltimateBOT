@@ -1,7 +1,14 @@
 package com.monkey.ultimatebot.gui.v26_2.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.gui.v26_2.impl.*;
+import com.monkey.ultimatebot.gui.v26_2.impl.action.SpawnItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.action.TeleportItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.CombatItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.CombatModeItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.DifficultyItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.FollowItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.TargetModeItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.TotemItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;

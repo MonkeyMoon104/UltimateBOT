@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot;
 
 import com.mojang.datafixers.util.Pair;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlot;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlotMode;
-import com.monkey.ultimatebot.api.model.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.ArrayList;

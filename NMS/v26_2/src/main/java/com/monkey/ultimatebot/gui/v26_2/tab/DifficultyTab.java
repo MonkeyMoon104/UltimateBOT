@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.v26_2.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.gui.v26_2.impl.DifficultyItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.settings.DifficultyItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;

@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.gui.v26_2.impl.BotTabItem;
+import com.monkey.ultimatebot.gui.v26_2.impl.navigation.BotTabItem;
 import com.monkey.ultimatebot.gui.v26_2.tab.*;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;

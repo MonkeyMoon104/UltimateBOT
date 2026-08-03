@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
-import com.monkey.ultimatebot.gui.impl.CombatModeItem;
-import com.monkey.ultimatebot.gui.impl.CombatTuningItem;
-import com.monkey.ultimatebot.gui.impl.DifficultyItem;
-import com.monkey.ultimatebot.gui.impl.ResetCombatTuningItem;
+import com.monkey.ultimatebot.gui.impl.settings.CombatModeItem;
+import com.monkey.ultimatebot.gui.impl.settings.CombatTuningItem;
+import com.monkey.ultimatebot.gui.impl.settings.DifficultyItem;
+import com.monkey.ultimatebot.gui.impl.settings.ResetCombatTuningItem;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;

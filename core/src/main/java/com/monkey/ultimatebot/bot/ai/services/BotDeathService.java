@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDeathEvent;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnEvent;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;

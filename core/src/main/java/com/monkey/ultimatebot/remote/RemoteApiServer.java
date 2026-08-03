@@ -6,7 +6,17 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.managers.IBotManager;
-import com.monkey.ultimatebot.api.model.*;
+import com.monkey.ultimatebot.api.model.configuration.BotArmorType;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.configuration.BotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotSettings;
+import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
+import com.monkey.ultimatebot.api.model.runtime.BotLocation;
+import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.util.EnumValues;
@@ -254,9 +264,12 @@ public final class RemoteApiServer {
 
         if ("target-mode".equals(parts[2])) {
             TargetModePayload payload = readJson(exchange, TargetModePayload.class);
-            com.monkey.ultimatebot.api.model.BotTargetMode mode = payload == null
+            com.monkey.ultimatebot.api.model.configuration.BotTargetMode mode = payload == null
                     ? null
-                    : EnumValues.parse(com.monkey.ultimatebot.api.model.BotTargetMode.class, payload.targetMode, null);
+                    : EnumValues.parse(
+                            com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class,
+                            payload.targetMode,
+                            null);
             boolean updated = mode != null
                     && runSync(() -> ownerUUID != null
                             ? manager.updateTargetMode(ownerUUID, mode)
@@ -394,9 +407,9 @@ public final class RemoteApiServer {
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
                 .targetMode(EnumValues.parse(
-                        com.monkey.ultimatebot.api.model.BotTargetMode.class,
+                        com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class,
                         safe.targetMode,
-                        com.monkey.ultimatebot.api.model.BotTargetMode.PLAYERS))
+                        com.monkey.ultimatebot.api.model.configuration.BotTargetMode.PLAYERS))
                 .combatMode(EnumValues.parse(CombatMode.class, safe.combatMode, CombatMode.SWORD))
                 .combatTuning(safe.combatTuning)
                 .changeableCombatMode(defaultBoolean(safe.changeableCombatMode, true))

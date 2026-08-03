@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.sdk.model.SdkBotArmor;
-import com.monkey.ultimatebot.sdk.model.SdkBotTargetMode;
+import com.monkey.ultimatebot.sdk.model.type.SdkBotArmor;
+import com.monkey.ultimatebot.sdk.model.type.SdkBotTargetMode;
 import org.junit.jupiter.api.Test;
 
 class CommonModelCompatibilityTest {

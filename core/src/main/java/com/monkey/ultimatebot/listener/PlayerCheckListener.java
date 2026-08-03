@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.listener;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.combat.BotKillPlayerEvent;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
-import com.monkey.ultimatebot.api.model.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotBroadcaster;
 import com.monkey.ultimatebot.bot.BotManager;
 import com.monkey.ultimatebot.bot.BotOptions;

@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.logging;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
-import com.monkey.ultimatebot.api.model.BotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotMode;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.nms.INMSBridge;
 import java.util.*;

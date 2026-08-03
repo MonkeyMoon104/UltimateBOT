@@ -4,7 +4,19 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.api.managers.IBotManager;
-import com.monkey.ultimatebot.api.model.*;
+import com.monkey.ultimatebot.api.model.configuration.BotArmorType;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.configuration.BotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotSettings;
+import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
+import com.monkey.ultimatebot.api.model.identity.BotSkin;
+import com.monkey.ultimatebot.api.model.identity.BotSkinSource;
+import com.monkey.ultimatebot.api.model.identity.BotSource;
+import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
 import com.monkey.ultimatebot.bot.*;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.common.model.CombatMode;
@@ -615,25 +627,27 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
-    public boolean updateTargetMode(UUID ownerUUID, com.monkey.ultimatebot.api.model.BotTargetMode targetMode) {
+    public boolean updateTargetMode(
+            UUID ownerUUID, com.monkey.ultimatebot.api.model.configuration.BotTargetMode targetMode) {
         BotOptions options = getLiveOptions(resolveManagedOwner(ownerUUID));
         if (options == null || targetMode == null) {
             return false;
         }
         UUID managedOwner = resolveManagedOwner(ownerUUID);
-        Optional<com.monkey.ultimatebot.api.model.BotTargetMode> proposed = proposedChange(
+        Optional<com.monkey.ultimatebot.api.model.configuration.BotTargetMode> proposed = proposedChange(
                 managedOwner,
                 BotSettingKey.TARGET_MODE,
                 options.getTargetMode(),
                 targetMode,
-                com.monkey.ultimatebot.api.model.BotTargetMode.class);
+                com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class);
         if (proposed.isEmpty()) return false;
         options.setTargetMode(proposed.get());
         return true;
     }
 
     @Override
-    public boolean updateTargetModeByBotUUID(UUID botUUID, com.monkey.ultimatebot.api.model.BotTargetMode targetMode) {
+    public boolean updateTargetModeByBotUUID(
+            UUID botUUID, com.monkey.ultimatebot.api.model.configuration.BotTargetMode targetMode) {
         UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
         return ownerUUID != null && updateTargetMode(ownerUUID, targetMode);
     }

@@ -1,6 +1,15 @@
 package com.monkey.ultimatebot.api.managers;
 
-import com.monkey.ultimatebot.api.model.*;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.configuration.BotMode;
+import com.monkey.ultimatebot.api.model.configuration.BotSettings;
+import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
+import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
+import com.monkey.ultimatebot.api.model.identity.BotSource;
+import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
+import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
+import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Collection;
