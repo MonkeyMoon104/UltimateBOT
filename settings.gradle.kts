@@ -8,24 +8,24 @@ pluginManagement {
 
 rootProject.name = "UltimateBot"
 
-include("ultimatebot-api")
-include("ultimatebot-sdk")
+include("api")
+include("sdk")
 include("common")
-include("ultimatebot-core")
+include("core")
 
 include("addons")
 include("addons:metrics")
 include("addons:guard")
 
-include("versions:v1_21_4")
-include("versions:v1_21_5")
-include("versions:v1_21_6")
-include("versions:v1_21_7")
-include("versions:v1_21_8")
-include("versions:v1_21_9")
-include("versions:v1_21_10")
-include("versions:v1_21_11")
-include("versions:v26_1")
-include("versions:v26_2")
+include("NMS:v1_21_4")
+include("NMS:v1_21_5")
+include("NMS:v1_21_6")
+include("NMS:v1_21_7")
+include("NMS:v1_21_8")
+include("NMS:v1_21_9")
+include("NMS:v1_21_10")
+include("NMS:v1_21_11")
+include("NMS:v26_1")
+include("NMS:v26_2")
 
-include("plugin")
+include("buildLogic")

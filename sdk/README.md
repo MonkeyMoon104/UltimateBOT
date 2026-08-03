@@ -1,4 +1,4 @@
-# ultimatebot-sdk
+# sdk
 
 ## Custom bot UUID and equipment slots
 
@@ -18,13 +18,13 @@ client.spawnEventBot(request);
 Slots can also be changed at runtime with `updateEquipmentSlot(...)`. `DEFAULT` returns control to the normal bot
 AI, `ITEM` keeps the configured material equipped, and `EMPTY` keeps the slot empty.
 
-`ultimatebot-sdk` is the Java-only remote client for UltimateBot.
+`sdk` is the Java-only remote client for UltimateBot.
 
 The SDK publishes JSpecify nullability contracts. Public parameters and return values are
 non-null by default, while optional response fields and builder values are explicitly
 annotated with `@Nullable`.
 
-Use this artifact with `implementation` when you do not want to depend on Bukkit/Paper classloading or the in-server `ultimatebot-api` singleton.
+Use this artifact with `implementation` when you do not want to depend on Bukkit/Paper classloading or the in-server `api` singleton.
 
 The SDK receives the dependency-free `common` contracts transitively and keeps its existing SDK-specific model names as compatibility façades.
 
@@ -32,7 +32,7 @@ The SDK receives the dependency-free `common` contracts transitively and keeps i
 
 ```gradle
 dependencies {
-    implementation "com.monkey.ultimatebot:ultimatebot-sdk:<version>"
+    implementation "com.monkey.ultimatebot:sdk:<version>"
 }
 ```
 

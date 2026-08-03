@@ -14,7 +14,7 @@ paperweight {
 val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 dependencies {
-    implementation(project(":ultimatebot-api"))
+    implementation(project(":api"))
     implementation(project(":common"))
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_4").get().requiredVersion)
 

@@ -107,7 +107,7 @@ val javaLoggingJmod = File(proguardJdkHome, "jmods/java.logging.jmod")
 
 evaluationDependsOn(":addons:metrics")
 evaluationDependsOn(":addons:guard")
-evaluationDependsOn(":ultimatebot-core")
+evaluationDependsOn(":core")
 val metricsAddonJarTask = project(":addons:metrics").tasks.named<ShadowJar>("shadowJar")
 val guardAddonJarTask = project(":addons:guard").tasks.named<Jar>("jar")
 val metricsAddonDescriptorFile = layout.buildDirectory.file("generated/addons/metrics.properties")
@@ -188,7 +188,7 @@ fun externalClasspathFor(dependencyProject: Project): FileCollection {
 val proguardLibraries = files(
     javaBaseJmod,
     javaLoggingJmod,
-    externalClasspathFor(project(":ultimatebot-core")),
+    externalClasspathFor(project(":core")),
 )
 
 if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
@@ -196,19 +196,19 @@ if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
 }
 
 dependencies {
-    implementation(project(":ultimatebot-core"))
-    implementation(project(path = ":versions:v1_21_4", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_5", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_6", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_7", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_8", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_9", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_10", configuration = "reobf"))
-    implementation(project(path = ":versions:v1_21_11", configuration = "reobf"))
-    implementation(project(path = ":versions:v26_1", configuration = "runtimeElements")) {
+    implementation(project(":core"))
+    implementation(project(path = ":NMS:v1_21_4", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_5", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_6", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_7", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_8", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_9", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_10", configuration = "reobf"))
+    implementation(project(path = ":NMS:v1_21_11", configuration = "reobf"))
+    implementation(project(path = ":NMS:v26_1", configuration = "runtimeElements")) {
         isTransitive = false
     }
-    implementation(project(path = ":versions:v26_2", configuration = "runtimeElements")) {
+    implementation(project(path = ":NMS:v26_2", configuration = "runtimeElements")) {
         isTransitive = false
     }
     add(invuiV2_1Shade.name, libsCatalog.findLibrary("invui-v2-1").get())

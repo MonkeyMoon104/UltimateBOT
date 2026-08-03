@@ -1,3 +1,5 @@
+import org.gradle.api.publish.maven.MavenPublication
+
 plugins {
     alias(libs.plugins.api.publish)
     alias(libs.plugins.revapi)
@@ -20,6 +22,12 @@ tasks.test {
 
 revapi {
     oldGroup.set("com.monkey.ultimatebot")
-    oldName.set("ultimatebot-api")
+    oldName.set("api")
     oldVersions.set(emptyList())
+}
+
+publishing {
+    publications.named<MavenPublication>("mavenJava") {
+        artifactId = "api"
+    }
 }

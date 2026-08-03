@@ -2,7 +2,7 @@
 
 Questa e l'unica guida da seguire per:
 
-- aggiornare `common`, `ultimatebot-api` e `ultimatebot-sdk`
+- aggiornare `common`, `api` e `sdk`
 - pubblicare una nuova versione API/SDK
 - aggiornare le Javadocs su GitHub Pages
 - evitare il problema della pagina docs che mostra ancora la versione vecchia
@@ -47,7 +47,7 @@ ultimatebot.version=1.1.0
 
 ```powershell
 git status --short
-.\gradlew.bat :plugin:shadowJar
+.\gradlew.bat :buildLogic:shadowJar
 ```
 
 La build deve passare prima di creare tag e docs.
@@ -64,24 +64,24 @@ Usa un messaggio coerente con il contenuto reale della release.
 
 ### 4. Rigenera le Javadocs
 
-Usa sempre `:ultimatebot-api:clean` e `:ultimatebot-sdk:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
+Usa sempre `:api:clean` e `:sdk:clean` per evitare Javadoc `UP-TO-DATE` con titolo vecchio:
 
 ```powershell
-.\gradlew.bat :ultimatebot-api:clean :ultimatebot-sdk:clean publishAllDocs
+.\gradlew.bat :api:clean :sdk:clean publishAllDocs
 ```
 
 Controlla il titolo:
 
 ```powershell
-Select-String -Path docs\ultimatebot\index.html -Pattern "ultimatebot-api"
-Select-String -Path docs\ultimatebot-sdk\index.html -Pattern "ultimatebot-sdk"
+Select-String -Path docs\ultimatebot\index.html -Pattern "api"
+Select-String -Path docs\sdk\index.html -Pattern "sdk"
 ```
 
 Deve mostrare:
 
 ```text
-ultimatebot-api 1.1.0 API
-ultimatebot-sdk 1.1.0 API
+api 1.1.0 API
+sdk 1.1.0 API
 ```
 
 ### 5. Commit e push delle docs
@@ -90,7 +90,7 @@ ultimatebot-sdk 1.1.0 API
 
 ```powershell
 git -C docs status --short
-git -C docs add ultimatebot ultimatebot-sdk
+git -C docs add ultimatebot sdk
 git -C docs commit -m "docs(api): regenerate javadocs for 1.1.0"
 git -C docs push origin master
 ```
@@ -122,11 +122,11 @@ Il push del tag `v*` avvia `.github/workflows/release.yml`, che pubblica l'API t
 Usa questa procedura solo se vuoi correggere/rigenerare GitHub Pages senza cambiare API.
 
 ```powershell
-.\gradlew.bat :ultimatebot-api:clean :ultimatebot-sdk:clean publishAllDocs
-Select-String -Path docs\ultimatebot\index.html -Pattern "ultimatebot-api"
-Select-String -Path docs\ultimatebot-sdk\index.html -Pattern "ultimatebot-sdk"
+.\gradlew.bat :api:clean :sdk:clean publishAllDocs
+Select-String -Path docs\ultimatebot\index.html -Pattern "api"
+Select-String -Path docs\sdk\index.html -Pattern "sdk"
 
-git -C docs add ultimatebot ultimatebot-sdk
+git -C docs add ultimatebot sdk
 git -C docs commit -m "docs(api): regenerate javadocs for X.Y.Z"
 git -C docs push origin master
 
@@ -139,13 +139,13 @@ git push origin ultimatebot
 
 ```powershell
 # prima modifica ultimatebot.version in gradle.properties
-.\gradlew.bat :plugin:shadowJar
+.\gradlew.bat :buildLogic:shadowJar
 git add .
 git commit -m "feat(api): <descrizione>"
 git push origin ultimatebot
 
-.\gradlew.bat :ultimatebot-api:clean :ultimatebot-sdk:clean publishAllDocs
-git -C docs add ultimatebot ultimatebot-sdk
+.\gradlew.bat :api:clean :sdk:clean publishAllDocs
+git -C docs add ultimatebot sdk
 git -C docs commit -m "docs(api): regenerate javadocs for X.Y.Z"
 git -C docs push origin master
 
@@ -162,8 +162,8 @@ git push origin vX.Y.Z
 git status --short
 git tag --points-at HEAD
 git ls-remote --tags origin vX.Y.Z
-Select-String -Path docs\ultimatebot\index.html -Pattern "ultimatebot-api"
-Select-String -Path docs\ultimatebot-sdk\index.html -Pattern "ultimatebot-sdk"
+Select-String -Path docs\ultimatebot\index.html -Pattern "api"
+Select-String -Path docs\sdk\index.html -Pattern "sdk"
 ```
 
 Su GitHub Pages potrebbe servire qualche minuto prima che la nuova versione sia visibile. Se localmente il file mostra la versione corretta ma online no, aspetta e forza refresh del browser.

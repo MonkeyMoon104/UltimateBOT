@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
  * Java-only remote client for UltimateBot servers with remote API enabled.
  *
  * <p>This SDK is safe to use with {@code implementation}; it does not depend on Bukkit,
- * Paper or the in-server {@code ultimatebot-api} classes.</p>
+ * Paper or the in-server {@code api} classes.</p>
  */
 public final class UltimateBotClient implements AutoCloseable {
 

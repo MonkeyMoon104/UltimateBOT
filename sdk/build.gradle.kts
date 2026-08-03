@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.testing.Test
 
 plugins {
@@ -25,6 +26,12 @@ tasks.named<Test>("test") {
 
 revapi {
     oldGroup.set("com.monkey.ultimatebot")
-    oldName.set("ultimatebot-sdk")
+    oldName.set("sdk")
     oldVersions.set(emptyList())
+}
+
+publishing {
+    publications.named<MavenPublication>("mavenJava") {
+        artifactId = "sdk"
+    }
 }

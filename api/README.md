@@ -20,7 +20,7 @@ Use `defaultEquipmentSlot(...)` or `BotEquipmentSlotSetting.defaultSlot()` to re
 management. Custom UUIDs are rejected when already assigned to an active bot, player, or loaded entity.
 
 ## Overview
-`ultimatebot-api` is the public integration contract for UltimateBot.
+`api` is the public integration contract for UltimateBot.
 
 It exposes:
 - the global API entrypoint
@@ -83,7 +83,7 @@ Local multi-module usage:
 
 ```gradle
 dependencies {
-    compileOnly project(":ultimatebot-api")
+    compileOnly project(":api")
 }
 ```
 
@@ -91,16 +91,16 @@ If your environment publishes the artifact externally, the effective coordinates
 
 ```gradle
 dependencies {
-    compileOnly "com.monkey.ultimatebot:ultimatebot-api:<version>"
+    compileOnly "com.monkey.ultimatebot:api:<version>"
 }
 ```
 
-Use `ultimatebot-api` for in-server Paper plugins that directly integrate with the loaded UltimateBot plugin.
+Use `api` for in-server Paper plugins that directly integrate with the loaded UltimateBot plugin.
 If you need an includable dependency, use the separate Java-only remote SDK:
 
 ```gradle
 dependencies {
-    implementation "com.monkey.ultimatebot:ultimatebot-sdk:<version>"
+    implementation "com.monkey.ultimatebot:sdk:<version>"
 }
 ```
 
@@ -439,11 +439,11 @@ The last point is an implementation-based recommendation: the current core spawn
 - Java 21 should be treated as the project baseline because the repository is compiled with `--release 21`
 
 ## Summary
-Depend on `ultimatebot-api` when you want a stable way to:
+Depend on `api` when you want a stable way to:
 - spawn bots
 - inspect active bots
 - update runtime options
 - resolve owners and players
 - cleanly integrate your own plugin with UltimateBot
 
-Do not depend on `ultimatebot-core` unless you are modifying the implementation itself.
+Do not depend on `core` unless you are modifying the implementation itself.

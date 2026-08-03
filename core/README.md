@@ -1,7 +1,7 @@
 # UltimateBot Core Module
 
 ## Overview
-`ultimatebot-core` is the runtime implementation module of the UltimateBot project.
+`core` is the runtime implementation module of the UltimateBot project.
 
 It contains:
 - the Bukkit/Paper plugin entrypoint
@@ -12,7 +12,7 @@ It contains:
 - the shared NMS-facing abstractions used by the version bridges
 - the combat AI stack that drives the training bots
 
-This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `plugin` module, which shadows `ultimatebot-core` together with the version-specific bridges under `versions/`.
+This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `buildLogic` module, which shadows `core` together with the version-specific bridges under `NMS/`.
 
 Platform-independent contracts shared by runtime modules live in `common`. That module contains only Java and JSpecify types and is protected by an architecture test that rejects Bukkit, Paper, Mojang and NMS dependencies.
 
@@ -32,7 +32,7 @@ Platform-independent contracts shared by runtime modules live in `common`. That 
 ## Runtime Stack
 - Java 21
 - Paper 1.21.4 through 1.21.11
-- Final packaged jar: `plugin/build/libs/UltimateBot.jar`
+- Final packaged jar: `buildLogic/build/libs/UltimateBot.jar`
 - External packet dependencies: none
 - Optional integrations: PlaceholderAPI, LuckPerms and WorldGuard
 - Optional observability runtime: downloaded automatically to `plugins/UltimateBot/addon/UltimateBot-Metrics.jar`
@@ -295,23 +295,23 @@ The core cleans runtime state aggressively to avoid stale entities and stale own
 
 ## Build and Packaging
 This repository is a multi-module build:
-- `ultimatebot-api` exposes the public contract
-- `ultimatebot-core` contains the runtime implementation
+- `api` exposes the public contract
+- `core` contains the runtime implementation
 - `common` contains the platform-independent contracts and shared Java utilities
 - `addons:metrics` produces the optional shaded Micrometer/Prometheus runtime
 - `addons:guard` produces the lightweight Paper compatibility guard
-- `versions:*` provide version-specific NMS bridges
+- `NMS:*` provide version-specific NMS bridges
 - `plugin` assembles the final distributable jar
 
 Useful tasks:
 
 ```bash
-./gradlew :ultimatebot-core:build
-./gradlew :plugin:shadowJar
+./gradlew :core:build
+./gradlew :buildLogic:shadowJar
 ```
 
 Expected production artifact:
-- `plugin/build/libs/UltimateBot.jar`
+- `buildLogic/build/libs/UltimateBot.jar`
 
 Optional addon artifacts:
 - `addons/metrics/build/libs/UltimateBot-Metrics.jar`
@@ -329,11 +329,11 @@ During startup, the core:
 2. registers it globally
 3. fires `UltimateBotReadyEvent`
 
-Third-party integrations should consume the public API from `ultimatebot-api`, not internal core classes.
+Third-party integrations should consume the public API from `api`, not internal core classes.
 
 ## Operational Notes
 - This is a Paper-oriented, NMS-backed implementation module
 - Bot rendering uses the native version-specific NMS bridges
 - PlaceholderAPI is part of the declared plugin dependency model
 - Player option state is runtime-only; the core does not persist it to a database
-- If you need a stable external integration surface, depend on `ultimatebot-api` instead of importing `ultimatebot-core`
+- If you need a stable external integration surface, depend on `api` instead of importing `core`

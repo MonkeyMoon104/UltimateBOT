@@ -111,7 +111,7 @@ subprojects {
 
     plugins.withId("io.papermc.paperweight.userdev") {
         val toolchains = extensions.getByType<JavaToolchainService>()
-        val targetVersion = if (project.path == ":versions:v26_1" || project.path == ":versions:v26_2") 25 else 21
+        val targetVersion = if (project.path == ":NMS:v26_1" || project.path == ":NMS:v26_2") 25 else 21
 
         tasks.withType<JavaLauncherTask>().configureEach {
             launcher.set(
@@ -149,10 +149,10 @@ tasks.named("build") {
 
 tasks.register<Sync>("publishApiDocs") {
     group = "documentation"
-    description = "Generates ultimatebot-api Javadocs and copies them to docs/ultimatebot/."
+    description = "Generates API Javadocs and copies them to docs/ultimatebot/."
 
-    dependsOn(":ultimatebot-api:javadoc")
-    from(project(":ultimatebot-api").layout.buildDirectory.dir("docs/javadoc"))
+    dependsOn(":api:javadoc")
+    from(project(":api").layout.buildDirectory.dir("docs/javadoc"))
     into(layout.projectDirectory.dir("docs/ultimatebot"))
 
     doLast {
@@ -165,11 +165,11 @@ tasks.register<Sync>("publishApiDocs") {
 
 tasks.register<Sync>("publishSdkDocs") {
     group = "documentation"
-    description = "Generates ultimatebot-sdk Javadocs and copies them to docs/ultimatebot-sdk/."
+    description = "Generates SDK Javadocs and copies them to docs/sdk/."
 
-    dependsOn(":ultimatebot-sdk:javadoc")
-    from(project(":ultimatebot-sdk").layout.buildDirectory.dir("docs/javadoc"))
-    into(layout.projectDirectory.dir("docs/ultimatebot-sdk"))
+    dependsOn(":sdk:javadoc")
+    from(project(":sdk").layout.buildDirectory.dir("docs/javadoc"))
+    into(layout.projectDirectory.dir("docs/sdk"))
 
     doLast {
         layout.projectDirectory
