@@ -13,8 +13,8 @@ final class ModeCombatPolicy {
 
     static boolean isCartOpportunity(
             double distance, double botY, double targetY, double targetHealthRatio, boolean periodicWindow) {
-        return distance >= 3.0D
-                && distance <= 7.0D
+        return distance >= 2.75D
+                && distance <= 8.5D
                 && botY <= targetY + 0.55D
                 && (targetHealthRatio <= 0.78D || periodicWindow);
     }
@@ -54,6 +54,20 @@ final class ModeCombatPolicy {
 
     static boolean isBowFullyDrawn(int drawTicks) {
         return drawTicks >= 20;
+    }
+
+    static double bowPower(int drawTicks) {
+        double draw = Math.clamp(drawTicks, 0, 20) / 20.0D;
+        return Math.min(1.0D, (draw * draw + draw * 2.0D) / 3.0D);
+    }
+
+    static int ignitionBowDrawTicks(double distance) {
+        if (!Double.isFinite(distance) || distance < 0.0D) {
+            throw new IllegalArgumentException("distance must be finite and non-negative");
+        }
+        double requiredPower = Math.clamp(distance / 15.0D, 0.25D, 1.0D);
+        double normalizedDraw = Math.sqrt(1.0D + requiredPower * 3.0D) - 1.0D;
+        return Math.clamp((int) Math.ceil(normalizedDraw * 20.0D), 5, 20);
     }
 
     static double projectileSpread(double accuracy) {

@@ -26,7 +26,7 @@ class ModeCombatPolicyTest {
                 .isTrue();
         assertThat(ModeCombatPolicy.isCartOpportunity(5.0D, 66.0D, 64.0D, 0.7D, false))
                 .isFalse();
-        assertThat(ModeCombatPolicy.isCartOpportunity(8.0D, 64.0D, 64.0D, 0.7D, false))
+        assertThat(ModeCombatPolicy.isCartOpportunity(8.6D, 64.0D, 64.0D, 0.7D, false))
                 .isFalse();
         assertThat(ModeCombatPolicy.isCartOpportunity(5.0D, 64.0D, 64.0D, 1.0D, true))
                 .isTrue();
@@ -91,5 +91,14 @@ class ModeCombatPolicyTest {
         assertThat(ModeCombatPolicy.isBowFullyDrawn(19)).isFalse();
         assertThat(ModeCombatPolicy.isBowFullyDrawn(20)).isTrue();
         assertThat(ModeCombatPolicy.isBowFullyDrawn(25)).isTrue();
+    }
+
+    @Test
+    void ignitionDrawUsesVanillaPowerCurveAndDistance() {
+        assertThat(ModeCombatPolicy.bowPower(0)).isZero();
+        assertThat(ModeCombatPolicy.bowPower(20)).isEqualTo(1.0D);
+        assertThat(ModeCombatPolicy.bowPower(30)).isEqualTo(1.0D);
+        assertThat(ModeCombatPolicy.ignitionBowDrawTicks(3.0D)).isLessThan(ModeCombatPolicy.ignitionBowDrawTicks(9.0D));
+        assertThat(ModeCombatPolicy.ignitionBowDrawTicks(30.0D)).isEqualTo(20);
     }
 }

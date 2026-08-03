@@ -1,8 +1,6 @@
 package com.monkey.ultimatebot.combat.mode;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,19 +15,22 @@ import org.jspecify.annotations.Nullable;
 final class CartExplosiveSequence {
     private static final int RAIL_SLOT = BotInventoryController.OBSIDIAN_SLOT;
     private static final int CART_SLOT = BotInventoryController.CRYSTAL_SLOT;
-    private static final int MAX_LIFETIME_TICKS = 80;
+    private static final int MAX_LIFETIME_TICKS = 600;
+    private static final int MAX_ARROW_FLIGHT_TICKS = 40;
+    private static final double TARGET_BLAST_RANGE_SQUARED = 9.0D;
 
     private @Nullable UUID cartId;
     private @Nullable UUID arrowId;
     private @Nullable Location railLocation;
     private int lifetimeTicks;
+    private int arrowFlightTicks;
 
     boolean placeRail(CombatModeContext context, LivingEntity target) {
         Location targetLocation =
                 Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
         context.inventory().switchToSlot(RAIL_SLOT);
-        for (Location placement :
-                railCandidates(targetLocation, target.getBukkitEntity().getVelocity())) {
+        for (Location placement : CartPlacementPlanner.railCandidates(
+                targetLocation, target.getBukkitEntity().getVelocity())) {
             if (!placement
                     .clone()
                     .subtract(0.0D, 1.0D, 0.0D)
@@ -59,20 +60,37 @@ final class CartExplosiveSequence {
         cart.setVelocity(new org.bukkit.util.Vector());
         cartId = cart.getUniqueId();
         lifetimeTicks = 0;
+        arrowFlightTicks = 0;
         return true;
     }
 
-    boolean fireIgnitionArrow(CombatModeContext context, double accuracy) {
+    int requiredIgnitionDrawTicks(CombatModeContext context) {
+        Entity cart = cart();
+        if (cart == null) {
+            return 20;
+        }
+        double distance = context.bukkitBot().getEyeLocation().distance(cart.getLocation());
+        return ModeCombatPolicy.ignitionBowDrawTicks(distance);
+    }
+
+    boolean isTargetCloseForIgnition(LivingEntity target) {
+        Entity cart = cart();
+        return cart != null && targetDistanceSquared(cart, target) <= TARGET_BLAST_RANGE_SQUARED;
+    }
+
+    boolean fireIgnitionArrow(CombatModeContext context, double accuracy, int drawTicks) {
         Entity cart = cart();
         if (cart == null) {
             return false;
         }
-        Arrow arrow = context.projectiles().fireIgnitionArrow(cart, accuracy);
+        removeIgnitionArrow(context);
+        Arrow arrow = context.projectiles().fireIgnitionArrow(cart, accuracy, drawTicks);
         arrowId = arrow.getUniqueId();
+        arrowFlightTicks = 0;
         return true;
     }
 
-    Status tick(CombatModeContext context) {
+    Status tick(CombatModeContext context, LivingEntity target) {
         Entity cart = cart();
         if (cart == null) {
             cleanup(context);
@@ -80,15 +98,29 @@ final class CartExplosiveSequence {
         }
         lifetimeTicks++;
         Entity arrow = arrowId == null ? null : Bukkit.getEntity(arrowId);
-        if (arrow != null && arrow.isValid() && arrow.getWorld().equals(cart.getWorld())) {
+        if (arrowId != null) {
+            arrowFlightTicks++;
+            if (arrow == null || !arrow.isValid() || !arrow.getWorld().equals(cart.getWorld())) {
+                removeIgnitionArrow(context);
+                return Status.NEEDS_IGNITION;
+            }
             if (isArrowImpact(arrow.getLocation().distanceSquared(cart.getLocation()))) {
+                if (!isTargetInBlastRange(targetDistanceSquared(cart, target))) {
+                    cleanup(context);
+                    return Status.TARGET_ESCAPED;
+                }
                 detonate(context, cart);
                 return Status.DETONATED;
+            }
+            if (arrowFlightTicks >= MAX_ARROW_FLIGHT_TICKS
+                    || (arrowFlightTicks >= 5 && arrow.getVelocity().lengthSquared() < 0.0025D)) {
+                removeIgnitionArrow(context);
+                return Status.NEEDS_IGNITION;
             }
         }
         if (lifetimeTicks >= MAX_LIFETIME_TICKS) {
             cleanup(context);
-            return Status.FINISHED;
+            return Status.EXPIRED;
         }
         return Status.ACTIVE;
     }
@@ -101,25 +133,8 @@ final class CartExplosiveSequence {
         return Double.isFinite(distanceSquared) && distanceSquared <= 1.8D;
     }
 
-    static List<Location> railCandidates(Location targetLocation, org.bukkit.util.Vector targetVelocity) {
-        Objects.requireNonNull(targetLocation, "targetLocation");
-        org.bukkit.util.Vector horizontalVelocity =
-                Objects.requireNonNull(targetVelocity, "targetVelocity").clone().setY(0.0D);
-        if (horizontalVelocity.lengthSquared() > 0.36D) {
-            horizontalVelocity.normalize().multiply(0.6D);
-        }
-        LinkedHashMap<WebTrapPlanner.Position, Location> candidates = new LinkedHashMap<>();
-        for (double predictionTicks : new double[] {2.0D, 1.0D, 0.0D}) {
-            Location candidate =
-                    targetLocation.clone().add(horizontalVelocity.clone().multiply(predictionTicks));
-            candidate = new Location(
-                    Objects.requireNonNull(candidate.getWorld(), "candidate world"),
-                    candidate.getBlockX(),
-                    candidate.getBlockY(),
-                    candidate.getBlockZ());
-            candidates.putIfAbsent(WebTrapPlanner.Position.from(candidate), candidate);
-        }
-        return List.copyOf(candidates.values());
+    static boolean isTargetInBlastRange(double distanceSquared) {
+        return Double.isFinite(distanceSquared) && distanceSquared <= TARGET_BLAST_RANGE_SQUARED;
     }
 
     void cleanup(CombatModeContext context) {
@@ -132,6 +147,7 @@ final class CartExplosiveSequence {
             railLocation = null;
         }
         lifetimeTicks = 0;
+        arrowFlightTicks = 0;
     }
 
     private void detonate(CombatModeContext context, Entity cart) {
@@ -148,6 +164,20 @@ final class CartExplosiveSequence {
         return cart != null && cart.isValid() ? cart : null;
     }
 
+    private void removeIgnitionArrow(CombatModeContext context) {
+        removeTrackedEntity(context, arrowId);
+        arrowId = null;
+        arrowFlightTicks = 0;
+    }
+
+    private static double targetDistanceSquared(Entity cart, LivingEntity target) {
+        Entity bukkitTarget = target.getBukkitEntity();
+        if (!cart.getWorld().equals(bukkitTarget.getWorld())) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return cart.getLocation().distanceSquared(bukkitTarget.getLocation());
+    }
+
     private static void removeTrackedEntity(CombatModeContext context, @Nullable UUID entityId) {
         if (entityId != null) {
             context.entities().remove(entityId);
@@ -156,7 +186,10 @@ final class CartExplosiveSequence {
 
     enum Status {
         ACTIVE,
+        NEEDS_IGNITION,
+        TARGET_ESCAPED,
         DETONATED,
+        EXPIRED,
         FINISHED
     }
 }

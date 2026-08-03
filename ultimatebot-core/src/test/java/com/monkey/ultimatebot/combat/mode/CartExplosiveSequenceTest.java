@@ -20,15 +20,26 @@ class CartExplosiveSequenceTest {
     }
 
     @Test
+    void detonatesOnlyWhileTheTargetRemainsInsideTheBlastRange() {
+        assertThat(CartExplosiveSequence.isTargetInBlastRange(9.0D)).isTrue();
+        assertThat(CartExplosiveSequence.isTargetInBlastRange(9.01D)).isFalse();
+        assertThat(CartExplosiveSequence.isTargetInBlastRange(Double.POSITIVE_INFINITY))
+                .isFalse();
+    }
+
+    @Test
     void railCandidatesFallBackFromPredictionToCurrentTargetBlock() {
         World world = mock(World.class);
         when(world.getUID()).thenReturn(UUID.randomUUID());
 
-        List<Location> candidates = CartExplosiveSequence.railCandidates(
+        List<Location> candidates = CartPlacementPlanner.railCandidates(
                 new Location(world, 4.2D, 64.0D, 7.8D), new Vector(0.8D, 0.2D, 0.0D));
 
-        assertThat(candidates).hasSizeGreaterThanOrEqualTo(2);
-        assertThat(candidates.getLast().getBlockX()).isEqualTo(4);
-        assertThat(candidates.getLast().getBlockZ()).isEqualTo(7);
+        assertThat(candidates).hasSizeGreaterThanOrEqualTo(6);
+        assertThat(candidates)
+                .anyMatch(location ->
+                        location.getBlockX() == 4 && location.getBlockY() == 64 && location.getBlockZ() == 7);
+        assertThat(candidates).anyMatch(location -> location.getBlockY() == 63);
+        assertThat(candidates).anyMatch(location -> location.getBlockY() == 65);
     }
 }
