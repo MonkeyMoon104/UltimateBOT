@@ -46,4 +46,36 @@ class ModeCombatPolicyTest {
         assertThat(ModeCombatPolicy.projectileSpread(0.5D)).isEqualTo(0.12D);
         assertThat(ModeCombatPolicy.projectileSpread(-0.5D)).isEqualTo(0.24D);
     }
+
+    @Test
+    void shieldThreatDetectsReadyAndRushingPlayers() {
+        assertThat(ModeCombatPolicy.isIncomingPlayerAttack(3.2D, 0.9D, false, false, 0.0D, 0.8D))
+                .isTrue();
+        assertThat(ModeCombatPolicy.isIncomingPlayerAttack(4.5D, 0.6D, false, false, 0.12D, 0.9D))
+                .isTrue();
+        assertThat(ModeCombatPolicy.isIncomingPlayerAttack(7.0D, 0.2D, false, true, 0.0D, 0.8D))
+                .isTrue();
+        assertThat(ModeCombatPolicy.isIncomingPlayerAttack(3.0D, 1.0D, true, true, 0.2D, 1.0D))
+                .isFalse();
+        assertThat(ModeCombatPolicy.isIncomingPlayerAttack(4.5D, 0.6D, false, false, 0.0D, 0.1D))
+                .isFalse();
+    }
+
+    @Test
+    void axeOpeningRequiresAStableSafeWindow() {
+        assertThat(ModeCombatPolicy.isSafeAxeOpening(3.0D, 3.2D, false, true, 3))
+                .isTrue();
+        assertThat(ModeCombatPolicy.isSafeAxeOpening(3.0D, 3.2D, true, true, 3)).isFalse();
+        assertThat(ModeCombatPolicy.isSafeAxeOpening(3.0D, 3.2D, false, false, 3))
+                .isFalse();
+        assertThat(ModeCombatPolicy.isSafeAxeOpening(3.0D, 3.2D, false, true, 2))
+                .isFalse();
+    }
+
+    @Test
+    void bowRequiresFullTwentyTickDraw() {
+        assertThat(ModeCombatPolicy.isBowFullyDrawn(19)).isFalse();
+        assertThat(ModeCombatPolicy.isBowFullyDrawn(20)).isTrue();
+        assertThat(ModeCombatPolicy.isBowFullyDrawn(25)).isTrue();
+    }
 }
