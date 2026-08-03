@@ -27,6 +27,12 @@ class ConfigurateRuntimeSettingsLoaderTest {
                     block-state:
                       maximum-size: 4096
                       expire-after-write-ms: 2000
+                protection-world:
+                  block-damage: true
+                  anti-dupe: false
+                  combat-block-lifetime-seconds: 45
+                  max-active-combat-blocks: 512
+                  respect-protection-plugins: false
                 """);
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
@@ -37,6 +43,8 @@ class ConfigurateRuntimeSettingsLoaderTest {
         assertThat(settings.targetCache().expireAfterWrite()).isEqualTo(Duration.ofMillis(125));
         assertThat(settings.blockStateCache().maximumSize()).isEqualTo(4_096);
         assertThat(settings.blockStateCache().expireAfterWrite()).isEqualTo(Duration.ofSeconds(2));
+        assertThat(settings.worldProtection())
+                .isEqualTo(new RuntimeSettings.WorldProtectionSettings(true, false, 45, 512, false));
     }
 
     @Test
@@ -48,6 +56,9 @@ class ConfigurateRuntimeSettingsLoaderTest {
                     target:
                       maximum-size: 0
                       expire-after-write-ms: -1
+                protection-world:
+                  combat-block-lifetime-seconds: -1
+                  max-active-combat-blocks: 0
                 """);
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
@@ -55,5 +66,7 @@ class ConfigurateRuntimeSettingsLoaderTest {
                 .load();
 
         assertThat(settings.targetCache()).isEqualTo(RuntimeSettings.defaults().targetCache());
+        assertThat(settings.worldProtection())
+                .isEqualTo(RuntimeSettings.defaults().worldProtection());
     }
 }
