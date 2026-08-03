@@ -10,28 +10,45 @@ import org.bukkit.util.Vector;
 
 final class TridentSpongeWebController {
     private final Set<WebTrapPlanner.Position> placed = new LinkedHashSet<>();
+    private boolean webReady;
 
     boolean tick(CombatModeContext context, LivingEntity target, int phaseTicks) {
         if (phaseTicks == 1) {
-            placeWeb(context, target);
-        } else if (phaseTicks >= 3 && phaseTicks <= 9 && phaseTicks % 2 == 1) {
+            webReady = placeWeb(context, target);
+        } else if (webReady && phaseTicks >= 3 && phaseTicks <= 9 && phaseTicks % 2 == 1) {
             placeSponge(context, target);
         }
-        return phaseTicks >= 11;
+        return (!webReady && phaseTicks >= 3) || phaseTicks >= 11;
     }
 
     void reset() {
         placed.clear();
+        webReady = false;
     }
 
-    private void placeWeb(CombatModeContext context, LivingEntity target) {
+    private boolean placeWeb(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(TridentLoadout.WEB_SLOT);
-        Location targetBlock = targetBlock(target);
-        if (targetBlock.getBlock().getType() == Material.COBWEB
-                || context.placeCombatBlock(targetBlock, Material.COBWEB, TridentLoadout.WEB_SLOT)) {
-            placed.add(WebTrapPlanner.Position.from(targetBlock));
-            context.actions().swingMainHand();
+        if (CobwebCombatAwareness.inspect(target).inside()) {
+            return true;
         }
+        org.bukkit.entity.Entity bukkitTarget = target.getBukkitEntity();
+        Location targetLocation = Objects.requireNonNull(bukkitTarget.getLocation(), "target location");
+        for (Location candidate : WebTrapPlanner.plan(
+                targetLocation,
+                bukkitTarget.getVelocity(),
+                bukkitTarget.isOnGround(),
+                targetLocation.getDirection(),
+                context.random())) {
+            if (!context.canPlaceCombatBlock(candidate, Material.COBWEB)) {
+                continue;
+            }
+            if (context.placeCombatBlock(candidate, Material.COBWEB, TridentLoadout.WEB_SLOT)) {
+                placed.add(WebTrapPlanner.Position.from(candidate));
+                context.actions().swingMainHand();
+                return true;
+            }
+        }
+        return false;
     }
 
     private void placeSponge(CombatModeContext context, LivingEntity target) {

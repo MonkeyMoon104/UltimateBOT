@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import net.minecraft.world.entity.LivingEntity;
 
 final class TridentPvPStrategy extends AbstractCombatModeStrategy {
-    private static final int RIPTIDE_COOLDOWN_TICKS = 45;
+    private static final int RIPTIDE_COOLDOWN_TICKS = 70;
     private static final int RIPTIDE_CHARGE_TICKS = 6;
     private static final int LOYALTY_DRAW_TICKS = 9;
 
@@ -13,6 +13,8 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.SELECT_ATTACK;
     private int phaseTicks;
     private long nextRiptideTick;
+    private long nextTrapTick;
+    private boolean loyaltyDue;
 
     TridentPvPStrategy() {
         super(CombatMode.TRIDENT, TridentLoadout.create());
@@ -24,6 +26,8 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         utilityActions.reset();
         spongeWebController.reset();
         nextRiptideTick = 0L;
+        nextTrapTick = 0L;
+        loyaltyDue = true;
         transitionTo(Phase.SELECT_ATTACK);
     }
 
@@ -55,9 +59,11 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
 
     private void selectAttack(CombatModeContext context, LivingEntity target) {
         double distance = context.motion().distanceTo(target);
-        if (context.motion().isBotInWater()) {
+        if (loyaltyDue && distance >= 3.5D) {
+            transitionTo(Phase.LOYALTY_DRAW);
+        } else if (context.motion().isBotInWater() && currentTick() >= nextRiptideTick) {
             transitionTo(Phase.CHARGE_RIPTIDE);
-        } else if (currentTick() >= nextRiptideTick && distance >= 4.0D && distance <= 14.0D) {
+        } else if (currentTick() >= nextRiptideTick && distance >= 2.5D && distance <= 14.0D) {
             transitionTo(Phase.PREPARE_WATER);
         } else if (distance >= 5.0D) {
             transitionTo(Phase.LOYALTY_DRAW);
@@ -108,6 +114,7 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         context.motion().steerVelocityTowards(target, 0.34D, context.bot().getDeltaMovement().y);
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, TridentLoadout.RIPTIDE_SLOT);
+            loyaltyDue = true;
             transitionTo(Phase.RECOVER);
         } else if (phaseTicks >= 5) {
             transitionTo(Phase.LOYALTY_DRAW);
@@ -123,6 +130,7 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         if (phaseTicks >= LOYALTY_DRAW_TICKS) {
             context.actions().releaseUseItem();
             context.projectiles().fireTrident(target, context.tuning().aimAccuracy());
+            loyaltyDue = false;
             transitionTo(Phase.LOYALTY_RECOVERY);
         }
     }
@@ -130,7 +138,7 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     private void loyaltyRecovery(CombatModeContext context, LivingEntity target) {
         context.motion().strafe(target, 0.7D);
         if (phaseTicks >= 6) {
-            transitionTo(context.motion().distanceTo(target) <= 4.0D ? Phase.GROUND_HIT : Phase.SELECT_ATTACK);
+            transitionTo(Phase.SELECT_ATTACK);
         }
     }
 
@@ -154,17 +162,28 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
             context.actions().swingMainHand();
         }
         if (phaseTicks >= 3) {
-            boolean trapOpportunity = context.motion().distanceTo(target) <= 4.5D
-                    && context.random().nextDouble() < 0.18D + context.tuning().aggression() * 0.35D;
-            transitionTo(trapOpportunity ? Phase.SPONGE_WEB : Phase.RECOVER);
+            boolean trapOpportunity = currentTick() >= nextTrapTick
+                    && context.motion().distanceTo(target) <= 4.5D
+                    && !CobwebCombatAwareness.inspect(target).inside()
+                    && context.random().nextDouble() < 0.35D + context.tuning().aggression() * 0.45D;
+            if (trapOpportunity) {
+                nextTrapTick = currentTick() + Math.max(30L, context.tuning().specialActionCooldownTicks());
+                transitionTo(Phase.SPONGE_WEB);
+            } else {
+                transitionTo(Phase.LOYALTY_DRAW);
+            }
         }
     }
 
     private void spongeWeb(CombatModeContext context, LivingEntity target) {
-        context.motion().retreat(target, 4.5D);
+        if (context.motion().distanceTo(target) < 3.5D) {
+            context.motion().retreat(target, 4.5D);
+        } else {
+            context.motion().strafe(target, 0.45D);
+        }
         if (spongeWebController.tick(context, target, phaseTicks)) {
             spongeWebController.reset();
-            transitionTo(Phase.RECOVER);
+            transitionTo(Phase.LOYALTY_DRAW);
         }
     }
 
