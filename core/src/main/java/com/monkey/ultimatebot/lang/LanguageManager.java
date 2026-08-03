@@ -69,7 +69,7 @@ public final class LanguageManager {
     }
 
     public synchronized String getString(String path) {
-        return getString(path, null);
+        return getString(path, path);
     }
 
     public synchronized String getString(String path, String fallbackValue) {
@@ -83,7 +83,7 @@ public final class LanguageManager {
             return defaultValue;
         }
 
-        return fallbackValue;
+        return fallbackValue == null ? path : fallbackValue;
     }
 
     public synchronized List<String> getStringList(String path) {

@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.jspecify.annotations.Nullable;
 
 public final class UpdateManager implements Listener {
 
@@ -29,8 +30,8 @@ public final class UpdateManager implements Listener {
     private final boolean periodicBroadcastEnabled;
     private final long periodicIntervalTicks;
 
-    private volatile UpdateState lastUpdateState;
-    private WrapperTask periodicTask;
+    private volatile @Nullable UpdateState lastUpdateState;
+    private @Nullable WrapperTask periodicTask;
 
     public UpdateManager(UltimateBot plugin) {
         this.plugin = plugin;
@@ -165,7 +166,7 @@ public final class UpdateManager implements Listener {
         return player.isOp() || player.hasPermission("ultimatebot.admin.use");
     }
 
-    private String safeMessage(String value) {
+    private String safeMessage(@Nullable String value) {
         return value == null || value.isBlank() ? "n/a" : value;
     }
 }

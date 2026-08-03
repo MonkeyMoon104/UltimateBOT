@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.*;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.BotTeleportController;
+import java.util.Objects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -13,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.jspecify.annotations.Nullable;
 
 public class BotEnderpearlController {
 
@@ -31,10 +33,10 @@ public class BotEnderpearlController {
     private int enderpearlCooldown = 0;
     private static final int ENDERPEARL_COOLDOWN_TICKS = 30;
 
-    private Player currentTarget;
+    private @Nullable Player currentTarget;
 
     private boolean isPreparingPearl = false;
-    private Vec3 pendingThrowTarget = null;
+    private @Nullable Vec3 pendingThrowTarget;
     private int preparationTicks = 0;
     private static final int PREPARATION_TIME = 3;
     private IPearlStrategyCalculator.PearlStrategy currentStrategy = IPearlStrategyCalculator.PearlStrategy.ESCAPE;
@@ -75,7 +77,7 @@ public class BotEnderpearlController {
         return tryUseEnderpearl(target, null);
     }
 
-    public boolean tryUseEnderpearl(Player target, IPearlStrategyCalculator.PearlStrategy forcedStrategy) {
+    public boolean tryUseEnderpearl(Player target, IPearlStrategyCalculator.@Nullable PearlStrategy forcedStrategy) {
         if (!enabled) return false;
         if (isPreparingPearl) return false;
         if (!inventoryController.hasEnderpearls()) return false;
@@ -92,7 +94,7 @@ public class BotEnderpearlController {
         try {
             if (!bot.onGround() && forcedStrategy == null) return false;
         } catch (RuntimeException ignoredUnavailableState) {
-            // Some version-specific fake-player handles cannot expose onGround during initialization.
+            return false;
         }
 
         if (!canUseEnderpearl()) return false;
@@ -226,7 +228,7 @@ public class BotEnderpearlController {
         if (!canAutoTeleport()) return false;
 
         Vec3 botPos = bot.position();
-        org.bukkit.Location targetLoc = target.getLocation();
+        org.bukkit.Location targetLoc = Objects.requireNonNull(target.getLocation(), "target location");
         Vec3 targetPos = new Vec3(targetLoc.getX(), targetLoc.getY(), targetLoc.getZ());
 
         double horizontalDistance =
@@ -464,7 +466,7 @@ public class BotEnderpearlController {
         return false;
     }
 
-    private Vec3 validatePearlTarget(Vec3 requestedTarget) {
+    private @Nullable Vec3 validatePearlTarget(Vec3 requestedTarget) {
         Vec3 botPos = bot.position();
         Vec3 candidate = requestedTarget;
         double distance = botPos.distanceTo(candidate);

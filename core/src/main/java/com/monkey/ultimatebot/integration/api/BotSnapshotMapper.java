@@ -9,12 +9,13 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Set;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public final class BotSnapshotMapper {
 
     private BotSnapshotMapper() {}
 
-    public static BotSnapshot toSnapshot(UUID ownerUUID, ITrainingBot bot) {
+    public static @Nullable BotSnapshot toSnapshot(UUID ownerUUID, @Nullable ITrainingBot bot) {
         if (bot == null) {
             return null;
         }

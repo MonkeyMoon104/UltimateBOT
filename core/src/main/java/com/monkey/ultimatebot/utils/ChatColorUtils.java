@@ -1,12 +1,11 @@
 package com.monkey.ultimatebot.utils;
 
+import java.util.Objects;
+
 public class ChatColorUtils {
 
     public static String translate(String input) {
-        if (input == null) {
-            return null;
-        }
-
+        Objects.requireNonNull(input, "input");
         char[] chars = input.toCharArray();
         for (int i = 0; i < chars.length - 1; i++) {
             if (chars[i] == '&' && isLegacyColorCode(chars[i + 1])) {

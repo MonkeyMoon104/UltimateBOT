@@ -17,6 +17,7 @@ public class CrystalAttacker {
 
     public CrystalAttacker(Player bot) {
         this.bot = bot;
+        this.cachedBotPosition = bot.position();
     }
 
     public void updateBotPosition() {

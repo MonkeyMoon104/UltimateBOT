@@ -46,6 +46,43 @@ import org.jspecify.annotations.Nullable;
 @SuppressWarnings({"deprecation", "TypeParameterUnusedInFormals"})
 public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit.entity.Player {
 
+    private static final Input NO_INPUT = new Input() {
+        @Override
+        public boolean isForward() {
+            return false;
+        }
+
+        @Override
+        public boolean isBackward() {
+            return false;
+        }
+
+        @Override
+        public boolean isLeft() {
+            return false;
+        }
+
+        @Override
+        public boolean isRight() {
+            return false;
+        }
+
+        @Override
+        public boolean isJump() {
+            return false;
+        }
+
+        @Override
+        public boolean isSneak() {
+            return false;
+        }
+
+        @Override
+        public boolean isSprint() {
+            return false;
+        }
+    };
+
     private final ITrainingBot trainingBot;
 
     public BotCraftPlayer(ITrainingBot trainingBot) {
@@ -68,7 +105,18 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public PlayerGiveResult give(Collection<ItemStack> items, boolean dropIfFull) {
-        return null;
+        Collection<ItemStack> leftovers = List.copyOf(items);
+        return new PlayerGiveResult() {
+            @Override
+            public Collection<ItemStack> leftovers() {
+                return leftovers;
+            }
+
+            @Override
+            public Collection<org.bukkit.entity.Item> drops() {
+                return List.of();
+            }
+        };
     }
 
     @Override
@@ -86,12 +134,12 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public @UnmodifiableView Iterable<? extends BossBar> activeBossBars() {
-        return null;
+        return List.of();
     }
 
     @Override
     public Component displayName() {
-        return null;
+        return Component.text(getName());
     }
 
     @Override
@@ -103,14 +151,14 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public void setDisplayName(String name) {}
+    public void setDisplayName(@Nullable String name) {}
 
     @Override
     public void playerListName(@Nullable Component name) {}
 
     @Override
     public Component playerListName() {
-        return null;
+        return Component.text(getName());
     }
 
     @Override
@@ -129,7 +177,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public void setPlayerListName(String name) {}
+    public void setPlayerListName(@Nullable String name) {}
 
     @Override
     public int getPlayerListOrder() {
@@ -167,7 +215,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public java.net.InetSocketAddress getAddress() {
+    public java.net.@Nullable InetSocketAddress getAddress() {
         return null;
     }
 
@@ -193,7 +241,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public CompletableFuture<byte[]> retrieveCookie(NamespacedKey key) {
-        return null;
+        return CompletableFuture.completedFuture(new byte[0]);
     }
 
     @Override
@@ -230,7 +278,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void sendRawMessage(@org.jetbrains.annotations.Nullable UUID sender, @NotNull String message) {}
 
     @Override
-    public void kickPlayer(String message) {}
+    public void kickPlayer(@Nullable String message) {}
 
     @Override
     public void kick() {}
@@ -320,7 +368,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public org.bukkit.Location getBedSpawnLocation() {
+    public org.bukkit.@Nullable Location getBedSpawnLocation() {
         return null;
     }
 
@@ -340,13 +388,13 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public void setBedSpawnLocation(org.bukkit.Location location) {}
+    public void setBedSpawnLocation(org.bukkit.@Nullable Location location) {}
 
     @Override
     public void setRespawnLocation(@Nullable Location location) {}
 
     @Override
-    public void setBedSpawnLocation(org.bukkit.Location location, boolean force) {}
+    public void setBedSpawnLocation(org.bukkit.@Nullable Location location, boolean force) {}
 
     @Override
     public void setRespawnLocation(@Nullable Location location, boolean force) {}
@@ -358,7 +406,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Input getCurrentInput() {
-        return null;
+        return NO_INPUT;
     }
 
     @Override
@@ -374,7 +422,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public TriState hasFlyingFallDamage() {
-        return null;
+        return TriState.NOT_SET;
     }
 
     @Override
@@ -475,7 +523,8 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public void addResourcePack(UUID id, String url, byte @Nullable [] hash, @Nullable String prompt, boolean force) {}
+    @SuppressWarnings("NullablePrimitiveArray")
+    public void addResourcePack(UUID id, String url, @Nullable byte[] hash, @Nullable String prompt, boolean force) {}
 
     @Override
     public void removeResourcePack(UUID id) {}
@@ -485,7 +534,8 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Scoreboard getScoreboard() {
-        return null;
+        return Objects.requireNonNull(Bukkit.getScoreboardManager(), "scoreboard manager")
+                .getMainScoreboard();
     }
 
     @Override
@@ -559,10 +609,10 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void stopSound(String sound) {}
 
     @Override
-    public void stopSound(org.bukkit.Sound sound, org.bukkit.SoundCategory category) {}
+    public void stopSound(org.bukkit.Sound sound, org.bukkit.@Nullable SoundCategory category) {}
 
     @Override
-    public void stopSound(String sound, org.bukkit.SoundCategory category) {}
+    public void stopSound(String sound, org.bukkit.@Nullable SoundCategory category) {}
 
     @Override
     public void stopSound(SoundCategory category) {}
@@ -574,7 +624,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void playEffect(org.bukkit.Location loc, org.bukkit.Effect effect, int data) {}
 
     @Override
-    public <T> void playEffect(org.bukkit.Location loc, org.bukkit.Effect effect, T data) {}
+    public <T> void playEffect(org.bukkit.Location loc, org.bukkit.Effect effect, @Nullable T data) {}
 
     @Override
     public boolean breakBlock(org.bukkit.block.Block block) {
@@ -818,7 +868,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void setPlayerWeather(org.bukkit.WeatherType type) {}
 
     @Override
-    public org.bukkit.WeatherType getPlayerWeather() {
+    public org.bukkit.@Nullable WeatherType getPlayerWeather() {
         return null;
     }
 
@@ -907,18 +957,18 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public org.bukkit.entity.Entity getSpectatorTarget() {
+    public org.bukkit.entity.@Nullable Entity getSpectatorTarget() {
         return null;
     }
 
     @Override
-    public void setSpectatorTarget(org.bukkit.entity.Entity entity) {}
+    public void setSpectatorTarget(org.bukkit.entity.@Nullable Entity entity) {}
 
     @Override
-    public void sendTitle(String title, String subtitle) {}
+    public void sendTitle(@Nullable String title, @Nullable String subtitle) {}
 
     @Override
-    public void sendTitle(String title, String subtitle, int fadeIn, int stay, int fadeOut) {}
+    public void sendTitle(@Nullable String title, @Nullable String subtitle, int fadeIn, int stay, int fadeOut) {}
 
     @Override
     public void resetTitle() {}
@@ -930,10 +980,12 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void spawnParticle(org.bukkit.Particle particle, double x, double y, double z, int count) {}
 
     @Override
-    public <T> void spawnParticle(org.bukkit.Particle particle, org.bukkit.Location location, int count, T data) {}
+    public <T> void spawnParticle(
+            org.bukkit.Particle particle, org.bukkit.Location location, int count, @Nullable T data) {}
 
     @Override
-    public <T> void spawnParticle(org.bukkit.Particle particle, double x, double y, double z, int count, T data) {}
+    public <T> void spawnParticle(
+            org.bukkit.Particle particle, double x, double y, double z, int count, @Nullable T data) {}
 
     @Override
     public void spawnParticle(
@@ -963,7 +1015,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
             double offsetX,
             double offsetY,
             double offsetZ,
-            T data) {}
+            @Nullable T data) {}
 
     @Override
     public <T> void spawnParticle(
@@ -975,7 +1027,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
             double offsetX,
             double offsetY,
             double offsetZ,
-            T data) {}
+            @Nullable T data) {}
 
     @Override
     public void spawnParticle(
@@ -1008,7 +1060,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
             double offsetY,
             double offsetZ,
             double extra,
-            T data) {}
+            @Nullable T data) {}
 
     @Override
     public <T> void spawnParticle(
@@ -1021,7 +1073,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
             double offsetY,
             double offsetZ,
             double extra,
-            T data) {}
+            @Nullable T data) {}
 
     @Override
     public <T> void spawnParticle(
@@ -1052,7 +1104,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     @Override
     public org.bukkit.advancement.AdvancementProgress getAdvancementProgress(
             org.bukkit.advancement.Advancement advancement) {
-        return null;
+        throw new UnsupportedOperationException("Bot advancement progress is unavailable");
     }
 
     @Override
@@ -1062,7 +1114,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Locale locale() {
-        return null;
+        return Locale.US;
     }
 
     @Override
@@ -1136,7 +1188,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public PlayerProfile getPlayerProfile() {
-        return null;
+        return Bukkit.createProfile(getUniqueId(), getName());
     }
 
     @Override
@@ -1208,7 +1260,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public <T> T getClientOption(ClientOption<T> option) {
-        return null;
+        throw new UnsupportedOperationException("Bot client options are unavailable");
     }
 
     @Override
@@ -1260,7 +1312,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Duration getIdleDuration() {
-        return null;
+        return Duration.ZERO;
     }
 
     @Override
@@ -1299,7 +1351,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     @Deprecated
-    public void sendSignChange(org.bukkit.Location loc, String[] lines) {}
+    public void sendSignChange(org.bukkit.Location loc, @Nullable String[] lines) {}
 
     @Override
     public @NotNull Map<String, Object> serialize() {

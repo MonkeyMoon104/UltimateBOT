@@ -1,6 +1,9 @@
 package com.monkey.ultimatebot.license;
 
-public record LicenseStartupResult(boolean allowed, boolean graceMode, String reasonCode, String message) {
+import org.jspecify.annotations.Nullable;
+
+public record LicenseStartupResult(
+        boolean allowed, boolean graceMode, @Nullable String reasonCode, String message) {
 
     public static LicenseStartupResult allowed(boolean graceMode, String message) {
         return new LicenseStartupResult(true, graceMode, null, message);

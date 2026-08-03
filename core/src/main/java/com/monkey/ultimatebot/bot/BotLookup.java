@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.utils.EntityUtils;
 import java.util.UUID;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import org.jspecify.annotations.Nullable;
 
 public class BotLookup {
 
@@ -14,7 +15,7 @@ public class BotLookup {
         this.registry = java.util.Objects.requireNonNull(registry, "registry");
     }
 
-    public ITrainingBot getBotByOwnerUUID(UUID ownerUUID) {
+    public @Nullable ITrainingBot getBotByOwnerUUID(UUID ownerUUID) {
         ServerLevel world = EntityUtils.getPlayerWorld(ownerUUID);
         if (world == null) return null;
 
@@ -25,7 +26,7 @@ public class BotLookup {
         return (entity instanceof ITrainingBot trainingBot) ? trainingBot : null;
     }
 
-    public ITrainingBot getBotSafe(UUID ownerUUID) {
+    public @Nullable ITrainingBot getBotSafe(UUID ownerUUID) {
         return registry.getBot(ownerUUID);
     }
 

@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import org.jspecify.annotations.Nullable;
 
 /** Single core dispatch point for Bukkit events and remote event observers. */
 public final class BotEventDispatcher {
@@ -28,7 +29,7 @@ public final class BotEventDispatcher {
         return sequences.computeIfAbsent(botUUID, ignored -> new AtomicLong()).incrementAndGet();
     }
 
-    public BotSnapshot snapshot(UUID ownerUUID, ITrainingBot bot) {
+    public @Nullable BotSnapshot snapshot(UUID ownerUUID, @Nullable ITrainingBot bot) {
         return BotSnapshotMapper.toSnapshot(ownerUUID, bot);
     }
 

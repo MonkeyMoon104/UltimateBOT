@@ -149,11 +149,11 @@ tasks.named("build") {
 
 tasks.register<Sync>("publishApiDocs") {
     group = "documentation"
-    description = "Generates API Javadocs and copies them to docs/ultimatebot/."
+    description = "Generates API Javadocs and copies them to docs/api/."
 
     dependsOn(":api:javadoc")
     from(project(":api").layout.buildDirectory.dir("docs/javadoc"))
-    into(layout.projectDirectory.dir("docs/ultimatebot"))
+    into(layout.projectDirectory.dir("docs/api"))
 
     doLast {
         layout.projectDirectory

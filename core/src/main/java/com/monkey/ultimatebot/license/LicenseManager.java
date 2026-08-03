@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Locale;
+import org.jspecify.annotations.Nullable;
 
 public final class LicenseManager {
 
@@ -23,11 +24,11 @@ public final class LicenseManager {
     private final ServerFingerprintService fingerprintService;
     private final LicenseHttpClient licenseHttpClient;
 
-    private WrapperTask heartbeatTask;
-    private String licenseKey;
-    private String installationId;
-    private String fingerprintHash;
-    private String hostFingerprint;
+    private @Nullable WrapperTask heartbeatTask;
+    private String licenseKey = "";
+    private String installationId = "";
+    private String fingerprintHash = "";
+    private String hostFingerprint = "";
     private int serverPort;
 
     public LicenseManager(UltimateBot plugin) {
@@ -135,7 +136,7 @@ public final class LicenseManager {
                 serverPort);
     }
 
-    private String normalizeLicenseKey(String rawLicenseKey) {
+    private String normalizeLicenseKey(@Nullable String rawLicenseKey) {
         return rawLicenseKey == null ? "" : rawLicenseKey.trim().toUpperCase(Locale.ROOT);
     }
 
@@ -146,7 +147,7 @@ public final class LicenseManager {
         return response.reasonCode();
     }
 
-    private String safeMessage(String value) {
+    private String safeMessage(@Nullable String value) {
         return value == null || value.isBlank() ? "n/a" : value;
     }
 }

@@ -8,6 +8,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleport
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.jspecify.annotations.Nullable;
 
 public class BotTeleportController {
 
@@ -15,7 +16,7 @@ public class BotTeleportController {
     private final ITeleportValidator validator;
 
     private boolean teleporting = false;
-    private org.bukkit.entity.Player currentTarget;
+    private org.bukkit.entity.@Nullable Player currentTarget;
 
     private int suffocationCount = 0;
     private long lastSuffocationTime = 0;
@@ -41,6 +42,7 @@ public class BotTeleportController {
 
         ITeleportStrategy strategy = new BesideTargetStrategy(1.5);
         Vec3 pos = strategy.findTeleportPosition(bot, nmsTarget);
+        if (pos == null) return false;
         return teleportTo(pos);
     }
 
@@ -96,11 +98,11 @@ public class BotTeleportController {
         return teleporting;
     }
 
-    public void setTarget(org.bukkit.entity.Player target) {
+    public void setTarget(org.bukkit.entity.@Nullable Player target) {
         this.currentTarget = target;
     }
 
-    public org.bukkit.entity.Player getCurrentTarget() {
+    public org.bukkit.entity.@Nullable Player getCurrentTarget() {
         return currentTarget;
     }
 }

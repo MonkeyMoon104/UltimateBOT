@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class TargetingService {
 
@@ -50,7 +51,7 @@ public class TargetingService {
                 .build();
     }
 
-    public Mob findClosestMob(ITrainingBot bot, double maxRange) {
+    public @Nullable Mob findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
         if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null || maxRange <= 0.0D) {
             return null;
         }
@@ -78,18 +79,25 @@ public class TargetingService {
 
     private static class TargetCache {
         Player player;
-        UUID excluded;
-        UUID center;
+
+        @Nullable UUID excluded;
+
+        @Nullable UUID center;
+
         double maxRange;
 
-        TargetCache(Player player, UUID excluded, UUID center, double maxRange) {
+        TargetCache(Player player, @Nullable UUID excluded, @Nullable UUID center, double maxRange) {
             this.player = player;
             this.excluded = excluded;
             this.center = center;
             this.maxRange = maxRange;
         }
 
-        boolean isValid(ITrainingBot bot, UUID expectedExcluded, UUID expectedCenter, double expectedMaxRange) {
+        boolean isValid(
+                ITrainingBot bot,
+                @Nullable UUID expectedExcluded,
+                @Nullable UUID expectedCenter,
+                double expectedMaxRange) {
             boolean excludedMatches = (expectedExcluded == null && excluded == null)
                     || (expectedExcluded != null && expectedExcluded.equals(excluded));
             boolean centerMatches = (expectedCenter == null && center == null)
@@ -104,29 +112,33 @@ public class TargetingService {
         }
     }
 
-    public Player findClosestPlayer(ITrainingBot bot, double maxRange) {
+    public @Nullable Player findClosestPlayer(ITrainingBot bot, double maxRange) {
         return findClosestPlayerNearBot(bot, maxRange, null, Set.of());
     }
 
-    public Player findClosestPlayer(ITrainingBot bot, double maxRange, Predicate<Player> candidateFilter) {
+    public @Nullable Player findClosestPlayer(ITrainingBot bot, double maxRange, Predicate<Player> candidateFilter) {
         return findClosestPlayerNearBot(bot, maxRange, null, Set.of(), candidateFilter);
     }
 
-    public Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
+    public @Nullable Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
         return findClosestPlayerNearBot(bot, maxRange, null, allowedTargets);
     }
 
-    public Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, UUID excludedPlayer) {
+    public @Nullable Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, @Nullable UUID excludedPlayer) {
         return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, Set.of());
     }
 
-    public Player findClosestPlayerNearPlayer(
-            ITrainingBot bot, Player centerPlayer, double maxRange, UUID excludedPlayer) {
+    public @Nullable Player findClosestPlayerNearPlayer(
+            ITrainingBot bot, @Nullable Player centerPlayer, double maxRange, @Nullable UUID excludedPlayer) {
         return findClosestPlayerNearPlayer(bot, centerPlayer, maxRange, excludedPlayer, Set.of());
     }
 
-    public Player findClosestPlayerNearPlayer(
-            ITrainingBot bot, Player centerPlayer, double maxRange, UUID excludedPlayer, Set<UUID> allowedTargets) {
+    public @Nullable Player findClosestPlayerNearPlayer(
+            ITrainingBot bot,
+            @Nullable Player centerPlayer,
+            double maxRange,
+            @Nullable UUID excludedPlayer,
+            Set<UUID> allowedTargets) {
         if (centerPlayer == null || !centerPlayer.isOnline() || centerPlayer.isDead()) {
             targetCache.invalidate(bot.asPlayer().getUUID());
             return null;
@@ -195,17 +207,17 @@ public class TargetingService {
         return closestPlayer;
     }
 
-    private Player findClosestPlayerNearBot(
-            ITrainingBot bot, double maxRange, UUID excludedPlayer, Set<UUID> allowedTargets) {
+    private @Nullable Player findClosestPlayerNearBot(
+            ITrainingBot bot, double maxRange, @Nullable UUID excludedPlayer, Set<UUID> allowedTargets) {
         return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, allowedTargets, null);
     }
 
-    private Player findClosestPlayerNearBot(
+    private @Nullable Player findClosestPlayerNearBot(
             ITrainingBot bot,
             double maxRange,
-            UUID excludedPlayer,
+            @Nullable UUID excludedPlayer,
             Set<UUID> allowedTargets,
-            Predicate<Player> candidateFilter) {
+            @Nullable Predicate<Player> candidateFilter) {
         if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
             return null;
         }

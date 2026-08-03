@@ -22,7 +22,7 @@ public interface ITrainingBot {
 
     void setTotemCount(int count);
 
-    org.bukkit.entity.Player getTargetPlayer();
+    org.bukkit.entity.@org.jspecify.annotations.Nullable Player getTargetPlayer();
 
     BotBrainController getBrainController();
 

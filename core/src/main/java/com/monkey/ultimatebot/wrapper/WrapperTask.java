@@ -3,8 +3,10 @@ package com.monkey.ultimatebot.wrapper;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.lang.reflect.Method;
 import org.bukkit.scheduler.BukkitTask;
+import org.jspecify.annotations.Nullable;
 
-public record WrapperTask(String backend, Object handle, Runnable cancelAction) {
+public record WrapperTask(
+        String backend, @Nullable Object handle, @Nullable Runnable cancelAction) {
     private static final System.Logger LOGGER = System.getLogger(WrapperTask.class.getName());
 
     public static WrapperTask none(String backend) {

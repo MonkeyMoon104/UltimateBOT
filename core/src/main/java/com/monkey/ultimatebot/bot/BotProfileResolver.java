@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 /** Resolves the protocol-safe name and skin profile used by a spawned bot. */
 final class BotProfileResolver {
@@ -72,21 +73,35 @@ final class BotProfileResolver {
             case OWNER -> BotFactory.createProfile(owner, botUUID, botName);
             case FIRST_TEAM_OWNER -> profileFromPlayerOrOwner(resolveFirstTeamOwner(options), owner, botUUID, botName);
             case PLAYER_REFERENCE ->
-                profileFromPlayerOrOwner(resolvePlayerReference(skin.playerReference()), owner, botUUID, botName);
+                profileFromPlayerOrOwner(
+                        resolvePlayerReference(java.util.Objects.requireNonNull(
+                                skin.playerReference(), "player-reference skin value")),
+                        owner,
+                        botUUID,
+                        botName);
             case TEXTURE_VALUE ->
-                BotFactory.createProfileWithTexture(botUUID, botName, skin.textureValue(), skin.textureSignature());
+                BotFactory.createProfileWithTexture(
+                        botUUID,
+                        botName,
+                        java.util.Objects.requireNonNull(skin.textureValue(), "texture skin value"),
+                        skin.textureSignature());
             case TEXTURE_URL ->
                 BotFactory.createProfileWithTexture(
-                        botUUID, botName, BotProfileCodec.textureValueFromUrl(skin.textureUrl()), null);
+                        botUUID,
+                        botName,
+                        BotProfileCodec.textureValueFromUrl(
+                                java.util.Objects.requireNonNull(skin.textureUrl(), "texture skin URL")),
+                        null);
         };
     }
 
-    private GameProfile profileFromPlayerOrOwner(Player candidate, Player owner, UUID botUUID, String botName) {
+    private GameProfile profileFromPlayerOrOwner(
+            @Nullable Player candidate, Player owner, UUID botUUID, String botName) {
         Player source = candidate != null && candidate.isOnline() ? candidate : owner;
         return BotFactory.createProfile(source, botUUID, botName);
     }
 
-    private Player resolveFirstTeamOwner(BotOptions options) {
+    private @Nullable Player resolveFirstTeamOwner(@Nullable BotOptions options) {
         if (options == null || options.getBotType() != BotType.TEAM_ALLY) {
             return null;
         }
@@ -99,7 +114,7 @@ final class BotProfileResolver {
         return null;
     }
 
-    private Player resolvePlayerReference(String reference) {
+    private @Nullable Player resolvePlayerReference(@Nullable String reference) {
         if (reference == null || reference.isBlank()) {
             return null;
         }
@@ -115,7 +130,7 @@ final class BotProfileResolver {
                 return byUuid;
             }
         } catch (IllegalArgumentException invalidUuid) {
-            // A non-UUID reference is valid here and is resolved as a player name below.
+            Bukkit.getLogger().finest(() -> "Skin player reference is not a UUID: " + reference);
         }
 
         Player fuzzy = Bukkit.getPlayer(reference);

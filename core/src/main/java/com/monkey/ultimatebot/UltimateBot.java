@@ -52,31 +52,32 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.Nullable;
 
 public final class UltimateBot extends JavaPlugin {
 
     private static final int BSTATS_PLUGIN_ID = 30749;
 
-    private PlayerOptions playerOptions;
-    private BotRegistry botRegistry;
-    private BotManager botManager;
-    private PlaceholderRegistration placeholderCoordinator;
-    private TargetingService targetingService;
-    private LicenseManager licenseManager;
-    private UpdateManager updateManager;
-    private LanguageManager languageManager;
-    private WrapperManager wrapperManager;
-    private GuardAddonManager guardAddonManager;
-    private WorldGuardPvpService worldGuardPvpService;
-    private WorldProtectionService worldProtectionService;
-    private RemoteApiServer remoteApiServer;
-    private BotEventDispatcher botEventDispatcher;
-    private BotMetrics botMetrics;
-    private ConfigurateRuntimeSettingsLoader runtimeSettingsLoader;
-    private CombatProfileLoader combatProfileLoader;
+    private @Nullable PlayerOptions playerOptions;
+    private @Nullable BotRegistry botRegistry;
+    private @Nullable BotManager botManager;
+    private @Nullable PlaceholderRegistration placeholderCoordinator;
+    private @Nullable TargetingService targetingService;
+    private @Nullable LicenseManager licenseManager;
+    private @Nullable UpdateManager updateManager;
+    private @Nullable LanguageManager languageManager;
+    private @Nullable WrapperManager wrapperManager;
+    private @Nullable GuardAddonManager guardAddonManager;
+    private @Nullable WorldGuardPvpService worldGuardPvpService;
+    private @Nullable WorldProtectionService worldProtectionService;
+    private @Nullable RemoteApiServer remoteApiServer;
+    private @Nullable BotEventDispatcher botEventDispatcher;
+    private @Nullable BotMetrics botMetrics;
+    private @Nullable ConfigurateRuntimeSettingsLoader runtimeSettingsLoader;
+    private @Nullable CombatProfileLoader combatProfileLoader;
     private RuntimeSettings runtimeSettings = RuntimeSettings.defaults();
-    private CombatProfileCatalog combatProfileCatalog;
-    private static UltimateBot instance;
+    private @Nullable CombatProfileCatalog combatProfileCatalog;
+    private static @Nullable UltimateBot instance;
 
     @Override
     public void onEnable() {
@@ -100,7 +101,10 @@ public final class UltimateBot extends JavaPlugin {
             startup.ready("Config", "default file verified");
             startup.detail(
                     "Path", getDataFolder().toPath().resolve("config.yml").toString());
-            startup.detail("Language", languageManager.getActiveLanguageFileName());
+            startup.detail(
+                    "Language",
+                    Objects.requireNonNull(languageManager, "languageManager is not initialized")
+                            .getActiveLanguageFileName());
             startup.detail(
                     "Profile",
                     getConfig().getString("bot.name", "CrystalBot")
@@ -307,7 +311,7 @@ public final class UltimateBot extends JavaPlugin {
         instance = null;
     }
 
-    public ITrainingBot getBot(Player player) {
+    public @Nullable ITrainingBot getBot(Player player) {
         if (botManager == null || !botManager.isBotSpawned(player.getUniqueId())) {
             return null;
         }
@@ -315,15 +319,15 @@ public final class UltimateBot extends JavaPlugin {
     }
 
     public BotRegistry getBotRegistry() {
-        return botRegistry;
+        return Objects.requireNonNull(botRegistry, "botRegistry is not initialized");
     }
 
     public BotManager getBotManager() {
-        return botManager;
+        return Objects.requireNonNull(botManager, "botManager is not initialized");
     }
 
     public TargetingService getTargetingService() {
-        return targetingService;
+        return Objects.requireNonNull(targetingService, "targetingService is not initialized");
     }
 
     public RuntimeSettings getRuntimeSettings() {
@@ -335,27 +339,27 @@ public final class UltimateBot extends JavaPlugin {
     }
 
     public PlayerOptions getPlayerOptions() {
-        return playerOptions;
+        return Objects.requireNonNull(playerOptions, "playerOptions is not initialized");
     }
 
     public static UltimateBot getInstance() {
-        return instance;
+        return Objects.requireNonNull(instance, "UltimateBot is not enabled");
     }
 
     public BotEventDispatcher getBotEventDispatcher() {
-        return botEventDispatcher;
+        return Objects.requireNonNull(botEventDispatcher, "botEventDispatcher is not initialized");
     }
 
     public BotMetrics getBotMetrics() {
-        return botMetrics;
+        return Objects.requireNonNull(botMetrics, "botMetrics is not initialized");
     }
 
     public WrapperManager getWrapperManager() {
-        return wrapperManager;
+        return Objects.requireNonNull(wrapperManager, "wrapperManager is not initialized");
     }
 
     public WorldGuardPvpService getWorldGuardPvpService() {
-        return worldGuardPvpService;
+        return Objects.requireNonNull(worldGuardPvpService, "worldGuardPvpService is not initialized");
     }
 
     public WorldProtectionService getWorldProtectionService() {
@@ -405,7 +409,7 @@ public final class UltimateBot extends JavaPlugin {
 
     public String getLangString(String path) {
         if (languageManager == null) {
-            return getConfig().getString(path);
+            return getConfig().getString(path, path);
         }
         return languageManager.getString(path);
     }
@@ -444,7 +448,7 @@ public final class UltimateBot extends JavaPlugin {
             List<String> registeredCommands,
             String name,
             CommandExecutor executor,
-            TabCompleter tabCompleter) {
+            @Nullable TabCompleter tabCompleter) {
         PluginCommand command = getCommand(name);
         if (command == null) {
             startup.warn("Command /" + name, "missing from plugin.yml");

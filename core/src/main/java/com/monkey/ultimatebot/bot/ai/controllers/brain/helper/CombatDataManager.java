@@ -9,6 +9,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class CombatDataManager implements ICombatDataManager {
 
@@ -22,7 +23,7 @@ public class CombatDataManager implements ICombatDataManager {
     private long lastDamageTime = 0;
     private static final long DAMAGE_COMBO_WINDOW = 2000;
 
-    private Vec3 lastTargetPosition;
+    private @Nullable Vec3 lastTargetPosition;
     private Vec3 targetVelocity = Vec3.ZERO;
     private long lastPositionUpdate = 0;
 
@@ -118,7 +119,7 @@ public class CombatDataManager implements ICombatDataManager {
     }
 
     @Override
-    public Vec3 getLastTargetPosition() {
+    public @Nullable Vec3 getLastTargetPosition() {
         return lastTargetPosition;
     }
 }

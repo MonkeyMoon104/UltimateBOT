@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.jspecify.annotations.Nullable;
 
 public class AttackExecutor implements IAttackExecutor {
     private static final System.Logger LOGGER = System.getLogger(AttackExecutor.class.getName());
@@ -24,9 +25,9 @@ public class AttackExecutor implements IAttackExecutor {
     private static final long LAVA_DAMAGE_DELAY_TICKS = 10L;
 
     private float cachedBaseDamage = -1;
-    private Player lastDamageCalculatedBot = null;
-    private net.minecraft.server.level.ServerLevel cachedServerLevel = null;
-    private Player lastServerLevelBot = null;
+    private @Nullable Player lastDamageCalculatedBot;
+    private net.minecraft.server.level.@Nullable ServerLevel cachedServerLevel;
+    private @Nullable Player lastServerLevelBot;
 
     @Override
     public void performCriticalAttack(Player bot, LivingEntity target) {
@@ -166,7 +167,7 @@ public class AttackExecutor implements IAttackExecutor {
             cachedServerLevel = (net.minecraft.server.level.ServerLevel) bot.level();
             lastServerLevelBot = bot;
         }
-        return cachedServerLevel;
+        return Objects.requireNonNull(cachedServerLevel, "server level cache");
     }
 
     public void invalidateCache() {

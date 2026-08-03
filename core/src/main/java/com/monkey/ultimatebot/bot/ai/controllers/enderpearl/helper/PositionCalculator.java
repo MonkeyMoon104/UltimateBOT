@@ -8,6 +8,7 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class PositionCalculator implements IPositionCalculator {
 
@@ -21,7 +22,7 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateEmergencyEscape(Player bot, Player target) {
+    public @Nullable Vec3 calculateEmergencyEscape(Player bot, Player target) {
         Vec3 botPos = bot.position();
         Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
         Vec3 best = findBestCandidate(
@@ -42,7 +43,7 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateMeleeDisengage(Player bot, Player target) {
+    public @Nullable Vec3 calculateMeleeDisengage(Player bot, Player target) {
         Vec3 botPos = bot.position();
         Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
         Vec3 best = findBestCandidate(
@@ -63,7 +64,7 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateLowGroundPosition(Player bot, Player target) {
+    public @Nullable Vec3 calculateLowGroundPosition(Player bot, Player target) {
         Vec3 targetPos = target.position();
         Vec3 aroundDirection = normalizeOrFallback(bot.position().subtract(targetPos), bot);
         Vec3 best = findBestCandidate(
@@ -87,7 +88,7 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateAnchorPosition(Player bot, Player target) {
+    public @Nullable Vec3 calculateAnchorPosition(Player bot, Player target) {
         Vec3 predictedTarget = target.position().add(target.getDeltaMovement().scale(PREDICT_TICKS / 20.0D));
         Vec3 aroundDirection = normalizeOrFallback(predictedTarget.subtract(bot.position()), bot);
         Vec3 best = findBestCandidate(
@@ -112,7 +113,8 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateAggressiveApproach(Player bot, Player target, Vec3 predictedTargetMovement) {
+    public @Nullable Vec3 calculateAggressiveApproach(
+            Player bot, Player target, @Nullable Vec3 predictedTargetMovement) {
         Vec3 targetPos = target.position();
         Vec3 movement = predictedTargetMovement == null ? Vec3.ZERO : predictedTargetMovement;
         Vec3 predictedPos = targetPos.add(movement.scale(PREDICT_TICKS / 20.0D));
@@ -140,7 +142,7 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public Vec3 calculateStandardEscape(Player bot, Player target) {
+    public @Nullable Vec3 calculateStandardEscape(Player bot, Player target) {
         Vec3 botPos = bot.position();
         Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
         Vec3 best = findBestCandidate(
@@ -160,7 +162,7 @@ public class PositionCalculator implements IPositionCalculator {
                 : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(9.0D))));
     }
 
-    private Vec3 findBestCandidate(
+    private @Nullable Vec3 findBestCandidate(
             Player bot,
             Player target,
             Vec3 origin,
@@ -218,7 +220,7 @@ public class PositionCalculator implements IPositionCalculator {
         return best;
     }
 
-    private Vec3 fallbackSafePosition(Player bot, BlockPos preferred) {
+    private @Nullable Vec3 fallbackSafePosition(Player bot, BlockPos preferred) {
         if (safetyValidator.isSafeLandingSpot(preferred)) {
             Vec3 center = Vec3.atCenterOf(preferred);
             if (hasThrowPath(bot, center)) {

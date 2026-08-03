@@ -15,23 +15,24 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+import org.jspecify.annotations.Nullable;
 
 public final class FoliaWrapper implements PlatformWrapper {
 
     private final JavaPlugin plugin;
     private final WrapperCapabilities capabilities;
 
-    private final Object globalRegionScheduler;
-    private final Object asyncScheduler;
-    private final Method entitySchedulerGetter;
+    private final @Nullable Object globalRegionScheduler;
+    private final @Nullable Object asyncScheduler;
+    private final @Nullable Method entitySchedulerGetter;
 
-    private final Method globalRunMethod;
-    private final Method globalRunDelayedMethod;
-    private final Method asyncRunNowMethod;
-    private final Method asyncRunDelayedMethod;
-    private final Method asyncRunAtFixedRateMethod;
-    private final Method entityRunMethod;
-    private final Method entityRunDelayedMethod;
+    private final @Nullable Method globalRunMethod;
+    private final @Nullable Method globalRunDelayedMethod;
+    private final @Nullable Method asyncRunNowMethod;
+    private final @Nullable Method asyncRunDelayedMethod;
+    private final @Nullable Method asyncRunAtFixedRateMethod;
+    private final @Nullable Method entityRunMethod;
+    private final @Nullable Method entityRunDelayedMethod;
 
     public FoliaWrapper(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -119,7 +120,11 @@ public final class FoliaWrapper implements PlatformWrapper {
     public WrapperTask runEntityLater(Player player, long delayTicks, Runnable task) {
         if (player != null && capabilities.entityScheduler()) {
             try {
-                Object entityScheduler = entitySchedulerGetter.invoke(player);
+                Method schedulerGetter = entitySchedulerGetter;
+                if (schedulerGetter == null) {
+                    return runSyncLater(task, delayTicks);
+                }
+                Object entityScheduler = schedulerGetter.invoke(player);
                 if (entityScheduler != null) {
                     Consumer<Object> taskConsumer = ignored -> wrap(task).run();
                     Runnable retired = () -> {};
@@ -212,7 +217,8 @@ public final class FoliaWrapper implements PlatformWrapper {
         return WrapperTask.none("folia-global-unavailable");
     }
 
-    private Object invokeAsyncMethod(Method method, Runnable task, long delayTicks, Long periodTicks) throws Exception {
+    private Object invokeAsyncMethod(Method method, Runnable task, long delayTicks, @Nullable Long periodTicks)
+            throws Exception {
         Consumer<Object> taskConsumer = ignored -> wrap(task).run();
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
@@ -277,7 +283,7 @@ public final class FoliaWrapper implements PlatformWrapper {
         return Math.max(0L, ticks) * 50L;
     }
 
-    private static Object invokeNoArgs(Object target, String methodName) {
+    private static @Nullable Object invokeNoArgs(@Nullable Object target, String methodName) {
         if (target == null) {
             return null;
         }
@@ -289,7 +295,7 @@ public final class FoliaWrapper implements PlatformWrapper {
         }
     }
 
-    private static Method findMethod(Class<?> owner, String methodName, int parameterCount) {
+    private static @Nullable Method findMethod(@Nullable Class<?> owner, String methodName, int parameterCount) {
         if (owner == null) {
             return null;
         }

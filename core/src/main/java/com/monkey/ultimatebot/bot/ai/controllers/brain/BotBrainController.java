@@ -22,6 +22,7 @@ import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
+import org.jspecify.annotations.Nullable;
 
 public class BotBrainController {
 
@@ -44,9 +45,9 @@ public class BotBrainController {
     private final ITrainingBot bot;
     private final BotAI botAI;
     private final UltimateBot plugin;
-    private org.bukkit.entity.Player targetPlayer;
-    private LivingEntity activeTarget;
-    private final org.bukkit.entity.Player ownerPlayer;
+    private org.bukkit.entity.@Nullable Player targetPlayer;
+    private @Nullable LivingEntity activeTarget;
+    private final org.bukkit.entity.@Nullable Player ownerPlayer;
     private final BotOptions botOptions;
     private boolean follow;
     private boolean combat;
@@ -71,12 +72,12 @@ public class BotBrainController {
 
     private boolean watchOnlyMode = false;
     private AllyAlertState lastAlertState = AllyAlertState.NONE;
-    private UUID lastAlertTarget = null;
+    private @Nullable UUID lastAlertTarget;
 
     public BotBrainController(
             ITrainingBot bot,
             UltimateBot plugin,
-            org.bukkit.entity.Player targetPlayer,
+            org.bukkit.entity.@Nullable Player targetPlayer,
             boolean follow,
             BotOptions botOptions) {
         java.util.Objects.requireNonNull(bot, "bot");
@@ -141,7 +142,7 @@ public class BotBrainController {
         activeTarget = selectedTarget;
         if (selectedTarget == null) {
             if (shouldFollowPlayerAnchor()) {
-                botAI.tick(targetPlayer, false);
+                botAI.tick(java.util.Objects.requireNonNull(targetPlayer, "follow target"), false);
                 return;
             }
             botAI.tickIdle();
@@ -163,12 +164,12 @@ public class BotBrainController {
         }
     }
 
-    private boolean sameTarget(LivingEntity first, LivingEntity second) {
+    private boolean sameTarget(@Nullable LivingEntity first, @Nullable LivingEntity second) {
         if (first == null || second == null) return first == null && second == null;
         return first.getUniqueId().equals(second.getUniqueId());
     }
 
-    private LivingEntity selectActiveTarget() {
+    private @Nullable LivingEntity selectActiveTarget() {
         BotTargetMode mode = botOptions.getTargetMode();
         boolean playerSelectable = mode.allowsPlayers()
                 && isTargetAvailable(targetPlayer)
@@ -374,7 +375,7 @@ public class BotBrainController {
         setTargetIfChanged(null);
     }
 
-    private ThreatSelection findClosestThreatNearOwners(
+    private @Nullable ThreatSelection findClosestThreatNearOwners(
             List<org.bukkit.entity.Player> owners, double range, Set<UUID> targetFilters) {
         if (owners.isEmpty()) {
             return null;
@@ -476,17 +477,18 @@ public class BotBrainController {
         return new ArrayList<>(candidates.values());
     }
 
-    private boolean isValidPvpTarget(org.bukkit.entity.Player candidate) {
+    private boolean isValidPvpTarget(org.bukkit.entity.@Nullable Player candidate) {
         if (candidate == null) {
             return false;
         }
-        if (!botOptions.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
+        if (!botOptions.isRespectWorldGuardPvp()) {
             return true;
         }
-        return plugin.getWorldGuardPvpService().isPvpAllowed(candidate.getLocation());
+        return plugin.getWorldGuardPvpService()
+                .isPvpAllowed(java.util.Objects.requireNonNull(candidate.getLocation(), "candidate location"));
     }
 
-    private boolean isTargetAvailable(org.bukkit.entity.Player candidate) {
+    private boolean isTargetAvailable(org.bukkit.entity.@Nullable Player candidate) {
         if (candidate == null || candidate.isDead()) {
             return false;
         }
@@ -494,17 +496,20 @@ public class BotBrainController {
     }
 
     private boolean isWorldGuardPvpAllowedForCurrentFight() {
-        if (!botOptions.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
+        if (!botOptions.isRespectWorldGuardPvp()) {
             return true;
         }
-        if (targetPlayer != null && !plugin.getWorldGuardPvpService().isPvpAllowed(targetPlayer.getLocation())) {
+        if (targetPlayer != null
+                && !plugin.getWorldGuardPvpService()
+                        .isPvpAllowed(
+                                java.util.Objects.requireNonNull(targetPlayer.getLocation(), "target location"))) {
             return false;
         }
         org.bukkit.entity.Entity bukkitBot = bot.asPlayer().getBukkitEntity();
         return bukkitBot == null || plugin.getWorldGuardPvpService().isPvpAllowed(bukkitBot.getLocation());
     }
 
-    private org.bukkit.entity.Player getClosestOwnerToBot(List<org.bukkit.entity.Player> owners) {
+    private org.bukkit.entity.@Nullable Player getClosestOwnerToBot(List<org.bukkit.entity.Player> owners) {
         org.bukkit.entity.Player bestOwner = null;
         double bestDistanceSq = Double.MAX_VALUE;
 
@@ -531,7 +536,7 @@ public class BotBrainController {
 
     private void notifyThreatIfChanged(
             AllyAlertState state,
-            org.bukkit.entity.Player threat,
+            org.bukkit.entity.@Nullable Player threat,
             List<org.bukkit.entity.Player> owners,
             String preRangeMessage,
             String rangeMessage) {
@@ -564,7 +569,7 @@ public class BotBrainController {
     }
 
     private void tryTeleportBackToOwnerIfFar(
-            org.bukkit.entity.Player owner, double returnTeleportDistance, long returnTeleportCooldownMs) {
+            org.bukkit.entity.@Nullable Player owner, double returnTeleportDistance, long returnTeleportCooldownMs) {
         if (owner == null) {
             return;
         }
@@ -584,7 +589,7 @@ public class BotBrainController {
         }
     }
 
-    private void setTargetIfChanged(org.bukkit.entity.Player newTarget) {
+    private void setTargetIfChanged(org.bukkit.entity.@Nullable Player newTarget) {
         if (sameTarget(newTarget, this.targetPlayer)) {
             return;
         }
@@ -597,11 +602,11 @@ public class BotBrainController {
         return botAI;
     }
 
-    public org.bukkit.entity.Player getTargetPlayer() {
+    public org.bukkit.entity.@Nullable Player getTargetPlayer() {
         return targetPlayer;
     }
 
-    public LivingEntity getActiveTarget() {
+    public @Nullable LivingEntity getActiveTarget() {
         return activeTarget;
     }
 

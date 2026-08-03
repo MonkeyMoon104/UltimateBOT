@@ -175,7 +175,10 @@ public class NMSBridge_v1_21_8 implements INMSBridge {
 
     @Override
     public GameProfile createProfileWithTexture(
-            UUID botUUID, String botName, String textureValue, String textureSignature) {
+            UUID botUUID,
+            String botName,
+            String textureValue,
+            @org.jspecify.annotations.Nullable String textureSignature) {
         GameProfile profile = new GameProfile(botUUID, botName);
         Property property = textureSignature == null || textureSignature.isBlank()
                 ? new Property("textures", textureValue)
@@ -194,11 +197,10 @@ public class NMSBridge_v1_21_8 implements INMSBridge {
 
     @Override
     public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
-        ((CraftServer) Bukkit.getServer())
-                .getHandle()
-                .getServer()
-                .getProfileCache()
-                .add(bot.getGameProfile());
+        var cache = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
+        if (cache != null) {
+            cache.add(bot.getGameProfile());
+        }
     }
 
     @Override
@@ -213,7 +215,11 @@ public class NMSBridge_v1_21_8 implements INMSBridge {
         return profile.getName();
     }
 
-    private void removeProfileCacheEntry(Object cache, UUID botUUID, GameProfile profile) {
+    private void removeProfileCacheEntry(
+            @org.jspecify.annotations.Nullable Object cache, UUID botUUID, GameProfile profile) {
+        if (cache == null) {
+            return;
+        }
         for (Method method : cache.getClass().getMethods()) {
             if (!method.getName().equals("remove") || method.getParameterCount() != 1) {
                 continue;
@@ -223,14 +229,15 @@ public class NMSBridge_v1_21_8 implements INMSBridge {
                 try {
                     method.invoke(cache, argument);
                 } catch (ReflectiveOperationException ignored) {
-                    // Try the next compatible cache removal overload.
+                    continue;
                 }
                 return;
             }
         }
     }
 
-    private Object resolveRemovalArgument(Class<?> parameterType, UUID botUUID, GameProfile profile) {
+    private @org.jspecify.annotations.Nullable Object resolveRemovalArgument(
+            Class<?> parameterType, UUID botUUID, GameProfile profile) {
         if (parameterType.isAssignableFrom(UUID.class)) {
             return botUUID;
         }

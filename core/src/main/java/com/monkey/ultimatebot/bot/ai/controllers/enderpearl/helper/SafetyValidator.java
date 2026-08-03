@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class SafetyValidator implements ISafetyValidator {
 
@@ -53,7 +54,7 @@ public class SafetyValidator implements ISafetyValidator {
     }
 
     @Override
-    public Vec3 findSafeLandingSpot(BlockPos center) {
+    public @Nullable Vec3 findSafeLandingSpot(BlockPos center) {
         for (int radius = 1; radius <= 3; radius++) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {

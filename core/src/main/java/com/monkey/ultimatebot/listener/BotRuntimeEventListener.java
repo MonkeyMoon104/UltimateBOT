@@ -19,6 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.jspecify.annotations.Nullable;
 
 /** Bridges relevant Bukkit runtime actions to stable UltimateBot API events. */
 public final class BotRuntimeEventListener implements Listener {
@@ -39,7 +40,7 @@ public final class BotRuntimeEventListener implements Listener {
             context.bot.getBotAI().recordShieldImpact(damager.getUniqueId());
         }
         BotDamageEvent botEvent = new BotDamageEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()),
+                dispatcher.nextSequence(context.snapshot.requireBotUUID()),
                 context.snapshot,
                 damager,
                 event.getCause().name(),
@@ -60,8 +61,8 @@ public final class BotRuntimeEventListener implements Listener {
         if (killer == null) return;
         BotContext context = findBot(killer.getUniqueId());
         if (context == null) return;
-        dispatcher.publish(
-                new BotKillEntityEvent(dispatcher.nextSequence(context.snapshot.botUUID()), context.snapshot, victim));
+        dispatcher.publish(new BotKillEntityEvent(
+                dispatcher.nextSequence(context.snapshot.requireBotUUID()), context.snapshot, victim));
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -69,7 +70,7 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getEntity().getUniqueId());
         if (context == null) return;
         BotHealEvent botEvent = dispatcher.publish(new BotHealEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()),
+                dispatcher.nextSequence(context.snapshot.requireBotUUID()),
                 context.snapshot,
                 event.getRegainReason().name(),
                 event.getAmount()));
@@ -85,7 +86,7 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getPlayer().getUniqueId());
         if (context == null || event.getTo() == null) return;
         BotTeleportEvent botEvent = dispatcher.publish(new BotTeleportEvent(
-                dispatcher.nextSequence(context.snapshot.botUUID()),
+                dispatcher.nextSequence(context.snapshot.requireBotUUID()),
                 context.snapshot,
                 event.getFrom(),
                 event.getTo(),
@@ -97,10 +98,11 @@ public final class BotRuntimeEventListener implements Listener {
         }
     }
 
-    private BotContext findBot(UUID botUUID) {
+    private @Nullable BotContext findBot(UUID botUUID) {
         UUID ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(botUUID);
         if (ownerUUID == null) return null;
         ITrainingBot bot = plugin.getBotRegistry().getBot(ownerUUID);
+        if (bot == null) return null;
         BotSnapshot snapshot = dispatcher.snapshot(ownerUUID, bot);
         return snapshot == null ? null : new BotContext(bot, snapshot);
     }

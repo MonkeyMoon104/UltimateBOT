@@ -3,14 +3,15 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.ICombatStateManager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class CombatStateManager implements ICombatStateManager {
-    private Vec3 lastTargetPosition;
+    private @Nullable Vec3 lastTargetPosition;
     private Vec3 targetVelocity = Vec3.ZERO;
     private boolean isUnderFire = false;
     private long lastDamageTime = 0;
     private int consecutiveHits = 0;
-    private Vec3 lastSafePosition = null;
+    private @Nullable Vec3 lastSafePosition;
 
     @Override
     public void updateCombatData(Player target) {
@@ -69,11 +70,11 @@ public class CombatStateManager implements ICombatStateManager {
         return targetVelocity;
     }
 
-    public void setLastSafePosition(Vec3 position) {
+    public void setLastSafePosition(@Nullable Vec3 position) {
         this.lastSafePosition = position;
     }
 
-    public Vec3 getLastSafePosition() {
+    public @Nullable Vec3 getLastSafePosition() {
         return lastSafePosition;
     }
 }

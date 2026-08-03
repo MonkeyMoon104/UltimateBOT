@@ -38,24 +38,29 @@ public final class CombatSettingsTab {
                 .addIngredient('m', combatModeItem)
                 .addIngredient('d', new DifficultyItem(context.getTraining(), options, refreshDifficultyDependents))
                 .addIngredient('r', new ResetCombatTuningItem(options))
-                .addIngredient('a', tuningItems.get(CombatTuningProperty.ATTACK_RANGE))
-                .addIngredient('b', tuningItems.get(CombatTuningProperty.ATTACK_COOLDOWN))
-                .addIngredient('c', tuningItems.get(CombatTuningProperty.REACTION_TIME))
-                .addIngredient('e', tuningItems.get(CombatTuningProperty.MOVEMENT_SPEED))
-                .addIngredient('f', tuningItems.get(CombatTuningProperty.STRAFE_STRENGTH))
-                .addIngredient('g', tuningItems.get(CombatTuningProperty.AIM_ACCURACY))
-                .addIngredient('h', tuningItems.get(CombatTuningProperty.AGGRESSION))
-                .addIngredient('i', tuningItems.get(CombatTuningProperty.RETREAT_HEALTH))
-                .addIngredient('j', tuningItems.get(CombatTuningProperty.HEALING_HEALTH))
-                .addIngredient('k', tuningItems.get(CombatTuningProperty.SPECIAL_COOLDOWN))
-                .addIngredient('l', tuningItems.get(CombatTuningProperty.PEARL_DISTANCE))
-                .addIngredient('n', tuningItems.get(CombatTuningProperty.ACTIONS_PER_TICK))
-                .addIngredient('o', tuningItems.get(CombatTuningProperty.DEFENSIVE_CHANCE))
-                .addIngredient('p', tuningItems.get(CombatTuningProperty.SPRINT_RESET_CHANCE))
+                .addIngredient('a', requireTuningItem(tuningItems, CombatTuningProperty.ATTACK_RANGE))
+                .addIngredient('b', requireTuningItem(tuningItems, CombatTuningProperty.ATTACK_COOLDOWN))
+                .addIngredient('c', requireTuningItem(tuningItems, CombatTuningProperty.REACTION_TIME))
+                .addIngredient('e', requireTuningItem(tuningItems, CombatTuningProperty.MOVEMENT_SPEED))
+                .addIngredient('f', requireTuningItem(tuningItems, CombatTuningProperty.STRAFE_STRENGTH))
+                .addIngredient('g', requireTuningItem(tuningItems, CombatTuningProperty.AIM_ACCURACY))
+                .addIngredient('h', requireTuningItem(tuningItems, CombatTuningProperty.AGGRESSION))
+                .addIngredient('i', requireTuningItem(tuningItems, CombatTuningProperty.RETREAT_HEALTH))
+                .addIngredient('j', requireTuningItem(tuningItems, CombatTuningProperty.HEALING_HEALTH))
+                .addIngredient('k', requireTuningItem(tuningItems, CombatTuningProperty.SPECIAL_COOLDOWN))
+                .addIngredient('l', requireTuningItem(tuningItems, CombatTuningProperty.PEARL_DISTANCE))
+                .addIngredient('n', requireTuningItem(tuningItems, CombatTuningProperty.ACTIONS_PER_TICK))
+                .addIngredient('o', requireTuningItem(tuningItems, CombatTuningProperty.DEFENSIVE_CHANCE))
+                .addIngredient('p', requireTuningItem(tuningItems, CombatTuningProperty.SPRINT_RESET_CHANCE))
                 .build();
     }
 
     private CombatTuningItem tuning(CombatTuningProperty property) {
         return new CombatTuningItem(context.getTraining(), context.getOptions(), property);
+    }
+
+    private static CombatTuningItem requireTuningItem(
+            Map<CombatTuningProperty, CombatTuningItem> items, CombatTuningProperty property) {
+        return Objects.requireNonNull(items.get(property), () -> "Missing tuning item for " + property);
     }
 }

@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class BotUpdater {
 
@@ -26,7 +27,7 @@ public class BotUpdater {
         updateArmor(ownerUUID, armorMap, new HashMap<>());
     }
 
-    private ITrainingBot getBot(UUID ownerUUID) {
+    private @Nullable ITrainingBot getBot(UUID ownerUUID) {
         return registry.getBot(ownerUUID);
     }
 

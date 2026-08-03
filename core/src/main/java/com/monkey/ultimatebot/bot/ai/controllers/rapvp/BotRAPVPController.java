@@ -8,6 +8,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -16,8 +17,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
-public class BotRAPVPController {
+public final class BotRAPVPController {
 
     private final Player bot;
     private final Level level;
@@ -31,10 +33,10 @@ public class BotRAPVPController {
     private boolean enabled = false;
     private RAPVPState state = RAPVPState.IDLE;
 
-    private BlockPos anchorPos = null;
-    private Player currentTarget = null;
-    private DifficultyLevel difficulty;
-    private RAPVPConfig config;
+    private @Nullable BlockPos anchorPos;
+    private @Nullable Player currentTarget;
+    private DifficultyLevel difficulty = DifficultyLevel.NORMAL;
+    private RAPVPConfig config = DifficultyProfileFactory.buildRAPVPConfig(difficulty);
     private int failedExplosionAttempts = 0;
     private long lastAnchorExplosionTime = 0L;
     private boolean ownsAnchor;
@@ -53,6 +55,7 @@ public class BotRAPVPController {
         this.anchorCharger = new AnchorCharger(bot, inventory, rotation, level);
         this.anchorExploder = new AnchorExploder(bot, inventory, rotation, level);
         this.positionFinder = new AnchorPositionFinder(bot, level);
+        setDifficulty(DifficultyLevel.NORMAL);
     }
 
     public void enable(Player target) {
@@ -95,12 +98,13 @@ public class BotRAPVPController {
             return;
         }
 
-        Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(currentTarget);
+        Player target = Objects.requireNonNull(currentTarget, "currentTarget");
+        Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(target);
         if (posOpt.isEmpty()) {
             if (!isHyperAggressiveDifficulty()
                     && pearlController.canUseEnderpearl()
                     && bot.distanceTo(currentTarget) > 10.0D) {
-                pearlController.tryUseEnderpearl(currentTarget);
+                pearlController.tryUseEnderpearl(target);
             }
             return;
         }
@@ -226,7 +230,7 @@ public class BotRAPVPController {
         return state;
     }
 
-    public BlockPos getCurrentAnchorPos() {
+    public @Nullable BlockPos getCurrentAnchorPos() {
         return anchorPos;
     }
 

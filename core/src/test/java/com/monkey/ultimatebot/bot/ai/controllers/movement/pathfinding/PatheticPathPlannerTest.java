@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,8 @@ class PatheticPathPlannerTest {
                 resolver.resolve(new BlockPos(0, 0, 0), requestedGoal, candidate -> !candidate.equals(requestedGoal));
 
         assertThat(resolved).isNotNull().isNotEqualTo(requestedGoal);
-        assertThat(Math.max(Math.abs(resolved.getX() - 5), Math.abs(resolved.getZ())))
+        BlockPos resolvedGoal = Objects.requireNonNull(resolved, "resolved goal");
+        assertThat(Math.max(Math.abs(resolvedGoal.getX() - 5), Math.abs(resolvedGoal.getZ())))
                 .isEqualTo(1);
     }
 
@@ -164,9 +166,11 @@ class PatheticPathPlannerTest {
         BlockPos goal = resolver.resolve(new BlockPos(0, 0, 0), new BlockPos(8, 15, 0));
 
         assertThat(goal).isNotNull();
-        assertThat(goal.getY()).isZero();
-        assertThat(environment.isBlocked(goal)).isFalse();
-        assertThat(Math.max(Math.abs(goal.getX() - 8), Math.abs(goal.getZ()))).isEqualTo(1);
+        BlockPos resolvedGoal = Objects.requireNonNull(goal, "projected goal");
+        assertThat(resolvedGoal.getY()).isZero();
+        assertThat(environment.isBlocked(resolvedGoal)).isFalse();
+        assertThat(Math.max(Math.abs(resolvedGoal.getX() - 8), Math.abs(resolvedGoal.getZ())))
+                .isEqualTo(1);
     }
 
     private static final class GridEnvironment implements BotTraversalEnvironment {

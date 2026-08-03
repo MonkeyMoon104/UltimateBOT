@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,10 +13,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jspecify.annotations.Nullable;
 
 public class CrystalManager {
 
-    private CPVPConfig config;
+    private CPVPConfig config = DifficultyProfileFactory.buildCPVPConfig(DifficultyLevel.NORMAL);
 
     public void cleanupCrystalCounts(Map<BlockPos, Integer> crystalCountAtPosition, Level level) {
         crystalCountAtPosition.entrySet().removeIf(entry -> {
@@ -32,7 +35,7 @@ public class CrystalManager {
         obsidianCache.entrySet().removeIf(entry -> currentTime - entry.getValue() > config.getObsidianCacheMs());
     }
 
-    public EndCrystal findCrystalAt(BlockPos pos, Level level) {
+    public @Nullable EndCrystal findCrystalAt(BlockPos pos, Level level) {
         return level.getEntitiesOfClass(EndCrystal.class, new AABB(pos).inflate(1.5)).stream()
                 .findFirst()
                 .orElse(null);

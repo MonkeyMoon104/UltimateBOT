@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public interface ICombatDataManager {
     void updateCombatData(Player target, boolean allowCombatActions);
@@ -14,5 +15,5 @@ public interface ICombatDataManager {
 
     Vec3 getTargetVelocity();
 
-    Vec3 getLastTargetPosition();
+    @Nullable Vec3 getLastTargetPosition();
 }

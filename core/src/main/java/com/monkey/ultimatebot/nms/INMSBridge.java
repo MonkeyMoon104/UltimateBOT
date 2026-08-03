@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jspecify.annotations.Nullable;
 
 public interface INMSBridge {
 
@@ -69,7 +70,8 @@ public interface INMSBridge {
 
     GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName);
 
-    GameProfile createProfileWithTexture(UUID botUUID, String botName, String textureValue, String textureSignature);
+    GameProfile createProfileWithTexture(
+            UUID botUUID, String botName, String textureValue, @Nullable String textureSignature);
 
     BotProfileData getProfileData(GameProfile profile);
 

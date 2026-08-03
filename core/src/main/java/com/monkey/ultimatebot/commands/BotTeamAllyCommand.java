@@ -300,7 +300,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    private ActiveTeamAlly findActiveTeamAlly(UUID ownerUUID) {
+    private @Nullable ActiveTeamAlly findActiveTeamAlly(UUID ownerUUID) {
         for (Map.Entry<UUID, ITrainingBot> entry :
                 plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot bot = entry.getValue();

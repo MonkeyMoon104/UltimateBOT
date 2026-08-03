@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import org.jspecify.annotations.Nullable;
 
 /** Projects airborne or obstructed targets onto nearby terrain that a walking bot can reach. */
 final class PathGoalResolver {
@@ -19,11 +20,11 @@ final class PathGoalResolver {
         this.environment = Objects.requireNonNull(environment, "environment");
     }
 
-    BlockPos resolve(BlockPos start, BlockPos requestedGoal) {
+    @Nullable BlockPos resolve(BlockPos start, BlockPos requestedGoal) {
         return resolve(start, requestedGoal, ignored -> true);
     }
 
-    BlockPos resolve(BlockPos start, BlockPos requestedGoal, Predicate<BlockPos> candidateFilter) {
+    @Nullable BlockPos resolve(BlockPos start, BlockPos requestedGoal, Predicate<BlockPos> candidateFilter) {
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(requestedGoal, "requestedGoal");
         Objects.requireNonNull(candidateFilter, "candidateFilter");

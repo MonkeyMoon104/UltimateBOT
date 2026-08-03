@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /** Stable, Bukkit-free payload written to the remote event stream. */
 public record RemoteBotEvent(
@@ -16,5 +17,5 @@ public record RemoteBotEvent(
         UUID ownerUUID,
         UUID botUUID,
         String source,
-        BotSnapshot snapshot,
+        @Nullable BotSnapshot snapshot,
         Map<String, Object> payload) {}

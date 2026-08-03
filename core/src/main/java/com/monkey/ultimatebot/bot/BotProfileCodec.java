@@ -2,12 +2,13 @@ package com.monkey.ultimatebot.bot;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import org.jspecify.annotations.Nullable;
 
 final class BotProfileCodec {
 
     private BotProfileCodec() {}
 
-    static String sanitizeName(String candidate) {
+    static String sanitizeName(@Nullable String candidate) {
         if (candidate == null || candidate.isBlank()) {
             return "CrystalBot";
         }
@@ -21,7 +22,7 @@ final class BotProfileCodec {
         return safe.length() > 16 ? safe.substring(0, 16) : safe;
     }
 
-    static String textureValueFromUrl(String textureUrl) {
+    static @Nullable String textureValueFromUrl(@Nullable String textureUrl) {
         if (textureUrl == null || textureUrl.isBlank()) {
             return null;
         }

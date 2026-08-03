@@ -52,7 +52,7 @@ public final class TrainingBot_v1_21_10 extends Player implements ITrainingBot {
         try {
             super.tick();
         } catch (ClassCastException ignored) {
-            // The compatibility entity is not always exposed as a Bukkit Player during teardown.
+            plugin.getLogger().finest("Skipped the Bukkit compatibility tick during bot teardown");
         }
         craftEntity.setHandle(this);
         logic.onTick();
@@ -75,7 +75,7 @@ public final class TrainingBot_v1_21_10 extends Player implements ITrainingBot {
         try {
             super.aiStep();
         } catch (ClassCastException ignored) {
-            // The compatibility entity is not always exposed as a Bukkit Player during teardown.
+            plugin.getLogger().finest("Skipped the Bukkit compatibility AI step during bot teardown");
         }
     }
 
@@ -133,7 +133,7 @@ public final class TrainingBot_v1_21_10 extends Player implements ITrainingBot {
     }
 
     @Override
-    public org.bukkit.entity.Player getTargetPlayer() {
+    public org.bukkit.entity.@org.jspecify.annotations.Nullable Player getTargetPlayer() {
         return logic.getBrainController().getTargetPlayer();
     }
 

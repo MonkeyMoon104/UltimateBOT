@@ -13,9 +13,10 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class EntityUtils {
-    public static Entity findBotByUUID(ServerLevel world, UUID botUUID) {
+    public static @Nullable Entity findBotByUUID(ServerLevel world, UUID botUUID) {
         List<? extends Entity> entities =
                 world.getEntities(EntityTypeTest.forClass(Entity.class), entity -> entity.getUUID()
                         .equals(botUUID));
@@ -23,12 +24,12 @@ public class EntityUtils {
         return entities.isEmpty() ? null : entities.getFirst();
     }
 
-    public static LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
+    public static @Nullable LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
         Entity entity = findBotByUUID(world, botUUID);
         return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
-    public static ServerLevel getPlayerWorld(UUID playerUUID) {
+    public static @Nullable ServerLevel getPlayerWorld(UUID playerUUID) {
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (online.getUniqueId().equals(playerUUID)) {
                 ServerPlayer handle = ((CraftPlayer) online).getHandle();
@@ -38,7 +39,7 @@ public class EntityUtils {
         return null;
     }
 
-    public static boolean removeEntity(ServerLevel world, UUID entityUUID) {
+    public static boolean removeEntity(@Nullable ServerLevel world, UUID entityUUID) {
         if (world != null) {
             Entity entity = findBotByUUID(world, entityUUID);
             if (entity != null) {

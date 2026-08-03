@@ -16,6 +16,7 @@ import java.util.UUID;
 import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class BotDeathService {
 
@@ -112,7 +113,7 @@ public class BotDeathService {
         }
     }
 
-    private Player getOwnerPlayer(BotOptions options) {
+    private @Nullable Player getOwnerPlayer(@Nullable BotOptions options) {
         if (options == null) {
             return null;
         }
@@ -125,11 +126,11 @@ public class BotDeathService {
         return Bukkit.getPlayer(ownerUUID);
     }
 
-    private boolean isKillMessageEnabled(BotOptions options) {
+    private boolean isKillMessageEnabled(@Nullable BotOptions options) {
         return options == null || options.isKillMessageEnabled();
     }
 
-    private String resolveKillMessage(BotOptions options, String fallback) {
+    private String resolveKillMessage(@Nullable BotOptions options, @Nullable String fallback) {
         if (options != null && options.getCustomKillMessage() != null) {
             return options.getCustomKillMessage();
         }

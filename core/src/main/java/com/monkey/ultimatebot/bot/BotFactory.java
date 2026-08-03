@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.UUID;
 import net.minecraft.server.level.ClientInformation;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class BotFactory {
 
@@ -17,7 +18,7 @@ public class BotFactory {
     }
 
     public static GameProfile createProfileWithTexture(
-            UUID botUUID, String botName, String textureValue, String textureSignature) {
+            UUID botUUID, String botName, @Nullable String textureValue, @Nullable String textureSignature) {
         if (textureValue == null || textureValue.isBlank()) {
             return createRandomProfile(botUUID, botName);
         }

@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -14,7 +16,7 @@ public class AnchorPositionFinder {
     private final Player bot;
     private final Level level;
     private long lastSearchTime = 0;
-    private RAPVPConfig config;
+    private RAPVPConfig config = DifficultyProfileFactory.buildRAPVPConfig(DifficultyLevel.NORMAL);
 
     public AnchorPositionFinder(Player bot, Level level) {
         this.bot = bot;

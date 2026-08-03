@@ -31,7 +31,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public PlayerProfile getPlayerProfile() {
-        return null;
+        return Bukkit.createProfile(getUniqueId(), getName());
     }
 
     @Override
@@ -81,7 +81,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
     }
 
     @Override
-    public Player getPlayer() {
+    public @Nullable Player getPlayer() {
         return bot.getTargetPlayer();
     }
 
@@ -192,7 +192,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public PersistentDataContainerView getPersistentDataContainer() {
-        return null;
+        return bot.asPlayer().getBukkitEntity().getPersistentDataContainer();
     }
 
     @Override

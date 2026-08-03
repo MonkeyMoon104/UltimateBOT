@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public class BotManager {
 
@@ -75,15 +76,15 @@ public class BotManager {
         spawner.despawnInWorld(owner, fromWorld);
     }
 
-    public ITrainingBot getBot(UUID ownerUUID) {
+    public @Nullable ITrainingBot getBot(UUID ownerUUID) {
         return lookup.getBotByOwnerUUID(ownerUUID);
     }
 
-    public ITrainingBot getBotSafe(UUID ownerUUID) {
+    public @Nullable ITrainingBot getBotSafe(UUID ownerUUID) {
         return lookup.getBotSafe(ownerUUID);
     }
 
-    public ITrainingBot getBotByParticipant(UUID participantUUID) {
+    public @Nullable ITrainingBot getBotByParticipant(@Nullable UUID participantUUID) {
         if (participantUUID == null) {
             return null;
         }
@@ -96,7 +97,7 @@ public class BotManager {
         return getTeamAllyBotByTeamOwner(participantUUID);
     }
 
-    public BotType getBotTypeByParticipant(UUID participantUUID) {
+    public @Nullable BotType getBotTypeByParticipant(UUID participantUUID) {
         ITrainingBot bot = getBotByParticipant(participantUUID);
         if (bot == null || bot.getBrainController() == null) {
             return null;
@@ -118,7 +119,7 @@ public class BotManager {
         lookup.removeBot(botUUID);
     }
 
-    public UUID findTeamAllyPrimaryOwner(UUID teamOwnerUUID) {
+    public @Nullable UUID findTeamAllyPrimaryOwner(@Nullable UUID teamOwnerUUID) {
         if (teamOwnerUUID == null) {
             return null;
         }
@@ -142,7 +143,7 @@ public class BotManager {
         return null;
     }
 
-    public ITrainingBot getTeamAllyBotByTeamOwner(UUID teamOwnerUUID) {
+    public @Nullable ITrainingBot getTeamAllyBotByTeamOwner(UUID teamOwnerUUID) {
         UUID primaryOwner = findTeamAllyPrimaryOwner(teamOwnerUUID);
         return primaryOwner == null ? null : getBotSafe(primaryOwner);
     }

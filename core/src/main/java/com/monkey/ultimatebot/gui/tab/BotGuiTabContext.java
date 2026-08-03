@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
 
@@ -56,7 +57,7 @@ public class BotGuiTabContext {
         return training.getBotManager().isBotSpawned(viewer.getUniqueId());
     }
 
-    public ITrainingBot resolveManagedBot() {
+    public @Nullable ITrainingBot resolveManagedBot() {
         return training.getBotManager().getBotSafe(resolveManagedOwnerUUID());
     }
 

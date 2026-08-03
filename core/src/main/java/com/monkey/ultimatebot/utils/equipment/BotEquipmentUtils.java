@@ -19,6 +19,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.Nullable;
 
 public class BotEquipmentUtils {
     public static void applyEquipment(
@@ -111,7 +112,7 @@ public class BotEquipmentUtils {
         handle.connection.send(equipmentPacket);
     }
 
-    public static Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(
+    public static @Nullable Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> getBotArmor(
             UUID playerUUID, BotRegistry botRegistry) {
         UUID botUUID = botRegistry.getBotUUID(playerUUID);
         if (botUUID == null) return null;

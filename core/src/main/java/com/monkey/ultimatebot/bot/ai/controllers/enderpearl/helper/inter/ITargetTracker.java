@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public interface ITargetTracker {
 
@@ -9,5 +10,5 @@ public interface ITargetTracker {
 
     Vec3 getPredictedTargetMovement();
 
-    Vec3 getLastTargetPosition();
+    @Nullable Vec3 getLastTargetPosition();
 }

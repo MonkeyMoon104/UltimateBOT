@@ -21,7 +21,6 @@ import org.jspecify.annotations.Nullable;
  * UltimateBotAPI api = UltimateBotAPI.getOrNull();
  * if (api != null) {
  *     IBotManager manager = api.getBotManager();
- *     // spawn / update / remove operations
  * }
  * }</pre>
  */

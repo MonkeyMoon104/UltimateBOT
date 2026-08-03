@@ -21,13 +21,13 @@ public class BotRegistry {
         return spawnedBots.containsKey(playerUUID);
     }
 
-    public UUID getBotUUID(UUID playerUUID) {
+    public @Nullable UUID getBotUUID(UUID playerUUID) {
         ITrainingBot bot = spawnedBots.get(playerUUID);
         if (bot == null) return null;
         return bot.asPlayer().getUUID();
     }
 
-    public UUID getOwnerUUIDByBotUUID(UUID botUUID) {
+    public @Nullable UUID getOwnerUUIDByBotUUID(@Nullable UUID botUUID) {
         if (botUUID == null) {
             return null;
         }
@@ -42,7 +42,7 @@ public class BotRegistry {
         return null;
     }
 
-    public ITrainingBot computeIfPresent(
+    public @Nullable ITrainingBot computeIfPresent(
             UUID playerUUID, BiFunction<UUID, ITrainingBot, ITrainingBot> remappingFunction) {
         return spawnedBots.computeIfPresent(playerUUID, remappingFunction);
     }
@@ -65,7 +65,7 @@ public class BotRegistry {
         return spawnedBots.size();
     }
 
-    public ITrainingBot getBot(UUID ownerUUID) {
+    public @Nullable ITrainingBot getBot(UUID ownerUUID) {
         return spawnedBots.get(ownerUUID);
     }
 

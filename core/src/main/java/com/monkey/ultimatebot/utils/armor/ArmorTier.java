@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.utils.armor;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jspecify.annotations.Nullable;
 
 public enum ArmorTier {
     LEATHER,
@@ -18,7 +19,7 @@ public enum ArmorTier {
         return Material.valueOf(name() + suffix);
     }
 
-    public static ArmorTier fromMaterial(Material material, EquipmentSlot slot) {
+    public static @Nullable ArmorTier fromMaterial(@Nullable Material material, @Nullable EquipmentSlot slot) {
         if (material == null) {
             return null;
         }
@@ -41,7 +42,7 @@ public enum ArmorTier {
         }
     }
 
-    private static String suffixFor(EquipmentSlot slot) {
+    private static String suffixFor(@Nullable EquipmentSlot slot) {
         if (slot == null) {
             return "";
         }

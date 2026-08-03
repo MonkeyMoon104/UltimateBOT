@@ -10,6 +10,7 @@ import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public final class PatheticPathfinder implements IPathfinder {
     private static final double MAX_LOCAL_PATH_DISTANCE = 48.0D;
@@ -34,7 +35,7 @@ public final class PatheticPathfinder implements IPathfinder {
     private List<Vec3> currentPath = List.of();
     private int pathIndex;
     private long lastPathCalculation;
-    private Vec3 lastRequestedTarget;
+    private @Nullable Vec3 lastRequestedTarget;
     private int observedPathIndex = -1;
     private double bestWaypointDistance = Double.POSITIVE_INFINITY;
     private long lastWaypointProgressTime;
@@ -150,7 +151,7 @@ public final class PatheticPathfinder implements IPathfinder {
     }
 
     @Override
-    public Vec3 getCurrentPathPoint() {
+    public @Nullable Vec3 getCurrentPathPoint() {
         return hasActivePath() ? currentPath.get(pathIndex) : null;
     }
 
@@ -177,7 +178,7 @@ public final class PatheticPathfinder implements IPathfinder {
         return true;
     }
 
-    private BlockPos findTraversableAt(int x, int expectedY, int z, BlockPos previous) {
+    private @Nullable BlockPos findTraversableAt(int x, int expectedY, int z, BlockPos previous) {
         int[] yOffsets = {0, 1, -1, -2, -3};
         for (int yOffset : yOffsets) {
             BlockPos candidate = new BlockPos(x, expectedY + yOffset, z);

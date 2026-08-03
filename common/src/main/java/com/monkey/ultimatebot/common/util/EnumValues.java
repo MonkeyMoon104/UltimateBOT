@@ -20,4 +20,8 @@ public final class EnumValues {
             return fallback;
         }
     }
+
+    public static <E extends Enum<E>> E parseOrDefault(Class<E> enumType, @Nullable String value, E fallback) {
+        return Objects.requireNonNull(parse(enumType, value, Objects.requireNonNull(fallback, "fallback")));
+    }
 }

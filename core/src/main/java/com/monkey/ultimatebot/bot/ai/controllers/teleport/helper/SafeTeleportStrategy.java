@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleport
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class SafeTeleportStrategy implements ITeleportStrategy {
 
@@ -15,7 +16,7 @@ public class SafeTeleportStrategy implements ITeleportStrategy {
     }
 
     @Override
-    public Vec3 findTeleportPosition(Player bot, Player target) {
+    public @Nullable Vec3 findTeleportPosition(Player bot, @Nullable Player target) {
         if (target == null) return null;
         Vec3 base = target.position();
         Vec3[] offsets = {

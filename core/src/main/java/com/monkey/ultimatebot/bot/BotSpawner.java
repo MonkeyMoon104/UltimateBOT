@@ -18,6 +18,7 @@ import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.EntityUtils;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -32,6 +33,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public class BotSpawner {
 
@@ -212,9 +214,10 @@ public class BotSpawner {
             }
         }
 
-        Location loc = registryOwner.getLocation();
-        Block block = loc.getWorld().getHighestBlockAt(loc);
-        return new Location(loc.getWorld(), block.getX(), block.getY(), block.getZ(), loc.getYaw(), loc.getPitch());
+        Location loc = Objects.requireNonNull(registryOwner.getLocation(), "registry owner location");
+        World world = Objects.requireNonNull(loc.getWorld(), "registry owner world");
+        Block block = world.getHighestBlockAt(loc);
+        return new Location(world, block.getX(), block.getY(), block.getZ(), loc.getYaw(), loc.getPitch());
     }
 
     private void applyCustomEquipment(ITrainingBot bot, BotOptions botOptions) {
@@ -377,7 +380,7 @@ public class BotSpawner {
         }
     }
 
-    private void cleanupDespawnState(UUID ownerUUID, UUID botUUID, boolean removed, BotDespawnReason reason) {
+    private void cleanupDespawnState(UUID ownerUUID, @Nullable UUID botUUID, boolean removed, BotDespawnReason reason) {
         ITrainingBot bot = registry.getBot(ownerUUID);
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(ownerUUID, bot);
         if (!removed && botUUID != null) {
@@ -397,14 +400,14 @@ public class BotSpawner {
             BotEventSource source = BotEventSourceContext.currentOr(BotEventSource.GUI);
             plugin.getBotEventDispatcher()
                     .publish(new BotDespawnEvent(
-                            plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()),
+                            plugin.getBotEventDispatcher().nextSequence(snapshot.requireBotUUID()),
                             snapshot,
                             source,
                             reason == BotDespawnReason.MANUAL
                                             && (source == BotEventSource.API || source == BotEventSource.REMOTE_API)
                                     ? BotDespawnReason.API_REQUEST
                                     : reason));
-            plugin.getBotEventDispatcher().forget(snapshot.botUUID());
+            plugin.getBotEventDispatcher().forget(snapshot.requireBotUUID());
         }
     }
 
@@ -420,7 +423,10 @@ public class BotSpawner {
         if (snapshot == null) return true;
         BotDespawnPrepareEvent event = plugin.getBotEventDispatcher()
                 .publish(new BotDespawnPrepareEvent(
-                        plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()), snapshot, source, reason));
+                        plugin.getBotEventDispatcher().nextSequence(snapshot.requireBotUUID()),
+                        snapshot,
+                        source,
+                        reason));
         return !event.isCancelled();
     }
 }

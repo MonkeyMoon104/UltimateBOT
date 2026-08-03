@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -11,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ObsidianScanner {
 
     private final Level level;
-    private CPVPConfig config;
+    private CPVPConfig config = DifficultyProfileFactory.buildCPVPConfig(DifficultyLevel.NORMAL);
 
     public ObsidianScanner(Level level) {
         this.level = level;

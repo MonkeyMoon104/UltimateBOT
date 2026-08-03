@@ -3,10 +3,11 @@ package com.monkey.ultimatebot.nms;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.jspecify.annotations.Nullable;
 
 public class NMSBridgeManager {
 
-    private static INMSBridge instance;
+    private static @Nullable INMSBridge instance;
     private static final String SUPPORTED_VERSIONS =
             "1.21.4, 1.21.5, 1.21.6, 1.21.7, 1.21.8, 1.21.9, 1.21.10, 1.21.11, 26.1.x, 26.2.x";
 
@@ -52,7 +53,7 @@ public class NMSBridgeManager {
         return SUPPORTED_VERSIONS;
     }
 
-    private static String resolveV26Bridge(String version) {
+    private static @Nullable String resolveV26Bridge(String version) {
         if ("26.1".equals(version) || version.startsWith("26.1.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v26_1";
         }
@@ -66,6 +67,6 @@ public class NMSBridgeManager {
         if (instance == null) {
             throw new RuntimeException("[UltimateBot] NMSBridgeManager is not initialized. Call init() in onEnable.");
         }
-        return instance;
+        return java.util.Objects.requireNonNull(instance, "NMS bridge");
     }
 }

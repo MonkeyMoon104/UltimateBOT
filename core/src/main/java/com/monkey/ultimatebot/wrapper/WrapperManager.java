@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jspecify.annotations.Nullable;
 
 public final class WrapperManager {
 
@@ -28,7 +29,7 @@ public final class WrapperManager {
         return activeWrapper;
     }
 
-    public PlatformWrapper get(WrapperType wrapperType) {
+    public @Nullable PlatformWrapper get(WrapperType wrapperType) {
         return wrappers.get(wrapperType);
     }
 

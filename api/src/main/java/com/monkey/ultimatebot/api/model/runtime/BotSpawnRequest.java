@@ -186,7 +186,7 @@ public final class BotSpawnRequest {
          * @param targets target collection
          * @return current builder
          */
-        public Builder targets(@Nullable Collection<@Nullable UUID> targets) {
+        public Builder targets(@Nullable Collection<UUID> targets) {
             this.targetUUIDs.clear();
             if (targets != null) {
                 for (UUID target : targets) {
@@ -219,7 +219,7 @@ public final class BotSpawnRequest {
          * @param owners owner collection
          * @return current builder
          */
-        public Builder teamOwners(@Nullable Collection<@Nullable UUID> owners) {
+        public Builder teamOwners(@Nullable Collection<UUID> owners) {
             this.teamOwnerUUIDs.clear();
             if (owners != null) {
                 for (UUID owner : owners) {

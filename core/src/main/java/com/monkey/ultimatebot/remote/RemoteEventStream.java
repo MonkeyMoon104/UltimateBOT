@@ -26,6 +26,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.jspecify.annotations.Nullable;
 
 /** Bounded replayable Server-Sent Events bridge for SDK clients. */
 final class RemoteEventStream implements AutoCloseable {
@@ -209,7 +210,7 @@ final class RemoteEventStream implements AutoCloseable {
         }
     }
 
-    private static long parseLastId(String value) {
+    private static long parseLastId(@Nullable String value) {
         try {
             return value == null ? 0L : Long.parseLong(value);
         } catch (NumberFormatException ignored) {
@@ -217,14 +218,14 @@ final class RemoteEventStream implements AutoCloseable {
         }
     }
 
-    private static Set<String> parseTypes(String value) {
+    private static Set<String> parseTypes(@Nullable String value) {
         if (value == null || value.isBlank()) return Set.of();
         Set<String> result = new HashSet<>();
         for (String type : value.split(",", -1)) result.add(type.trim().toUpperCase(Locale.ROOT));
         return Set.copyOf(result);
     }
 
-    private static Map<String, String> parseFilters(String query) {
+    private static Map<String, String> parseFilters(@Nullable String query) {
         if (query == null || query.isBlank()) return Map.of();
         Map<String, String> result = new HashMap<>();
         for (String part : query.split("&", -1)) {
@@ -234,7 +235,7 @@ final class RemoteEventStream implements AutoCloseable {
         return result;
     }
 
-    private static UUID parseUuid(String value) {
+    private static @Nullable UUID parseUuid(@Nullable String value) {
         try {
             return value == null || value.isBlank() ? null : UUID.fromString(value);
         } catch (IllegalArgumentException ignored) {
@@ -257,11 +258,11 @@ final class RemoteEventStream implements AutoCloseable {
 
     private static final class Client {
         private final Set<String> types;
-        private final UUID ownerUUID;
-        private final UUID botUUID;
+        private final @Nullable UUID ownerUUID;
+        private final @Nullable UUID botUUID;
         private final ArrayBlockingQueue<RemoteBotEvent> queue = new ArrayBlockingQueue<>(BUFFER_SIZE);
 
-        private Client(Set<String> types, UUID ownerUUID, UUID botUUID) {
+        private Client(Set<String> types, @Nullable UUID ownerUUID, @Nullable UUID botUUID) {
             this.types = types;
             this.ownerUUID = ownerUUID;
             this.botUUID = botUUID;

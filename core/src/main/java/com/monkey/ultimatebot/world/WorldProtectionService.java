@@ -102,9 +102,9 @@ public final class WorldProtectionService implements AutoCloseable {
         if (block.getType().isAir()) {
             return false;
         }
-        boolean tracked = isTracked(block);
-        BlockData originalData =
-                tracked ? placements.get(WorldBlockKey.from(block)).originalData() : null;
+        TrackedWorldBlock placement = placements.get(WorldBlockKey.from(block));
+        boolean tracked = placement != null;
+        BlockData originalData = placement == null ? null : placement.originalData();
         WorldBlockEventDispatcher.BreakResult result = WorldBlockEventDispatcher.requestBreak(block, breaker);
         if (result.cancelled()) {
             return false;

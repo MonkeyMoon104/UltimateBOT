@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 /** Smooths horizontal direction changes while preserving deliberate A* steering. */
 final class PathSteering {
@@ -9,7 +10,7 @@ final class PathSteering {
     private static final double SHARP_TURN_BLEND = 0.55D;
     private static final double MIN_DIRECTION_LENGTH_SQUARED = 1.0E-6D;
 
-    private Vec3 direction;
+    private @Nullable Vec3 direction;
 
     Vec3 update(Vec3 currentVelocity, Vec3 desiredDirection) {
         Vec3 desired = horizontalNormalized(desiredDirection);

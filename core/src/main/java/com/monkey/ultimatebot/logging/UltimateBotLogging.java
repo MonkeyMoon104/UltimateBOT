@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.jspecify.annotations.Nullable;
 
 public final class UltimateBotLogging {
 
@@ -223,7 +224,7 @@ public final class UltimateBotLogging {
         private final long startedAtNanos;
         private final List<PhaseSnapshot> phases = new ArrayList<>();
 
-        private PhaseSnapshot currentPhase;
+        private @Nullable PhaseSnapshot currentPhase;
         private String currentModule = "Boot";
         private String currentContext = "bootstrap";
         private String nmsBridgeName = "pending";

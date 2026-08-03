@@ -3,13 +3,14 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 
 public class BotNoobMovementController {
 
     private final Player bot;
     private final Level level;
 
-    private double[] diversionDirection = null;
+    private double @Nullable [] diversionDirection;
     private int diversionTicks = 0;
 
     private double movementSpeed = 0.25;
@@ -144,7 +145,7 @@ public class BotNoobMovementController {
         }
     }
 
-    private double[] findAlternativeDirection(double dx, double dz, int maxTries) {
+    private double @Nullable [] findAlternativeDirection(double dx, double dz, int maxTries) {
         double angle = Math.atan2(dz, dx);
 
         for (int i = 1; i <= maxTries; i++) {

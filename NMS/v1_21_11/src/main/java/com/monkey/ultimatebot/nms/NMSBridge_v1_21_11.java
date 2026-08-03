@@ -181,7 +181,10 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
 
     @Override
     public GameProfile createProfileWithTexture(
-            UUID botUUID, String botName, String textureValue, String textureSignature) {
+            UUID botUUID,
+            String botName,
+            String textureValue,
+            @org.jspecify.annotations.Nullable String textureSignature) {
         Property property = textureSignature == null || textureSignature.isBlank()
                 ? new Property("textures", textureValue)
                 : new Property("textures", textureValue, textureSignature);
@@ -213,7 +216,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
                 paperServices.filledProfileCache().add(profile);
             }
         } catch (Exception e) {
-            // The optional Paper profile cache differs across patch versions.
+            return;
         }
     }
 
@@ -232,7 +235,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
                 removeProfileCacheEntry(paperServices.filledProfileCache(), botUUID, profile, null);
             }
         } catch (Exception e) {
-            // Cache cleanup is best-effort during bot removal.
+            return;
         }
     }
 
@@ -241,7 +244,11 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
         return profile.name();
     }
 
-    private void removeProfileCacheEntry(Object cache, UUID botUUID, GameProfile profile, Object nameAndId) {
+    private void removeProfileCacheEntry(
+            @org.jspecify.annotations.Nullable Object cache,
+            UUID botUUID,
+            GameProfile profile,
+            @org.jspecify.annotations.Nullable Object nameAndId) {
         if (cache == null) {
             return;
         }
@@ -254,14 +261,18 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
                 try {
                     method.invoke(cache, argument);
                 } catch (ReflectiveOperationException ignored) {
-                    // Try the next compatible cache removal overload.
+                    continue;
                 }
                 return;
             }
         }
     }
 
-    private Object resolveRemovalArgument(Class<?> parameterType, UUID botUUID, GameProfile profile, Object nameAndId) {
+    private @org.jspecify.annotations.Nullable Object resolveRemovalArgument(
+            Class<?> parameterType,
+            UUID botUUID,
+            GameProfile profile,
+            @org.jspecify.annotations.Nullable Object nameAndId) {
         if (parameterType.isAssignableFrom(UUID.class)) {
             return botUUID;
         }

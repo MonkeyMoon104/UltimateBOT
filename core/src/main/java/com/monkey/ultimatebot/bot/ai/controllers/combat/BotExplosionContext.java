@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.bukkit.Location;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Marks the synchronous Bukkit explosion event fired by a bot combat action.
@@ -37,7 +38,7 @@ public final class BotExplosionContext {
 
     /** Runs a bot explosion after exposing its mutable policy to API listeners. */
     public static <T> T execute(
-            ITrainingBot bot,
+            @Nullable ITrainingBot bot,
             BotExplosionType type,
             Location location,
             boolean blockDamage,

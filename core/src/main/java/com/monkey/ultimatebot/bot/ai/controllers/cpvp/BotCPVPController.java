@@ -19,8 +19,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import org.jspecify.annotations.Nullable;
 
-public class BotCPVPController {
+public final class BotCPVPController {
 
     private final Player bot;
     private final Level level;
@@ -34,8 +35,8 @@ public class BotCPVPController {
     private final CrystalManager crystalManager;
     private final CrystalCombatPolicy combatPolicy;
     private final CrystalTargetPlanner targetPlanner;
-    private DifficultyLevel difficulty;
-    private CPVPConfig config;
+    private DifficultyLevel difficulty = DifficultyLevel.NORMAL;
+    private CPVPConfig config = DifficultyProfileFactory.buildCPVPConfig(difficulty);
 
     private int obsidianPlaceCooldown = 0;
     private int crystalPlaceCooldown = 0;
@@ -51,15 +52,15 @@ public class BotCPVPController {
     private long lastFullScan = 0;
 
     private boolean isPreparingObsidian = false;
-    private BlockPos pendingObsidianPos = null;
+    private @Nullable BlockPos pendingObsidianPos;
     private int obsidianPreparationTicks = 0;
 
     private boolean isPreparingCrystal = false;
-    private BlockPos pendingCrystalPos = null;
+    private @Nullable BlockPos pendingCrystalPos;
     private int crystalPreparationTicks = 0;
 
     private boolean isPreparingAttack = false;
-    private EndCrystal pendingAttackCrystal = null;
+    private @Nullable EndCrystal pendingAttackCrystal;
     private int attackPreparationTicks = 0;
     private boolean enabled = true;
 
@@ -77,6 +78,7 @@ public class BotCPVPController {
         this.crystalManager = new CrystalManager();
         this.combatPolicy = new CrystalCombatPolicy();
         this.targetPlanner = new CrystalTargetPlanner(bot, crystalManager, crystalPositionEvaluator);
+        setDifficulty(DifficultyLevel.NORMAL);
     }
 
     public void tick(Player target) {

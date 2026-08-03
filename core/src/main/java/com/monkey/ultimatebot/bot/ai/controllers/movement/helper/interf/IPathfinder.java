@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf;
 
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public interface IPathfinder {
     boolean calculatePathTo(Vec3 targetPos);
@@ -17,5 +18,5 @@ public interface IPathfinder {
 
     boolean isPathObstructed(Vec3 targetPos);
 
-    Vec3 getCurrentPathPoint();
+    @Nullable Vec3 getCurrentPathPoint();
 }

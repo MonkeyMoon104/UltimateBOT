@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public final class PlaceholderApiSupport {
 
@@ -14,7 +15,7 @@ public final class PlaceholderApiSupport {
     private static final String PLACEHOLDER_COORDINATOR_CLASS =
             "com.monkey.ultimatebot.placeholders.BotPlaceholderCoordinator";
 
-    private static volatile Method setPlaceholdersMethod;
+    private static volatile @Nullable Method setPlaceholdersMethod;
 
     private PlaceholderApiSupport() {}
 
@@ -22,7 +23,7 @@ public final class PlaceholderApiSupport {
         return Bukkit.getPluginManager().getPlugin(PLACEHOLDER_API_PLUGIN) != null && hasPlaceholderApiClass();
     }
 
-    public static PlaceholderRegistration createRegistration(UltimateBot plugin) {
+    public static @Nullable PlaceholderRegistration createRegistration(UltimateBot plugin) {
         if (!isAvailable()) {
             return null;
         }
@@ -44,7 +45,7 @@ public final class PlaceholderApiSupport {
     }
 
     public static String apply(Player owner, String input) {
-        if (owner == null || input == null || input.isBlank() || !isAvailable()) {
+        if (input.isBlank() || !isAvailable()) {
             return input;
         }
 

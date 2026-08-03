@@ -27,7 +27,7 @@ import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class CoreBotManagerAdapter implements IBotManager {
 
@@ -187,7 +187,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return BotOperationResult.success("Bot spawned successfully.", snapshot);
     }
 
-    private String validateRequestedBotUUID(UUID requestedBotUUID) {
+    private @Nullable String validateRequestedBotUUID(@Nullable UUID requestedBotUUID) {
         if (requestedBotUUID == null) {
             return null;
         }
@@ -206,10 +206,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
     @Override
     public BotOperationResult spawnByReferences(
             BotMode mode,
-            String ownerReference,
-            Collection<String> targetReferences,
-            Collection<String> teamOwnerReferences,
-            BotSettings settings) {
+            @Nullable String ownerReference,
+            @Nullable Collection<String> targetReferences,
+            @Nullable Collection<String> teamOwnerReferences,
+            @Nullable BotSettings settings) {
         if (mode == null) {
             return BotOperationResult.failure("mode cannot be null");
         }
@@ -258,7 +258,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     @Override
-    public Optional<UUID> parsePlayerReference(String playerReference) {
+    public Optional<UUID> parsePlayerReference(@Nullable String playerReference) {
         if (playerReference == null || playerReference.isBlank()) {
             return Optional.empty();
         }
@@ -275,7 +275,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 return Optional.of(byUuid.getUniqueId());
             }
         } catch (IllegalArgumentException ignored) {
-            // The reference is a player name rather than a UUID; continue with fuzzy name lookup.
+            Bukkit.getLogger().finest(() -> "Player reference is not a UUID: " + playerReference);
         }
 
         Player fuzzy = Bukkit.getPlayer(playerReference);
@@ -936,7 +936,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return botRegistry.getAllBots().size();
     }
 
-    private ITrainingBot getLiveBot(UUID ownerUUID) {
+    private @Nullable ITrainingBot getLiveBot(@Nullable UUID ownerUUID) {
         if (ownerUUID == null) {
             return null;
         }
@@ -955,7 +955,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 valueType);
     }
 
-    private BotOptions getLiveOptions(UUID ownerUUID) {
+    private @Nullable BotOptions getLiveOptions(@Nullable UUID ownerUUID) {
         ITrainingBot bot = getLiveBot(ownerUUID);
         if (bot == null || bot.getBrainController() == null) {
             return null;
@@ -964,9 +964,6 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     private UUID resolveManagedOwner(UUID ownerUUID) {
-        if (ownerUUID == null) {
-            return null;
-        }
         if (botManager.isBotSpawned(ownerUUID)) {
             return ownerUUID;
         }
@@ -999,7 +996,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
     }
 
-    private UUID resolvePrimaryOwnerUUID(
+    private @Nullable UUID resolvePrimaryOwnerUUID(
             BotType type, @Nullable UUID requestedOwnerUUID, Set<UUID> teamOwners, Set<UUID> targetUUIDs) {
         if (type == BotType.EVENT) {
             UUID contextOwner = resolveOnlineUUID(requestedOwnerUUID);
@@ -1042,7 +1039,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return null;
     }
 
-    private UUID resolveOnlineUUID(@Nullable UUID uuid) {
+    private @Nullable UUID resolveOnlineUUID(@Nullable UUID uuid) {
         if (uuid == null) {
             return null;
         }
@@ -1124,7 +1121,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .build();
     }
 
-    private String validateSkinForMode(BotType botType, BotSettings settings) {
+    private @Nullable String validateSkinForMode(BotType botType, @Nullable BotSettings settings) {
         if (settings == null || settings.botSkin() == null || settings.botSkin().source() == null) {
             return null;
         }
@@ -1148,8 +1145,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
         return null;
     }
 
-    private BotOperationResult spawnFailure(String reason) {
-        return BotOperationResult.failure(reason);
+    private BotOperationResult spawnFailure(@Nullable String reason) {
+        return BotOperationResult.failure(Objects.requireNonNullElse(reason, "Bot operation failed."));
     }
 
     private static BotType toCoreType(BotMode mode) {

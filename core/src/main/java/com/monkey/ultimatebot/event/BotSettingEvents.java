@@ -28,7 +28,7 @@ public final class BotSettingEvents {
         if (snapshot == null) return Optional.empty();
         BotSettingsChangeEvent event = plugin.getBotEventDispatcher()
                 .publish(new BotSettingsChangeEvent(
-                        plugin.getBotEventDispatcher().nextSequence(snapshot.botUUID()),
+                        plugin.getBotEventDispatcher().nextSequence(snapshot.requireBotUUID()),
                         snapshot,
                         source,
                         key,

@@ -3,10 +3,11 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ITargetTracker;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class TargetTracker implements ITargetTracker {
 
-    private Vec3 lastTargetPosition;
+    private @Nullable Vec3 lastTargetPosition;
     private Vec3 predictedTargetMovement = Vec3.ZERO;
 
     @Override
@@ -25,7 +26,7 @@ public class TargetTracker implements ITargetTracker {
     }
 
     @Override
-    public Vec3 getLastTargetPosition() {
+    public @Nullable Vec3 getLastTargetPosition() {
         return lastTargetPosition;
     }
 }

@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacl
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class MovementExecutor implements IMovementExecutor {
     private static final int ZIG_ZAG_CHANGE_TICKS = 12;
@@ -300,7 +301,7 @@ public class MovementExecutor implements IMovementExecutor {
         }
     }
 
-    private Vec3 findBestPath(Vec3 from, Vec3 to, double targetDistance) {
+    private @Nullable Vec3 findBestPath(Vec3 from, Vec3 to, double targetDistance) {
         Vec3 baseDirection = to.subtract(from).normalize();
         Vec3 targetPoint = to.subtract(baseDirection.scale(targetDistance));
         Vec3 desiredDirection = targetPoint.subtract(from).normalize();

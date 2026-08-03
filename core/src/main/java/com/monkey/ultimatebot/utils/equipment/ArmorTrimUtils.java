@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -16,7 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public final class ArmorTrimUtils {
 
@@ -63,11 +64,11 @@ public final class ArmorTrimUtils {
         return resolveOrderedKeys(MATERIAL_ORDER, trimMaterialRegistry());
     }
 
-    public static String getNextTrimPatternKey(@Nullable String currentKey, boolean forward) {
+    public static @Nullable String getNextTrimPatternKey(@Nullable String currentKey, boolean forward) {
         return getNextKey(getTrimPatternKeys(), currentKey, forward);
     }
 
-    public static String getNextTrimMaterialKey(@Nullable String currentKey, boolean forward) {
+    public static @Nullable String getNextTrimMaterialKey(@Nullable String currentKey, boolean forward) {
         return getNextKey(getTrimMaterialKeys(), currentKey, forward);
     }
 
@@ -119,7 +120,8 @@ public final class ArmorTrimUtils {
     }
 
     public static Material resolvePatternDisplayMaterial(@Nullable String patternKey) {
-        return switch (normalizeKey(patternKey)) {
+        String normalized = Objects.requireNonNullElse(normalizeKey(patternKey), "");
+        return switch (normalized) {
             case "sentry" -> materialOrDefault("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
             case "dune" -> materialOrDefault("DUNE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
             case "coast" -> materialOrDefault("COAST_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
@@ -143,7 +145,8 @@ public final class ArmorTrimUtils {
     }
 
     public static Material resolveTrimMaterialDisplayMaterial(@Nullable String materialKey) {
-        return switch (normalizeKey(materialKey)) {
+        String normalized = Objects.requireNonNullElse(normalizeKey(materialKey), "");
+        return switch (normalized) {
             case "quartz" -> Material.QUARTZ;
             case "iron" -> Material.IRON_INGOT;
             case "netherite" -> Material.NETHERITE_INGOT;
@@ -179,7 +182,7 @@ public final class ArmorTrimUtils {
         return builder.toString();
     }
 
-    @Nullable private static String getNextKey(List<String> values, @Nullable String currentKey, boolean forward) {
+    private static @Nullable String getNextKey(List<String> values, @Nullable String currentKey, boolean forward) {
         if (values.isEmpty()) {
             return null;
         }
@@ -198,12 +201,12 @@ public final class ArmorTrimUtils {
         return values.get(nextIndex);
     }
 
-    @Nullable private static TrimPattern resolveTrimPattern(@Nullable String patternKey) {
+    private static @Nullable TrimPattern resolveTrimPattern(@Nullable String patternKey) {
         String normalized = normalizeKey(patternKey);
         return normalized == null ? null : trimPatternRegistry().get(NamespacedKey.minecraft(normalized));
     }
 
-    @Nullable private static TrimMaterial resolveTrimMaterial(@Nullable String materialKey) {
+    private static @Nullable TrimMaterial resolveTrimMaterial(@Nullable String materialKey) {
         String normalized = normalizeKey(materialKey);
         return normalized == null ? null : trimMaterialRegistry().get(NamespacedKey.minecraft(normalized));
     }
@@ -229,7 +232,7 @@ public final class ArmorTrimUtils {
         return available;
     }
 
-    @Nullable private static String normalizeKey(@Nullable String key) {
+    private static @Nullable String normalizeKey(@Nullable String key) {
         if (key == null) {
             return null;
         }

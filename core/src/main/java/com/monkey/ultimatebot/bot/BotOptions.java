@@ -40,22 +40,22 @@ public final class BotOptions {
             new EnumMap<>(CombatMode.class);
     private BotType botType = BotType.SINGLE;
     private BotCreationSource creationSource = BotCreationSource.CORE;
-    private UUID requestedBotUUID;
-    private UUID ownerUUID;
-    private UUID preferredTargetUUID;
+    private @Nullable UUID requestedBotUUID;
+    private @Nullable UUID ownerUUID;
+    private @Nullable UUID preferredTargetUUID;
     private final Set<UUID> teamOwnerUUIDs = new LinkedHashSet<>();
     private final Set<UUID> targetUUIDs = new LinkedHashSet<>();
-    private String botNameTemplate;
+    private @Nullable String botNameTemplate;
     private BotSkin botSkin = BotSkin.owner();
     private int minTotemCount = -1;
-    private Integer maxTotemCountOverride;
+    private @Nullable Integer maxTotemCountOverride;
     private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
     private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
     private ArmorTier minArmorTier = ArmorTier.LEATHER;
     private ArmorTier maxArmorTier = ArmorTier.NETHERITE;
     private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
     private final Map<EquipmentSlot, String> trimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
-    private BotLocation spawnLocation;
+    private @Nullable BotLocation spawnLocation;
     private boolean autoTarget = false;
     private double autoTargetRange = 16.0D;
     private boolean attackBots = false;
@@ -72,7 +72,7 @@ public final class BotOptions {
     private boolean enderPearls = true;
     private boolean healing = true;
     private boolean killMessageEnabled = true;
-    private String customKillMessage;
+    private @Nullable String customKillMessage;
     private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
     private final Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlotSettings =
             new EnumMap<>(BotEquipmentSlot.class);
@@ -107,27 +107,27 @@ public final class BotOptions {
         this.setBotType(eventBot ? BotType.EVENT : BotType.SINGLE);
     }
 
-    public UUID getOwnerUUID() {
+    public @Nullable UUID getOwnerUUID() {
         return ownerUUID;
     }
 
-    public UUID getRequestedBotUUID() {
+    public @Nullable UUID getRequestedBotUUID() {
         return requestedBotUUID;
     }
 
-    public void setRequestedBotUUID(UUID requestedBotUUID) {
+    public void setRequestedBotUUID(@Nullable UUID requestedBotUUID) {
         this.requestedBotUUID = requestedBotUUID;
     }
 
-    public void setOwnerUUID(UUID ownerUUID) {
+    public void setOwnerUUID(@Nullable UUID ownerUUID) {
         this.ownerUUID = ownerUUID;
     }
 
-    public UUID getPreferredTargetUUID() {
+    public @Nullable UUID getPreferredTargetUUID() {
         return preferredTargetUUID;
     }
 
-    public void setPreferredTargetUUID(UUID preferredTargetUUID) {
+    public void setPreferredTargetUUID(@Nullable UUID preferredTargetUUID) {
         this.preferredTargetUUID = preferredTargetUUID;
         if (preferredTargetUUID != null) {
             this.targetUUIDs.add(preferredTargetUUID);
@@ -174,11 +174,11 @@ public final class BotOptions {
         return !targetUUIDs.isEmpty();
     }
 
-    public String getBotNameTemplate() {
+    public @Nullable String getBotNameTemplate() {
         return botNameTemplate;
     }
 
-    public void setBotNameTemplate(String botNameTemplate) {
+    public void setBotNameTemplate(@Nullable String botNameTemplate) {
         this.botNameTemplate = botNameTemplate;
     }
 
@@ -186,15 +186,15 @@ public final class BotOptions {
         return botSkin;
     }
 
-    public void setBotSkin(BotSkin botSkin) {
+    public void setBotSkin(@Nullable BotSkin botSkin) {
         this.botSkin = botSkin == null ? BotSkin.owner() : botSkin;
     }
 
-    public BotLocation getSpawnLocation() {
+    public @Nullable BotLocation getSpawnLocation() {
         return spawnLocation;
     }
 
-    public void setSpawnLocation(BotLocation spawnLocation) {
+    public void setSpawnLocation(@Nullable BotLocation spawnLocation) {
         this.spawnLocation = spawnLocation;
     }
 
@@ -334,11 +334,11 @@ public final class BotOptions {
         this.killMessageEnabled = killMessageEnabled;
     }
 
-    public String getCustomKillMessage() {
+    public @Nullable String getCustomKillMessage() {
         return customKillMessage;
     }
 
-    public void setCustomKillMessage(String customKillMessage) {
+    public void setCustomKillMessage(@Nullable String customKillMessage) {
         this.customKillMessage = customKillMessage == null || customKillMessage.isBlank() ? null : customKillMessage;
     }
 
@@ -727,11 +727,11 @@ public final class BotOptions {
         return blast;
     }
 
-    public String getTrimPatternKey(EquipmentSlot slot) {
+    public @Nullable String getTrimPatternKey(EquipmentSlot slot) {
         return trimPatternKeys.get(slot);
     }
 
-    public void setTrimPatternKey(EquipmentSlot slot, String trimPatternKey) {
+    public void setTrimPatternKey(EquipmentSlot slot, @Nullable String trimPatternKey) {
         if (slot == null) {
             return;
         }
@@ -739,11 +739,11 @@ public final class BotOptions {
         applyTrimSelection(slot);
     }
 
-    public String getTrimMaterialKey(EquipmentSlot slot) {
+    public @Nullable String getTrimMaterialKey(EquipmentSlot slot) {
         return trimMaterialKeys.get(slot);
     }
 
-    public void setTrimMaterialKey(EquipmentSlot slot, String trimMaterialKey) {
+    public void setTrimMaterialKey(EquipmentSlot slot, @Nullable String trimMaterialKey) {
         if (slot == null) {
             return;
         }

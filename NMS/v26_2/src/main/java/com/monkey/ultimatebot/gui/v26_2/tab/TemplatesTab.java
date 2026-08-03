@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.v26_2.impl.customization.ArmorItem;
 import com.monkey.ultimatebot.gui.v26_2.impl.customization.TrimMaterialSelectorItem;
 import com.monkey.ultimatebot.gui.v26_2.impl.customization.TrimPatternSelectorItem;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -21,13 +22,13 @@ public class TemplatesTab {
     public Gui build(Material borderMaterial, String borderName) {
         BotOptions options = context.getOptions();
         ArmorItem helmetItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.HEAD, options.getArmor().get(EquipmentSlot.HEAD), options);
+                context.getTraining(), EquipmentSlot.HEAD, requireArmor(options, EquipmentSlot.HEAD), options);
         ArmorItem chestItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.CHEST, options.getArmor().get(EquipmentSlot.CHEST), options);
+                context.getTraining(), EquipmentSlot.CHEST, requireArmor(options, EquipmentSlot.CHEST), options);
         ArmorItem legsItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.LEGS, options.getArmor().get(EquipmentSlot.LEGS), options);
+                context.getTraining(), EquipmentSlot.LEGS, requireArmor(options, EquipmentSlot.LEGS), options);
         ArmorItem bootsItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.FEET, options.getArmor().get(EquipmentSlot.FEET), options);
+                context.getTraining(), EquipmentSlot.FEET, requireArmor(options, EquipmentSlot.FEET), options);
 
         Gui gui = Gui.builder()
                 .setStructure(
@@ -62,5 +63,9 @@ public class TemplatesTab {
                 .build();
 
         return gui;
+    }
+
+    private static ItemStack requireArmor(BotOptions options, EquipmentSlot slot) {
+        return Objects.requireNonNull(options.getArmor().get(slot), () -> "Missing armor item for " + slot);
     }
 }

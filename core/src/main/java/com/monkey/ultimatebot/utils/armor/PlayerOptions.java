@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 public class PlayerOptions {
 
@@ -13,7 +14,7 @@ public class PlayerOptions {
         this.options.put(uuid, options);
     }
 
-    public BotOptions getOptions(UUID uuid) {
+    public @Nullable BotOptions getOptions(UUID uuid) {
         return this.options.get(uuid);
     }
 

@@ -8,6 +8,7 @@ import com.monkey.ultimatebot.config.RuntimeSettings;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class BotMovementController {
     private final Player bot;
@@ -136,7 +137,7 @@ public class BotMovementController {
         return pathfinder.isPathObstructed(targetPos);
     }
 
-    public Vec3 getCurrentPathPoint() {
+    public @Nullable Vec3 getCurrentPathPoint() {
         return pathfinder.getCurrentPathPoint();
     }
 

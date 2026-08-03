@@ -4,10 +4,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.jspecify.annotations.Nullable;
 
 public class EquipmentConverter {
 
-    public static EquipmentSlot toNMSSlot(org.bukkit.inventory.EquipmentSlot bukkitSlot) {
+    public static @Nullable EquipmentSlot toNMSSlot(org.bukkit.inventory.EquipmentSlot bukkitSlot) {
         return switch (bukkitSlot) {
             case HEAD -> EquipmentSlot.HEAD;
             case CHEST -> EquipmentSlot.CHEST;

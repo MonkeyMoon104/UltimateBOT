@@ -26,6 +26,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.jspecify.annotations.Nullable;
 
 public class PlayerCheckListener implements Listener {
 
@@ -37,7 +38,8 @@ public class PlayerCheckListener implements Listener {
     private final BotManager botManager;
     private final PlayerOptions playerOptions;
 
-    private record BotKillContext(UUID ownerUUID, ITrainingBot bot, BotOptions options) {}
+    private record BotKillContext(
+            UUID ownerUUID, ITrainingBot bot, @Nullable BotOptions options) {}
 
     public PlayerCheckListener(UltimateBot plugin) {
         this.plugin = plugin;
@@ -139,7 +141,7 @@ public class PlayerCheckListener implements Listener {
         }
     }
 
-    private void setBotDeathMessage(PlayerDeathEvent event, Player player, BotOptions options) {
+    private void setBotDeathMessage(PlayerDeathEvent event, Player player, @Nullable BotOptions options) {
         if (options != null && !options.isKillMessageEnabled()) {
             event.deathMessage(null);
             return;
@@ -153,13 +155,16 @@ public class PlayerCheckListener implements Listener {
         event.deathMessage(LEGACY_SECTION_SERIALIZER.deserialize(formatted));
     }
 
-    private String getDeathMessageText(PlayerDeathEvent event) {
+    private @Nullable String getDeathMessageText(PlayerDeathEvent event) {
         Component deathMessage = event.deathMessage();
         return deathMessage == null ? null : PLAIN_TEXT_SERIALIZER.serialize(deathMessage);
     }
 
-    private BotKillContext resolveBotKillContext(
-            Player victim, Entity killer, boolean victimOwnsBot, String currentDeathMessage) {
+    private @Nullable BotKillContext resolveBotKillContext(
+            Player victim,
+            org.bukkit.entity.@Nullable Entity killer,
+            boolean victimOwnsBot,
+            @Nullable String currentDeathMessage) {
         UUID killerUUID = killer == null ? null : killer.getUniqueId();
         if (killerUUID != null) {
             BotKillContext direct = findBotByBotUUID(killerUUID);
@@ -196,14 +201,14 @@ public class PlayerCheckListener implements Listener {
         return null;
     }
 
-    private boolean deathMessageNamesBot(String deathMessage, ITrainingBot bot) {
+    private boolean deathMessageNamesBot(@Nullable String deathMessage, ITrainingBot bot) {
         return deathMessage != null
                 && bot != null
                 && bot.asPlayer() != null
                 && deathMessage.contains(bot.asPlayer().getName().getString());
     }
 
-    private BotKillContext findBotByBotUUID(UUID botUUID) {
+    private @Nullable BotKillContext findBotByBotUUID(@Nullable UUID botUUID) {
         if (botUUID == null) {
             return null;
         }
@@ -220,9 +225,8 @@ public class PlayerCheckListener implements Listener {
     }
 
     private BotKillContext toKillContext(UUID ownerUUID, ITrainingBot bot) {
-        BotOptions options = bot != null && bot.getBrainController() != null
-                ? bot.getBrainController().getBotOptions()
-                : null;
+        BotOptions options =
+                bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
         return new BotKillContext(ownerUUID, bot, options);
     }
 
@@ -231,6 +235,9 @@ public class PlayerCheckListener implements Listener {
             return;
         }
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(context.ownerUUID(), context.bot());
+        if (snapshot == null) {
+            return;
+        }
         plugin.getServer()
                 .getPluginManager()
                 .callEvent(new BotKillPlayerEvent(

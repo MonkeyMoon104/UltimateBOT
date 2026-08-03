@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Executors;
 import org.bukkit.Bukkit;
+import org.jspecify.annotations.Nullable;
 
 public final class RemoteApiServer {
 
@@ -42,10 +43,10 @@ public final class RemoteApiServer {
     private final UltimateBot plugin;
     private final UltimateBotAPI api;
     private final ObjectMapper objectMapper;
-    private HttpServer server;
-    private String token;
-    private String basePath;
-    private RemoteEventStream eventStream;
+    private @Nullable HttpServer server;
+    private String token = "";
+    private String basePath = DEFAULT_BASE_PATH;
+    private @Nullable RemoteEventStream eventStream;
 
     public RemoteApiServer(UltimateBot plugin, UltimateBotAPI api) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
@@ -73,11 +74,13 @@ public final class RemoteApiServer {
         basePath = normalizeBasePath(plugin.getConfig().getString("remote-api.base-path", DEFAULT_BASE_PATH));
 
         try {
-            server = HttpServer.create(new InetSocketAddress(host, port), 0);
-            eventStream = new RemoteEventStream(plugin, objectMapper);
-            server.createContext(basePath, this::handle);
-            server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
-            server.start();
+            HttpServer createdServer = HttpServer.create(new InetSocketAddress(host, port), 0);
+            RemoteEventStream createdEventStream = new RemoteEventStream(plugin, objectMapper);
+            server = createdServer;
+            eventStream = createdEventStream;
+            createdServer.createContext(basePath, this::handle);
+            createdServer.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+            createdServer.start();
             plugin.getLogger().info("Remote API started on http://" + host + ":" + port + basePath);
         } catch (IOException ex) {
             if (eventStream != null) {
@@ -128,10 +131,15 @@ public final class RemoteApiServer {
             }
 
             if ("GET".equals(method) && "/events".equals(relativePath)) {
+                RemoteEventStream activeEventStream = eventStream;
+                if (activeEventStream == null) {
+                    writeJson(exchange, 503, RemoteOperationResponse.failure("Event stream is unavailable."));
+                    return;
+                }
                 try {
-                    eventStream.handle(exchange);
+                    activeEventStream.handle(exchange);
                 } catch (IOException disconnected) {
-                    // Normal when an SSE client disconnects or the server stops.
+                    return;
                 }
                 return;
             }
@@ -164,7 +172,11 @@ public final class RemoteApiServer {
 
             writeJson(exchange, 404, RemoteOperationResponse.failure("Endpoint not found."));
         } catch (IllegalArgumentException ex) {
-            writeJson(exchange, 400, RemoteOperationResponse.failure(ex.getMessage()));
+            writeJson(
+                    exchange,
+                    400,
+                    RemoteOperationResponse.failure(
+                            Objects.requireNonNullElse(ex.getMessage(), "Invalid remote API request")));
         } catch (Exception ex) {
             plugin.getLogger().warning("Remote API request failed: " + ex.getMessage());
             writeJson(exchange, 500, RemoteOperationResponse.failure("Internal remote API error."));
@@ -184,7 +196,7 @@ public final class RemoteApiServer {
         BotSpawnRequest request = BotSpawnRequest.builder(BotMode.EVENT)
                 .botUUID(payload.botUUID)
                 .owner(payload.ownerUUID)
-                .targets(payload.targetUUIDs == null ? List.of() : payload.targetUUIDs)
+                .targets(payload.targetUUIDs)
                 .equipmentSlots(toEquipmentSettings(payload.equipmentSlots))
                 .settings(settings)
                 .build();
@@ -349,7 +361,7 @@ public final class RemoteApiServer {
             HttpExchange exchange,
             IBotManager manager,
             UUID requestedUUID,
-            UUID ownerUUID,
+            @Nullable UUID ownerUUID,
             boolean updated,
             String failureMessage)
             throws IOException {
@@ -376,9 +388,9 @@ public final class RemoteApiServer {
                 .blastProtection(false, false, false, false)
                 .setChangeableBlast(defaultBoolean(safe.changeableBlast, true))
                 .armorValue(
-                        EnumValues.parse(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
-                        EnumValues.parse(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
-                .armor(EnumValues.parse(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
+                        EnumValues.parseOrDefault(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
+                        EnumValues.parseOrDefault(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
+                .armor(EnumValues.parseOrDefault(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
                 .setChangeableArmor(defaultBoolean(safe.changeableArmor, true))
                 .totemValue(
                         defaultInt(safe.minTotemCount, -1),
@@ -386,9 +398,9 @@ public final class RemoteApiServer {
                 .totemCount(defaultInt(safe.totemCount, -1))
                 .setChangeableTotem(defaultBoolean(safe.changeableTotem, true))
                 .difficultyValue(
-                        EnumValues.parse(DifficultyLevel.class, safe.minDifficulty, DifficultyLevel.EASY),
-                        EnumValues.parse(DifficultyLevel.class, safe.maxDifficulty, DifficultyLevel.GOD))
-                .difficulty(EnumValues.parse(DifficultyLevel.class, safe.difficulty, DifficultyLevel.EASY))
+                        EnumValues.parseOrDefault(DifficultyLevel.class, safe.minDifficulty, DifficultyLevel.EASY),
+                        EnumValues.parseOrDefault(DifficultyLevel.class, safe.maxDifficulty, DifficultyLevel.GOD))
+                .difficulty(EnumValues.parseOrDefault(DifficultyLevel.class, safe.difficulty, DifficultyLevel.EASY))
                 .setChangeableDifficulty(defaultBoolean(safe.changeableDifficulty, true));
 
         if (safe.spawnLocation != null) {
@@ -406,11 +418,11 @@ public final class RemoteApiServer {
                 .autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
-                .targetMode(EnumValues.parse(
+                .targetMode(EnumValues.parseOrDefault(
                         com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class,
                         safe.targetMode,
                         com.monkey.ultimatebot.api.model.configuration.BotTargetMode.PLAYERS))
-                .combatMode(EnumValues.parse(CombatMode.class, safe.combatMode, CombatMode.SWORD))
+                .combatMode(EnumValues.parseOrDefault(CombatMode.class, safe.combatMode, CombatMode.SWORD))
                 .combatTuning(safe.combatTuning)
                 .changeableCombatMode(defaultBoolean(safe.changeableCombatMode, true))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
@@ -435,7 +447,7 @@ public final class RemoteApiServer {
     }
 
     private Map<BotEquipmentSlot, BotEquipmentSlotSetting> toEquipmentSettings(
-            Map<String, EquipmentSlotPayload> payloads) {
+            @Nullable Map<String, EquipmentSlotPayload> payloads) {
         if (payloads == null || payloads.isEmpty()) {
             return Map.of();
         }
@@ -453,7 +465,7 @@ public final class RemoteApiServer {
         return Map.copyOf(settings);
     }
 
-    private BotEquipmentSlotSetting toEquipmentSetting(EquipmentSlotPayload payload) {
+    private @Nullable BotEquipmentSlotSetting toEquipmentSetting(@Nullable EquipmentSlotPayload payload) {
         if (payload == null) {
             return null;
         }
@@ -475,7 +487,7 @@ public final class RemoteApiServer {
         };
     }
 
-    private UUID resolveOwnerUUID(IBotManager manager, UUID requestedUUID) {
+    private @Nullable UUID resolveOwnerUUID(IBotManager manager, @Nullable UUID requestedUUID) {
         if (requestedUUID == null) {
             return null;
         }
@@ -487,7 +499,7 @@ public final class RemoteApiServer {
                 .orElse(null);
     }
 
-    private BotSettings.FollowStep applySkin(BotSettings.BotSkinStep skinStep, String skin) {
+    private BotSettings.FollowStep applySkin(BotSettings.BotSkinStep skinStep, @Nullable String skin) {
         if ("OWNER".equalsIgnoreCase(skin)) {
             return skinStep.setBotSkinOwner();
         }
@@ -582,29 +594,32 @@ public final class RemoteApiServer {
         };
     }
 
-    private static String defaultString(String value, String fallback) {
+    private static String defaultString(@Nullable String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
     }
 
-    private static boolean defaultBoolean(Boolean value, boolean fallback) {
+    private static boolean defaultBoolean(@Nullable Boolean value, boolean fallback) {
         return value == null ? fallback : value;
     }
 
-    private static int defaultInt(Integer value, int fallback) {
+    private static int defaultInt(@Nullable Integer value, int fallback) {
         return value == null ? fallback : value;
     }
 
-    private static long defaultLong(Long value, long fallback) {
+    private static long defaultLong(@Nullable Long value, long fallback) {
         return value == null ? fallback : value;
     }
 
-    private static double defaultDouble(Double value, double fallback) {
+    private static double defaultDouble(@Nullable Double value, double fallback) {
         return value == null ? fallback : value;
     }
 
     private record RemoteOperationResponse(
-            boolean success, String message, BotSnapshot snapshot, Integer removedCount) {
-        static RemoteOperationResponse success(String message, BotSnapshot snapshot) {
+            boolean success,
+            String message,
+            @Nullable BotSnapshot snapshot,
+            @Nullable Integer removedCount) {
+        static RemoteOperationResponse success(String message, @Nullable BotSnapshot snapshot) {
             return new RemoteOperationResponse(true, message, snapshot, null);
         }
 
@@ -622,69 +637,69 @@ public final class RemoteApiServer {
     }
 
     public static final class EventBotSpawnPayload {
-        public UUID ownerUUID;
-        public UUID botUUID;
-        public List<UUID> targetUUIDs;
-        public String botNameTemplate;
-        public String botSkin;
-        public Boolean follow;
-        public Boolean changeableFollow;
-        public Boolean combat;
-        public Boolean changeableCombat;
-        public Boolean changeableBlast;
-        public Boolean changeableArmor;
-        public Boolean changeableTotem;
-        public Boolean changeableDifficulty;
-        public Boolean changeableCombatMode;
-        public String armor;
-        public String minArmor;
-        public String maxArmor;
-        public Integer totemCount;
-        public Integer minTotemCount;
-        public Integer maxTotemCount;
-        public String difficulty;
-        public String minDifficulty;
-        public String maxDifficulty;
-        public String combatMode;
-        public CombatTuning combatTuning;
-        public RemoteLocationPayload spawnLocation;
-        public Boolean autoTarget;
-        public Double autoTargetRange;
-        public Boolean attackBots;
-        public String targetMode;
-        public Boolean respectWorldGuardPvp;
-        public Boolean stayAfterOwnerDeath;
-        public Boolean idleWander;
-        public Double idleWanderRadius;
-        public Double idleReturnDistance;
-        public Long idleReturnDelayMs;
-        public Boolean crystalPvp;
-        public Boolean explosions;
-        public Boolean explosionBlockDamage;
-        public Boolean enderPearls;
-        public Boolean healing;
-        public Boolean killMessageEnabled;
-        public String killMessage;
-        public Map<String, EquipmentSlotPayload> equipmentSlots;
+        public @Nullable UUID ownerUUID;
+        public @Nullable UUID botUUID;
+        public @Nullable List<UUID> targetUUIDs;
+        public @Nullable String botNameTemplate;
+        public @Nullable String botSkin;
+        public @Nullable Boolean follow;
+        public @Nullable Boolean changeableFollow;
+        public @Nullable Boolean combat;
+        public @Nullable Boolean changeableCombat;
+        public @Nullable Boolean changeableBlast;
+        public @Nullable Boolean changeableArmor;
+        public @Nullable Boolean changeableTotem;
+        public @Nullable Boolean changeableDifficulty;
+        public @Nullable Boolean changeableCombatMode;
+        public @Nullable String armor;
+        public @Nullable String minArmor;
+        public @Nullable String maxArmor;
+        public @Nullable Integer totemCount;
+        public @Nullable Integer minTotemCount;
+        public @Nullable Integer maxTotemCount;
+        public @Nullable String difficulty;
+        public @Nullable String minDifficulty;
+        public @Nullable String maxDifficulty;
+        public @Nullable String combatMode;
+        public @Nullable CombatTuning combatTuning;
+        public @Nullable RemoteLocationPayload spawnLocation;
+        public @Nullable Boolean autoTarget;
+        public @Nullable Double autoTargetRange;
+        public @Nullable Boolean attackBots;
+        public @Nullable String targetMode;
+        public @Nullable Boolean respectWorldGuardPvp;
+        public @Nullable Boolean stayAfterOwnerDeath;
+        public @Nullable Boolean idleWander;
+        public @Nullable Double idleWanderRadius;
+        public @Nullable Double idleReturnDistance;
+        public @Nullable Long idleReturnDelayMs;
+        public @Nullable Boolean crystalPvp;
+        public @Nullable Boolean explosions;
+        public @Nullable Boolean explosionBlockDamage;
+        public @Nullable Boolean enderPearls;
+        public @Nullable Boolean healing;
+        public @Nullable Boolean killMessageEnabled;
+        public @Nullable String killMessage;
+        public @Nullable Map<String, EquipmentSlotPayload> equipmentSlots;
     }
 
     public static final class EquipmentSlotPayload {
-        public String mode;
-        public String material;
-        public Integer amount;
+        public @Nullable String mode;
+        public @Nullable String material;
+        public @Nullable Integer amount;
     }
 
     public static final class TargetModePayload {
-        public String targetMode;
+        public @Nullable String targetMode;
     }
 
     public static final class CombatModePayload {
-        public String combatMode;
+        public @Nullable String combatMode;
     }
 
     public static final class RemoteLocationPayload {
-        public String worldName;
-        public UUID worldUUID;
+        public @Nullable String worldName;
+        public @Nullable UUID worldUUID;
         public double x;
         public double y;
         public double z;
@@ -693,6 +708,6 @@ public final class RemoteApiServer {
     }
 
     public static final class TogglePayload {
-        public Boolean enabled;
+        public @Nullable Boolean enabled;
     }
 }

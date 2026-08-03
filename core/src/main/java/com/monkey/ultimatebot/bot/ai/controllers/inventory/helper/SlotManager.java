@@ -131,7 +131,7 @@ public final class SlotManager implements ISlotManager {
             resourceReplenisher.replenishItem(hotbarSlots, currentSlot);
         }
 
-        return current;
+        return current == null ? ItemStack.EMPTY : current;
     }
 
     @Override

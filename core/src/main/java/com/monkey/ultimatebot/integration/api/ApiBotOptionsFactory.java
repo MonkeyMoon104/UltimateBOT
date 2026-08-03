@@ -15,6 +15,7 @@ import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /** Maps the public API settings model into the mutable runtime options model. */
 final class ApiBotOptionsFactory {
@@ -31,7 +32,7 @@ final class ApiBotOptionsFactory {
             UUID targetUUID,
             Set<UUID> targetUUIDs,
             Set<UUID> teamOwners,
-            UUID requestedBotUUID,
+            @Nullable UUID requestedBotUUID,
             Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots,
             BotSettings settings) {
         BotOptions options =

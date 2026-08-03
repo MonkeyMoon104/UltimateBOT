@@ -56,7 +56,7 @@ public class BotGuiTabContext {
         return training.getBotManager().isBotSpawned(viewer.getUniqueId());
     }
 
-    public ITrainingBot resolveManagedBot() {
+    public @org.jspecify.annotations.Nullable ITrainingBot resolveManagedBot() {
         return training.getBotManager().getBotSafe(resolveManagedOwnerUUID());
     }
 

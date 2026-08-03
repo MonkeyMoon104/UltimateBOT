@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class BotPlaceholderCoordinator extends PlaceholderExpansion implements PlaceholderRegistration {
 
@@ -93,7 +94,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
     }
 
     @Override
-    public String onPlaceholderRequest(Player player, String identifier) {
+    public @Nullable String onPlaceholderRequest(@Nullable Player player, @Nullable String identifier) {
         if (player == null || identifier == null) {
             return null;
         }

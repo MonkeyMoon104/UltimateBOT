@@ -36,6 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.jspecify.annotations.Nullable;
 
 public class BotAI {
 
@@ -314,7 +315,7 @@ public class BotAI {
                 && !teleportController.isTeleporting();
     }
 
-    private LivingEntity resolveNmsTarget(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
+    private @Nullable LivingEntity resolveNmsTarget(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
         if (targetBukkitPlayer instanceof CraftLivingEntity craftLivingEntity) {
             return craftLivingEntity.getHandle();
         }

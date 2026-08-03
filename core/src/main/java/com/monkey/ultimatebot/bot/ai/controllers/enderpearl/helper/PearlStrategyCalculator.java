@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlS
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
@@ -88,8 +89,8 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
     }
 
     @Override
-    public Vec3 calculateTargetForStrategy(
-            PearlStrategy strategy, Player bot, Player target, Vec3 predictedTargetMovement) {
+    public @Nullable Vec3 calculateTargetForStrategy(
+            PearlStrategy strategy, Player bot, Player target, @Nullable Vec3 predictedTargetMovement) {
         return switch (strategy) {
             case COMBO_ESCAPE, ESCAPE -> positionCalculator.calculateEmergencyEscape(bot, target);
             case MELEE_DISENGAGE -> positionCalculator.calculateMeleeDisengage(bot, target);

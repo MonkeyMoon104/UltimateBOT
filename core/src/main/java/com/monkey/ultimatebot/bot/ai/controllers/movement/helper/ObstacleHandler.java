@@ -7,6 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class ObstacleHandler implements IObstacleHandler {
     private final Player bot;
@@ -15,7 +16,7 @@ public class ObstacleHandler implements IObstacleHandler {
     private final double movementSpeed;
     private final double jumpVelocity;
 
-    private double[] diversionDirection = null;
+    private double @Nullable [] diversionDirection;
     private int diversionTicks = 0;
     private boolean isUnderFire = false;
 
@@ -91,7 +92,7 @@ public class ObstacleHandler implements IObstacleHandler {
         }
     }
 
-    private double[] findAlternativeDirection(double dx, double dz, int maxTries) {
+    private double @Nullable [] findAlternativeDirection(double dx, double dz, int maxTries) {
         double angle = Math.atan2(dz, dx);
 
         for (int i = 1; i <= maxTries; i++) {

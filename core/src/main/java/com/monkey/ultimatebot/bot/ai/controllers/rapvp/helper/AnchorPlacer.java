@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 public class AnchorPlacer {
 
@@ -66,7 +67,7 @@ public class AnchorPlacer {
         }
     }
 
-    private Direction findBestPlacementFace(BlockPos targetPos) {
+    private @Nullable Direction findBestPlacementFace(BlockPos targetPos) {
         Vec3 botPos = bot.position();
 
         for (Direction direction : Direction.Plane.HORIZONTAL) {

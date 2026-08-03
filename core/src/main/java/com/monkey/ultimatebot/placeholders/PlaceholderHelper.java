@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 
 public class PlaceholderHelper {
 
@@ -13,7 +14,7 @@ public class PlaceholderHelper {
         this.plugin = plugin;
     }
 
-    public ITrainingBot getBotForPlaceholder(Player player) {
+    public @Nullable ITrainingBot getBotForPlaceholder(Player player) {
         ITrainingBot eventBot = getActiveEventBot();
         if (eventBot != null) {
             return eventBot;
@@ -22,7 +23,7 @@ public class PlaceholderHelper {
         return plugin.getBotManager().getBotByParticipant(player.getUniqueId());
     }
 
-    private ITrainingBot getActiveEventBot() {
+    private @Nullable ITrainingBot getActiveEventBot() {
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
                 var botOptions = bot.getBrainController().getBotOptions();
