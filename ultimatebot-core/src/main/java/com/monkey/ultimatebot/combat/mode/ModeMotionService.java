@@ -81,6 +81,19 @@ final class ModeMotionService {
         movement.clearPath();
     }
 
+    void knockAway(LivingEntity target, double horizontalStrength, double verticalStrength) {
+        Vec3 away = target.position().subtract(bot.position());
+        double horizontalLength = Math.hypot(away.x, away.z);
+        if (horizontalLength < 0.001D) {
+            return;
+        }
+        target.setDeltaMovement(
+                away.x / horizontalLength * horizontalStrength,
+                verticalStrength,
+                away.z / horizontalLength * horizontalStrength);
+        target.hurtMarked = true;
+    }
+
     void stop() {
         movement.stopMovement();
     }

@@ -1,38 +1,28 @@
 package com.monkey.ultimatebot.combat.mode;
 
-import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
 
 final class TridentPvPStrategy extends AbstractCombatModeStrategy {
-    private static final int WATER_SLOT = BotInventoryController.TOTEM_SLOT;
-    private static final int WEB_SLOT = BotInventoryController.OBSIDIAN_SLOT;
-    private static final int SPONGE_SLOT = BotInventoryController.CRYSTAL_SLOT;
-    private static final int RIPTIDE_COOLDOWN_TICKS = 60;
-    private static final int TRIDENT_DRAW_TICKS = 10;
+    private static final int RIPTIDE_COOLDOWN_TICKS = 45;
+    private static final int RIPTIDE_CHARGE_TICKS = 6;
+    private static final int LOYALTY_DRAW_TICKS = 9;
 
     private final TridentUtilityActions utilityActions = new TridentUtilityActions();
+    private final TridentSpongeWebController spongeWebController = new TridentSpongeWebController();
     private Phase phase = Phase.SELECT_ATTACK;
     private int phaseTicks;
     private long nextRiptideTick;
 
     TridentPvPStrategy() {
-        super(
-                CombatMode.TRIDENT,
-                ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.TRIDENT)
-                        .slot(WATER_SLOT, Items.WATER_BUCKET, 4)
-                        .slot(WEB_SLOT, Items.COBWEB, 16)
-                        .slot(SPONGE_SLOT, Items.SPONGE, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .build());
+        super(CombatMode.TRIDENT, TridentLoadout.create());
     }
 
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
         utilityActions.reset();
+        spongeWebController.reset();
         nextRiptideTick = 0L;
         transitionTo(Phase.SELECT_ATTACK);
     }
@@ -40,7 +30,7 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     public void exit(CombatModeContext context) {
         utilityActions.restoreWater(context);
-        utilityActions.restoreSponge(context);
+        spongeWebController.reset();
         super.exit(context);
     }
 
@@ -50,13 +40,15 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         phaseTicks++;
         switch (phase) {
             case SELECT_ATTACK -> selectAttack(context, target);
-            case PREPARE_RIPTIDE -> prepareRiptide(context);
-            case RIPTIDE -> riptide(context, target);
+            case PREPARE_WATER -> prepareWater(context);
+            case CHARGE_RIPTIDE -> chargeRiptide(context, target);
+            case RIPTIDE_FLIGHT -> riptideFlight(context, target);
             case AIR_HIT -> airHit(context, target);
-            case DRAW_TRIDENT -> drawTrident(context, target);
-            case THROW_RECOVERY -> throwRecovery(context, target);
-            case MELEE -> melee(context, target);
-            case TRAP -> trap(context, target);
+            case LOYALTY_DRAW -> loyaltyDraw(context, target);
+            case LOYALTY_RECOVERY -> loyaltyRecovery(context, target);
+            case GROUND_HIT -> groundHit(context, target);
+            case HOE_SWAP -> hoeSwap(context, target);
+            case SPONGE_WEB -> spongeWeb(context, target);
             case RECOVER -> recover(context, target);
         }
     }
@@ -64,116 +56,124 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     private void selectAttack(CombatModeContext context, LivingEntity target) {
         double distance = context.motion().distanceTo(target);
         if (context.motion().isBotInWater()) {
-            transitionTo(Phase.RIPTIDE);
-        } else if (currentTick() >= nextRiptideTick
-                && distance >= 3.5D
-                && distance <= 12.0D
-                && context.random().nextDouble() < 0.35D) {
-            transitionTo(Phase.PREPARE_RIPTIDE);
-        } else if (distance >= 3.8D) {
-            transitionTo(Phase.DRAW_TRIDENT);
+            transitionTo(Phase.CHARGE_RIPTIDE);
+        } else if (currentTick() >= nextRiptideTick && distance >= 4.0D && distance <= 14.0D) {
+            transitionTo(Phase.PREPARE_WATER);
+        } else if (distance >= 5.0D) {
+            transitionTo(Phase.LOYALTY_DRAW);
         } else {
-            transitionTo(Phase.MELEE);
+            transitionTo(Phase.GROUND_HIT);
         }
     }
 
-    private void prepareRiptide(CombatModeContext context) {
+    private void prepareWater(CombatModeContext context) {
         if (phaseTicks == 1) {
             utilityActions.selectWater(context);
         } else if (phaseTicks == 2) {
             utilityActions.placeWater(context);
         }
-        if (phaseTicks >= 4) {
+        if (phaseTicks >= 5) {
             nextRiptideTick = currentTick() + RIPTIDE_COOLDOWN_TICKS;
-            transitionTo(utilityActions.isWaterPrepared() ? Phase.RIPTIDE : Phase.DRAW_TRIDENT);
+            transitionTo(utilityActions.isWaterPrepared() ? Phase.CHARGE_RIPTIDE : Phase.LOYALTY_DRAW);
         }
     }
 
-    private void riptide(CombatModeContext context, LivingEntity target) {
-        context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
-        context.motion().setSwimming(true);
+    private void chargeRiptide(CombatModeContext context, LivingEntity target) {
+        context.inventory().switchToSlot(TridentLoadout.RIPTIDE_SLOT);
         if (phaseTicks == 1) {
-            utilityActions.restoreWater(context);
-            context.motion().propelTowards(target, 0.72D, riptideVerticalVelocity(context, target));
-        } else {
-            context.motion().steerVelocityTowards(target, 0.42D, context.bot().getDeltaMovement().y);
+            context.actions().useMainhandItem();
         }
-        if (context.motion().distanceTo(target) <= 3.1D || phaseTicks >= 7) {
+        context.motion().stop();
+        if (phaseTicks >= RIPTIDE_CHARGE_TICKS) {
+            context.actions().releaseUseItem();
+            context.motion().setSwimming(true);
+            context.motion().propelTowards(target, 0.75D, utilityActions.riptideVerticalVelocity(context, target));
+            transitionTo(Phase.RIPTIDE_FLIGHT);
+        }
+    }
+
+    private void riptideFlight(CombatModeContext context, LivingEntity target) {
+        if (phaseTicks == 2) {
+            utilityActions.restoreWater(context);
+        }
+        context.motion().steerVelocityTowards(target, 0.46D, context.bot().getDeltaMovement().y);
+        if (context.motion().distanceTo(target) <= 3.0D || phaseTicks >= 8) {
             context.motion().setSwimming(false);
             transitionTo(Phase.AIR_HIT);
         }
     }
 
     private void airHit(CombatModeContext context, LivingEntity target) {
-        context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
+        context.inventory().switchToSlot(TridentLoadout.RIPTIDE_SLOT);
         context.motion().steerVelocityTowards(target, 0.34D, context.bot().getDeltaMovement().y);
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
-            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+            context.actions().attack(target, TridentLoadout.RIPTIDE_SLOT);
             transitionTo(Phase.RECOVER);
         } else if (phaseTicks >= 5) {
-            transitionTo(Phase.DRAW_TRIDENT);
+            transitionTo(Phase.LOYALTY_DRAW);
         }
     }
 
-    private void drawTrident(CombatModeContext context, LivingEntity target) {
+    private void loyaltyDraw(CombatModeContext context, LivingEntity target) {
+        context.inventory().switchToSlot(TridentLoadout.LOYALTY_SLOT);
         if (phaseTicks == 1) {
-            context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
             context.actions().useMainhandItem();
         }
-        context.motion().retreat(target, 5.0D);
-        if (phaseTicks >= TRIDENT_DRAW_TICKS) {
+        context.motion().retreat(target, 6.0D);
+        if (phaseTicks >= LOYALTY_DRAW_TICKS) {
             context.actions().releaseUseItem();
             context.projectiles().fireTrident(target, context.tuning().aimAccuracy());
-            transitionTo(Phase.THROW_RECOVERY);
+            transitionTo(Phase.LOYALTY_RECOVERY);
         }
     }
 
-    private void throwRecovery(CombatModeContext context, LivingEntity target) {
-        context.motion().strafe(target, 1.1D);
-        if (phaseTicks >= 5) {
-            boolean trapOpportunity = context.motion().distanceTo(target) <= 5.0D
-                    && context.random().nextDouble() < 0.3D;
-            transitionTo(trapOpportunity ? Phase.TRAP : Phase.RECOVER);
+    private void loyaltyRecovery(CombatModeContext context, LivingEntity target) {
+        context.motion().strafe(target, 0.7D);
+        if (phaseTicks >= 6) {
+            transitionTo(context.motion().distanceTo(target) <= 4.0D ? Phase.GROUND_HIT : Phase.SELECT_ATTACK);
         }
     }
 
-    private void melee(CombatModeContext context, LivingEntity target) {
-        context.actions().releaseUseItem();
+    private void groundHit(CombatModeContext context, LivingEntity target) {
         double distance = context.motion().distanceTo(target);
-        if (distance <= context.tuning().attackRange()) {
-            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
-            transitionTo(Phase.RECOVER);
-        } else {
-            context.motion().approach(target, 2.3D);
+        if (distance > context.tuning().attackRange()) {
+            context.motion().approach(target, 2.2D);
+            if (phaseTicks >= 8) {
+                transitionTo(Phase.SELECT_ATTACK);
+            }
+            return;
         }
-        if (phaseTicks >= 8) {
-            transitionTo(Phase.DRAW_TRIDENT);
+        context.actions().attack(target, TridentLoadout.RIPTIDE_SLOT);
+        transitionTo(Phase.HOE_SWAP);
+    }
+
+    private void hoeSwap(CombatModeContext context, LivingEntity target) {
+        if (phaseTicks == 1) {
+            context.inventory().switchToSlot(TridentLoadout.HOE_SLOT);
+            context.motion().knockAway(target, 0.48D, 0.16D);
+            context.actions().swingMainHand();
+        }
+        if (phaseTicks >= 3) {
+            boolean trapOpportunity = context.motion().distanceTo(target) <= 4.5D
+                    && context.random().nextDouble() < 0.18D + context.tuning().aggression() * 0.35D;
+            transitionTo(trapOpportunity ? Phase.SPONGE_WEB : Phase.RECOVER);
         }
     }
 
-    private void trap(CombatModeContext context, LivingEntity target) {
-        if (phaseTicks == 1) {
-            utilityActions.placeWeb(context, target);
-        } else if (phaseTicks == 3) {
-            utilityActions.placeSponge(context, target);
-        }
-        context.motion().retreat(target, 5.0D);
-        if (phaseTicks >= 7) {
-            utilityActions.restoreSponge(context);
+    private void spongeWeb(CombatModeContext context, LivingEntity target) {
+        context.motion().retreat(target, 4.5D);
+        if (spongeWebController.tick(context, target, phaseTicks)) {
+            spongeWebController.reset();
             transitionTo(Phase.RECOVER);
         }
     }
 
     private void recover(CombatModeContext context, LivingEntity target) {
-        context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
-        context.motion().strafe(target, 1.2D);
+        context.inventory().switchToSlot(TridentLoadout.RIPTIDE_SLOT);
+        context.motion().strafe(target, 0.8D);
         if (phaseTicks >= 5) {
             transitionTo(Phase.SELECT_ATTACK);
         }
-    }
-
-    private double riptideVerticalVelocity(CombatModeContext context, LivingEntity target) {
-        return Math.clamp((target.getY() - context.bot().getY()) * 0.22D + 0.24D, 0.12D, 0.52D);
     }
 
     private void transitionTo(Phase nextPhase) {
@@ -183,13 +183,15 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
 
     private enum Phase {
         SELECT_ATTACK,
-        PREPARE_RIPTIDE,
-        RIPTIDE,
+        PREPARE_WATER,
+        CHARGE_RIPTIDE,
+        RIPTIDE_FLIGHT,
         AIR_HIT,
-        DRAW_TRIDENT,
-        THROW_RECOVERY,
-        MELEE,
-        TRAP,
+        LOYALTY_DRAW,
+        LOYALTY_RECOVERY,
+        GROUND_HIT,
+        HOE_SWAP,
+        SPONGE_WEB,
         RECOVER
     }
 }

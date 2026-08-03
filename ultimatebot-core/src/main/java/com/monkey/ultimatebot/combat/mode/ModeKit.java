@@ -56,6 +56,18 @@ final class ModeKit {
             return this;
         }
 
+        Builder slot(int slot, ItemStack item) {
+            if (slot < 0 || slot > 8) {
+                throw new IllegalArgumentException("Hotbar slot must be between 0 and 8: " + slot);
+            }
+            ItemStack checkedItem = Objects.requireNonNull(item, "item");
+            if (checkedItem.isEmpty()) {
+                throw new IllegalArgumentException("Mode kit item cannot be empty");
+            }
+            slots.put(slot, checkedItem.copy());
+            return this;
+        }
+
         Builder equipment(EquipmentSlot slot, Item item) {
             EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
             if (checkedSlot == EquipmentSlot.MAINHAND || checkedSlot == EquipmentSlot.BODY) {
