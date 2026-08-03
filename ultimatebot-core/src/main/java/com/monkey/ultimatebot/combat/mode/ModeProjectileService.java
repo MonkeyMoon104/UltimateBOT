@@ -3,12 +3,17 @@ package com.monkey.ultimatebot.combat.mode;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
 import net.minecraft.world.entity.LivingEntity;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Trident;
 import org.bukkit.entity.WindCharge;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.util.Vector;
 
 final class ModeProjectileService {
@@ -52,6 +57,19 @@ final class ModeProjectileService {
 
     void launchSelfWindCharge() {
         tracker.track(shooter.launchProjectile(WindCharge.class, new Vector(0.0D, -1.35D, 0.0D)));
+    }
+
+    void throwSplashPotionDownward(Color color) {
+        Objects.requireNonNull(color, "color");
+        ItemStack item = new ItemStack(Material.SPLASH_POTION);
+        if (item.getItemMeta() instanceof PotionMeta potionMeta) {
+            potionMeta.setColor(color);
+            item.setItemMeta(potionMeta);
+        }
+        ThrownPotion potion =
+                tracker.track(shooter.launchProjectile(ThrownPotion.class, new Vector(0.0D, -0.85D, 0.0D)));
+        potion.setItem(item);
+        shooter.swingMainHand();
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {

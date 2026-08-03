@@ -35,6 +35,9 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getEntity().getUniqueId());
         if (context == null) return;
         Entity damager = event instanceof EntityDamageByEntityEvent byEntity ? byEntity.getDamager() : null;
+        if (damager != null && context.bot.asPlayer().isBlocking()) {
+            context.bot.getBotAI().recordShieldImpact(damager.getUniqueId());
+        }
         BotDamageEvent botEvent = new BotDamageEvent(
                 dispatcher.nextSequence(context.snapshot.botUUID()),
                 context.snapshot,
@@ -99,8 +102,8 @@ public final class BotRuntimeEventListener implements Listener {
         if (ownerUUID == null) return null;
         ITrainingBot bot = plugin.getBotRegistry().getBot(ownerUUID);
         BotSnapshot snapshot = dispatcher.snapshot(ownerUUID, bot);
-        return snapshot == null ? null : new BotContext(snapshot);
+        return snapshot == null ? null : new BotContext(bot, snapshot);
     }
 
-    private record BotContext(BotSnapshot snapshot) {}
+    private record BotContext(ITrainingBot bot, BotSnapshot snapshot) {}
 }

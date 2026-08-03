@@ -14,13 +14,21 @@ import org.jspecify.annotations.Nullable;
 final class ModeBlockTracker implements AutoCloseable {
     private final Set<BlockKey> blocks = new HashSet<>();
 
+    boolean canPlace(Location location, Material material) {
+        Objects.requireNonNull(location, "location");
+        Material checkedMaterial = Objects.requireNonNull(material, "material");
+        Block block = location.getBlock();
+        return block.isPassable()
+                && !block.isLiquid()
+                && (!requiresSupport(checkedMaterial)
+                        || block.getRelative(0, -1, 0).getType().isSolid());
+    }
+
     boolean place(Location location, Material material) {
         Objects.requireNonNull(location, "location");
         Material checkedMaterial = Objects.requireNonNull(material, "material");
         Block block = location.getBlock();
-        if (!block.isPassable()
-                || block.isLiquid()
-                || !block.getRelative(0, -1, 0).getType().isSolid()) {
+        if (!canPlace(location, checkedMaterial)) {
             return false;
         }
         blocks.add(BlockKey.from(block));
@@ -45,6 +53,10 @@ final class ModeBlockTracker implements AutoCloseable {
             }
         }
         blocks.clear();
+    }
+
+    private static boolean requiresSupport(Material material) {
+        return material == Material.RAIL;
     }
 
     private static void broadcast(Location location, BlockData blockData) {

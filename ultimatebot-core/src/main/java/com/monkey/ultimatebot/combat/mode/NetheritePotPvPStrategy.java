@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
+import org.bukkit.Color;
 
 final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private static final int FIRST_POTION_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -12,6 +13,7 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
 
     private Phase phase = Phase.PREBUFF;
     private int phaseTicks;
+    private boolean potionPrepared;
 
     NetheritePotPvPStrategy() {
         super(
@@ -29,6 +31,7 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     @Override
     public void enter(CombatModeContext context) {
         super.enter(context);
+        potionPrepared = false;
         transitionTo(Phase.PREBUFF);
     }
 
@@ -50,9 +53,15 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private void prebuff(CombatModeContext context) {
         if (phaseTicks == 1 && context.inventory().consumeItem(FIRST_POTION_SLOT)) {
             context.inventory().switchToSlot(FIRST_POTION_SLOT);
+            potionPrepared = true;
+        }
+        if (phaseTicks == 2 && potionPrepared) {
+            context.projectiles().throwSplashPotionDownward(Color.PURPLE);
+        }
+        if (phaseTicks == 4 && potionPrepared) {
             context.actions().applyCombatBuffs();
         }
-        if (phaseTicks >= 5) {
+        if (phaseTicks >= 6) {
             transitionTo(Phase.TRADE);
         }
     }
@@ -93,9 +102,15 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private void splash(CombatModeContext context, int slot, Phase nextPhase) {
         if (phaseTicks == 1 && context.inventory().consumeItem(slot)) {
             context.inventory().switchToSlot(slot);
+            potionPrepared = true;
+        }
+        if (phaseTicks == 2 && potionPrepared) {
+            context.projectiles().throwSplashPotionDownward(Color.RED);
+        }
+        if (phaseTicks == 4 && potionPrepared) {
             context.actions().applyInstantHealth(1);
         }
-        if (phaseTicks >= 2) {
+        if (phaseTicks >= 5) {
             transitionTo(nextPhase);
         }
     }
@@ -122,6 +137,7 @@ final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private void transitionTo(Phase nextPhase) {
         phase = nextPhase;
         phaseTicks = 0;
+        potionPrepared = false;
     }
 
     private enum Phase {

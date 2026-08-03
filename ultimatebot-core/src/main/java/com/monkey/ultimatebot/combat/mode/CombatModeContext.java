@@ -31,6 +31,7 @@ final class CombatModeContext implements AutoCloseable {
     private final ModeProjectileService projectiles;
     private final ModeMotionService motion;
     private final ModeCombatActions actions;
+    private final ModeCombatSignals signals;
     private final RandomGenerator random;
 
     CombatModeContext(
@@ -62,6 +63,7 @@ final class CombatModeContext implements AutoCloseable {
         this.projectiles = new ModeProjectileService(bukkitBot, entities, random);
         this.motion = new ModeMotionService(bot, movement, rotation, this::tuning, random);
         this.actions = new ModeCombatActions(bot, bukkitBot, attack, inventory, this::tuning);
+        this.signals = new ModeCombatSignals();
     }
 
     CombatTuning tuning() {
@@ -112,6 +114,10 @@ final class CombatModeContext implements AutoCloseable {
         return actions;
     }
 
+    ModeCombatSignals signals() {
+        return signals;
+    }
+
     RandomGenerator random() {
         return random;
     }
@@ -123,10 +129,15 @@ final class CombatModeContext implements AutoCloseable {
     void clearTransientState() {
         entities.close();
         blocks.close();
+        signals.clear();
     }
 
     boolean placeTemporaryBlock(Location location, Material material) {
         return blocks.place(location, material);
+    }
+
+    boolean canPlaceTemporaryBlock(Location location, Material material) {
+        return blocks.canPlace(location, material);
     }
 
     void restoreTemporaryBlock(Location location) {
@@ -144,6 +155,7 @@ final class CombatModeContext implements AutoCloseable {
         crystal.setEnabled(false);
         entities.close();
         blocks.close();
+        signals.clear();
         inventorySession.close();
         movement.resetCombatState();
         motion.setSwimming(false);

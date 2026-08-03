@@ -12,6 +12,7 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
@@ -77,6 +78,13 @@ public final class CombatModeEngine implements AutoCloseable {
         }
         activeStrategy.exit(context);
         suspended = true;
+    }
+
+    public void recordShieldImpact(UUID attackerUUID) {
+        Objects.requireNonNull(attackerUUID, "attackerUUID");
+        if (!closed) {
+            context.signals().recordShieldImpact(attackerUUID);
+        }
     }
 
     public void deactivate() {

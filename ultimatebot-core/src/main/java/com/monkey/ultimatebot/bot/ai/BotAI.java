@@ -27,6 +27,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import java.util.Objects;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -299,6 +301,10 @@ public class BotAI {
 
     public CombatState getCurrentState() {
         return CombatState.valueOf(combatStateManager.getCurrentState().name());
+    }
+
+    public void recordShieldImpact(UUID attackerUUID) {
+        combatModeEngine.recordShieldImpact(Objects.requireNonNull(attackerUUID, "attackerUUID"));
     }
 
     private boolean canForceVerticalTeleport() {

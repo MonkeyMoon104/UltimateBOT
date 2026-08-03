@@ -9,6 +9,8 @@ import net.minecraft.world.item.Items;
 final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.GUARD;
     private int safeOpeningTicks;
+    private int guardMovementCooldownTicks;
+    private boolean counterStrike;
 
     AxeShieldPvPStrategy() {
         super(
@@ -24,6 +26,8 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     public void enter(CombatModeContext context) {
         super.enter(context);
         safeOpeningTicks = 0;
+        guardMovementCooldownTicks = 0;
+        counterStrike = false;
         transitionTo(Phase.GUARD);
     }
 
@@ -41,6 +45,20 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
         context.actions().defendWithOffhand();
         double distance = context.motion().distanceTo(target);
+        if (guardMovementCooldownTicks > 0) {
+            guardMovementCooldownTicks--;
+        }
+        if (context.signals().consumeShieldImpact(target.getUUID())
+                && ModeCombatPolicy.shouldCounterShieldImpact(
+                        distance,
+                        context.tuning().attackRange(),
+                        context.actions().canAttack(),
+                        context.tuning().aggression(),
+                        context.random().nextDouble())) {
+            counterStrike = true;
+            transitionTo(Phase.AXE_STRIKE);
+            return;
+        }
         if (distance > context.tuning().attackRange()) {
             safeOpeningTicks = 0;
             context.motion().approach(target, 2.0D);
@@ -50,10 +68,11 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         boolean incomingAttack = context.actions().isIncomingAttackLikely(target);
         if (incomingAttack) {
             safeOpeningTicks = 0;
-            if (distance <= 2.6D) {
+            if (distance <= 1.9D && guardMovementCooldownTicks == 0) {
                 context.motion().retreat(target, 3.2D);
-            } else {
-                context.motion().strafe(target, 0.65D);
+                guardMovementCooldownTicks = 5;
+            } else if (guardMovementCooldownTicks == 0) {
+                context.motion().stop();
             }
             return;
         }
@@ -71,16 +90,18 @@ final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
 
     private void axeStrike(CombatModeContext context, LivingEntity target) {
         double distance = context.motion().distanceTo(target);
-        if (context.actions().isIncomingAttackLikely(target)
+        if ((!counterStrike && context.actions().isIncomingAttackLikely(target))
                 || distance > context.tuning().attackRange()
                 || !context.actions().canAttack()) {
             safeOpeningTicks = 0;
+            counterStrike = false;
             transitionTo(Phase.GUARD);
             return;
         }
         context.actions().releaseUseItem();
         context.actions().attack(target, BotInventoryController.SWORD_SLOT);
         safeOpeningTicks = 0;
+        counterStrike = false;
         transitionTo(Phase.GUARD);
     }
 

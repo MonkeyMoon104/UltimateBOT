@@ -34,7 +34,8 @@ final class ModeCombatPolicy {
             return false;
         }
         boolean aimedItemUse = usingItem && distance <= 8.0D && facingDot >= 0.35D;
-        boolean immediateSwing = distance <= 3.55D && attackStrength >= 0.72D && facingDot >= 0.05D;
+        boolean immediateSwing =
+                distance <= 3.55D && attackStrength >= 0.72D && closingSpeed >= 0.01D && facingDot >= 0.05D;
         boolean rushingAttack =
                 distance <= 4.8D && attackStrength >= 0.45D && closingSpeed >= 0.035D && facingDot >= 0.25D;
         return aimedItemUse || immediateSwing || rushingAttack;
@@ -43,6 +44,12 @@ final class ModeCombatPolicy {
     static boolean isSafeAxeOpening(
             double distance, double attackRange, boolean incomingAttack, boolean attackReady, int guardedTicks) {
         return distance <= attackRange && !incomingAttack && attackReady && guardedTicks >= 3;
+    }
+
+    static boolean shouldCounterShieldImpact(
+            double distance, double attackRange, boolean attackReady, double aggression, double randomRoll) {
+        double counterChance = 0.35D + Math.clamp(aggression, 0.0D, 1.0D) * 0.5D;
+        return distance <= attackRange && attackReady && randomRoll < counterChance;
     }
 
     static boolean isBowFullyDrawn(int drawTicks) {

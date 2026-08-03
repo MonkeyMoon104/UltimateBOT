@@ -44,6 +44,13 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     @Override
+    public void exit(CombatModeContext context) {
+        restoreWater(context);
+        restoreTrap(context);
+        super.exit(context);
+    }
+
+    @Override
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
@@ -64,7 +71,10 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
             transitionTo(Phase.RIPTIDE);
             return;
         }
-        if (phaseTicks == 1 && context.inventory().consumeItem(WATER_SLOT)) {
+        if (phaseTicks == 1) {
+            context.inventory().switchToSlot(WATER_SLOT);
+        }
+        if (phaseTicks == 2 && context.inventory().consumeItem(WATER_SLOT)) {
             Location placement = Objects.requireNonNull(context.bukkitBot().getLocation(), "bot location")
                     .getBlock()
                     .getLocation();
@@ -73,20 +83,23 @@ final class TridentPvPStrategy extends AbstractCombatModeStrategy {
             }
         }
         if (phaseTicks >= 4) {
-            restoreWater(context);
-            transitionTo(context.motion().isBotInWater() ? Phase.RIPTIDE : Phase.LOYALTY_THROW);
+            transitionTo(waterLocation != null ? Phase.RIPTIDE : Phase.LOYALTY_THROW);
         }
     }
 
     private void riptide(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
-        context.motion().setSwimming(context.motion().isBotInWater());
+        context.motion().setSwimming(true);
+        if (phaseTicks == 1) {
+            restoreWater(context);
+        }
         context.motion()
                 .propelTowards(
                         target,
                         0.72D,
                         Math.clamp((target.getY() - context.bot().getY()) * 0.22D + 0.24D, 0.12D, 0.52D));
         if (context.motion().distanceTo(target) <= 3.1D || phaseTicks >= 9) {
+            context.motion().setSwimming(false);
             transitionTo(Phase.AIR_HIT);
         }
     }
