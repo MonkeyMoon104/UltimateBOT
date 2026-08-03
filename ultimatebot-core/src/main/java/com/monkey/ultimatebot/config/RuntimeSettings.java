@@ -35,7 +35,7 @@ public record RuntimeSettings(
     }
 
     public record WorldProtectionSettings(
-            boolean blockDamage,
+            boolean allowBotExplosionBlockDamage,
             boolean antiDupe,
             int combatBlockLifetimeSeconds,
             int maxActiveCombatBlocks,

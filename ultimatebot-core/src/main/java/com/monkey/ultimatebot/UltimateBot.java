@@ -168,7 +168,8 @@ public final class UltimateBot extends JavaPlugin {
             startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
             startup.detail(
                     "World protection",
-                    "blockDamage=" + runtimeSettings.worldProtection().blockDamage()
+                    "allowBotExplosionBlockDamage="
+                            + runtimeSettings.worldProtection().allowBotExplosionBlockDamage()
                             + " | antiDupe=" + runtimeSettings.worldProtection().antiDupe()
                             + " | combatBlockLimit="
                             + runtimeSettings.worldProtection().maxActiveCombatBlocks());

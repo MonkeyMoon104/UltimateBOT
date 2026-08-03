@@ -50,11 +50,19 @@ public final class ConfigurateRuntimeSettingsLoader {
                 defaults.maxActiveCombatBlocks(),
                 "max-active-combat-blocks");
         return new RuntimeSettings.WorldProtectionSettings(
-                node.node("block-damage").getBoolean(defaults.blockDamage()),
+                readExplosionBlockDamagePermission(node, defaults.allowBotExplosionBlockDamage()),
                 node.node("anti-dupe").getBoolean(defaults.antiDupe()),
                 lifetimeSeconds,
                 maximumBlocks,
                 node.node("respect-protection-plugins").getBoolean(defaults.respectProtectionPlugins()));
+    }
+
+    private boolean readExplosionBlockDamagePermission(ConfigurationNode node, boolean fallback) {
+        ConfigurationNode current = node.node("allow-bot-explosion-block-damage");
+        if (current.raw() != null) {
+            return current.getBoolean(fallback);
+        }
+        return node.node("block-damage").getBoolean(fallback);
     }
 
     private RuntimeSettings.CacheSettings readCache(

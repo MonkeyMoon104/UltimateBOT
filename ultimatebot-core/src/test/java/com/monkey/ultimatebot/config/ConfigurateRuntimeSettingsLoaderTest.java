@@ -28,7 +28,7 @@ class ConfigurateRuntimeSettingsLoaderTest {
                       maximum-size: 4096
                       expire-after-write-ms: 2000
                 protection-world:
-                  block-damage: true
+                  allow-bot-explosion-block-damage: true
                   anti-dupe: false
                   combat-block-lifetime-seconds: 45
                   max-active-combat-blocks: 512
@@ -45,6 +45,21 @@ class ConfigurateRuntimeSettingsLoaderTest {
         assertThat(settings.blockStateCache().expireAfterWrite()).isEqualTo(Duration.ofSeconds(2));
         assertThat(settings.worldProtection())
                 .isEqualTo(new RuntimeSettings.WorldProtectionSettings(true, false, 45, 512, false));
+    }
+
+    @Test
+    void supportsLegacyExplosionBlockDamagePermission() throws IOException {
+        Path configuration = temporaryDirectory.resolve("legacy-config.yml");
+        Files.writeString(configuration, """
+                protection-world:
+                  block-damage: true
+                """);
+
+        RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
+                        configuration, Logger.getLogger(ConfigurateRuntimeSettingsLoaderTest.class.getName()))
+                .load();
+
+        assertThat(settings.worldProtection().allowBotExplosionBlockDamage()).isTrue();
     }
 
     @Test

@@ -303,7 +303,7 @@ public final class BotOptions {
 
     public boolean canExplosionDamageBlocks() {
         return explosionBlockDamage
-                && training.getRuntimeSettings().worldProtection().blockDamage();
+                && training.getRuntimeSettings().worldProtection().allowBotExplosionBlockDamage();
     }
 
     public void setExplosionBlockDamage(boolean explosionBlockDamage) {

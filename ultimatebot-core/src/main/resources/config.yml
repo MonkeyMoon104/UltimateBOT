@@ -37,8 +37,8 @@ performance:
       expire-after-write-ms: 5000
 
 protection-world:
-  # Global ceiling for terrain destruction by bot explosions. Per-bot settings cannot override false.
-  block-damage: false
+  # Global permission for bot explosions to damage terrain. Per-bot settings cannot override false.
+  allow-bot-explosion-block-damage: false
   # Prevents drops and removes tracked bot blocks on shutdown. When false, they become normal server blocks.
   anti-dupe: true
   # Seconds before combat blocks are restored. Use 0 to keep them until broken or the configured limit is reached.
@@ -59,7 +59,7 @@ bot:
   combat:
     infinite-resources: true
     healing: true
-    # Keep entity damage/knockback while deciding independently whether bot explosions break terrain.
+    # Default per bot. Only effective when globally allowed under protection-world.
     explosion-block-damage: false
 
   event:
