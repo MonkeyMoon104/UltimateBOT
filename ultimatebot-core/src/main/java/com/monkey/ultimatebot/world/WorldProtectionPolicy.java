@@ -13,6 +13,10 @@ final class WorldProtectionPolicy {
         return antiDupe && tracked && materialMatches;
     }
 
+    static boolean shouldRemoveEntityOnShutdown(boolean antiDupe, boolean tracked) {
+        return antiDupe && tracked;
+    }
+
     static boolean hasPlacementSupport(Material material, boolean supportedBelow) {
         return material != Material.COBWEB || supportedBelow;
     }

@@ -9,7 +9,7 @@ public record RuntimeSettings(
     private static final CacheSettings DEFAULT_TARGET_CACHE = new CacheSettings(2_048, Duration.ofMillis(250));
     private static final CacheSettings DEFAULT_BLOCK_STATE_CACHE = new CacheSettings(1_000, Duration.ofSeconds(5));
     private static final WorldProtectionSettings DEFAULT_WORLD_PROTECTION =
-            new WorldProtectionSettings(false, true, 0, 2_048, true);
+            new WorldProtectionSettings(false, true, 0, 2_048, 0, 512, true);
 
     public RuntimeSettings {
         Objects.requireNonNull(targetCache, "targetCache");
@@ -39,6 +39,8 @@ public record RuntimeSettings(
             boolean antiDupe,
             int combatBlockLifetimeSeconds,
             int maxActiveCombatBlocks,
+            int combatEntityLifetimeSeconds,
+            int maxActiveCombatEntities,
             boolean respectProtectionPlugins) {
 
         public WorldProtectionSettings {
@@ -47,6 +49,12 @@ public record RuntimeSettings(
             }
             if (maxActiveCombatBlocks <= 0) {
                 throw new IllegalArgumentException("maxActiveCombatBlocks must be positive");
+            }
+            if (combatEntityLifetimeSeconds < 0) {
+                throw new IllegalArgumentException("combatEntityLifetimeSeconds cannot be negative");
+            }
+            if (maxActiveCombatEntities <= 0) {
+                throw new IllegalArgumentException("maxActiveCombatEntities must be positive");
             }
         }
     }

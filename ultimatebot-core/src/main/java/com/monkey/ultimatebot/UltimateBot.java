@@ -172,7 +172,9 @@ public final class UltimateBot extends JavaPlugin {
                             + runtimeSettings.worldProtection().allowBotExplosionBlockDamage()
                             + " | antiDupe=" + runtimeSettings.worldProtection().antiDupe()
                             + " | combatBlockLimit="
-                            + runtimeSettings.worldProtection().maxActiveCombatBlocks());
+                            + runtimeSettings.worldProtection().maxActiveCombatBlocks()
+                            + " | combatEntityLimit="
+                            + runtimeSettings.worldProtection().maxActiveCombatEntities());
             startup.detail(
                     "Observability",
                     botMetrics.isEnabled()

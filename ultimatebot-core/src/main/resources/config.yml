@@ -39,12 +39,16 @@ performance:
 protection-world:
   # Global permission for bot explosions to damage terrain. Per-bot settings cannot override false.
   allow-bot-explosion-block-damage: false
-  # Prevents drops and removes tracked bot blocks on shutdown. When false, they become normal server blocks.
+  # Prevents drops and removes tracked bot blocks/entities on shutdown. When false, they become normal world content.
   anti-dupe: true
   # Seconds before combat blocks are restored. Use 0 to keep them until broken or the configured limit is reached.
   combat-block-lifetime-seconds: 0
   # Hard limit that prevents combat blocks and their tracking data from growing without bounds.
   max-active-combat-blocks: 2048
+  # Seconds before persistent bot entities such as unused TNT minecarts are removed. Use 0 to keep them.
+  combat-entity-lifetime-seconds: 0
+  # Hard limit for persistent bot-created combat entities.
+  max-active-combat-entities: 512
   # Fires normal placement events so WorldGuard and other protection plugins can deny bot blocks.
   respect-protection-plugins: true
 

@@ -49,11 +49,21 @@ public final class ConfigurateRuntimeSettingsLoader {
                 node.node("max-active-combat-blocks").getInt(defaults.maxActiveCombatBlocks()),
                 defaults.maxActiveCombatBlocks(),
                 "max-active-combat-blocks");
+        int entityLifetimeSeconds = nonNegativeOrDefault(
+                node.node("combat-entity-lifetime-seconds").getInt(defaults.combatEntityLifetimeSeconds()),
+                defaults.combatEntityLifetimeSeconds(),
+                "combat-entity-lifetime-seconds");
+        int maximumEntities = positiveProtectionOrDefault(
+                node.node("max-active-combat-entities").getInt(defaults.maxActiveCombatEntities()),
+                defaults.maxActiveCombatEntities(),
+                "max-active-combat-entities");
         return new RuntimeSettings.WorldProtectionSettings(
                 readExplosionBlockDamagePermission(node, defaults.allowBotExplosionBlockDamage()),
                 node.node("anti-dupe").getBoolean(defaults.antiDupe()),
                 lifetimeSeconds,
                 maximumBlocks,
+                entityLifetimeSeconds,
+                maximumEntities,
                 node.node("respect-protection-plugins").getBoolean(defaults.respectProtectionPlugins()));
     }
 

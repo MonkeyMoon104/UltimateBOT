@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
 import org.bukkit.Bukkit;
@@ -12,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +21,7 @@ import org.jspecify.annotations.Nullable;
 public final class WorldProtectionService implements AutoCloseable {
     private final Plugin plugin;
     private final Map<WorldBlockKey, TrackedWorldBlock> placements = new ConcurrentHashMap<>();
+    private final Map<UUID, TrackedWorldEntity> combatEntities = new ConcurrentHashMap<>();
     private volatile WorldProtectionSettings settings;
 
     public WorldProtectionService(Plugin plugin, WorldProtectionSettings settings) {
@@ -130,6 +133,42 @@ public final class WorldProtectionService implements AutoCloseable {
         }
     }
 
+    public synchronized boolean trackCombatEntity(
+            Entity entity, boolean explosionBlockDamageAllowed, BooleanSupplier inventoryCommit) {
+        Objects.requireNonNull(entity, "entity");
+        Objects.requireNonNull(inventoryCommit, "inventoryCommit");
+        pruneCombatEntities();
+        UUID entityId = entity.getUniqueId();
+        if (!entity.isValid()
+                || combatEntities.containsKey(entityId)
+                || combatEntities.size() >= settings.maxActiveCombatEntities()) {
+            entity.remove();
+            return false;
+        }
+        ScheduledTask expiryTask;
+        try {
+            expiryTask = scheduleEntityExpiry(entity);
+        } catch (RuntimeException schedulingError) {
+            entity.remove();
+            throw new IllegalStateException("Could not schedule combat entity expiry", schedulingError);
+        }
+        if (!inventoryCommit.getAsBoolean()) {
+            if (expiryTask != null) {
+                expiryTask.cancel();
+            }
+            entity.remove();
+            return false;
+        }
+        combatEntities.put(entityId, new TrackedWorldEntity(explosionBlockDamageAllowed, expiryTask));
+        return true;
+    }
+
+    public synchronized void removeCombatEntity(Entity entity) {
+        Objects.requireNonNull(entity, "entity");
+        forgetCombatEntity(entity);
+        entity.remove();
+    }
+
     private boolean placementAllowed(
             Block block, BlockState replacedState, Material placementItem, org.bukkit.entity.Player placer) {
         if (!settings.respectProtectionPlugins()) {
@@ -146,11 +185,26 @@ public final class WorldProtectionService implements AutoCloseable {
         return placements.containsKey(WorldBlockKey.from(Objects.requireNonNull(block, "block")));
     }
 
+    boolean isTracked(Entity entity) {
+        return combatEntities.containsKey(
+                Objects.requireNonNull(entity, "entity").getUniqueId());
+    }
+
+    boolean isExplosionBlockDamageAllowed(Entity entity) {
+        TrackedWorldEntity tracked =
+                combatEntities.get(Objects.requireNonNull(entity, "entity").getUniqueId());
+        return tracked == null || tracked.explosionBlockDamageAllowed();
+    }
+
     void forget(Block block) {
         TrackedWorldBlock placement = placements.remove(WorldBlockKey.from(block));
         if (placement != null) {
             placement.cancelExpiry();
         }
+    }
+
+    void forgetCombatEntity(Entity entity) {
+        forgetCombatEntity(entity.getUniqueId());
     }
 
     private @Nullable ScheduledTask scheduleExpiry(WorldBlockKey key, Location location) {
@@ -162,12 +216,52 @@ public final class WorldProtectionService implements AutoCloseable {
                 .runDelayed(plugin, location, ignored -> expire(key), Math.max(1L, lifetimeSeconds * 20L));
     }
 
+    private @Nullable ScheduledTask scheduleEntityExpiry(Entity entity) {
+        int lifetimeSeconds = settings.combatEntityLifetimeSeconds();
+        if (lifetimeSeconds == 0) {
+            return null;
+        }
+        UUID entityId = entity.getUniqueId();
+        return entity.getScheduler()
+                .runDelayed(
+                        plugin,
+                        ignored -> expireCombatEntity(entityId),
+                        () -> forgetCombatEntity(entityId),
+                        Math.max(1L, lifetimeSeconds * 20L));
+    }
+
     private void expire(WorldBlockKey key) {
         TrackedWorldBlock placement = placements.remove(key);
         Block block = key.block();
         if (placement != null && block != null && block.getType() == placement.material()) {
             block.setBlockData(placement.originalData(), false);
         }
+    }
+
+    private synchronized void expireCombatEntity(UUID entityId) {
+        TrackedWorldEntity tracked = combatEntities.remove(entityId);
+        Entity entity = Bukkit.getEntity(entityId);
+        if (tracked != null && entity != null) {
+            entity.remove();
+        }
+    }
+
+    private synchronized void forgetCombatEntity(UUID entityId) {
+        TrackedWorldEntity tracked = combatEntities.remove(entityId);
+        if (tracked != null) {
+            tracked.cancelExpiry();
+        }
+    }
+
+    private void pruneCombatEntities() {
+        combatEntities.entrySet().removeIf(entry -> {
+            Entity entity = Bukkit.getEntity(entry.getKey());
+            if (entity != null && entity.isValid()) {
+                return false;
+            }
+            entry.getValue().cancelExpiry();
+            return true;
+        });
     }
 
     @Override
@@ -184,5 +278,14 @@ public final class WorldProtectionService implements AutoCloseable {
             }
         }
         placements.clear();
+        for (Map.Entry<UUID, TrackedWorldEntity> entry :
+                Map.copyOf(combatEntities).entrySet()) {
+            entry.getValue().cancelExpiry();
+            Entity entity = Bukkit.getEntity(entry.getKey());
+            if (entity != null && WorldProtectionPolicy.shouldRemoveEntityOnShutdown(settings.antiDupe(), true)) {
+                entity.remove();
+            }
+        }
+        combatEntities.clear();
     }
 }

@@ -26,6 +26,16 @@ class WorldProtectionPolicyTest {
     }
 
     @Test
+    void shutdownRemovesOnlyTrackedBotEntitiesWhenAntiDupeIsEnabled() {
+        assertThat(WorldProtectionPolicy.shouldRemoveEntityOnShutdown(true, true))
+                .isTrue();
+        assertThat(WorldProtectionPolicy.shouldRemoveEntityOnShutdown(true, false))
+                .isFalse();
+        assertThat(WorldProtectionPolicy.shouldRemoveEntityOnShutdown(false, true))
+                .isFalse();
+    }
+
+    @Test
     void cobwebsRequireSolidGroundOrAnotherCobwebBelow() {
         assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.COBWEB, false))
                 .isFalse();

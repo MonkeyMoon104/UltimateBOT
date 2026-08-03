@@ -32,6 +32,8 @@ class ConfigurateRuntimeSettingsLoaderTest {
                   anti-dupe: false
                   combat-block-lifetime-seconds: 45
                   max-active-combat-blocks: 512
+                  combat-entity-lifetime-seconds: 90
+                  max-active-combat-entities: 128
                   respect-protection-plugins: false
                 """);
 
@@ -44,7 +46,7 @@ class ConfigurateRuntimeSettingsLoaderTest {
         assertThat(settings.blockStateCache().maximumSize()).isEqualTo(4_096);
         assertThat(settings.blockStateCache().expireAfterWrite()).isEqualTo(Duration.ofSeconds(2));
         assertThat(settings.worldProtection())
-                .isEqualTo(new RuntimeSettings.WorldProtectionSettings(true, false, 45, 512, false));
+                .isEqualTo(new RuntimeSettings.WorldProtectionSettings(true, false, 45, 512, 90, 128, false));
     }
 
     @Test
@@ -74,6 +76,8 @@ class ConfigurateRuntimeSettingsLoaderTest {
                 protection-world:
                   combat-block-lifetime-seconds: -1
                   max-active-combat-blocks: 0
+                  combat-entity-lifetime-seconds: -1
+                  max-active-combat-entities: 0
                 """);
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(

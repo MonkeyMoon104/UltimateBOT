@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.vehicle.VehicleDestroyEvent;
 
 public final class WorldProtectionListener implements Listener {
     private final WorldProtectionService protection;
@@ -37,12 +38,31 @@ public final class WorldProtectionListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void suppressExplosionDrops(EntityExplodeEvent event) {
+        if (!protection.isExplosionBlockDamageAllowed(event.getEntity())) {
+            event.blockList().clear();
+        }
         destroyTrackedBlocksWithoutDrops(event.blockList());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void forgetExplodedBlocks(EntityExplodeEvent event) {
+        protection.forgetCombatEntity(event.getEntity());
         event.blockList().forEach(protection::forget);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void suppressTrackedVehicleDrops(VehicleDestroyEvent event) {
+        if (!WorldProtectionPolicy.shouldSuppressDrops(
+                protection.isAntiDupeEnabled(), protection.isTracked(event.getVehicle()))) {
+            return;
+        }
+        event.setCancelled(true);
+        protection.removeCombatEntity(event.getVehicle());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void forgetDestroyedVehicle(VehicleDestroyEvent event) {
+        protection.forgetCombatEntity(event.getVehicle());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
