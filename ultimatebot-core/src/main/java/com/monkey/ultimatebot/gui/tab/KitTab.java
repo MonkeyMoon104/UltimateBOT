@@ -22,13 +22,14 @@ public class KitTab {
         BotOptions options = context.getOptions();
         CombatItem combatItem = new CombatItem(context.getTraining(), options);
         FollowItem followItem = new FollowItem(context.getTraining(), options, combatItem);
+        CombatModeItem combatModeItem = new CombatModeItem(context.getTraining(), options, refreshModeDependents);
 
         Gui gui = Gui.normal()
                 .setStructure(
                         "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . o m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
-                .addIngredient('r', new DifficultyItem(context.getTraining(), options))
+                .addIngredient('r', new DifficultyItem(context.getTraining(), options, combatModeItem::notifyWindows))
                 .addIngredient('t', new TotemItem(options, context.getTraining()))
                 .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(context.getTraining(), context.getViewer(), options))
@@ -38,7 +39,7 @@ public class KitTab {
                                 ? new TeleportItem(context.getTraining())
                                 : new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
-                .addIngredient('o', new CombatModeItem(context.getTraining(), options, refreshModeDependents))
+                .addIngredient('o', combatModeItem)
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
 
