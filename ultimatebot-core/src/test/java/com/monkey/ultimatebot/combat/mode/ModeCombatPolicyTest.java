@@ -26,7 +26,9 @@ class ModeCombatPolicyTest {
                 .isTrue();
         assertThat(ModeCombatPolicy.isCartOpportunity(5.0D, 66.0D, 64.0D, 0.7D, false))
                 .isFalse();
-        assertThat(ModeCombatPolicy.isCartOpportunity(8.6D, 64.0D, 64.0D, 0.7D, false))
+        assertThat(ModeCombatPolicy.isCartOpportunity(10.1D, 64.0D, 64.0D, 0.7D, false))
+                .isFalse();
+        assertThat(ModeCombatPolicy.isCartOpportunity(0.9D, 64.0D, 64.0D, 0.7D, true))
                 .isFalse();
         assertThat(ModeCombatPolicy.isCartOpportunity(5.0D, 64.0D, 64.0D, 1.0D, true))
                 .isTrue();

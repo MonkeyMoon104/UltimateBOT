@@ -13,9 +13,9 @@ final class ModeCombatPolicy {
 
     static boolean isCartOpportunity(
             double distance, double botY, double targetY, double targetHealthRatio, boolean periodicWindow) {
-        return distance >= 2.75D
-                && distance <= 8.5D
-                && botY <= targetY + 0.55D
+        return distance >= 1.0D
+                && distance <= 10.0D
+                && Math.abs(botY - targetY) <= 1.5D
                 && (targetHealthRatio <= 0.78D || periodicWindow);
     }
 

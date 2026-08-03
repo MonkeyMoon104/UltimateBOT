@@ -31,14 +31,14 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
     public void enter(CombatModeContext context) {
         super.enter(context);
         bowController.reset();
-        explosiveSequence.cleanup(context);
-        nextCartTick = 6L;
+        explosiveSequence.release(context);
+        nextCartTick = 2L;
         transitionTo(Phase.MELEE);
     }
 
     @Override
     public void exit(CombatModeContext context) {
-        explosiveSequence.cleanup(context);
+        explosiveSequence.release(context);
         super.exit(context);
     }
 
@@ -73,7 +73,7 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                 context.actions().targetHealthRatio(target),
                 currentTick() >= nextCartTick);
         if (opportunity && currentTick() >= nextCartTick) {
-            transitionTo(distance < 4.25D ? Phase.CREATE_DISTANCE : Phase.PLACE_RAIL);
+            transitionTo(distance < 2.9D ? Phase.CREATE_DISTANCE : Phase.PLACE_RAIL);
         } else {
             meleeOrMove(context, target, BotInventoryController.SWORD_SLOT);
         }
@@ -81,7 +81,7 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
 
     private void createDistance(CombatModeContext context, LivingEntity target) {
         double distance = context.motion().distanceTo(target);
-        transitionTo(distance < 4.25D ? Phase.DISTANCE_DRAW : Phase.PLACE_RAIL);
+        transitionTo(distance < 2.9D ? Phase.DISTANCE_DRAW : Phase.PLACE_RAIL);
     }
 
     private void drawDistanceBow(CombatModeContext context, LivingEntity target) {
@@ -125,13 +125,13 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
             abort(context);
             return;
         }
-        nextCartTick = currentTick() + Math.max(28L, context.tuning().specialActionCooldownTicks() / 2L);
+        nextCartTick = currentTick() + Math.max(4L, context.tuning().reactionTicks() / 2L);
         transitionTo(Phase.EVADE);
     }
 
     private void evade(CombatModeContext context, LivingEntity target) {
         if (!explosiveSequence.isTargetCloseForIgnition(target)) {
-            abort(context);
+            abandonAndRetry(context);
             return;
         }
         if (context.motion().distanceTo(target) < 4.5D && phaseTicks < 4) {
@@ -164,7 +164,7 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
 
     private void recover(CombatModeContext context, LivingEntity target) {
         context.motion().strafe(target, 1.2D);
-        if (phaseTicks >= 5) {
+        if (phaseTicks >= 2) {
             transitionTo(Phase.MELEE);
         }
     }
@@ -182,16 +182,24 @@ final class CartPvPStrategy extends AbstractCombatModeStrategy {
                 }
                 abort(context);
             }
-            case TARGET_ESCAPED, EXPIRED, FINISHED -> abort(context);
+            case TARGET_ESCAPED, FINISHED -> abandonAndRetry(context);
             case DETONATED -> transitionTo(Phase.RECOVER);
         }
     }
 
     private void abort(CombatModeContext context) {
         context.actions().releaseUseItem();
-        explosiveSequence.cleanup(context);
+        explosiveSequence.release(context);
         bowController.reset();
-        nextCartTick = currentTick() + Math.max(6L, context.tuning().reactionTicks());
+        nextCartTick = currentTick() + Math.max(2L, context.tuning().reactionTicks() / 2L);
+        transitionTo(Phase.RECOVER);
+    }
+
+    private void abandonAndRetry(CombatModeContext context) {
+        context.actions().releaseUseItem();
+        explosiveSequence.release(context);
+        bowController.reset();
+        nextCartTick = currentTick() + 2L;
         transitionTo(Phase.RECOVER);
     }
 

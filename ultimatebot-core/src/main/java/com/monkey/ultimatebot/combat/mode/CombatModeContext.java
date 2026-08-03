@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
 
 final class CombatModeContext implements AutoCloseable {
     private final Player bot;
@@ -165,6 +166,11 @@ final class CombatModeContext implements AutoCloseable {
             invalidateMovementForWorldChange();
         }
         return placed;
+    }
+
+    boolean trackCombatEntity(Entity entity, int inventorySlot) {
+        return worldProtection.trackCombatEntity(
+                entity, options.canExplosionDamageBlocks(), () -> inventory.consumeItem(inventorySlot));
     }
 
     boolean breakCombatBlock(Location location, int toolSlot) {

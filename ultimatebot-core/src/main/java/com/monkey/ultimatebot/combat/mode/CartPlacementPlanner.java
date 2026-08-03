@@ -20,13 +20,16 @@ final class CartPlacementPlanner {
         for (double predictionTicks : new double[] {2.0D, 1.0D, 0.0D}) {
             Location predicted =
                     targetLocation.clone().add(horizontalVelocity.clone().multiply(predictionTicks));
-            for (int yOffset : new int[] {0, -1, 1}) {
-                Location candidate = new Location(
-                        Objects.requireNonNull(predicted.getWorld(), "candidate world"),
-                        predicted.getBlockX(),
-                        predicted.getBlockY() + yOffset,
-                        predicted.getBlockZ());
-                candidates.putIfAbsent(Position.from(candidate), candidate);
+            for (int[] horizontalOffset :
+                    new int[][] {{0, 0}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}) {
+                for (int yOffset : new int[] {0, -1, 1}) {
+                    Location candidate = new Location(
+                            Objects.requireNonNull(predicted.getWorld(), "candidate world"),
+                            predicted.getBlockX() + horizontalOffset[0],
+                            predicted.getBlockY() + yOffset,
+                            predicted.getBlockZ() + horizontalOffset[1]);
+                    candidates.putIfAbsent(Position.from(candidate), candidate);
+                }
             }
         }
         return List.copyOf(candidates.values());
