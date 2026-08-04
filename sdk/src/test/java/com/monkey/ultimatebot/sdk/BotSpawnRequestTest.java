@@ -4,20 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
-import com.monkey.ultimatebot.sdk.model.request.EventBotSpawnRequest;
+import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-class EventBotEquipmentRequestTest {
+class BotSpawnRequestTest {
 
     @Test
     void serializesCustomUuidAndExplicitEmptySlots() throws Exception {
         UUID botUUID = UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420001");
-        EventBotSpawnRequest request = EventBotSpawnRequest.independent()
+        BotSpawnRequest request = BotSpawnRequest.independent()
                 .botUUID(botUUID)
                 .emptyEquipmentSlot(SdkBotEquipmentSlot.MAIN_HAND)
                 .emptyEquipmentSlot(SdkBotEquipmentSlot.OFF_HAND)
@@ -33,7 +35,7 @@ class EventBotEquipmentRequestTest {
 
     @Test
     void defaultModeRemovesAnExistingOverride() {
-        EventBotSpawnRequest request = EventBotSpawnRequest.builder()
+        BotSpawnRequest request = BotSpawnRequest.builder()
                 .emptyEquipmentSlot(SdkBotEquipmentSlot.FEET)
                 .defaultEquipmentSlot(SdkBotEquipmentSlot.FEET)
                 .build();
@@ -50,7 +52,7 @@ class EventBotEquipmentRequestTest {
 
     @Test
     void serializesCombatModeAndCustomTuning() throws Exception {
-        EventBotSpawnRequest request = EventBotSpawnRequest.builder()
+        BotSpawnRequest request = BotSpawnRequest.builder()
                 .combatMode(CombatMode.WATER)
                 .combatTuning(CombatTuning.builder().attackRange(3.8D).build())
                 .build();
@@ -59,5 +61,29 @@ class EventBotEquipmentRequestTest {
 
         assertThat(json).contains("\"combatMode\":\"WATER\"");
         assertThat(json).contains("\"attackRange\":3.8");
+    }
+
+    @Test
+    void serializesEveryOwnershipModeAndGuiPermission() throws Exception {
+        UUID ownerUUID = UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420002");
+        BotSpawnRequest request = BotSpawnRequest.builder()
+                .mode(BotMode.TEAM_ALLY)
+                .teamOwnerUUIDs(java.util.List.of(ownerUUID))
+                .changeableFollow(false)
+                .changeableCombat(false)
+                .changeableBlast(false)
+                .blastProtection(new BlastProtectionSettings(true, false, true, false))
+                .changeableArmor(false)
+                .changeableTotem(false)
+                .changeableDifficulty(false)
+                .changeableCombatMode(false)
+                .build();
+
+        String json = new ObjectMapper().writeValueAsString(request);
+
+        assertThat(json).contains("\"mode\":\"TEAM_ALLY\"");
+        assertThat(json).contains(ownerUUID.toString());
+        assertThat(json).contains("\"changeableCombatMode\":false");
+        assertThat(json).contains("\"blastProtection\":{\"boots\":true,\"leggings\":false");
     }
 }

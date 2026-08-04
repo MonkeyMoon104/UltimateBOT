@@ -4,15 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotArmor;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotTargetMode;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import org.junit.jupiter.api.Test;
 
 class CommonModelCompatibilityTest {
     @Test
-    void sdkModelsExposeCanonicalCommonValues() {
-        assertEquals(BotArmorTier.GOLDEN, SdkBotArmor.GOLD.toCommon());
-        assertEquals(BotTargetMode.MOBS, SdkBotTargetMode.MOBS.toCommon());
-        assertEquals(SdkBotTargetMode.PLAYERS_AND_MOBS, SdkBotTargetMode.fromCommon(BotTargetMode.PLAYERS_AND_MOBS));
+    void sdkUsesCanonicalCommonTypesDirectly() throws NoSuchMethodException {
+        assertEquals(
+                BotArmorTier.class, BotSpawnRequest.class.getMethod("armor").getReturnType());
+        assertEquals(
+                BotTargetMode.class,
+                BotSpawnRequest.class.getMethod("targetMode").getReturnType());
+        assertEquals(
+                DifficultyTier.class,
+                BotSpawnRequest.class.getMethod("difficulty").getReturnType());
     }
 }
