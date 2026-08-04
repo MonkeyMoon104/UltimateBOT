@@ -1,32 +1,11 @@
-# sdk
+# UltimateBot SDK
 
-## Custom bot UUID and equipment slots
+The SDK is the Java-only remote client for UltimateBot. Use it with `implementation` when an integration must not
+depend on Bukkit/Paper class loading or the in-server `api` singleton.
 
-Remote event bots can use a caller-provided UUID and persistent equipment settings:
-
-```java
-EventBotSpawnRequest request = EventBotSpawnRequest.independent()
-        .botUUID(UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420001"))
-        .emptyEquipmentSlot(SdkBotEquipmentSlot.MAIN_HAND)
-        .emptyEquipmentSlot(SdkBotEquipmentSlot.OFF_HAND)
-        .equipmentItem(SdkBotEquipmentSlot.HEAD, "DIAMOND_HELMET", 1)
-        .build();
-
-client.spawnEventBot(request);
-```
-
-Slots can also be changed at runtime with `updateEquipmentSlot(...)`. `DEFAULT` returns control to the normal bot
-AI, `ITEM` keeps the configured material equipped, and `EMPTY` keeps the slot empty.
-
-`sdk` is the Java-only remote client for UltimateBot.
-
-The SDK publishes JSpecify nullability contracts. Public parameters and return values are
-non-null by default, while optional response fields and builder values are explicitly
-annotated with `@Nullable`.
-
-Use this artifact with `implementation` when you do not want to depend on Bukkit/Paper classloading or the in-server `api` singleton.
-
-The SDK receives the dependency-free `common` contracts transitively and keeps its existing SDK-specific model names as compatibility façades.
+It receives the dependency-free `common` contracts transitively and uses their canonical enums directly for bot
+modes, combat modes, difficulty, armor, targets and creation sources. Public contracts include JSpecify nullability
+annotations.
 
 ## Gradle
 
@@ -36,9 +15,9 @@ dependencies {
 }
 ```
 
-## Server Config
+## Server configuration
 
-Enable the remote API in `config.yml`:
+Enable the authenticated Remote API in `config.yml`:
 
 ```yaml
 remote-api:
@@ -49,9 +28,11 @@ remote-api:
   token: "replace-with-a-secret-token"
 ```
 
-Keep the host on `127.0.0.1` unless you intentionally put it behind a firewall or reverse proxy.
+Keep the host on `127.0.0.1` unless the endpoint is intentionally protected by a firewall or reverse proxy.
 
-## Example
+## Spawn and manage bots
+
+Every bot mode supports a caller-provided bot UUID, complete combat settings and persistent equipment-slot rules:
 
 ```java
 UltimateBotClient client = UltimateBotClient.builder()
@@ -59,51 +40,50 @@ UltimateBotClient client = UltimateBotClient.builder()
         .token("replace-with-a-secret-token")
         .build();
 
-BotOperationResponse spawn = client.spawnEventBot(EventBotSpawnRequest.builder()
-        .botNameTemplate("EventBot")
-        .autoTarget(true)
-        .explosions(true)
-        .explosionBlockDamage(false)
-        .build());
+BotSpawnRequest request = BotSpawnRequest.independent()
+        .botUUID(UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420001"))
+        .combatMode(CombatMode.UHC)
+        .difficulty(DifficultyTier.HARD)
+        .targetMode(BotTargetMode.PLAYERS_AND_MOBS)
+        .emptyEquipmentSlot(SdkBotEquipmentSlot.OFF_HAND)
+        .equipmentItem(SdkBotEquipmentSlot.HEAD, "DIAMOND_HELMET", 1)
+        .build();
 
-UUID botId = spawn.snapshot().ownerUUID();
-client.updateEnderPearls(botId, false);
-client.remove(botId);
+BotOperationResponse result = client.spawnBot(request);
+UUID botUUID = result.snapshot().botUUID();
+client.updateEnderPearls(botUUID, false);
+client.removeByBotUUID(botUUID);
 ```
+
+`DEFAULT` equipment slots return control to the bot AI, `ITEM` keeps the configured material equipped and `EMPTY`
+keeps the slot empty.
 
 ## Remote EventBus
 
-The SDK exposes a reconnecting Server-Sent Events client. It authenticates with the
-same token, sends `Last-Event-ID` after reconnects and supports server-side type filters.
+The reconnecting Server-Sent Events client authenticates with the same token, resumes with `Last-Event-ID` and
+supports filters by event type, owner UUID and bot UUID.
 
 ```java
 BotEventSubscription events = client.events().subscribe(
         Set.of(SdkBotEventType.SPAWNED, SdkBotEventType.KILLED_ENTITY,
                 SdkBotEventType.EXPLOSION_PREPARED),
-        event -> System.out.println(event.type() + " -> " + event.payload())
-);
+        event -> System.out.println(event.type() + " -> " + event.payload()));
 
-// later
 events.close();
 ```
 
-Each `BotEventEnvelope` includes schema version, event ID, per-bot sequence, timestamp,
-owner/bot UUIDs, source, snapshot and an event-specific payload. Unknown future event
-types remain readable through the envelope string instead of breaking deserialization.
+Each `BotEventEnvelope` includes the schema version, event ID, per-bot sequence, timestamp, owner/bot UUIDs, source,
+snapshot and structured event payload. Unknown future event types remain readable through `type()`.
 
-The raw authenticated endpoint is `GET /ultimatebot/api/v1/events`; optional filtering uses
-`?types=SPAWNED,DIED,TOTEM_USED`. Streams can also be filtered with `ownerUUID` or
-`botUUID`; the SDK exposes `subscribeForOwner(...)` and `subscribeForBot(...)` helpers.
+## Supported operations
 
-## Supported Operations
-
-- `health()`
-- `listBots()`
-- `spawnEventBot(...)`
-- `remove(UUID ownerUUID)`
-- `removeAll()`
-- `updateCrystalPvp(UUID ownerUUID, boolean enabled)`
-- `updateExplosions(UUID ownerUUID, boolean enabled)`
-- `updateExplosionBlockDamage(UUID ownerUUID, boolean enabled)`
-- `updateEnderPearls(UUID ownerUUID, boolean enabled)`
-- `events().subscribe(...)`
+- Health, active count, complete bot listing and lookup by owner or bot UUID.
+- Complete combat-mode catalog, capabilities and per-difficulty profiles.
+- Spawn for `SINGLE`, `EVENT`, `ALLY` and `TEAM_ALLY` bots.
+- Removal by owner/bot UUID, creation source or all bots.
+- Runtime updates for totems, follow, combat, difficulty, armor and equipment slots.
+- Runtime updates for target mode, explicit targets, team owners and automatic targeting.
+- Runtime updates for explosive combat, healing, idle movement and owner persistence.
+- Combat-mode selection, custom tuning and tuning reset.
+- Custom kill-message update and disable operations.
+- Reconnecting EventBus subscriptions.

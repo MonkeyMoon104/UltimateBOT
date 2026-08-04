@@ -163,6 +163,22 @@ tasks.register<Sync>("publishApiDocs") {
     }
 }
 
+tasks.register<Sync>("publishCommonDocs") {
+    group = "documentation"
+    description = "Generates shared public-contract Javadocs and copies them to docs/common/."
+
+    dependsOn(":common:javadoc")
+    from(project(":common").layout.buildDirectory.dir("docs/javadoc"))
+    into(layout.projectDirectory.dir("docs/common"))
+
+    doLast {
+        layout.projectDirectory
+            .file("docs/.nojekyll")
+            .asFile
+            .writeText("")
+    }
+}
+
 tasks.register<Sync>("publishSdkDocs") {
     group = "documentation"
     description = "Generates SDK Javadocs and copies them to docs/sdk/."
@@ -182,5 +198,5 @@ tasks.register<Sync>("publishSdkDocs") {
 tasks.register("publishAllDocs") {
     group = "documentation"
     description = "Generates and copies every public Javadoc site."
-    dependsOn("publishApiDocs", "publishSdkDocs")
+    dependsOn("publishApiDocs", "publishCommonDocs", "publishSdkDocs")
 }

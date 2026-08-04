@@ -72,8 +72,8 @@ Event contracts are organized by responsibility instead of sharing one flat pack
 - `BotSkin`
 - `BotSkinSource`
 - `BotBlastProtection`
-- `BotArmorType`
-- `DifficultyLevel`
+- `BotArmorTier`
+- `DifficultyTier`
 - `BotSnapshot`
 - `BotSource`
 - `BotOperationResult`
@@ -171,7 +171,7 @@ the underlying action continues.
 - `updateFollow(UUID ownerUUID, boolean follow)`
 - `updateCombat(UUID ownerUUID, boolean combat)`
 - `updateBlastProtection(UUID ownerUUID, boolean blastProtection)`
-- `updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty)`
+- `updateDifficulty(UUID ownerUUID, DifficultyTier difficulty)`
 
 ### Removal
 - `remove(UUID ownerUUID)`
@@ -396,14 +396,14 @@ public final class ExamplePlugin extends JavaPlugin implements Listener {
                 .setChangeableCombat(true)
                 .blastProtection(false, false, false, false)
                 .setChangeableBlast(true)
-                .armorValue(BotArmorType.DIAMOND, BotArmorType.NETHERITE)
-                .armor(BotArmorType.NETHERITE)
+                .armorValue(BotArmorTier.DIAMOND, BotArmorTier.NETHERITE)
+                .armor(BotArmorTier.NETHERITE)
                 .setChangeableArmor(true)
                 .totemValue(0, 32)
                 .totemCount(16)
                 .setChangeableTotem(true)
-                .difficultyValue(DifficultyLevel.NORMAL, DifficultyLevel.GOD)
-                .difficulty(DifficultyLevel.HARD)
+                .difficultyValue(DifficultyTier.NORMAL, DifficultyTier.GOD)
+                .difficulty(DifficultyTier.HARD)
                 .setChangeableDifficulty(true)
                 .explosions(false)
                 .crystalPvp(false)
