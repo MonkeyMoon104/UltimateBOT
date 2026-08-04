@@ -3,17 +3,30 @@ package com.monkey.ultimatebot.sdk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.sdk.model.request.ArmorRequest;
+import com.monkey.ultimatebot.sdk.model.request.AutoTargetRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
+import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.request.CombatModeRequest;
-import com.monkey.ultimatebot.sdk.model.request.EventBotSpawnRequest;
+import com.monkey.ultimatebot.sdk.model.request.DifficultyRequest;
+import com.monkey.ultimatebot.sdk.model.request.IdleWanderRequest;
+import com.monkey.ultimatebot.sdk.model.request.KillMessageRequest;
 import com.monkey.ultimatebot.sdk.model.request.TargetModeRequest;
 import com.monkey.ultimatebot.sdk.model.request.ToggleRequest;
+import com.monkey.ultimatebot.sdk.model.request.TotemCountRequest;
+import com.monkey.ultimatebot.sdk.model.request.UuidSetRequest;
+import com.monkey.ultimatebot.sdk.model.response.BotCountResponse;
 import com.monkey.ultimatebot.sdk.model.response.BotOperationResponse;
 import com.monkey.ultimatebot.sdk.model.response.BotSnapshotResponse;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotTargetMode;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -22,6 +35,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
@@ -34,6 +48,7 @@ import org.jspecify.annotations.Nullable;
 public final class UltimateBotClient implements AutoCloseable {
 
     private static final TypeReference<List<BotSnapshotResponse>> BOT_LIST_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<CombatModeDefinition>> COMBAT_MODE_LIST_TYPE = new TypeReference<>() {};
 
     private final URI baseUri;
     private final String token;
@@ -72,6 +87,26 @@ public final class UltimateBotClient implements AutoCloseable {
         return send("GET", "/bots", null, BOT_LIST_TYPE);
     }
 
+    /** Returns the server's current active-bot count. */
+    public int activeBotCount() {
+        return send("GET", "/bots/count", null, BotCountResponse.class).count();
+    }
+
+    /** Returns every server combat mode with enabled state and difficulty profiles. */
+    public List<CombatModeDefinition> listCombatModes() {
+        return send("GET", "/combat-modes", null, COMBAT_MODE_LIST_TYPE);
+    }
+
+    /** Returns one complete server combat-mode definition. */
+    public CombatModeDefinition getCombatMode(CombatMode combatMode) {
+        return send(
+                "GET",
+                "/combat-modes/"
+                        + Objects.requireNonNull(combatMode, "combatMode").name(),
+                null,
+                CombatModeDefinition.class);
+    }
+
     public BotSnapshotResponse getBot(UUID ownerOrBotUUID) {
         return send(
                 "GET",
@@ -80,8 +115,9 @@ public final class UltimateBotClient implements AutoCloseable {
                 BotSnapshotResponse.class);
     }
 
-    public BotOperationResponse spawnEventBot(EventBotSpawnRequest request) {
-        return send("POST", "/bots/event", Objects.requireNonNull(request, "request"), BotOperationResponse.class);
+    /** Spawns any supported bot type using the complete remote configuration contract. */
+    public BotOperationResponse spawnBot(BotSpawnRequest request) {
+        return send("POST", "/bots", Objects.requireNonNull(request, "request"), BotOperationResponse.class);
     }
 
     /** Updates a persistent equipment slot using either an owner UUID or bot UUID. */
@@ -107,6 +143,79 @@ public final class UltimateBotClient implements AutoCloseable {
 
     public BotOperationResponse removeAll() {
         return send("DELETE", "/bots", null, BotOperationResponse.class);
+    }
+
+    /** Removes every bot created through the requested source. */
+    public BotOperationResponse removeBySource(BotSource source) {
+        return send(
+                "DELETE",
+                "/bots/source/" + Objects.requireNonNull(source, "source").name(),
+                null,
+                BotOperationResponse.class);
+    }
+
+    public BotOperationResponse updateTotems(UUID ownerOrBotUUID, int totemCount) {
+        return patch(ownerOrBotUUID, "totems", new TotemCountRequest(totemCount));
+    }
+
+    public BotOperationResponse updateFollow(UUID ownerOrBotUUID, boolean enabled) {
+        return toggle(ownerOrBotUUID, "follow", enabled);
+    }
+
+    public BotOperationResponse updateCombat(UUID ownerOrBotUUID, boolean enabled) {
+        return toggle(ownerOrBotUUID, "combat", enabled);
+    }
+
+    public BotOperationResponse updateBlastProtection(UUID ownerOrBotUUID, boolean enabled) {
+        return updateBlastProtection(ownerOrBotUUID, BlastProtectionSettings.all(enabled));
+    }
+
+    public BotOperationResponse updateBlastProtection(UUID ownerOrBotUUID, BlastProtectionSettings blastProtection) {
+        return patch(ownerOrBotUUID, "blast-protection", Objects.requireNonNull(blastProtection, "blastProtection"));
+    }
+
+    public BotOperationResponse updateDifficulty(UUID ownerOrBotUUID, DifficultyTier difficulty) {
+        return patch(
+                ownerOrBotUUID, "difficulty", new DifficultyRequest(Objects.requireNonNull(difficulty, "difficulty")));
+    }
+
+    public BotOperationResponse updateArmor(UUID ownerOrBotUUID, BotArmorTier armor) {
+        return patch(ownerOrBotUUID, "armor", new ArmorRequest(Objects.requireNonNull(armor, "armor")));
+    }
+
+    public BotOperationResponse updateAutoTarget(UUID ownerOrBotUUID, boolean enabled, double range) {
+        return patch(ownerOrBotUUID, "auto-target", new AutoTargetRequest(enabled, range));
+    }
+
+    public BotOperationResponse updateWorldGuardPvpRespect(UUID ownerOrBotUUID, boolean enabled) {
+        return toggle(ownerOrBotUUID, "world-guard-pvp", enabled);
+    }
+
+    public BotOperationResponse updateStayAfterOwnerDeath(UUID ownerOrBotUUID, boolean enabled) {
+        return toggle(ownerOrBotUUID, "stay-after-owner-death", enabled);
+    }
+
+    public BotOperationResponse updateIdleWander(
+            UUID ownerOrBotUUID, boolean enabled, double radius, double returnDistance, long returnDelayMs) {
+        return patch(
+                ownerOrBotUUID, "idle-wander", new IdleWanderRequest(enabled, radius, returnDistance, returnDelayMs));
+    }
+
+    public BotOperationResponse updateTargets(UUID ownerOrBotUUID, Set<UUID> targetUUIDs) {
+        return patch(ownerOrBotUUID, "targets", new UuidSetRequest(targetUUIDs));
+    }
+
+    public BotOperationResponse updateTeamOwners(UUID ownerOrBotUUID, Set<UUID> teamOwnerUUIDs) {
+        return patch(ownerOrBotUUID, "team-owners", new UuidSetRequest(teamOwnerUUIDs));
+    }
+
+    public BotOperationResponse updateKillMessage(UUID ownerOrBotUUID, String killMessage) {
+        return patch(ownerOrBotUUID, "kill-message", new KillMessageRequest(killMessage));
+    }
+
+    public BotOperationResponse disableKillMessage(UUID ownerOrBotUUID) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        return send("DELETE", "/bots/" + ownerOrBotUUID + "/kill-message", null, BotOperationResponse.class);
     }
 
     public BotOperationResponse updateCrystalPvp(UUID ownerUUID, boolean enabled) {
@@ -157,11 +266,11 @@ public final class UltimateBotClient implements AutoCloseable {
         return toggle(Objects.requireNonNull(botUUID, "botUUID"), "attack-bots", enabled);
     }
 
-    public BotOperationResponse updateTargetMode(UUID ownerUUID, SdkBotTargetMode targetMode) {
+    public BotOperationResponse updateTargetMode(UUID ownerUUID, BotTargetMode targetMode) {
         return targetMode(ownerUUID, targetMode);
     }
 
-    public BotOperationResponse updateTargetModeByBotUUID(UUID botUUID, SdkBotTargetMode targetMode) {
+    public BotOperationResponse updateTargetModeByBotUUID(UUID botUUID, BotTargetMode targetMode) {
         return targetMode(botUUID, targetMode);
     }
 
@@ -196,7 +305,7 @@ public final class UltimateBotClient implements AutoCloseable {
                 BotOperationResponse.class);
     }
 
-    private BotOperationResponse targetMode(UUID ownerOrBotUUID, SdkBotTargetMode targetMode) {
+    private BotOperationResponse targetMode(UUID ownerOrBotUUID, BotTargetMode targetMode) {
         Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
         Objects.requireNonNull(targetMode, "targetMode");
         return send(
@@ -210,6 +319,15 @@ public final class UltimateBotClient implements AutoCloseable {
         Objects.requireNonNull(ownerUUID, "ownerUUID");
         return send(
                 "PATCH", "/bots/" + ownerUUID + "/" + field, new ToggleRequest(enabled), BotOperationResponse.class);
+    }
+
+    private BotOperationResponse patch(UUID ownerOrBotUUID, String field, Object request) {
+        Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
+        return send(
+                "PATCH",
+                "/bots/" + ownerOrBotUUID + "/" + Objects.requireNonNull(field, "field"),
+                Objects.requireNonNull(request, "request"),
+                BotOperationResponse.class);
     }
 
     private <T> T send(String method, String path, @Nullable Object body, Class<T> responseType) {

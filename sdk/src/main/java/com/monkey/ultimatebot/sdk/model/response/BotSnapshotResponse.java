@@ -1,9 +1,18 @@
 package com.monkey.ultimatebot.sdk.model.response;
 
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.common.util.TextValues;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotTargetMode;
+import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
+import com.monkey.ultimatebot.sdk.model.request.BotLocationRequest;
+import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
@@ -13,10 +22,10 @@ import org.jspecify.annotations.Nullable;
  *
  * @param ownerUUID primary owner UUID when the bot has one
  * @param botUUID spawned bot entity UUID
- * @param botType selected armor/combat type
- * @param botDifficulty selected difficulty profile
- * @param minDifficultyLevel minimum random difficulty profile
- * @param maxDifficultyLevel maximum random difficulty profile
+ * @param botMode lifecycle and ownership mode
+ * @param difficulty selected difficulty profile
+ * @param minDifficulty minimum random difficulty profile
+ * @param maxDifficulty maximum random difficulty profile
  * @param combatMode selected combat mode
  * @param combatTuning resolved combat tuning
  * @param customizedCombatTuning whether the tuning is an override
@@ -44,14 +53,31 @@ import org.jspecify.annotations.Nullable;
  * @param enderPearls whether ender pearl logic is enabled
  * @param healing whether healing logic is enabled
  * @param killMessageEnabled whether the built-in kill message is enabled
+ * @param teamOwnerUUIDs complete owner set for a shared team bot
+ * @param botNameTemplate configured bot name template
+ * @param botSkinSource configured skin source
+ * @param minArmor minimum configured armor tier
+ * @param maxArmor maximum configured armor tier
+ * @param armor current armor tier
+ * @param blastProtection per-piece blast-protection state
+ * @param changeableFollow whether GUI follow changes are allowed
+ * @param changeableCombat whether GUI combat changes are allowed
+ * @param changeableBlast whether GUI blast changes are allowed
+ * @param changeableArmor whether GUI armor changes are allowed
+ * @param changeableTotem whether GUI totem changes are allowed
+ * @param changeableDifficulty whether GUI difficulty changes are allowed
+ * @param changeableCombatMode whether GUI combat-mode changes are allowed
+ * @param spawnLocation configured spawn location, when explicit
+ * @param killMessage configured custom kill message, when present
+ * @param equipmentSlots persistent equipment-slot overrides
  */
 public record BotSnapshotResponse(
         @Nullable UUID ownerUUID,
         @Nullable UUID botUUID,
-        String botType,
-        String botDifficulty,
-        String minDifficultyLevel,
-        String maxDifficultyLevel,
+        BotMode botMode,
+        DifficultyTier difficulty,
+        DifficultyTier minDifficulty,
+        DifficultyTier maxDifficulty,
         CombatMode combatMode,
         CombatTuning combatTuning,
         boolean customizedCombatTuning,
@@ -62,11 +88,11 @@ public record BotSnapshotResponse(
         int maxTotemCount,
         @Nullable UUID targetUUID,
         Set<UUID> targetUUIDs,
-        String source,
+        BotSource source,
         boolean autoTarget,
         double autoTargetRange,
         boolean attackBots,
-        SdkBotTargetMode targetMode,
+        BotTargetMode targetMode,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,
@@ -78,17 +104,42 @@ public record BotSnapshotResponse(
         boolean explosionBlockDamage,
         boolean enderPearls,
         boolean healing,
-        boolean killMessageEnabled) {
+        boolean killMessageEnabled,
+        Set<UUID> teamOwnerUUIDs,
+        String botNameTemplate,
+        String botSkinSource,
+        BotArmorTier minArmor,
+        BotArmorTier maxArmor,
+        BotArmorTier armor,
+        BlastProtectionSettings blastProtection,
+        boolean changeableFollow,
+        boolean changeableCombat,
+        boolean changeableBlast,
+        boolean changeableArmor,
+        boolean changeableTotem,
+        boolean changeableDifficulty,
+        boolean changeableCombatMode,
+        @Nullable BotLocationRequest spawnLocation,
+        @Nullable String killMessage,
+        Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
     public BotSnapshotResponse {
-        botType = TextValues.orElseIfBlank(botType, "UNKNOWN");
-        botDifficulty = TextValues.orElseIfBlank(botDifficulty, "UNKNOWN");
-        minDifficultyLevel = TextValues.orElseIfBlank(minDifficultyLevel, "EASY");
-        maxDifficultyLevel = TextValues.orElseIfBlank(maxDifficultyLevel, "GOD");
+        botMode = botMode == null ? BotMode.SINGLE : botMode;
+        difficulty = difficulty == null ? DifficultyTier.EASY : difficulty;
+        minDifficulty = minDifficulty == null ? DifficultyTier.EASY : minDifficulty;
+        maxDifficulty = maxDifficulty == null ? DifficultyTier.GOD : maxDifficulty;
         combatMode = combatMode == null ? CombatMode.SWORD : combatMode;
         combatTuning = combatTuning == null ? CombatTuning.builder().build() : combatTuning;
         targetUUIDs = targetUUIDs == null ? Set.of() : Set.copyOf(targetUUIDs);
-        source = TextValues.orElseIfBlank(source, "CORE");
-        targetMode = targetMode == null ? SdkBotTargetMode.PLAYERS : targetMode;
+        teamOwnerUUIDs = teamOwnerUUIDs == null ? Set.of() : Set.copyOf(teamOwnerUUIDs);
+        source = source == null ? BotSource.CORE : source;
+        targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;
+        botNameTemplate = TextValues.orElseIfBlank(botNameTemplate, "UltimateBot");
+        botSkinSource = TextValues.orElseIfBlank(botSkinSource, "RANDOM");
+        minArmor = minArmor == null ? BotArmorTier.LEATHER : minArmor;
+        maxArmor = maxArmor == null ? BotArmorTier.NETHERITE : maxArmor;
+        armor = armor == null ? minArmor : armor;
+        blastProtection = blastProtection == null ? BlastProtectionSettings.all(false) : blastProtection;
+        equipmentSlots = equipmentSlots == null ? Map.of() : Map.copyOf(equipmentSlots);
     }
 
     /**
@@ -115,7 +166,7 @@ public record BotSnapshotResponse(
      * @return whether the creation source is API
      */
     public boolean isApiCreated() {
-        return "API".equalsIgnoreCase(source);
+        return source == BotSource.API;
     }
 
     /**
@@ -133,7 +184,6 @@ public record BotSnapshotResponse(
      * @return whether min and max difficulty differ from the selected difficulty
      */
     public boolean usesDifficultyRange() {
-        return !botDifficulty.equalsIgnoreCase(minDifficultyLevel)
-                || !botDifficulty.equalsIgnoreCase(maxDifficultyLevel);
+        return difficulty != minDifficulty || difficulty != maxDifficulty;
     }
 }

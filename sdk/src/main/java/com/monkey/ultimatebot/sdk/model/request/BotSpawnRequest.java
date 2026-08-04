@@ -1,12 +1,14 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotArmor;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlotMode;
-import com.monkey.ultimatebot.sdk.model.type.SdkBotTargetMode;
-import com.monkey.ultimatebot.sdk.model.type.SdkDifficultyLevel;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,15 +16,25 @@ import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Request body used to spawn one remote event bot.
+ * Complete request body used to spawn any supported remote bot type.
  *
+ * @param mode lifecycle and ownership mode
  * @param ownerUUID optional owner UUID for owner-bound use cases
+ * @param teamOwnerUUIDs owner UUIDs used by team-allied bots
  * @param botUUID optional explicit bot UUID; {@code null} generates one automatically
  * @param targetUUIDs explicit target players for independent/event bots
  * @param botNameTemplate bot display name or name template
  * @param botSkin skin mode or player/texture reference
  * @param follow whether follow logic is active
+ * @param changeableFollow whether players may change follow from the GUI
  * @param combat whether combat logic is active
+ * @param changeableCombat whether players may change combat from the GUI
+ * @param changeableBlast whether players may change blast protection from the GUI
+ * @param blastProtection per-piece blast-protection state
+ * @param changeableArmor whether players may change armor from the GUI
+ * @param changeableTotem whether players may change totems from the GUI
+ * @param changeableDifficulty whether players may change difficulty from the GUI
+ * @param changeableCombatMode whether players may change combat mode from the GUI
  * @param armor selected armor tier
  * @param minArmor minimum random armor tier
  * @param maxArmor maximum random armor tier
@@ -54,28 +66,38 @@ import org.jspecify.annotations.Nullable;
  * @param combatMode selected combat mode
  * @param combatTuning optional tuning override for the selected mode and difficulty
  */
-public record EventBotSpawnRequest(
+public record BotSpawnRequest(
+        BotMode mode,
         @Nullable UUID ownerUUID,
+        List<UUID> teamOwnerUUIDs,
         @Nullable UUID botUUID,
         List<UUID> targetUUIDs,
         String botNameTemplate,
         String botSkin,
         boolean follow,
+        boolean changeableFollow,
         boolean combat,
-        String armor,
-        String minArmor,
-        String maxArmor,
+        boolean changeableCombat,
+        boolean changeableBlast,
+        BlastProtectionSettings blastProtection,
+        boolean changeableArmor,
+        boolean changeableTotem,
+        boolean changeableDifficulty,
+        boolean changeableCombatMode,
+        BotArmorTier armor,
+        BotArmorTier minArmor,
+        BotArmorTier maxArmor,
         int totemCount,
         int minTotemCount,
         int maxTotemCount,
-        String difficulty,
-        String minDifficulty,
-        String maxDifficulty,
+        DifficultyTier difficulty,
+        DifficultyTier minDifficulty,
+        DifficultyTier maxDifficulty,
         @Nullable BotLocationRequest spawnLocation,
         boolean autoTarget,
         double autoTargetRange,
         boolean attackBots,
-        SdkBotTargetMode targetMode,
+        BotTargetMode targetMode,
         boolean respectWorldGuardPvp,
         boolean stayAfterOwnerDeath,
         boolean idleWander,
@@ -92,7 +114,10 @@ public record EventBotSpawnRequest(
         Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots,
         CombatMode combatMode,
         @Nullable CombatTuning combatTuning) {
-    public EventBotSpawnRequest {
+    public BotSpawnRequest {
+        Objects.requireNonNull(mode, "mode");
+        Objects.requireNonNull(blastProtection, "blastProtection");
+        teamOwnerUUIDs = teamOwnerUUIDs == null ? List.of() : List.copyOf(teamOwnerUUIDs);
         targetUUIDs = targetUUIDs == null ? List.of() : List.copyOf(targetUUIDs);
         equipmentSlots = equipmentSlots == null ? Map.of() : Map.copyOf(equipmentSlots);
         Objects.requireNonNull(botNameTemplate, "botNameTemplate");
@@ -105,87 +130,53 @@ public record EventBotSpawnRequest(
         Objects.requireNonNull(maxDifficulty, "maxDifficulty");
         Objects.requireNonNull(targetMode, "targetMode");
         Objects.requireNonNull(combatMode, "combatMode");
-    }
-
-    /**
-     * Creates a spawn request using the legacy component set.
-     *
-     * <p>This overload preserves binary compatibility for integrations compiled against older SDK
-     * releases. The bot UUID is generated automatically and all equipment slots use their normal
-     * bot behavior.
-     */
-    public EventBotSpawnRequest(
-            @Nullable UUID ownerUUID,
-            List<UUID> targetUUIDs,
-            String botNameTemplate,
-            String botSkin,
-            boolean follow,
-            boolean combat,
-            String armor,
-            String minArmor,
-            String maxArmor,
-            int totemCount,
-            int minTotemCount,
-            int maxTotemCount,
-            String difficulty,
-            String minDifficulty,
-            String maxDifficulty,
-            @Nullable BotLocationRequest spawnLocation,
-            boolean autoTarget,
-            double autoTargetRange,
-            boolean attackBots,
-            SdkBotTargetMode targetMode,
-            boolean respectWorldGuardPvp,
-            boolean stayAfterOwnerDeath,
-            boolean idleWander,
-            double idleWanderRadius,
-            double idleReturnDistance,
-            long idleReturnDelayMs,
-            boolean crystalPvp,
-            boolean explosions,
-            boolean explosionBlockDamage,
-            boolean enderPearls,
-            boolean healing,
-            boolean killMessageEnabled,
-            @Nullable String killMessage) {
-        this(
-                ownerUUID,
-                null,
-                targetUUIDs,
-                botNameTemplate,
-                botSkin,
-                follow,
-                combat,
-                armor,
-                minArmor,
-                maxArmor,
-                totemCount,
-                minTotemCount,
-                maxTotemCount,
-                difficulty,
-                minDifficulty,
-                maxDifficulty,
-                spawnLocation,
-                autoTarget,
-                autoTargetRange,
-                attackBots,
-                targetMode,
-                respectWorldGuardPvp,
-                stayAfterOwnerDeath,
-                idleWander,
-                idleWanderRadius,
-                idleReturnDistance,
-                idleReturnDelayMs,
-                crystalPvp,
-                explosions,
-                explosionBlockDamage,
-                enderPearls,
-                healing,
-                killMessageEnabled,
-                killMessage,
-                Map.of(),
-                CombatMode.SWORD,
-                null);
+        if (botUUID != null && botUUID.equals(new UUID(0L, 0L))) {
+            throw new IllegalArgumentException("botUUID cannot be the nil UUID");
+        }
+        if ((mode == BotMode.SINGLE || mode == BotMode.ALLY) && ownerUUID == null) {
+            throw new IllegalArgumentException("ownerUUID is required for single and ally bot modes");
+        }
+        if (mode == BotMode.TEAM_ALLY && ownerUUID == null && teamOwnerUUIDs.isEmpty()) {
+            throw new IllegalArgumentException("TEAM_ALLY requires at least one owner");
+        }
+        if (mode != BotMode.TEAM_ALLY && !teamOwnerUUIDs.isEmpty()) {
+            throw new IllegalArgumentException("teamOwnerUUIDs are valid only for TEAM_ALLY mode");
+        }
+        if (botNameTemplate.isBlank()) {
+            throw new IllegalArgumentException("botNameTemplate cannot be blank");
+        }
+        if (minArmor.compareTo(maxArmor) > 0 || armor.compareTo(minArmor) < 0 || armor.compareTo(maxArmor) > 0) {
+            throw new IllegalArgumentException("armor and armor range are inconsistent");
+        }
+        if (minTotemCount < -1 || maxTotemCount < 0 || minTotemCount > maxTotemCount) {
+            throw new IllegalArgumentException("totem range is invalid");
+        }
+        if ((totemCount < minTotemCount || totemCount > maxTotemCount) && (totemCount != -1 || minTotemCount > -1)) {
+            throw new IllegalArgumentException("totemCount is outside its configured range");
+        }
+        if (minDifficulty.compareTo(maxDifficulty) > 0
+                || difficulty.compareTo(minDifficulty) < 0
+                || difficulty.compareTo(maxDifficulty) > 0) {
+            throw new IllegalArgumentException("difficulty and difficulty range are inconsistent");
+        }
+        if (!follow && !changeableFollow && changeableCombat) {
+            throw new IllegalArgumentException("combat cannot be changeable when follow is fixed to false");
+        }
+        if (combat && !changeableCombat && changeableFollow) {
+            throw new IllegalArgumentException("follow cannot be changeable while combat is fixed to true");
+        }
+        if (!Double.isFinite(autoTargetRange) || autoTargetRange <= 0.0D) {
+            throw new IllegalArgumentException("autoTargetRange must be finite and greater than 0");
+        }
+        if (!Double.isFinite(idleWanderRadius) || idleWanderRadius <= 0.0D) {
+            throw new IllegalArgumentException("idleWanderRadius must be finite and greater than 0");
+        }
+        if (!Double.isFinite(idleReturnDistance) || idleReturnDistance <= 0.0D) {
+            throw new IllegalArgumentException("idleReturnDistance must be finite and greater than 0");
+        }
+        if (idleReturnDelayMs < 0L) {
+            throw new IllegalArgumentException("idleReturnDelayMs cannot be negative");
+        }
     }
 
     public static Builder builder() {
@@ -193,12 +184,12 @@ public record EventBotSpawnRequest(
     }
 
     /**
-     * Creates a builder for an independent event bot without owner UUID.
+     * Creates a builder for an independent event bot without an owner UUID.
      *
      * @return request builder
      */
     public static Builder independent() {
-        return builder().ownerUUID(null);
+        return builder().mode(BotMode.EVENT).ownerUUID(null);
     }
 
     /**
@@ -208,31 +199,41 @@ public record EventBotSpawnRequest(
      * @return request builder
      */
     public static Builder ownedBy(UUID ownerUUID) {
-        return builder().ownerUUID(ownerUUID);
+        return builder().mode(BotMode.SINGLE).ownerUUID(ownerUUID);
     }
 
     public static final class Builder {
+        private BotMode mode = BotMode.EVENT;
         private @Nullable UUID ownerUUID;
+        private List<UUID> teamOwnerUUIDs = List.of();
         private @Nullable UUID botUUID;
         private List<UUID> targetUUIDs = List.of();
         private String botNameTemplate = "UltimateBot";
         private String botSkin = "RANDOM";
         private boolean follow = true;
+        private boolean changeableFollow = true;
         private boolean combat = true;
-        private String armor = "NETHERITE";
-        private String minArmor = "LEATHER";
-        private String maxArmor = "NETHERITE";
+        private boolean changeableCombat = true;
+        private boolean changeableBlast = true;
+        private BlastProtectionSettings blastProtection = BlastProtectionSettings.all(false);
+        private boolean changeableArmor = true;
+        private boolean changeableTotem = true;
+        private boolean changeableDifficulty = true;
+        private boolean changeableCombatMode = true;
+        private BotArmorTier armor = BotArmorTier.NETHERITE;
+        private BotArmorTier minArmor = BotArmorTier.LEATHER;
+        private BotArmorTier maxArmor = BotArmorTier.NETHERITE;
         private int totemCount = -1;
         private int minTotemCount = -1;
         private int maxTotemCount = 74;
-        private String difficulty = "EASY";
-        private String minDifficulty = "EASY";
-        private String maxDifficulty = "GOD";
+        private DifficultyTier difficulty = DifficultyTier.EASY;
+        private DifficultyTier minDifficulty = DifficultyTier.EASY;
+        private DifficultyTier maxDifficulty = DifficultyTier.GOD;
         private @Nullable BotLocationRequest spawnLocation;
         private boolean autoTarget = true;
         private double autoTargetRange = 16.0D;
         private boolean attackBots = false;
-        private SdkBotTargetMode targetMode = SdkBotTargetMode.PLAYERS;
+        private BotTargetMode targetMode = BotTargetMode.PLAYERS;
         private boolean respectWorldGuardPvp = false;
         private boolean stayAfterOwnerDeath = false;
         private boolean idleWander = false;
@@ -252,8 +253,18 @@ public record EventBotSpawnRequest(
 
         private Builder() {}
 
+        public Builder mode(BotMode mode) {
+            this.mode = Objects.requireNonNull(mode, "mode");
+            return this;
+        }
+
         public Builder ownerUUID(@Nullable UUID ownerUUID) {
             this.ownerUUID = ownerUUID;
+            return this;
+        }
+
+        public Builder teamOwnerUUIDs(@Nullable List<UUID> teamOwnerUUIDs) {
+            this.teamOwnerUUIDs = teamOwnerUUIDs == null ? List.of() : List.copyOf(teamOwnerUUIDs);
             return this;
         }
 
@@ -283,30 +294,63 @@ public record EventBotSpawnRequest(
             return this;
         }
 
+        public Builder changeableFollow(boolean changeableFollow) {
+            this.changeableFollow = changeableFollow;
+            return this;
+        }
+
         public Builder combat(boolean combat) {
             this.combat = combat;
             return this;
         }
 
-        public Builder armor(String armor) {
+        public Builder changeableCombat(boolean changeableCombat) {
+            this.changeableCombat = changeableCombat;
+            return this;
+        }
+
+        public Builder changeableBlast(boolean changeableBlast) {
+            this.changeableBlast = changeableBlast;
+            return this;
+        }
+
+        public Builder blastProtection(BlastProtectionSettings blastProtection) {
+            this.blastProtection = Objects.requireNonNull(blastProtection, "blastProtection");
+            return this;
+        }
+
+        public Builder blastProtection(boolean enabled) {
+            return blastProtection(BlastProtectionSettings.all(enabled));
+        }
+
+        public Builder changeableArmor(boolean changeableArmor) {
+            this.changeableArmor = changeableArmor;
+            return this;
+        }
+
+        public Builder changeableTotem(boolean changeableTotem) {
+            this.changeableTotem = changeableTotem;
+            return this;
+        }
+
+        public Builder changeableDifficulty(boolean changeableDifficulty) {
+            this.changeableDifficulty = changeableDifficulty;
+            return this;
+        }
+
+        public Builder changeableCombatMode(boolean changeableCombatMode) {
+            this.changeableCombatMode = changeableCombatMode;
+            return this;
+        }
+
+        public Builder armor(BotArmorTier armor) {
             this.armor = Objects.requireNonNull(armor, "armor");
             return this;
         }
 
-        public Builder armor(SdkBotArmor armor) {
-            this.armor = Objects.requireNonNull(armor, "armor").apiValue();
-            return this;
-        }
-
-        public Builder armorRange(String minArmor, String maxArmor) {
+        public Builder armorRange(BotArmorTier minArmor, BotArmorTier maxArmor) {
             this.minArmor = Objects.requireNonNull(minArmor, "minArmor");
             this.maxArmor = Objects.requireNonNull(maxArmor, "maxArmor");
-            return this;
-        }
-
-        public Builder armorRange(SdkBotArmor minArmor, SdkBotArmor maxArmor) {
-            this.minArmor = Objects.requireNonNull(minArmor, "minArmor").apiValue();
-            this.maxArmor = Objects.requireNonNull(maxArmor, "maxArmor").apiValue();
             return this;
         }
 
@@ -321,27 +365,14 @@ public record EventBotSpawnRequest(
             return this;
         }
 
-        public Builder difficulty(String difficulty) {
+        public Builder difficulty(DifficultyTier difficulty) {
             this.difficulty = Objects.requireNonNull(difficulty, "difficulty");
             return this;
         }
 
-        public Builder difficulty(SdkDifficultyLevel difficulty) {
-            this.difficulty = Objects.requireNonNull(difficulty, "difficulty").apiValue();
-            return this;
-        }
-
-        public Builder difficultyRange(String minDifficulty, String maxDifficulty) {
+        public Builder difficultyRange(DifficultyTier minDifficulty, DifficultyTier maxDifficulty) {
             this.minDifficulty = Objects.requireNonNull(minDifficulty, "minDifficulty");
             this.maxDifficulty = Objects.requireNonNull(maxDifficulty, "maxDifficulty");
-            return this;
-        }
-
-        public Builder difficultyRange(SdkDifficultyLevel minDifficulty, SdkDifficultyLevel maxDifficulty) {
-            this.minDifficulty =
-                    Objects.requireNonNull(minDifficulty, "minDifficulty").apiValue();
-            this.maxDifficulty =
-                    Objects.requireNonNull(maxDifficulty, "maxDifficulty").apiValue();
             return this;
         }
 
@@ -365,7 +396,7 @@ public record EventBotSpawnRequest(
             return this;
         }
 
-        public Builder targetMode(SdkBotTargetMode targetMode) {
+        public Builder targetMode(BotTargetMode targetMode) {
             this.targetMode = Objects.requireNonNull(targetMode, "targetMode");
             return this;
         }
@@ -502,15 +533,25 @@ public record EventBotSpawnRequest(
             return this;
         }
 
-        public EventBotSpawnRequest build() {
-            return new EventBotSpawnRequest(
+        public BotSpawnRequest build() {
+            return new BotSpawnRequest(
+                    mode,
                     ownerUUID,
+                    teamOwnerUUIDs,
                     botUUID,
                     targetUUIDs,
                     botNameTemplate,
                     botSkin,
                     follow,
+                    changeableFollow,
                     combat,
+                    changeableCombat,
+                    changeableBlast,
+                    blastProtection,
+                    changeableArmor,
+                    changeableTotem,
+                    changeableDifficulty,
+                    changeableCombatMode,
                     armor,
                     minArmor,
                     maxArmor,
