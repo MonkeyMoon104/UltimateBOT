@@ -3,8 +3,11 @@ package com.monkey.ultimatebot.api.model.configuration;
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,15 +43,15 @@ public final class BotSettings {
     private final boolean changeableCombatMode;
     private final String botNameTemplate;
     private final BotSkin botSkin;
-    private final BotArmorType armorType;
-    private final BotArmorType minArmorType;
-    private final BotArmorType maxArmorType;
+    private final BotArmorTier armorType;
+    private final BotArmorTier minArmorType;
+    private final BotArmorTier maxArmorType;
     private final int totemCount;
     private final int minTotemCount;
     private final int maxTotemCount;
-    private final DifficultyLevel difficulty;
-    private final DifficultyLevel minDifficulty;
-    private final DifficultyLevel maxDifficulty;
+    private final DifficultyTier difficulty;
+    private final DifficultyTier minDifficulty;
+    private final DifficultyTier maxDifficulty;
     private final CombatMode combatMode;
     private final @Nullable CombatTuning combatTuning;
     private final @Nullable BotLocation spawnLocation;
@@ -244,7 +247,7 @@ public final class BotSettings {
      *
      * @return default armor tier
      */
-    public BotArmorType armorType() {
+    public BotArmorTier armorType() {
         return armorType;
     }
 
@@ -253,7 +256,7 @@ public final class BotSettings {
      *
      * @return min armor tier
      */
-    public BotArmorType minArmorType() {
+    public BotArmorTier minArmorType() {
         return minArmorType;
     }
 
@@ -262,7 +265,7 @@ public final class BotSettings {
      *
      * @return max armor tier
      */
-    public BotArmorType maxArmorType() {
+    public BotArmorTier maxArmorType() {
         return maxArmorType;
     }
 
@@ -298,7 +301,7 @@ public final class BotSettings {
      *
      * @return default difficulty
      */
-    public DifficultyLevel difficulty() {
+    public DifficultyTier difficulty() {
         return difficulty;
     }
 
@@ -307,7 +310,7 @@ public final class BotSettings {
      *
      * @return min difficulty
      */
-    public DifficultyLevel minDifficulty() {
+    public DifficultyTier minDifficulty() {
         return minDifficulty;
     }
 
@@ -316,7 +319,7 @@ public final class BotSettings {
      *
      * @return max difficulty
      */
-    public DifficultyLevel maxDifficulty() {
+    public DifficultyTier maxDifficulty() {
         return maxDifficulty;
     }
 
@@ -646,7 +649,7 @@ public final class BotSettings {
          * @param maxArmorType maximum armor tier
          * @return next step (default armor)
          */
-        ArmorStep armorValue(BotArmorType minArmorType, BotArmorType maxArmorType);
+        ArmorStep armorValue(BotArmorTier minArmorType, BotArmorTier maxArmorType);
     }
 
     /**
@@ -659,7 +662,7 @@ public final class BotSettings {
          * @param defaultArmorType default armor tier
          * @return next step (armor mutability)
          */
-        ChangeableArmorStep armor(BotArmorType defaultArmorType);
+        ChangeableArmorStep armor(BotArmorTier defaultArmorType);
     }
 
     /**
@@ -729,7 +732,7 @@ public final class BotSettings {
          * @param maxDifficulty maximum difficulty
          * @return next step (default difficulty)
          */
-        DifficultyStep difficultyValue(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty);
+        DifficultyStep difficultyValue(DifficultyTier minDifficulty, DifficultyTier maxDifficulty);
     }
 
     /**
@@ -742,7 +745,7 @@ public final class BotSettings {
          * @param defaultDifficulty default difficulty
          * @return next step (difficulty mutability)
          */
-        ChangeableDifficultyStep difficulty(DifficultyLevel defaultDifficulty);
+        ChangeableDifficultyStep difficulty(DifficultyTier defaultDifficulty);
     }
 
     /**
@@ -852,15 +855,15 @@ public final class BotSettings {
         private boolean changeableCombatMode = true;
         private String botNameTemplate = "";
         private BotSkin botSkin = BotSkin.random();
-        private BotArmorType armorType = BotArmorType.LEATHER;
-        private BotArmorType minArmorType = BotArmorType.LEATHER;
-        private BotArmorType maxArmorType = BotArmorType.NETHERITE;
+        private BotArmorTier armorType = BotArmorTier.LEATHER;
+        private BotArmorTier minArmorType = BotArmorTier.LEATHER;
+        private BotArmorTier maxArmorType = BotArmorTier.NETHERITE;
         private int totemCount;
         private int minTotemCount;
         private int maxTotemCount;
-        private DifficultyLevel difficulty = DifficultyLevel.EASY;
-        private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
-        private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
+        private DifficultyTier difficulty = DifficultyTier.EASY;
+        private DifficultyTier minDifficulty = DifficultyTier.EASY;
+        private DifficultyTier maxDifficulty = DifficultyTier.GOD;
         private CombatMode combatMode = CombatMode.SWORD;
         private @Nullable CombatTuning combatTuning;
         private @Nullable BotLocation spawnLocation;
@@ -1005,14 +1008,14 @@ public final class BotSettings {
         }
 
         @Override
-        public ArmorStep armorValue(BotArmorType minArmorType, BotArmorType maxArmorType) {
+        public ArmorStep armorValue(BotArmorTier minArmorType, BotArmorTier maxArmorType) {
             this.minArmorType = Objects.requireNonNull(minArmorType, "minArmorType");
             this.maxArmorType = Objects.requireNonNull(maxArmorType, "maxArmorType");
             return this;
         }
 
         @Override
-        public ChangeableArmorStep armor(BotArmorType defaultArmorType) {
+        public ChangeableArmorStep armor(BotArmorTier defaultArmorType) {
             this.armorType = Objects.requireNonNull(defaultArmorType, "defaultArmorType");
             return this;
         }
@@ -1043,14 +1046,14 @@ public final class BotSettings {
         }
 
         @Override
-        public DifficultyStep difficultyValue(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
+        public DifficultyStep difficultyValue(DifficultyTier minDifficulty, DifficultyTier maxDifficulty) {
             this.minDifficulty = Objects.requireNonNull(minDifficulty, "minDifficulty");
             this.maxDifficulty = Objects.requireNonNull(maxDifficulty, "maxDifficulty");
             return this;
         }
 
         @Override
-        public ChangeableDifficultyStep difficulty(DifficultyLevel defaultDifficulty) {
+        public ChangeableDifficultyStep difficulty(DifficultyTier defaultDifficulty) {
             this.difficulty = Objects.requireNonNull(defaultDifficulty, "defaultDifficulty");
             return this;
         }
@@ -1305,13 +1308,13 @@ public final class BotSettings {
             }
         }
 
-        private static void validateArmorRange(BotArmorType minArmorType, BotArmorType maxArmorType) {
+        private static void validateArmorRange(BotArmorTier minArmorType, BotArmorTier maxArmorType) {
             if (minArmorType.compareTo(maxArmorType) > 0) {
                 throw new IllegalArgumentException("min armor cannot be greater than max armor");
             }
         }
 
-        private static void validateDifficultyRange(DifficultyLevel min, DifficultyLevel max) {
+        private static void validateDifficultyRange(DifficultyTier min, DifficultyTier max) {
             if (min.compareTo(max) > 0) {
                 throw new IllegalArgumentException("min difficulty cannot be greater than max difficulty");
             }

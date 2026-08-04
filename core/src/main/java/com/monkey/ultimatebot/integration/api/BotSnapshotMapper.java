@@ -1,12 +1,21 @@
 package com.monkey.ultimatebot.integration.api;
 
-import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
-import com.monkey.ultimatebot.api.model.identity.BotSource;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
+import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
+import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
@@ -22,10 +31,10 @@ public final class BotSnapshotMapper {
 
         UUID botUUID = bot.asPlayer() != null ? bot.asPlayer().getUUID() : null;
 
-        String botType = "UNKNOWN";
-        String botDifficulty = "UNKNOWN";
-        String minDifficultyLevel = "EASY";
-        String maxDifficultyLevel = "GOD";
+        BotMode botMode = BotMode.SINGLE;
+        DifficultyTier difficulty = DifficultyTier.EASY;
+        DifficultyTier minDifficulty = DifficultyTier.EASY;
+        DifficultyTier maxDifficulty = DifficultyTier.GOD;
         CombatMode combatMode = CombatMode.SWORD;
         CombatTuning combatTuning = CombatTuning.builder().build();
         boolean customizedCombatTuning = false;
@@ -49,20 +58,39 @@ public final class BotSnapshotMapper {
         boolean enderPearls = true;
         boolean healing = true;
         boolean killMessageEnabled = true;
+        Set<UUID> teamOwnerUUIDs = Set.of();
+        String botNameTemplate = "UltimateBot";
+        String botSkinSource = "RANDOM";
+        BotArmorTier minArmor = BotArmorTier.LEATHER;
+        BotArmorTier maxArmor = BotArmorTier.NETHERITE;
+        BotArmorTier armor = BotArmorTier.LEATHER;
+        BlastProtectionSettings blastProtection = BlastProtectionSettings.all(false);
+        boolean changeableFollow = true;
+        boolean changeableCombat = true;
+        boolean changeableBlast = true;
+        boolean changeableArmor = true;
+        boolean changeableTotem = true;
+        boolean changeableDifficulty = true;
+        boolean changeableCombatMode = true;
+        BotLocation spawnLocation = null;
+        String killMessage = null;
+        Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots = Map.of();
         if (bot.getBrainController() != null) {
             BotOptions options = bot.getBrainController().getBotOptions();
             if (options != null && options.getBotType() != null) {
-                botType = options.getBotType().name();
-                botDifficulty = options.getDifficulty().name();
-                minDifficultyLevel = options.getMinDifficulty().name();
-                maxDifficultyLevel = options.getMaxDifficulty().name();
+                botMode = options.getBotType().toCommon();
+                difficulty = DifficultyTier.valueOf(options.getDifficulty().name());
+                minDifficulty =
+                        DifficultyTier.valueOf(options.getMinDifficulty().name());
+                maxDifficulty =
+                        DifficultyTier.valueOf(options.getMaxDifficulty().name());
                 combatMode = options.getCombatMode();
                 combatTuning = options.getCombatTuning();
                 customizedCombatTuning = options.getCustomCombatTuning() != null;
                 minTotemCount = options.getMinTotemCount();
                 maxTotemCount = options.getMaxTotemCount();
                 targetUUIDs = options.getTargetUUIDs();
-                source = BotSource.fromCommon(options.getCreationSource().toCommon());
+                source = options.getCreationSource().toCommon();
                 autoTarget = options.isAutoTarget();
                 autoTargetRange = options.getAutoTargetRange();
                 attackBots = options.isAttackBots();
@@ -79,6 +107,33 @@ public final class BotSnapshotMapper {
                 enderPearls = options.isEnderPearls();
                 healing = options.isHealing();
                 killMessageEnabled = options.isKillMessageEnabled();
+                teamOwnerUUIDs = options.getTeamOwnerUUIDs();
+                botNameTemplate = Objects.requireNonNullElse(options.getBotNameTemplate(), "UltimateBot");
+                botSkinSource = options.getBotSkin().source().name();
+                minArmor = BotArmorTier.valueOf(options.getMinArmorTier().name());
+                maxArmor = BotArmorTier.valueOf(options.getMaxArmorTier().name());
+                org.bukkit.inventory.ItemStack chestplate =
+                        options.getArmor().get(org.bukkit.inventory.EquipmentSlot.CHEST);
+                com.monkey.ultimatebot.utils.armor.ArmorTier currentArmor = chestplate == null
+                        ? null
+                        : com.monkey.ultimatebot.utils.armor.ArmorTier.fromMaterial(
+                                chestplate.getType(), org.bukkit.inventory.EquipmentSlot.CHEST);
+                armor = currentArmor == null ? minArmor : BotArmorTier.valueOf(currentArmor.name());
+                blastProtection = new BlastProtectionSettings(
+                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.FEET, false),
+                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.LEGS, false),
+                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.CHEST, false),
+                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.HEAD, false));
+                changeableFollow = options.isChangeableFollow();
+                changeableCombat = options.isChangeableCombat();
+                changeableBlast = options.isChangeableBlast();
+                changeableArmor = options.isChangeableArmor();
+                changeableTotem = options.isChangeableTotem();
+                changeableDifficulty = options.isChangeableDifficulty();
+                changeableCombatMode = options.isChangeableCombatMode();
+                spawnLocation = options.getSpawnLocation();
+                killMessage = options.getCustomKillMessage();
+                equipmentSlots = options.getEquipmentSlotSettings();
             }
         }
 
@@ -90,10 +145,10 @@ public final class BotSnapshotMapper {
         return new BotSnapshot(
                 ownerUUID,
                 botUUID,
-                botType,
-                botDifficulty,
-                minDifficultyLevel,
-                maxDifficultyLevel,
+                botMode,
+                difficulty,
+                minDifficulty,
+                maxDifficulty,
                 combatMode,
                 combatTuning,
                 customizedCombatTuning,
@@ -120,6 +175,23 @@ public final class BotSnapshotMapper {
                 explosionBlockDamage,
                 enderPearls,
                 healing,
-                killMessageEnabled);
+                killMessageEnabled,
+                teamOwnerUUIDs,
+                botNameTemplate,
+                botSkinSource,
+                minArmor,
+                maxArmor,
+                armor,
+                blastProtection,
+                changeableFollow,
+                changeableCombat,
+                changeableBlast,
+                changeableArmor,
+                changeableTotem,
+                changeableDifficulty,
+                changeableCombatMode,
+                spawnLocation,
+                killMessage,
+                equipmentSlots);
     }
 }

@@ -39,11 +39,36 @@ public final class CoreBotRegistryAdapter implements IBotRegistry {
     }
 
     @Override
+    public Optional<BotSnapshot> getBotByBotUUID(UUID botUUID) {
+        if (botUUID == null) {
+            return Optional.empty();
+        }
+        UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
+        return ownerUUID == null ? Optional.empty() : getBot(ownerUUID);
+    }
+
+    @Override
     public Optional<UUID> getBotUUID(UUID ownerUUID) {
         if (ownerUUID == null) {
             return Optional.empty();
         }
         return Optional.ofNullable(botRegistry.getBotUUID(ownerUUID));
+    }
+
+    @Override
+    public Optional<UUID> getOwnerUUID(UUID botUUID) {
+        return botUUID == null ? Optional.empty() : Optional.ofNullable(botRegistry.getOwnerUUIDByBotUUID(botUUID));
+    }
+
+    @Override
+    public Map<UUID, BotSnapshot> getAllBotsByBotUUID() {
+        Map<UUID, BotSnapshot> snapshots = new HashMap<>();
+        for (BotSnapshot snapshot : getAllBots().values()) {
+            if (snapshot.botUUID() != null) {
+                snapshots.put(snapshot.requireBotUUID(), snapshot);
+            }
+        }
+        return Collections.unmodifiableMap(snapshots);
     }
 
     @Override

@@ -1,15 +1,15 @@
 package com.monkey.ultimatebot.integration.api;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.model.configuration.BotArmorType;
 import com.monkey.ultimatebot.api.model.configuration.BotBlastProtection;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
 import com.monkey.ultimatebot.bot.BotCreationSource;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import java.util.Map;
@@ -103,10 +103,9 @@ final class ApiBotOptionsFactory {
         }
     }
 
-    static com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel toCoreDifficulty(DifficultyLevel difficulty) {
-        com.monkey.ultimatebot.common.model.DifficultyTier common =
-                difficulty == null ? com.monkey.ultimatebot.common.model.DifficultyTier.EASY : difficulty.toCommon();
-        return switch (common) {
+    static com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel toCoreDifficulty(DifficultyTier difficulty) {
+        DifficultyTier resolved = difficulty == null ? DifficultyTier.EASY : difficulty;
+        return switch (resolved) {
             case EASY -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.EASY;
             case NORMAL -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.NORMAL;
             case MEDIUM -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.MEDIUM;
@@ -115,10 +114,9 @@ final class ApiBotOptionsFactory {
         };
     }
 
-    private static ArmorTier toCoreArmor(BotArmorType armorType) {
-        com.monkey.ultimatebot.common.model.BotArmorTier common =
-                armorType == null ? com.monkey.ultimatebot.common.model.BotArmorTier.LEATHER : armorType.toCommon();
-        return switch (common) {
+    private static ArmorTier toCoreArmor(BotArmorTier armorType) {
+        BotArmorTier resolved = armorType == null ? BotArmorTier.LEATHER : armorType;
+        return switch (resolved) {
             case LEATHER -> ArmorTier.LEATHER;
             case IRON -> ArmorTier.IRON;
             case GOLDEN -> ArmorTier.GOLDEN;

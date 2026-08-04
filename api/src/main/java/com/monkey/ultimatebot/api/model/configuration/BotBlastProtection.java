@@ -67,6 +67,17 @@ public record BotBlastProtection(boolean feet, boolean legs, boolean chest, bool
         return feet && legs && chest && head;
     }
 
+    /** Converts this Bukkit API model to the platform-independent representation. */
+    public com.monkey.ultimatebot.common.model.BlastProtectionSettings toCommon() {
+        return new com.monkey.ultimatebot.common.model.BlastProtectionSettings(feet, legs, chest, head);
+    }
+
+    /** Creates the Bukkit API model from the platform-independent representation. */
+    public static BotBlastProtection fromCommon(com.monkey.ultimatebot.common.model.BlastProtectionSettings settings) {
+        java.util.Objects.requireNonNull(settings, "settings");
+        return new BotBlastProtection(settings.boots(), settings.leggings(), settings.chestplate(), settings.helmet());
+    }
+
     private static boolean parseBinary(int value, String field) {
         if (value == 0) {
             return false;

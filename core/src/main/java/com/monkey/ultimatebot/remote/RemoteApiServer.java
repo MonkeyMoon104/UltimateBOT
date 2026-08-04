@@ -6,19 +6,22 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.managers.IBotManager;
-import com.monkey.ultimatebot.api.model.configuration.BotArmorType;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
-import com.monkey.ultimatebot.api.model.configuration.BotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.common.util.EnumValues;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.metrics.BotMetrics;
@@ -149,19 +152,50 @@ public final class RemoteApiServer {
                 return;
             }
 
+            if ("GET".equals(method) && "/combat-modes".equals(relativePath)) {
+                writeJson(exchange, 200, api.getBotManager().getCombatModes());
+                return;
+            }
+
+            if ("GET".equals(method) && relativePath.startsWith("/combat-modes/")) {
+                String requestedMode = relativePath.substring("/combat-modes/".length());
+                CombatMode combatMode = EnumValues.parse(CombatMode.class, requestedMode, null);
+                var definition = combatMode == null
+                        ? Optional.empty()
+                        : api.getBotManager().getCombatMode(combatMode);
+                if (definition.isEmpty()) {
+                    writeJson(exchange, 404, RemoteOperationResponse.failure("Combat mode not found."));
+                } else {
+                    writeJson(exchange, 200, definition.get());
+                }
+                return;
+            }
+
             if ("GET".equals(method) && "/bots/count".equals(relativePath)) {
                 writeJson(exchange, 200, Map.of("count", api.getBotManager().getActiveBotCount()));
                 return;
             }
 
-            if ("POST".equals(method) && "/bots/event".equals(relativePath)) {
-                handleEventSpawn(exchange);
+            if ("POST".equals(method) && "/bots".equals(relativePath)) {
+                handleSpawn(exchange);
                 return;
             }
 
             if ("DELETE".equals(method) && "/bots".equals(relativePath)) {
                 int removed = runSync(() -> api.getBotManager().removeAll());
                 writeJson(exchange, 200, RemoteOperationResponse.removed("Removed all bots.", removed));
+                return;
+            }
+
+            if ("DELETE".equals(method) && relativePath.startsWith("/bots/source/")) {
+                String requestedSource = relativePath.substring("/bots/source/".length());
+                BotSource source = EnumValues.parse(BotSource.class, requestedSource, null);
+                if (source == null) {
+                    writeJson(exchange, 400, RemoteOperationResponse.failure("Invalid bot source."));
+                } else {
+                    int removed = runSync(() -> api.getBotManager().removeBySource(source));
+                    writeJson(exchange, 200, RemoteOperationResponse.removed("Removed bots by source.", removed));
+                }
                 return;
             }
 
@@ -187,15 +221,17 @@ public final class RemoteApiServer {
         }
     }
 
-    private void handleEventSpawn(HttpExchange exchange) throws IOException {
-        EventBotSpawnPayload payload = readJson(exchange, EventBotSpawnPayload.class);
+    private void handleSpawn(HttpExchange exchange) throws IOException {
+        BotSpawnPayload payload = readJson(exchange, BotSpawnPayload.class);
         if (payload == null) {
-            payload = new EventBotSpawnPayload();
+            payload = new BotSpawnPayload();
         }
         BotSettings settings = buildSettings(payload);
-        BotSpawnRequest request = BotSpawnRequest.builder(BotMode.EVENT)
+        BotMode mode = parseEnumOrDefault(BotMode.class, payload.mode, BotMode.EVENT, "mode");
+        BotSpawnRequest request = BotSpawnRequest.builder(mode)
                 .botUUID(payload.botUUID)
                 .owner(payload.ownerUUID)
+                .teamOwners(payload.teamOwnerUUIDs)
                 .targets(payload.targetUUIDs)
                 .equipmentSlots(toEquipmentSettings(payload.equipmentSlots))
                 .settings(settings)
@@ -269,6 +305,14 @@ public final class RemoteApiServer {
             return;
         }
 
+        if ("DELETE".equals(method) && parts.length == 3 && "kill-message".equals(parts[2])) {
+            boolean updated = runSync(() -> ownerUUID != null
+                    ? manager.disableKillMessage(ownerUUID)
+                    : manager.disableKillMessageByBotUUID(requestedUUID));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Kill message update failed.");
+            return;
+        }
+
         if (!"PATCH".equals(method) || parts.length != 3) {
             writeJson(exchange, 404, RemoteOperationResponse.failure("Endpoint not found."));
             return;
@@ -276,12 +320,8 @@ public final class RemoteApiServer {
 
         if ("target-mode".equals(parts[2])) {
             TargetModePayload payload = readJson(exchange, TargetModePayload.class);
-            com.monkey.ultimatebot.api.model.configuration.BotTargetMode mode = payload == null
-                    ? null
-                    : EnumValues.parse(
-                            com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class,
-                            payload.targetMode,
-                            null);
+            BotTargetMode mode =
+                    payload == null ? null : EnumValues.parse(BotTargetMode.class, payload.targetMode, null);
             boolean updated = mode != null
                     && runSync(() -> ownerUUID != null
                             ? manager.updateTargetMode(ownerUUID, mode)
@@ -294,6 +334,126 @@ public final class RemoteApiServer {
                     updated ? 200 : 400,
                     new RemoteOperationResponse(
                             updated, updated ? "Bot updated." : "Invalid target mode.", snapshot, null));
+            return;
+        }
+
+        if ("totems".equals(parts[2])) {
+            TotemCountPayload payload = readJson(exchange, TotemCountPayload.class);
+            Integer requestedTotemCount = payload == null ? null : payload.totemCount;
+            int requestedTotemValue = requestedTotemCount == null ? 0 : requestedTotemCount;
+            boolean updated = requestedTotemCount != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateTotems(ownerUUID, requestedTotemValue)
+                            : manager.updateTotemsByBotUUID(requestedUUID, requestedTotemValue));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid totem count.");
+            return;
+        }
+
+        if ("difficulty".equals(parts[2])) {
+            DifficultyPayload payload = readJson(exchange, DifficultyPayload.class);
+            DifficultyTier difficulty =
+                    payload == null ? null : EnumValues.parse(DifficultyTier.class, payload.difficulty, null);
+            boolean updated = difficulty != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateDifficulty(ownerUUID, difficulty)
+                            : manager.updateDifficultyByBotUUID(requestedUUID, difficulty));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid difficulty.");
+            return;
+        }
+
+        if ("blast-protection".equals(parts[2])) {
+            BlastProtectionSettings settings = readJson(exchange, BlastProtectionSettings.class);
+            boolean updated = settings != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateBlastProtection(ownerUUID, settings)
+                            : manager.updateBlastProtectionByBotUUID(requestedUUID, settings));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid blast protection.");
+            return;
+        }
+
+        if ("armor".equals(parts[2])) {
+            ArmorPayload payload = readJson(exchange, ArmorPayload.class);
+            BotArmorTier armorType = payload == null ? null : EnumValues.parse(BotArmorTier.class, payload.armor, null);
+            boolean updated = armorType != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateArmorType(ownerUUID, armorType)
+                            : manager.updateArmorTypeByBotUUID(requestedUUID, armorType));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid armor tier.");
+            return;
+        }
+
+        if ("auto-target".equals(parts[2])) {
+            AutoTargetPayload payload = readJson(exchange, AutoTargetPayload.class);
+            Boolean requestedEnabled = payload == null ? null : payload.enabled;
+            Double requestedRange = payload == null ? null : payload.range;
+            boolean requestedEnabledValue = Boolean.TRUE.equals(requestedEnabled);
+            double requestedRangeValue = requestedRange == null ? 0.0D : requestedRange;
+            boolean updated = requestedEnabled != null
+                    && requestedRange != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateAutoTarget(ownerUUID, requestedEnabledValue, requestedRangeValue)
+                            : manager.updateAutoTargetByBotUUID(
+                                    requestedUUID, requestedEnabledValue, requestedRangeValue));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid auto-target settings.");
+            return;
+        }
+
+        if ("idle-wander".equals(parts[2])) {
+            IdleWanderPayload payload = readJson(exchange, IdleWanderPayload.class);
+            Boolean requestedEnabled = payload == null ? null : payload.enabled;
+            Double requestedRadius = payload == null ? null : payload.radius;
+            Double requestedReturnDistance = payload == null ? null : payload.returnDistance;
+            Long requestedReturnDelayMs = payload == null ? null : payload.returnDelayMs;
+            boolean requestedEnabledValue = Boolean.TRUE.equals(requestedEnabled);
+            double requestedRadiusValue = requestedRadius == null ? 0.0D : requestedRadius;
+            double requestedReturnDistanceValue = requestedReturnDistance == null ? 0.0D : requestedReturnDistance;
+            long requestedReturnDelayValue = requestedReturnDelayMs == null ? -1L : requestedReturnDelayMs;
+            boolean updated = requestedEnabled != null
+                    && requestedRadius != null
+                    && requestedReturnDistance != null
+                    && requestedReturnDelayMs != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateIdleWander(
+                                    ownerUUID,
+                                    requestedEnabledValue,
+                                    requestedRadiusValue,
+                                    requestedReturnDistanceValue,
+                                    requestedReturnDelayValue)
+                            : manager.updateIdleWanderByBotUUID(
+                                    requestedUUID,
+                                    requestedEnabledValue,
+                                    requestedRadiusValue,
+                                    requestedReturnDistanceValue,
+                                    requestedReturnDelayValue));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid idle settings.");
+            return;
+        }
+
+        if ("targets".equals(parts[2]) || "team-owners".equals(parts[2])) {
+            UuidSetPayload payload = readJson(exchange, UuidSetPayload.class);
+            Set<UUID> uuids = payload == null || payload.uuids == null ? Set.of() : Set.copyOf(payload.uuids);
+            boolean teamOwners = "team-owners".equals(parts[2]);
+            boolean updated = runSync(() -> teamOwners
+                    ? ownerUUID != null
+                            ? manager.updateTeamOwners(ownerUUID, uuids)
+                            : manager.updateTeamOwnersByBotUUID(requestedUUID, uuids)
+                    : ownerUUID != null
+                            ? manager.updateTargets(ownerUUID, uuids)
+                            : manager.updateTargetsByBotUUID(requestedUUID, uuids));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "UUID set update failed.");
+            return;
+        }
+
+        if ("kill-message".equals(parts[2])) {
+            KillMessagePayload payload = readJson(exchange, KillMessagePayload.class);
+            String requestedMessage = payload == null ? null : payload.message;
+            String requiredMessage = Objects.requireNonNullElse(requestedMessage, "");
+            boolean updated = requestedMessage != null
+                    && !requiredMessage.isBlank()
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateKillMessage(ownerUUID, requiredMessage)
+                            : manager.updateKillMessageByBotUUID(requestedUUID, requiredMessage));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid kill message.");
             return;
         }
 
@@ -319,7 +479,11 @@ public final class RemoteApiServer {
         }
 
         TogglePayload payload = readJson(exchange, TogglePayload.class);
-        boolean enabled = payload != null && Boolean.TRUE.equals(payload.enabled);
+        if (payload == null || payload.enabled == null) {
+            writeJson(exchange, 400, RemoteOperationResponse.failure("Missing required enabled value."));
+            return;
+        }
+        boolean enabled = payload.enabled;
         boolean updated =
                 switch (parts[2]) {
                     case "crystal-pvp" ->
@@ -346,6 +510,22 @@ public final class RemoteApiServer {
                         runSync(() -> ownerUUID != null
                                 ? manager.updateAttackBots(ownerUUID, enabled)
                                 : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
+                    case "follow" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateFollow(ownerUUID, enabled)
+                                : manager.updateFollowByBotUUID(requestedUUID, enabled));
+                    case "combat" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateCombat(ownerUUID, enabled)
+                                : manager.updateCombatByBotUUID(requestedUUID, enabled));
+                    case "world-guard-pvp" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateWorldGuardPvpRespect(ownerUUID, enabled)
+                                : manager.updateWorldGuardPvpRespectByBotUUID(requestedUUID, enabled));
+                    case "stay-after-owner-death" ->
+                        runSync(() -> ownerUUID != null
+                                ? manager.updateStayAfterOwnerDeath(ownerUUID, enabled)
+                                : manager.updateStayAfterOwnerDeathByBotUUID(requestedUUID, enabled));
                     default -> false;
                 };
         BotSnapshot snapshot = runSync(() -> ownerUUID != null
@@ -374,8 +554,8 @@ public final class RemoteApiServer {
                 new RemoteOperationResponse(updated, updated ? "Bot updated." : failureMessage, snapshot, null));
     }
 
-    private BotSettings buildSettings(EventBotSpawnPayload payload) {
-        EventBotSpawnPayload safe = payload == null ? new EventBotSpawnPayload() : payload;
+    private BotSettings buildSettings(BotSpawnPayload payload) {
+        BotSpawnPayload safe = payload == null ? new BotSpawnPayload() : payload;
         BotSettings.BuildStep buildStep = applySkin(
                         BotSettings.builder()
                                 .setBotNameTemplate(defaultString(
@@ -385,12 +565,16 @@ public final class RemoteApiServer {
                 .setChangeableFollow(defaultBoolean(safe.changeableFollow, true))
                 .combat(defaultBoolean(safe.combat, true))
                 .setChangeableCombat(defaultBoolean(safe.changeableCombat, true))
-                .blastProtection(false, false, false, false)
+                .blastProtection(
+                        safe.blastProtection == null ? false : safe.blastProtection.boots(),
+                        safe.blastProtection == null ? false : safe.blastProtection.leggings(),
+                        safe.blastProtection == null ? false : safe.blastProtection.chestplate(),
+                        safe.blastProtection == null ? false : safe.blastProtection.helmet())
                 .setChangeableBlast(defaultBoolean(safe.changeableBlast, true))
                 .armorValue(
-                        EnumValues.parseOrDefault(BotArmorType.class, safe.minArmor, BotArmorType.LEATHER),
-                        EnumValues.parseOrDefault(BotArmorType.class, safe.maxArmor, BotArmorType.NETHERITE))
-                .armor(EnumValues.parseOrDefault(BotArmorType.class, safe.armor, BotArmorType.NETHERITE))
+                        parseEnumOrDefault(BotArmorTier.class, safe.minArmor, BotArmorTier.LEATHER, "minArmor"),
+                        parseEnumOrDefault(BotArmorTier.class, safe.maxArmor, BotArmorTier.NETHERITE, "maxArmor"))
+                .armor(parseEnumOrDefault(BotArmorTier.class, safe.armor, BotArmorTier.NETHERITE, "armor"))
                 .setChangeableArmor(defaultBoolean(safe.changeableArmor, true))
                 .totemValue(
                         defaultInt(safe.minTotemCount, -1),
@@ -398,9 +582,12 @@ public final class RemoteApiServer {
                 .totemCount(defaultInt(safe.totemCount, -1))
                 .setChangeableTotem(defaultBoolean(safe.changeableTotem, true))
                 .difficultyValue(
-                        EnumValues.parseOrDefault(DifficultyLevel.class, safe.minDifficulty, DifficultyLevel.EASY),
-                        EnumValues.parseOrDefault(DifficultyLevel.class, safe.maxDifficulty, DifficultyLevel.GOD))
-                .difficulty(EnumValues.parseOrDefault(DifficultyLevel.class, safe.difficulty, DifficultyLevel.EASY))
+                        parseEnumOrDefault(
+                                DifficultyTier.class, safe.minDifficulty, DifficultyTier.EASY, "minDifficulty"),
+                        parseEnumOrDefault(
+                                DifficultyTier.class, safe.maxDifficulty, DifficultyTier.GOD, "maxDifficulty"))
+                .difficulty(
+                        parseEnumOrDefault(DifficultyTier.class, safe.difficulty, DifficultyTier.EASY, "difficulty"))
                 .setChangeableDifficulty(defaultBoolean(safe.changeableDifficulty, true));
 
         if (safe.spawnLocation != null) {
@@ -418,11 +605,9 @@ public final class RemoteApiServer {
                 .autoTarget(defaultBoolean(safe.autoTarget, true))
                 .autoTargetRange(defaultDouble(safe.autoTargetRange, 16.0D))
                 .attackBots(defaultBoolean(safe.attackBots, false))
-                .targetMode(EnumValues.parseOrDefault(
-                        com.monkey.ultimatebot.api.model.configuration.BotTargetMode.class,
-                        safe.targetMode,
-                        com.monkey.ultimatebot.api.model.configuration.BotTargetMode.PLAYERS))
-                .combatMode(EnumValues.parseOrDefault(CombatMode.class, safe.combatMode, CombatMode.SWORD))
+                .targetMode(
+                        parseEnumOrDefault(BotTargetMode.class, safe.targetMode, BotTargetMode.PLAYERS, "targetMode"))
+                .combatMode(parseEnumOrDefault(CombatMode.class, safe.combatMode, CombatMode.SWORD, "combatMode"))
                 .combatTuning(safe.combatTuning)
                 .changeableCombatMode(defaultBoolean(safe.changeableCombatMode, true))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
@@ -579,18 +764,33 @@ public final class RemoteApiServer {
             return switch (parts[2]) {
                 case "equipment" -> "/bots/{bot}/equipment/{slot}";
                 case "target-mode",
+                        "totems",
+                        "difficulty",
+                        "armor",
+                        "auto-target",
+                        "idle-wander",
+                        "targets",
+                        "team-owners",
+                        "kill-message",
+                        "combat-mode",
+                        "combat-tuning",
                         "crystal-pvp",
                         "explosions",
                         "explosion-block-damage",
                         "ender-pearls",
                         "healing",
-                        "attack-bots" -> "/bots/{bot}/" + parts[2];
+                        "attack-bots",
+                        "follow",
+                        "combat",
+                        "blast-protection",
+                        "world-guard-pvp",
+                        "stay-after-owner-death" -> "/bots/{bot}/" + parts[2];
                 default -> "/bots/{bot}/unmatched";
             };
         }
         return switch (relativePath) {
-            case "/health", "/metrics", "/events", "/bots", "/bots/count", "/bots/event" -> relativePath;
-            default -> "/unmatched";
+            case "/health", "/metrics", "/events", "/bots", "/bots/count", "/combat-modes" -> relativePath;
+            default -> relativePath.startsWith("/combat-modes/") ? "/combat-modes/{mode}" : "/unmatched";
         };
     }
 
@@ -608,6 +808,18 @@ public final class RemoteApiServer {
 
     private static long defaultLong(@Nullable Long value, long fallback) {
         return value == null ? fallback : value;
+    }
+
+    private static <E extends Enum<E>> E parseEnumOrDefault(
+            Class<E> enumType, @Nullable String value, E fallback, String fieldName) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        E parsed = EnumValues.parse(enumType, value, null);
+        if (parsed == null) {
+            throw new IllegalArgumentException("Invalid " + fieldName + ": " + value);
+        }
+        return parsed;
     }
 
     private static double defaultDouble(@Nullable Double value, double fallback) {
@@ -636,8 +848,10 @@ public final class RemoteApiServer {
         }
     }
 
-    public static final class EventBotSpawnPayload {
+    public static final class BotSpawnPayload {
+        public @Nullable String mode;
         public @Nullable UUID ownerUUID;
+        public @Nullable List<UUID> teamOwnerUUIDs;
         public @Nullable UUID botUUID;
         public @Nullable List<UUID> targetUUIDs;
         public @Nullable String botNameTemplate;
@@ -647,6 +861,7 @@ public final class RemoteApiServer {
         public @Nullable Boolean combat;
         public @Nullable Boolean changeableCombat;
         public @Nullable Boolean changeableBlast;
+        public @Nullable BlastProtectionSettings blastProtection;
         public @Nullable Boolean changeableArmor;
         public @Nullable Boolean changeableTotem;
         public @Nullable Boolean changeableDifficulty;
@@ -695,6 +910,38 @@ public final class RemoteApiServer {
 
     public static final class CombatModePayload {
         public @Nullable String combatMode;
+    }
+
+    public static final class TotemCountPayload {
+        public @Nullable Integer totemCount;
+    }
+
+    public static final class DifficultyPayload {
+        public @Nullable String difficulty;
+    }
+
+    public static final class ArmorPayload {
+        public @Nullable String armor;
+    }
+
+    public static final class AutoTargetPayload {
+        public @Nullable Boolean enabled;
+        public @Nullable Double range;
+    }
+
+    public static final class IdleWanderPayload {
+        public @Nullable Boolean enabled;
+        public @Nullable Double radius;
+        public @Nullable Double returnDistance;
+        public @Nullable Long returnDelayMs;
+    }
+
+    public static final class UuidSetPayload {
+        public @Nullable Set<UUID> uuids;
+    }
+
+    public static final class KillMessagePayload {
+        public @Nullable String message;
     }
 
     public static final class RemoteLocationPayload {

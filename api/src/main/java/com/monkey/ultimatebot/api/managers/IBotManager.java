@@ -2,19 +2,24 @@ package com.monkey.ultimatebot.api.managers;
 
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
-import com.monkey.ultimatebot.api.model.configuration.BotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
-import com.monkey.ultimatebot.api.model.configuration.DifficultyLevel;
-import com.monkey.ultimatebot.api.model.identity.BotSource;
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
+import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.BotArmorTier;
+import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.DifficultyTier;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -47,9 +52,14 @@ public interface IBotManager {
      */
     Optional<BotSnapshot> getBot(UUID ownerUUID);
 
-    default Optional<BotSnapshot> getBotByBotUUID(UUID botUUID) {
-        return Optional.empty();
-    }
+    /** Returns a snapshot using the runtime bot entity UUID. */
+    Optional<BotSnapshot> getBotByBotUUID(UUID botUUID);
+
+    /** Returns every configured combat mode, including disabled modes. */
+    List<CombatModeDefinition> getCombatModes();
+
+    /** Returns the complete server definition for one combat mode. */
+    Optional<CombatModeDefinition> getCombatMode(CombatMode combatMode);
 
     /**
      * Returns the TEAM_ALLY bot snapshot associated with a team owner UUID.
@@ -130,6 +140,9 @@ public interface IBotManager {
      */
     boolean updateTotems(UUID ownerUUID, int totemCount);
 
+    /** Updates the current totem count using the runtime bot UUID. */
+    boolean updateTotemsByBotUUID(UUID botUUID, int totemCount);
+
     /**
      * Updates follow behavior for a managed bot.
      *
@@ -138,6 +151,9 @@ public interface IBotManager {
      * @return {@code true} if update was applied
      */
     boolean updateFollow(UUID ownerUUID, boolean follow);
+
+    /** Updates follow behavior using the runtime bot UUID. */
+    boolean updateFollowByBotUUID(UUID botUUID, boolean follow);
 
     /**
      * Updates combat behavior for a managed bot.
@@ -150,6 +166,9 @@ public interface IBotManager {
      */
     boolean updateCombat(UUID ownerUUID, boolean combat);
 
+    /** Updates combat behavior using the runtime bot UUID. */
+    boolean updateCombatByBotUUID(UUID botUUID, boolean combat);
+
     /**
      * Updates blast protection toggle for a managed bot.
      *
@@ -159,6 +178,15 @@ public interface IBotManager {
      */
     boolean updateBlastProtection(UUID ownerUUID, boolean blastProtection);
 
+    /** Updates blast protection independently for each standard armor piece. */
+    boolean updateBlastProtection(UUID ownerUUID, BlastProtectionSettings blastProtection);
+
+    /** Updates blast protection using the runtime bot UUID. */
+    boolean updateBlastProtectionByBotUUID(UUID botUUID, boolean blastProtection);
+
+    /** Updates per-piece blast protection using the runtime bot UUID. */
+    boolean updateBlastProtectionByBotUUID(UUID botUUID, BlastProtectionSettings blastProtection);
+
     /**
      * Updates difficulty for a managed bot.
      *
@@ -166,80 +194,91 @@ public interface IBotManager {
      * @param difficulty desired bot difficulty
      * @return {@code true} if update was applied
      */
-    boolean updateDifficulty(UUID ownerUUID, DifficultyLevel difficulty);
+    boolean updateDifficulty(UUID ownerUUID, DifficultyTier difficulty);
+
+    /** Updates difficulty using the runtime bot UUID. */
+    boolean updateDifficultyByBotUUID(UUID botUUID, DifficultyTier difficulty);
 
     /** Changes the active combat mode for an existing bot. */
-    default boolean updateCombatMode(UUID ownerUUID, CombatMode combatMode) {
-        return false;
-    }
+    boolean updateCombatMode(UUID ownerUUID, CombatMode combatMode);
 
     /** Changes the active combat mode using the runtime bot UUID. */
-    default boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode) {
-        return false;
-    }
+    boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode);
 
     /** Overrides tuning for the bot's current combat mode and difficulty. */
-    default boolean updateCombatTuning(UUID ownerUUID, CombatTuning combatTuning) {
-        return false;
-    }
+    boolean updateCombatTuning(UUID ownerUUID, CombatTuning combatTuning);
 
     /** Overrides tuning using the runtime bot UUID. */
-    default boolean updateCombatTuningByBotUUID(UUID botUUID, CombatTuning combatTuning) {
-        return false;
-    }
+    boolean updateCombatTuningByBotUUID(UUID botUUID, CombatTuning combatTuning);
 
     /** Restores server tuning for the bot's current combat mode and difficulty. */
-    default boolean resetCombatTuning(UUID ownerUUID) {
-        return false;
-    }
+    boolean resetCombatTuning(UUID ownerUUID);
 
     /** Restores server tuning using the runtime bot UUID. */
-    default boolean resetCombatTuningByBotUUID(UUID botUUID) {
-        return false;
-    }
+    boolean resetCombatTuningByBotUUID(UUID botUUID);
 
     boolean updateArmor(
             UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
 
+    /** Replaces all standard armor pieces with one validated armor tier. */
+    boolean updateArmorType(UUID ownerUUID, BotArmorTier armorType);
+
+    /** Replaces all standard armor pieces using the runtime bot UUID. */
+    boolean updateArmorTypeByBotUUID(UUID botUUID, BotArmorTier armorType);
+
+    /** Replaces armor contents using the runtime bot UUID. */
+    boolean updateArmorByBotUUID(
+            UUID botUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
+
     boolean updateEquipment(UUID ownerUUID, Map<Integer, ItemStack> equipment);
+
+    /** Replaces inventory equipment using the runtime bot UUID. */
+    boolean updateEquipmentByBotUUID(UUID botUUID, Map<Integer, ItemStack> equipment);
 
     boolean updateEquipmentSlot(UUID ownerUUID, int slot, ItemStack item);
 
+    /** Updates an inventory slot using the runtime bot UUID. */
+    boolean updateEquipmentSlotByBotUUID(UUID botUUID, int slot, ItemStack item);
+
     /** Applies or removes a persistent equipment-slot setting. */
-    default boolean updateEquipmentSlot(UUID ownerUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
-        return false;
-    }
+    boolean updateEquipmentSlot(UUID ownerUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting);
 
     /** Applies or removes a persistent equipment-slot setting using the bot UUID. */
-    default boolean updateEquipmentSlotByBotUUID(UUID botUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting) {
-        return false;
-    }
+    boolean updateEquipmentSlotByBotUUID(UUID botUUID, BotEquipmentSlot slot, BotEquipmentSlotSetting setting);
 
     boolean updateAutoTarget(UUID ownerUUID, boolean autoTarget, double range);
 
-    default boolean updateAutoTargetByBotUUID(UUID botUUID, boolean autoTarget, double range) {
-        return false;
-    }
+    boolean updateAutoTargetByBotUUID(UUID botUUID, boolean autoTarget, double range);
 
-    default boolean updateAttackBots(UUID ownerUUID, boolean attackBots) {
-        return false;
-    }
+    boolean updateAttackBots(UUID ownerUUID, boolean attackBots);
 
-    default boolean updateAttackBotsByBotUUID(UUID botUUID, boolean attackBots) {
-        return false;
-    }
+    boolean updateAttackBotsByBotUUID(UUID botUUID, boolean attackBots);
 
-    default boolean updateTargetMode(UUID ownerUUID, BotTargetMode targetMode) {
-        return false;
-    }
+    boolean updateTargetMode(UUID ownerUUID, BotTargetMode targetMode);
 
-    default boolean updateTargetModeByBotUUID(UUID botUUID, BotTargetMode targetMode) {
-        return false;
-    }
+    boolean updateTargetModeByBotUUID(UUID botUUID, BotTargetMode targetMode);
+
+    /** Replaces the complete target allow-list for a bot. */
+    boolean updateTargets(UUID ownerUUID, Set<UUID> targetUUIDs);
+
+    /** Replaces the complete target allow-list using the runtime bot UUID. */
+    boolean updateTargetsByBotUUID(UUID botUUID, Set<UUID> targetUUIDs);
+
+    /** Replaces the team-owner set used by a shared team bot. */
+    boolean updateTeamOwners(UUID ownerUUID, Set<UUID> teamOwnerUUIDs);
+
+    /** Replaces team owners using the runtime bot UUID. */
+    boolean updateTeamOwnersByBotUUID(UUID botUUID, Set<UUID> teamOwnerUUIDs);
 
     boolean updateWorldGuardPvpRespect(UUID ownerUUID, boolean respectWorldGuardPvp);
 
+    /** Updates WorldGuard PvP behavior using the runtime bot UUID. */
+    boolean updateWorldGuardPvpRespectByBotUUID(UUID botUUID, boolean respectWorldGuardPvp);
+
     boolean updateStayAfterOwnerDeath(UUID ownerUUID, boolean stayAfterOwnerDeath);
+
+    /** Updates owner-death persistence using the runtime bot UUID. */
+    boolean updateStayAfterOwnerDeathByBotUUID(UUID botUUID, boolean stayAfterOwnerDeath);
 
     boolean updateIdleWander(
             UUID ownerUUID,
@@ -248,45 +287,43 @@ public interface IBotManager {
             double idleReturnDistance,
             long idleReturnDelayMs);
 
+    /** Updates idle wandering using the runtime bot UUID. */
+    boolean updateIdleWanderByBotUUID(
+            UUID botUUID,
+            boolean idleWander,
+            double idleWanderRadius,
+            double idleReturnDistance,
+            long idleReturnDelayMs);
+
     boolean updateCrystalPvp(UUID ownerUUID, boolean crystalPvp);
 
-    default boolean updateCrystalPvpByBotUUID(UUID botUUID, boolean crystalPvp) {
-        return false;
-    }
+    boolean updateCrystalPvpByBotUUID(UUID botUUID, boolean crystalPvp);
 
-    default boolean updateExplosions(UUID ownerUUID, boolean explosions) {
-        return false;
-    }
+    boolean updateExplosions(UUID ownerUUID, boolean explosions);
 
-    default boolean updateExplosionsByBotUUID(UUID botUUID, boolean explosions) {
-        return false;
-    }
+    boolean updateExplosionsByBotUUID(UUID botUUID, boolean explosions);
 
-    default boolean updateExplosionBlockDamage(UUID ownerUUID, boolean explosionBlockDamage) {
-        return false;
-    }
+    boolean updateExplosionBlockDamage(UUID ownerUUID, boolean explosionBlockDamage);
 
-    default boolean updateExplosionBlockDamageByBotUUID(UUID botUUID, boolean explosionBlockDamage) {
-        return false;
-    }
+    boolean updateExplosionBlockDamageByBotUUID(UUID botUUID, boolean explosionBlockDamage);
 
     boolean updateEnderPearls(UUID ownerUUID, boolean enderPearls);
 
-    default boolean updateEnderPearlsByBotUUID(UUID botUUID, boolean enderPearls) {
-        return false;
-    }
+    boolean updateEnderPearlsByBotUUID(UUID botUUID, boolean enderPearls);
 
-    default boolean updateHealing(UUID ownerUUID, boolean healing) {
-        return false;
-    }
+    boolean updateHealing(UUID ownerUUID, boolean healing);
 
-    default boolean updateHealingByBotUUID(UUID botUUID, boolean healing) {
-        return false;
-    }
+    boolean updateHealingByBotUUID(UUID botUUID, boolean healing);
 
     boolean updateKillMessage(UUID ownerUUID, String killMessage);
 
+    /** Updates the kill message using the runtime bot UUID. */
+    boolean updateKillMessageByBotUUID(UUID botUUID, String killMessage);
+
     boolean disableKillMessage(UUID ownerUUID);
+
+    /** Disables the kill message using the runtime bot UUID. */
+    boolean disableKillMessageByBotUUID(UUID botUUID);
 
     /**
      * Removes/despawns the bot associated with the given owner.
@@ -296,9 +333,7 @@ public interface IBotManager {
      */
     boolean remove(UUID ownerUUID);
 
-    default boolean removeByBotUUID(UUID botUUID) {
-        return false;
-    }
+    boolean removeByBotUUID(UUID botUUID);
 
     /**
      * Removes all active bots created from the given source.
@@ -316,11 +351,7 @@ public interface IBotManager {
      *
      * @return number of bots that were active before removal
      */
-    default int removeAll() {
-        int activeBots = getActiveBotCount();
-        despawnAll();
-        return activeBots;
-    }
+    int removeAll();
 
     /**
      * Alias for {@link #remove(UUID)}.

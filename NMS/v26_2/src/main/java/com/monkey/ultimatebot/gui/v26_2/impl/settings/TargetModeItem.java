@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.gui.v26_2.impl.settings;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

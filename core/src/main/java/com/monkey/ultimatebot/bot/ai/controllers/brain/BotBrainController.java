@@ -2,13 +2,13 @@ package com.monkey.ultimatebot.bot.ai.controllers.brain;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.state.BotTargetChangeEvent;
-import com.monkey.ultimatebot.api.model.configuration.BotTargetMode;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.BotAI;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
+import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

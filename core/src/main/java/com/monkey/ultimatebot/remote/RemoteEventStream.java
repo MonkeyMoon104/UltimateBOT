@@ -122,8 +122,8 @@ final class RemoteEventStream implements AutoCloseable {
         }
         if (event instanceof BotSettingsChangeEvent value) {
             payload.put("setting", value.getSetting().name());
-            payload.put("oldValue", String.valueOf(value.getOldValue()));
-            payload.put("newValue", String.valueOf(value.getNewValue()));
+            payload.put("oldValue", value.getOldValue());
+            payload.put("newValue", value.getNewValue());
         }
         if (event instanceof BotAttackEvent value) {
             payload.put("attackType", value.getAttackType().name());

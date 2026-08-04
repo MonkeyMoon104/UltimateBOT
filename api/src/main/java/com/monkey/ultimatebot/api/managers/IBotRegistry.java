@@ -28,6 +28,9 @@ public interface IBotRegistry {
      */
     Optional<BotSnapshot> getBot(UUID ownerUUID);
 
+    /** Returns a bot snapshot using its runtime entity UUID. */
+    Optional<BotSnapshot> getBotByBotUUID(UUID botUUID);
+
     /**
      * Returns the runtime bot entity UUID for the given owner.
      *
@@ -35,6 +38,12 @@ public interface IBotRegistry {
      * @return bot UUID when present, otherwise empty
      */
     Optional<UUID> getBotUUID(UUID ownerUUID);
+
+    /** Returns the primary owner UUID associated with a runtime bot UUID. */
+    Optional<UUID> getOwnerUUID(UUID botUUID);
+
+    /** Returns snapshots keyed by runtime bot UUID. */
+    Map<UUID, BotSnapshot> getAllBotsByBotUUID();
 
     /**
      * Checks whether a bot exists for the provided owner.
