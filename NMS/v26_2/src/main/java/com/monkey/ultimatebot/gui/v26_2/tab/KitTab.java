@@ -9,6 +9,7 @@ import com.monkey.ultimatebot.gui.v26_2.impl.settings.DifficultyItem;
 import com.monkey.ultimatebot.gui.v26_2.impl.settings.FollowItem;
 import com.monkey.ultimatebot.gui.v26_2.impl.settings.TargetModeItem;
 import com.monkey.ultimatebot.gui.v26_2.impl.settings.TotemItem;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;
@@ -17,9 +18,11 @@ import xyz.xenondevs.invui.item.Item;
 public class KitTab {
 
     private final BotGuiTabContext context;
+    private final Runnable refreshModeDependents;
 
-    public KitTab(BotGuiTabContext context) {
-        this.context = context;
+    public KitTab(BotGuiTabContext context, Runnable refreshModeDependents) {
+        this.context = Objects.requireNonNull(context, "context");
+        this.refreshModeDependents = Objects.requireNonNull(refreshModeDependents, "refreshModeDependents");
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -27,12 +30,13 @@ public class KitTab {
         CombatItem combatItem = new CombatItem(context.getTraining(), options);
         FollowItem followItem = new FollowItem(context.getTraining(), options, combatItem);
 
+        CombatModeItem combatModeItem = new CombatModeItem(context.getTraining(), options, refreshModeDependents);
         Gui gui = Gui.builder()
                 .setStructure(
                         "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . o m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
-                .addIngredient('r', new DifficultyItem(context.getTraining(), options))
+                .addIngredient('r', new DifficultyItem(context.getTraining(), options, combatModeItem::notifyWindows))
                 .addIngredient('t', new TotemItem(options, context.getTraining()))
                 .addIngredient('f', followItem)
                 .addIngredient('s', new SpawnItem(context.getTraining(), context.getViewer(), options))
@@ -42,7 +46,7 @@ public class KitTab {
                                 ? new TeleportItem(context.getTraining())
                                 : Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient('c', combatItem)
-                .addIngredient('o', new CombatModeItem(context.getTraining(), options))
+                .addIngredient('o', combatModeItem)
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
 

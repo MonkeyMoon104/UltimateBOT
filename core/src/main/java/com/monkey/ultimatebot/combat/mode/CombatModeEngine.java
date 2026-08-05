@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode;
 
+import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.api.extension.combat.CombatModeProvider;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
@@ -8,38 +10,35 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.combat.mode.cart.CartPvPStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.AxeShieldPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.CrystalPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.MacePvPStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.NetheritePotPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.SmpPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.strategy.SwordPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.trident.TridentPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.uhc.UhcPvPStrategy;
-import com.monkey.ultimatebot.combat.mode.water.WaterPvPStrategy;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
+import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.world.WorldProtectionService;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.SplittableRandom;
 import java.util.UUID;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 public final class CombatModeEngine implements AutoCloseable {
+    private final UltimateBot plugin;
     private final BotOptions options;
     private final CombatModeContext context;
     private final Map<CombatMode, CombatModeStrategy> strategies;
+    private final ExternalCombatModeSessionManager external;
 
+    private @Nullable CombatMode activeMode;
     private @Nullable CombatModeStrategy activeStrategy;
     private boolean suspended;
     private boolean closed;
 
     public CombatModeEngine(
+            UltimateBot plugin,
             Player bot,
             BotOptions options,
             BotMovementController movement,
@@ -50,37 +49,36 @@ public final class CombatModeEngine implements AutoCloseable {
             BotRAPVPController anchor,
             ICombatStrategyExecutor legacyCombat,
             WorldProtectionService worldProtection) {
+        this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.options = Objects.requireNonNull(options, "options");
         this.context = new CombatModeContext(
                 bot, options, movement, rotation, attack, inventory, crystal, anchor, legacyCombat, worldProtection);
-        EnumMap<CombatMode, CombatModeStrategy> registeredStrategies = new EnumMap<>(CombatMode.class);
-        register(registeredStrategies, new SwordPvPStrategy());
-        register(registeredStrategies, new UhcPvPStrategy());
-        register(registeredStrategies, new CartPvPStrategy());
-        register(registeredStrategies, new CrystalPvPStrategy());
-        register(registeredStrategies, new MacePvPStrategy());
-        register(registeredStrategies, new WaterPvPStrategy());
-        register(registeredStrategies, new AxeShieldPvPStrategy());
-        register(registeredStrategies, new NetheritePotPvPStrategy());
-        register(registeredStrategies, new SmpPvPStrategy());
-        register(registeredStrategies, new TridentPvPStrategy());
-        this.strategies = Map.copyOf(registeredStrategies);
-        if (strategies.size() != CombatMode.values().length) {
-            throw new IllegalStateException("Every combat mode must have exactly one strategy");
-        }
+        CoreBotControl control = new CoreBotControl(bot, movement, rotation, attack, inventory);
+        CoreNativeBotAccess nativeAccess =
+                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
+        this.external = new ExternalCombatModeSessionManager(
+                plugin,
+                options,
+                context,
+                control,
+                nativeAccess,
+                new SplittableRandom(
+                        bot.getUUID().getMostSignificantBits() ^ bot.getUUID().getLeastSignificantBits()));
+        this.strategies = BuiltInCombatModeStrategies.create();
     }
 
     public void tick(LivingEntity target) {
+        ensureOpen();
         Objects.requireNonNull(target, "target");
-        if (closed) {
-            throw new IllegalStateException("Combat mode engine is already closed");
+        transitionIfRequired();
+        resumeIfRequired();
+        if (external.tick(target)) {
+            return;
         }
-        CombatModeStrategy selectedStrategy = selectedStrategy();
-        if (!Objects.equals(activeStrategy, selectedStrategy)) {
-            transitionTo(selectedStrategy);
+        CombatModeStrategy builtIn = activeStrategy;
+        if (builtIn != null) {
+            builtIn.tick(context, target);
         }
-        suspended = false;
-        selectedStrategy.tick(context, target);
     }
 
     public boolean controlsNavigation(LivingEntity target) {
@@ -88,14 +86,23 @@ public final class CombatModeEngine implements AutoCloseable {
         if (closed) {
             return false;
         }
-        return selectedStrategy().controlsNavigation(context, target);
+        transitionIfRequired();
+        if (external.isActive()) {
+            return external.controlsNavigation();
+        }
+        CombatModeStrategy builtIn = activeStrategy;
+        return builtIn != null && builtIn.controlsNavigation(context, target);
     }
 
     public void suspend() {
-        if (activeStrategy == null || suspended) {
+        if (suspended) {
             return;
         }
-        activeStrategy.exit(context);
+        CombatModeStrategy builtIn = activeStrategy;
+        if (builtIn != null) {
+            builtIn.exit(context);
+        }
+        external.suspend();
         suspended = true;
     }
 
@@ -106,35 +113,72 @@ public final class CombatModeEngine implements AutoCloseable {
         }
     }
 
-    public void deactivate() {
-        if (activeStrategy == null) {
+    public void refreshRegistration() {
+        if (closed || !external.isActive() || activeMode == null) {
             return;
         }
-        if (!suspended) {
-            activeStrategy.exit(context);
+        if (plugin.getExtensionRegistry().combatMode(activeMode).isPresent()) {
+            return;
         }
+        deactivate();
+        options.setCombatMode(CombatMode.SWORD);
+        transitionIfRequired();
+    }
+
+    public void deactivate() {
+        CombatModeStrategy builtIn = activeStrategy;
         activeStrategy = null;
+        if (builtIn != null && !suspended) {
+            builtIn.exit(context);
+        }
+        external.close();
+        activeMode = null;
         suspended = false;
     }
 
-    private void transitionTo(CombatModeStrategy selectedStrategy) {
+    private void transitionIfRequired() {
+        CombatMode selected = options.getCombatMode();
+        if (external.isActive()
+                && Objects.equals(activeMode, selected)
+                && plugin.getExtensionRegistry().combatMode(selected).isEmpty()) {
+            deactivate();
+            options.setCombatMode(CombatMode.SWORD);
+            selected = CombatMode.SWORD;
+        }
+        if (Objects.equals(activeMode, selected)) {
+            return;
+        }
         deactivate();
+        activeMode = selected;
+        CombatModeProvider externalProvider =
+                plugin.getExtensionRegistry().combatMode(selected).orElse(null);
+        if (externalProvider != null) {
+            external.start(selected, externalProvider);
+            return;
+        }
+        CombatModeStrategy selectedStrategy = strategies.get(selected);
+        if (selectedStrategy == null) {
+            throw new IllegalStateException("No strategy registered for " + selected);
+        }
         selectedStrategy.enter(context);
         activeStrategy = selectedStrategy;
     }
 
-    private CombatModeStrategy selectedStrategy() {
-        CombatModeStrategy selectedStrategy = strategies.get(options.getCombatMode());
-        if (selectedStrategy == null) {
-            throw new IllegalStateException("No strategy registered for " + options.getCombatMode());
+    private void resumeIfRequired() {
+        if (!suspended) {
+            return;
         }
-        return selectedStrategy;
+        suspended = false;
+        CombatModeStrategy builtIn = activeStrategy;
+        if (builtIn != null) {
+            builtIn.enter(context);
+        }
+        external.resume();
     }
 
-    private static void register(EnumMap<CombatMode, CombatModeStrategy> strategies, CombatModeStrategy strategy) {
-        CombatModeStrategy previous = strategies.put(strategy.mode(), strategy);
-        if (previous != null) {
-            throw new IllegalStateException("Duplicate strategy for " + strategy.mode());
+    private void ensureOpen() {
+        if (closed) {
+            throw new IllegalStateException("combat mode engine is closed");
         }
     }
 

@@ -32,6 +32,9 @@ class SdkSurfaceParityTest {
                         "activeBotCount",
                         "listCombatModes",
                         "getCombatMode",
+                        "listBrains",
+                        "getBrain",
+                        "listAddons",
                         "getBot",
                         "spawnBot",
                         "remove",
@@ -53,6 +56,8 @@ class SdkSurfaceParityTest {
                         "updateCombatMode",
                         "updateCombatTuning",
                         "resetCombatTuning",
+                        "updateBrain",
+                        "resetBrain",
                         "updateWorldGuardPvpRespect",
                         "updateStayAfterOwnerDeath",
                         "updateIdleWander",
@@ -82,7 +87,9 @@ class SdkSurfaceParityTest {
             assertThat(json).contains("\"mode\":\"SINGLE\"");
             assertThat(json).contains("\"armor\":\"GOLDEN\"");
             assertThat(json).contains("\"difficulty\":\"NORMAL\"");
-            assertThat(json).contains("\"combatMode\":\"" + combatMode.name() + "\"");
+            assertThat(json)
+                    .contains(
+                            "\"combatMode\":{\"namespace\":\"ultimatebot\",\"value\":\"" + combatMode.value() + "\"}");
         }
 
         assertThat(BotSpawnRequest.independent().build().mode()).isEqualTo(BotMode.EVENT);

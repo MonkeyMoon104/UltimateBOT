@@ -25,7 +25,7 @@ public final class ResetCombatTuningItem extends AbstractItem {
                 .setLegacyName(ChatColorUtils.translate("&cReset combat profile"))
                 .addLegacyLoreLines(
                         ChatColorUtils.translate("&7Restore the server profile for"),
-                        ChatColorUtils.translate("&e" + options.getCombatMode().displayName()
+                        ChatColorUtils.translate("&e" + options.getCombatModeDisplayName()
                                 + " &7/ &e"
                                 + options.getDifficulty().name()),
                         "",

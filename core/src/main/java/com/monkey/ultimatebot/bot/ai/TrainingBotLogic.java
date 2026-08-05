@@ -52,7 +52,7 @@ public class TrainingBotLogic {
     }
 
     private void onTickInternal() {
-        if (bot.isCombat()) {
+        if (bot.isCombat() && !brainController.getBotAI().usesCustomBrain()) {
             if (brainController.getBotAI().getHealController().isHealing()) {
                 brainController.getBotAI().getHealController().updateHealAction();
                 totemTracker.onTick();
@@ -80,7 +80,13 @@ public class TrainingBotLogic {
 
         boolean result = equipmentHandler.handleDamage(level, source, amount, event);
 
-        if (bot.isCombat() && brainController.getBotOptions().isHealing()) {
+        if (brainController.getBotAI().usesCustomBrain()) {
+            brainController.getBotAI().customBrainDamaged(event);
+        }
+
+        if (bot.isCombat()
+                && brainController.getBotOptions().isHealing()
+                && !brainController.getBotAI().usesCustomBrain()) {
             boolean fireOrLavaDamage = isFireOrLavaDamage(source);
             if (!fireOrLavaDamage) {
                 brainController.getBotAI().getMovementController().onDamageReceived();

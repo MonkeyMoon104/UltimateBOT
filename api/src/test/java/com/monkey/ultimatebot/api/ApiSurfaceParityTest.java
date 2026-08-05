@@ -48,6 +48,7 @@ class ApiSurfaceParityTest {
                 "botMode",
                 "botUUID",
                 "combatMode",
+                "brain",
                 "combatTuning",
                 "armor",
                 "blastProtection",

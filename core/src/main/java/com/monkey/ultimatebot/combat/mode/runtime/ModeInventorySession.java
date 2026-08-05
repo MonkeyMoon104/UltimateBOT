@@ -22,7 +22,7 @@ public final class ModeInventorySession implements AutoCloseable {
     private int originalSelectedSlot;
     private boolean captured;
 
-    ModeInventorySession(BotInventoryController inventory) {
+    public ModeInventorySession(BotInventoryController inventory) {
         this.inventory = Objects.requireNonNull(inventory, "inventory");
     }
 

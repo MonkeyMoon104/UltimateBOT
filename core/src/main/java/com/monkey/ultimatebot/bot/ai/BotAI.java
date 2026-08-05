@@ -27,6 +27,10 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
+import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
+import com.monkey.ultimatebot.extension.runtime.CustomBrainRuntime;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -70,6 +74,7 @@ public class BotAI {
     private final IdleBehaviorController idleBehaviorController;
     private final SustainFoodController sustainFoodController;
     private final FollowBehaviorController followBehaviorController;
+    private final CustomBrainRuntime customBrainRuntime;
     private final BotOptions options;
     private final UltimateBot plugin;
     private long lastForcedVerticalTeleportTime = 0L;
@@ -116,6 +121,7 @@ public class BotAI {
                 combatStateManager,
                 combatDataManager);
         this.combatModeEngine = new CombatModeEngine(
+                plugin,
                 bot,
                 options,
                 movementController,
@@ -131,6 +137,12 @@ public class BotAI {
         this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);
         this.followBehaviorController =
                 new FollowBehaviorController(bot, movementController, noobMovementController, pathfindingManager);
+        CoreBotControl extensionControl =
+                new CoreBotControl(bot, movementController, rotationController, attackController, inventoryController);
+        CoreNativeBotAccess nativeAccess =
+                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
+        this.customBrainRuntime =
+                new CustomBrainRuntime(plugin, bot, options, extensionControl, nativeAccess, inventoryController);
     }
 
     public void tick(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
@@ -152,11 +164,15 @@ public class BotAI {
             return;
         }
 
+        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
+        if (customBrainRuntime.tick(target, options.isFollow(), combatEnabled)) {
+            return;
+        }
+
         if (!options.isHealing() && healController.isHealing()) {
             healController.resetHealState();
         }
         boolean isCurrentlyHealing = options.isHealing() && healController.isHealing();
-        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
 
         if (!(target instanceof Player playerTarget)) {
             tickMobTarget(target, combatEnabled);
@@ -164,7 +180,7 @@ public class BotAI {
         }
 
         combatDataManager.updateCombatData(
-                playerTarget, combatEnabled && options.getCombatMode() == CombatMode.CRYSTAL);
+                playerTarget, combatEnabled && options.getCombatMode().equals(CombatMode.CRYSTAL));
 
         if (combatStateManager instanceof CombatStateManager stateManager) {
             stateManager.updateDamageData(
@@ -232,6 +248,9 @@ public class BotAI {
     public void tickIdle() {
         syncExplosiveCombat();
         enderpearlController.setEnabled(options.isEnderPearls());
+        if (customBrainRuntime.tick(null, options.isFollow(), options.isCombat())) {
+            return;
+        }
         if (handleSustainFood()) {
             return;
         }
@@ -308,6 +327,24 @@ public class BotAI {
 
     public void recordShieldImpact(UUID attackerUUID) {
         combatModeEngine.recordShieldImpact(Objects.requireNonNull(attackerUUID, "attackerUUID"));
+    }
+
+    public boolean usesCustomBrain() {
+        return customBrainRuntime.isConfigured();
+    }
+
+    public void customBrainTargetChanged(
+            org.bukkit.entity.@Nullable LivingEntity previous, org.bukkit.entity.@Nullable LivingEntity current) {
+        customBrainRuntime.targetChanged(previous, current);
+    }
+
+    public void customBrainDamaged(org.bukkit.event.entity.EntityDamageEvent event) {
+        customBrainRuntime.damaged(Objects.requireNonNull(event, "event"));
+    }
+
+    public void refreshExtensions() {
+        customBrainRuntime.refreshRegistration();
+        combatModeEngine.refreshRegistration();
     }
 
     private boolean canForceVerticalTeleport() {
@@ -397,7 +434,7 @@ public class BotAI {
 
     private void syncExplosiveCombat() {
         boolean explosionsEnabled = options.isExplosions();
-        boolean crystalMode = options.getCombatMode() == CombatMode.CRYSTAL;
+        boolean crystalMode = options.getCombatMode().equals(CombatMode.CRYSTAL);
         cpvpController.setEnabled(explosionsEnabled && crystalMode && options.isCrystalPvp());
         if (!crystalMode) {
             rapvpController.disable();
@@ -454,6 +491,7 @@ public class BotAI {
     }
 
     public void close() {
+        customBrainRuntime.close();
         combatModeEngine.close();
         idleBehaviorController.close();
         sustainFoodController.close();

@@ -14,11 +14,13 @@ import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
+import com.monkey.ultimatebot.common.model.AddonInfo;
 import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -157,9 +159,47 @@ public final class RemoteApiServer {
                 return;
             }
 
+            if ("GET".equals(method) && "/brains".equals(relativePath)) {
+                writeJson(exchange, 200, api.getBotManager().getBrains());
+                return;
+            }
+
+            if ("GET".equals(method) && "/addons".equals(relativePath)) {
+                writeJson(
+                        exchange,
+                        200,
+                        api.getAddons().addons().stream()
+                                .map(snapshot -> new AddonInfo(
+                                        snapshot.descriptor().id(),
+                                        snapshot.descriptor().name(),
+                                        snapshot.descriptor().version(),
+                                        snapshot.state().name(),
+                                        snapshot.descriptor().authors(),
+                                        snapshot.descriptor().dependencies(),
+                                        snapshot.failure()))
+                                .toList());
+                return;
+            }
+
+            if ("GET".equals(method) && relativePath.startsWith("/brains/")) {
+                String requestedBrain = relativePath.substring("/brains/".length());
+                Optional<com.monkey.ultimatebot.common.model.BrainDefinition> definition;
+                try {
+                    definition = api.getBotManager().getBrain(BrainKey.parse(requestedBrain));
+                } catch (IllegalArgumentException exception) {
+                    definition = Optional.empty();
+                }
+                if (definition.isEmpty()) {
+                    writeJson(exchange, 404, RemoteOperationResponse.failure("Brain not found."));
+                } else {
+                    writeJson(exchange, 200, definition.get());
+                }
+                return;
+            }
+
             if ("GET".equals(method) && relativePath.startsWith("/combat-modes/")) {
                 String requestedMode = relativePath.substring("/combat-modes/".length());
-                CombatMode combatMode = EnumValues.parse(CombatMode.class, requestedMode, null);
+                CombatMode combatMode = parseCombatMode(requestedMode, null);
                 var definition = combatMode == null
                         ? Optional.empty()
                         : api.getBotManager().getCombatMode(combatMode);
@@ -313,6 +353,13 @@ public final class RemoteApiServer {
             return;
         }
 
+        if ("DELETE".equals(method) && parts.length == 3 && "brain".equals(parts[2])) {
+            boolean updated = runSync(() ->
+                    ownerUUID != null ? manager.resetBrain(ownerUUID) : manager.resetBrainByBotUUID(requestedUUID));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Unable to reset brain.");
+            return;
+        }
+
         if (!"PATCH".equals(method) || parts.length != 3) {
             writeJson(exchange, 404, RemoteOperationResponse.failure("Endpoint not found."));
             return;
@@ -459,12 +506,23 @@ public final class RemoteApiServer {
 
         if ("combat-mode".equals(parts[2])) {
             CombatModePayload payload = readJson(exchange, CombatModePayload.class);
-            CombatMode mode = payload == null ? null : EnumValues.parse(CombatMode.class, payload.combatMode, null);
+            CombatMode mode = payload == null ? null : payload.combatMode;
             boolean updated = mode != null
                     && runSync(() -> ownerUUID != null
                             ? manager.updateCombatMode(ownerUUID, mode)
                             : manager.updateCombatModeByBotUUID(requestedUUID, mode));
             writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid combat mode.");
+            return;
+        }
+
+        if ("brain".equals(parts[2])) {
+            BrainPayload payload = readJson(exchange, BrainPayload.class);
+            BrainKey brain = payload == null ? null : payload.brain;
+            boolean updated = brain != null
+                    && runSync(() -> ownerUUID != null
+                            ? manager.updateBrain(ownerUUID, brain)
+                            : manager.updateBrainByBotUUID(requestedUUID, brain));
+            writeMutationResult(exchange, manager, requestedUUID, ownerUUID, updated, "Invalid brain.");
             return;
         }
 
@@ -607,7 +665,8 @@ public final class RemoteApiServer {
                 .attackBots(defaultBoolean(safe.attackBots, false))
                 .targetMode(
                         parseEnumOrDefault(BotTargetMode.class, safe.targetMode, BotTargetMode.PLAYERS, "targetMode"))
-                .combatMode(parseEnumOrDefault(CombatMode.class, safe.combatMode, CombatMode.SWORD, "combatMode"))
+                .combatMode(safe.combatMode == null ? CombatMode.SWORD : safe.combatMode)
+                .brain(safe.brain)
                 .combatTuning(safe.combatTuning)
                 .changeableCombatMode(defaultBoolean(safe.changeableCombatMode, true))
                 .respectWorldGuardPvp(defaultBoolean(safe.respectWorldGuardPvp, false))
@@ -822,6 +881,20 @@ public final class RemoteApiServer {
         return parsed;
     }
 
+    private static @Nullable CombatMode parseCombatMode(@Nullable String value, @Nullable CombatMode fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        try {
+            return CombatMode.parse(value);
+        } catch (IllegalArgumentException exception) {
+            if (fallback == null) {
+                return null;
+            }
+            throw new IllegalArgumentException("Invalid combatMode: " + value, exception);
+        }
+    }
+
     private static double defaultDouble(@Nullable Double value, double fallback) {
         return value == null ? fallback : value;
     }
@@ -875,7 +948,8 @@ public final class RemoteApiServer {
         public @Nullable String difficulty;
         public @Nullable String minDifficulty;
         public @Nullable String maxDifficulty;
-        public @Nullable String combatMode;
+        public @Nullable CombatMode combatMode;
+        public @Nullable BrainKey brain;
         public @Nullable CombatTuning combatTuning;
         public @Nullable RemoteLocationPayload spawnLocation;
         public @Nullable Boolean autoTarget;
@@ -909,7 +983,11 @@ public final class RemoteApiServer {
     }
 
     public static final class CombatModePayload {
-        public @Nullable String combatMode;
+        public @Nullable CombatMode combatMode;
+    }
+
+    public static final class BrainPayload {
+        public @Nullable BrainKey brain;
     }
 
     public static final class TotemCountPayload {

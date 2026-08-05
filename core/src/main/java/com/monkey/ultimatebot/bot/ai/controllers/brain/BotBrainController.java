@@ -138,6 +138,7 @@ public class BotBrainController {
                                 selectedTarget));
                 selectedTarget = event.isCancelled() ? activeTarget : event.getNewTarget();
             }
+            botAI.customBrainTargetChanged(activeTarget, selectedTarget);
         }
         activeTarget = selectedTarget;
         if (selectedTarget == null) {

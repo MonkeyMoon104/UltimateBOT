@@ -11,6 +11,7 @@ import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -36,6 +37,7 @@ public final class BotSnapshotMapper {
         DifficultyTier minDifficulty = DifficultyTier.EASY;
         DifficultyTier maxDifficulty = DifficultyTier.GOD;
         CombatMode combatMode = CombatMode.SWORD;
+        BrainKey brain = null;
         CombatTuning combatTuning = CombatTuning.builder().build();
         boolean customizedCombatTuning = false;
         int minTotemCount = -1;
@@ -85,6 +87,7 @@ public final class BotSnapshotMapper {
                 maxDifficulty =
                         DifficultyTier.valueOf(options.getMaxDifficulty().name());
                 combatMode = options.getCombatMode();
+                brain = options.getBrainKey();
                 combatTuning = options.getCombatTuning();
                 customizedCombatTuning = options.getCustomCombatTuning() != null;
                 minTotemCount = options.getMinTotemCount();
@@ -150,6 +153,7 @@ public final class BotSnapshotMapper {
                 minDifficulty,
                 maxDifficulty,
                 combatMode,
+                brain,
                 combatTuning,
                 customizedCombatTuning,
                 bot.isFollow(),

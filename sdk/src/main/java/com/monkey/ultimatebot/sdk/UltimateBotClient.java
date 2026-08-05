@@ -3,10 +3,13 @@ package com.monkey.ultimatebot.sdk;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.model.AddonInfo;
 import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainDefinition;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
@@ -15,6 +18,7 @@ import com.monkey.ultimatebot.sdk.model.request.ArmorRequest;
 import com.monkey.ultimatebot.sdk.model.request.AutoTargetRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
+import com.monkey.ultimatebot.sdk.model.request.BrainRequest;
 import com.monkey.ultimatebot.sdk.model.request.CombatModeRequest;
 import com.monkey.ultimatebot.sdk.model.request.DifficultyRequest;
 import com.monkey.ultimatebot.sdk.model.request.IdleWanderRequest;
@@ -49,6 +53,8 @@ public final class UltimateBotClient implements AutoCloseable {
 
     private static final TypeReference<List<BotSnapshotResponse>> BOT_LIST_TYPE = new TypeReference<>() {};
     private static final TypeReference<List<CombatModeDefinition>> COMBAT_MODE_LIST_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<BrainDefinition>> BRAIN_LIST_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<AddonInfo>> ADDON_LIST_TYPE = new TypeReference<>() {};
 
     private final URI baseUri;
     private final String token;
@@ -102,9 +108,25 @@ public final class UltimateBotClient implements AutoCloseable {
         return send(
                 "GET",
                 "/combat-modes/"
-                        + Objects.requireNonNull(combatMode, "combatMode").name(),
+                        + Objects.requireNonNull(combatMode, "combatMode").key(),
                 null,
                 CombatModeDefinition.class);
+    }
+
+    /** Returns all custom brains currently installed on the server. */
+    public List<BrainDefinition> listBrains() {
+        return send("GET", "/brains", null, BRAIN_LIST_TYPE);
+    }
+
+    /** Returns one installed custom brain definition. */
+    public BrainDefinition getBrain(BrainKey brainKey) {
+        return send(
+                "GET", "/brains/" + Objects.requireNonNull(brainKey, "brainKey").key(), null, BrainDefinition.class);
+    }
+
+    /** Returns all addons discovered by the server-side addon engine. */
+    public List<AddonInfo> listAddons() {
+        return send("GET", "/addons", null, ADDON_LIST_TYPE);
     }
 
     public BotSnapshotResponse getBot(UUID ownerOrBotUUID) {
@@ -294,6 +316,24 @@ public final class UltimateBotClient implements AutoCloseable {
     public BotOperationResponse resetCombatTuning(UUID ownerOrBotUUID) {
         Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID");
         return send("DELETE", "/bots/" + ownerOrBotUUID + "/combat-tuning", null, BotOperationResponse.class);
+    }
+
+    /** Assigns a custom brain to the addressed owner or runtime bot UUID. */
+    public BotOperationResponse updateBrain(UUID ownerOrBotUUID, BrainKey brainKey) {
+        return send(
+                "PATCH",
+                "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID") + "/brain",
+                new BrainRequest(Objects.requireNonNull(brainKey, "brainKey")),
+                BotOperationResponse.class);
+    }
+
+    /** Restores the mode-provided or built-in brain. */
+    public BotOperationResponse resetBrain(UUID ownerOrBotUUID) {
+        return send(
+                "DELETE",
+                "/bots/" + Objects.requireNonNull(ownerOrBotUUID, "ownerOrBotUUID") + "/brain",
+                null,
+                BotOperationResponse.class);
     }
 
     private BotOperationResponse combatMode(UUID ownerOrBotUUID, CombatMode combatMode) {

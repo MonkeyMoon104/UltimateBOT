@@ -33,15 +33,13 @@ public final class CombatModeItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        CombatMode mode = options.getCombatMode();
-        String configuredMaterial =
-                plugin.getCombatProfileCatalog().configuration(mode).iconMaterial();
+        String configuredMaterial = options.getCombatModeIconMaterial();
         Material material = Material.matchMaterial(configuredMaterial);
         if (material == null) {
             material = Material.DIAMOND_SWORD;
         }
         ItemBuilder builder = new ItemBuilder(material)
-                .setDisplayName(ChatColorUtils.translate("&6Combat mode: &e" + mode.displayName()))
+                .setDisplayName(ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
                 .setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES));
         builder.addLoreLines(
                 ChatColorUtils.translate(
@@ -65,7 +63,7 @@ public final class CombatModeItem extends AbstractItem {
             return;
         }
         CombatMode currentMode = options.getCombatMode();
-        CombatMode nextMode = options.nextCombatMode(clickType.isLeftClick());
+        CombatMode nextMode = options.nextCombatMode(player, clickType.isLeftClick());
         var proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
@@ -78,10 +76,11 @@ public final class CombatModeItem extends AbstractItem {
             return;
         }
         options.setCombatMode(proposed.get());
-        CombatModeLoadoutDefaults.applyArmor(options, options.getCombatMode());
+        if (options.getCombatMode().builtIn()) {
+            CombatModeLoadoutDefaults.applyArmor(options, options.getCombatMode());
+        }
         plugin.getBotManager().updateArmor(resolveManagedOwnerUUID(player), options.getArmor(), options.getBlast());
-        player.sendMessage(ChatColorUtils.translate(
-                "&aCombat mode set to &e" + options.getCombatMode().displayName()));
+        player.sendMessage(ChatColorUtils.translate("&aCombat mode set to &e" + options.getCombatModeDisplayName()));
         refreshModeDependents.run();
         notifyWindows();
     }

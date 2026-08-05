@@ -21,6 +21,8 @@ import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainDefinition;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
@@ -76,14 +78,39 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
     @Override
     public List<CombatModeDefinition> getCombatModes() {
-        return Arrays.stream(CombatMode.values())
-                .map(this::combatModeDefinition)
-                .toList();
+        List<CombatModeDefinition> definitions = new ArrayList<>();
+        Arrays.stream(CombatMode.values()).map(this::combatModeDefinition).forEach(definitions::add);
+        plugin.getExtensionRegistry().combatModes().stream()
+                .map(provider -> combatModeDefinition(provider.descriptor()))
+                .forEach(definitions::add);
+        return List.copyOf(definitions);
     }
 
     @Override
     public Optional<CombatModeDefinition> getCombatMode(CombatMode combatMode) {
-        return combatMode == null ? Optional.empty() : Optional.of(combatModeDefinition(combatMode));
+        if (combatMode == null) {
+            return Optional.empty();
+        }
+        if (combatMode.builtIn()) {
+            return Optional.of(combatModeDefinition(combatMode));
+        }
+        return plugin.getExtensionRegistry()
+                .combatMode(combatMode)
+                .map(provider -> combatModeDefinition(provider.descriptor()));
+    }
+
+    @Override
+    public List<BrainDefinition> getBrains() {
+        return plugin.getExtensionRegistry().brains().stream()
+                .map(provider -> brainDefinition(provider.descriptor()))
+                .toList();
+    }
+
+    @Override
+    public Optional<BrainDefinition> getBrain(BrainKey brainKey) {
+        return brainKey == null
+                ? Optional.empty()
+                : plugin.getExtensionRegistry().brain(brainKey).map(provider -> brainDefinition(provider.descriptor()));
     }
 
     @Override
@@ -519,7 +546,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || combatMode == null || !options.isChangeableCombatMode()) {
             return false;
         }
-        if (!plugin.getCombatProfileCatalog().configuration(combatMode).enabled()) {
+        boolean available = combatMode.builtIn()
+                ? plugin.getCombatProfileCatalog().configuration(combatMode).enabled()
+                : plugin.getExtensionRegistry().combatMode(combatMode).isPresent();
+        if (!available) {
             return false;
         }
         Optional<CombatMode> proposed = proposedChange(
@@ -535,6 +565,66 @@ public final class CoreBotManagerAdapter implements IBotManager {
     public boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode) {
         UUID ownerUUID = botRegistry.getOwnerUUIDByBotUUID(botUUID);
         return ownerUUID != null && updateCombatMode(ownerUUID, combatMode);
+    }
+
+    @Override
+    public boolean updateBrain(UUID ownerUUID, BrainKey brainKey) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null
+                || brainKey == null
+                || plugin.getExtensionRegistry().brain(brainKey).isEmpty()) {
+            return false;
+        }
+        BotSettingEvents.NullableProposal<BrainKey> proposed = BotSettingEvents.proposeNullable(
+                plugin,
+                managedOwner,
+                BotEventSourceContext.currentOr(BotEventSource.API),
+                BotSettingKey.BRAIN,
+                options.getBrainKey(),
+                brainKey,
+                BrainKey.class);
+        if (!proposed.accepted()
+                || (proposed.value() != null
+                        && plugin.getExtensionRegistry().brain(proposed.value()).isEmpty())) {
+            return false;
+        }
+        options.setBrainKey(proposed.value());
+        return true;
+    }
+
+    @Override
+    public boolean updateBrainByBotUUID(UUID botUUID, BrainKey brainKey) {
+        UUID ownerUUID = resolveOwnerByBotUUID(botUUID);
+        return ownerUUID != null && updateBrain(ownerUUID, brainKey);
+    }
+
+    @Override
+    public boolean resetBrain(UUID ownerUUID) {
+        UUID managedOwner = resolveManagedOwner(ownerUUID);
+        BotOptions options = getLiveOptions(managedOwner);
+        if (options == null) {
+            return false;
+        }
+        BotSettingEvents.NullableProposal<BrainKey> proposed = BotSettingEvents.proposeNullable(
+                plugin,
+                managedOwner,
+                BotEventSourceContext.currentOr(BotEventSource.API),
+                BotSettingKey.BRAIN,
+                options.getBrainKey(),
+                null,
+                BrainKey.class);
+        if (!proposed.accepted()) {
+            return false;
+        }
+        options.setBrainKey(proposed.value());
+        return true;
+    }
+
+    @Override
+    public boolean resetBrainByBotUUID(UUID botUUID) {
+        UUID ownerUUID = resolveOwnerByBotUUID(botUUID);
+        return ownerUUID != null && resetBrain(ownerUUID);
     }
 
     @Override
@@ -1238,7 +1328,39 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 configuration.enabled(),
                 configuration.iconMaterial(),
                 combatMode.capabilities(),
-                configuration.profiles());
+                configuration.profiles(),
+                "ultimatebot",
+                List.of(),
+                "",
+                Arrays.asList(CombatMode.values()).indexOf(combatMode),
+                null);
+    }
+
+    private CombatModeDefinition combatModeDefinition(
+            com.monkey.ultimatebot.api.extension.combat.CombatModeDescriptor descriptor) {
+        return new CombatModeDefinition(
+                descriptor.mode(),
+                descriptor.displayName(),
+                true,
+                descriptor.icon().name(),
+                descriptor.capabilities(),
+                descriptor.profiles(),
+                descriptor.mode().namespace(),
+                descriptor.description(),
+                descriptor.permission(),
+                descriptor.order(),
+                descriptor.brain());
+    }
+
+    private static BrainDefinition brainDefinition(
+            com.monkey.ultimatebot.api.extension.brain.BrainDescriptor descriptor) {
+        return new BrainDefinition(
+                descriptor.key(),
+                descriptor.displayName(),
+                descriptor.description(),
+                descriptor.capabilities(),
+                descriptor.nativeAccess(),
+                descriptor.key().namespace());
     }
 
     private @Nullable UUID resolveOwnerByBotUUID(@Nullable UUID botUUID) {

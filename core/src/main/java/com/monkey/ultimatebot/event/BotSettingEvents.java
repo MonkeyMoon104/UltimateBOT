@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /** Shared typed gate used by every runtime setting entry point. */
 public final class BotSettingEvents {
@@ -74,5 +75,47 @@ public final class BotSettingEvents {
             validatedValues.add(uuid);
         }
         return Optional.of(Set.copyOf(validatedValues));
+    }
+
+    public static <T> NullableProposal<T> proposeNullable(
+            UltimateBot plugin,
+            UUID ownerUUID,
+            BotEventSource source,
+            BotSettingKey key,
+            @Nullable T oldValue,
+            @Nullable T newValue,
+            Class<T> valueType) {
+        if (Objects.equals(oldValue, newValue)) {
+            return NullableProposal.accepted(newValue);
+        }
+        ITrainingBot bot = plugin.getBotRegistry().getBot(ownerUUID);
+        BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
+        if (snapshot == null) {
+            return NullableProposal.rejected();
+        }
+        BotSettingsChangeEvent event = plugin.getBotEventDispatcher()
+                .publish(new BotSettingsChangeEvent(
+                        plugin.getBotEventDispatcher().nextSequence(snapshot.requireBotUUID()),
+                        snapshot,
+                        source,
+                        key,
+                        oldValue,
+                        newValue));
+        Object proposed = event.getNewValue();
+        if (event.isCancelled() || (proposed != null && !valueType.isInstance(proposed))) {
+            return NullableProposal.rejected();
+        }
+        return NullableProposal.accepted(proposed == null ? null : valueType.cast(proposed));
+    }
+
+    public record NullableProposal<T>(
+            boolean accepted, @Nullable T value) {
+        private static <T> NullableProposal<T> accepted(@Nullable T value) {
+            return new NullableProposal<>(true, value);
+        }
+
+        private static <T> NullableProposal<T> rejected() {
+            return new NullableProposal<>(false, null);
+        }
     }
 }

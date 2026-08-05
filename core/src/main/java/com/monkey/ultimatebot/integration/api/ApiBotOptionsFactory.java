@@ -86,6 +86,7 @@ final class ApiBotOptionsFactory {
                 toCoreDifficulty(settings.minDifficulty()), toCoreDifficulty(settings.maxDifficulty()));
         options.setDifficulty(toCoreDifficulty(settings.difficulty()));
         options.setCombatMode(settings.combatMode());
+        options.setBrainKey(settings.brain());
         options.setCustomCombatTuning(settings.combatTuning());
         options.setTotemRange(settings.minTotemCount(), settings.maxTotemCount());
         options.setTotems(settings.totemCount());

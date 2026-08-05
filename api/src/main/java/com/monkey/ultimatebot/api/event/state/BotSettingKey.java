@@ -7,6 +7,7 @@ public enum BotSettingKey {
     TOTEM_COUNT,
     DIFFICULTY,
     COMBAT_MODE,
+    BRAIN,
     COMBAT_TUNING,
     ARMOR,
     AUTO_TARGET,

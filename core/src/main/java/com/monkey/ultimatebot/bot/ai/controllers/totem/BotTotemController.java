@@ -82,7 +82,7 @@ public class BotTotemController {
             return false;
         }
         CombatMode mode = trainingBot.getBrainController().getBotOptions().getCombatMode();
-        return mode == CombatMode.AXE_SHIELD || mode == CombatMode.UHC;
+        return mode.equals(CombatMode.AXE_SHIELD) || mode.equals(CombatMode.UHC);
     }
 
     public void onTotemUsed() {

@@ -7,6 +7,8 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +31,7 @@ public final class CombatProfileLoader {
                     .path(configurationPath)
                     .build()
                     .load();
-            EnumMap<CombatMode, CombatModeConfiguration> modes = new EnumMap<>(CombatMode.class);
+            Map<CombatMode, CombatModeConfiguration> modes = new LinkedHashMap<>();
             for (CombatMode mode : CombatMode.values()) {
                 modes.put(mode, readMode(root, mode));
             }
@@ -88,7 +90,11 @@ public final class CombatProfileLoader {
                 : override.node(name).getInt(fallback);
     }
 
-    private String key(Enum<?> value) {
+    private String key(DifficultyTier value) {
         return value.name().toLowerCase(java.util.Locale.ROOT).replace('_', '-');
+    }
+
+    private String key(CombatMode value) {
+        return value.value();
     }
 }

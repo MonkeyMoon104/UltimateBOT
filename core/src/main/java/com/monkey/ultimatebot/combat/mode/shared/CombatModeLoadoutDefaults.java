@@ -13,9 +13,12 @@ public final class CombatModeLoadoutDefaults {
     }
 
     public static ArmorTier armorTier(CombatMode mode) {
-        return switch (Objects.requireNonNull(mode, "mode")) {
-            case SWORD, UHC, WATER, TRIDENT -> ArmorTier.DIAMOND;
-            case CART, CRYSTAL, MACE, AXE_SHIELD, NETHERITE_POT, SMP -> ArmorTier.NETHERITE;
-        };
+        CombatMode checked = Objects.requireNonNull(mode, "mode");
+        return checked.equals(CombatMode.SWORD)
+                        || checked.equals(CombatMode.UHC)
+                        || checked.equals(CombatMode.WATER)
+                        || checked.equals(CombatMode.TRIDENT)
+                ? ArmorTier.DIAMOND
+                : ArmorTier.NETHERITE;
     }
 }

@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,10 +22,16 @@ public class DifficultyItem extends AbstractItem {
 
     private final UltimateBot training;
     private final BotOptions options;
+    private final Runnable refreshDependents;
 
     public DifficultyItem(UltimateBot training, BotOptions options) {
-        this.training = training;
-        this.options = options;
+        this(training, options, () -> {});
+    }
+
+    public DifficultyItem(UltimateBot training, BotOptions options, Runnable refreshDependents) {
+        this.training = Objects.requireNonNull(training, "training");
+        this.options = Objects.requireNonNull(options, "options");
+        this.refreshDependents = Objects.requireNonNull(refreshDependents, "refreshDependents");
     }
 
     @Override
@@ -103,6 +110,7 @@ public class DifficultyItem extends AbstractItem {
         training.getBotManager().setDifficultyLevel(resolveManagedOwnerUUID(player), newDifficulty);
 
         player.sendMessage(ChatColorUtils.translate("&aDifficulty set to &e" + newDifficulty.getSelectedName()));
+        refreshDependents.run();
         notifyWindows();
     }
 

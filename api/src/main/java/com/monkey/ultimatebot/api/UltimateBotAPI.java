@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.api;
 
+import com.monkey.ultimatebot.api.addon.AddonRegistry;
 import com.monkey.ultimatebot.api.event.bus.BotEventBus;
+import com.monkey.ultimatebot.api.extension.UltimateBotExtensionRegistry;
 import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.managers.IBotRegistry;
 import java.util.Objects;
@@ -11,8 +13,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Main public entry point for the UltimateBot API.
  *
- * <p>This object exposes the two core API services:
- * {@link IBotManager} for operations and {@link IBotRegistry} for read-only snapshots.
+ * <p>This object exposes bot management, snapshots, events, dynamic extensions and addon status.
+ * {@link IBotManager} handles operations and {@link IBotRegistry} provides read-only snapshots.
  * The instance is registered by the core plugin during startup and can be retrieved by
  * external plugins after {@code UltimateBotReadyEvent} is fired.</p>
  *
@@ -33,6 +35,8 @@ public final class UltimateBotAPI {
     private final IBotManager botManager;
     private final IBotRegistry botRegistry;
     private final BotEventBus eventBus;
+    private final UltimateBotExtensionRegistry extensions;
+    private final AddonRegistry addons;
 
     /**
      * Creates a new API container.
@@ -44,11 +48,20 @@ public final class UltimateBotAPI {
      * @param plugin owning Bukkit plugin instance
      * @param botManager bot management service implementation
      * @param botRegistry bot registry service implementation
+     * @param extensions dynamic combat-mode and brain registry
+     * @param addons read-only hosted-addon registry
      */
-    public UltimateBotAPI(Plugin plugin, IBotManager botManager, IBotRegistry botRegistry) {
+    public UltimateBotAPI(
+            Plugin plugin,
+            IBotManager botManager,
+            IBotRegistry botRegistry,
+            UltimateBotExtensionRegistry extensions,
+            AddonRegistry addons) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.botManager = Objects.requireNonNull(botManager, "botManager");
         this.botRegistry = Objects.requireNonNull(botRegistry, "botRegistry");
+        this.extensions = Objects.requireNonNull(extensions, "extensions");
+        this.addons = Objects.requireNonNull(addons, "addons");
         this.eventBus = new BotEventBus();
     }
 
@@ -138,5 +151,15 @@ public final class UltimateBotAPI {
     /** Returns the typed Bukkit-backed event subscription facade. */
     public BotEventBus getEventBus() {
         return eventBus;
+    }
+
+    /** Returns the dynamic combat-mode and custom-brain registry. */
+    public UltimateBotExtensionRegistry getExtensions() {
+        return extensions;
+    }
+
+    /** Returns the read-only status of jars managed by the addon engine. */
+    public AddonRegistry getAddons() {
+        return addons;
     }
 }

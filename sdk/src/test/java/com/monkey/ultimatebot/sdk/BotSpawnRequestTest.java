@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
 import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
@@ -54,12 +55,14 @@ class BotSpawnRequestTest {
     void serializesCombatModeAndCustomTuning() throws Exception {
         BotSpawnRequest request = BotSpawnRequest.builder()
                 .combatMode(CombatMode.WATER)
+                .brain(BrainKey.of("example", "expert"))
                 .combatTuning(CombatTuning.builder().attackRange(3.8D).build())
                 .build();
 
         String json = new ObjectMapper().writeValueAsString(request);
 
-        assertThat(json).contains("\"combatMode\":\"WATER\"");
+        assertThat(json).contains("\"combatMode\":{\"namespace\":\"ultimatebot\",\"value\":\"water\"}");
+        assertThat(json).contains("\"brain\":{\"namespace\":\"example\",\"value\":\"expert\"}");
         assertThat(json).contains("\"attackRange\":3.8");
     }
 

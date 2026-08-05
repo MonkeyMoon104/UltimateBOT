@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -66,6 +67,7 @@ public record BotSnapshot(
         DifficultyTier minDifficulty,
         DifficultyTier maxDifficulty,
         CombatMode combatMode,
+        @Nullable BrainKey brain,
         CombatTuning combatTuning,
         boolean customizedCombatTuning,
         boolean follow,

@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -53,6 +54,7 @@ public final class BotSettings {
     private final DifficultyTier minDifficulty;
     private final DifficultyTier maxDifficulty;
     private final CombatMode combatMode;
+    private final @Nullable BrainKey brain;
     private final @Nullable CombatTuning combatTuning;
     private final @Nullable BotLocation spawnLocation;
     private final boolean autoTarget;
@@ -100,6 +102,7 @@ public final class BotSettings {
         this.minDifficulty = builder.minDifficulty;
         this.maxDifficulty = builder.maxDifficulty;
         this.combatMode = builder.combatMode;
+        this.brain = builder.brain;
         this.combatTuning = builder.combatTuning;
         this.spawnLocation = builder.spawnLocation;
         this.autoTarget = builder.autoTarget;
@@ -326,6 +329,11 @@ public final class BotSettings {
     /** Returns the selected combat mode. */
     public CombatMode combatMode() {
         return combatMode;
+    }
+
+    /** Returns the custom brain selected at spawn, or {@code null} for the mode/default brain. */
+    public @Nullable BrainKey brain() {
+        return brain;
     }
 
     /** Returns a custom tuning override, or {@code null} to use the server profile. */
@@ -777,6 +785,8 @@ public final class BotSettings {
 
         BuildStep combatMode(CombatMode combatMode);
 
+        BuildStep brain(@Nullable BrainKey brain);
+
         BuildStep combatTuning(@Nullable CombatTuning combatTuning);
 
         BuildStep changeableCombatMode(boolean changeableCombatMode);
@@ -865,6 +875,7 @@ public final class BotSettings {
         private DifficultyTier minDifficulty = DifficultyTier.EASY;
         private DifficultyTier maxDifficulty = DifficultyTier.GOD;
         private CombatMode combatMode = CombatMode.SWORD;
+        private @Nullable BrainKey brain;
         private @Nullable CombatTuning combatTuning;
         private @Nullable BotLocation spawnLocation;
         private boolean autoTarget = false;
@@ -1097,6 +1108,12 @@ public final class BotSettings {
         @Override
         public BuildStep combatMode(CombatMode combatMode) {
             this.combatMode = Objects.requireNonNull(combatMode, "combatMode");
+            return this;
+        }
+
+        @Override
+        public BuildStep brain(@Nullable BrainKey brain) {
+            this.brain = brain;
             return this;
         }
 

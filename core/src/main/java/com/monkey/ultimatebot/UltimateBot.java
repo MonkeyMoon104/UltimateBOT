@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot;
 
 import com.monkey.ultimatebot.addon.GuardAddonManager;
+import com.monkey.ultimatebot.addon.runtime.CoreAddonRegistry;
+import com.monkey.ultimatebot.addon.runtime.UltimateBotAddonEngine;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.api.event.lifecycle.UltimateBotReadyEvent;
@@ -14,6 +16,8 @@ import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import com.monkey.ultimatebot.event.BotEventDispatcher;
+import com.monkey.ultimatebot.extension.registry.CoreExtensionRegistry;
+import com.monkey.ultimatebot.extension.registry.ExtensionOwnerListener;
 import com.monkey.ultimatebot.integration.api.CoreBotManagerAdapter;
 import com.monkey.ultimatebot.integration.api.CoreBotRegistryAdapter;
 import com.monkey.ultimatebot.integration.worldguard.WorldGuardPvpService;
@@ -77,6 +81,9 @@ public final class UltimateBot extends JavaPlugin {
     private @Nullable CombatProfileLoader combatProfileLoader;
     private RuntimeSettings runtimeSettings = RuntimeSettings.defaults();
     private @Nullable CombatProfileCatalog combatProfileCatalog;
+    private @Nullable CoreExtensionRegistry extensionRegistry;
+    private @Nullable CoreAddonRegistry addonRegistry;
+    private @Nullable UltimateBotAddonEngine addonEngine;
     private static @Nullable UltimateBot instance;
 
     @Override
@@ -151,6 +158,8 @@ public final class UltimateBot extends JavaPlugin {
             this.targetingService = new TargetingService(runtimeSettings.targetCache());
             this.playerOptions = new PlayerOptions();
             this.botRegistry = new BotRegistry();
+            this.extensionRegistry = new CoreExtensionRegistry();
+            this.addonRegistry = new CoreAddonRegistry();
             this.botMetrics = new BotMetrics(
                     getConfig().getBoolean("addons.metrics.enabled", false),
                     getConfig().getBoolean("addons.metrics.prometheus-endpoint-enabled", false),
@@ -191,7 +200,9 @@ public final class UltimateBot extends JavaPlugin {
             UltimateBotAPI api = new UltimateBotAPI(
                     this,
                     new CoreBotManagerAdapter(this, botManager, botRegistry, playerOptions),
-                    new CoreBotRegistryAdapter(botRegistry));
+                    new CoreBotRegistryAdapter(botRegistry),
+                    extensionRegistry,
+                    addonRegistry);
             startup.ready("API", "adapters wired");
             startup.detail("Manager", UltimateBotLogging.apiManagerSummary());
             startup.detail("Registry", UltimateBotLogging.apiRegistrySummary());
@@ -211,6 +222,11 @@ public final class UltimateBot extends JavaPlugin {
 
             List<String> registeredListeners = new ArrayList<>();
             List<String> disabledListeners = new ArrayList<>();
+            this.addonEngine = new UltimateBotAddonEngine(this, api, extensionRegistry, addonRegistry);
+            int externalAddons = addonEngine.loadAll();
+            startup.detail("External addons", Integer.toString(externalAddons));
+            registerListener(
+                    registeredListeners, "extension lifecycle", new ExtensionOwnerListener(this, extensionRegistry));
             if (getConfig().getBoolean("addons.guard.enabled", true)) {
                 this.guardAddonManager = new GuardAddonManager(this, botRegistry);
                 if (guardAddonManager.load()) {
@@ -364,6 +380,10 @@ public final class UltimateBot extends JavaPlugin {
 
     public WorldProtectionService getWorldProtectionService() {
         return Objects.requireNonNull(worldProtectionService, "worldProtectionService is not initialized");
+    }
+
+    public CoreExtensionRegistry getExtensionRegistry() {
+        return Objects.requireNonNull(extensionRegistry, "extensionRegistry is not initialized");
     }
 
     public void markCompatibilityBot(Entity entity) {
@@ -534,8 +554,6 @@ public final class UltimateBot extends JavaPlugin {
             licenseManager = null;
         }
 
-        UltimateBotAPI.unregister();
-
         if (placeholderCoordinator != null) {
             placeholderCoordinator.unregister();
             placeholderCoordinator = null;
@@ -544,6 +562,19 @@ public final class UltimateBot extends JavaPlugin {
             botManager.despawnAll(BotDespawnReason.PLUGIN_DISABLE);
             botManager = null;
         }
+        if (addonEngine != null) {
+            addonEngine.close();
+            addonEngine = null;
+        }
+        if (extensionRegistry != null) {
+            extensionRegistry.close();
+            extensionRegistry = null;
+        }
+        if (addonRegistry != null) {
+            addonRegistry.clear();
+            addonRegistry = null;
+        }
+        UltimateBotAPI.unregister();
         if (worldProtectionService != null) {
             worldProtectionService.close();
             worldProtectionService = null;

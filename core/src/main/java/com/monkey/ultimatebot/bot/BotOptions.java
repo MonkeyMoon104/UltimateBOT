@@ -8,6 +8,7 @@ import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -36,8 +37,8 @@ public final class BotOptions {
     private DifficultyLevel difficulty = DifficultyLevel.EASY;
     private boolean changeableCombatMode = true;
     private CombatMode combatMode = CombatMode.SWORD;
-    private final Map<CombatMode, EnumMap<DifficultyLevel, CombatTuning>> customCombatTunings =
-            new EnumMap<>(CombatMode.class);
+    private final Map<CombatMode, EnumMap<DifficultyLevel, CombatTuning>> customCombatTunings = new HashMap<>();
+    private @Nullable BrainKey brainKey;
     private BotType botType = BotType.SINGLE;
     private BotCreationSource creationSource = BotCreationSource.CORE;
     private @Nullable UUID requestedBotUUID;
@@ -415,16 +416,68 @@ public final class BotOptions {
         return combatMode;
     }
 
+    public String getCombatModeDisplayName() {
+        if (combatMode.builtIn()) {
+            return combatMode.displayName();
+        }
+        return training.getExtensionRegistry()
+                .combatMode(combatMode)
+                .map(provider -> provider.descriptor().displayName())
+                .orElseGet(combatMode::displayName);
+    }
+
+    public String getCombatModeIconMaterial() {
+        if (combatMode.builtIn()) {
+            return training.getCombatProfileCatalog().configuration(combatMode).iconMaterial();
+        }
+        return training.getExtensionRegistry()
+                .combatMode(combatMode)
+                .map(provider -> provider.descriptor().icon().name())
+                .orElse("DIAMOND_SWORD");
+    }
+
     public void setCombatMode(CombatMode combatMode) {
         CombatMode requiredMode = Objects.requireNonNull(combatMode, "combatMode");
-        if (!training.getCombatProfileCatalog().configuration(requiredMode).enabled()) {
+        boolean builtInEnabled = requiredMode.builtIn()
+                && training.getCombatProfileCatalog()
+                        .configuration(requiredMode)
+                        .enabled();
+        boolean customEnabled =
+                training.getExtensionRegistry().combatMode(requiredMode).isPresent();
+        if (!builtInEnabled && !customEnabled) {
             throw new IllegalArgumentException("Combat mode is disabled: " + requiredMode);
         }
         this.combatMode = requiredMode;
     }
 
     public CombatMode nextCombatMode(boolean forward) {
-        List<CombatMode> enabledModes = training.getCombatProfileCatalog().enabledModes();
+        return nextCombatMode(enabledCombatModes(), forward);
+    }
+
+    public CombatMode nextCombatMode(org.bukkit.entity.Player viewer, boolean forward) {
+        Objects.requireNonNull(viewer, "viewer");
+        List<CombatMode> visibleModes = enabledCombatModes().stream()
+                .filter(mode -> training.getExtensionRegistry()
+                        .combatMode(mode)
+                        .map(provider -> provider.descriptor().permission())
+                        .filter(permission -> !permission.isBlank())
+                        .map(viewer::hasPermission)
+                        .orElse(true))
+                .toList();
+        return nextCombatMode(visibleModes, forward);
+    }
+
+    private List<CombatMode> enabledCombatModes() {
+        List<CombatMode> enabledModes =
+                new ArrayList<>(training.getCombatProfileCatalog().enabledModes());
+        training.getExtensionRegistry().combatModes().stream()
+                .map(provider -> provider.descriptor().mode())
+                .filter(mode -> !enabledModes.contains(mode))
+                .forEach(enabledModes::add);
+        return enabledModes;
+    }
+
+    private CombatMode nextCombatMode(List<CombatMode> enabledModes, boolean forward) {
         if (enabledModes.isEmpty()) {
             throw new IllegalStateException("No combat modes are enabled");
         }
@@ -438,9 +491,28 @@ public final class BotOptions {
 
     public CombatTuning getCombatTuning() {
         CombatTuning customTuning = getCustomCombatTuning();
-        return customTuning != null
-                ? customTuning
-                : training.getCombatProfileCatalog().resolve(combatMode, DifficultyTier.valueOf(difficulty.name()));
+        if (customTuning != null) {
+            return customTuning;
+        }
+        DifficultyTier tier = DifficultyTier.valueOf(difficulty.name());
+        if (combatMode.builtIn()) {
+            return training.getCombatProfileCatalog().resolve(combatMode, tier);
+        }
+        return training.getExtensionRegistry()
+                .combatMode(combatMode)
+                .map(provider -> provider.descriptor().profile(tier))
+                .orElseThrow(() -> new IllegalStateException("Combat mode is unavailable: " + combatMode));
+    }
+
+    public @Nullable BrainKey getBrainKey() {
+        return brainKey;
+    }
+
+    public void setBrainKey(@Nullable BrainKey brainKey) {
+        if (brainKey != null && training.getExtensionRegistry().brain(brainKey).isEmpty()) {
+            throw new IllegalArgumentException("Brain is not registered: " + brainKey);
+        }
+        this.brainKey = brainKey;
     }
 
     public @Nullable CombatTuning getCustomCombatTuning() {

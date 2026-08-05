@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.combat.profile;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
-import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +13,7 @@ public final class CombatProfileCatalog {
 
     public CombatProfileCatalog(Map<CombatMode, CombatModeConfiguration> configurations) {
         Objects.requireNonNull(configurations, "configurations");
-        EnumMap<CombatMode, CombatModeConfiguration> copy = new EnumMap<>(CombatMode.class);
+        Map<CombatMode, CombatModeConfiguration> copy = new LinkedHashMap<>();
         copy.putAll(configurations);
         for (CombatMode mode : CombatMode.values()) {
             if (!copy.containsKey(mode)) {

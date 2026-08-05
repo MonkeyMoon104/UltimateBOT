@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -64,6 +65,7 @@ import org.jspecify.annotations.Nullable;
  * @param killMessage custom kill message, or null for default
  * @param equipmentSlots equipment-slot overrides kept active while the bot is running
  * @param combatMode selected combat mode
+ * @param brain optional custom brain; {@code null} uses the brain assigned to the mode
  * @param combatTuning optional tuning override for the selected mode and difficulty
  */
 public record BotSpawnRequest(
@@ -113,6 +115,7 @@ public record BotSpawnRequest(
         @Nullable String killMessage,
         Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots,
         CombatMode combatMode,
+        @Nullable BrainKey brain,
         @Nullable CombatTuning combatTuning) {
     public BotSpawnRequest {
         Objects.requireNonNull(mode, "mode");
@@ -249,6 +252,7 @@ public record BotSpawnRequest(
         private @Nullable String killMessage;
         private Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots = Map.of();
         private CombatMode combatMode = CombatMode.SWORD;
+        private @Nullable BrainKey brain;
         private @Nullable CombatTuning combatTuning;
 
         private Builder() {}
@@ -403,6 +407,11 @@ public record BotSpawnRequest(
 
         public Builder combatMode(CombatMode combatMode) {
             this.combatMode = Objects.requireNonNull(combatMode, "combatMode");
+            return this;
+        }
+
+        public Builder brain(@Nullable BrainKey brain) {
+            this.brain = brain;
             return this;
         }
 
@@ -581,6 +590,7 @@ public record BotSpawnRequest(
                     killMessage,
                     equipmentSlots,
                     combatMode,
+                    brain,
                     combatTuning);
         }
     }

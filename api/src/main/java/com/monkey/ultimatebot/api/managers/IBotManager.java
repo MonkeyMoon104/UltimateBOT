@@ -11,6 +11,8 @@ import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
 import com.monkey.ultimatebot.common.model.BotSource;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.BrainDefinition;
+import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
@@ -60,6 +62,12 @@ public interface IBotManager {
 
     /** Returns the complete server definition for one combat mode. */
     Optional<CombatModeDefinition> getCombatMode(CombatMode combatMode);
+
+    /** Returns every custom brain currently registered on the server. */
+    List<BrainDefinition> getBrains();
+
+    /** Returns one custom brain definition. */
+    Optional<BrainDefinition> getBrain(BrainKey brainKey);
 
     /**
      * Returns the TEAM_ALLY bot snapshot associated with a team owner UUID.
@@ -204,6 +212,18 @@ public interface IBotManager {
 
     /** Changes the active combat mode using the runtime bot UUID. */
     boolean updateCombatModeByBotUUID(UUID botUUID, CombatMode combatMode);
+
+    /** Assigns a custom brain to an active bot independently of its combat mode. */
+    boolean updateBrain(UUID ownerUUID, BrainKey brainKey);
+
+    /** Assigns a custom brain using the runtime bot UUID. */
+    boolean updateBrainByBotUUID(UUID botUUID, BrainKey brainKey);
+
+    /** Restores the brain declared by the selected combat mode, or the built-in brain. */
+    boolean resetBrain(UUID ownerUUID);
+
+    /** Restores the default brain using the runtime bot UUID. */
+    boolean resetBrainByBotUUID(UUID botUUID);
 
     /** Overrides tuning for the bot's current combat mode and difficulty. */
     boolean updateCombatTuning(UUID ownerUUID, CombatTuning combatTuning);

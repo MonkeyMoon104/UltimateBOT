@@ -77,6 +77,19 @@ public final class ModeKit {
             return this;
         }
 
+        public Builder equipment(EquipmentSlot slot, ItemStack item) {
+            EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+            if (checkedSlot == EquipmentSlot.MAINHAND || checkedSlot == EquipmentSlot.BODY) {
+                throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
+            }
+            ItemStack checkedItem = Objects.requireNonNull(item, "item");
+            if (checkedItem.isEmpty()) {
+                throw new IllegalArgumentException("Mode equipment item cannot be empty");
+            }
+            equipment.put(checkedSlot, checkedItem.copy());
+            return this;
+        }
+
         public ModeKit build() {
             return new ModeKit(slots, equipment);
         }

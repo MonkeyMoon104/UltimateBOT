@@ -73,11 +73,13 @@ public class NewBotGUI_v26_2 {
 
         BotGuiTabContext tabContext = new BotGuiTabContext(player, training, options, botType);
 
-        Gui tab0 = new KitTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab1 = new TemplatesTab(tabContext).build(borderMat, translatedBorderName);
+        TemplatesTab templatesTab = new TemplatesTab(tabContext);
+        Gui tab1 = templatesTab.build(borderMat, translatedBorderName);
+        Gui tab0 = new KitTab(tabContext, templatesTab::refreshArmorItems).build(borderMat, translatedBorderName);
         Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
         Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab4 = new CombatSettingsTab(tabContext).build(borderMat, translatedBorderName);
+        Gui tab4 = new CombatSettingsTab(tabContext, templatesTab::refreshArmorItems)
+                .build(borderMat, translatedBorderName);
 
         Gui tabGui = TabGui.builder()
                 .setStructure(
