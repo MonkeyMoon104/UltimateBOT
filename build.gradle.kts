@@ -272,3 +272,12 @@ tasks.register("publishAllDocs") {
     description = "Generates and copies every public Javadoc site."
     dependsOn("publishApiDocs", "publishCommonDocs", "publishSdkDocs")
 }
+
+if (layout.projectDirectory
+        .dir("docs/site-src")
+        .asFile.isDirectory
+) {
+    tasks.named("build") {
+        dependsOn("publishAllDocs")
+    }
+}
