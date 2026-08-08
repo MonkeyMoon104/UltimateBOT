@@ -88,6 +88,22 @@ public interface INMSBridge {
 
     void broadcastMetadata(ITrainingBot bot);
 
+    /**
+     * Reads equipment from the native fake-player inventory.
+     *
+     * <p>Must not go through {@code CraftInventoryPlayer}: {@code BotCraftPlayer} is not a
+     * {@code CraftPlayer} and Bukkit inventory setters cast to that type.
+     */
+    ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot);
+
+    void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack);
+
+    void clearBotInventory(ITrainingBot bot);
+
+    void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand);
+
+    void stopUsingBotItem(ITrainingBot bot);
+
     default void openBotGui(Player player, UltimateBot plugin, BotType botType) {
         new NewBotGUI(player, plugin, botType).open();
     }

@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.bot.ai;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Location;
@@ -13,10 +14,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -200,54 +199,27 @@ public interface ITrainingBot {
     }
 
     default ItemStack getItem(EquipmentSlot slot) {
-        PlayerInventory inventory = asBukkitPlayer().getInventory();
-        return switch (Objects.requireNonNull(slot, "slot")) {
-            case HAND -> inventory.getItemInMainHand();
-            case OFF_HAND -> inventory.getItemInOffHand();
-            case FEET -> nullToAir(inventory.getBoots());
-            case LEGS -> nullToAir(inventory.getLeggings());
-            case CHEST -> nullToAir(inventory.getChestplate());
-            case HEAD -> nullToAir(inventory.getHelmet());
-            default -> {
-                EntityEquipment equipment = asBukkitPlayer().getEquipment();
-                yield equipment != null ? nullToAir(equipment.getItem(slot)) : ItemStack.empty();
-            }
-        };
+        return NMSBridgeManager.get().getBotItem(this, Objects.requireNonNull(slot, "slot"));
     }
 
     default void setItem(EquipmentSlot slot, @Nullable ItemStack stack) {
-        PlayerInventory inventory = asBukkitPlayer().getInventory();
-        ItemStack value = stack == null ? ItemStack.empty() : stack;
-        switch (Objects.requireNonNull(slot, "slot")) {
-            case HAND -> inventory.setItemInMainHand(value);
-            case OFF_HAND -> inventory.setItemInOffHand(value);
-            case FEET -> inventory.setBoots(value);
-            case LEGS -> inventory.setLeggings(value);
-            case CHEST -> inventory.setChestplate(value);
-            case HEAD -> inventory.setHelmet(value);
-            default -> {
-                EntityEquipment equipment = asBukkitPlayer().getEquipment();
-                if (equipment != null) {
-                    equipment.setItem(slot, value);
-                }
-            }
-        }
+        NMSBridgeManager.get().setBotItem(this, Objects.requireNonNull(slot, "slot"), stack);
     }
 
     default ItemStack getItemInMainHand() {
-        return asBukkitPlayer().getInventory().getItemInMainHand();
+        return getItem(EquipmentSlot.HAND);
     }
 
     default ItemStack getItemInOffHand() {
-        return asBukkitPlayer().getInventory().getItemInOffHand();
+        return getItem(EquipmentSlot.OFF_HAND);
     }
 
     default void setItemInMainHand(@Nullable ItemStack stack) {
-        asBukkitPlayer().getInventory().setItemInMainHand(stack == null ? ItemStack.empty() : stack);
+        setItem(EquipmentSlot.HAND, stack);
     }
 
     default void setItemInOffHand(@Nullable ItemStack stack) {
-        asBukkitPlayer().getInventory().setItemInOffHand(stack == null ? ItemStack.empty() : stack);
+        setItem(EquipmentSlot.OFF_HAND, stack);
     }
 
     default boolean isUsingItem() {
@@ -259,18 +231,15 @@ public interface ITrainingBot {
     }
 
     default void beginUsingItem(EquipmentSlot hand) {
-        asBukkitPlayer()
-                .startUsingItem(Objects.requireNonNull(hand, "hand") == EquipmentSlot.OFF_HAND
-                        ? EquipmentSlot.OFF_HAND
-                        : EquipmentSlot.HAND);
+        NMSBridgeManager.get().beginUsingBotItem(this, Objects.requireNonNull(hand, "hand"));
     }
 
     default void stopUsingItem() {
-        asBukkitPlayer().clearActiveItem();
+        NMSBridgeManager.get().stopUsingBotItem(this);
     }
 
     default void clearInventory() {
-        asBukkitPlayer().getInventory().clear();
+        NMSBridgeManager.get().clearBotInventory(this);
     }
 
     default boolean isSneaking() {
@@ -303,9 +272,5 @@ public interface ITrainingBot {
 
     default void lookAt(Entity entity) {
         lookAt(Objects.requireNonNull(entity, "entity").getLocation());
-    }
-
-    private static ItemStack nullToAir(@Nullable ItemStack stack) {
-        return stack == null ? ItemStack.empty() : stack;
     }
 }

@@ -357,6 +357,38 @@ public class NMSBridge_v26_2 implements INMSBridge {
         }
     }
 
+    @Override
+    public ItemStack getBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot slot) {
+        net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
+        if (nmsSlot == null) {
+            return ItemStack.empty();
+        }
+        return CraftItemStack.asBukkitCopy(nativeBot(bot).getItemBySlot(nmsSlot));
+    }
+
+    @Override
+    public void setBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot slot, org.bukkit.inventory.@org.jspecify.annotations.Nullable ItemStack stack) {
+        net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
+        if (nmsSlot == null) {
+            return;
+        }
+        nativeBot(bot).setItemSlot(nmsSlot, CraftItemStack.asNMSCopy(stack == null ? ItemStack.empty() : stack));
+    }
+
+    @Override
+    public void clearBotInventory(ITrainingBot bot) {
+        nativeBot(bot).getInventory().clearContent();
+    }
+
+    @Override
+    public void beginUsingBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot hand) {
+        nativeBot(bot).startUsingItem(toInteractionHand(hand));
+    }
+
+    @Override
+    public void stopUsingBotItem(ITrainingBot bot) {
+        nativeBot(bot).stopUsingItem();
+    }
     public net.minecraft.server.level.ClientInformation createClientInformation() {
         return new net.minecraft.server.level.ClientInformation(
                 "it_IT", 10, ChatVisiblity.FULL, true, 0, HumanoidArm.RIGHT, false, true, net.minecraft.server.level.ParticleStatus.ALL);
