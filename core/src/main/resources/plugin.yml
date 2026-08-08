@@ -10,6 +10,16 @@ softdepend:
   - LuckPerms
   - WorldGuard
 
+libraries:
+  - org.bstats:bstats-bukkit:${bstats}
+  - com.fasterxml.jackson.core:jackson-databind:${jackson}
+  - com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}
+  - com.github.ben-manes.caffeine:caffeine:${caffeine}
+  - de.bsommerfeld.pathetic:engine:${pathetic}
+  - org.spongepowered:configurate-yaml:${configurate}
+  - io.github.revxrsal:lamp.common:${lamp}
+  - io.github.revxrsal:lamp.bukkit:${lamp}
+
 commands:
   bot:
     description: Open the normal bot settings GUI

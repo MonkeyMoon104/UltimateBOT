@@ -13,7 +13,6 @@ import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
-import java.time.Duration
 import java.util.HexFormat
 import java.util.function.IntSupplier
 import java.util.function.LongSupplier
@@ -267,13 +266,6 @@ tasks.named<ShadowJar>("shadowJar") {
     from(guardAddonDescriptorFile) {
         into("META-INF/ultimatebot/addons")
     }
-    relocate("org.bstats", "com.monkey.ultimatebot.libs.bstats")
-    relocate("com.fasterxml.jackson", "com.monkey.ultimatebot.libs.jackson")
-    relocate("com.github.benmanes.caffeine", "com.monkey.ultimatebot.libs.caffeine")
-    relocate("de.bsommerfeld.pathetic", "com.monkey.ultimatebot.libs.pathetic")
-    relocate("org.spongepowered.configurate", "com.monkey.ultimatebot.libs.configurate")
-    relocate("org.yaml.snakeyaml", "com.monkey.ultimatebot.libs.snakeyaml")
-    relocate("io.leangen.geantyref", "com.monkey.ultimatebot.libs.geantyref")
     relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.v1") {
         exclude("com/monkey/ultimatebot/gui/v26_1/**")
         exclude("com/monkey/ultimatebot/gui/v26_2/**")
@@ -365,25 +357,6 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
         }
 
         URLClassLoader(arrayOf(pluginJar.toURI().toURL()), ClassLoader.getPlatformClassLoader()).use { loader ->
-            val caffeineClass = loader.loadClass("com.monkey.ultimatebot.libs.caffeine.cache.Caffeine")
-            val cacheClass = loader.loadClass("com.monkey.ultimatebot.libs.caffeine.cache.Cache")
-            val builder = caffeineClass.getMethod("newBuilder").invoke(null)
-
-            caffeineClass.getMethod("maximumSize", Long::class.javaPrimitiveType).invoke(builder, 2_048L)
-            caffeineClass.getMethod("expireAfterWrite", Duration::class.java).invoke(builder, Duration.ofMillis(250))
-            caffeineClass.getMethod("recordStats").invoke(builder)
-
-            val cache = caffeineClass.getMethod("build").invoke(builder)
-            cacheClass.getMethod("put", Any::class.java, Any::class.java).invoke(cache, "probe", "ok")
-            val value = cacheClass.getMethod("getIfPresent", Any::class.java).invoke(cache, "probe")
-            check(value == "ok") {
-                "Caffeine smoke test returned an unexpected value from the obfuscated plugin jar"
-            }
-
-            val patheticFactoryClass =
-                loader.loadClass("com.monkey.ultimatebot.libs.pathetic.engine.factory.AStarPathfinderFactory")
-            patheticFactoryClass.getConstructor().newInstance()
-
             val addonJar = metricsAddonJarTask.get().archiveFile.get().asFile
             URLClassLoader(arrayOf(addonJar.toURI().toURL()), loader).use { addonLoader ->
                 val backendInterface = loader.loadClass("com.monkey.ultimatebot.common.metrics.MetricsBackend")

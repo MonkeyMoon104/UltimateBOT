@@ -18,13 +18,15 @@ dependencies {
     implementation(project(":common"))
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_4").get().requiredVersion)
 
-    implementation(libs.bstats.bukkit)
-    implementation(libs.jackson.databind)
-    implementation(libs.jackson.datatype.jsr310)
+    compileOnly(libs.bstats.bukkit)
+    compileOnly(libs.jackson.databind)
+    compileOnly(libs.jackson.datatype.jsr310)
+    compileOnly(libs.caffeine)
+    compileOnly(libs.pathetic.engine)
+    compileOnly(libs.configurate.yaml)
+    compileOnly(libs.lamp.common)
+    compileOnly(libs.lamp.bukkit)
     implementation(libs.invui.v1)
-    implementation(libs.caffeine)
-    implementation(libs.pathetic.engine)
-    implementation(libs.configurate.yaml)
     compileOnly(libs.placeholderapi)
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.sirblobman.core)
@@ -42,7 +44,15 @@ tasks.named<Test>("test") {
 }
 
 tasks.named<ProcessResources>("processResources") {
-    val props = mapOf("version" to version)
+    val props = mapOf(
+        "version" to version,
+        "bstats" to libs.versions.bstats.get(),
+        "jackson" to libs.versions.jackson.get(),
+        "caffeine" to libs.versions.caffeine.get(),
+        "pathetic" to libs.versions.pathetic.get(),
+        "configurate" to libs.versions.configurate.get(),
+        "lamp" to libs.versions.lamp.get(),
+    )
     inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {
