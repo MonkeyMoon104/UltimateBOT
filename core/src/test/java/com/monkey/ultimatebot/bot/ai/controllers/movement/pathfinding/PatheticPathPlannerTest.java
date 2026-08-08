@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 import org.junit.jupiter.api.Test;
 
 class PatheticPathPlannerTest {
@@ -19,14 +19,14 @@ class PatheticPathPlannerTest {
             }
         }
 
-        List<BlockPos> path =
-                new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), new BlockPos(8, 0, 0));
+        List<BlockVector> path = new PatheticPathPlanner(environment)
+                .findPath(new BlockVector(0, 0, 0), new BlockVector(8, 0, 0));
 
         assertThat(path).isNotEmpty();
-        assertThat(path.getFirst()).isEqualTo(new BlockPos(0, 0, 0));
-        assertThat(path.getLast()).isEqualTo(new BlockPos(8, 0, 0));
+        assertThat(path.getFirst()).isEqualTo(new BlockVector(0, 0, 0));
+        assertThat(path.getLast()).isEqualTo(new BlockVector(8, 0, 0));
         assertThat(path).noneMatch(environment::isBlocked);
-        assertThat(path).anyMatch(position -> Math.abs(position.getZ()) >= 2);
+        assertThat(path).anyMatch(position -> Math.abs(position.getBlockZ()) >= 2);
     }
 
     @Test
@@ -35,26 +35,27 @@ class PatheticPathPlannerTest {
         environment.block(1, 0);
         environment.block(0, 1);
 
-        List<BlockPos> path =
-                new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), new BlockPos(3, 0, 3));
+        List<BlockVector> path = new PatheticPathPlanner(environment)
+                .findPath(new BlockVector(0, 0, 0), new BlockVector(3, 0, 3));
 
         assertThat(path).isNotEmpty();
-        assertThat(path).doesNotContain(new BlockPos(1, 0, 1));
+        assertThat(path).doesNotContain(new BlockVector(1, 0, 1));
     }
 
     @Test
     void rejectsPartialFallbackWhenGoalIsCompletelyEnclosed() {
         GridEnvironment environment = new GridEnvironment(-8, 8);
-        BlockPos target = new BlockPos(4, 0, 4);
+        BlockVector target = new BlockVector(4, 0, 4);
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx != 0 || dz != 0) {
-                    environment.block(target.getX() + dx, target.getZ() + dz);
+                    environment.block(target.getBlockX() + dx, target.getBlockZ() + dz);
                 }
             }
         }
 
-        List<BlockPos> path = new PatheticPathPlanner(environment).findPath(new BlockPos(0, 0, 0), target);
+        List<BlockVector> path =
+                new PatheticPathPlanner(environment).findPath(new BlockVector(0, 0, 0), target);
 
         assertThat(path).isEmpty();
     }
@@ -71,43 +72,43 @@ class PatheticPathPlannerTest {
             environment.block(5, z);
         }
 
-        BlockPos start = new BlockPos(0, 0, 0);
-        BlockPos target = new BlockPos(9, 0, 0);
-        List<BlockPos> path = new PatheticPathPlanner(environment).findPath(start, target);
+        BlockVector start = new BlockVector(0, 0, 0);
+        BlockVector target = new BlockVector(9, 0, 0);
+        List<BlockVector> path = new PatheticPathPlanner(environment).findPath(start, target);
 
         assertThat(path).isNotEmpty();
         assertThat(path.getFirst()).isEqualTo(start);
         assertThat(path.getLast()).isEqualTo(target);
         assertThat(path).noneMatch(environment::isBlocked);
-        assertThat(path).anyMatch(position -> position.getX() <= -2);
+        assertThat(path).anyMatch(position -> position.getBlockX() <= -2);
     }
 
     @Test
     void routesAroundTemporarilyFailedWaypoint() {
         GridEnvironment environment = new GridEnvironment(-12, 12);
-        BlockPos failedWaypoint = new BlockPos(2, 0, 0);
+        BlockVector failedWaypoint = new BlockVector(2, 0, 0);
 
-        List<BlockPos> path = new PatheticPathPlanner(environment)
-                .findPath(new BlockPos(0, 0, 0), new BlockPos(5, 0, 0), Set.of(failedWaypoint));
+        List<BlockVector> path = new PatheticPathPlanner(environment)
+                .findPath(new BlockVector(0, 0, 0), new BlockVector(5, 0, 0), Set.of(failedWaypoint));
 
         assertThat(path).isNotEmpty();
         assertThat(path).doesNotContain(failedWaypoint);
-        assertThat(path.getLast()).isEqualTo(new BlockPos(5, 0, 0));
-        assertThat(path).anyMatch(position -> position.getZ() != 0);
+        assertThat(path.getLast()).isEqualTo(new BlockVector(5, 0, 0));
+        assertThat(path).anyMatch(position -> position.getBlockZ() != 0);
     }
 
     @Test
     void choosesAlternativeGoalWhenPreferredGoalPreviouslyFailed() {
         GridEnvironment environment = new GridEnvironment(-12, 12);
         PathGoalResolver resolver = new PathGoalResolver(environment);
-        BlockPos requestedGoal = new BlockPos(5, 0, 0);
+        BlockVector requestedGoal = new BlockVector(5, 0, 0);
 
-        BlockPos resolved =
-                resolver.resolve(new BlockPos(0, 0, 0), requestedGoal, candidate -> !candidate.equals(requestedGoal));
+        BlockVector resolved = resolver.resolve(
+                new BlockVector(0, 0, 0), requestedGoal, candidate -> !candidate.equals(requestedGoal));
 
         assertThat(resolved).isNotNull().isNotEqualTo(requestedGoal);
-        BlockPos resolvedGoal = Objects.requireNonNull(resolved, "resolved goal");
-        assertThat(Math.max(Math.abs(resolvedGoal.getX() - 5), Math.abs(resolvedGoal.getZ())))
+        BlockVector resolvedGoal = Objects.requireNonNull(resolved, "resolved goal");
+        assertThat(Math.max(Math.abs(resolvedGoal.getBlockX() - 5), Math.abs(resolvedGoal.getBlockZ())))
                 .isEqualTo(1);
     }
 
@@ -137,13 +138,13 @@ class PatheticPathPlannerTest {
         environment.setHeight(2, 0, 1);
         environment.setHeight(3, 0, -2);
 
-        assertThat(environment.canTraverse(new BlockPos(0, 0, 0), new BlockPos(1, 1, 0)))
+        assertThat(environment.canTraverse(new BlockVector(0, 0, 0), new BlockVector(1, 1, 0)))
                 .isTrue();
-        assertThat(environment.canTraverse(new BlockPos(2, 1, 0), new BlockPos(3, -2, 0)))
+        assertThat(environment.canTraverse(new BlockVector(2, 1, 0), new BlockVector(3, -2, 0)))
                 .isTrue();
-        assertThat(environment.canTraverse(new BlockPos(0, 0, 0), new BlockPos(1, 2, 0)))
+        assertThat(environment.canTraverse(new BlockVector(0, 0, 0), new BlockVector(1, 2, 0)))
                 .isFalse();
-        assertThat(environment.canTraverse(new BlockPos(2, 1, 0), new BlockPos(3, -3, 0)))
+        assertThat(environment.canTraverse(new BlockVector(2, 1, 0), new BlockVector(3, -3, 0)))
                 .isFalse();
     }
 
@@ -152,9 +153,9 @@ class PatheticPathPlannerTest {
         GridEnvironment environment = new GridEnvironment(-16, 16);
         PathGoalResolver resolver = new PathGoalResolver(environment);
 
-        BlockPos goal = resolver.resolve(new BlockPos(0, 0, 0), new BlockPos(8, 15, 0));
+        BlockVector goal = resolver.resolve(new BlockVector(0, 0, 0), new BlockVector(8, 15, 0));
 
-        assertThat(goal).isEqualTo(new BlockPos(8, 0, 0));
+        assertThat(goal).isEqualTo(new BlockVector(8, 0, 0));
     }
 
     @Test
@@ -163,14 +164,18 @@ class PatheticPathPlannerTest {
         environment.block(8, 0);
         PathGoalResolver resolver = new PathGoalResolver(environment);
 
-        BlockPos goal = resolver.resolve(new BlockPos(0, 0, 0), new BlockPos(8, 15, 0));
+        BlockVector goal = resolver.resolve(new BlockVector(0, 0, 0), new BlockVector(8, 15, 0));
 
         assertThat(goal).isNotNull();
-        BlockPos resolvedGoal = Objects.requireNonNull(goal, "projected goal");
-        assertThat(resolvedGoal.getY()).isZero();
+        BlockVector resolvedGoal = Objects.requireNonNull(goal, "projected goal");
+        assertThat(resolvedGoal.getBlockY()).isZero();
         assertThat(environment.isBlocked(resolvedGoal)).isFalse();
-        assertThat(Math.max(Math.abs(resolvedGoal.getX() - 8), Math.abs(resolvedGoal.getZ())))
+        assertThat(Math.max(Math.abs(resolvedGoal.getBlockX() - 8), Math.abs(resolvedGoal.getBlockZ())))
                 .isEqualTo(1);
+    }
+
+    private static long pack(int x, int z) {
+        return (((long) x) << 32) ^ (z & 0xffff_ffffL);
     }
 
     private static final class GridEnvironment implements BotTraversalEnvironment {
@@ -184,29 +189,29 @@ class PatheticPathPlannerTest {
         }
 
         private void block(int x, int z) {
-            blocked.add(BlockPos.asLong(x, 0, z));
+            blocked.add(pack(x, z));
         }
 
-        private boolean isBlocked(BlockPos position) {
-            return blocked.contains(BlockPos.asLong(position.getX(), 0, position.getZ()));
+        private boolean isBlocked(BlockVector position) {
+            return blocked.contains(pack(position.getBlockX(), position.getBlockZ()));
         }
 
         @Override
-        public boolean canStandAt(BlockPos position) {
-            return position.getY() == 0
-                    && position.getX() >= minimum
-                    && position.getX() <= maximum
-                    && position.getZ() >= minimum
-                    && position.getZ() <= maximum
+        public boolean canStandAt(BlockVector position) {
+            return position.getBlockY() == 0
+                    && position.getBlockX() >= minimum
+                    && position.getBlockX() <= maximum
+                    && position.getBlockZ() >= minimum
+                    && position.getBlockZ() <= maximum
                     && !isBlocked(position);
         }
 
         @Override
-        public boolean canOccupy(BlockPos position) {
-            return position.getX() >= minimum
-                    && position.getX() <= maximum
-                    && position.getZ() >= minimum
-                    && position.getZ() <= maximum
+        public boolean canOccupy(BlockVector position) {
+            return position.getBlockX() >= minimum
+                    && position.getBlockX() <= maximum
+                    && position.getBlockZ() >= minimum
+                    && position.getBlockZ() <= maximum
                     && !isBlocked(position);
         }
     }
@@ -215,19 +220,19 @@ class PatheticPathPlannerTest {
         private final java.util.Map<Long, Integer> heights = new java.util.HashMap<>();
 
         private void setHeight(int x, int z, int feetY) {
-            heights.put(BlockPos.asLong(x, 0, z), feetY);
+            heights.put(pack(x, z), feetY);
         }
 
         @Override
-        public boolean canStandAt(BlockPos position) {
-            return heights.getOrDefault(BlockPos.asLong(position.getX(), 0, position.getZ()), Integer.MIN_VALUE)
-                    == position.getY();
+        public boolean canStandAt(BlockVector position) {
+            return heights.getOrDefault(pack(position.getBlockX(), position.getBlockZ()), Integer.MIN_VALUE)
+                    == position.getBlockY();
         }
 
         @Override
-        public boolean canOccupy(BlockPos position) {
-            Integer feetY = heights.get(BlockPos.asLong(position.getX(), 0, position.getZ()));
-            return feetY != null && position.getY() >= feetY;
+        public boolean canOccupy(BlockVector position) {
+            Integer feetY = heights.get(pack(position.getBlockX(), position.getBlockZ()));
+            return feetY != null && position.getBlockY() >= feetY;
         }
     }
 }
