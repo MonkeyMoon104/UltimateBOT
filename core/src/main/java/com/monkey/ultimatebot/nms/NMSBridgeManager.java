@@ -53,6 +53,14 @@ public class NMSBridgeManager {
         return SUPPORTED_VERSIONS;
     }
 
+    public static java.util.Set<com.monkey.ultimatebot.common.model.PlatformCapability> capabilities() {
+        return get().capabilities();
+    }
+
+    public static boolean supports(com.monkey.ultimatebot.common.model.PlatformCapability capability) {
+        return get().supports(capability);
+    }
+
     private static @Nullable String resolveV26Bridge(String version) {
         if ("26.1".equals(version) || version.startsWith("26.1.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v26_1";
