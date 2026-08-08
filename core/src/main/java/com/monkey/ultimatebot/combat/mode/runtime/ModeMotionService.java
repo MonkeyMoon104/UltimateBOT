@@ -188,7 +188,7 @@ public final class ModeMotionService {
     }
 
     public double botVerticalVelocity() {
-        return bukkitBot.getVelocity().getY();
+        return bot.bukkitVelocity().getY();
     }
 
     public double botY() {

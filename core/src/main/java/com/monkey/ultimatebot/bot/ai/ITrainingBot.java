@@ -86,20 +86,19 @@ public interface ITrainingBot {
     }
 
     default Vector bukkitVelocity() {
-        return asBukkitPlayer().getVelocity();
+        return NMSBridgeManager.get().getBotVelocity(this);
     }
 
     default void setBukkitVelocity(Vector velocity) {
-        asBukkitPlayer().setVelocity(Objects.requireNonNull(velocity, "velocity"));
+        NMSBridgeManager.get().setBotVelocity(this, Objects.requireNonNull(velocity, "velocity"));
     }
 
     default boolean isOnGround() {
-        return asBukkitPlayer().getVelocity().getY() == 0.0D;
+        return NMSBridgeManager.get().isBotOnGround(this);
     }
 
     default void setOnGround(boolean onGround) {
-        // Paper exposes setOnGround on CraftEntity; fall back is a no-op if unavailable.
-        asBukkitPlayer().setGravity(!onGround || asBukkitPlayer().hasGravity());
+        // Intentionally unused by combat AI; native ground state is owned by the server tick.
     }
 
     default float getYaw() {

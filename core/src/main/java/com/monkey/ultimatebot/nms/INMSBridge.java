@@ -104,6 +104,14 @@ public interface INMSBridge {
 
     void stopUsingBotItem(ITrainingBot bot);
 
+    /** Native on-ground flag. Do not infer this from Bukkit velocity. */
+    boolean isBotOnGround(ITrainingBot bot);
+
+    Vector getBotVelocity(ITrainingBot bot);
+
+    /** Sets native delta-movement and marks the entity for velocity sync ({@code hurtMarked}). */
+    void setBotVelocity(ITrainingBot bot, Vector velocity);
+
     default void openBotGui(Player player, UltimateBot plugin, BotType botType) {
         new NewBotGUI(player, plugin, botType).open();
     }
