@@ -98,7 +98,7 @@ public interface ITrainingBot {
     }
 
     default void setOnGround(boolean onGround) {
-        // Intentionally unused by combat AI; native ground state is owned by the server tick.
+        NMSBridgeManager.get().setBotOnGround(this, onGround);
     }
 
     default float getYaw() {
@@ -160,8 +160,28 @@ public interface ITrainingBot {
         return asBukkitPlayer().hasLineOfSight(entity);
     }
 
+    /**
+     * Forces a full attack-strength charge. Implemented by NMS {@code TrainingBot} subclasses
+     * (they can touch the protected ticker; do not put helpers under {@code net.minecraft.*}).
+     */
+    default void prepareFullAttackStrength() {}
+
     default void attackEntity(Entity target) {
-        asBukkitPlayer().attack(Objects.requireNonNull(target, "target"));
+        Entity checked = Objects.requireNonNull(target, "target");
+        if (checked instanceof LivingEntity living) {
+            prepareFullAttackStrength();
+            NMSBridgeManager.get().attackTarget(this, living);
+            return;
+        }
+        asBukkitPlayer().attack(checked);
+    }
+
+    default float fallDistanceValue() {
+        return NMSBridgeManager.get().getBotFallDistance(this);
+    }
+
+    default void setFallDistanceValue(float fallDistance) {
+        NMSBridgeManager.get().setBotFallDistance(this, fallDistance);
     }
 
     default void swingMainHand() {

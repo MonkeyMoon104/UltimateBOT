@@ -46,6 +46,14 @@ public final class TrainingBot_v1_21_4 extends Player implements ITrainingBot {
     }
 
     @Override
+    public void prepareFullAttackStrength() {
+        int delay = Math.max(1, (int) Math.ceil(this.getCurrentItemAttackStrengthDelay()));
+        if (this.attackStrengthTicker < delay) {
+            this.attackStrengthTicker = delay;
+        }
+    }
+
+    @Override
     public void tick() {
         try {
             super.tick();

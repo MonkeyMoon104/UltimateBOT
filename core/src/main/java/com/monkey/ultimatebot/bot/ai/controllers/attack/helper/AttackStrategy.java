@@ -29,8 +29,7 @@ public class AttackStrategy implements IAttackStrategy {
 
         if (bot.isOnGround()) {
             jumpAttackManager.initiateJumpAttack(bot);
-        } else if (!bot.isOnGround()) {
-            bot.swingMainHand();
+        } else {
             attackExecutor.performCriticalAttack(bot, target);
             cooldownManager.setRandomCooldown(20, 11);
         }

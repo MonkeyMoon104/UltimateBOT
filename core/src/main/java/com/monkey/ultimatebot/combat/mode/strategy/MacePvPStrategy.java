@@ -109,8 +109,9 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
                 && context.motion().heightAbove(target) >= -0.2D
                 && context.motion().horizontalDistanceTo(target) <= 1.75D;
         if (strikeWindow) {
-            context.bukkitBot().setFallDistance(Math.max(context.bukkitBot().getFallDistance(), 6.0F));
-            context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+            context.bot().setOnGround(false);
+            context.bot().setFallDistanceValue(Math.max(context.bot().fallDistanceValue(), 6.0F));
+            context.actions().forceMelee(target, BotInventoryController.SWORD_SLOT);
             transitionTo(Phase.RECOVER);
         } else if (context.motion().isBotOnGround() || phaseTicks > 18) {
             transitionTo(Phase.RECOVER);

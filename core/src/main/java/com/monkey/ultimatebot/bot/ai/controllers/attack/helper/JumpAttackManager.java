@@ -26,7 +26,6 @@ public class JumpAttackManager implements IJumpAttackManager {
         jumpTicks++;
 
         if (jumpTicks >= JUMP_ATTACK_DELAY && !bot.isOnGround()) {
-            bot.swingMainHand();
             attackExecutor.performCriticalAttack(bot, target);
 
             isJumping = false;

@@ -6,13 +6,10 @@ import com.monkey.ultimatebot.common.guard.GuardMetadata;
 import com.monkey.ultimatebot.nms.DamageKind;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.jspecify.annotations.Nullable;
 
 public class AttackExecutor implements IAttackExecutor {
     private static final System.Logger LOGGER = System.getLogger(AttackExecutor.class.getName());
@@ -25,27 +22,9 @@ public class AttackExecutor implements IAttackExecutor {
     private static final float LAVA_DAMAGE = 2.0F;
     private static final long LAVA_DAMAGE_DELAY_TICKS = 10L;
 
-    private float cachedBaseDamage = -1;
-    private @Nullable ITrainingBot lastDamageCalculatedBot;
-
     @Override
     public void performCriticalAttack(ITrainingBot bot, LivingEntity target) {
-        try {
-            float baseDamage = getCachedBaseDamage(bot);
-            float criticalDamage = baseDamage * 1.5f;
-
-            NMSBridgeManager.get()
-                    .hurt(
-                            target,
-                            bot.asBukkitPlayer(),
-                            criticalDamage,
-                            DamageKind.PLAYER_ATTACK);
-            applyFireAspect(bot, target);
-            applyLavaDamage(bot, target);
-
-        } catch (Exception e) {
-            performNormalAttack(bot, target);
-        }
+        performNormalAttack(bot, target);
     }
 
     @Override
@@ -60,8 +39,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (target == null) {
             return;
         }
-        if (bot.asBukkitPlayer().getInventory().getItemInMainHand().getType()
-                != Material.NETHERITE_SWORD) {
+        if (bot.getItemInMainHand().getType() != Material.NETHERITE_SWORD) {
             return;
         }
 
@@ -83,9 +61,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (target == null) {
             return;
         }
-        if (bot.asBukkitPlayer().getInventory().getItemInMainHand().getType()
-                        != Material.NETHERITE_SWORD
-                || bot.distanceTo(target) > 3.7D) {
+        if (bot.getItemInMainHand().getType() != Material.NETHERITE_SWORD || bot.distanceTo(target) > 3.7D) {
             return;
         }
 
@@ -154,19 +130,5 @@ public class AttackExecutor implements IAttackExecutor {
                             }
                         },
                         LAVA_DAMAGE_DELAY_TICKS);
-    }
-
-    private float getCachedBaseDamage(ITrainingBot bot) {
-        if (!Objects.equals(lastDamageCalculatedBot, bot) || cachedBaseDamage < 0) {
-            AttributeInstance attackDamage = bot.asBukkitPlayer().getAttribute(Attribute.ATTACK_DAMAGE);
-            cachedBaseDamage = attackDamage == null ? 1.0F : (float) attackDamage.getValue();
-            lastDamageCalculatedBot = bot;
-        }
-        return cachedBaseDamage;
-    }
-
-    public void invalidateCache() {
-        cachedBaseDamage = -1;
-        lastDamageCalculatedBot = null;
     }
 }

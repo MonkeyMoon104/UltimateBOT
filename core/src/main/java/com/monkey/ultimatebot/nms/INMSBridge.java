@@ -107,10 +107,20 @@ public interface INMSBridge {
     /** Native on-ground flag. Do not infer this from Bukkit velocity. */
     boolean isBotOnGround(ITrainingBot bot);
 
+    /** Sets the native on-ground flag (needed before mace smash checks). */
+    void setBotOnGround(ITrainingBot bot, boolean onGround);
+
     Vector getBotVelocity(ITrainingBot bot);
 
     /** Sets native delta-movement and marks the entity for velocity sync ({@code hurtMarked}). */
     void setBotVelocity(ITrainingBot bot, Vector velocity);
+
+    float getBotFallDistance(ITrainingBot bot);
+
+    void setBotFallDistance(ITrainingBot bot, float fallDistance);
+
+    /** Native {@code Player#attack} so mace smash and item attributes apply. */
+    void attackTarget(ITrainingBot bot, LivingEntity target);
 
     default void openBotGui(Player player, UltimateBot plugin, BotType botType) {
         new NewBotGUI(player, plugin, botType).open();

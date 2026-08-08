@@ -385,6 +385,25 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
         nativeBot.setDeltaMovement(velocity.getX(), velocity.getY(), velocity.getZ());
         nativeBot.hurtMarked = true;
     }
+
+    @Override
+    public void setBotOnGround(ITrainingBot bot, boolean onGround) {
+        nativeBot(bot).setOnGround(onGround);
+    }
+    @Override
+    public float getBotFallDistance(ITrainingBot bot) {
+        return (float) nativeBot(bot).fallDistance;
+    }
+
+    @Override
+    public void setBotFallDistance(ITrainingBot bot, float fallDistance) {
+        nativeBot(bot).fallDistance = fallDistance;
+    }
+
+    @Override
+    public void attackTarget(ITrainingBot bot, org.bukkit.entity.LivingEntity target) {
+        nativeBot(bot).attack(((CraftLivingEntity) target).getHandle());
+    }
     public net.minecraft.server.level.ClientInformation createClientInformation() {
         return new net.minecraft.server.level.ClientInformation(
                 "it_IT", 10, ChatVisiblity.FULL, true, 0, HumanoidArm.RIGHT, false, true, net.minecraft.server.level.ParticleStatus.ALL);

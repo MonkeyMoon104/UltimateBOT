@@ -158,4 +158,16 @@ public final class ModeCombatActions {
             attack.setAttackCooldown(tuning.get().attackCooldownTicks());
         }
     }
+
+    /** Direct melee without jump-crit orchestration (e.g. aerial mace smash). */
+    public void forceMelee(LivingEntity target, int slot) {
+        if (inventory.getCurrentSlot() != slot) {
+            inventory.switchToSlot(slot);
+        }
+        attack.setAttackCooldown(0);
+        attack.performNormalAttack(target);
+        if (attack.getAttackCooldown() > tuning.get().attackCooldownTicks()) {
+            attack.setAttackCooldown(tuning.get().attackCooldownTicks());
+        }
+    }
 }
