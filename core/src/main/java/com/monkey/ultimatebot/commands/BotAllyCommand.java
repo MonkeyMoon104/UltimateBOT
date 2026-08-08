@@ -7,12 +7,13 @@ import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionDefault;
+import revxrsal.commands.annotation.Command;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
 
-public class BotAllyCommand implements CommandExecutor {
+public class BotAllyCommand {
 
     private final UltimateBot plugin;
 
@@ -20,39 +21,35 @@ public class BotAllyCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
-            return true;
+    @Command("botally")
+    @CommandPermission(value = "ultimatebot.bot.use", defaultAccess = PermissionDefault.TRUE)
+    public void botAlly(BukkitCommandActor actor) {
+        if (!actor.isPlayer()) {
+            return;
         }
-
-        if (!sender.hasPermission("ultimatebot.bot.use")) {
-            sender.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.reload-no-permission", "")));
-            return true;
-        }
+        Player player = actor.requirePlayer();
 
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
         if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
             String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
-            return true;
+            return;
         }
 
         if (isEventBotActive()) {
             String msg = plugin.getLangString("messages.event-bot-active-block-normal");
             player.sendMessage(ChatColorUtils.translate(msg));
-            return true;
+            return;
         }
 
         BotType activeType = plugin.getBotManager().getBotTypeByParticipant(player.getUniqueId());
         if (activeType == BotType.SINGLE || activeType == BotType.TEAM_ALLY) {
             player.sendMessage(ChatColorUtils.translate(getConflictMessage(activeType)));
-            return true;
+            return;
         }
 
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.ALLY);
-        return true;
     }
 
     private boolean isEventBotActive() {

@@ -6,18 +6,24 @@ import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.bukkit.permissions.PermissionDefault;
+import org.jspecify.annotations.Nullable;
+import revxrsal.commands.annotation.Command;
+import revxrsal.commands.annotation.Sized;
+import revxrsal.commands.annotation.Subcommand;
+import revxrsal.commands.annotation.SuggestWith;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import revxrsal.commands.bukkit.annotation.CommandPermission;
 
-public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
+public class BotTeamAllyCommand {
 
     private final UltimateBot plugin;
 
@@ -25,76 +31,59 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         this.plugin = plugin;
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player player)) {
-            return true;
+    @Command("botteamally")
+    @CommandPermission(value = "ultimatebot.bot.use", defaultAccess = PermissionDefault.TRUE)
+    public void openGui(BukkitCommandActor actor) {
+        if (!actor.isPlayer()) {
+            return;
+        }
+        Player player = actor.requirePlayer();
+        if (!guardCommon(player)) {
+            return;
         }
 
-        if (!player.hasPermission("ultimatebot.bot.use")) {
-            sendConfigured(player, "messages.reload-no-permission");
-            return true;
+        ActiveTeamAlly activeTeamAlly = findActiveTeamAlly(player.getUniqueId());
+        if (activeTeamAlly == null) {
+            sendConfigured(player, "messages.team-ally.create-usage");
+            return;
         }
 
-        World world = player.getWorld();
-        List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
-        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
-            String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
-            player.sendMessage(ChatColorUtils.translate(msg));
-            return true;
-        }
-
-        if (isEventBotActive()) {
-            sendConfigured(player, "messages.event-bot-active-block-normal");
-            return true;
-        }
-
-        if (args.length == 0) {
-            ActiveTeamAlly activeTeamAlly = findActiveTeamAlly(player.getUniqueId());
-            if (activeTeamAlly == null) {
-                sendConfigured(player, "messages.team-ally.create-usage");
-                return true;
-            }
-
-            BotOptions sharedOptions = activeTeamAlly.options();
-            sharedOptions.setBotType(BotType.TEAM_ALLY);
-            plugin.getPlayerOptions().put(player.getUniqueId(), sharedOptions);
-            NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
-            sendConfigured(player, "messages.team-ally.gui-opened");
-            return true;
-        }
-
-        String sub = args[0].toLowerCase(Locale.ROOT);
-        if (sub.equals("create")) {
-            return handleCreate(player, args);
-        }
-        if (sub.equals("addowners")) {
-            return handleAddOwners(player, args);
-        }
-        if (sub.equals("removeowners")) {
-            return handleRemoveOwners(player, args);
-        }
-
-        sendConfigured(player, "messages.team-ally.create-usage");
-        return true;
+        BotOptions sharedOptions = activeTeamAlly.options();
+        sharedOptions.setBotType(BotType.TEAM_ALLY);
+        plugin.getPlayerOptions().put(player.getUniqueId(), sharedOptions);
+        NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
+        sendConfigured(player, "messages.team-ally.gui-opened");
     }
 
-    private boolean handleCreate(Player player, String[] args) {
-        if (args.length < 3) {
-            sendConfigured(player, "messages.team-ally.create-usage");
-            return true;
+    @Subcommand("create")
+    @Command("botteamally")
+    @CommandPermission(value = "ultimatebot.bot.use", defaultAccess = PermissionDefault.TRUE)
+    public void create(
+            BukkitCommandActor actor,
+            @Sized(min = 0) @SuggestWith(OnlinePlayerNameSuggestions.class) String[] ownerNames) {
+        if (!actor.isPlayer()) {
+            return;
+        }
+        Player player = actor.requirePlayer();
+        if (!guardCommon(player)) {
+            return;
         }
 
-        String duplicate = findFirstDuplicateName(args, 1);
+        if (ownerNames.length < 2) {
+            sendConfigured(player, "messages.team-ally.create-usage");
+            return;
+        }
+
+        String duplicate = findFirstDuplicateName(ownerNames);
         if (duplicate != null) {
             sendConfigured(player, "messages.team-ally.duplicate-owner", "%player%", duplicate);
-            return true;
+            return;
         }
 
-        Set<UUID> owners = resolveOwners(player, args, 1);
+        Set<UUID> owners = resolveOwners(player, ownerNames);
         if (owners.size() < 2) {
             sendConfigured(player, "messages.team-ally.create-min-owners");
-            return true;
+            return;
         }
 
         for (UUID ownerUUID : owners) {
@@ -108,7 +97,7 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
                         ownerName == null ? ownerUUID.toString() : ownerName,
                         "%bottype%",
                         busyType.name().toLowerCase(Locale.ROOT));
-                return true;
+                return;
             }
         }
 
@@ -127,34 +116,46 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
 
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
         sendConfigured(player, "messages.team-ally.gui-opened");
-        return true;
     }
 
-    private boolean handleAddOwners(Player player, String[] args) {
-        if (args.length < 2) {
-            sendConfigured(player, "messages.team-ally.addowners-usage");
-            return true;
+    @Subcommand("addowners")
+    @Command("botteamally")
+    @CommandPermission(value = "ultimatebot.bot.use", defaultAccess = PermissionDefault.TRUE)
+    public void addOwners(
+            BukkitCommandActor actor,
+            @Sized(min = 0) @SuggestWith(OnlinePlayerNameSuggestions.class) String[] ownerNames) {
+        if (!actor.isPlayer()) {
+            return;
+        }
+        Player player = actor.requirePlayer();
+        if (!guardCommon(player)) {
+            return;
         }
 
-        String duplicate = findFirstDuplicateName(args, 1);
+        if (ownerNames.length < 1) {
+            sendConfigured(player, "messages.team-ally.addowners-usage");
+            return;
+        }
+
+        String duplicate = findFirstDuplicateName(ownerNames);
         if (duplicate != null) {
             sendConfigured(player, "messages.team-ally.duplicate-owner", "%player%", duplicate);
-            return true;
+            return;
         }
 
         ActiveTeamAlly activeTeamAlly = findActiveTeamAlly(player.getUniqueId());
         if (activeTeamAlly == null) {
             sendConfigured(player, "messages.team-ally.no-active-teamally");
-            return true;
+            return;
         }
 
         BotOptions options = activeTeamAlly.options();
         Set<UUID> owners = new LinkedHashSet<>(options.getTeamOwnerUUIDs());
 
-        for (int i = 1; i < args.length; i++) {
-            Player owner = Bukkit.getPlayerExact(args[i]);
+        for (String ownerName : ownerNames) {
+            Player owner = Bukkit.getPlayerExact(ownerName);
             if (owner == null) {
-                sendConfigured(player, "messages.team-ally.invalid-owner", "%player%", args[i]);
+                sendConfigured(player, "messages.team-ally.invalid-owner", "%player%", ownerName);
                 continue;
             }
 
@@ -181,34 +182,46 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
 
         options.setTeamOwnerUUIDs(owners);
         plugin.getPlayerOptions().put(player.getUniqueId(), options);
-        return true;
     }
 
-    private boolean handleRemoveOwners(Player player, String[] args) {
-        if (args.length < 2) {
-            sendConfigured(player, "messages.team-ally.removeowners-usage");
-            return true;
+    @Subcommand("removeowners")
+    @Command("botteamally")
+    @CommandPermission(value = "ultimatebot.bot.use", defaultAccess = PermissionDefault.TRUE)
+    public void removeOwners(
+            BukkitCommandActor actor,
+            @Sized(min = 0) @SuggestWith(OnlinePlayerNameSuggestions.class) String[] ownerNames) {
+        if (!actor.isPlayer()) {
+            return;
+        }
+        Player player = actor.requirePlayer();
+        if (!guardCommon(player)) {
+            return;
         }
 
-        String duplicate = findFirstDuplicateName(args, 1);
+        if (ownerNames.length < 1) {
+            sendConfigured(player, "messages.team-ally.removeowners-usage");
+            return;
+        }
+
+        String duplicate = findFirstDuplicateName(ownerNames);
         if (duplicate != null) {
             sendConfigured(player, "messages.team-ally.duplicate-owner", "%player%", duplicate);
-            return true;
+            return;
         }
 
         ActiveTeamAlly activeTeamAlly = findActiveTeamAlly(player.getUniqueId());
         if (activeTeamAlly == null) {
             sendConfigured(player, "messages.team-ally.no-active-teamally");
-            return true;
+            return;
         }
 
         BotOptions options = activeTeamAlly.options();
         Set<UUID> owners = new LinkedHashSet<>(options.getTeamOwnerUUIDs());
 
-        for (int i = 1; i < args.length; i++) {
-            Player owner = Bukkit.getPlayerExact(args[i]);
+        for (String ownerName : ownerNames) {
+            Player owner = Bukkit.getPlayerExact(ownerName);
             if (owner == null) {
-                sendConfigured(player, "messages.team-ally.invalid-owner", "%player%", args[i]);
+                sendConfigured(player, "messages.team-ally.invalid-owner", "%player%", ownerName);
                 continue;
             }
 
@@ -228,16 +241,31 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
 
         options.setTeamOwnerUUIDs(owners);
         plugin.getPlayerOptions().put(player.getUniqueId(), options);
+    }
+
+    private boolean guardCommon(Player player) {
+        World world = player.getWorld();
+        java.util.List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
+        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
+            String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
+            player.sendMessage(ChatColorUtils.translate(msg));
+            return false;
+        }
+
+        if (isEventBotActive()) {
+            sendConfigured(player, "messages.event-bot-active-block-normal");
+            return false;
+        }
         return true;
     }
 
-    private Set<UUID> resolveOwners(Player sender, String[] args, int startIndex) {
+    private Set<UUID> resolveOwners(Player sender, String[] ownerNames) {
         Set<UUID> owners = new LinkedHashSet<>();
 
-        for (int i = startIndex; i < args.length; i++) {
-            Player owner = Bukkit.getPlayerExact(args[i]);
+        for (String ownerName : ownerNames) {
+            Player owner = Bukkit.getPlayerExact(ownerName);
             if (owner == null) {
-                sendConfigured(sender, "messages.team-ally.invalid-owner", "%player%", args[i]);
+                sendConfigured(sender, "messages.team-ally.invalid-owner", "%player%", ownerName);
                 continue;
             }
 
@@ -249,12 +277,12 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         return owners;
     }
 
-    private @Nullable String findFirstDuplicateName(String[] args, int startIndex) {
+    private @Nullable String findFirstDuplicateName(String[] ownerNames) {
         Set<String> names = new LinkedHashSet<>();
-        for (int i = startIndex; i < args.length; i++) {
-            String lowered = args[i].toLowerCase(Locale.ROOT);
+        for (String ownerName : ownerNames) {
+            String lowered = ownerName.toLowerCase(Locale.ROOT);
             if (!names.add(lowered)) {
-                return args[i];
+                return ownerName;
             }
         }
         return null;
@@ -319,89 +347,6 @@ public class BotTeamAllyCommand implements CommandExecutor, TabCompleter {
         }
 
         return null;
-    }
-
-    @Override
-    public @Nullable List<String> onTabComplete(
-            @NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
-        if (!(sender instanceof Player player)) {
-            return List.of();
-        }
-
-        List<String> suggestions = new ArrayList<>();
-        String current = args.length == 0 ? "" : args[args.length - 1].toLowerCase(Locale.ROOT);
-
-        if (args.length == 1) {
-            addIfMatches(suggestions, "create", current);
-            addIfMatches(suggestions, "addowners", current);
-            addIfMatches(suggestions, "removeowners", current);
-            return suggestions;
-        }
-
-        String sub = args[0].toLowerCase(Locale.ROOT);
-
-        if (sub.equals("create")) {
-            Set<String> already = collectLowercaseArgs(args, 1, args.length - 1);
-            for (Player online : Bukkit.getOnlinePlayers()) {
-                String name = online.getName();
-                if (already.contains(name.toLowerCase(Locale.ROOT))) {
-                    continue;
-                }
-                addIfMatches(suggestions, name, current);
-            }
-            return suggestions;
-        }
-
-        if (sub.equals("addowners") || sub.equals("removeowners")) {
-            ActiveTeamAlly activeTeamAlly = findActiveTeamAlly(player.getUniqueId());
-            if (activeTeamAlly == null) {
-                return List.of();
-            }
-
-            Set<String> already = collectLowercaseArgs(args, 1, args.length - 1);
-            Set<UUID> currentOwners = activeTeamAlly.options().getTeamOwnerUUIDs();
-
-            if (sub.equals("addowners")) {
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    if (currentOwners.contains(online.getUniqueId())) {
-                        continue;
-                    }
-                    String name = online.getName();
-                    if (already.contains(name.toLowerCase(Locale.ROOT))) {
-                        continue;
-                    }
-                    addIfMatches(suggestions, name, current);
-                }
-            } else {
-                for (UUID ownerUUID : currentOwners) {
-                    Player owner = Bukkit.getPlayer(ownerUUID);
-                    if (owner == null) {
-                        continue;
-                    }
-                    String name = owner.getName();
-                    if (already.contains(name.toLowerCase(Locale.ROOT))) {
-                        continue;
-                    }
-                    addIfMatches(suggestions, name, current);
-                }
-            }
-        }
-
-        return suggestions;
-    }
-
-    private void addIfMatches(List<String> suggestions, String candidate, String currentLowercase) {
-        if (candidate.toLowerCase(Locale.ROOT).startsWith(currentLowercase)) {
-            suggestions.add(candidate);
-        }
-    }
-
-    private Set<String> collectLowercaseArgs(String[] args, int startInclusive, int endExclusive) {
-        Set<String> values = new LinkedHashSet<>();
-        for (int i = startInclusive; i < endExclusive && i < args.length; i++) {
-            values.add(args[i].toLowerCase(Locale.ROOT));
-        }
-        return values;
     }
 
     private void sendConfigured(Player player, String path) {

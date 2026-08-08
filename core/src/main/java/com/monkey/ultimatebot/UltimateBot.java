@@ -48,15 +48,13 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.Nullable;
+import revxrsal.commands.bukkit.BukkitLamp;
 
 public final class UltimateBot extends JavaPlugin {
 
@@ -210,14 +208,16 @@ public final class UltimateBot extends JavaPlugin {
 
             startup.beginPhase(7, "Hooks", "Commands and Listeners");
 
-            List<String> registeredCommands = new ArrayList<>();
-            registerCommand(startup, registeredCommands, "bot", new BotCommand(this));
-            registerCommand(startup, registeredCommands, "botevent", new BotEventCommand(this));
-            registerCommand(startup, registeredCommands, "botally", new BotAllyCommand(this));
-
-            BotTeamAllyCommand botTeamAllyCommand = new BotTeamAllyCommand(this);
-            registerCommand(startup, registeredCommands, "botteamally", botTeamAllyCommand, botTeamAllyCommand);
-            registerCommand(startup, registeredCommands, "ultimatebotreload", new ReloadCommand(this));
+            List<String> registeredCommands = List.of("bot", "botevent", "botally", "botteamally", "ultimatebotreload");
+            BukkitLamp.builder(this)
+                    .exceptionHandler(new UltimateBotExceptionHandler(this))
+                    .build()
+                    .register(
+                            new BotCommand(this),
+                            new BotEventCommand(this),
+                            new BotAllyCommand(this),
+                            new BotTeamAllyCommand(this),
+                            new ReloadCommand(this));
             startup.markCommands(registeredCommands);
 
             List<String> registeredListeners = new ArrayList<>();
@@ -453,34 +453,6 @@ public final class UltimateBot extends JavaPlugin {
             return getConfig();
         }
         return languageManager.getActiveLanguageConfiguration();
-    }
-
-    private void registerCommand(
-            UltimateBotLogging.StartupSession startup,
-            List<String> registeredCommands,
-            String name,
-            CommandExecutor executor) {
-        registerCommand(startup, registeredCommands, name, executor, null);
-    }
-
-    private void registerCommand(
-            UltimateBotLogging.StartupSession startup,
-            List<String> registeredCommands,
-            String name,
-            CommandExecutor executor,
-            @Nullable TabCompleter tabCompleter) {
-        PluginCommand command = getCommand(name);
-        if (command == null) {
-            startup.warn("Command /" + name, "missing from plugin.yml");
-            return;
-        }
-
-        command.setExecutor(executor);
-        if (tabCompleter != null) {
-            command.setTabCompleter(tabCompleter);
-        }
-
-        registeredCommands.add(name);
     }
 
     private void registerListener(List<String> registeredListeners, String label, Listener listener) {
