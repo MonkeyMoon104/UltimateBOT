@@ -22,8 +22,8 @@ public class LocationPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
-            var loc = bot.asPlayer().getBukkitEntity().getLocation();
+        if (bot != null && bot.asBukkitPlayer() != null) {
+            var loc = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
             return String.format("⚬ X:%d Y:%d Z:%d", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
         }
         return "⚬ X:0 Y:0 Z:0";

@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IMovementPatternSelector;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public class MovementPatternSelector implements IMovementPatternSelector {
     private static final long MIN_PATTERN_DURATION = 1500;
@@ -18,10 +18,10 @@ public class MovementPatternSelector implements IMovementPatternSelector {
 
     @Override
     public MovementPattern selectOptimalPattern(
-            Player target,
+            LivingEntity target,
             double targetDistance,
-            Vec3 botPos,
-            Vec3 targetPos,
+            Vector botPos,
+            Vector targetPos,
             boolean isUnderFire,
             int consecutiveHits) {
         long currentTime = System.currentTimeMillis();
@@ -29,9 +29,9 @@ public class MovementPatternSelector implements IMovementPatternSelector {
             return currentPattern;
         }
 
-        double distance = botPos.distanceTo(targetPos);
-        double yDiff = botPos.y - targetPos.y;
-        boolean airborneTargetAbove = !target.onGround() && targetPos.y > botPos.y + 0.5D;
+        double distance = botPos.distance(targetPos);
+        double yDiff = botPos.getY() - targetPos.getY();
+        boolean airborneTargetAbove = !target.isOnGround() && targetPos.getY() > botPos.getY() + 0.5D;
 
         MovementPattern newPattern;
         if (airborneTargetAbove && distance <= 8.0D) {

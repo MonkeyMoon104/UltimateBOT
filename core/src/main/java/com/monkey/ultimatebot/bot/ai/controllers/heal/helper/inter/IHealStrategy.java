@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IHealStrategy {
 
-    void executeHeal(Player bot);
+    void executeHeal(ITrainingBot bot);
 
-    boolean shouldHeal(Player bot);
+    boolean shouldHeal(ITrainingBot bot);
 }

@@ -4,32 +4,32 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.util.BlockVector;
 
 public class BlockStateValidator implements IBlockStateValidator {
-    private final Level level;
-    private volatile Cache<BlockPos, Boolean> standablePositionCache;
-    private volatile Cache<BlockPos, Boolean> bodySpaceCache;
+    private final World world;
+    private volatile Cache<BlockVector, Boolean> standablePositionCache;
+    private volatile Cache<BlockVector, Boolean> bodySpaceCache;
 
-    public BlockStateValidator(Level level, RuntimeSettings.CacheSettings settings) {
-        this.level = level;
+    public BlockStateValidator(World world, RuntimeSettings.CacheSettings settings) {
+        this.world = world;
         this.standablePositionCache = createCache(settings);
         this.bodySpaceCache = createCache(settings);
     }
 
     public void reconfigure(RuntimeSettings.CacheSettings settings) {
-        Cache<BlockPos, Boolean> previousStandableCache = standablePositionCache;
-        Cache<BlockPos, Boolean> previousBodySpaceCache = bodySpaceCache;
+        Cache<BlockVector, Boolean> previousStandableCache = standablePositionCache;
+        Cache<BlockVector, Boolean> previousBodySpaceCache = bodySpaceCache;
         standablePositionCache = createCache(settings);
         bodySpaceCache = createCache(settings);
         previousStandableCache.invalidateAll();
         previousBodySpaceCache.invalidateAll();
     }
 
-    private static Cache<BlockPos, Boolean> createCache(RuntimeSettings.CacheSettings settings) {
+    private static Cache<BlockVector, Boolean> createCache(RuntimeSettings.CacheSettings settings) {
         return Caffeine.newBuilder()
                 .maximumSize(settings.maximumSize())
                 .expireAfterWrite(settings.expireAfterWrite())
@@ -38,52 +38,50 @@ public class BlockStateValidator implements IBlockStateValidator {
     }
 
     @Override
-    public boolean isPositionPassableCached(BlockPos pos) {
+    public boolean isPositionPassableCached(BlockVector pos) {
         if (containsCobweb(pos)) {
             return false;
         }
-        return standablePositionCache.get(pos.immutable(), this::isPositionPassable);
+        return standablePositionCache.get(cacheKey(pos), this::isPositionPassable);
     }
 
     @Override
-    public boolean isPositionPassable(BlockPos pos) {
+    public boolean isPositionPassable(BlockVector pos) {
         try {
-            if (pos.getY() < -64 || pos.getY() > 319) {
+            if (pos.getBlockY() < world.getMinHeight() || pos.getBlockY() > world.getMaxHeight() - 1) {
                 return false;
             }
 
-            BlockState below = level.getBlockState(pos.below());
-            return isBodySpaceClearCached(pos)
-                    && !below.is(Blocks.COBWEB)
-                    && !below.getCollisionShape(level, pos.below()).isEmpty();
+            Block below = blockAt(below(pos));
+            return isBodySpaceClearCached(pos) && below.getType() != Material.COBWEB && below.getType().isSolid();
         } catch (Exception e) {
             return false;
         }
     }
 
     @Override
-    public boolean isBodySpaceClearCached(BlockPos pos) {
+    public boolean isBodySpaceClearCached(BlockVector pos) {
         if (containsCobweb(pos)) {
             return false;
         }
-        return bodySpaceCache.get(pos.immutable(), this::isBodySpaceClear);
+        return bodySpaceCache.get(cacheKey(pos), this::isBodySpaceClear);
     }
 
     @Override
-    public boolean isBodySpaceClear(BlockPos pos) {
+    public boolean isBodySpaceClear(BlockVector pos) {
         try {
-            if (pos.getY() < -64 || pos.getY() > 318) {
+            if (pos.getBlockY() < world.getMinHeight() || pos.getBlockY() > world.getMaxHeight() - 2) {
                 return false;
             }
 
-            BlockState feet = level.getBlockState(pos);
-            BlockState head = level.getBlockState(pos.above());
-            return !feet.is(Blocks.COBWEB)
-                    && !head.is(Blocks.COBWEB)
-                    && feet.getCollisionShape(level, pos).isEmpty()
-                    && head.getCollisionShape(level, pos.above()).isEmpty()
-                    && feet.getFluidState().isEmpty()
-                    && head.getFluidState().isEmpty();
+            Block feet = blockAt(pos);
+            Block head = blockAt(above(pos));
+            return feet.getType() != Material.COBWEB
+                    && head.getType() != Material.COBWEB
+                    && feet.isPassable()
+                    && head.isPassable()
+                    && !feet.isLiquid()
+                    && !head.isLiquid();
         } catch (Exception e) {
             return false;
         }
@@ -106,9 +104,25 @@ public class BlockStateValidator implements IBlockStateValidator {
         return Math.toIntExact(standablePositionCache.estimatedSize() + bodySpaceCache.estimatedSize());
     }
 
-    private boolean containsCobweb(BlockPos position) {
-        return level.getBlockState(position).is(Blocks.COBWEB)
-                || level.getBlockState(position.above()).is(Blocks.COBWEB)
-                || level.getBlockState(position.below()).is(Blocks.COBWEB);
+    private boolean containsCobweb(BlockVector position) {
+        return blockAt(position).getType() == Material.COBWEB
+                || blockAt(above(position)).getType() == Material.COBWEB
+                || blockAt(below(position)).getType() == Material.COBWEB;
+    }
+
+    private Block blockAt(BlockVector position) {
+        return world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+    }
+
+    private static BlockVector above(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY() + 1, position.getBlockZ());
+    }
+
+    private static BlockVector below(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY() - 1, position.getBlockZ());
+    }
+
+    private static BlockVector cacheKey(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY(), position.getBlockZ());
     }
 }

@@ -1,32 +1,6 @@
 package com.monkey.ultimatebot.utils.equipment;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import org.bukkit.Material;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.jspecify.annotations.Nullable;
-
 public class EquipmentConverter {
-
-    public static @Nullable EquipmentSlot toNMSSlot(org.bukkit.inventory.EquipmentSlot bukkitSlot) {
-        return switch (bukkitSlot) {
-            case HEAD -> EquipmentSlot.HEAD;
-            case CHEST -> EquipmentSlot.CHEST;
-            case LEGS -> EquipmentSlot.LEGS;
-            case FEET -> EquipmentSlot.FEET;
-            case HAND -> EquipmentSlot.MAINHAND;
-            case OFF_HAND -> EquipmentSlot.OFFHAND;
-            case BODY -> null;
-        };
-    }
-
-    public static Material toMaterial(ItemStack nmsItem) {
-        if (nmsItem == null || nmsItem.isEmpty()) {
-            return Material.AIR;
-        }
-        org.bukkit.inventory.ItemStack bukkitItem = CraftItemStack.asBukkitCopy(nmsItem);
-        return bukkitItem.getType();
-    }
 
     public static org.bukkit.inventory.EquipmentSlot[] getArmorSlots() {
         return new org.bukkit.inventory.EquipmentSlot[] {

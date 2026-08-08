@@ -36,7 +36,7 @@ public final class BotRuntimeEventListener implements Listener {
         BotContext context = findBot(event.getEntity().getUniqueId());
         if (context == null) return;
         Entity damager = event instanceof EntityDamageByEntityEvent byEntity ? byEntity.getDamager() : null;
-        if (damager != null && context.bot.asPlayer().isBlocking()) {
+        if (damager != null && context.bot.asBukkitPlayer().isBlocking()) {
             context.bot.getBotAI().recordShieldImpact(damager.getUniqueId());
         }
         BotDamageEvent botEvent = new BotDamageEvent(

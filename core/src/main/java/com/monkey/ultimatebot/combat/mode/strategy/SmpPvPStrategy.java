@@ -5,9 +5,9 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EquipmentSlot;
 
 public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
     private static final int AXE_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -22,12 +22,12 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.SMP,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_SWORD)
-                        .slot(AXE_SLOT, Items.NETHERITE_AXE)
-                        .slot(SHIELD_SLOT, Items.SHIELD)
-                        .slot(PEARL_SLOT, Items.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.ENCHANTED_GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFFHAND, Items.TOTEM_OF_UNDYING)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(AXE_SLOT, Material.NETHERITE_AXE)
+                        .slot(SHIELD_SLOT, Material.SHIELD)
+                        .slot(PEARL_SLOT, Material.ENDER_PEARL, 16)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.ENCHANTED_GOLDEN_APPLE, 64)
+                        .equipment(EquipmentSlot.OFF_HAND, Material.TOTEM_OF_UNDYING)
                         .build());
     }
 

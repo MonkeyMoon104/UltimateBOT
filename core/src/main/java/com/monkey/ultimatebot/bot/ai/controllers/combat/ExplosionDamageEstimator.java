@@ -1,13 +1,13 @@
 package com.monkey.ultimatebot.bot.ai.controllers.combat;
 
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
+@SuppressWarnings("NullAway")
 public final class ExplosionDamageEstimator {
 
     private static final double CRYSTAL_POWER = 6.0D;
@@ -16,23 +16,22 @@ public final class ExplosionDamageEstimator {
 
     private ExplosionDamageEstimator() {}
 
-    public static double estimateCrystalDamage(Level level, Vec3 explosionPos, Player entity) {
-        return estimateExplosionDamage(level, explosionPos, entity, CRYSTAL_POWER);
+    public static double estimateCrystalDamage(Location explosionLocation, Player entity) {
+        return estimateExplosionDamage(explosionLocation, entity, CRYSTAL_POWER);
     }
 
-    public static double estimateAnchorDamage(Level level, Vec3 explosionPos, Player entity) {
-        return estimateExplosionDamage(level, explosionPos, entity, ANCHOR_POWER);
+    public static double estimateAnchorDamage(Location explosionLocation, Player entity) {
+        return estimateExplosionDamage(explosionLocation, entity, ANCHOR_POWER);
     }
 
-    private static double estimateExplosionDamage(
-            Level level, Vec3 explosionPos, Player entity, double explosionPower) {
+    private static double estimateExplosionDamage(Location explosionLocation, Player entity, double explosionPower) {
         double maxRadius = explosionPower * 2.0D;
-        double distance = explosionPos.distanceTo(entity.position());
+        double distance = explosionLocation.distance(entity.getLocation());
         if (distance > maxRadius) {
             return 0.0D;
         }
 
-        double exposure = estimateExposure(level, explosionPos, entity);
+        double exposure = estimateExposure(explosionLocation, entity);
         double impact = (1.0D - (distance / maxRadius)) * exposure;
         if (impact <= 0.0D) {
             return 0.0D;
@@ -41,26 +40,29 @@ public final class ExplosionDamageEstimator {
         return ((impact * impact + impact) * 7.0D * explosionPower) + 1.0D;
     }
 
-    private static double estimateExposure(Level level, Vec3 explosionPos, Player entity) {
-        AABB bb = entity.getBoundingBox();
+    private static double estimateExposure(Location explosionLocation, Player entity) {
+        BoundingBox bb = entity.getBoundingBox();
         int visible = 0;
         int total = 0;
-
         int steps = EXPOSURE_SAMPLES_PER_AXIS - 1;
+
         for (int x = 0; x <= steps; x++) {
-            double sampleX = Mth.lerp((double) x / steps, bb.minX, bb.maxX);
+            double sampleX = lerp((double) x / steps, bb.getMinX(), bb.getMaxX());
             for (int y = 0; y <= steps; y++) {
-                double sampleY = Mth.lerp((double) y / steps, bb.minY, bb.maxY);
+                double sampleY = lerp((double) y / steps, bb.getMinY(), bb.getMaxY());
                 for (int z = 0; z <= steps; z++) {
-                    double sampleZ = Mth.lerp((double) z / steps, bb.minZ, bb.maxZ);
-                    Vec3 samplePoint = new Vec3(sampleX, sampleY, sampleZ);
-
-                    ClipContext context = new ClipContext(
-                            samplePoint, explosionPos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
-
-                    HitResult result = level.clip(context);
-                    if (result.getType() == HitResult.Type.MISS) {
+                    double sampleZ = lerp((double) z / steps, bb.getMinZ(), bb.getMaxZ());
+                    Location sample = new Location(entity.getWorld(), sampleX, sampleY, sampleZ);
+                    Vector direction = explosionLocation.toVector().subtract(sample.toVector());
+                    double distance = direction.length();
+                    if (distance < 1.0E-6D) {
                         visible++;
+                    } else {
+                        RayTraceResult result = entity.getWorld().rayTraceBlocks(
+                                sample, direction.normalize(), distance, FluidCollisionMode.NEVER, true);
+                        if (result == null || result.getHitBlock() == null) {
+                            visible++;
+                        }
                     }
                     total++;
                 }
@@ -68,5 +70,9 @@ public final class ExplosionDamageEstimator {
         }
 
         return total == 0 ? 0.0D : (double) visible / total;
+    }
+
+    private static double lerp(double delta, double start, double end) {
+        return start + delta * (end - start);
     }
 }

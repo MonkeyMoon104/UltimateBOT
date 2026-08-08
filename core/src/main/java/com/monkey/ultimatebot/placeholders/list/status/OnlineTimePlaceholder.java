@@ -22,8 +22,8 @@ public class OnlineTimePlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
-            long ticks = bot.asPlayer().tickCount;
+        if (bot != null && bot.asBukkitPlayer() != null) {
+            long ticks = bot.asBukkitPlayer().getTicksLived();
             long seconds = ticks / 20;
             long minutes = seconds / 60;
             long hours = minutes / 60;

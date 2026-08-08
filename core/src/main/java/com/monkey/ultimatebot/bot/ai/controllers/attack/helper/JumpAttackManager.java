@@ -3,9 +3,9 @@ package com.monkey.ultimatebot.bot.ai.controllers.attack.helper;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public class JumpAttackManager implements IJumpAttackManager {
 
@@ -22,11 +22,11 @@ public class JumpAttackManager implements IJumpAttackManager {
     }
 
     @Override
-    public void handleJumpAttack(Player bot, LivingEntity target) {
+    public void handleJumpAttack(ITrainingBot bot, LivingEntity target) {
         jumpTicks++;
 
-        if (jumpTicks >= JUMP_ATTACK_DELAY && !bot.onGround()) {
-            bot.swing(InteractionHand.MAIN_HAND);
+        if (jumpTicks >= JUMP_ATTACK_DELAY && !bot.isOnGround()) {
+            bot.swingMainHand();
             attackExecutor.performCriticalAttack(bot, target);
 
             isJumping = false;
@@ -35,7 +35,7 @@ public class JumpAttackManager implements IJumpAttackManager {
             cooldownManager.setRandomCooldown(20, 11);
         }
 
-        if (bot.onGround() && jumpTicks > 10) {
+        if (bot.isOnGround() && jumpTicks > 10) {
             isJumping = false;
             jumpTicks = 0;
             bot.setSprinting(false);
@@ -44,9 +44,11 @@ public class JumpAttackManager implements IJumpAttackManager {
     }
 
     @Override
-    public void initiateJumpAttack(Player bot) {
+    public void initiateJumpAttack(ITrainingBot bot) {
         bot.setSprinting(true);
-        bot.setDeltaMovement(bot.getDeltaMovement().x, 0.42, bot.getDeltaMovement().z);
+        Vector velocity = bot.bukkitVelocity();
+        velocity.setY(0.42D);
+        bot.setBukkitVelocity(velocity);
         isJumping = true;
         jumpTicks = 0;
     }
@@ -57,7 +59,7 @@ public class JumpAttackManager implements IJumpAttackManager {
     }
 
     @Override
-    public void resetJumpState(Player bot) {
+    public void resetJumpState(ITrainingBot bot) {
         isJumping = false;
         jumpTicks = 0;
         bot.setSprinting(false);

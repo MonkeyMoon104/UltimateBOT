@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.bukkit.Material;
 import org.jspecify.annotations.Nullable;
 
 public class BotUpdater {
@@ -56,9 +57,7 @@ public class BotUpdater {
     public void updateInventorySlot(UUID ownerUUID, int slot, org.bukkit.inventory.ItemStack item) {
         ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
-            net.minecraft.world.item.ItemStack nmsItem =
-                    org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(item);
-            bot.getBotAI().getInventoryController().setItem(slot, nmsItem);
+            bot.getBotAI().getInventoryController().setItem(slot, item);
         }
     }
 
@@ -79,7 +78,7 @@ public class BotUpdater {
     public int getBotEnderpearlCount(UUID ownerUUID) {
         ITrainingBot bot = getBot(ownerUUID);
         if (bot != null) {
-            return bot.getBotAI().getInventoryController().getItemCount(net.minecraft.world.item.Items.ENDER_PEARL);
+            return bot.getBotAI().getInventoryController().getItemCount(Material.ENDER_PEARL);
         }
         return 0;
     }

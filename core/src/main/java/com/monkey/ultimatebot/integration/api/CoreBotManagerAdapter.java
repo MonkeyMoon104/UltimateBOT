@@ -33,8 +33,10 @@ import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import java.util.*;
+import org.bukkit.Material;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 public final class CoreBotManagerAdapter implements IBotManager {
@@ -1060,9 +1062,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        crystalPvp
-                                ? new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.END_CRYSTAL, 64)
-                                : net.minecraft.world.item.ItemStack.EMPTY);
+                        crystalPvp ? new ItemStack(Material.END_CRYSTAL, 64) : ItemStack.empty());
         return true;
     }
 
@@ -1486,17 +1486,17 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
     }
 
     private @Nullable BotType getOwnerBusyType(UUID ownerUUID, @Nullable UUID allowedTeamPrimaryOwner) {

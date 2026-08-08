@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public interface IPathfindingManager {
@@ -10,11 +10,11 @@ public interface IPathfindingManager {
 
     void attemptPathfindingOrPearl(LivingEntity target);
 
-    boolean hasObstacleBetween(Vec3 start, Vec3 end);
+    boolean hasObstacleBetween(Vector start, Vector end);
 
-    @Nullable Vec3 calculatePearlTargetAroundPlayer(LivingEntity target);
+    @Nullable Vector calculatePearlTargetAroundPlayer(LivingEntity target);
 
-    boolean isSafeLandingSpot(BlockPos pos);
+    boolean isSafeLandingSpot(BlockVector pos);
 
     void forceUnstuck(LivingEntity target);
 

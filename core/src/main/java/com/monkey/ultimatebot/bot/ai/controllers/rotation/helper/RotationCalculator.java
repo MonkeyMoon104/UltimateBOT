@@ -1,9 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public class RotationCalculator implements IRotationCalculator {
 
@@ -11,26 +12,29 @@ public class RotationCalculator implements IRotationCalculator {
     private static final float MIN_PITCH = -90f;
 
     @Override
-    public float[] calculateRotationToTarget(Player bot, LivingEntity target) {
-        double dx = target.getX() - bot.getX();
-        double dy = target.getEyeY() - bot.getEyeY();
-        double dz = target.getZ() - bot.getZ();
+    public float[] calculateRotationToTarget(ITrainingBot bot, LivingEntity target) {
+        Vector botEye = bot.bukkitEyePosition();
+        Location targetEye = target.getEyeLocation();
+        double dx = target.getX() - botEye.getX();
+        double dy = targetEye.getY() - botEye.getY();
+        double dz = target.getZ() - botEye.getZ();
 
         return calculateRotationFromDeltas(dx, dy, dz);
     }
 
     @Override
-    public float[] calculateRotationToPosition(Player bot, double x, double y, double z) {
-        double dx = x - bot.getX();
-        double dy = y - bot.getEyeY();
-        double dz = z - bot.getZ();
+    public float[] calculateRotationToPosition(ITrainingBot bot, double x, double y, double z) {
+        Vector botEye = bot.bukkitEyePosition();
+        double dx = x - botEye.getX();
+        double dy = y - botEye.getY();
+        double dz = z - botEye.getZ();
 
         return calculateRotationFromDeltas(dx, dy, dz);
     }
 
     @Override
-    public float[] calculateRotationToPosition(Player bot, Vec3 targetPos) {
-        return calculateRotationToPosition(bot, targetPos.x, targetPos.y, targetPos.z);
+    public float[] calculateRotationToPosition(ITrainingBot bot, Vector targetPos) {
+        return calculateRotationToPosition(bot, targetPos.getX(), targetPos.getY(), targetPos.getZ());
     }
 
     private float[] calculateRotationFromDeltas(double dx, double dy, double dz) {

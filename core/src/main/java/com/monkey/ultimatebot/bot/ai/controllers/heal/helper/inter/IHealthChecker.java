@@ -1,14 +1,14 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IHealthChecker {
 
-    boolean needsHealing(Player bot);
+    boolean needsHealing(ITrainingBot bot);
 
     float getHealthThreshold();
 
     void setHealthThreshold(float threshold);
 
-    float getCurrentHealth(Player bot);
+    float getCurrentHealth(ITrainingBot bot);
 }

@@ -48,7 +48,7 @@ public final class BotExplosionContext {
         if (bot != null && bot.getPlugin() != null) {
             UUID ownerUUID = bot.getPlugin()
                     .getBotRegistry()
-                    .getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                    .getOwnerUUIDByBotUUID(bot.getUniqueId());
             BotSnapshot snapshot = ownerUUID == null
                     ? null
                     : bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -58,7 +58,7 @@ public final class BotExplosionContext {
                         .publish(new BotExplosionEvent(
                                 bot.getPlugin()
                                         .getBotEventDispatcher()
-                                        .nextSequence(bot.asPlayer().getUUID()),
+                                        .nextSequence(bot.getUniqueId()),
                                 snapshot,
                                 type,
                                 location,

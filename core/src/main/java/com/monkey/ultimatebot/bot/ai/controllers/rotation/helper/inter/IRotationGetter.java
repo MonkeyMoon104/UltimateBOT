@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IRotationGetter {
 
-    float getCurrentYaw(Player bot);
+    float getCurrentYaw(ITrainingBot bot);
 
-    float getCurrentPitch(Player bot);
+    float getCurrentPitch(ITrainingBot bot);
 }

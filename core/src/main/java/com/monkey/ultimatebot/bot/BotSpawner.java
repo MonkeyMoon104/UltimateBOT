@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot;
 
-import com.mojang.authlib.GameProfile;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnEvent;
@@ -15,21 +14,17 @@ import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.integration.api.BotSnapshotMapper;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
+import com.monkey.ultimatebot.protocol.BotProfileData;
 import com.monkey.ultimatebot.utils.EntityUtils;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -74,7 +69,7 @@ public class BotSpawner {
         }
 
         FileConfiguration config = plugin.getConfig();
-        GameProfile profile = profileResolver.resolve(config, registryOwner, resolvedTarget, botUUID, botOptions);
+        BotProfileData profile = profileResolver.resolve(config, registryOwner, resolvedTarget, botUUID, botOptions);
 
         Location spawnLocation = resolveSpawnLocation(registryOwner, botOptions);
         BotEventSource spawnSource = BotEventSourceContext.currentOr(
@@ -97,14 +92,9 @@ public class BotSpawner {
             despawnByOwnerUUID(registryOwnerUUID, BotDespawnReason.REPLACED);
         }
         botOptions.setSpawnLocation(BotLocation.of(spawnLocation));
-        ServerLevel world = ((CraftWorld) spawnLocation.getWorld()).getHandle();
-        BlockPos spawnPos = BlockPos.containing(spawnLocation.getX(), spawnLocation.getY(), spawnLocation.getZ());
-
         ITrainingBot bot = NMSBridgeManager.get()
                 .createTrainingBot(
-                        world,
-                        spawnPos,
-                        0,
+                        spawnLocation,
                         profile,
                         resolvedTarget,
                         follow,
@@ -114,11 +104,11 @@ public class BotSpawner {
                         botOptions);
 
         bot.setTotemCount(totem);
-        NMSBridgeManager.get().addToProfileCache(bot.asPlayer());
-        world.addFreshEntity(bot.asPlayer());
-        plugin.markCompatibilityBot(bot.asPlayer().getBukkitEntity());
+        NMSBridgeManager.get().registerBotEntity(bot);
+        NMSBridgeManager.get().addToProfileCache(bot);
+        plugin.markCompatibilityBot(bot.asBukkitPlayer());
         bot.getBotAI().manageTotem();
-        BotEquipmentUtils.applyEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
+        BotEquipmentUtils.applyEquipment(bot, armorMap, blastProtectionMap);
         applyCustomEquipment(bot, botOptions);
 
         BotBroadcaster.broadcastSpawn(bot, armorMap, blastProtectionMap);
@@ -131,7 +121,7 @@ public class BotSpawner {
                     .getInventoryController()
                     .setItem(
                             com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
-                            net.minecraft.world.item.ItemStack.EMPTY);
+                            ItemStack.empty());
         }
 
         if (botOptions == null || botOptions.isCombat()) {
@@ -155,7 +145,7 @@ public class BotSpawner {
                                     botOptions != null && botOptions.getCreationSource() == BotCreationSource.API
                                             ? BotEventSource.API
                                             : BotEventSource.GUI),
-                            bot.asPlayer().getBukkitEntity()));
+                            bot.asBukkitPlayer()));
         }
         return true;
     }
@@ -183,17 +173,17 @@ public class BotSpawner {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
-                        net.minecraft.world.item.ItemStack.EMPTY);
+                        ItemStack.empty());
     }
 
     private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {
@@ -230,9 +220,7 @@ public class BotSpawner {
             if (entry.getKey() == null || entry.getValue() == null) {
                 continue;
             }
-            net.minecraft.world.item.ItemStack nmsItem =
-                    org.bukkit.craftbukkit.inventory.CraftItemStack.asNMSCopy(entry.getValue());
-            bot.getBotAI().getInventoryController().setItem(entry.getKey(), nmsItem);
+            bot.getBotAI().getInventoryController().setItem(entry.getKey(), entry.getValue());
         }
     }
 
@@ -296,9 +284,7 @@ public class BotSpawner {
         if (!allowDespawn(ownerUUID, reason)) return false;
         prepareBotDespawn(ownerUUID);
 
-        ServerPlayer handle = ((CraftPlayer) owner).getHandle();
-        ServerLevel world = NMSBridgeManager.get().getServerLevel(handle);
-        boolean removed = EntityUtils.removeEntity(world, botUUID);
+        boolean removed = EntityUtils.removeEntity(owner.getWorld(), botUUID);
         cleanupDespawnState(ownerUUID, botUUID, removed, reason);
         return true;
     }
@@ -320,8 +306,8 @@ public class BotSpawner {
         prepareBotDespawn(ownerUUID);
 
         ITrainingBot bot = registry.getBot(ownerUUID);
-        if (bot != null && bot.asPlayer().level() instanceof ServerLevel world) {
-            boolean removed = EntityUtils.removeEntity(world, botUUID);
+        if (bot != null && bot.asBukkitPlayer().getWorld() != null) {
+            boolean removed = EntityUtils.removeEntity(bot.asBukkitPlayer().getWorld(), botUUID);
             cleanupDespawnState(ownerUUID, botUUID, removed, reason);
             return true;
         }
@@ -346,8 +332,8 @@ public class BotSpawner {
             if (owner != null && owner.isOnline()) {
                 despawn(owner, reason);
             } else {
-                UUID botUUID = bot != null && bot.asPlayer() != null
-                        ? bot.asPlayer().getUUID()
+                UUID botUUID = bot != null && bot.asBukkitPlayer() != null
+                        ? bot.asBukkitPlayer().getUniqueId()
                         : registry.getBotUUID(ownerUUID);
                 if (!allowDespawn(ownerUUID, reason)) return;
                 prepareBotDespawn(ownerUUID);
@@ -368,8 +354,7 @@ public class BotSpawner {
         if (!allowDespawn(ownerUUID, reason)) return;
         prepareBotDespawn(ownerUUID);
 
-        ServerLevel world = ((org.bukkit.craftbukkit.CraftWorld) fromWorld).getHandle();
-        boolean removed = EntityUtils.removeEntity(world, botUUID);
+        boolean removed = EntityUtils.removeEntity(fromWorld, botUUID);
         cleanupDespawnState(ownerUUID, botUUID, removed, reason);
     }
 

@@ -9,34 +9,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.World;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
 
+@SuppressWarnings("NullAway")
 final class CrystalTargetPlanner {
 
     private final Player bot;
-    private final Level level;
+    private final World world;
     private final CrystalManager crystalManager;
     private final CrystalPositionEvaluator positionEvaluator;
 
     CrystalTargetPlanner(Player bot, CrystalManager crystalManager, CrystalPositionEvaluator positionEvaluator) {
         this.bot = Objects.requireNonNull(bot, "bot");
-        this.level = bot.level();
+        this.world = bot.getWorld();
         this.crystalManager = Objects.requireNonNull(crystalManager, "crystalManager");
         this.positionEvaluator = Objects.requireNonNull(positionEvaluator, "positionEvaluator");
     }
 
-    List<EndCrystal> collectAttackCandidates(Player target, Set<EndCrystal> botCrystals, CPVPConfig config) {
-        Set<EndCrystal> unique = new LinkedHashSet<>();
-        botCrystals.stream().filter(EndCrystal::isAlive).forEach(unique::add);
-        crystalManager.findNearbyCrystals(bot, level, config.getCrystalAttackRange()).stream()
-                .filter(EndCrystal::isAlive)
+    List<EnderCrystal> collectAttackCandidates(Player target, Set<EnderCrystal> botCrystals, CPVPConfig config) {
+        Set<EnderCrystal> unique = new LinkedHashSet<>();
+        botCrystals.stream().filter(crystal -> !crystal.isDead() && crystal.isValid()).forEach(unique::add);
+        crystalManager.findNearbyCrystals(bot, world, config.getCrystalAttackRange()).stream()
+                .filter(crystal -> !crystal.isDead() && crystal.isValid())
                 .forEach(unique::add);
 
-        List<EndCrystal> candidates = new ArrayList<>(unique);
+        List<EnderCrystal> candidates = new ArrayList<>(unique);
         candidates.sort((first, second) ->
                 Double.compare(score(second, target, botCrystals, config), score(first, target, botCrystals, config)));
         return candidates;
@@ -44,13 +44,13 @@ final class CrystalTargetPlanner {
 
     boolean shouldForceObsidianPlacement(
             Player target,
-            Map<BlockPos, Long> obsidianCache,
-            Map<BlockPos, Integer> crystalCounts,
-            Map<BlockPos, Long> recentUsage,
+            Map<BlockVector, Long> obsidianCache,
+            Map<BlockVector, Integer> crystalCounts,
+            Map<BlockVector, Long> recentUsage,
             CPVPConfig config,
             CrystalCombatPolicy policy) {
-        List<BlockPos> positions = crystalManager.getValidCrystalPositions(
-                obsidianCache, target, bot, level, config.getMaxCrystalDistance());
+        List<BlockVector> positions = crystalManager.getValidCrystalPositions(
+                obsidianCache, target, bot, world, config.getMaxCrystalDistance());
         if (positions.isEmpty()) {
             return true;
         }
@@ -58,7 +58,7 @@ final class CrystalTargetPlanner {
         long now = System.currentTimeMillis();
         double threshold = config.getMinCrystalScore() + policy.strongScoreOffset();
         int strongPositions = 0;
-        for (BlockPos position : positions) {
+        for (BlockVector position : positions) {
             if (isCoolingDown(position, recentUsage, policy, now)) {
                 continue;
             }
@@ -71,21 +71,21 @@ final class CrystalTargetPlanner {
         return true;
     }
 
-    void pruneObsidianCache(Player target, Map<BlockPos, Long> obsidianCache, CrystalCombatPolicy policy) {
+    void pruneObsidianCache(Player target, Map<BlockVector, Long> obsidianCache, CrystalCombatPolicy policy) {
         long now = System.currentTimeMillis();
         obsidianCache
                 .entrySet()
                 .removeIf(entry ->
-                        target.position().distanceTo(Vec3.atCenterOf(entry.getKey())) > policy.maxUsefulTargetDistance()
+                        target.getLocation().distance(entry.getKey().toLocation(world)) > policy.maxUsefulTargetDistance()
                                 && now - entry.getValue() > 500L);
     }
 
-    boolean isCoolingDown(BlockPos position, Map<BlockPos, Long> recentUsage, CrystalCombatPolicy policy, long now) {
+    boolean isCoolingDown(BlockVector position, Map<BlockVector, Long> recentUsage, CrystalCombatPolicy policy, long now) {
         Long lastUsed = recentUsage.get(position);
         return lastUsed != null && now - lastUsed < policy.positionReuseDelayMs();
     }
 
-    private double score(EndCrystal crystal, Player target, Set<EndCrystal> botCrystals, CPVPConfig config) {
+    private double score(EnderCrystal crystal, Player target, Set<EnderCrystal> botCrystals, CPVPConfig config) {
         return positionEvaluator.evaluateCrystalForAttack(
                 crystal,
                 target,

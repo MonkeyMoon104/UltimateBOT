@@ -26,7 +26,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public UUID getUniqueId() {
-        return bot.asPlayer().getUUID();
+        return bot.getUniqueId();
     }
 
     @Override
@@ -67,7 +67,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public String getName() {
-        return bot.asPlayer().getName().getString();
+        return bot.asBukkitPlayer().getName();
     }
 
     @Override
@@ -192,7 +192,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public PersistentDataContainerView getPersistentDataContainer() {
-        return bot.asPlayer().getBukkitEntity().getPersistentDataContainer();
+        return bot.asBukkitPlayer().getPersistentDataContainer();
     }
 
     @Override

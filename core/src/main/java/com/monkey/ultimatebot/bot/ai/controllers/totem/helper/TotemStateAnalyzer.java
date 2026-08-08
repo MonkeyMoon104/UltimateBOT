@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStateAnalyzer;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public class TotemStateAnalyzer implements ITotemStateAnalyzer {
     private final ITotemInventoryManager inventoryManager;

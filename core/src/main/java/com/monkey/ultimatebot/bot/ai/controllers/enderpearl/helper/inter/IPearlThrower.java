@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 public interface IPearlThrower {
 
-    void throwEnderpearl(Player bot, Vec3 targetPos);
+    void throwEnderpearl(Player bot, Vector targetPos);
 }

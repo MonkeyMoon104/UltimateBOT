@@ -1,14 +1,16 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class BotNoobMovementController {
 
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
+    private final World world;
 
     private double @Nullable [] diversionDirection;
     private int diversionTicks = 0;
@@ -16,18 +18,19 @@ public class BotNoobMovementController {
     private double movementSpeed = 0.25;
     private double jumpVelocity = 0.42;
 
-    public BotNoobMovementController(Player bot, Level level) {
+    public BotNoobMovementController(ITrainingBot bot) {
         this.bot = bot;
-        this.level = level;
+        this.world = bot.getWorld();
     }
 
-    public void moveTowards(Player target, double targetDistance) {
+    public void moveTowards(LivingEntity target, double targetDistance) {
         double targetX = target.getX();
         double targetZ = target.getZ();
 
-        double botX = bot.getX();
-        double botY = bot.getY();
-        double botZ = bot.getZ();
+        Vector botPos = bot.bukkitPosition();
+        double botX = botPos.getX();
+        double botY = botPos.getY();
+        double botZ = botPos.getZ();
 
         double dx = targetX - botX;
         double dz = targetZ - botZ;
@@ -65,15 +68,16 @@ public class BotNoobMovementController {
             return;
         }
 
-        bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
+        setVelocity(moveX, bot.bukkitVelocity().getY(), moveZ);
     }
 
-    public void moveAwayFrom(Player target, double targetDistance) {
+    public void moveAwayFrom(LivingEntity target, double targetDistance) {
         double targetX = target.getX();
         double targetZ = target.getZ();
 
-        double botX = bot.getX();
-        double botZ = bot.getZ();
+        Vector botPos = bot.bukkitPosition();
+        double botX = botPos.getX();
+        double botZ = botPos.getZ();
 
         double dx = botX - targetX;
         double dz = botZ - targetZ;
@@ -91,24 +95,24 @@ public class BotNoobMovementController {
         double moveX = dx * movementSpeed;
         double moveZ = dz * movementSpeed;
 
-        if (handleObstacles(dx, dz, botX, bot.getY(), botZ)) {
+        if (handleObstacles(dx, dz, botX, botPos.getY(), botZ)) {
             return;
         }
 
-        bot.setDeltaMovement(moveX, bot.getDeltaMovement().y, moveZ);
+        setVelocity(moveX, bot.bukkitVelocity().getY(), moveZ);
     }
 
     private boolean handleObstacles(double dx, double dz, double botX, double botY, double botZ) {
-        BlockPos front = BlockPos.containing(botX + dx, botY, botZ + dz);
-        BlockPos above = front.above();
-        BlockPos above2 = above.above();
+        BlockVector front = blockAt(botX + dx, botY, botZ + dz);
+        BlockVector above = above(front);
+        BlockVector above2 = above(above);
 
         boolean frontBlocked =
-                !level.getBlockState(front).getCollisionShape(level, front).isEmpty();
+                !world.getBlockAt(front.getBlockX(), front.getBlockY(), front.getBlockZ()).isPassable();
         boolean aboveClear =
-                level.getBlockState(above).getCollisionShape(level, above).isEmpty();
+                world.getBlockAt(above.getBlockX(), above.getBlockY(), above.getBlockZ()).isPassable();
         boolean above2Clear =
-                level.getBlockState(above2).getCollisionShape(level, above2).isEmpty();
+                world.getBlockAt(above2.getBlockX(), above2.getBlockY(), above2.getBlockZ()).isPassable();
 
         boolean canStepUp = frontBlocked && aboveClear;
         boolean tooHigh = frontBlocked && !aboveClear && !above2Clear;
@@ -118,8 +122,9 @@ public class BotNoobMovementController {
             return true;
         }
 
-        if (canStepUp && bot.onGround()) {
-            bot.setDeltaMovement(bot.getDeltaMovement().x, jumpVelocity, bot.getDeltaMovement().z);
+        if (canStepUp && bot.isOnGround()) {
+            Vector velocity = bot.bukkitVelocity();
+            setVelocity(velocity.getX(), jumpVelocity, velocity.getZ());
         }
 
         return false;
@@ -135,9 +140,9 @@ public class BotNoobMovementController {
             diversionTicks--;
             double altDx = diversionDirection[0];
             double altDz = diversionDirection[1];
-            bot.setDeltaMovement(altDx * movementSpeed, bot.getDeltaMovement().y, altDz * movementSpeed);
+            setVelocity(altDx * movementSpeed, bot.bukkitVelocity().getY(), altDz * movementSpeed);
         } else {
-            bot.setDeltaMovement(0, bot.getDeltaMovement().y, 0);
+            setVelocity(0, bot.bukkitVelocity().getY(), 0);
         }
 
         if (diversionTicks <= 0) {
@@ -167,18 +172,17 @@ public class BotNoobMovementController {
     }
 
     private boolean isPathClear(double dx, double dz) {
-        BlockPos checkPos = BlockPos.containing(bot.getX() + dx, bot.getY(), bot.getZ() + dz);
-        BlockPos checkAbove = checkPos.above();
-        BlockPos checkAbove2 = checkAbove.above();
+        Vector botPos = bot.bukkitPosition();
+        BlockVector checkPos = blockAt(botPos.getX() + dx, botPos.getY(), botPos.getZ() + dz);
+        BlockVector checkAbove = above(checkPos);
+        BlockVector checkAbove2 = above(checkAbove);
 
         boolean frontClear =
-                level.getBlockState(checkPos).getCollisionShape(level, checkPos).isEmpty();
-        boolean aboveClear = level.getBlockState(checkAbove)
-                .getCollisionShape(level, checkAbove)
-                .isEmpty();
-        boolean above2Clear = level.getBlockState(checkAbove2)
-                .getCollisionShape(level, checkAbove2)
-                .isEmpty();
+                world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY(), checkPos.getBlockZ()).isPassable();
+        boolean aboveClear =
+                world.getBlockAt(checkAbove.getBlockX(), checkAbove.getBlockY(), checkAbove.getBlockZ()).isPassable();
+        boolean above2Clear = world.getBlockAt(checkAbove2.getBlockX(), checkAbove2.getBlockY(), checkAbove2.getBlockZ())
+                .isPassable();
 
         return frontClear && aboveClear && above2Clear;
     }
@@ -192,12 +196,24 @@ public class BotNoobMovementController {
     }
 
     public void stopMovement() {
-        bot.setDeltaMovement(0, bot.getDeltaMovement().y, 0);
+        setVelocity(0, bot.bukkitVelocity().getY(), 0);
         diversionDirection = null;
         diversionTicks = 0;
     }
 
     public boolean isDiverting() {
         return diversionTicks > 0 && diversionDirection != null;
+    }
+
+    private void setVelocity(double x, double y, double z) {
+        bot.setBukkitVelocity(new Vector(x, y, z));
+    }
+
+    private static BlockVector blockAt(double x, double y, double z) {
+        return new BlockVector((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
+    }
+
+    private static BlockVector above(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY() + 1, position.getBlockZ());
     }
 }

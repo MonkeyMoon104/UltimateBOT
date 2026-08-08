@@ -1,23 +1,15 @@
 package com.monkey.ultimatebot.bot;
 
-import com.mojang.datafixers.util.Pair;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 /** Enforces fixed item and fixed-empty equipment settings after bot AI actions. */
 public final class BotEquipmentPolicy {
@@ -26,7 +18,7 @@ public final class BotEquipmentPolicy {
     public static boolean enforce(ITrainingBot bot, BotOptions options) {
         Objects.requireNonNull(bot, "bot");
         Objects.requireNonNull(options, "options");
-        List<Pair<EquipmentSlot, ItemStack>> changes = new ArrayList<>();
+        Map<EquipmentSlot, ItemStack> changes = new EnumMap<>(EquipmentSlot.class);
 
         for (Map.Entry<BotEquipmentSlot, BotEquipmentSlotSetting> entry :
                 options.getEquipmentSlotSettings().entrySet()) {
@@ -35,17 +27,17 @@ public final class BotEquipmentPolicy {
                 continue;
             }
 
-            EquipmentSlot nmsSlot = toNmsSlot(entry.getKey());
+            EquipmentSlot bukkitSlot = toBukkitSlot(entry.getKey());
             ItemStack desired = setting.mode() == BotEquipmentSlotMode.EMPTY
-                    ? ItemStack.EMPTY
-                    : CraftItemStack.asNMSCopy(Objects.requireNonNull(setting.item(), "item"));
-            ItemStack current = bot.asPlayer().getItemBySlot(nmsSlot);
-            if (ItemStack.matches(current, desired)) {
+                    ? ItemStack.empty()
+                    : Objects.requireNonNull(setting.item(), "item").clone();
+            ItemStack current = bot.getItem(bukkitSlot);
+            if (current != null && current.isSimilar(desired) && current.getAmount() == desired.getAmount()) {
                 continue;
             }
 
-            bot.asPlayer().setItemSlot(nmsSlot, desired.copy());
-            changes.add(Pair.of(nmsSlot, desired.copy()));
+            bot.setItem(bukkitSlot, desired.clone());
+            changes.put(bukkitSlot, desired.clone());
         }
 
         broadcast(bot, changes);
@@ -63,59 +55,38 @@ public final class BotEquipmentPolicy {
             }
             case OFF_HAND -> bot.getBotAI().manageTotem();
             case HEAD, CHEST, LEGS, FEET -> {
-                org.bukkit.inventory.EquipmentSlot bukkitSlot = toBukkitSlot(slot);
-                org.bukkit.inventory.ItemStack configured = options.getArmor().get(bukkitSlot);
+                EquipmentSlot bukkitSlot = toBukkitSlot(slot);
+                ItemStack configured = options.getArmor().get(bukkitSlot);
                 ItemStack restored;
                 if (configured == null) {
-                    restored = ItemStack.EMPTY;
+                    restored = ItemStack.empty();
                 } else {
-                    org.bukkit.inventory.ItemStack item = configured.clone();
+                    ItemStack item = configured.clone();
                     com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils.applyArmorEnchants(
                             item, options.getBlast().getOrDefault(bukkitSlot, false));
-                    restored = CraftItemStack.asNMSCopy(item);
+                    restored = item;
                 }
-                EquipmentSlot nmsSlot = toNmsSlot(slot);
-                bot.asPlayer().setItemSlot(nmsSlot, restored.copy());
-                broadcast(bot, List.of(Pair.of(nmsSlot, restored.copy())));
+                bot.setItem(bukkitSlot, restored.clone());
+                broadcast(bot, Map.of(bukkitSlot, restored.clone()));
             }
         }
     }
 
-    private static void broadcast(ITrainingBot bot, List<Pair<EquipmentSlot, ItemStack>> changes) {
+    private static void broadcast(ITrainingBot bot, Map<EquipmentSlot, ItemStack> changes) {
         if (changes.isEmpty()) {
             return;
         }
-        ClientboundSetEquipmentPacket packet =
-                NMSBridgeManager.get().createEquipmentPacket(bot.asPlayer().getId(), changes);
-        org.bukkit.World botWorld = bot.asPlayer().getBukkitEntity().getWorld();
-        for (Player viewer : Bukkit.getOnlinePlayers()) {
-            if (!viewer.getWorld().getUID().equals(botWorld.getUID())) {
-                continue;
-            }
-            ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
-            handle.connection.send(packet);
-        }
+        NMSBridgeManager.get().broadcastEquipment(bot, changes);
     }
 
-    private static EquipmentSlot toNmsSlot(BotEquipmentSlot slot) {
+    private static EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
         return switch (slot) {
-            case MAIN_HAND -> EquipmentSlot.MAINHAND;
-            case OFF_HAND -> EquipmentSlot.OFFHAND;
+            case MAIN_HAND -> EquipmentSlot.HAND;
+            case OFF_HAND -> EquipmentSlot.OFF_HAND;
             case HEAD -> EquipmentSlot.HEAD;
             case CHEST -> EquipmentSlot.CHEST;
             case LEGS -> EquipmentSlot.LEGS;
             case FEET -> EquipmentSlot.FEET;
-        };
-    }
-
-    private static org.bukkit.inventory.EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
-        return switch (slot) {
-            case MAIN_HAND -> org.bukkit.inventory.EquipmentSlot.HAND;
-            case OFF_HAND -> org.bukkit.inventory.EquipmentSlot.OFF_HAND;
-            case HEAD -> org.bukkit.inventory.EquipmentSlot.HEAD;
-            case CHEST -> org.bukkit.inventory.EquipmentSlot.CHEST;
-            case LEGS -> org.bukkit.inventory.EquipmentSlot.LEGS;
-            case FEET -> org.bukkit.inventory.EquipmentSlot.FEET;
         };
     }
 }

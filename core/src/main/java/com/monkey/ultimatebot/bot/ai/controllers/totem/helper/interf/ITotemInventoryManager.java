@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf;
 
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public interface ITotemInventoryManager {
     boolean hasTotemInSlot(ItemStack itemStack);

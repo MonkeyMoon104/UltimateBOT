@@ -1,55 +1,28 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
-import com.mojang.datafixers.util.Pair;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import java.util.EnumMap;
+import java.util.Map;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class EquipmentBroadcaster implements IEquipmentBroadcaster {
 
     @Override
-    public void broadcastEquipmentChange(Player bot) {
-        List<Pair<EquipmentSlot, ItemStack>> equipmentList = new ArrayList<>();
-        equipmentList.add(Pair.of(
-                EquipmentSlot.MAINHAND,
-                bot.getItemBySlot(EquipmentSlot.MAINHAND).copy()));
-        equipmentList.add(Pair.of(
-                EquipmentSlot.OFFHAND, bot.getItemBySlot(EquipmentSlot.OFFHAND).copy()));
-        equipmentList.add(Pair.of(
-                EquipmentSlot.HEAD, bot.getItemBySlot(EquipmentSlot.HEAD).copy()));
-        equipmentList.add(Pair.of(
-                EquipmentSlot.CHEST, bot.getItemBySlot(EquipmentSlot.CHEST).copy()));
-        equipmentList.add(Pair.of(
-                EquipmentSlot.LEGS, bot.getItemBySlot(EquipmentSlot.LEGS).copy()));
-        equipmentList.add(Pair.of(
-                EquipmentSlot.FEET, bot.getItemBySlot(EquipmentSlot.FEET).copy()));
-
-        ClientboundSetEquipmentPacket packet = NMSBridgeManager.get().createEquipmentPacket(bot.getId(), equipmentList);
-
-        for (org.bukkit.entity.Player online : bot.getBukkitEntity().getWorld().getPlayers()) {
-            ServerPlayer handle = ((CraftPlayer) online).getHandle();
-            handle.connection.send(packet);
-        }
+    public void broadcastEquipmentChange(ITrainingBot bot) {
+        Map<EquipmentSlot, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(EquipmentSlot.class);
+        equipment.put(EquipmentSlot.HAND, bot.getItem(EquipmentSlot.HAND));
+        equipment.put(EquipmentSlot.OFF_HAND, bot.getItem(EquipmentSlot.OFF_HAND));
+        equipment.put(EquipmentSlot.HEAD, bot.getItem(EquipmentSlot.HEAD));
+        equipment.put(EquipmentSlot.CHEST, bot.getItem(EquipmentSlot.CHEST));
+        equipment.put(EquipmentSlot.LEGS, bot.getItem(EquipmentSlot.LEGS));
+        equipment.put(EquipmentSlot.FEET, bot.getItem(EquipmentSlot.FEET));
+        NMSBridgeManager.get().broadcastEquipment(bot, equipment);
     }
 
     @Override
-    public void broadcastMetadataChange(Player bot) {
-        List<SynchedEntityData.DataValue<?>> metadata = bot.getEntityData().packDirty();
-        if (metadata == null || metadata.isEmpty()) {
-            return;
-        }
-        ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(bot.getId(), metadata);
-        for (org.bukkit.entity.Player online : bot.getBukkitEntity().getWorld().getPlayers()) {
-            ((CraftPlayer) online).getHandle().connection.send(packet);
-        }
+    public void broadcastMetadataChange(ITrainingBot bot) {
+        NMSBridgeManager.get().broadcastMetadata(bot);
     }
 }

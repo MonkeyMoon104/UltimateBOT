@@ -5,48 +5,32 @@ import com.monkey.ultimatebot.api.event.combat.BotExplosionType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.BotExplosionContext;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.EnderCrystal;
 
 public class CrystalAttacker {
-    private final Player bot;
-    private Vec3 cachedBotPosition;
-    private boolean positionUpdatedThisTick = false;
+    private final ITrainingBot bot;
 
-    public CrystalAttacker(Player bot) {
+    public CrystalAttacker(ITrainingBot bot) {
         this.bot = bot;
-        this.cachedBotPosition = bot.position();
     }
 
-    public void updateBotPosition() {
-        cachedBotPosition = bot.position();
-        positionUpdatedThisTick = true;
-    }
+    public void updateBotPosition() {}
 
-    public boolean attackCrystal(EndCrystal crystal) {
-        if (crystal == null || !crystal.isAlive()) return false;
-
-        if (!positionUpdatedThisTick) {
-            cachedBotPosition = bot.position();
-        }
-        positionUpdatedThisTick = false;
-
+    public boolean attackCrystal(EnderCrystal crystal) {
+        if (crystal == null || crystal.isDead() || !crystal.isValid()) return false;
         if (!bot.hasLineOfSight(crystal)) {
             return false;
         }
 
         try {
-            ITrainingBot trainingBot = bot instanceof ITrainingBot value ? value : null;
             return BotExplosionContext.execute(
-                    trainingBot,
+                    bot,
                     BotExplosionType.END_CRYSTAL,
-                    crystal.getBukkitEntity().getLocation(),
+                    crystal.getLocation(),
                     shouldDamageBlocks(),
                     ignored -> {
-                        bot.attack(crystal);
-                        bot.swing(InteractionHand.MAIN_HAND);
+                        bot.attackEntity(crystal);
+                        bot.swingMainHand();
                         return true;
                     },
                     false);
@@ -58,26 +42,14 @@ public class CrystalAttacker {
     }
 
     private boolean shouldDamageBlocks() {
-        if (!(bot instanceof ITrainingBot trainingBot) || trainingBot.getBrainController() == null) {
-            return false;
-        }
-        return trainingBot.getBrainController().getBotOptions().canExplosionDamageBlocks();
+        return bot.getBrainController() != null
+                && bot.getBrainController().getBotOptions().canExplosionDamageBlocks();
     }
 
-    public boolean canAttackCrystal(EndCrystal crystal, double crystalAttackRange) {
-        if (crystal == null || !crystal.isAlive()) return false;
-
-        Vec3 botPos = getCachedBotPosition();
-        double distanceSquared = botPos.distanceToSqr(crystal.position());
+    public boolean canAttackCrystal(EnderCrystal crystal, double crystalAttackRange) {
+        if (crystal == null || crystal.isDead() || !crystal.isValid()) return false;
+        double distanceSquared = bot.getLocation().distanceSquared(crystal.getLocation());
         double rangeSquared = crystalAttackRange * crystalAttackRange;
-
         return distanceSquared <= rangeSquared && bot.hasLineOfSight(crystal);
-    }
-
-    private Vec3 getCachedBotPosition() {
-        if (cachedBotPosition == null) {
-            cachedBotPosition = bot.position();
-        }
-        return cachedBotPosition;
     }
 }

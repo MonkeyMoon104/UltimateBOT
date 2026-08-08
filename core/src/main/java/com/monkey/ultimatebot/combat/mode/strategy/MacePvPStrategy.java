@@ -6,8 +6,8 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 
 public final class MacePvPStrategy extends AbstractCombatModeStrategy {
     private static final int WIND_CHARGE_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -19,10 +19,10 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.MACE,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.MACE)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Items.WIND_CHARGE, 64)
-                        .slot(BotInventoryController.OBSIDIAN_SLOT, Items.COBWEB, 64)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.MACE)
+                        .slot(BotInventoryController.ENDERPEARL_SLOT, Material.WIND_CHARGE, 64)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, Material.COBWEB, 64)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .build());
     }
 
@@ -55,7 +55,7 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
             }
             return;
         }
-        if (!context.motion().hasVerticalClearance(context.bot(), 6)) {
+        if (!context.motion().hasVerticalClearance(context.bukkitBot(), 6)) {
             context.motion().strafe(target, 2.2D);
             return;
         }
@@ -63,7 +63,7 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
             context.motion().approach(target, 3.4D);
             return;
         }
-        if (!ModeCombatPolicy.canLaunchMace(horizontalDistance, context.bot().onGround(), specialActionReady())) {
+        if (!ModeCombatPolicy.canLaunchMace(horizontalDistance, context.motion().isBotOnGround(), specialActionReady())) {
             context.motion().strafe(target, 0.9D);
             return;
         }
@@ -79,21 +79,21 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void ascendAboveTarget(CombatModeContext context, LivingEntity target) {
-        if (!context.motion().hasVerticalClearance(context.bot(), 2)) {
+        if (!context.motion().hasVerticalClearance(context.bukkitBot(), 2)) {
             transitionTo(Phase.RECOVER);
             return;
         }
-        double verticalVelocity = context.bot().getDeltaMovement().y;
+        double verticalVelocity = context.motion().botVerticalVelocity();
         context.motion().steerVelocityTowards(target, 0.22D, verticalVelocity);
         if (context.motion().heightAbove(target) >= 3.0D && verticalVelocity <= 0.12D) {
             transitionTo(Phase.ALIGN);
-        } else if (phaseTicks > 22 || context.bot().onGround()) {
+        } else if (phaseTicks > 22 || context.motion().isBotOnGround()) {
             transitionTo(Phase.RECOVER);
         }
     }
 
     private void alignForDive(CombatModeContext context, LivingEntity target) {
-        double verticalVelocity = Math.min(context.bot().getDeltaMovement().y, -0.12D);
+        double verticalVelocity = Math.min(context.motion().botVerticalVelocity(), -0.12D);
         context.motion()
                 .steerVelocityTowards(
                         target, context.motion().horizontalDistanceTo(target) > 1.0D ? 0.28D : 0.08D, verticalVelocity);
@@ -104,7 +104,7 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
 
     private void diveAndStrike(CombatModeContext context, LivingEntity target) {
         context.motion()
-                .steerVelocityTowards(target, 0.34D, Math.min(context.bot().getDeltaMovement().y - 0.04D, -0.36D));
+                .steerVelocityTowards(target, 0.34D, Math.min(context.motion().botVerticalVelocity() - 0.04D, -0.36D));
         boolean strikeWindow = context.motion().heightAbove(target) <= 2.8D
                 && context.motion().heightAbove(target) >= -0.2D
                 && context.motion().horizontalDistanceTo(target) <= 1.75D;
@@ -112,7 +112,7 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
             context.bukkitBot().setFallDistance(Math.max(context.bukkitBot().getFallDistance(), 6.0F));
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
             transitionTo(Phase.RECOVER);
-        } else if (context.bot().onGround() || phaseTicks > 18) {
+        } else if (context.motion().isBotOnGround() || phaseTicks > 18) {
             transitionTo(Phase.RECOVER);
         }
     }

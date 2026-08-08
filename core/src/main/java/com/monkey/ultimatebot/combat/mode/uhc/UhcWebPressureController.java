@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.combat.mode.uhc;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
-import net.minecraft.world.entity.LivingEntity;
+import org.bukkit.entity.LivingEntity;
 
 final class UhcWebPressureController {
     void tick(CombatModeContext context, LivingEntity target) {

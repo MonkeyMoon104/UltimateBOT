@@ -22,9 +22,9 @@ public class HealthPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
-            double health = bot.asPlayer().getBukkitEntity().getHealth();
-            double maxHealth = bot.asPlayer().getBukkitEntity().getMaxHealth();
+        if (bot != null && bot.asBukkitPlayer() != null) {
+            double health = bot.healthValue();
+            double maxHealth = bot.maxHealthValue();
             return String.format("♥ %.1f/%.1f", health, maxHealth);
         }
         return "♥ 0.0/20.0";

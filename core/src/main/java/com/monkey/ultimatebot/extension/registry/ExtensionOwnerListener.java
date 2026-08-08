@@ -21,7 +21,8 @@ public final class ExtensionOwnerListener implements Listener {
     public void onPluginDisable(PluginDisableEvent event) {
         registry.unregisterOwner(event.getPlugin().getName());
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
-            if (!(bot.asPlayer().getBukkitEntity() instanceof Player player)) {
+            Player player = bot.asBukkitPlayer();
+            if (player == null) {
                 continue;
             }
             plugin.getWrapperManager().active().runEntity(player, bot.getBotAI()::refreshExtensions);

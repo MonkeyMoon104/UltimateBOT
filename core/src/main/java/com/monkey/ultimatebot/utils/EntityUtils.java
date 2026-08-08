@@ -1,49 +1,31 @@
 package com.monkey.ultimatebot.utils;
 
-import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import java.util.List;
 import java.util.UUID;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 public class EntityUtils {
-    public static @Nullable Entity findBotByUUID(ServerLevel world, UUID botUUID) {
-        List<? extends Entity> entities =
-                world.getEntities(EntityTypeTest.forClass(Entity.class), entity -> entity.getUUID()
-                        .equals(botUUID));
-
-        return entities.isEmpty() ? null : entities.getFirst();
+    public static @Nullable Entity findBotByUUID(@Nullable World world, UUID botUUID) {
+        if (world == null || botUUID == null) {
+            return null;
+        }
+        Entity entity = Bukkit.getEntity(botUUID);
+        return entity != null && entity.getWorld().getUID().equals(world.getUID()) ? entity : null;
     }
 
-    public static @Nullable LivingEntity findBotAsLivingEntity(ServerLevel world, UUID botUUID) {
+    public static @Nullable LivingEntity findBotAsLivingEntity(@Nullable World world, UUID botUUID) {
         Entity entity = findBotByUUID(world, botUUID);
         return entity instanceof LivingEntity livingEntity ? livingEntity : null;
     }
 
-    public static @Nullable ServerLevel getPlayerWorld(UUID playerUUID) {
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            if (online.getUniqueId().equals(playerUUID)) {
-                ServerPlayer handle = ((CraftPlayer) online).getHandle();
-                return NMSBridgeManager.get().getServerLevel(handle);
-            }
-        }
-        return null;
-    }
-
-    public static boolean removeEntity(@Nullable ServerLevel world, UUID entityUUID) {
+    public static boolean removeEntity(@Nullable World world, UUID entityUUID) {
         if (world != null) {
             Entity entity = findBotByUUID(world, entityUUID);
             if (entity != null) {
-                entity.remove(Entity.RemovalReason.DISCARDED);
+                entity.remove();
                 return true;
             }
         }
@@ -51,13 +33,10 @@ public class EntityUtils {
     }
 
     public static boolean removeEntityInLoadedWorlds(UUID entityUUID) {
-        for (World loadedWorld : Bukkit.getWorlds()) {
-            ServerLevel handle = ((CraftWorld) loadedWorld).getHandle();
-            Entity entity = findBotByUUID(handle, entityUUID);
-            if (entity != null) {
-                entity.remove(Entity.RemovalReason.DISCARDED);
-                return true;
-            }
+        Entity entity = Bukkit.getEntity(entityUUID);
+        if (entity != null) {
+            entity.remove();
+            return true;
         }
         return false;
     }

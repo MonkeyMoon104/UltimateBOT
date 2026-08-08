@@ -1,17 +1,17 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.*;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.*;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding.PatheticPathfinder;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding.UltimateBotTraversalEnvironment;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class BotMovementController {
-    private final Player bot;
+    private final ITrainingBot bot;
 
     private final BlockStateValidator blockValidator;
     private final IPathfinder pathfinder;
@@ -23,11 +23,11 @@ public class BotMovementController {
     private long lastMovementTime = 0;
     private static final long MAX_MOVEMENT_STALL_TIME = 1000;
 
-    public BotMovementController(Player bot, Level level, RuntimeSettings.CacheSettings blockCacheSettings) {
+    public BotMovementController(ITrainingBot bot, RuntimeSettings.CacheSettings blockCacheSettings) {
         this.bot = bot;
 
-        this.blockValidator = new BlockStateValidator(level, blockCacheSettings);
-        this.obstacleHandler = new ObstacleHandler(bot, level, blockValidator, 0.25, 0.42);
+        this.blockValidator = new BlockStateValidator(bot.getWorld(), blockCacheSettings);
+        this.obstacleHandler = new ObstacleHandler(bot, blockValidator, 0.25, 0.42);
         this.movementExecutor = new MovementExecutor(bot, blockValidator, obstacleHandler);
         this.pathfinder = new PatheticPathfinder(bot, new UltimateBotTraversalEnvironment(blockValidator));
         this.patternSelector = new MovementPatternSelector(obstacleHandler);
@@ -38,7 +38,7 @@ public class BotMovementController {
         blockValidator.reconfigure(settings);
     }
 
-    public void moveTowards(Player target, double targetDistance) {
+    public void moveTowards(LivingEntity target, double targetDistance) {
         if (isStuckInPlace()) {
             forceUnstick(target);
             return;
@@ -48,8 +48,8 @@ public class BotMovementController {
         MovementPattern selectedPattern = patternSelector.selectOptimalPattern(
                 target,
                 targetDistance,
-                bot.position(),
-                target.position(),
+                bot.bukkitPosition(),
+                target.getLocation().toVector(),
                 combatStateManager.isUnderFire(),
                 combatStateManager.getConsecutiveHits());
 
@@ -57,7 +57,7 @@ public class BotMovementController {
         lastMovementTime = System.currentTimeMillis();
     }
 
-    public void moveToTarget(Player target, double targetDistance) {
+    public void moveToTarget(LivingEntity target, double targetDistance) {
         double currentDistance = bot.distanceTo(target);
         if (Math.abs(currentDistance - targetDistance) <= 0.3) {
             if (patternSelector.getCurrentPattern() != MovementPattern.STRAFE_CIRCLE) {
@@ -71,7 +71,7 @@ public class BotMovementController {
         }
     }
 
-    public void moveAwayFrom(Player target, double targetDistance) {
+    public void moveAwayFrom(LivingEntity target, double targetDistance) {
         combatStateManager.updateCombatData(target);
         if (patternSelector.getCurrentPattern() != MovementPattern.RETREAT_SPIRAL
                 && patternSelector.getCurrentPattern() != MovementPattern.EVASIVE_ZIG_ZAG) {
@@ -80,7 +80,7 @@ public class BotMovementController {
         executeRetreatMovement(target, targetDistance);
     }
 
-    public void maintainDistance(Player target, double targetDistance) {
+    public void maintainDistance(LivingEntity target, double targetDistance) {
         if (isStuckInPlace()) {
             forceUnstick(target);
             return;
@@ -100,13 +100,13 @@ public class BotMovementController {
         lastMovementTime = System.currentTimeMillis();
     }
 
-    public boolean calculatePathTo(Vec3 targetPos) {
+    public boolean calculatePathTo(Vector targetPos) {
         return pathfinder.calculatePathTo(targetPos);
     }
 
     public boolean followPath() {
         if (pathfinder.followPath()) {
-            Vec3 currentPoint = pathfinder.getCurrentPathPoint();
+            Vector currentPoint = pathfinder.getCurrentPathPoint();
             if (currentPoint != null) {
                 movementExecutor.moveAlongPath(currentPoint);
             }
@@ -129,19 +129,19 @@ public class BotMovementController {
         return pathfinder.shouldRecalculatePath();
     }
 
-    public boolean shouldRecalculatePath(Vec3 targetPos) {
+    public boolean shouldRecalculatePath(Vector targetPos) {
         return pathfinder.shouldRecalculatePath(targetPos);
     }
 
-    public boolean isPathObstructed(Vec3 targetPos) {
+    public boolean isPathObstructed(Vector targetPos) {
         return pathfinder.isPathObstructed(targetPos);
     }
 
-    public @Nullable Vec3 getCurrentPathPoint() {
+    public @Nullable Vector getCurrentPathPoint() {
         return pathfinder.getCurrentPathPoint();
     }
 
-    public void moveToPosition(Vec3 targetPos) {
+    public void moveToPosition(Vector targetPos) {
         movementExecutor.moveToPosition(targetPos);
     }
 
@@ -174,7 +174,7 @@ public class BotMovementController {
             pathfinder.clearPath();
         }
 
-        combatStateManager.setLastSafePosition(bot.position());
+        combatStateManager.setLastSafePosition(bot.bukkitPosition());
 
         ensureMovement();
         lastMovementTime = System.currentTimeMillis();
@@ -187,34 +187,34 @@ public class BotMovementController {
             return true;
         }
 
-        Vec3 velocity = bot.getDeltaMovement();
-        return velocity.lengthSqr() < 0.01;
+        Vector velocity = bot.bukkitVelocity();
+        return velocity.lengthSquared() < 0.01;
     }
 
-    public void forceUnstick(Player target) {
+    public void forceUnstick(@Nullable LivingEntity target) {
         resetCombatState();
         obstacleHandler.clearDiversion();
 
         setUnderFire(true);
         emergencyEvade();
-        if (bot.onGround()) {
-            Vec3 velocity = bot.getDeltaMovement();
-            bot.setDeltaMovement(velocity.x, Math.max(velocity.y, 0.36), velocity.z);
+        if (bot.isOnGround()) {
+            Vector velocity = bot.bukkitVelocity();
+            bot.setBukkitVelocity(new Vector(velocity.getX(), Math.max(velocity.getY(), 0.36), velocity.getZ()));
         }
 
         if (target != null) {
-            Vec3 botPos = bot.position();
-            Vec3 targetPos = target.position();
+            Vector botPos = bot.bukkitPosition();
+            Vector targetPos = target.getLocation().toVector();
 
-            Vec3 direction = targetPos.subtract(botPos).normalize();
-            Vec3 sideDirection = new Vec3(-direction.z, 0, direction.x);
+            Vector direction = targetPos.subtract(botPos).normalize();
+            Vector sideDirection = new Vector(-direction.getZ(), 0, direction.getX());
 
-            Vec3 unstuckPos = botPos.add(sideDirection.scale(3.0));
+            Vector unstuckPos = botPos.clone().add(sideDirection.multiply(3.0));
             moveToPosition(unstuckPos);
         } else {
             double randomX = (Math.random() - 0.5) * 4.0;
             double randomZ = (Math.random() - 0.5) * 4.0;
-            Vec3 randomPos = bot.position().add(randomX, 0, randomZ);
+            Vector randomPos = bot.bukkitPosition().add(new Vector(randomX, 0, randomZ));
             moveToPosition(randomPos);
         }
 
@@ -275,7 +275,7 @@ public class BotMovementController {
         return patternSelector.getCurrentPattern() == MovementPattern.RETREAT_SPIRAL;
     }
 
-    public Vec3 getTargetVelocity() {
+    public Vector getTargetVelocity() {
         return combatStateManager.getTargetVelocity();
     }
 
@@ -306,7 +306,7 @@ public class BotMovementController {
         blockValidator.forceCacheClean();
     }
 
-    private void executeMovementPattern(Player target, double targetDistance, MovementPattern pattern) {
+    private void executeMovementPattern(LivingEntity target, double targetDistance, MovementPattern pattern) {
         switch (pattern) {
             case DIRECT -> movementExecutor.executeDirectMovement(target, targetDistance);
             case STRAFE_CIRCLE -> movementExecutor.executeStrafeCircle(target, targetDistance);
@@ -318,7 +318,8 @@ public class BotMovementController {
         }
     }
 
-    private void executeRetreatMovement(Player target, double targetDistance) {
+    private void executeRetreatMovement(LivingEntity target, double targetDistance) {
         movementExecutor.executeRetreatSpiral(target, targetDistance);
     }
+
 }

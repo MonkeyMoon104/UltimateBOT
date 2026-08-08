@@ -7,9 +7,9 @@ import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.CombatBlockBreakSequence;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EquipmentSlot;
 
 public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     private static final int AXE_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -26,15 +26,15 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.UHC,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.DIAMOND_SWORD)
-                        .slot(AXE_SLOT, Items.DIAMOND_AXE)
-                        .slot(CROSSBOW_SLOT, Items.CROSSBOW)
-                        .slot(BotInventoryController.OBSIDIAN_SLOT, Items.WATER_BUCKET, 4)
-                        .slot(BotInventoryController.CRYSTAL_SLOT, Items.LAVA_BUCKET, 2)
-                        .slot(BotInventoryController.ANCHOR_SLOT, Items.COBWEB, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .slot(ARROW_SLOT, Items.ARROW, 64)
-                        .equipment(EquipmentSlot.OFFHAND, Items.SHIELD)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.DIAMOND_SWORD)
+                        .slot(AXE_SLOT, Material.DIAMOND_AXE)
+                        .slot(CROSSBOW_SLOT, Material.CROSSBOW)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, Material.WATER_BUCKET, 4)
+                        .slot(BotInventoryController.CRYSTAL_SLOT, Material.LAVA_BUCKET, 2)
+                        .slot(BotInventoryController.ANCHOR_SLOT, Material.COBWEB, 16)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
+                        .slot(ARROW_SLOT, Material.ARROW, 64)
+                        .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)
                         .build());
     }
 
@@ -173,7 +173,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private boolean breakRestrainingWeb(CombatModeContext context) {
-        java.util.List<org.bukkit.Location> occupiedWebs = CobwebCombatAwareness.occupiedWebs(context.bot());
+        java.util.List<org.bukkit.Location> occupiedWebs = CobwebCombatAwareness.occupiedWebs(context.bukkitBot());
         if (!occupiedWebs.isEmpty()) {
             return blockBreakSequence.tick(context, occupiedWebs.getFirst(), BotInventoryController.SWORD_SLOT);
         }

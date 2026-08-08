@@ -1,8 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.teleport.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleportStrategy;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class BesideTargetStrategy implements ITeleportStrategy {
@@ -14,9 +15,9 @@ public class BesideTargetStrategy implements ITeleportStrategy {
     }
 
     @Override
-    public @Nullable Vec3 findTeleportPosition(Player bot, @Nullable Player target) {
+    public @Nullable Vector findTeleportPosition(ITrainingBot bot, @Nullable Player target) {
         if (target == null) return null;
-        Vec3 pos = target.position();
-        return pos.add(offset, 0, 0);
+        Vector pos = java.util.Objects.requireNonNull(target.getLocation()).toVector();
+        return pos.add(new Vector(offset, 0, 0));
     }
 }

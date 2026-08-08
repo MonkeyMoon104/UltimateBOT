@@ -1,35 +1,33 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 
 public class CrystalPlacer {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotInventoryController inventoryController;
-    private final Level level;
 
-    public CrystalPlacer(Player bot, BotInventoryController inventoryController, Level level) {
+    public CrystalPlacer(ITrainingBot bot, BotInventoryController inventoryController) {
         this.bot = bot;
         this.inventoryController = inventoryController;
-        this.level = level;
     }
 
-    public boolean placeCrystal(BlockPos pos) {
-        if (!inventoryController.hasItem(Items.END_CRYSTAL)) return false;
-
+    public boolean placeCrystal(BlockVector pos) {
+        if (!inventoryController.hasItem(Material.END_CRYSTAL)) return false;
         if (!inventoryController.isHoldingCrystal()) {
             inventoryController.switchToCrystal();
             return false;
@@ -37,42 +35,38 @@ public class CrystalPlacer {
 
         try {
             ItemStack crystalStack = inventoryController.getCurrentItem();
-            if (!Items.END_CRYSTAL.equals(crystalStack.getItem())) return false;
+            if (crystalStack.getType() != Material.END_CRYSTAL) return false;
+            Location hit = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 1.0D, pos.getBlockZ() + 0.5D);
+            boolean consumed = NMSBridgeManager.get()
+                    .useItemOnBlock(bot.asBukkitPlayer(), crystalStack, blockAt(pos), BlockFace.UP, hit, EquipmentSlot.HAND);
 
-            BlockHitResult hitResult =
-                    new BlockHitResult(Vec3.atCenterOf(pos).add(0, 0.5, 0), Direction.UP, pos, false);
-
-            InteractionResult result =
-                    NMSBridgeManager.get().useItemOnBlock(bot, crystalStack, hitResult, InteractionHand.MAIN_HAND);
-
-            if (result.consumesAction()) {
-                bot.swing(InteractionHand.MAIN_HAND);
-
+            if (consumed) {
+                bot.swingMainHand();
                 inventoryController.onItemUsed(BotInventoryController.CRYSTAL_SLOT);
-
                 return true;
             }
         } catch (Exception e) {
             UltimateBotLogging.warn(
                     UltimateBot.getInstance().getLogger(), "Combat", "Crystal placement failed -> " + e.getMessage());
         }
-
         return false;
     }
 
-    public boolean hasLineOfSight(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
+    public boolean hasLineOfSight(BlockVector pos) {
+        Location eye = bot.asBukkitPlayer().getEyeLocation();
+        Location target = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+        Vector direction = target.toVector().subtract(eye.toVector());
+        double distance = direction.length();
+        if (distance < 1.0E-6D) return true;
+        RayTraceResult result = bot.getWorld().rayTraceBlocks(eye, direction.normalize(), distance, FluidCollisionMode.NEVER, true);
+        return result == null || result.getHitBlock() == null || blockEquals(result.getHitBlock(), pos);
+    }
 
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot);
+    private Block blockAt(BlockVector pos) {
+        return bot.getWorld().getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    }
 
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
-                || result.getBlockPos().equals(pos);
+    private static boolean blockEquals(Block block, BlockVector pos) {
+        return block.getX() == pos.getBlockX() && block.getY() == pos.getBlockY() && block.getZ() == pos.getBlockZ();
     }
 }

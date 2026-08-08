@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IEquipmentBroadcaster {
 
-    void broadcastEquipmentChange(Player bot);
+    void broadcastEquipmentChange(ITrainingBot bot);
 
-    void broadcastMetadataChange(Player bot);
+    void broadcastMetadataChange(ITrainingBot bot);
 }

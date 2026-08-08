@@ -1,24 +1,24 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.ICombatStateManager;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class CombatStateManager implements ICombatStateManager {
-    private @Nullable Vec3 lastTargetPosition;
-    private Vec3 targetVelocity = Vec3.ZERO;
+    private @Nullable Vector lastTargetPosition;
+    private Vector targetVelocity = new Vector();
     private boolean isUnderFire = false;
     private long lastDamageTime = 0;
     private int consecutiveHits = 0;
-    private @Nullable Vec3 lastSafePosition;
+    private @Nullable Vector lastSafePosition;
 
     @Override
-    public void updateCombatData(Player target) {
-        Vec3 currentTargetPos = target.position();
+    public void updateCombatData(LivingEntity target) {
+        Vector currentTargetPos = target.getLocation().toVector();
 
         if (lastTargetPosition != null) {
-            targetVelocity = currentTargetPos.subtract(lastTargetPosition);
+            targetVelocity = currentTargetPos.clone().subtract(lastTargetPosition);
         }
 
         long currentTime = System.currentTimeMillis();
@@ -66,15 +66,15 @@ public class CombatStateManager implements ICombatStateManager {
     }
 
     @Override
-    public Vec3 getTargetVelocity() {
+    public Vector getTargetVelocity() {
         return targetVelocity;
     }
 
-    public void setLastSafePosition(@Nullable Vec3 position) {
+    public void setLastSafePosition(@Nullable Vector position) {
         this.lastSafePosition = position;
     }
 
-    public @Nullable Vec3 getLastSafePosition() {
+    public @Nullable Vector getLastSafePosition() {
         return lastSafePosition;
     }
 }

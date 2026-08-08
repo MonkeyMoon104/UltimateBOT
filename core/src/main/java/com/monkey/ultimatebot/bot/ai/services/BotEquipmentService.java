@@ -2,11 +2,11 @@ package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class BotEquipmentService {
 
@@ -16,9 +16,9 @@ public class BotEquipmentService {
         this.bot = bot;
     }
 
-    public boolean handleDamage(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
+    public boolean handleDamage(float amount, EntityDamageEvent event) {
         try {
-            boolean result = NMSBridgeManager.get().actuallyHurt(bot.asPlayer(), level, source, amount, event);
+            boolean result = NMSBridgeManager.get().actuallyHurt(bot.asBukkitPlayer(), amount, event);
             if (result) applyArmorFix();
             return result;
         } catch (ClassCastException | NullPointerException e) {
@@ -33,13 +33,18 @@ public class BotEquipmentService {
     }
 
     private void applyArmorFix() {
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
-                ItemStack armorPiece = bot.asPlayer().getItemBySlot(slot);
-                if (armorPiece != null && !armorPiece.isEmpty() && armorPiece.isDamageableItem()) {
-                    armorPiece.setDamageValue(0);
-                    bot.asPlayer().setItemSlot(slot, armorPiece);
-                }
+        for (EquipmentSlot slot : new EquipmentSlot[] {
+            EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+        }) {
+            ItemStack armorPiece = bot.getItem(slot);
+            if (armorPiece == null || armorPiece.isEmpty()) {
+                continue;
+            }
+            ItemMeta meta = armorPiece.getItemMeta();
+            if (meta instanceof Damageable damageable && damageable.hasDamage()) {
+                damageable.setDamage(0);
+                armorPiece.setItemMeta(meta);
+                bot.setItem(slot, armorPiece);
             }
         }
     }

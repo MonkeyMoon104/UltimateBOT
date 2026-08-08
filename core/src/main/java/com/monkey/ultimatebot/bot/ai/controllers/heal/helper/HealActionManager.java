@@ -2,7 +2,9 @@ package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealActionManager;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 public class HealActionManager implements IHealActionManager {
 
@@ -22,7 +24,7 @@ public class HealActionManager implements IHealActionManager {
     }
 
     @Override
-    public void startHealAction(Player bot) {
+    public void startHealAction(ITrainingBot bot) {
         if (!canStartNewHeal()) return;
 
         healExecutor.consumeGoldenApple(bot);
@@ -33,7 +35,7 @@ public class HealActionManager implements IHealActionManager {
     }
 
     @Override
-    public void updateHealAction(Player bot) {
+    public void updateHealAction(ITrainingBot bot) {
         if (!isHealing) return;
 
         healingTicks++;
@@ -72,27 +74,12 @@ public class HealActionManager implements IHealActionManager {
     }
 
     @Override
-    public void applyGoldenAppleEffectsManually(Player bot) {
-        try {
-            net.minecraft.world.effect.MobEffectInstance regeneration =
-                    new net.minecraft.world.effect.MobEffectInstance(
-                            net.minecraft.world.effect.MobEffects.REGENERATION, 100, 1);
-
-            net.minecraft.world.effect.MobEffectInstance absorption = new net.minecraft.world.effect.MobEffectInstance(
-                    net.minecraft.world.effect.MobEffects.ABSORPTION, 2400, 0);
-
-            bot.addEffect(regeneration);
-            bot.addEffect(absorption);
-
-            float currentHealth = bot.getHealth();
-            float newHealth = Math.min(currentHealth + 4.0f, bot.getMaxHealth());
-            bot.setHealth(newHealth);
-
-        } catch (Exception e) {
-            float currentHealth = bot.getHealth();
-            float newHealth = Math.min(currentHealth + 4.0f, bot.getMaxHealth());
-            bot.setHealth(newHealth);
-        }
+    public void applyGoldenAppleEffectsManually(ITrainingBot bot) {
+        bot.asBukkitPlayer()
+                .addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1, false, false, false));
+        bot.asBukkitPlayer()
+                .addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 2400, 0, false, false, false));
+        bot.setHealthValue(Math.min(bot.healthValue() + 4.0D, bot.maxHealthValue()));
     }
 
     public boolean isInCooldown() {

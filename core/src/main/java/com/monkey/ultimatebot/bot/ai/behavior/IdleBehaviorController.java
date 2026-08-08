@@ -3,17 +3,16 @@ package com.monkey.ultimatebot.bot.ai.behavior;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import java.util.Objects;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public final class IdleBehaviorController {
@@ -21,8 +20,7 @@ public final class IdleBehaviorController {
     private static final long DESTINATION_RETRY_MS = 3500L;
     private static final double DESTINATION_REACHED_DISTANCE = 1.6D;
 
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
     private final BotOptions options;
     private final UltimateBot plugin;
     private final BotMovementController movementController;
@@ -31,16 +29,15 @@ public final class IdleBehaviorController {
 
     private long lastTargetSeenAt = System.currentTimeMillis();
     private long lastDestinationSelectionAt;
-    private @Nullable Vec3 destination;
+    private @Nullable Vector destination;
 
     public IdleBehaviorController(
-            Player bot,
+            ITrainingBot bot,
             BotOptions options,
             UltimateBot plugin,
             BotMovementController movementController,
             BotRotationController rotationController) {
         this.bot = Objects.requireNonNull(bot, "bot");
-        this.level = bot.level();
         this.options = Objects.requireNonNull(options, "options");
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.movementController = Objects.requireNonNull(movementController, "movementController");
@@ -59,13 +56,13 @@ public final class IdleBehaviorController {
             return;
         }
 
-        Vec3 spawn = resolveSpawnPosition();
+        Vector spawn = resolveSpawnPosition();
         if (spawn == null) {
             return;
         }
 
         long now = System.currentTimeMillis();
-        double distanceFromSpawn = bot.position().distanceTo(spawn);
+        double distanceFromSpawn = bot.bukkitPosition().distance(spawn);
         boolean shouldReturn = distanceFromSpawn > options.getIdleReturnDistance()
                 || now - lastTargetSeenAt >= options.getIdleReturnDelayMs();
         if (shouldReturn && distanceFromSpawn > DESTINATION_REACHED_DISTANCE) {
@@ -75,7 +72,7 @@ public final class IdleBehaviorController {
         }
 
         if (destination == null
-                || bot.position().distanceTo(destination) <= DESTINATION_REACHED_DISTANCE
+                || bot.bukkitPosition().distance(destination) <= DESTINATION_REACHED_DISTANCE
                 || now - lastDestinationSelectionAt >= DESTINATION_RETRY_MS) {
             destination = findDestination(spawn);
             lastDestinationSelectionAt = now;
@@ -89,23 +86,23 @@ public final class IdleBehaviorController {
         destination = null;
     }
 
-    private void moveTo(Vec3 position) {
+    private void moveTo(Vector position) {
         movementController.moveToPosition(position);
-        rotationController.lookAt(position.x, position.y, position.z);
+        rotationController.lookAt(position);
     }
 
-    private Vec3 findDestination(Vec3 spawn) {
+    private Vector findDestination(Vector spawn) {
         double radius = options.getIdleWanderRadius();
         for (int attempt = 0; attempt < 12; attempt++) {
             double angle = random.nextDouble() * Math.PI * 2.0D;
             double distance = 2.0D + random.nextDouble() * Math.max(1.0D, radius - 2.0D);
-            int x = (int) Math.floor(spawn.x + Math.cos(angle) * distance);
-            int z = (int) Math.floor(spawn.z + Math.sin(angle) * distance);
-            int y = findSafeY(x, (int) Math.round(spawn.y), z);
+            int x = (int) Math.floor(spawn.getX() + Math.cos(angle) * distance);
+            int z = (int) Math.floor(spawn.getZ() + Math.sin(angle) * distance);
+            int y = findSafeY(x, (int) Math.round(spawn.getY()), z);
             if (y == Integer.MIN_VALUE) {
                 continue;
             }
-            Vec3 candidate = new Vec3(x + 0.5D, y, z + 0.5D);
+            Vector candidate = new Vector(x + 0.5D, y, z + 0.5D);
             if (isPvpAllowed(candidate)) {
                 return candidate;
             }
@@ -114,39 +111,39 @@ public final class IdleBehaviorController {
     }
 
     private int findSafeY(int x, int baseY, int z) {
-        World world = bot.getBukkitEntity().getWorld();
-        int minBuildHeight = world == null ? -64 : world.getMinHeight();
-        int maxBuildHeight = world == null ? 320 : world.getMaxHeight();
+        World world = bot.getWorld();
+        int minBuildHeight = world.getMinHeight();
+        int maxBuildHeight = world.getMaxHeight();
         int minY = Math.max(minBuildHeight, baseY - 6);
         int maxY = Math.min(maxBuildHeight - 2, baseY + 6);
         for (int y = maxY; y >= minY; y--) {
-            BlockPos feet = new BlockPos(x, y, z);
-            if (level.getBlockState(feet.below()).isSolidRender()
-                    && !level.getBlockState(feet).isSolidRender()
-                    && !level.getBlockState(feet.above()).isSolidRender()) {
+            Block feet = world.getBlockAt(x, y, z);
+            if (feet.getRelative(0, -1, 0).getType().isSolid()
+                    && feet.isPassable()
+                    && feet.getRelative(0, 1, 0).isPassable()) {
                 return y;
             }
         }
         return Integer.MIN_VALUE;
     }
 
-    private @Nullable Vec3 resolveSpawnPosition() {
+    private @Nullable Vector resolveSpawnPosition() {
         BotLocation spawn = options.getSpawnLocation();
-        return spawn == null ? null : new Vec3(spawn.x(), spawn.y(), spawn.z());
+        return spawn == null ? null : new Vector(spawn.x(), spawn.y(), spawn.z());
     }
 
-    private boolean isPvpAllowed(Vec3 position) {
+    private boolean isPvpAllowed(Vector position) {
         if (!options.isRespectWorldGuardPvp() || plugin.getWorldGuardPvpService() == null) {
             return true;
         }
 
-        World world = bot.getBukkitEntity().getWorld();
+        World world = bot.getWorld();
         if (world == null) {
             BotLocation spawn = options.getSpawnLocation();
             world = spawn == null || spawn.worldUUID() == null ? null : Bukkit.getWorld(spawn.worldUUID());
         }
         return world != null
                 && plugin.getWorldGuardPvpService()
-                        .isPvpAllowed(new Location(world, position.x, position.y, position.z));
+                        .isPvpAllowed(new Location(world, position.getX(), position.getY(), position.getZ()));
     }
 }

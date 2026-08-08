@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 import org.jspecify.annotations.Nullable;
 
 /** Projects airborne or obstructed targets onto nearby terrain that a walking bot can reach. */
@@ -20,24 +20,26 @@ final class PathGoalResolver {
         this.environment = Objects.requireNonNull(environment, "environment");
     }
 
-    @Nullable BlockPos resolve(BlockPos start, BlockPos requestedGoal) {
+    @Nullable BlockVector resolve(BlockVector start, BlockVector requestedGoal) {
         return resolve(start, requestedGoal, ignored -> true);
     }
 
-    @Nullable BlockPos resolve(BlockPos start, BlockPos requestedGoal, Predicate<BlockPos> candidateFilter) {
+    @Nullable BlockVector resolve(BlockVector start, BlockVector requestedGoal, Predicate<BlockVector> candidateFilter) {
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(requestedGoal, "requestedGoal");
         Objects.requireNonNull(candidateFilter, "candidateFilter");
 
         if (environment.canStandAt(requestedGoal)
                 && candidateFilter.test(requestedGoal)
-                && Math.abs(requestedGoal.getY() - start.getY()) <= VERTICAL_SEARCH_RADIUS) {
+                && Math.abs(requestedGoal.getBlockY() - start.getBlockY()) <= VERTICAL_SEARCH_RADIUS) {
             return requestedGoal;
         }
 
         for (GoalOffset offset : SEARCH_OFFSETS) {
-            BlockPos candidate = new BlockPos(
-                    requestedGoal.getX() + offset.x(), start.getY() + offset.y(), requestedGoal.getZ() + offset.z());
+            BlockVector candidate = new BlockVector(
+                    requestedGoal.getBlockX() + offset.x(),
+                    start.getBlockY() + offset.y(),
+                    requestedGoal.getBlockZ() + offset.z());
             if (environment.canStandAt(candidate) && candidateFilter.test(candidate)) {
                 return candidate;
             }

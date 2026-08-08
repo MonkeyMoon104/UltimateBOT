@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter;
 
 import java.util.Map;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public interface IItemChecker {
 
@@ -22,7 +22,7 @@ public interface IItemChecker {
 
     boolean hasEnderpearls(Map<Integer, ItemStack> hotbarSlots, boolean infiniteResources);
 
-    int getItemCount(Map<Integer, ItemStack> hotbarSlots, Item item, boolean infiniteResources);
+    int getItemCount(Map<Integer, ItemStack> hotbarSlots, Material material, boolean infiniteResources);
 
-    boolean hasItem(Map<Integer, ItemStack> hotbarSlots, Item item, boolean infiniteResources);
+    boolean hasItem(Map<Integer, ItemStack> hotbarSlots, Material material, boolean infiniteResources);
 }

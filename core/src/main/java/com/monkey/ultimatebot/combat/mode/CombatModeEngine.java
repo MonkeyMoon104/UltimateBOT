@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.combat.mode;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.extension.combat.CombatModeProvider;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.cpvp.BotCPVPController;
@@ -15,14 +16,12 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeStrategy;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
-import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.UUID;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 public final class CombatModeEngine implements AutoCloseable {
@@ -39,7 +38,7 @@ public final class CombatModeEngine implements AutoCloseable {
 
     public CombatModeEngine(
             UltimateBot plugin,
-            Player bot,
+            ITrainingBot bot,
             BotOptions options,
             BotMovementController movement,
             BotRotationController rotation,
@@ -48,22 +47,21 @@ public final class CombatModeEngine implements AutoCloseable {
             BotCPVPController crystal,
             BotRAPVPController anchor,
             ICombatStrategyExecutor legacyCombat,
-            WorldProtectionService worldProtection) {
+            WorldProtectionService worldProtection,
+            CoreBotControl control,
+            CoreNativeBotAccess nativeAccess) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.options = Objects.requireNonNull(options, "options");
         this.context = new CombatModeContext(
                 bot, options, movement, rotation, attack, inventory, crystal, anchor, legacyCombat, worldProtection);
-        CoreBotControl control = new CoreBotControl(bot, movement, rotation, attack, inventory);
-        CoreNativeBotAccess nativeAccess =
-                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
         this.external = new ExternalCombatModeSessionManager(
                 plugin,
                 options,
                 context,
-                control,
-                nativeAccess,
+                Objects.requireNonNull(control, "control"),
+                Objects.requireNonNull(nativeAccess, "nativeAccess"),
                 new SplittableRandom(
-                        bot.getUUID().getMostSignificantBits() ^ bot.getUUID().getLeastSignificantBits()));
+                        bot.getUniqueId().getMostSignificantBits() ^ bot.getUniqueId().getLeastSignificantBits()));
         this.strategies = BuiltInCombatModeStrategies.create();
     }
 

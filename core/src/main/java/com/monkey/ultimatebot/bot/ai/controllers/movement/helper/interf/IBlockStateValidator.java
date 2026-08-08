@@ -1,15 +1,15 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf;
 
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 
 public interface IBlockStateValidator {
-    boolean isPositionPassable(BlockPos pos);
+    boolean isPositionPassable(BlockVector pos);
 
-    boolean isPositionPassableCached(BlockPos pos);
+    boolean isPositionPassableCached(BlockVector pos);
 
-    boolean isBodySpaceClear(BlockPos pos);
+    boolean isBodySpaceClear(BlockVector pos);
 
-    boolean isBodySpaceClearCached(BlockPos pos);
+    boolean isBodySpaceClearCached(BlockVector pos);
 
     void clearCache();
 

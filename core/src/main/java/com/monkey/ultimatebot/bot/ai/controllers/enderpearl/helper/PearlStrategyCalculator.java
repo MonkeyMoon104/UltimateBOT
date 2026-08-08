@@ -2,10 +2,11 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public class PearlStrategyCalculator implements IPearlStrategyCalculator {
 
     private static final long EMERGENCY_PEARL_COOLDOWN = 3000;
@@ -25,11 +26,11 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
             long comboStartTime,
             int repositionPearlCooldown,
             int aggressivePearlCooldown) {
-        double distance = bot.distanceTo(target);
-        float healthPercent = bot.getHealth() / bot.getMaxHealth();
-        Vec3 botPos = bot.position();
-        Vec3 targetPos = target.position();
-        double yDiff = botPos.y - targetPos.y;
+        double distance = bot.getLocation().distance(target.getLocation());
+        double healthPercent = bot.getHealth() / bot.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue();
+        Vector botPos = bot.getLocation().toVector();
+        Vector targetPos = target.getLocation().toVector();
+        double yDiff = botPos.getY() - targetPos.getY();
 
         long currentTime = System.currentTimeMillis();
 
@@ -49,7 +50,7 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
             return PearlStrategy.REPOSITION_LOW;
         }
 
-        if (target.onGround() && distance > 4.6 && distance < 10.5 && yDiff > 0.8) {
+        if (isOnGround(target) && distance > 4.6 && distance < 10.5 && yDiff > 0.8) {
             return PearlStrategy.ANCHOR_POSITION;
         }
 
@@ -69,7 +70,7 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
             long lastEmergencyPearl,
             int repositionPearlCooldown,
             int aggressivePearlCooldown) {
-        double distance = bot.distanceTo(target);
+        double distance = bot.getLocation().distance(target.getLocation());
         long currentTime = System.currentTimeMillis();
 
         return switch (strategy) {
@@ -80,17 +81,20 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
                 repositionPearlCooldown <= 0
                         && distance > 4.5
                         && distance < 13.0
-                        && bot.position().y - target.position().y > 2.3;
+                        && bot.getLocation().getY() - target.getLocation().getY() > 2.3;
             case ANCHOR_POSITION ->
-                target.onGround() && distance > 4.2 && distance < 11.0 && bot.position().y - target.position().y > 0.6;
+                isOnGround(target)
+                        && distance > 4.2
+                        && distance < 11.0
+                        && bot.getLocation().getY() - target.getLocation().getY() > 0.6;
             case AGGRESSIVE_CLOSE ->
                 aggressivePearlCooldown <= 0 && distance > 7.0 && distance < 14.5 && bot.getHealth() > 8.0f;
         };
     }
 
     @Override
-    public @Nullable Vec3 calculateTargetForStrategy(
-            PearlStrategy strategy, Player bot, Player target, @Nullable Vec3 predictedTargetMovement) {
+    public @Nullable Vector calculateTargetForStrategy(
+            PearlStrategy strategy, Player bot, Player target, @Nullable Vector predictedTargetMovement) {
         return switch (strategy) {
             case COMBO_ESCAPE, ESCAPE -> positionCalculator.calculateEmergencyEscape(bot, target);
             case MELEE_DISENGAGE -> positionCalculator.calculateMeleeDisengage(bot, target);
@@ -99,5 +103,9 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
             case AGGRESSIVE_CLOSE ->
                 positionCalculator.calculateAggressiveApproach(bot, target, predictedTargetMovement);
         };
+    }
+
+    private static boolean isOnGround(Player player) {
+        return Math.abs(player.getVelocity().getY()) < 1.0E-3D;
     }
 }

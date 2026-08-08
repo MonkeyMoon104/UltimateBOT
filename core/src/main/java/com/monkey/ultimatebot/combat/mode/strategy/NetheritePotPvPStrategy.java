@@ -6,10 +6,10 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
 import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EquipmentSlot;
 
 public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private static final int FIRST_POTION_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -23,12 +23,12 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.NETHERITE_POT,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_SWORD)
-                        .slot(FIRST_POTION_SLOT, Items.SPLASH_POTION, 64)
-                        .slot(SECOND_POTION_SLOT, Items.SPLASH_POTION, 64)
-                        .slot(BotInventoryController.OBSIDIAN_SLOT, Items.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFFHAND, Items.TOTEM_OF_UNDYING)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(FIRST_POTION_SLOT, Material.SPLASH_POTION, 64)
+                        .slot(SECOND_POTION_SLOT, Material.SPLASH_POTION, 64)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, Material.ENDER_PEARL, 16)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
+                        .equipment(EquipmentSlot.OFF_HAND, Material.TOTEM_OF_UNDYING)
                         .build());
     }
 

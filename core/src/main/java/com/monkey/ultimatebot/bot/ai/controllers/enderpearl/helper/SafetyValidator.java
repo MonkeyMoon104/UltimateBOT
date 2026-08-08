@@ -1,72 +1,77 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class SafetyValidator implements ISafetyValidator {
 
-    private final Level level;
+    private final World world;
 
-    public SafetyValidator(Level level) {
-        this.level = level;
+    public SafetyValidator(World world) {
+        this.world = world;
     }
 
     @Override
-    public boolean isSafeLandingSpot(BlockPos pos) {
-        BlockState stateAt = level.getBlockState(pos);
-        BlockState stateAbove = level.getBlockState(pos.above());
-        BlockState stateBelow = level.getBlockState(pos.below());
+    public boolean isSafeLandingSpot(BlockVector pos) {
+        Block stateAt = blockAt(pos);
+        Block stateAbove = stateAt.getRelative(0, 1, 0);
+        Block stateBelow = stateAt.getRelative(0, -1, 0);
 
-        if (!stateAt.isAir() || !stateAbove.isAir()) {
+        if (!isPassable(stateAt) || !isPassable(stateAbove)) {
             return false;
         }
 
-        if (stateBelow.isAir()) {
+        if (!isSolid(stateBelow)) {
             return false;
         }
 
-        if (stateBelow.getCollisionShape(level, pos.below()).isEmpty()) {
-            return false;
-        }
-
-        if (!level.getFluidState(pos.below()).isEmpty()) return false;
-        if (!level.getFluidState(pos).isEmpty()) return false;
-        if (!level.getFluidState(pos.above()).isEmpty()) return false;
-
-        if (Blocks.CACTUS.equals(stateBelow.getBlock())
-                || Blocks.MAGMA_BLOCK.equals(stateBelow.getBlock())
-                || Blocks.LAVA.equals(stateBelow.getBlock())
-                || Blocks.WATER.equals(stateBelow.getBlock())) {
-            return false;
-        }
-
-        if (!stateBelow.isFaceSturdy(level, pos.below(), Direction.UP)) {
-            return false;
-        }
-
-        return true;
+        Material belowType = stateBelow.getType();
+        return belowType != Material.CACTUS
+                && belowType != Material.MAGMA_BLOCK
+                && belowType != Material.LAVA
+                && belowType != Material.WATER;
     }
 
     @Override
-    public @Nullable Vec3 findSafeLandingSpot(BlockPos center) {
+    public @Nullable Vector findSafeLandingSpot(BlockVector center) {
         for (int radius = 1; radius <= 3; radius++) {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     for (int y = -1; y <= 2; y++) {
-                        BlockPos checkPos = center.offset(x, y, z);
+                        BlockVector checkPos = new BlockVector(
+                                center.getBlockX() + x,
+                                center.getBlockY() + y,
+                                center.getBlockZ() + z);
                         if (isSafeLandingSpot(checkPos)) {
-                            return Vec3.atCenterOf(checkPos);
+                            return centerOf(checkPos);
                         }
                     }
                 }
             }
         }
         return null;
+    }
+
+    private Block blockAt(BlockVector value) {
+        return world.getBlockAt(value.getBlockX(), value.getBlockY(), value.getBlockZ());
+    }
+
+    private static Vector centerOf(BlockVector value) {
+        return new Vector(value.getBlockX() + 0.5D, value.getBlockY() + 0.5D, value.getBlockZ() + 0.5D);
+    }
+
+    private static boolean isPassable(Block block) {
+        Material type = block.getType();
+        return type.isAir() || block.isPassable();
+    }
+
+    private static boolean isSolid(Block block) {
+        Material type = block.getType();
+        return type.isBlock() && type.isSolid() && !block.isPassable();
     }
 }

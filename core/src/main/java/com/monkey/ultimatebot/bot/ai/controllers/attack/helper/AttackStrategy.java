@@ -4,9 +4,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExec
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.entity.LivingEntity;
 
 public class AttackStrategy implements IAttackStrategy {
 
@@ -22,16 +21,16 @@ public class AttackStrategy implements IAttackStrategy {
     }
 
     @Override
-    public void executeAttack(Player bot, LivingEntity target) {
+    public void executeAttack(ITrainingBot bot, LivingEntity target) {
         if (jumpAttackManager.isInJumpAttack()) {
             jumpAttackManager.handleJumpAttack(bot, target);
             return;
         }
 
-        if (bot.onGround()) {
+        if (bot.isOnGround()) {
             jumpAttackManager.initiateJumpAttack(bot);
-        } else if (!bot.onGround()) {
-            bot.swing(InteractionHand.MAIN_HAND);
+        } else if (!bot.isOnGround()) {
+            bot.swingMainHand();
             attackExecutor.performCriticalAttack(bot, target);
             cooldownManager.setRandomCooldown(20, 11);
         }

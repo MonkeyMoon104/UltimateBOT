@@ -33,15 +33,14 @@ import com.monkey.ultimatebot.extension.runtime.CustomBrainRuntime;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public class BotAI {
 
     public enum CombatState {
@@ -53,8 +52,8 @@ public class BotAI {
         RETREATING
     }
 
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
+    private final Player bukkitBot;
     private final BotNoobMovementController noobMovementController;
     private final BotMovementController movementController;
     private final BotRotationController rotationController;
@@ -76,19 +75,18 @@ public class BotAI {
     private final FollowBehaviorController followBehaviorController;
     private final CustomBrainRuntime customBrainRuntime;
     private final BotOptions options;
-    private final UltimateBot plugin;
     private long lastForcedVerticalTeleportTime = 0L;
     private static final long FORCED_VERTICAL_TELEPORT_COOLDOWN_MS = 3000L;
 
-    public BotAI(Player bot, UltimateBot plugin, BotOptions options) {
-        this.bot = java.util.Objects.requireNonNull(bot, "bot");
-        this.level = bot.level();
+    public BotAI(ITrainingBot bot, UltimateBot plugin, BotOptions options) {
+        this.bot = Objects.requireNonNull(bot, "bot");
+        this.bukkitBot = bot.asBukkitPlayer();
         this.options = java.util.Objects.requireNonNull(options, "options");
-        this.plugin = java.util.Objects.requireNonNull(plugin, "plugin");
+        java.util.Objects.requireNonNull(plugin, "plugin");
 
-        this.noobMovementController = new BotNoobMovementController(bot, level);
+        this.noobMovementController = new BotNoobMovementController(bot);
         this.movementController = new BotMovementController(
-                bot, level, plugin.getRuntimeSettings().blockStateCache());
+                bot, plugin.getRuntimeSettings().blockStateCache());
         this.rotationController = new BotRotationController(bot);
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
@@ -108,7 +106,7 @@ public class BotAI {
 
         this.combatStateManager = new CombatStateManager(bot, inventoryController, cpvpController, rapvpController);
         this.combatDataManager = new CombatDataManager(bot, enderpearlController, rapvpController, cpvpController);
-        this.pathfindingManager = new PathfindingManager(bot, level, movementController, enderpearlController);
+        this.pathfindingManager = new PathfindingManager(bot, movementController, enderpearlController);
         this.combatStrategyExecutor = new CombatStrategyExecutor(
                 bot,
                 movementController,
@@ -120,6 +118,15 @@ public class BotAI {
                 rapvpController,
                 combatStateManager,
                 combatDataManager);
+        this.idleBehaviorController =
+                new IdleBehaviorController(bot, options, plugin, movementController, rotationController);
+        this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);
+        this.followBehaviorController =
+                new FollowBehaviorController(bot, movementController, noobMovementController, pathfindingManager);
+        CoreBotControl extensionControl =
+                new CoreBotControl(bot, movementController, rotationController, attackController, inventoryController);
+        CoreNativeBotAccess nativeAccess =
+                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
         this.combatModeEngine = new CombatModeEngine(
                 plugin,
                 bot,
@@ -131,16 +138,9 @@ public class BotAI {
                 cpvpController,
                 rapvpController,
                 combatStrategyExecutor,
-                plugin.getWorldProtectionService());
-        this.idleBehaviorController =
-                new IdleBehaviorController(bot, options, plugin, movementController, rotationController);
-        this.sustainFoodController = new SustainFoodController(bot, options, inventoryController);
-        this.followBehaviorController =
-                new FollowBehaviorController(bot, movementController, noobMovementController, pathfindingManager);
-        CoreBotControl extensionControl =
-                new CoreBotControl(bot, movementController, rotationController, attackController, inventoryController);
-        CoreNativeBotAccess nativeAccess =
-                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
+                plugin.getWorldProtectionService(),
+                extensionControl,
+                nativeAccess);
         this.customBrainRuntime =
                 new CustomBrainRuntime(plugin, bot, options, extensionControl, nativeAccess, inventoryController);
     }
@@ -158,14 +158,8 @@ public class BotAI {
         }
         idleBehaviorController.recordTargetSeen();
 
-        LivingEntity target = resolveNmsTarget(targetBukkitPlayer);
-        if (target == null) {
-            tickIdle();
-            return;
-        }
-
-        boolean combatEnabled = ((ITrainingBot) bot).isCombat() && allowCombat;
-        if (customBrainRuntime.tick(target, options.isFollow(), combatEnabled)) {
+        boolean combatEnabled = bot.isCombat() && allowCombat;
+        if (customBrainRuntime.tick(targetBukkitPlayer, options.isFollow(), combatEnabled)) {
             return;
         }
 
@@ -174,8 +168,8 @@ public class BotAI {
         }
         boolean isCurrentlyHealing = options.isHealing() && healController.isHealing();
 
-        if (!(target instanceof Player playerTarget)) {
-            tickMobTarget(target, combatEnabled);
+        if (!(targetBukkitPlayer instanceof Player playerTarget)) {
+            tickMobTarget(targetBukkitPlayer, combatEnabled);
             return;
         }
 
@@ -189,10 +183,10 @@ public class BotAI {
 
         if (combatEnabled) {
             followBehaviorController.reset();
-            if (!isCurrentlyHealing && combatModeEngine.controlsNavigation(playerTarget)) {
+            if (!isCurrentlyHealing && combatModeEngine.controlsNavigation((org.bukkit.entity.Player) targetBukkitPlayer)) {
                 clearActivePathfinding();
                 combatStateManager.updateCombatState(playerTarget);
-                combatModeEngine.tick(playerTarget);
+                combatModeEngine.tick((org.bukkit.entity.Player) targetBukkitPlayer);
             } else {
                 if (shouldForceVerticalTeleport(playerTarget) && canForceVerticalTeleport()) {
                     boolean teleported =
@@ -201,7 +195,7 @@ public class BotAI {
                     if (teleported) {
                         lastForcedVerticalTeleportTime = System.currentTimeMillis();
                         clearActivePathfinding();
-                        rotationController.updateRotation(playerTarget);
+                        rotationController.updateRotation(targetBukkitPlayer);
                     }
                 }
 
@@ -209,20 +203,20 @@ public class BotAI {
                         && enderpearlController.checkAndPerformAutoTeleport(
                                 (org.bukkit.entity.Player) targetBukkitPlayer)) {
                     clearActivePathfinding();
-                    rotationController.updateRotation(playerTarget);
+                    rotationController.updateRotation(targetBukkitPlayer);
                 }
                 if (!followActivePath(playerTarget)) {
-                    pathfindingManager.checkForStuck(playerTarget);
+                    pathfindingManager.checkForStuck(targetBukkitPlayer);
                     enderpearlController.tick();
 
                     if (pathfindingManager.isUsingPathfinding()) {
                         followActivePath(playerTarget);
-                    } else if (((ITrainingBot) bot).isCombat() && !isCurrentlyHealing && allowCombat) {
+                    } else if (bot.isCombat() && !isCurrentlyHealing && allowCombat) {
                         combatStateManager.updateCombatState(playerTarget);
-                        combatModeEngine.tick(playerTarget);
+                        combatModeEngine.tick((org.bukkit.entity.Player) targetBukkitPlayer);
                     } else if (isCurrentlyHealing) {
                         combatStateManager.updateCombatState(playerTarget);
-                        executeHealingMovement(playerTarget);
+                        executeHealingMovement(targetBukkitPlayer);
                     } else {
                         combatStrategyExecutor.basicFollowBehavior(playerTarget);
                     }
@@ -231,10 +225,10 @@ public class BotAI {
         } else {
             combatModeEngine.suspend();
             if (!isCurrentlyHealing) {
-                followBehaviorController.tick(playerTarget);
+                followBehaviorController.tick((org.bukkit.entity.Player) targetBukkitPlayer);
             } else {
                 followBehaviorController.reset();
-                executeHealingMovement(playerTarget);
+                executeHealingMovement(targetBukkitPlayer);
             }
         }
 
@@ -242,7 +236,7 @@ public class BotAI {
             manager.updateLastBotPosition();
         }
 
-        rotationController.updateRotation(playerTarget);
+        rotationController.updateRotation(targetBukkitPlayer);
     }
 
     public void tickIdle() {
@@ -258,7 +252,7 @@ public class BotAI {
         idleBehaviorController.tick();
     }
 
-    private void executeHealingMovement(Player target) {
+    private void executeHealingMovement(org.bukkit.entity.LivingEntity target) {
         double distance = bot.distanceTo(target);
 
         if (distance < 3.0) {
@@ -352,25 +346,8 @@ public class BotAI {
                 && !teleportController.isTeleporting();
     }
 
-    private @Nullable LivingEntity resolveNmsTarget(org.bukkit.entity.LivingEntity targetBukkitPlayer) {
-        if (targetBukkitPlayer instanceof CraftLivingEntity craftLivingEntity) {
-            return craftLivingEntity.getHandle();
-        }
-        if (targetBukkitPlayer instanceof CraftPlayer craftPlayer) {
-            return craftPlayer.getHandle();
-        }
-        for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
-            if (managedBot != null
-                    && managedBot.asPlayer() != null
-                    && managedBot.asPlayer().getUUID().equals(targetBukkitPlayer.getUniqueId())) {
-                return managedBot.asPlayer();
-            }
-        }
-        return null;
-    }
-
-    private void tickMobTarget(LivingEntity target, boolean combatEnabled) {
-        rotationController.updateRotation(target);
+    private void tickMobTarget(LivingEntity bukkitTarget, boolean combatEnabled) {
+        rotationController.updateRotation(bukkitTarget);
         if (!combatEnabled) {
             combatModeEngine.suspend();
             movementController.stopMovement();
@@ -381,22 +358,22 @@ public class BotAI {
             healController.resetHealState();
         }
         if (options.isHealing() && healController.isHealing()) {
-            Vec3 away = bot.position().subtract(target.position());
-            if (away.horizontalDistanceSqr() > 0.001D) {
-                movementController.moveToPosition(
-                        bot.position().add(away.normalize().scale(5.0D)));
+            Vector away = bot.bukkitPosition().subtract(bukkitTarget.getLocation().toVector());
+            away.setY(0.0D);
+            if (away.lengthSquared() > 0.001D) {
+                movementController.moveToPosition(bot.bukkitPosition().add(away.normalize().multiply(5.0D)));
             }
             return;
         }
-        if (combatModeEngine.controlsNavigation(target)) {
+        if (combatModeEngine.controlsNavigation(bukkitTarget)) {
             clearActivePathfinding();
-            combatModeEngine.tick(target);
-        } else if (!followActivePath(target)) {
-            pathfindingManager.checkForStuck(target);
+            combatModeEngine.tick(bukkitTarget);
+        } else if (!followActivePath(bukkitTarget)) {
+            pathfindingManager.checkForStuck(bukkitTarget);
             if (pathfindingManager.isUsingPathfinding()) {
-                followActivePath(target);
+                followActivePath(bukkitTarget);
             } else {
-                combatModeEngine.tick(target);
+                combatModeEngine.tick(bukkitTarget);
             }
         }
         if (pathfindingManager instanceof PathfindingManager manager) {
@@ -409,8 +386,9 @@ public class BotAI {
             return false;
         }
 
-        if (movementController.shouldRecalculatePath(target.position())
-                && !movementController.calculatePathTo(target.position())) {
+        Vector targetPosition = target.getLocation().toVector();
+        if (movementController.shouldRecalculatePath(targetPosition)
+                && !movementController.calculatePathTo(targetPosition)) {
             pathfindingManager.setUsingPathfinding(false);
             movementController.clearPath();
             return false;
@@ -444,9 +422,9 @@ public class BotAI {
         }
 
         rapvpController.disable();
-        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
-        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
-        inventoryController.setItem(BotInventoryController.GLOW_SLOT, net.minecraft.world.item.ItemStack.EMPTY);
+        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, org.bukkit.inventory.ItemStack.empty());
+        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, org.bukkit.inventory.ItemStack.empty());
+        inventoryController.setItem(BotInventoryController.GLOW_SLOT, org.bukkit.inventory.ItemStack.empty());
     }
 
     private boolean handleSustainFood() {
@@ -454,32 +432,35 @@ public class BotAI {
     }
 
     private boolean shouldForceVerticalTeleport(Player target) {
-        Vec3 botPos = bot.position();
-        Vec3 targetPos = target.position();
-        double horizontalDistance = Math.hypot(botPos.x - targetPos.x, botPos.z - targetPos.z);
+        Vector botPos = bot.bukkitPosition();
+        Vector targetPos = target.getLocation().toVector();
+        double horizontalDistance = Math.hypot(botPos.getX() - targetPos.getX(), botPos.getZ() - targetPos.getZ());
         if (horizontalDistance > 3.2D) {
             return false;
         }
 
-        double verticalDistance = Math.abs(botPos.y - targetPos.y);
+        double verticalDistance = Math.abs(botPos.getY() - targetPos.getY());
         if (verticalDistance < 3.0D) {
             return false;
         }
 
-        BlockPos botBlock = bot.blockPosition();
-        BlockPos targetBlock = target.blockPosition();
-        int minY = Math.min(botBlock.getY(), targetBlock.getY()) + 1;
-        int maxY = Math.max(botBlock.getY(), targetBlock.getY()) - 1;
+        int botX = botPos.getBlockX();
+        int botY = botPos.getBlockY();
+        int botZ = botPos.getBlockZ();
+        int targetX = targetPos.getBlockX();
+        int targetY = targetPos.getBlockY();
+        int targetZ = targetPos.getBlockZ();
+        int minY = Math.min(botY, targetY) + 1;
+        int maxY = Math.max(botY, targetY) - 1;
         if (maxY < minY) {
             return false;
         }
 
         int solidBetween = 0;
         for (int y = minY; y <= maxY; y++) {
-            BlockPos checkAtBotColumn = new BlockPos(botBlock.getX(), y, botBlock.getZ());
-            BlockPos checkAtTargetColumn = new BlockPos(targetBlock.getX(), y, targetBlock.getZ());
-            if (level.getBlockState(checkAtBotColumn).isSolidRender()
-                    || level.getBlockState(checkAtTargetColumn).isSolidRender()) {
+            Block checkAtBotColumn = bukkitBot.getWorld().getBlockAt(botX, y, botZ);
+            Block checkAtTargetColumn = bukkitBot.getWorld().getBlockAt(targetX, y, targetZ);
+            if (isSolid(checkAtBotColumn) || isSolid(checkAtTargetColumn)) {
                 solidBetween++;
                 if (solidBetween >= 2) {
                     return true;
@@ -488,6 +469,11 @@ public class BotAI {
         }
 
         return false;
+    }
+
+    private static boolean isSolid(Block block) {
+        Material type = block.getType();
+        return type.isBlock() && type.isSolid() && !block.isPassable();
     }
 
     public void close() {

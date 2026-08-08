@@ -2,9 +2,8 @@ package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
 import java.util.Map;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public class ItemChecker implements IItemChecker {
 
@@ -20,51 +19,37 @@ public class ItemChecker implements IItemChecker {
 
     @Override
     public boolean isHoldingSword(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == SWORD_SLOT
-                && Items.NETHERITE_SWORD.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == SWORD_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.NETHERITE_SWORD;
     }
 
     @Override
     public boolean isHoldingEnderpearl(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ENDERPEARL_SLOT
-                && Items.ENDER_PEARL.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == ENDERPEARL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.ENDER_PEARL;
     }
 
     @Override
     public boolean isHoldingObsidian(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == OBSIDIAN_SLOT
-                && Items.OBSIDIAN.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == OBSIDIAN_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.OBSIDIAN;
     }
 
     @Override
     public boolean isHoldingCrystal(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == CRYSTAL_SLOT
-                && Items.END_CRYSTAL.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == CRYSTAL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.END_CRYSTAL;
     }
 
     @Override
     public boolean isHoldingAnchor(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ANCHOR_SLOT
-                && Items.RESPAWN_ANCHOR.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == ANCHOR_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.RESPAWN_ANCHOR;
     }
 
     @Override
     public boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GLOW_SLOT
-                && Items.GLOWSTONE.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == GLOW_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GLOWSTONE;
     }
 
     @Override
     public boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GOLDEN_APPLE_SLOT
-                && Items.GOLDEN_APPLE.equals(
-                        getCurrentItem(currentSlot, hotbarSlots).getItem());
+        return currentSlot == GOLDEN_APPLE_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GOLDEN_APPLE;
     }
 
     @Override
@@ -73,33 +58,34 @@ public class ItemChecker implements IItemChecker {
         if (infiniteResources) {
             return true;
         }
-        return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getCount() > 0;
+        return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getAmount() > 0;
     }
 
     @Override
-    public int getItemCount(Map<Integer, ItemStack> hotbarSlots, Item item, boolean infiniteResources) {
+    public int getItemCount(Map<Integer, ItemStack> hotbarSlots, Material material, boolean infiniteResources) {
         if (infiniteResources) {
-            if (Items.OBSIDIAN.equals(item) || Items.END_CRYSTAL.equals(item)) {
+            if (material == Material.OBSIDIAN || material == Material.END_CRYSTAL || material == Material.RESPAWN_ANCHOR
+                    || material == Material.GLOWSTONE || material == Material.GOLDEN_APPLE) {
                 return 64;
-            } else if (Items.ENDER_PEARL.equals(item)) {
+            } else if (material == Material.ENDER_PEARL) {
                 return 16;
             }
         }
 
         for (ItemStack stack : hotbarSlots.values()) {
-            if (stack.getItem().equals(item)) {
-                return stack.getCount();
+            if (stack != null && stack.getType() == material) {
+                return stack.getAmount();
             }
         }
         return 0;
     }
 
     @Override
-    public boolean hasItem(Map<Integer, ItemStack> hotbarSlots, Item item, boolean infiniteResources) {
-        return getItemCount(hotbarSlots, item, infiniteResources) > 0;
+    public boolean hasItem(Map<Integer, ItemStack> hotbarSlots, Material material, boolean infiniteResources) {
+        return getItemCount(hotbarSlots, material, infiniteResources) > 0;
     }
 
     private ItemStack getCurrentItem(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return hotbarSlots.getOrDefault(currentSlot, ItemStack.EMPTY);
+        return hotbarSlots.getOrDefault(currentSlot, ItemStack.empty());
     }
 }

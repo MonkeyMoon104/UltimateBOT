@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.util.BlockVector;
 
 public interface ITeleportValidator {
-    boolean isSafePosition(Player bot, BlockPos pos);
+    boolean isSafePosition(ITrainingBot bot, BlockVector pos);
 
-    boolean isSuffocationDamage(Player bot);
+    boolean isSuffocationDamage(ITrainingBot bot);
 }

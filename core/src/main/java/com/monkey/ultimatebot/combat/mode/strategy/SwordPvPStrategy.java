@@ -5,8 +5,8 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 
 public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.SPACING;
@@ -16,9 +16,9 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.SWORD,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.DIAMOND_SWORD)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Items.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.DIAMOND_SWORD)
+                        .slot(BotInventoryController.ENDERPEARL_SLOT, Material.ENDER_PEARL, 16)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .build());
     }
 
@@ -58,25 +58,25 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void initiate(CombatModeContext context, LivingEntity target) {
-        if (context.bot().onGround()) {
+        if (context.motion().isBotOnGround()) {
             context.motion().propelTowards(target, 0.34D, 0.34D);
         } else {
-            context.motion().steerVelocityTowards(target, 0.31D, context.bot().getDeltaMovement().y);
+            context.motion().steerVelocityTowards(target, 0.31D, context.motion().botVerticalVelocity());
         }
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
-            transitionTo(context.bot().getDeltaMovement().y < 0.0D ? Phase.CRIT_TRADE : Phase.COMBO);
+            transitionTo(context.motion().botVerticalVelocity() < 0.0D ? Phase.CRIT_TRADE : Phase.COMBO);
         } else if (phaseTicks >= 8) {
             transitionTo(Phase.SPACING);
         }
     }
 
     private void critTrade(CombatModeContext context, LivingEntity target) {
-        context.motion().steerVelocityTowards(target, 0.24D, context.bot().getDeltaMovement().y);
+        context.motion().steerVelocityTowards(target, 0.24D, context.motion().botVerticalVelocity());
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
         }
-        if (context.bot().onGround() || phaseTicks >= 6) {
+        if (context.motion().isBotOnGround() || phaseTicks >= 6) {
             transitionTo(Phase.COMBO);
         }
     }
@@ -86,7 +86,7 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
                 .steerVelocityTowards(
                         target,
                         0.29D,
-                        context.bot().onGround() ? 0.0D : context.bot().getDeltaMovement().y);
+                        context.motion().isBotOnGround() ? 0.0D : context.motion().botVerticalVelocity());
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
         }
@@ -97,7 +97,7 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
 
     private void deflect(CombatModeContext context, LivingEntity target) {
         context.motion().retreat(target, 4.6D);
-        if (phaseTicks == 3 && context.bot().onGround()) {
+        if (phaseTicks == 3 && context.motion().isBotOnGround()) {
             context.motion().propelTowards(target, -0.25D, 0.28D);
         }
         if (phaseTicks >= 7) {

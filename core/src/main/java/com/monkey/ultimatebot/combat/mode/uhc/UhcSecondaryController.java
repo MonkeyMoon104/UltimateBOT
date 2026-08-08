@@ -7,9 +7,9 @@ import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 
 final class UhcSecondaryController {
     private static final int LAVA_SLOT = BotInventoryController.CRYSTAL_SLOT;
@@ -57,14 +57,11 @@ final class UhcSecondaryController {
     }
 
     private void placeNextWeb(CombatModeContext context, LivingEntity target) {
-        if (!(target.getBukkitEntity() instanceof org.bukkit.entity.LivingEntity livingTarget)) {
-            return;
-        }
-        Location targetLocation = Objects.requireNonNull(livingTarget.getLocation(), "target location");
+        Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
         for (Location candidate : WebTrapPlanner.plan(
                 targetLocation,
-                livingTarget.getVelocity(),
-                livingTarget.isOnGround(),
+                target.getVelocity(),
+                target.isOnGround(),
                 targetLocation.getDirection(),
                 context.random())) {
             WebTrapPlanner.Position position = WebTrapPlanner.Position.from(candidate);
@@ -84,12 +81,11 @@ final class UhcSecondaryController {
         if (!context.inventory().consumeItem(LAVA_SLOT)) {
             return;
         }
-        target.setRemainingFireTicks(Math.max(target.getRemainingFireTicks(), 80));
-        target.getBukkitEntity()
-                .getWorld()
+        target.setFireTicks(Math.max(target.getFireTicks(), 80));
+        target.getWorld()
                 .spawnParticle(
                         org.bukkit.Particle.LAVA,
-                        Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location"),
+                        Objects.requireNonNull(target.getLocation(), "target location"),
                         12,
                         0.35D,
                         0.15D,

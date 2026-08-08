@@ -1,20 +1,21 @@
 package com.monkey.ultimatebot.bot.ai.behavior;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
 import java.util.Objects;
-import net.minecraft.world.entity.player.Player;
+import org.bukkit.entity.Player;
 
 public final class FollowBehaviorController {
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotMovementController movement;
     private final BotNoobMovementController directMovement;
     private final IPathfindingManager pathfinding;
     private final FollowDistancePolicy distancePolicy = new FollowDistancePolicy();
 
     public FollowBehaviorController(
-            Player bot,
+            ITrainingBot bot,
             BotMovementController movement,
             BotNoobMovementController directMovement,
             IPathfindingManager pathfinding) {
@@ -26,8 +27,8 @@ public final class FollowBehaviorController {
 
     public void tick(Player target) {
         Objects.requireNonNull(target, "target");
-        double deltaX = target.getX() - bot.getX();
-        double deltaZ = target.getZ() - bot.getZ();
+        double deltaX = target.getX() - bot.bukkitPosition().getX();
+        double deltaZ = target.getZ() - bot.bukkitPosition().getZ();
         double horizontalDistance = Math.hypot(deltaX, deltaZ);
         if (!distancePolicy.shouldAdvance(horizontalDistance)) {
             stop();

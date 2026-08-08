@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf;
 
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public interface ICombatStateManager {
     void setUnderFire(boolean underFire);
@@ -15,7 +16,7 @@ public interface ICombatStateManager {
 
     void resetCombatState();
 
-    Vec3 getTargetVelocity();
+    Vector getTargetVelocity();
 
-    void updateCombatData(net.minecraft.world.entity.player.Player target);
+    void updateCombatData(LivingEntity target);
 }

@@ -12,19 +12,18 @@ import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExec
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import org.bukkit.entity.LivingEntity;
 
 public class BotAttackController {
 
-    private final Player bot;
+    private final ITrainingBot bot;
 
     private final ICooldownManager cooldownManager;
     private final IAttackExecutor attackExecutor;
     private final IJumpAttackManager jumpAttackManager;
     private final IAttackStrategy attackStrategy;
 
-    public BotAttackController(Player bot) {
+    public BotAttackController(ITrainingBot bot) {
         this.bot = java.util.Objects.requireNonNull(bot, "bot");
 
         this.cooldownManager = new CooldownManager();
@@ -56,17 +55,17 @@ public class BotAttackController {
     }
 
     private boolean allowAttack(LivingEntity target, BotAttackType type) {
-        if (!(bot instanceof ITrainingBot trainingBot) || target == null) return target != null;
-        var plugin = trainingBot.getPlugin();
-        var ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUUID());
-        if (ownerUUID == null || !(target.getBukkitEntity() instanceof org.bukkit.entity.LivingEntity bukkitTarget)) {
+        if (target == null) return false;
+        var plugin = bot.getPlugin();
+        var ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
+        if (ownerUUID == null) {
             return true;
         }
-        BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, trainingBot);
+        BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
         if (snapshot == null) return true;
         BotAttackEvent event = plugin.getBotEventDispatcher()
                 .publish(new BotAttackEvent(
-                        plugin.getBotEventDispatcher().nextSequence(bot.getUUID()), snapshot, bukkitTarget, type));
+                        plugin.getBotEventDispatcher().nextSequence(bot.getUniqueId()), snapshot, target, type));
         return !event.isCancelled();
     }
 

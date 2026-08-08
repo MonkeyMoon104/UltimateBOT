@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IRotationApplier {
 
-    void applyRotation(Player bot, float yaw, float pitch);
+    void applyRotation(ITrainingBot bot, float yaw, float pitch);
 
-    void resetRotation(Player bot);
+    void resetRotation(ITrainingBot bot);
 }

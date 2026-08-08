@@ -5,12 +5,12 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.jspecify.annotations.Nullable;
 
@@ -28,11 +28,10 @@ final class CartExplosiveSequence {
     private int arrowFlightTicks;
 
     boolean placeRail(CombatModeContext context, LivingEntity target) {
-        Location targetLocation =
-                Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
+        Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
         context.inventory().switchToSlot(RAIL_SLOT);
         for (Location placement : CartPlacementPlanner.railCandidates(
-                targetLocation, target.getBukkitEntity().getVelocity())) {
+                targetLocation, target.getVelocity())) {
             if (!placement
                     .clone()
                     .subtract(0.0D, 1.0D, 0.0D)
@@ -181,11 +180,10 @@ final class CartExplosiveSequence {
     }
 
     private static double targetDistanceSquared(Entity cart, LivingEntity target) {
-        Entity bukkitTarget = target.getBukkitEntity();
-        if (!cart.getWorld().equals(bukkitTarget.getWorld())) {
+        if (!cart.getWorld().equals(target.getWorld())) {
             return Double.POSITIVE_INFINITY;
         }
-        return cart.getLocation().distanceSquared(bukkitTarget.getLocation());
+        return cart.getLocation().distanceSquared(target.getLocation());
     }
 
     private static boolean containsExplosiveCart(Location rail) {

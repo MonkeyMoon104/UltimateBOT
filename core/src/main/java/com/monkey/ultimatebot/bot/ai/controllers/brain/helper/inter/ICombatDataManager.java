@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public interface ICombatDataManager {
@@ -13,7 +13,7 @@ public interface ICombatDataManager {
 
     long getLastDamageTime();
 
-    Vec3 getTargetVelocity();
+    Vector getTargetVelocity();
 
-    @Nullable Vec3 getLastTargetPosition();
+    @Nullable Vector getLastTargetPosition();
 }

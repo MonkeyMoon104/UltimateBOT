@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.world.entity.player.Player;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.jspecify.annotations.Nullable;
@@ -89,7 +87,7 @@ public class BotBrainController {
         this.targetPlayer = targetPlayer;
         this.ownerPlayer = targetPlayer;
         this.follow = follow;
-        this.botAI = new BotAI(bot.asPlayer(), plugin, botOptions);
+        this.botAI = new BotAI(bot, plugin, botOptions);
         this.botOptions = botOptions;
         this.combat = botOptions.isCombat();
 
@@ -113,9 +111,8 @@ public class BotBrainController {
     }
 
     private void configureBotAI() {
-        if (targetPlayer != null && follow && targetPlayer instanceof CraftPlayer) {
-            Player target = ((CraftPlayer) targetPlayer).getHandle();
-            botAI.getRotationController().setInstantRotation(target);
+        if (targetPlayer != null && follow) {
+            botAI.getRotationController().lookAt(targetPlayer.getX(), targetPlayer.getEyeLocation().getY(), targetPlayer.getZ());
         }
     }
 
@@ -125,14 +122,14 @@ public class BotBrainController {
         LivingEntity selectedTarget = selectActiveTarget();
         if (!sameTarget(activeTarget, selectedTarget)) {
             UUID ownerUUID =
-                    plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                    plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
             BotSnapshot snapshot =
                     ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
             if (snapshot != null) {
                 BotTargetChangeEvent event = plugin.getBotEventDispatcher()
                         .publish(new BotTargetChangeEvent(
                                 plugin.getBotEventDispatcher()
-                                        .nextSequence(bot.asPlayer().getUUID()),
+                                        .nextSequence(bot.getUniqueId()),
                                 snapshot,
                                 activeTarget,
                                 selectedTarget));
@@ -205,9 +202,9 @@ public class BotBrainController {
     }
 
     private double distanceSquaredFromBot(LivingEntity entity) {
-        double dx = entity.getX() - bot.asPlayer().getX();
-        double dy = entity.getY() - bot.asPlayer().getY();
-        double dz = entity.getZ() - bot.asPlayer().getZ();
+        double dx = entity.getX() - bot.asBukkitPlayer().getX();
+        double dy = entity.getY() - bot.asBukkitPlayer().getY();
+        double dz = entity.getZ() - bot.asBukkitPlayer().getZ();
         return dx * dx + dy * dy + dz * dz;
     }
 
@@ -254,7 +251,7 @@ public class BotBrainController {
             watchOnlyMode = false;
             clearAlertState();
 
-            targetingService.invalidateCache(bot.asPlayer().getUUID());
+            targetingService.invalidateCache(bot.getUniqueId());
             setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange, this::isValidPvpTarget));
             return;
         }
@@ -393,7 +390,7 @@ public class BotBrainController {
 
         double rangeSq = range * range;
         ThreatSelection best = null;
-        UUID botUUID = bot.asPlayer().getUUID();
+        UUID botUUID = bot.getUniqueId();
 
         for (org.bukkit.entity.Player candidate : collectThreatCandidates()) {
             if (candidate == null || candidate.isDead()) {
@@ -467,12 +464,11 @@ public class BotBrainController {
         }
 
         for (ITrainingBot managedBot : plugin.getBotRegistry().getAllBots().values()) {
-            if (managedBot == null || managedBot.asPlayer() == null) {
+            if (managedBot == null || managedBot.asBukkitPlayer() == null) {
                 continue;
             }
-            if (managedBot.asPlayer().getBukkitEntity() instanceof org.bukkit.entity.Player managedPlayer) {
-                candidates.put(managedPlayer.getUniqueId(), managedPlayer);
-            }
+            org.bukkit.entity.Player managedPlayer = managedBot.asBukkitPlayer();
+            candidates.put(managedPlayer.getUniqueId(), managedPlayer);
         }
 
         return new ArrayList<>(candidates.values());
@@ -506,7 +502,7 @@ public class BotBrainController {
                                 java.util.Objects.requireNonNull(targetPlayer.getLocation(), "target location"))) {
             return false;
         }
-        org.bukkit.entity.Entity bukkitBot = bot.asPlayer().getBukkitEntity();
+        org.bukkit.entity.Entity bukkitBot = bot.asBukkitPlayer();
         return bukkitBot == null || plugin.getWorldGuardPvpService().isPvpAllowed(bukkitBot.getLocation());
     }
 
@@ -521,11 +517,12 @@ public class BotBrainController {
 
             if (!owner.getWorld()
                     .getUID()
-                    .equals(bot.asPlayer().level().getWorld().getUID())) {
+                    .equals(bot.asBukkitPlayer().getWorld().getUID())) {
                 continue;
             }
 
-            double distanceSq = bot.asPlayer().distanceToSqr(((CraftPlayer) owner).getHandle());
+            double distanceSq = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location")
+                    .distanceSquared(java.util.Objects.requireNonNull(owner.getLocation(), "owner location"));
             if (distanceSq < bestDistanceSq) {
                 bestDistanceSq = distanceSq;
                 bestOwner = owner;
@@ -575,7 +572,8 @@ public class BotBrainController {
             return;
         }
 
-        double distance = bot.asPlayer().distanceTo(((CraftPlayer) owner).getHandle());
+        double distance = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location")
+                .distance(java.util.Objects.requireNonNull(owner.getLocation(), "owner location"));
         if (distance <= returnTeleportDistance) {
             return;
         }

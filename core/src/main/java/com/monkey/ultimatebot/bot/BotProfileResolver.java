@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot;
 
-import com.mojang.authlib.GameProfile;
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.identity.BotSkinSource;
 import com.monkey.ultimatebot.placeholders.PlaceholderApiSupport;
+import com.monkey.ultimatebot.protocol.BotProfileData;
 import java.util.Locale;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 /** Resolves the protocol-safe name and skin profile used by a spawned bot. */
 final class BotProfileResolver {
 
-    GameProfile resolve(FileConfiguration config, Player owner, Player target, UUID botUUID, BotOptions options) {
+    BotProfileData resolve(FileConfiguration config, Player owner, Player target, UUID botUUID, BotOptions options) {
         String template = resolveNameTemplate(config, options);
         String botName = resolveName(template, owner, target, options);
         return resolveProfile(owner, botUUID, botName, options);
@@ -57,7 +57,7 @@ final class BotProfileResolver {
         return BotProfileCodec.sanitizeName(PlaceholderApiSupport.apply(owner, replaced));
     }
 
-    private GameProfile resolveProfile(Player owner, UUID botUUID, String botName, BotOptions options) {
+    private BotProfileData resolveProfile(Player owner, UUID botUUID, String botName, BotOptions options) {
         if (options == null || options.getCreationSource() != BotCreationSource.API) {
             return BotFactory.createProfile(owner, botUUID, botName);
         }
@@ -95,7 +95,7 @@ final class BotProfileResolver {
         };
     }
 
-    private GameProfile profileFromPlayerOrOwner(
+    private BotProfileData profileFromPlayerOrOwner(
             @Nullable Player candidate, Player owner, UUID botUUID, String botName) {
         Player source = candidate != null && candidate.isOnline() ? candidate : owner;
         return BotFactory.createProfile(source, botUUID, botName);

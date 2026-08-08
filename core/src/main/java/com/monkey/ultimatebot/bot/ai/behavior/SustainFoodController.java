@@ -1,19 +1,18 @@
 package com.monkey.ultimatebot.bot.ai.behavior;
 
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import java.util.Objects;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public final class SustainFoodController {
 
     private static final int CONSUMPTION_DURATION_TICKS = 32;
     private static final int TRIGGER_FOOD_LEVEL = 6;
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotOptions options;
     private final BotInventoryController inventoryController;
 
@@ -21,7 +20,7 @@ public final class SustainFoodController {
     private boolean eating;
     private int consumptionTicks;
 
-    public SustainFoodController(Player bot, BotOptions options, BotInventoryController inventoryController) {
+    public SustainFoodController(ITrainingBot bot, BotOptions options, BotInventoryController inventoryController) {
         this.bot = Objects.requireNonNull(bot, "bot");
         this.options = Objects.requireNonNull(options, "options");
         this.inventoryController = Objects.requireNonNull(inventoryController, "inventoryController");
@@ -34,7 +33,7 @@ public final class SustainFoodController {
             return false;
         }
 
-        if (bot.isUsingItem() && Items.GOLDEN_APPLE.equals(bot.getUseItem().getItem())) {
+        if (bot.isUsingItem() && bot.activeItemStack().getType() == Material.GOLDEN_APPLE) {
             inventoryController.releaseUsingItem();
             resetEatingState();
             inventoryController.switchToSword();
@@ -52,13 +51,13 @@ public final class SustainFoodController {
             return true;
         }
 
-        if (bot.getFoodData().getFoodLevel() > TRIGGER_FOOD_LEVEL) {
+        if (bot.asBukkitPlayer().getFoodLevel() > TRIGGER_FOOD_LEVEL) {
             return false;
         }
 
         inventoryController.switchToSlot(BotInventoryController.GOLDEN_APPLE_SLOT);
         try {
-            inventoryController.startUsingItem(InteractionHand.MAIN_HAND);
+            inventoryController.startUsingMainHand();
         } catch (IllegalStateException ignored) {
             applyFood();
             inventoryController.switchToSword();
@@ -78,20 +77,21 @@ public final class SustainFoodController {
         if (options.isHealing()) {
             if (foodSlotActive) {
                 inventoryController.setItem(
-                        BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.GOLDEN_APPLE, 64));
+                        BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Material.GOLDEN_APPLE, 64));
                 foodSlotActive = false;
             }
             return;
         }
         if (!foodSlotActive) {
-            inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Items.COOKED_BEEF, 64));
+            inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Material.COOKED_BEEF, 64));
             foodSlotActive = true;
         }
     }
 
     private void applyFood() {
-        if (bot.getFoodData().getFoodLevel() < 20) {
-            bot.getFoodData().eat(8, 0.8F);
+        if (bot.asBukkitPlayer().getFoodLevel() < 20) {
+            bot.asBukkitPlayer().setFoodLevel(Math.min(20, bot.asBukkitPlayer().getFoodLevel() + 8));
+            bot.asBukkitPlayer().setSaturation(Math.min(20.0F, bot.asBukkitPlayer().getSaturation() + 0.8F));
         }
         inventoryController.releaseUsingItem();
     }

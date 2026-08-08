@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public interface IPearlStrategyCalculator {
@@ -33,6 +33,6 @@ public interface IPearlStrategyCalculator {
             int repositionPearlCooldown,
             int aggressivePearlCooldown);
 
-    @Nullable Vec3 calculateTargetForStrategy(
-            PearlStrategy strategy, Player bot, Player target, @Nullable Vec3 predictedTargetMovement);
+    @Nullable Vector calculateTargetForStrategy(
+            PearlStrategy strategy, Player bot, Player target, @Nullable Vector predictedTargetMovement);
 }

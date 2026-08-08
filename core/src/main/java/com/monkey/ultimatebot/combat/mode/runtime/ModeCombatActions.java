@@ -1,31 +1,34 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Objects;
 import java.util.function.Supplier;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
 public final class ModeCombatActions {
-    private final Player bot;
-    private final org.bukkit.entity.Player bukkitBot;
+    private final ITrainingBot bot;
+    private final Player bukkitBot;
     private final BotAttackController attack;
     private final BotInventoryController inventory;
     private final Supplier<CombatTuning> tuning;
 
     ModeCombatActions(
-            Player bot,
-            org.bukkit.entity.Player bukkitBot,
+            ITrainingBot bot,
+            Player bukkitBot,
             BotAttackController attack,
             BotInventoryController inventory,
             Supplier<CombatTuning> tuning) {
@@ -37,11 +40,13 @@ public final class ModeCombatActions {
     }
 
     public double healthRatio() {
-        return bot.getHealth() / bot.getMaxHealth();
+        return bot.healthValue() / bot.maxHealthValue();
     }
 
     public double targetHealthRatio(LivingEntity target) {
-        return target.getHealth() / target.getMaxHealth();
+        AttributeInstance maxHealth = target.getAttribute(Attribute.MAX_HEALTH);
+        double maxHealthValue = maxHealth != null ? maxHealth.getValue() : target.getHealth();
+        return target.getHealth() / maxHealthValue;
     }
 
     public boolean isTargetBlocking(LivingEntity target) {
@@ -49,37 +54,40 @@ public final class ModeCombatActions {
     }
 
     public void defendWithOffhand() {
-        inventory.startUsingItem(InteractionHand.OFF_HAND);
+        inventory.startUsingItem(EquipmentSlot.OFF_HAND);
     }
 
     public boolean isDefendingWithOffhand() {
-        return bot.isUsingItem() && bot.getUsedItemHand() == InteractionHand.OFF_HAND;
+        return bot.isUsingItem();
     }
 
     public void useMainhandItem() {
-        inventory.startUsingItem(InteractionHand.MAIN_HAND);
+        inventory.startUsingItem(EquipmentSlot.HAND);
     }
 
     public boolean isIncomingAttackLikely(LivingEntity target) {
-        double distance = bot.distanceTo(target);
+        Location botLocation = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
+        Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
+        double distance = botLocation.distance(targetLocation);
         if (!(target instanceof Player player)) {
             return distance <= 3.6D;
         }
 
-        Vec3 towardBot = bot.position().subtract(player.position()).multiply(1.0D, 0.0D, 1.0D);
-        if (towardBot.lengthSqr() < 0.001D) {
-            return distance <= 3.2D && !player.isUsingItem();
+        Location playerLocation = Objects.requireNonNull(player.getLocation(), "player location");
+        Vector towardBot = botLocation.toVector().subtract(playerLocation.toVector()).setY(0.0D);
+        if (towardBot.lengthSquared() < 0.001D) {
+            return distance <= 3.2D && !player.isHandRaised();
         }
-        Vec3 direction = towardBot.normalize();
+        Vector direction = towardBot.normalize();
         double closingSpeed =
-                player.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D).dot(direction);
-        double facingDot =
-                player.getLookAngle().multiply(1.0D, 0.0D, 1.0D).normalize().dot(direction);
+                player.getVelocity().clone().setY(0.0D).dot(direction);
+        Vector look = playerLocation.getDirection().setY(0.0D);
+        double facingDot = look.lengthSquared() < 0.001D ? 0.0D : look.normalize().dot(direction);
         return ModeCombatPolicy.isIncomingPlayerAttack(
                 distance,
-                player.getAttackStrengthScale(0.5F),
+                player.getAttackCooldown(),
                 player.isBlocking(),
-                player.isUsingItem(),
+                player.isHandRaised(),
                 closingSpeed,
                 facingDot);
     }
@@ -120,7 +128,7 @@ public final class ModeCombatActions {
             return;
         }
         inventory.switchToSlot(slot);
-        bot.setHealth((float) Math.min(bot.getMaxHealth(), bot.getHealth() + 4.0D));
+        bot.setHealthValue(Math.min(bot.maxHealthValue(), bot.healthValue() + 4.0D));
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 1, false, false, false));
         bukkitBot.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1200, 0, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");

@@ -6,12 +6,14 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 
+@SuppressWarnings("NullAway")
 public class CombatStateManager implements ICombatStateManager {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotInventoryController inventoryController;
     private final BotCPVPController cpvpController;
     private final BotRAPVPController rapvpController;
@@ -25,7 +27,7 @@ public class CombatStateManager implements ICombatStateManager {
     private long lastComboPressureTime = 0L;
 
     public CombatStateManager(
-            Player bot,
+            ITrainingBot bot,
             BotInventoryController inventoryController,
             BotCPVPController cpvpController,
             BotRAPVPController rapvpController) {
@@ -39,15 +41,15 @@ public class CombatStateManager implements ICombatStateManager {
     public void updateCombatState(Player target) {
         long currentTime = System.currentTimeMillis();
         double distance = bot.distanceTo(target);
-        float healthPercent = bot.getHealth() / bot.getMaxHealth();
+        float healthPercent = (float) (bot.healthValue() / bot.maxHealthValue());
 
         long minDuration = (currentTime - lastDamageTime < 1000) ? 250 : MIN_STATE_DURATION;
         if (currentTime - lastStateChange < minDuration) return;
 
         CombatState newState = currentState;
 
-        int botY = bot.blockPosition().getY();
-        int targetY = target.blockPosition().getY();
+        int botY = bot.getLocation().getBlockY();
+        int targetY = target.getLocation().getBlockY();
         int yDiff = targetY - botY;
         DifficultyLevel difficulty = cpvpController.getDifficulty();
         boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
@@ -107,7 +109,7 @@ public class CombatStateManager implements ICombatStateManager {
         boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         double maxDistance = hyperAggressive ? 16.0 : 12.0;
         float minHealth = hyperAggressive ? 0.12f : 0.3f;
-        return distance > 0.7 && distance < maxDistance && bot.getHealth() / bot.getMaxHealth() > minHealth;
+        return distance > 0.7 && distance < maxDistance && bot.healthValue() / bot.maxHealthValue() > minHealth;
     }
 
     @Override
@@ -129,24 +131,24 @@ public class CombatStateManager implements ICombatStateManager {
     @Override
     public boolean shouldAttemptAnchor(Player target, long currentTime) {
         if (currentTime - lastAnchorAttempt < getAnchorAttemptCooldown()) return false;
-        if (!inventoryController.hasItem(Items.RESPAWN_ANCHOR)) return false;
-        if (!inventoryController.hasItem(Items.GLOWSTONE)) return false;
+        if (!inventoryController.hasItem(Material.RESPAWN_ANCHOR)) return false;
+        if (!inventoryController.hasItem(Material.GLOWSTONE)) return false;
 
         DifficultyLevel difficulty = cpvpController.getDifficulty();
         boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
         double distance = bot.distanceTo(target);
         double maxDistance = hyperAggressive ? 11.0 : 8.0;
-        return distance > 1.0 && distance < maxDistance && (target.onGround() || hyperAggressive);
+        return distance > 1.0 && distance < maxDistance && (isOnGround(target) || hyperAggressive);
     }
 
     @Override
     public boolean shouldReposition(Player target, double distance) {
         DifficultyLevel difficulty = cpvpController.getDifficulty();
         boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
-        net.minecraft.world.phys.Vec3 botPos = bot.position();
-        net.minecraft.world.phys.Vec3 targetPos = target.position();
-        double yDiff = botPos.y - targetPos.y;
-        if (!target.onGround() && targetPos.y > botPos.y + 0.5D) {
+        double botY = bot.getLocation().getY();
+        double targetY = target.getLocation().getY();
+        double yDiff = botY - targetY;
+        if (!isOnGround(target) && targetY > botY + 0.5D) {
             return distance > 14.0D;
         }
 
@@ -173,5 +175,9 @@ public class CombatStateManager implements ICombatStateManager {
     public void updateDamageData(int consecutiveDamageCount, long lastDamageTime) {
         this.consecutiveDamageCount = consecutiveDamageCount;
         this.lastDamageTime = lastDamageTime;
+    }
+
+    private static boolean isOnGround(Player player) {
+        return Math.abs(player.getVelocity().getY()) < 1.0E-3D;
     }
 }

@@ -6,12 +6,12 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import java.util.UUID;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
 public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
@@ -22,13 +22,13 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.CRYSTAL,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_SWORD)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Items.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.OBSIDIAN_SLOT, Items.OBSIDIAN, 64)
-                        .slot(BotInventoryController.CRYSTAL_SLOT, Items.END_CRYSTAL, 64)
-                        .slot(BotInventoryController.ANCHOR_SLOT, Items.RESPAWN_ANCHOR, 64)
-                        .slot(BotInventoryController.GLOW_SLOT, Items.GLOWSTONE, 64)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.ENCHANTED_GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(BotInventoryController.ENDERPEARL_SLOT, Material.ENDER_PEARL, 16)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, Material.OBSIDIAN, 64)
+                        .slot(BotInventoryController.CRYSTAL_SLOT, Material.END_CRYSTAL, 64)
+                        .slot(BotInventoryController.ANCHOR_SLOT, Material.RESPAWN_ANCHOR, 64)
+                        .slot(BotInventoryController.GLOW_SLOT, Material.GLOWSTONE, 64)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.ENCHANTED_GOLDEN_APPLE, 64)
                         .build());
     }
 
@@ -56,7 +56,7 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
                 && distance <= 6.0D
                 && specialActionReady()
                 && context.inventory().consumeItem(BotInventoryController.CRYSTAL_SLOT)) {
-            Location location = target.getBukkitEntity().getLocation().add(0.0D, 0.5D, 0.0D);
+            Location location = target.getLocation().add(0.0D, 0.5D, 0.0D);
             EnderCrystal crystal = context.entities().track(location.getWorld().spawn(location, EnderCrystal.class));
             crystal.setShowingBottom(false);
             mobCrystalId = crystal.getUniqueId();

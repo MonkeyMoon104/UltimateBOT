@@ -1,28 +1,33 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.*;
+import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.AnchorCharger;
+import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.AnchorExploder;
+import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.AnchorPlacer;
+import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.AnchorPositionFinder;
+import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RespawnAnchorBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.RespawnAnchor;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public final class BotRAPVPController {
 
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
     private final BotInventoryController inventory;
     private final BotEnderpearlController pearlController;
     private final AnchorPlacer anchorPlacer;
@@ -32,8 +37,7 @@ public final class BotRAPVPController {
 
     private boolean enabled = false;
     private RAPVPState state = RAPVPState.IDLE;
-
-    private @Nullable BlockPos anchorPos;
+    private @Nullable BlockVector anchorPos;
     private @Nullable Player currentTarget;
     private DifficultyLevel difficulty = DifficultyLevel.NORMAL;
     private RAPVPConfig config = DifficultyProfileFactory.buildRAPVPConfig(difficulty);
@@ -42,23 +46,25 @@ public final class BotRAPVPController {
     private boolean ownsAnchor;
 
     public BotRAPVPController(
-            Player bot,
+            ITrainingBot bot,
             BotInventoryController inventory,
             BotRotationController rotation,
             BotEnderpearlController pearlController) {
         this.bot = bot;
         this.inventory = inventory;
         this.pearlController = pearlController;
-        this.level = bot.level();
-
-        this.anchorPlacer = new AnchorPlacer(bot, inventory, rotation, level);
-        this.anchorCharger = new AnchorCharger(bot, inventory, rotation, level);
-        this.anchorExploder = new AnchorExploder(bot, inventory, rotation, level);
-        this.positionFinder = new AnchorPositionFinder(bot, level);
+        this.anchorPlacer = new AnchorPlacer(bot, inventory, rotation);
+        this.anchorCharger = new AnchorCharger(bot, inventory, rotation);
+        this.anchorExploder = new AnchorExploder(bot, inventory, rotation);
+        this.positionFinder = new AnchorPositionFinder(bot);
         setDifficulty(DifficultyLevel.NORMAL);
     }
 
     public void enable(Player target) {
+        if (!NMSBridgeManager.get().supports(PlatformCapability.RESPAWN_ANCHOR)) {
+            disable();
+            return;
+        }
         this.enabled = true;
         this.state = RAPVPState.PLACING_ANCHOR;
         this.anchorPos = null;
@@ -69,15 +75,11 @@ public final class BotRAPVPController {
     }
 
     public void tick() {
-        if (!bot.isAlive() || currentTarget == null || !currentTarget.isAlive() || !enabled) {
+        if (!bot.isAlive() || currentTarget == null || currentTarget.isDead() || !enabled) {
             return;
         }
-
-        int actionCycles = getActionCyclesForDifficulty();
-        for (int i = 0; i < actionCycles; i++) {
-            if (!enabled || currentTarget == null || !currentTarget.isAlive()) {
-                break;
-            }
+        for (int i = 0; i < getActionCyclesForDifficulty(); i++) {
+            if (!enabled || currentTarget == null || currentTarget.isDead()) break;
             switch (state) {
                 case PLACING_ANCHOR -> handlePlacingAnchor();
                 case CHARGING_ANCHOR -> handleChargingAnchor();
@@ -88,39 +90,33 @@ public final class BotRAPVPController {
     }
 
     private void handlePlacingAnchor() {
-        Optional<BlockPos> reusableAnchor = findReusableAnchorNearTarget();
+        Optional<BlockVector> reusableAnchor = findReusableAnchorNearTarget();
         if (reusableAnchor.isPresent()) {
             anchorPos = reusableAnchor.get();
             ownsAnchor = false;
-            BlockState reusableState = bot.level().getBlockState(anchorPos);
-            int charges = reusableState.getValue(RespawnAnchorBlock.CHARGE);
+            RespawnAnchor anchorData = anchorData(anchorPos);
+            int charges = anchorData == null ? 0 : anchorData.getCharges();
             state = charges > 0 ? RAPVPState.WAITING_EXPLOSION : RAPVPState.CHARGING_ANCHOR;
             return;
         }
-
         Player target = Objects.requireNonNull(currentTarget, "currentTarget");
-        Optional<BlockPos> posOpt = positionFinder.findBestAnchorPos(target);
+        Optional<BlockVector> posOpt = positionFinder.findBestAnchorPos(target);
         if (posOpt.isEmpty()) {
-            if (!isHyperAggressiveDifficulty()
-                    && pearlController.canUseEnderpearl()
-                    && bot.distanceTo(currentTarget) > 10.0D) {
+            if (!isHyperAggressiveDifficulty() && pearlController.canUseEnderpearl() && bot.distanceTo(target) > 10.0D) {
                 pearlController.tryUseEnderpearl(target);
             }
             return;
         }
-
         anchorPos = posOpt.get();
-
         if (!inventory.isHoldingAnchor()) {
             inventory.switchToAnchor();
             return;
         }
-
         if (anchorPlacer.placeAnchor(anchorPos)) {
             ownsAnchor = true;
             state = RAPVPState.CHARGING_ANCHOR;
             failedExplosionAttempts = 0;
-        } else if (bot.level().getBlockState(anchorPos).getBlock() instanceof RespawnAnchorBlock) {
+        } else if (anchorData(anchorPos) != null) {
             state = RAPVPState.CHARGING_ANCHOR;
         }
     }
@@ -130,33 +126,21 @@ public final class BotRAPVPController {
             state = RAPVPState.PLACING_ANCHOR;
             return;
         }
-
-        BlockState stateBlock = bot.level().getBlockState(anchorPos);
-        if (!(stateBlock.getBlock() instanceof RespawnAnchorBlock)) {
+        RespawnAnchor anchorData = anchorData(anchorPos);
+        if (anchorData == null) {
             state = RAPVPState.PLACING_ANCHOR;
             anchorPos = null;
             return;
         }
-
-        int charges = stateBlock.getValue(RespawnAnchorBlock.CHARGE);
-        if (charges > 0) {
+        if (anchorData.getCharges() > 0) {
             state = RAPVPState.WAITING_EXPLOSION;
             return;
         }
-
         if (!inventory.isHoldingGlow()) {
             inventory.switchToGlow();
             return;
         }
-
         if (anchorCharger.chargeAnchor(anchorPos)) {
-            state = RAPVPState.WAITING_EXPLOSION;
-            return;
-        }
-
-        BlockState afterCharge = bot.level().getBlockState(anchorPos);
-        if (afterCharge.getBlock() instanceof RespawnAnchorBlock
-                && afterCharge.getValue(RespawnAnchorBlock.CHARGE) > 0) {
             state = RAPVPState.WAITING_EXPLOSION;
         }
     }
@@ -166,38 +150,24 @@ public final class BotRAPVPController {
             state = RAPVPState.PLACING_ANCHOR;
             return;
         }
-
-        BlockState stateBlock = bot.level().getBlockState(anchorPos);
-        if (stateBlock.getBlock() instanceof RespawnAnchorBlock) {
-            int charges = stateBlock.getValue(RespawnAnchorBlock.CHARGE);
-            if (charges <= 0) {
-                state = RAPVPState.CHARGING_ANCHOR;
-                return;
-            }
-
-            inventory.switchToEmptySlot();
-            boolean exploded = anchorExploder.explodeAnchor(anchorPos);
-            if (exploded) {
-                failedExplosionAttempts = 0;
-                lastAnchorExplosionTime = System.currentTimeMillis();
-                state = RAPVPState.PLACING_ANCHOR;
-                anchorPos = null;
-                ownsAnchor = false;
-            } else {
-                failedExplosionAttempts++;
-                int retryLimit = isHyperAggressiveDifficulty() ? 3 : 4;
-                if (failedExplosionAttempts >= retryLimit) {
-                    failedExplosionAttempts = 0;
-                    state = RAPVPState.PLACING_ANCHOR;
-                    anchorPos = null;
-                    ownsAnchor = false;
-                }
-            }
-        } else {
+        RespawnAnchor anchorData = anchorData(anchorPos);
+        if (anchorData == null) {
+            resetAnchor();
+            return;
+        }
+        if (anchorData.getCharges() <= 0) {
+            state = RAPVPState.CHARGING_ANCHOR;
+            return;
+        }
+        inventory.switchToEmptySlot();
+        boolean exploded = anchorExploder.explodeAnchor(anchorPos);
+        if (exploded) {
             failedExplosionAttempts = 0;
-            state = RAPVPState.PLACING_ANCHOR;
-            anchorPos = null;
-            ownsAnchor = false;
+            lastAnchorExplosionTime = System.currentTimeMillis();
+            resetAnchor();
+        } else if (++failedExplosionAttempts >= (isHyperAggressiveDifficulty() ? 3 : 4)) {
+            failedExplosionAttempts = 0;
+            resetAnchor();
         }
     }
 
@@ -211,49 +181,38 @@ public final class BotRAPVPController {
         this.lastAnchorExplosionTime = 0L;
     }
 
+    private void resetAnchor() {
+        state = RAPVPState.PLACING_ANCHOR;
+        anchorPos = null;
+        ownsAnchor = false;
+    }
+
     private void removeOwnedAnchor() {
         if (!ownsAnchor || anchorPos == null) {
             ownsAnchor = false;
             return;
         }
-        if (level.getBlockState(anchorPos).getBlock() instanceof RespawnAnchorBlock) {
-            level.setBlockAndUpdate(anchorPos, Blocks.AIR.defaultBlockState());
+        if (anchorData(anchorPos) != null) {
+            blockAt(anchorPos).setType(Material.AIR, false);
         }
         ownsAnchor = false;
     }
 
-    public boolean isActive() {
-        return enabled;
-    }
-
-    public RAPVPState getState() {
-        return state;
-    }
-
-    public @Nullable BlockPos getCurrentAnchorPos() {
-        return anchorPos;
-    }
+    public boolean isActive() { return enabled; }
+    public RAPVPState getState() { return state; }
+    public @Nullable BlockVector getCurrentAnchorPos() { return anchorPos; }
 
     public void setDifficulty(DifficultyLevel difficulty) {
         this.difficulty = difficulty;
         this.config = DifficultyProfileFactory.buildRAPVPConfig(difficulty);
-
         this.positionFinder.setConfig(config);
     }
 
-    public DifficultyLevel getDifficulty() {
-        return difficulty;
-    }
-
-    public RAPVPConfig getConfig() {
-        return config;
-    }
+    public DifficultyLevel getDifficulty() { return difficulty; }
+    public RAPVPConfig getConfig() { return config; }
 
     public boolean hadRecentAnchorExplosion(long windowMs) {
-        if (lastAnchorExplosionTime <= 0L) {
-            return false;
-        }
-        return System.currentTimeMillis() - lastAnchorExplosionTime <= windowMs;
+        return lastAnchorExplosionTime > 0L && System.currentTimeMillis() - lastAnchorExplosionTime <= windowMs;
     }
 
     private boolean isHyperAggressiveDifficulty() {
@@ -261,64 +220,33 @@ public final class BotRAPVPController {
     }
 
     private int getActionCyclesForDifficulty() {
-        if (difficulty == DifficultyLevel.GOD) {
-            return 2;
-        }
-        if (difficulty == DifficultyLevel.HARD) {
-            return 2;
-        }
-        return 1;
+        return difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD ? 2 : 1;
     }
 
-    private Optional<BlockPos> findReusableAnchorNearTarget() {
-        if (config == null || currentTarget == null) {
-            return Optional.empty();
-        }
-
-        BlockPos targetPos = currentTarget.blockPosition();
+    private Optional<BlockVector> findReusableAnchorNearTarget() {
+        if (config == null || currentTarget == null) return Optional.empty();
+        int targetX = currentTarget.getLocation().getBlockX();
+        int targetY = currentTarget.getLocation().getBlockY();
+        int targetZ = currentTarget.getLocation().getBlockZ();
         int horizontalRadius = Math.max(3, Math.min(config.getMaxDistance(), isHyperAggressiveDifficulty() ? 5 : 7));
         int verticalRadius = isHyperAggressiveDifficulty() ? 4 : 3;
         double maxTargetDistance = isHyperAggressiveDifficulty() ? 4.0D : 5.0D;
-
-        BlockPos bestPos = null;
+        BlockVector bestPos = null;
         double bestScore = Double.NEGATIVE_INFINITY;
-
         for (int dx = -horizontalRadius; dx <= horizontalRadius; dx++) {
             for (int dz = -horizontalRadius; dz <= horizontalRadius; dz++) {
                 for (int dy = -verticalRadius; dy <= verticalRadius; dy++) {
-                    BlockPos check = targetPos.offset(dx, dy, dz);
-                    BlockState state = bot.level().getBlockState(check);
-                    if (!(state.getBlock() instanceof RespawnAnchorBlock)) {
-                        continue;
-                    }
-
-                    Vec3 anchorCenter = Vec3.atCenterOf(check);
-                    double distanceToBot = anchorCenter.distanceTo(bot.position());
-                    if (distanceToBot > config.getMaxDistance()) {
-                        continue;
-                    }
-                    double distanceToTarget = anchorCenter.distanceTo(currentTarget.position());
-                    if (distanceToTarget > maxTargetDistance) {
-                        continue;
-                    }
-
-                    int charges = state.getValue(RespawnAnchorBlock.CHARGE);
-                    if (charges <= 0 && !inventory.hasItem(net.minecraft.world.item.Items.GLOWSTONE)) {
-                        continue;
-                    }
-
-                    double targetDamage =
-                            ExplosionDamageEstimator.estimateAnchorDamage(level, anchorCenter, currentTarget);
-                    double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(level, anchorCenter, bot);
-                    if (selfDamage >= bot.getHealth() - 1.0F) {
-                        continue;
-                    }
-
-                    double score = (targetDamage * 3.2D) - (selfDamage * 2.8D);
-                    score += charges > 0 ? 8.0D : 2.0D;
-                    score -= distanceToBot * 0.45D;
-                    score -= Math.max(0.0D, distanceToTarget - 3.0D) * 3.2D;
-
+                    BlockVector check = new BlockVector(targetX + dx, targetY + dy, targetZ + dz);
+                    RespawnAnchor data = anchorData(check);
+                    if (data == null) continue;
+                    org.bukkit.Location center = centerOf(check);
+                    if (center.distance(bot.getLocation()) > config.getMaxDistance()) continue;
+                    if (center.distance(currentTarget.getLocation()) > maxTargetDistance) continue;
+                    if (data.getCharges() <= 0 && !inventory.hasItem(Material.GLOWSTONE)) continue;
+                    double targetDamage = ExplosionDamageEstimator.estimateAnchorDamage(center, currentTarget);
+                    double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(center, bot.asBukkitPlayer());
+                    if (selfDamage >= bot.healthValue() - 1.0D) continue;
+                    double score = (targetDamage * 3.2D) - (selfDamage * 2.8D) + (data.getCharges() > 0 ? 8.0D : 2.0D);
                     if (score > bestScore) {
                         bestScore = score;
                         bestPos = check;
@@ -326,7 +254,18 @@ public final class BotRAPVPController {
                 }
             }
         }
-
         return Optional.ofNullable(bestPos);
+    }
+
+    private @Nullable RespawnAnchor anchorData(BlockVector pos) {
+        return blockAt(pos).getBlockData() instanceof RespawnAnchor anchor ? anchor : null;
+    }
+
+    private Block blockAt(BlockVector pos) {
+        return bot.getWorld().getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    }
+
+    private org.bukkit.Location centerOf(BlockVector pos) {
+        return new org.bukkit.Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
     }
 }

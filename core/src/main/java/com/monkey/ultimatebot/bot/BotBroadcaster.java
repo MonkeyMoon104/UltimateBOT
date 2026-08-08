@@ -18,7 +18,7 @@ public class BotBroadcaster {
         for (Player online : Bukkit.getOnlinePlayers()) {
             showBotToViewer(online, bot);
         }
-        BotEquipmentUtils.broadcastEquipment(bot.asPlayer(), armorMap, blastProtectionMap);
+        BotEquipmentUtils.broadcastEquipment(bot, armorMap, blastProtectionMap);
     }
 
     public static int syncVisibleBotsForPlayer(Player viewer, Collection<ITrainingBot> bots) {
@@ -30,11 +30,11 @@ public class BotBroadcaster {
         World viewerWorld = viewer.getWorld();
 
         for (ITrainingBot bot : bots) {
-            if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
+            if (bot == null || bot.asBukkitPlayer() == null || bot.asBukkitPlayer().getWorld() == null) {
                 continue;
             }
 
-            World botWorld = bot.asPlayer().level().getWorld();
+            World botWorld = bot.asBukkitPlayer().getWorld();
             if (botWorld == null || !viewerWorld.getUID().equals(botWorld.getUID())) {
                 continue;
             }
@@ -49,6 +49,6 @@ public class BotBroadcaster {
     private static void showBotToViewer(Player viewer, ITrainingBot bot) {
         Packet.sendAddPlayerPacket(viewer, bot);
         Packet.sendSpawnPlayerPacket(viewer, bot);
-        BotEquipmentUtils.sendCurrentEquipmentToViewer(bot.asPlayer(), viewer);
+        BotEquipmentUtils.sendCurrentEquipmentToViewer(bot, viewer);
     }
 }

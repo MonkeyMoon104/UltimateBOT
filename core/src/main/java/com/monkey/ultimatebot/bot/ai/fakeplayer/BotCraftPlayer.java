@@ -86,7 +86,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     private final ITrainingBot trainingBot;
 
     public BotCraftPlayer(ITrainingBot trainingBot) {
-        super((CraftServer) Bukkit.getServer(), trainingBot.asPlayer());
+        super((CraftServer) Bukkit.getServer(), (Player) trainingBot);
         this.trainingBot = trainingBot;
     }
 
@@ -129,7 +129,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Player getHandle() {
-        return trainingBot.asPlayer();
+        return nativeHandle();
     }
 
     @Override
@@ -335,22 +335,26 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public boolean isSneaking() {
-        return trainingBot.asPlayer().isShiftKeyDown();
+        return nativeHandle().isShiftKeyDown();
     }
 
     @Override
     public void setSneaking(boolean sneak) {
-        trainingBot.asPlayer().setShiftKeyDown(sneak);
+        nativeHandle().setShiftKeyDown(sneak);
     }
 
     @Override
     public boolean isSprinting() {
-        return trainingBot.asPlayer().isSprinting();
+        return nativeHandle().isSprinting();
     }
 
     @Override
     public void setSprinting(boolean sprinting) {
-        trainingBot.asPlayer().setSprinting(sprinting);
+        nativeHandle().setSprinting(sprinting);
+    }
+
+    private Player nativeHandle() {
+        return (Player) trainingBot;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IDamageTracker;
-import net.minecraft.world.entity.player.Player;
 
 public class DamageTracker implements IDamageTracker {
 
@@ -13,13 +13,13 @@ public class DamageTracker implements IDamageTracker {
     private long comboStartTime = 0;
     private boolean wasRecentlyDamaged = false;
 
-    public DamageTracker(Player bot) {
-        this.lastHealth = bot.getHealth();
+    public DamageTracker(ITrainingBot bot) {
+        this.lastHealth = (float) bot.healthValue();
     }
 
     @Override
-    public void onDamageReceived(Player bot) {
-        float currentHealth = bot.getHealth();
+    public void onDamageReceived(ITrainingBot bot) {
+        float currentHealth = (float) bot.healthValue();
         long currentTime = System.currentTimeMillis();
 
         if (currentHealth < lastHealth) {

@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.entity.LivingEntity;
 
 public interface IAttackExecutor {
 
-    void performCriticalAttack(Player bot, LivingEntity target);
+    void performCriticalAttack(ITrainingBot bot, LivingEntity target);
 
-    void performNormalAttack(Player bot, LivingEntity target);
+    void performNormalAttack(ITrainingBot bot, LivingEntity target);
 }

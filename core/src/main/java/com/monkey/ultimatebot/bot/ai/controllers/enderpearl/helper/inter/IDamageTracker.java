@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IDamageTracker {
 
-    void onDamageReceived(Player bot);
+    void onDamageReceived(ITrainingBot bot);
 
     void tick();
 

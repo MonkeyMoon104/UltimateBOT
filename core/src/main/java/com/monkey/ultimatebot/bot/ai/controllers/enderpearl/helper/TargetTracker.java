@@ -1,32 +1,33 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ITargetTracker;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public class TargetTracker implements ITargetTracker {
 
-    private @Nullable Vec3 lastTargetPosition;
-    private Vec3 predictedTargetMovement = Vec3.ZERO;
+    private @Nullable Vector lastTargetPosition;
+    private Vector predictedTargetMovement = new Vector();
 
     @Override
     public void updateTargetTracking(Player target) {
-        Vec3 currentPos = target.position();
+        Vector currentPos = target.getLocation().toVector();
         if (lastTargetPosition != null) {
-            Vec3 movement = currentPos.subtract(lastTargetPosition);
-            predictedTargetMovement = movement.scale(0.8).add(predictedTargetMovement.scale(0.2));
+            Vector movement = currentPos.clone().subtract(lastTargetPosition);
+            predictedTargetMovement = movement.multiply(0.8).add(predictedTargetMovement.multiply(0.2));
         }
         lastTargetPosition = currentPos;
     }
 
     @Override
-    public Vec3 getPredictedTargetMovement() {
+    public Vector getPredictedTargetMovement() {
         return predictedTargetMovement;
     }
 
     @Override
-    public @Nullable Vec3 getLastTargetPosition() {
+    public @Nullable Vector getLastTargetPosition() {
         return lastTargetPosition;
     }
 }

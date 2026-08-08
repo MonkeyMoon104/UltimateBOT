@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.EquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ItemChecker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ItemManager;
@@ -11,15 +12,13 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemMan
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public class BotInventoryController {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final SlotManager slotManager;
     private final IResourceReplenisher resourceReplenisher;
     private final IEquipmentBroadcaster equipmentBroadcaster;
@@ -36,7 +35,7 @@ public class BotInventoryController {
     public static final int GOLDEN_APPLE_SLOT = 7;
     public static final int EMPTY_SLOT = 8;
 
-    public BotInventoryController(Player bot) {
+    public BotInventoryController(ITrainingBot bot) {
         this.bot = Objects.requireNonNull(bot, "bot");
         this.resourceReplenisher = new ResourceReplenisher();
         this.equipmentBroadcaster = new EquipmentBroadcaster();
@@ -110,17 +109,26 @@ public class BotInventoryController {
         return slotManager.getItem(slot);
     }
 
+    public ItemStack getBukkitItem(int slot) {
+        return getItem(slot);
+    }
+
     public ItemStack getEquipment(EquipmentSlot slot) {
-        return bot.getItemBySlot(java.util.Objects.requireNonNull(slot, "slot"));
+        return bot.getItem(java.util.Objects.requireNonNull(slot, "slot"));
+    }
+
+    public ItemStack getBukkitEquipment(EquipmentSlot slot) {
+        return getEquipment(slot);
     }
 
     public void setEquipment(EquipmentSlot slot, ItemStack item) {
         EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
         ItemStack checkedItem = Objects.requireNonNull(item, "item");
-        if (ItemStack.matches(bot.getItemBySlot(checkedSlot), checkedItem)) {
+        ItemStack current = bot.getItem(checkedSlot);
+        if (current.isSimilar(checkedItem) && current.getAmount() == checkedItem.getAmount()) {
             return;
         }
-        bot.setItemSlot(checkedSlot, checkedItem.copy());
+        bot.setItem(checkedSlot, checkedItem.clone());
         equipmentBroadcaster.broadcastEquipmentChange(bot);
     }
 
@@ -134,8 +142,9 @@ public class BotInventoryController {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : checkedLoadout.entrySet()) {
             EquipmentSlot slot = Objects.requireNonNull(entry.getKey(), "equipment slot");
             ItemStack item = Objects.requireNonNull(entry.getValue(), "equipment item");
-            if (!ItemStack.matches(bot.getItemBySlot(slot), item)) {
-                bot.setItemSlot(slot, item.copy());
+            ItemStack current = bot.getItem(slot);
+            if (!current.isSimilar(item) || current.getAmount() != item.getAmount()) {
+                bot.setItem(slot, item.clone());
                 changed = true;
             }
         }
@@ -144,26 +153,40 @@ public class BotInventoryController {
         }
     }
 
-    public void startUsingItem(InteractionHand hand) {
-        InteractionHand checkedHand = Objects.requireNonNull(hand, "hand");
-        ItemStack heldItem = bot.getItemInHand(checkedHand);
-        if (bot.isUsingItem()
-                && bot.getUsedItemHand() == checkedHand
-                && ItemStack.matches(bot.getUseItem(), heldItem)) {
+    public void applyBukkitHotbarLoadout(Map<Integer, ItemStack> loadout, int selectedSlot) {
+        applyHotbarLoadout(loadout, selectedSlot);
+    }
+
+    public void applyBukkitEquipmentLoadout(Map<EquipmentSlot, ItemStack> loadout) {
+        applyEquipmentLoadout(loadout);
+    }
+
+    public void startUsingItem(EquipmentSlot hand) {
+        EquipmentSlot checkedHand = Objects.requireNonNull(hand, "hand");
+        ItemStack heldItem = bot.getItem(checkedHand);
+        if (bot.isUsingItem() && bot.activeItemStack().isSimilar(heldItem)) {
             return;
         }
         if (bot.isUsingItem()) {
-            bot.releaseUsingItem();
+            bot.stopUsingItem();
         }
-        bot.startUsingItem(checkedHand);
+        bot.beginUsingItem(checkedHand);
         equipmentBroadcaster.broadcastMetadataChange(bot);
+    }
+
+    public void startUsingMainHand() {
+        startUsingItem(EquipmentSlot.HAND);
+    }
+
+    public void startUsingOffHand() {
+        startUsingItem(EquipmentSlot.OFF_HAND);
     }
 
     public void releaseUsingItem() {
         if (!bot.isUsingItem()) {
             return;
         }
-        bot.releaseUsingItem();
+        bot.stopUsingItem();
         equipmentBroadcaster.broadcastMetadataChange(bot);
     }
 
@@ -205,9 +228,9 @@ public class BotInventoryController {
             return false;
         }
         if (!resourceReplenisher.hasInfiniteResources()) {
-            stack.shrink(1);
+            stack.setAmount(stack.getAmount() - 1);
             if (stack.isEmpty()) {
-                setItem(slot, ItemStack.EMPTY);
+                setItem(slot, ItemStack.empty());
             } else {
                 setItem(slot, stack);
             }
@@ -215,12 +238,13 @@ public class BotInventoryController {
         return true;
     }
 
-    public int getItemCount(Item item) {
-        return itemChecker.getItemCount(slotManager.getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
+    public int getItemCount(Material material) {
+        return itemChecker.getItemCount(
+                slotManager.getHotbarSlots(), material, resourceReplenisher.hasInfiniteResources());
     }
 
-    public boolean hasItem(Item item) {
-        return itemChecker.hasItem(slotManager.getHotbarSlots(), item, resourceReplenisher.hasInfiniteResources());
+    public boolean hasItem(Material material) {
+        return itemChecker.hasItem(slotManager.getHotbarSlots(), material, resourceReplenisher.hasInfiniteResources());
     }
 
     public void setInfiniteResources(boolean infinite) {

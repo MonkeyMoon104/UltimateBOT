@@ -1,29 +1,26 @@
 package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.api.extension.control.BotControl;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import java.util.Objects;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 public final class CoreBotControl implements BotControl {
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotMovementController movement;
     private final BotRotationController rotation;
     private final BotAttackController attack;
     private final BotInventoryController inventory;
 
     public CoreBotControl(
-            Player bot,
+            ITrainingBot bot,
             BotMovementController movement,
             BotRotationController rotation,
             BotAttackController attack,
@@ -37,40 +34,40 @@ public final class CoreBotControl implements BotControl {
 
     @Override
     public void lookAt(org.bukkit.entity.LivingEntity target) {
-        rotation.updateRotation(nms(target));
+        rotation.updateRotation(target);
     }
 
     @Override
     public void moveTo(Location destination) {
         Location checked = Objects.requireNonNull(destination, "destination");
         World destinationWorld = Objects.requireNonNull(checked.getWorld(), "destination.world");
-        if (!destinationWorld.getUID().equals(bot.level().getWorld().getUID())) {
+        if (!destinationWorld.getUID().equals(bot.getWorld().getUID())) {
             throw new IllegalArgumentException("destination must be in the bot world");
         }
-        movement.moveToPosition(new Vec3(checked.getX(), checked.getY(), checked.getZ()));
+        movement.moveToPosition(checked.toVector());
     }
 
     @Override
     public void moveTowards(org.bukkit.entity.LivingEntity target, double desiredDistance) {
         requireDistance(desiredDistance);
-        LivingEntity handle = nms(target);
-        Vec3 delta = handle.position().subtract(bot.position());
-        if (delta.horizontalDistanceSqr() <= desiredDistance * desiredDistance) {
+        Vector delta = target.getLocation().toVector().subtract(bot.bukkitPosition());
+        delta.setY(0.0D);
+        if (delta.lengthSquared() <= desiredDistance * desiredDistance) {
             movement.stopMovement();
             return;
         }
-        movement.moveToPosition(handle.position());
+        movement.moveToPosition(target.getLocation().toVector());
     }
 
     @Override
     public void moveAwayFrom(org.bukkit.entity.LivingEntity target, double desiredDistance) {
         requireDistance(desiredDistance);
-        LivingEntity handle = nms(target);
-        Vec3 away = bot.position().subtract(handle.position());
-        if (away.horizontalDistanceSqr() < 1.0E-6D) {
-            away = new Vec3(1.0D, 0.0D, 0.0D);
+        Vector away = bot.bukkitPosition().subtract(target.getLocation().toVector());
+        away.setY(0.0D);
+        if (away.lengthSquared() < 1.0E-6D) {
+            away = new Vector(1.0D, 0.0D, 0.0D);
         }
-        movement.moveToPosition(bot.position().add(away.normalize().scale(desiredDistance)));
+        movement.moveToPosition(bot.bukkitPosition().add(away.normalize().multiply(desiredDistance)));
     }
 
     @Override
@@ -80,12 +77,12 @@ public final class CoreBotControl implements BotControl {
 
     @Override
     public void attack(org.bukkit.entity.LivingEntity target) {
-        attack.handleAttack(nms(target));
+        attack.handleAttack(target);
     }
 
     @Override
     public void swingMainHand() {
-        bot.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+        bot.swingMainHand();
     }
 
     @Override
@@ -97,20 +94,13 @@ public final class CoreBotControl implements BotControl {
     @Override
     public void setInventoryItem(int slot, ItemStack item) {
         validateSlot(slot);
-        inventory.setItem(slot, CraftItemStack.asNMSCopy(Objects.requireNonNull(item, "item")));
+        inventory.setItem(slot, Objects.requireNonNull(item, "item"));
     }
 
     @Override
     public ItemStack inventoryItem(int slot) {
         validateSlot(slot);
-        return CraftItemStack.asBukkitCopy(inventory.getItem(slot));
-    }
-
-    private static LivingEntity nms(org.bukkit.entity.LivingEntity entity) {
-        if (!(Objects.requireNonNull(entity, "entity") instanceof CraftLivingEntity craftEntity)) {
-            throw new IllegalArgumentException("entity does not expose a CraftBukkit handle");
-        }
-        return craftEntity.getHandle();
+        return inventory.getItem(slot).clone();
     }
 
     private static void validateSlot(int slot) {

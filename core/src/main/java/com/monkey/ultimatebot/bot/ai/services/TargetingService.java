@@ -52,16 +52,16 @@ public class TargetingService {
     }
 
     public @Nullable Mob findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
-        if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null || maxRange <= 0.0D) {
+        if (bot == null || bot.asBukkitPlayer() == null || maxRange <= 0.0D) {
             return null;
         }
 
-        org.bukkit.World world = bot.asPlayer().level().getWorld();
+        org.bukkit.World world = bot.asBukkitPlayer().getWorld();
         if (world == null) {
             return null;
         }
 
-        org.bukkit.Location center = bot.asPlayer().getBukkitEntity().getLocation();
+        org.bukkit.Location center = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
         double closestDistanceSq = maxRange * maxRange;
         Mob closest = null;
         for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
@@ -140,11 +140,11 @@ public class TargetingService {
             @Nullable UUID excludedPlayer,
             Set<UUID> allowedTargets) {
         if (centerPlayer == null || !centerPlayer.isOnline() || centerPlayer.isDead()) {
-            targetCache.invalidate(bot.asPlayer().getUUID());
+            targetCache.invalidate(bot.getUniqueId());
             return null;
         }
 
-        UUID botUUID = bot.asPlayer().getUUID();
+        UUID botUUID = bot.getUniqueId();
         UUID centerUUID = centerPlayer.getUniqueId();
         boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
 
@@ -218,11 +218,11 @@ public class TargetingService {
             @Nullable UUID excludedPlayer,
             Set<UUID> allowedTargets,
             @Nullable Predicate<Player> candidateFilter) {
-        if (bot == null || bot.asPlayer() == null || bot.asPlayer().level() == null) {
+        if (bot == null || bot.asBukkitPlayer() == null) {
             return null;
         }
 
-        UUID botUUID = bot.asPlayer().getUUID();
+        UUID botUUID = bot.getUniqueId();
         boolean useAllowedTargetsFilter = allowedTargets != null && !allowedTargets.isEmpty();
         boolean useDynamicFilter = candidateFilter != null;
 
@@ -237,15 +237,15 @@ public class TargetingService {
             targetCache.invalidate(botUUID);
         }
 
-        org.bukkit.World centerWorld = bot.asPlayer().level().getWorld();
+        org.bukkit.World centerWorld = bot.asBukkitPlayer().getWorld();
         if (centerWorld == null) {
             targetCache.invalidate(botUUID);
             return null;
         }
 
-        double centerX = bot.asPlayer().getX();
-        double centerY = bot.asPlayer().getY();
-        double centerZ = bot.asPlayer().getZ();
+        double centerX = bot.asBukkitPlayer().getX();
+        double centerY = bot.asBukkitPlayer().getY();
+        double centerZ = bot.asBukkitPlayer().getZ();
         double closestDistanceSq = maxRange * maxRange;
         Player closestPlayer = null;
 
@@ -332,12 +332,11 @@ public class TargetingService {
 
         for (ITrainingBot managedBot :
                 options.getTraining().getBotRegistry().getAllBots().values()) {
-            if (managedBot == null || managedBot.asPlayer() == null) {
+            if (managedBot == null || managedBot.asBukkitPlayer() == null) {
                 continue;
             }
-            if (managedBot.asPlayer().getBukkitEntity() instanceof Player managedPlayer) {
-                candidates.put(managedPlayer.getUniqueId(), managedPlayer);
-            }
+            Player managedPlayer = managedBot.asBukkitPlayer();
+            candidates.put(managedPlayer.getUniqueId(), managedPlayer);
         }
 
         return new ArrayList<>(candidates.values());

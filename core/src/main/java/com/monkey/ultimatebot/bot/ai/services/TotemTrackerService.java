@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public class TotemTrackerService {
 
@@ -19,8 +19,8 @@ public class TotemTrackerService {
     }
 
     public void onTick() {
-        ItemStack offhand = bot.asPlayer().getItemBySlot(EquipmentSlot.OFFHAND);
-        ItemStack mainhand = bot.asPlayer().getItemBySlot(EquipmentSlot.MAINHAND);
+        ItemStack offhand = bot.getItem(EquipmentSlot.OFF_HAND);
+        ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
 
         boolean hasOffhandTotem = isTotem(offhand);
         boolean hasMainhandTotem = isTotem(mainhand);
@@ -54,7 +54,7 @@ public class TotemTrackerService {
                 }
                 java.util.UUID ownerUUID = bot.getPlugin()
                         .getBotRegistry()
-                        .getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                        .getOwnerUUIDByBotUUID(bot.getUniqueId());
                 if (ownerUUID != null) {
                     com.monkey.ultimatebot.api.model.runtime.BotSnapshot snapshot =
                             bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -64,7 +64,7 @@ public class TotemTrackerService {
                                 .publish(new com.monkey.ultimatebot.api.event.combat.BotTotemUseEvent(
                                         bot.getPlugin()
                                                 .getBotEventDispatcher()
-                                                .nextSequence(bot.asPlayer().getUUID()),
+                                                .nextSequence(bot.getUniqueId()),
                                         snapshot,
                                         consumedTotems,
                                         totemCount));
@@ -81,7 +81,7 @@ public class TotemTrackerService {
     }
 
     private boolean isTotem(ItemStack itemStack) {
-        return itemStack != null && !itemStack.isEmpty() && Items.TOTEM_OF_UNDYING.equals(itemStack.getItem());
+        return itemStack != null && !itemStack.isEmpty() && itemStack.getType() == Material.TOTEM_OF_UNDYING;
     }
 
     public int getTotemCount() {

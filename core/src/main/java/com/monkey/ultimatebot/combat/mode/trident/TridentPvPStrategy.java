@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.LivingEntity;
+import org.bukkit.entity.LivingEntity;
 
 public final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     private static final int RIPTIDE_COOLDOWN_TICKS = 70;
@@ -105,7 +105,7 @@ public final class TridentPvPStrategy extends AbstractCombatModeStrategy {
         if (phaseTicks == 2) {
             utilityActions.restoreWater(context);
         }
-        context.motion().steerVelocityTowards(target, 0.46D, context.bot().getDeltaMovement().y);
+        context.motion().steerVelocityTowards(target, 0.46D, context.motion().botVerticalVelocity());
         if (context.motion().distanceTo(target) <= 3.0D || phaseTicks >= 8) {
             context.motion().setSwimming(false);
             transitionTo(Phase.AIR_HIT);
@@ -114,7 +114,7 @@ public final class TridentPvPStrategy extends AbstractCombatModeStrategy {
 
     private void airHit(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(TridentLoadout.RIPTIDE_SLOT);
-        context.motion().steerVelocityTowards(target, 0.34D, context.bot().getDeltaMovement().y);
+        context.motion().steerVelocityTowards(target, 0.34D, context.motion().botVerticalVelocity());
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, TridentLoadout.RIPTIDE_SLOT);
             loyaltyDue = true;

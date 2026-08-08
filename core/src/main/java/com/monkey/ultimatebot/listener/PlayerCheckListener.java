@@ -135,7 +135,7 @@ public class PlayerCheckListener implements Listener {
         if (wasBotSpawned && currentDeathMessage != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
             if (bot != null
-                    && currentDeathMessage.contains(bot.asPlayer().getName().getString())) {
+                    && currentDeathMessage.contains(bot.asBukkitPlayer().getName())) {
                 setBotDeathMessage(event, player, options);
             }
         }
@@ -204,8 +204,8 @@ public class PlayerCheckListener implements Listener {
     private boolean deathMessageNamesBot(@Nullable String deathMessage, ITrainingBot bot) {
         return deathMessage != null
                 && bot != null
-                && bot.asPlayer() != null
-                && deathMessage.contains(bot.asPlayer().getName().getString());
+                && bot.asBukkitPlayer() != null
+                && deathMessage.contains(bot.asBukkitPlayer().getName());
     }
 
     private @Nullable BotKillContext findBotByBotUUID(@Nullable UUID botUUID) {
@@ -216,8 +216,8 @@ public class PlayerCheckListener implements Listener {
                 plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot candidate = entry.getValue();
             if (candidate != null
-                    && candidate.asPlayer() != null
-                    && botUUID.equals(candidate.asPlayer().getUUID())) {
+                    && candidate.asBukkitPlayer() != null
+                    && botUUID.equals(candidate.getUniqueId())) {
                 return toKillContext(entry.getKey(), candidate);
             }
         }
@@ -231,7 +231,7 @@ public class PlayerCheckListener implements Listener {
     }
 
     private void callBotKillEvent(Player victim, BotKillContext context) {
-        if (context == null || context.bot() == null || context.bot().asPlayer() == null) {
+        if (context == null || context.bot() == null || context.bot().asBukkitPlayer() == null) {
             return;
         }
         BotSnapshot snapshot = BotSnapshotMapper.toSnapshot(context.ownerUUID(), context.bot());
@@ -241,6 +241,6 @@ public class PlayerCheckListener implements Listener {
         plugin.getServer()
                 .getPluginManager()
                 .callEvent(new BotKillPlayerEvent(
-                        context.ownerUUID(), context.bot().asPlayer().getUUID(), victim, snapshot));
+                        context.ownerUUID(), context.bot().getUniqueId(), victim, snapshot));
     }
 }

@@ -7,13 +7,14 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlControl
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public class CombatDataManager implements ICombatDataManager {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotEnderpearlController enderpearlController;
     private final BotRAPVPController rapvpController;
     private final BotCPVPController cpvpController;
@@ -23,12 +24,12 @@ public class CombatDataManager implements ICombatDataManager {
     private long lastDamageTime = 0;
     private static final long DAMAGE_COMBO_WINDOW = 2000;
 
-    private @Nullable Vec3 lastTargetPosition;
-    private Vec3 targetVelocity = Vec3.ZERO;
+    private @Nullable Vector lastTargetPosition;
+    private Vector targetVelocity = new Vector();
     private long lastPositionUpdate = 0;
 
     public CombatDataManager(
-            Player bot,
+            ITrainingBot bot,
             BotEnderpearlController enderpearlController,
             BotRAPVPController rapvpController,
             BotCPVPController cpvpController) {
@@ -36,12 +37,12 @@ public class CombatDataManager implements ICombatDataManager {
         this.enderpearlController = enderpearlController;
         this.rapvpController = rapvpController;
         this.cpvpController = cpvpController;
-        this.lastKnownHealth = bot.getHealth();
+        this.lastKnownHealth = (float) bot.healthValue();
     }
 
     @Override
     public void updateCombatData(Player target, boolean allowCombatActions) {
-        float currentHealth = bot.getHealth();
+        float currentHealth = (float) bot.healthValue();
         long currentTime = System.currentTimeMillis();
 
         if (currentHealth < lastKnownHealth) {
@@ -54,18 +55,18 @@ public class CombatDataManager implements ICombatDataManager {
 
         lastKnownHealth = currentHealth;
 
-        Vec3 currentTargetPos = target.position();
+        Vector currentTargetPos = target.getLocation().toVector();
         if (lastTargetPosition != null && currentTime - lastPositionUpdate > 50) {
-            targetVelocity = currentTargetPos
+            targetVelocity = currentTargetPos.clone()
                     .subtract(lastTargetPosition)
-                    .scale(20.0 / (currentTime - lastPositionUpdate) * 1000);
+                    .multiply(20.0 / (currentTime - lastPositionUpdate) * 1000);
         }
         lastTargetPosition = currentTargetPos;
         lastPositionUpdate = currentTime;
 
-        if (((ITrainingBot) bot).isCombat() && allowCombatActions) {
-            int botY = bot.blockPosition().getY();
-            int targetY = target.blockPosition().getY();
+        if (bot.isCombat() && allowCombatActions) {
+            int botY = bot.getLocation().getBlockY();
+            int targetY = target.getLocation().getBlockY();
             int yDiff = targetY - botY;
             DifficultyLevel difficulty = cpvpController.getDifficulty();
             boolean hyperAggressive = difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
@@ -114,12 +115,12 @@ public class CombatDataManager implements ICombatDataManager {
     }
 
     @Override
-    public Vec3 getTargetVelocity() {
+    public Vector getTargetVelocity() {
         return targetVelocity;
     }
 
     @Override
-    public @Nullable Vec3 getLastTargetPosition() {
+    public @Nullable Vector getLastTargetPosition() {
         return lastTargetPosition;
     }
 }

@@ -1,20 +1,20 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public interface IPositionCalculator {
 
-    @Nullable Vec3 calculateEmergencyEscape(Player bot, Player target);
+    @Nullable Vector calculateEmergencyEscape(Player bot, Player target);
 
-    @Nullable Vec3 calculateMeleeDisengage(Player bot, Player target);
+    @Nullable Vector calculateMeleeDisengage(Player bot, Player target);
 
-    @Nullable Vec3 calculateLowGroundPosition(Player bot, Player target);
+    @Nullable Vector calculateLowGroundPosition(Player bot, Player target);
 
-    @Nullable Vec3 calculateAnchorPosition(Player bot, Player target);
+    @Nullable Vector calculateAnchorPosition(Player bot, Player target);
 
-    @Nullable Vec3 calculateAggressiveApproach(Player bot, Player target, @Nullable Vec3 predictedTargetMovement);
+    @Nullable Vector calculateAggressiveApproach(Player bot, Player target, @Nullable Vector predictedTargetMovement);
 
-    @Nullable Vec3 calculateStandardEscape(Player bot, Player target);
+    @Nullable Vector calculateStandardEscape(Player bot, Player target);
 }

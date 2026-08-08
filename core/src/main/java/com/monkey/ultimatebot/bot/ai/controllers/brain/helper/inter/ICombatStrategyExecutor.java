@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 public interface ICombatStrategyExecutor {
     void executeCombatStrategy(Player target);
@@ -21,7 +21,7 @@ public interface ICombatStrategyExecutor {
 
     boolean executeRetreating(Player target, double distance);
 
-    Vec3 getStrafeDirection(Player target);
+    Vector getStrafeDirection(Player target);
 
     void moveToTarget(Player target, double targetDistance);
 

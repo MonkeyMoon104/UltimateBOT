@@ -24,10 +24,10 @@ public class DistancePlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
+        if (bot != null && bot.asBukkitPlayer() != null) {
             Location playerLocation = Objects.requireNonNull(player.getLocation(), "player location");
             Location botLocation =
-                    Objects.requireNonNull(bot.asPlayer().getBukkitEntity().getLocation(), "bot location");
+                    Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
             double distance = playerLocation.distance(botLocation);
             return String.format("◈ %.1fm", distance);
         }

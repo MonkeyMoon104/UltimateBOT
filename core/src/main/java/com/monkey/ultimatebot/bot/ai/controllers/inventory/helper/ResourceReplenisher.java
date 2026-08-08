@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import java.util.Map;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public class ResourceReplenisher implements IResourceReplenisher {
 
@@ -27,12 +27,12 @@ public class ResourceReplenisher implements IResourceReplenisher {
         if (currentStack == null || currentStack.isEmpty()) return;
 
         switch (slot) {
-            case OBSIDIAN_SLOT -> refill(currentStack, Items.OBSIDIAN, 64);
-            case CRYSTAL_SLOT -> refill(currentStack, Items.END_CRYSTAL, 64);
-            case ENDERPEARL_SLOT -> refill(currentStack, Items.ENDER_PEARL, 16);
-            case ANCHOR_SLOT -> refill(currentStack, Items.RESPAWN_ANCHOR, 64);
-            case GLOW_SLOT -> refill(currentStack, Items.GLOWSTONE, 64);
-            case GOLDEN_APPLE_SLOT -> refill(currentStack, Items.GOLDEN_APPLE, 64);
+            case OBSIDIAN_SLOT -> refill(currentStack, Material.OBSIDIAN, 64);
+            case CRYSTAL_SLOT -> refill(currentStack, Material.END_CRYSTAL, 64);
+            case ENDERPEARL_SLOT -> refill(currentStack, Material.ENDER_PEARL, 16);
+            case ANCHOR_SLOT -> refill(currentStack, Material.RESPAWN_ANCHOR, 64);
+            case GLOW_SLOT -> refill(currentStack, Material.GLOWSTONE, 64);
+            case GOLDEN_APPLE_SLOT -> refill(currentStack, Material.GOLDEN_APPLE, 64);
             default -> {}
         }
     }
@@ -59,9 +59,9 @@ public class ResourceReplenisher implements IResourceReplenisher {
         return infiniteResources;
     }
 
-    private static void refill(ItemStack stack, net.minecraft.world.item.Item expectedItem, int count) {
-        if (expectedItem.equals(stack.getItem()) && stack.getCount() < count) {
-            stack.setCount(count);
+    private static void refill(ItemStack stack, Material expectedMaterial, int count) {
+        if (stack.getType() == expectedMaterial && stack.getAmount() < count) {
+            stack.setAmount(count);
         }
     }
 }

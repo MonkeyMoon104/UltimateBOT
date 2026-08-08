@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public final class ModeKit {
     private final Map<Integer, ItemStack> slots;
@@ -14,10 +14,10 @@ public final class ModeKit {
 
     private ModeKit(Map<Integer, ItemStack> slots, Map<EquipmentSlot, ItemStack> equipment) {
         Map<Integer, ItemStack> copy = new HashMap<>();
-        slots.forEach((slot, item) -> copy.put(slot, item.copy()));
+        slots.forEach((slot, item) -> copy.put(slot, item.clone()));
         this.slots = Collections.unmodifiableMap(copy);
         Map<EquipmentSlot, ItemStack> equipmentCopy = new java.util.EnumMap<>(EquipmentSlot.class);
-        equipment.forEach((slot, item) -> equipmentCopy.put(slot, item.copy()));
+        equipment.forEach((slot, item) -> equipmentCopy.put(slot, item.clone()));
         this.equipment = Collections.unmodifiableMap(equipmentCopy);
     }
 
@@ -27,13 +27,13 @@ public final class ModeKit {
 
     public Map<Integer, ItemStack> slots() {
         Map<Integer, ItemStack> copy = new HashMap<>();
-        slots.forEach((slot, item) -> copy.put(slot, item.copy()));
+        slots.forEach((slot, item) -> copy.put(slot, item.clone()));
         return copy;
     }
 
     public Map<EquipmentSlot, ItemStack> equipment() {
         Map<EquipmentSlot, ItemStack> copy = new java.util.EnumMap<>(EquipmentSlot.class);
-        equipment.forEach((slot, item) -> copy.put(slot, item.copy()));
+        equipment.forEach((slot, item) -> copy.put(slot, item.clone()));
         return copy;
     }
 
@@ -41,11 +41,11 @@ public final class ModeKit {
         private final Map<Integer, ItemStack> slots = new HashMap<>();
         private final Map<EquipmentSlot, ItemStack> equipment = new java.util.EnumMap<>(EquipmentSlot.class);
 
-        public Builder slot(int slot, Item item) {
+        public Builder slot(int slot, Material item) {
             return slot(slot, item, 1);
         }
 
-        public Builder slot(int slot, Item item, int count) {
+        public Builder slot(int slot, Material item, int count) {
             if (slot < 0 || slot > 8) {
                 throw new IllegalArgumentException("Hotbar slot must be between 0 and 8: " + slot);
             }
@@ -64,13 +64,13 @@ public final class ModeKit {
             if (checkedItem.isEmpty()) {
                 throw new IllegalArgumentException("Mode kit item cannot be empty");
             }
-            slots.put(slot, checkedItem.copy());
+            slots.put(slot, checkedItem.clone());
             return this;
         }
 
-        public Builder equipment(EquipmentSlot slot, Item item) {
+        public Builder equipment(EquipmentSlot slot, Material item) {
             EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
-            if (checkedSlot == EquipmentSlot.MAINHAND || checkedSlot == EquipmentSlot.BODY) {
+            if (checkedSlot == EquipmentSlot.HAND) {
                 throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
             }
             equipment.put(checkedSlot, new ItemStack(Objects.requireNonNull(item, "item")));
@@ -79,14 +79,14 @@ public final class ModeKit {
 
         public Builder equipment(EquipmentSlot slot, ItemStack item) {
             EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
-            if (checkedSlot == EquipmentSlot.MAINHAND || checkedSlot == EquipmentSlot.BODY) {
+            if (checkedSlot == EquipmentSlot.HAND) {
                 throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
             }
             ItemStack checkedItem = Objects.requireNonNull(item, "item");
             if (checkedItem.isEmpty()) {
                 throw new IllegalArgumentException("Mode equipment item cannot be empty");
             }
-            equipment.put(checkedSlot, checkedItem.copy());
+            equipment.put(checkedSlot, checkedItem.clone());
             return this;
         }
 

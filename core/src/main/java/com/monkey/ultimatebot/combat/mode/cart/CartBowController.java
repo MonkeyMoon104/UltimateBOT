@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.combat.mode.cart;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
-import net.minecraft.world.entity.LivingEntity;
+import org.bukkit.entity.LivingEntity;
 
 final class CartBowController {
     static final int BOW_SLOT = BotInventoryController.ENDERPEARL_SLOT;

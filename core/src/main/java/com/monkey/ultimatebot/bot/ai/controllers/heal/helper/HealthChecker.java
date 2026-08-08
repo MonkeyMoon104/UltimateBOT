@@ -1,14 +1,14 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class HealthChecker implements IHealthChecker {
 
     private float healthThreshold = 5.0f;
 
     @Override
-    public boolean needsHealing(Player bot) {
+    public boolean needsHealing(ITrainingBot bot) {
         return getCurrentHealth(bot) <= healthThreshold;
     }
 
@@ -23,7 +23,7 @@ public class HealthChecker implements IHealthChecker {
     }
 
     @Override
-    public float getCurrentHealth(Player bot) {
-        return bot.getHealth();
+    public float getCurrentHealth(ITrainingBot bot) {
+        return (float) bot.healthValue();
     }
 }

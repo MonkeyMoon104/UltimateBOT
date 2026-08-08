@@ -1,76 +1,46 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.RespawnAnchorBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.RespawnAnchor;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 
 public class AnchorCharger {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotInventoryController inventory;
     private final BotRotationController rotation;
-    private final Level level;
 
-    public AnchorCharger(Player bot, BotInventoryController inventory, BotRotationController rotation, Level level) {
+    public AnchorCharger(ITrainingBot bot, BotInventoryController inventory, BotRotationController rotation) {
         this.bot = bot;
         this.inventory = inventory;
         this.rotation = rotation;
-        this.level = level;
     }
 
-    public boolean chargeAnchor(BlockPos anchorPos) {
+    public boolean chargeAnchor(BlockVector anchorPos) {
         try {
-
-            if (!hasLineOfSight(anchorPos)) {
-                return false;
-            }
-
             ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || !Items.GLOWSTONE.equals(stack.getItem())) {
-                return false;
-            }
-
-            BlockState anchorState = bot.level().getBlockState(anchorPos);
-            if (!(anchorState.getBlock() instanceof RespawnAnchorBlock)) {
-                return false;
-            }
-
-            int currentCharges = anchorState.getValue(RespawnAnchorBlock.CHARGE);
-            if (currentCharges >= 4) {
-                return false;
-            }
-
-            BlockState newState = anchorState.setValue(RespawnAnchorBlock.CHARGE, 4);
-
-            bot.level().setBlock(anchorPos, newState, 3);
-
+            if (stack == null || stack.getType() != Material.GLOWSTONE) return false;
+            Block block = blockAt(anchorPos);
+            if (!(block.getBlockData() instanceof RespawnAnchor anchorData)) return false;
+            if (anchorData.getCharges() >= anchorData.getMaximumCharges()) return false;
+            anchorData.setCharges(anchorData.getMaximumCharges());
+            block.setBlockData(anchorData, true);
             NMSBridgeManager.get()
-                    .playSound(
-                            bot.level(),
-                            anchorPos,
-                            net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
-                            net.minecraft.sounds.SoundSource.BLOCKS,
-                            1.0F,
-                            1.0F);
-
-            rotation.lookAt(Vec3.atLowerCornerOf(anchorPos));
-
-            bot.swing(InteractionHand.MAIN_HAND);
-
+                    .playSound(centerOf(anchorPos), "block.respawn_anchor.charge", "blocks", 1.0F, 1.0F);
+            rotation.lookAt(new Vector(anchorPos.getBlockX(), anchorPos.getBlockY(), anchorPos.getBlockZ()));
+            bot.swingMainHand();
             inventory.onItemUsed(BotInventoryController.GLOW_SLOT);
             return true;
-
         } catch (Exception e) {
             UltimateBotLogging.warn(
                     UltimateBot.getInstance().getLogger(), "Combat", "Anchor charge failed -> " + e.getMessage());
@@ -78,19 +48,11 @@ public class AnchorCharger {
         }
     }
 
-    private boolean hasLineOfSight(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
+    private Block blockAt(BlockVector pos) {
+        return bot.getWorld().getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+    }
 
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot);
-
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
-                || result.getBlockPos().equals(pos);
+    private Location centerOf(BlockVector pos) {
+        return new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
     }
 }

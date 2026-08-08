@@ -1,17 +1,17 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
-import net.minecraft.world.entity.player.Player;
 
 public class RotationGetter implements IRotationGetter {
 
     @Override
-    public float getCurrentYaw(Player bot) {
-        return bot.getYRot();
+    public float getCurrentYaw(ITrainingBot bot) {
+        return bot.getYaw();
     }
 
     @Override
-    public float getCurrentPitch(Player bot) {
-        return bot.getXRot();
+    public float getCurrentPitch(ITrainingBot bot) {
+        return bot.getPitch();
     }
 }

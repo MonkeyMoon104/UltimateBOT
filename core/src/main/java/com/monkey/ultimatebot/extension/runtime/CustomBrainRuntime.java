@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.api.extension.brain.BotBrainProvider;
 import com.monkey.ultimatebot.api.extension.brain.BotBrainSession;
 import com.monkey.ultimatebot.api.extension.brain.BrainTick;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeInventorySession;
 import com.monkey.ultimatebot.common.model.BrainKey;
@@ -14,15 +15,13 @@ import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.logging.Level;
 import java.util.random.RandomGenerator;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.Nullable;
 
 public final class CustomBrainRuntime implements AutoCloseable {
     private static final int MAX_CONSECUTIVE_FAILURES = 3;
 
     private final UltimateBot plugin;
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotOptions options;
     private final CoreExtensionRegistry extensions;
     private final CoreBotControl control;
@@ -40,7 +39,7 @@ public final class CustomBrainRuntime implements AutoCloseable {
 
     public CustomBrainRuntime(
             UltimateBot plugin,
-            Player bot,
+            ITrainingBot bot,
             BotOptions options,
             CoreBotControl control,
             CoreNativeBotAccess nativeAccess,
@@ -53,11 +52,11 @@ public final class CustomBrainRuntime implements AutoCloseable {
         this.nativeAccess = Objects.requireNonNull(nativeAccess, "nativeAccess");
         this.kitSession = new ModeInventorySession(Objects.requireNonNull(inventory, "inventory"));
         this.random = new SplittableRandom(
-                bot.getUUID().getMostSignificantBits() ^ ~bot.getUUID().getLeastSignificantBits());
+                bot.getUniqueId().getMostSignificantBits() ^ ~bot.getUniqueId().getLeastSignificantBits());
         this.signals = new CustomBrainSignalDispatcher(() -> disabled ? null : session, this::handleSignalFailure);
     }
 
-    public boolean tick(@Nullable LivingEntity target, boolean follow, boolean combat) {
+    public boolean tick(org.bukkit.entity.@Nullable LivingEntity target, boolean follow, boolean combat) {
         BrainKey selected = selectedBrain();
         CombatMode selectedMode = options.getCombatMode();
         boolean providerAvailable =
@@ -83,10 +82,8 @@ public final class CustomBrainRuntime implements AutoCloseable {
             return false;
         }
         nativeAccess.target(target);
-        org.bukkit.entity.LivingEntity bukkitTarget =
-                target == null ? null : (org.bukkit.entity.LivingEntity) target.getBukkitEntity();
         try {
-            current.tick(new BrainTick(sequence++, follow, combat, bukkitTarget));
+            current.tick(new BrainTick(sequence++, follow, combat, target));
             consecutiveFailures = 0;
             return true;
         } catch (RuntimeException | LinkageError error) {
@@ -94,7 +91,7 @@ public final class CustomBrainRuntime implements AutoCloseable {
             plugin.getLogger()
                     .log(
                             Level.WARNING,
-                            "Custom brain " + activeKey + " failed for bot " + bot.getUUID() + " ("
+                            "Custom brain " + activeKey + " failed for bot " + bot.getUniqueId() + " ("
                                     + consecutiveFailures + '/' + MAX_CONSECUTIVE_FAILURES + ')',
                             error);
             if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
@@ -206,6 +203,6 @@ public final class CustomBrainRuntime implements AutoCloseable {
         activeKey = null;
         activeMode = null;
         disabled = true;
-        nativeAccess.target(null);
+        nativeAccess.clearTarget();
     }
 }

@@ -7,11 +7,10 @@ import com.monkey.ultimatebot.bot.ai.services.BotDeathService;
 import com.monkey.ultimatebot.bot.ai.services.BotEquipmentService;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.player.Player;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jspecify.annotations.Nullable;
 
 public class TrainingBotLogic {
 
@@ -72,13 +71,12 @@ public class TrainingBotLogic {
         totemTracker.onTick();
     }
 
-    public void onDeath(DamageSource cause) {
-        deathHandler.handleDeath(cause);
+    public void onDeath(@Nullable LivingEntity killer) {
+        deathHandler.handleDeath(killer);
     }
 
-    public boolean onActuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-
-        boolean result = equipmentHandler.handleDamage(level, source, amount, event);
+    public boolean onDamaged(float amount, EntityDamageEvent event) {
+        boolean result = equipmentHandler.handleDamage(amount, event);
 
         if (brainController.getBotAI().usesCustomBrain()) {
             brainController.getBotAI().customBrainDamaged(event);
@@ -87,20 +85,20 @@ public class TrainingBotLogic {
         if (bot.isCombat()
                 && brainController.getBotOptions().isHealing()
                 && !brainController.getBotAI().usesCustomBrain()) {
-            boolean fireOrLavaDamage = isFireOrLavaDamage(source);
+            boolean fireOrLavaDamage = isFireOrLavaDamage(event);
             if (!fireOrLavaDamage) {
                 brainController.getBotAI().getMovementController().onDamageReceived();
             }
             org.bukkit.entity.Player currentTarget = bot.getTargetPlayer();
 
-            net.minecraft.world.entity.Entity attacker = source.getEntity();
-            if (attacker instanceof Player nmsPlayer
+            org.bukkit.entity.Entity attacker = event instanceof EntityDamageByEntityEvent byEntity
+                    ? byEntity.getDamager()
+                    : null;
+            if (attacker instanceof org.bukkit.entity.Player attackingPlayer
                     && currentTarget != null
-                    && nmsPlayer.getUUID().equals(currentTarget.getUniqueId())) {
+                    && attackingPlayer.getUniqueId().equals(currentTarget.getUniqueId())) {
                 if (!fireOrLavaDamage) {
-                    if (source.isCritical()) {
-                        brainController.getBotAI().getEnderpearlController().onDamageReceived();
-                    }
+                    brainController.getBotAI().getEnderpearlController().onDamageReceived();
                 }
             }
 
@@ -121,19 +119,22 @@ public class TrainingBotLogic {
 
             if (currentTarget != null
                     && brainController.getBotAI().getMovementController().isStuckInPlace()) {
-                brainController
-                        .getBotAI()
-                        .getMovementController()
-                        .forceUnstick(((CraftPlayer) currentTarget).getHandle());
+                brainController.getBotAI().getMovementController().forceUnstick(currentTarget);
             }
         }
 
         return result;
     }
 
-    private boolean isFireOrLavaDamage(DamageSource source) {
-        String msgId = source.getMsgId();
-        return "inFire".equals(msgId) || "onFire".equals(msgId) || "lava".equals(msgId);
+    public void onDamaged(EntityDamageEvent event) {
+        onDamaged((float) event.getFinalDamage(), event);
+    }
+
+    private boolean isFireOrLavaDamage(EntityDamageEvent event) {
+        return switch (event.getCause()) {
+            case FIRE, FIRE_TICK, LAVA, HOT_FLOOR -> true;
+            default -> false;
+        };
     }
 
     public BotBrainController getBrainController() {

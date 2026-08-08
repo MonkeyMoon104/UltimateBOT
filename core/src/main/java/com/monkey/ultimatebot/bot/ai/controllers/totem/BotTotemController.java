@@ -17,12 +17,11 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStrat
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import java.util.Objects;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public class BotTotemController {
-    private final Player bot;
+    private final ITrainingBot bot;
 
     private final ITotemInventoryManager inventoryManager;
     private final ITotemStateAnalyzer stateAnalyzer;
@@ -30,7 +29,7 @@ public class BotTotemController {
     private final ITotemNotificationManager notificationManager;
     private final ITotemUsageTracker usageTracker;
 
-    public BotTotemController(Player bot, UltimateBot plugin) {
+    public BotTotemController(ITrainingBot bot, UltimateBot plugin) {
         this.bot = Objects.requireNonNull(bot, "bot");
 
         this.inventoryManager = new TotemInventoryManager(bot, new EquipmentBroadcaster());
@@ -41,16 +40,15 @@ public class BotTotemController {
     }
 
     public void manageTotem() {
-        if (!(bot instanceof ITrainingBot trainingBot)) return;
-        if (reservesOffhandForCombatMode(trainingBot)) {
+        if (reservesOffhandForCombatMode(bot)) {
             return;
         }
 
-        ItemStack offhand = bot.getItemBySlot(EquipmentSlot.OFFHAND);
-        ItemStack mainhand = bot.getItemBySlot(EquipmentSlot.MAINHAND);
+        ItemStack offhand = bot.getItem(EquipmentSlot.OFF_HAND);
+        ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
 
-        int totemCount = trainingBot.getTotemCount();
-        boolean isCombat = trainingBot.isCombat();
+        int totemCount = bot.getTotemCount();
+        boolean isCombat = bot.isCombat();
 
         TotemState totemState = stateAnalyzer.getTotemState(totemCount);
         TotemEquipmentState equipmentState = stateAnalyzer.analyzeCurrentEquipment(offhand, mainhand);
@@ -62,7 +60,7 @@ public class BotTotemController {
             }
             case NONE -> {
                 strategyHandler.handleNoTotems(equipmentState);
-                handleNoTotemsWarning(trainingBot);
+                handleNoTotemsWarning(bot);
             }
             case ONE -> {
                 strategyHandler.handleOneTotem(equipmentState, isCombat);
@@ -86,9 +84,7 @@ public class BotTotemController {
     }
 
     public void onTotemUsed() {
-        if (bot instanceof ITrainingBot trainingBot) {
-            usageTracker.onTotemUsed(trainingBot);
-        }
+        usageTracker.onTotemUsed(bot);
     }
 
     public int getEquippedTotemCount() {

@@ -1,18 +1,19 @@
 package com.monkey.ultimatebot.bot.ai.controllers.teleport;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.BasicTeleportValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.BesideTargetStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.SafeTeleportStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleportStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleportValidator;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class BotTeleportController {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final ITeleportValidator validator;
 
     private boolean teleporting = false;
@@ -23,35 +24,34 @@ public class BotTeleportController {
     private static final long SUFFOCATION_RESET_TIME = 5000;
     private static final int MAX_SUFFOCATION_BEFORE_TELEPORT = 2;
 
-    public BotTeleportController(Player bot) {
+    public BotTeleportController(ITrainingBot bot) {
         this.bot = bot;
         this.validator = new BasicTeleportValidator();
     }
 
-    public boolean teleportTo(Vec3 pos) {
+    public boolean teleportTo(Vector pos) {
         if (teleporting || pos == null) return false;
         teleporting = true;
-        bot.teleportTo(pos.x, pos.y, pos.z);
+        Location destination = new Location(bot.getWorld(), pos.getX(), pos.getY(), pos.getZ());
+        bot.asBukkitPlayer().teleport(destination);
         teleporting = false;
         return true;
     }
 
-    public boolean teleportBeside(org.bukkit.entity.Player target) {
+    public boolean teleportBeside(Player target) {
         if (target == null) return false;
-        Player nmsTarget = ((CraftPlayer) target).getHandle();
 
         ITeleportStrategy strategy = new BesideTargetStrategy(1.5);
-        Vec3 pos = strategy.findTeleportPosition(bot, nmsTarget);
+        Vector pos = strategy.findTeleportPosition(bot, target);
         if (pos == null) return false;
         return teleportTo(pos);
     }
 
-    public boolean teleportSafeNear(org.bukkit.entity.Player target) {
+    public boolean teleportSafeNear(Player target) {
         if (target == null) return false;
-        Player nmsTarget = ((CraftPlayer) target).getHandle();
 
         ITeleportStrategy strategy = new SafeTeleportStrategy(validator);
-        Vec3 pos = strategy.findTeleportPosition(bot, nmsTarget);
+        Vector pos = strategy.findTeleportPosition(bot, target);
         if (pos == null) return false;
         return teleportTo(pos);
     }

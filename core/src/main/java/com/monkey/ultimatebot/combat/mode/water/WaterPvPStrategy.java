@@ -6,8 +6,8 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 
 public final class WaterPvPStrategy extends AbstractCombatModeStrategy {
     private Phase phase = Phase.WAIT_FOR_WATER;
@@ -18,9 +18,9 @@ public final class WaterPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.WATER,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.DIAMOND_SWORD)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Items.WATER_BUCKET)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.DIAMOND_SWORD)
+                        .slot(BotInventoryController.ENDERPEARL_SLOT, Material.WATER_BUCKET)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .build());
     }
 

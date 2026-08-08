@@ -3,13 +3,13 @@ package com.monkey.ultimatebot.combat.mode.runtime;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import java.util.Objects;
 import java.util.random.RandomGenerator;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Trident;
 import org.bukkit.entity.WindCharge;
@@ -55,8 +55,7 @@ public final class ModeProjectileService {
 
     public void fireEnderPearlAwayFrom(LivingEntity target) {
         Location shooterLocation = Objects.requireNonNull(shooter.getLocation(), "shooter location");
-        Location targetLocation =
-                Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location");
+        Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
         Vector away =
                 shooterLocation.toVector().subtract(targetLocation.toVector()).setY(0.0D);
         if (away.lengthSquared() < 0.001D) {
@@ -84,8 +83,7 @@ public final class ModeProjectileService {
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {
-        org.bukkit.entity.Entity targetEntity = target.getBukkitEntity();
-        return velocity(targetEntity, target.getBbHeight() * 0.65D, accuracy, speed);
+        return velocity(target, target.getHeight() * 0.65D, accuracy, speed);
     }
 
     private Vector velocity(org.bukkit.entity.Entity target, double heightOffset, double accuracy, double speed) {

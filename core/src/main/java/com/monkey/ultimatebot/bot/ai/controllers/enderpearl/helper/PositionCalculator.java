@@ -2,14 +2,14 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings("NullAway")
 public class PositionCalculator implements IPositionCalculator {
 
     private static final int PREDICT_TICKS = 8;
@@ -22,10 +22,10 @@ public class PositionCalculator implements IPositionCalculator {
     }
 
     @Override
-    public @Nullable Vec3 calculateEmergencyEscape(Player bot, Player target) {
-        Vec3 botPos = bot.position();
-        Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
-        Vec3 best = findBestCandidate(
+    public @Nullable Vector calculateEmergencyEscape(Player bot, Player target) {
+        Vector botPos = bot.getLocation().toVector();
+        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 botPos,
@@ -39,14 +39,14 @@ public class PositionCalculator implements IPositionCalculator {
 
         return best != null
                 ? best
-                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(8.0D))));
+                : fallbackSafePosition(bot, toBlockVector(botPos.clone().add(awayDirection.multiply(8.0D))));
     }
 
     @Override
-    public @Nullable Vec3 calculateMeleeDisengage(Player bot, Player target) {
-        Vec3 botPos = bot.position();
-        Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
-        Vec3 best = findBestCandidate(
+    public @Nullable Vector calculateMeleeDisengage(Player bot, Player target) {
+        Vector botPos = bot.getLocation().toVector();
+        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 botPos,
@@ -60,14 +60,14 @@ public class PositionCalculator implements IPositionCalculator {
 
         return best != null
                 ? best
-                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(7.0D))));
+                : fallbackSafePosition(bot, toBlockVector(botPos.clone().add(awayDirection.multiply(7.0D))));
     }
 
     @Override
-    public @Nullable Vec3 calculateLowGroundPosition(Player bot, Player target) {
-        Vec3 targetPos = target.position();
-        Vec3 aroundDirection = normalizeOrFallback(bot.position().subtract(targetPos), bot);
-        Vec3 best = findBestCandidate(
+    public @Nullable Vector calculateLowGroundPosition(Player bot, Player target) {
+        Vector targetPos = target.getLocation().toVector();
+        Vector aroundDirection = normalizeOrFallback(bot.getLocation().toVector().subtract(targetPos), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 targetPos,
@@ -79,19 +79,18 @@ public class PositionCalculator implements IPositionCalculator {
                 true,
                 12.0D);
 
-        if (best != null) {
-            return best;
-        }
-        return fallbackSafePosition(
-                bot,
-                BlockPos.containing(targetPos.add(aroundDirection.scale(4.2D)).add(0.0D, -2.4D, 0.0D)));
+        return best != null
+                ? best
+                : fallbackSafePosition(
+                        bot,
+                        toBlockVector(targetPos.clone().add(aroundDirection.multiply(4.2D)).add(new Vector(0.0D, -2.4D, 0.0D))));
     }
 
     @Override
-    public @Nullable Vec3 calculateAnchorPosition(Player bot, Player target) {
-        Vec3 predictedTarget = target.position().add(target.getDeltaMovement().scale(PREDICT_TICKS / 20.0D));
-        Vec3 aroundDirection = normalizeOrFallback(predictedTarget.subtract(bot.position()), bot);
-        Vec3 best = findBestCandidate(
+    public @Nullable Vector calculateAnchorPosition(Player bot, Player target) {
+        Vector predictedTarget = target.getLocation().toVector().add(target.getVelocity().multiply(PREDICT_TICKS / 20.0D));
+        Vector aroundDirection = normalizeOrFallback(predictedTarget.clone().subtract(bot.getLocation().toVector()), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 predictedTarget,
@@ -103,24 +102,24 @@ public class PositionCalculator implements IPositionCalculator {
                 true,
                 11.0D);
 
-        if (best != null) {
-            return best;
-        }
-        return fallbackSafePosition(
-                bot,
-                BlockPos.containing(
-                        predictedTarget.add(aroundDirection.scale(3.8D)).add(0.0D, -1.2D, 0.0D)));
+        return best != null
+                ? best
+                : fallbackSafePosition(
+                        bot,
+                        toBlockVector(predictedTarget.clone()
+                                .add(aroundDirection.multiply(3.8D))
+                                .add(new Vector(0.0D, -1.2D, 0.0D))));
     }
 
     @Override
-    public @Nullable Vec3 calculateAggressiveApproach(
-            Player bot, Player target, @Nullable Vec3 predictedTargetMovement) {
-        Vec3 targetPos = target.position();
-        Vec3 movement = predictedTargetMovement == null ? Vec3.ZERO : predictedTargetMovement;
-        Vec3 predictedPos = targetPos.add(movement.scale(PREDICT_TICKS / 20.0D));
+    public @Nullable Vector calculateAggressiveApproach(
+            Player bot, Player target, @Nullable Vector predictedTargetMovement) {
+        Vector targetPos = target.getLocation().toVector();
+        Vector movement = predictedTargetMovement == null ? new Vector() : predictedTargetMovement.clone();
+        Vector predictedPos = targetPos.clone().add(movement.multiply(PREDICT_TICKS / 20.0D));
 
-        Vec3 approachDirection = normalizeOrFallback(bot.position().subtract(predictedPos), bot);
-        Vec3 best = findBestCandidate(
+        Vector approachDirection = normalizeOrFallback(bot.getLocation().toVector().subtract(predictedPos), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 predictedPos,
@@ -132,20 +131,20 @@ public class PositionCalculator implements IPositionCalculator {
                 false,
                 10.5D);
 
-        if (best != null) {
-            return best;
-        }
-        return fallbackSafePosition(
-                bot,
-                BlockPos.containing(
-                        predictedPos.add(approachDirection.scale(2.7D)).add(0.0D, 0.4D, 0.0D)));
+        return best != null
+                ? best
+                : fallbackSafePosition(
+                        bot,
+                        toBlockVector(predictedPos.clone()
+                                .add(approachDirection.multiply(2.7D))
+                                .add(new Vector(0.0D, 0.4D, 0.0D))));
     }
 
     @Override
-    public @Nullable Vec3 calculateStandardEscape(Player bot, Player target) {
-        Vec3 botPos = bot.position();
-        Vec3 awayDirection = normalizeOrFallback(botPos.subtract(target.position()), bot);
-        Vec3 best = findBestCandidate(
+    public @Nullable Vector calculateStandardEscape(Player bot, Player target) {
+        Vector botPos = bot.getLocation().toVector();
+        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector best = findBestCandidate(
                 bot,
                 target,
                 botPos,
@@ -159,45 +158,47 @@ public class PositionCalculator implements IPositionCalculator {
 
         return best != null
                 ? best
-                : fallbackSafePosition(bot, BlockPos.containing(botPos.add(awayDirection.scale(9.0D))));
+                : fallbackSafePosition(bot, toBlockVector(botPos.clone().add(awayDirection.multiply(9.0D))));
     }
 
-    private @Nullable Vec3 findBestCandidate(
+    private @Nullable Vector findBestCandidate(
             Player bot,
             Player target,
-            Vec3 origin,
-            Vec3 baseDirection,
+            Vector origin,
+            Vector baseDirection,
             double[] distances,
             double[] yOffsets,
             double idealTargetDistance,
             double maxTargetDistance,
             boolean preferLowerThanTarget,
             double maxBotDistance) {
-        Vec3 best = null;
+        Vector best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
+        Vector targetPosition = target.getLocation().toVector();
+        Vector botPosition = bot.getLocation().toVector();
 
         for (double distance : distances) {
             for (double angleDeg : ANGLES_DEG) {
-                Vec3 direction = rotateVector(baseDirection, Math.toRadians(angleDeg));
+                Vector direction = rotateVector(baseDirection, Math.toRadians(angleDeg));
                 for (double yOffset : yOffsets) {
-                    Vec3 candidate = origin.add(direction.scale(distance)).add(0.0D, yOffset, 0.0D);
-                    BlockPos candidateBlock = BlockPos.containing(candidate);
+                    Vector candidate = origin.clone().add(direction.clone().multiply(distance)).add(new Vector(0.0D, yOffset, 0.0D));
+                    BlockVector candidateBlock = toBlockVector(candidate);
                     if (!safetyValidator.isSafeLandingSpot(candidateBlock)) {
                         continue;
                     }
 
-                    Vec3 center = Vec3.atCenterOf(candidateBlock);
+                    Vector center = centerOf(candidateBlock);
                     if (!hasThrowPath(bot, center)) {
                         continue;
                     }
 
-                    double distanceToTarget = center.distanceTo(target.position());
-                    double distanceToBot = center.distanceTo(bot.position());
+                    double distanceToTarget = center.distance(targetPosition);
+                    double distanceToBot = center.distance(botPosition);
                     if (distanceToTarget > maxTargetDistance || distanceToBot > maxBotDistance) {
                         continue;
                     }
 
-                    double verticalFromTarget = center.y - target.position().y;
+                    double verticalFromTarget = center.getY() - targetPosition.getY();
                     double score = 0.0D;
                     score -= Math.abs(distanceToTarget - idealTargetDistance) * 2.2D;
                     score -= distanceToBot * 0.14D;
@@ -220,56 +221,59 @@ public class PositionCalculator implements IPositionCalculator {
         return best;
     }
 
-    private @Nullable Vec3 fallbackSafePosition(Player bot, BlockPos preferred) {
+    private @Nullable Vector fallbackSafePosition(Player bot, BlockVector preferred) {
         if (safetyValidator.isSafeLandingSpot(preferred)) {
-            Vec3 center = Vec3.atCenterOf(preferred);
+            Vector center = centerOf(preferred);
             if (hasThrowPath(bot, center)) {
                 return center;
             }
         }
 
-        Vec3 safe = safetyValidator.findSafeLandingSpot(preferred);
+        Vector safe = safetyValidator.findSafeLandingSpot(preferred);
         if (safe != null && hasThrowPath(bot, safe)) {
             return safe;
         }
         return safe;
     }
 
-    private boolean hasThrowPath(Player bot, Vec3 destination) {
-        Vec3 eyes = bot.getEyePosition(1.0F);
-        ClipContext context =
-                new ClipContext(eyes, destination, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, bot);
-
-        HitResult result = bot.level().clip(context);
-        if (result.getType() == HitResult.Type.MISS) {
+    private boolean hasThrowPath(Player bot, Vector destination) {
+        Vector eyes = bot.getEyeLocation().toVector();
+        Vector delta = destination.clone().subtract(eyes);
+        double distance = delta.length();
+        if (distance < 1.0E-6D) {
             return true;
         }
-
-        if (result instanceof BlockHitResult blockHit) {
-            BlockPos destinationBlock = BlockPos.containing(destination);
-            BlockPos hitBlock = blockHit.getBlockPos();
-            return hitBlock.equals(destinationBlock)
-                    || hitBlock.equals(destinationBlock.below())
-                    || hitBlock.equals(destinationBlock.above());
-        }
-
-        return false;
+        RayTraceResult result = bot.getWorld().rayTraceBlocks(
+                bot.getEyeLocation(), delta.normalize(), distance, FluidCollisionMode.NEVER, true);
+        return result == null || result.getHitBlock() == null;
     }
 
-    private Vec3 normalizeOrFallback(Vec3 vector, Player bot) {
-        if (vector.lengthSqr() > 1.0E-5D) {
+    private Vector normalizeOrFallback(Vector vector, Player bot) {
+        if (vector.lengthSquared() > 1.0E-5D) {
             return vector.normalize();
         }
-        Vec3 look = bot.getLookAngle();
-        if (look.lengthSqr() > 1.0E-5D) {
-            return look.scale(-1.0D).normalize();
+        Vector look = bot.getLocation().getDirection();
+        if (look.lengthSquared() > 1.0E-5D) {
+            return look.multiply(-1.0D).normalize();
         }
-        return new Vec3(1.0D, 0.0D, 0.0D);
+        return new Vector(1.0D, 0.0D, 0.0D);
     }
 
-    private Vec3 rotateVector(Vec3 vector, double angle) {
+    private Vector rotateVector(Vector vector, double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
-        return new Vec3(vector.x * cos - vector.z * sin, vector.y, vector.x * sin + vector.z * cos).normalize();
+        return new Vector(
+                        vector.getX() * cos - vector.getZ() * sin,
+                        vector.getY(),
+                        vector.getX() * sin + vector.getZ() * cos)
+                .normalize();
+    }
+
+    private static BlockVector toBlockVector(Vector value) {
+        return new BlockVector(value.getBlockX(), value.getBlockY(), value.getBlockZ());
+    }
+
+    private static Vector centerOf(BlockVector value) {
+        return new Vector(value.getBlockX() + 0.5D, value.getBlockY() + 0.5D, value.getBlockZ() + 0.5D);
     }
 }

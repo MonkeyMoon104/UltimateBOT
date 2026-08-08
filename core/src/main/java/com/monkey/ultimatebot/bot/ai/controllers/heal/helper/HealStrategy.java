@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class HealStrategy implements IHealStrategy {
 
@@ -20,7 +20,7 @@ public class HealStrategy implements IHealStrategy {
     }
 
     @Override
-    public void executeHeal(Player bot) {
+    public void executeHeal(ITrainingBot bot) {
         long currentTime = System.currentTimeMillis();
 
         if (currentTime - lastExecuteHealCall < EXECUTE_HEAL_INTERVAL) {
@@ -48,7 +48,7 @@ public class HealStrategy implements IHealStrategy {
     }
 
     @Override
-    public boolean shouldHeal(Player bot) {
+    public boolean shouldHeal(ITrainingBot bot) {
         if (actionManager.isHealing()) {
             return false;
         }

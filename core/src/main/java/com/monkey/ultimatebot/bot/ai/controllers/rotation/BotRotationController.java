@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.AngleNormalizer;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.RotationApplier;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.RotationCalculator;
@@ -8,20 +9,19 @@ import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IAngleNor
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationApplier;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationGetter;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public class BotRotationController {
 
-    private final Player bot;
+    private final ITrainingBot bot;
 
     private final IRotationCalculator rotationCalculator;
     private final IAngleNormalizer angleNormalizer;
     private final IRotationApplier rotationApplier;
     private final IRotationGetter rotationGetter;
 
-    public BotRotationController(Player bot) {
+    public BotRotationController(ITrainingBot bot) {
         this.bot = bot;
 
         this.rotationCalculator = new RotationCalculator();
@@ -56,7 +56,7 @@ public class BotRotationController {
         rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }
 
-    public void lookAt(Vec3 targetPos) {
+    public void lookAt(Vector targetPos) {
         float[] rotation = rotationCalculator.calculateRotationToPosition(bot, targetPos);
         rotationApplier.applyRotation(bot, rotation[0], rotation[1]);
     }

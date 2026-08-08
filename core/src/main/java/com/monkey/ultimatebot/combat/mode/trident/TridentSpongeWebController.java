@@ -6,9 +6,9 @@ import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
 final class TridentSpongeWebController {
@@ -34,12 +34,11 @@ final class TridentSpongeWebController {
         if (CobwebCombatAwareness.inspect(target).inside()) {
             return true;
         }
-        org.bukkit.entity.Entity bukkitTarget = target.getBukkitEntity();
-        Location targetLocation = Objects.requireNonNull(bukkitTarget.getLocation(), "target location");
+        Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
         for (Location candidate : WebTrapPlanner.plan(
                 targetLocation,
-                bukkitTarget.getVelocity(),
-                bukkitTarget.isOnGround(),
+                target.getVelocity(),
+                target.isOnGround(),
                 targetLocation.getDirection(),
                 context.random())) {
             if (!context.canPlaceCombatBlock(candidate, Material.COBWEB)) {
@@ -57,7 +56,7 @@ final class TridentSpongeWebController {
     private void placeSponge(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(TridentLoadout.SPONGE_SLOT);
         Location base = targetBlock(target);
-        Vector direction = target.getBukkitEntity().getVelocity().setY(0.0D);
+        Vector direction = target.getVelocity().setY(0.0D);
         if (direction.lengthSquared() < 0.0025D) {
             direction = base.getDirection().setY(0.0D);
         }
@@ -85,7 +84,7 @@ final class TridentSpongeWebController {
     }
 
     private static Location targetBlock(LivingEntity target) {
-        return Objects.requireNonNull(target.getBukkitEntity().getLocation(), "target location")
+        return Objects.requireNonNull(target.getLocation(), "target location")
                 .getBlock()
                 .getLocation();
     }

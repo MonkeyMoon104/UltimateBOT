@@ -24,7 +24,7 @@ public class BotRegistry {
     public @Nullable UUID getBotUUID(UUID playerUUID) {
         ITrainingBot bot = spawnedBots.get(playerUUID);
         if (bot == null) return null;
-        return bot.asPlayer().getUUID();
+        return bot.getUniqueId();
     }
 
     public @Nullable UUID getOwnerUUIDByBotUUID(@Nullable UUID botUUID) {
@@ -34,8 +34,8 @@ public class BotRegistry {
         for (Map.Entry<UUID, ITrainingBot> entry : spawnedBots.entrySet()) {
             ITrainingBot bot = entry.getValue();
             if (bot != null
-                    && bot.asPlayer() != null
-                    && botUUID.equals(bot.asPlayer().getUUID())) {
+                    && bot.asBukkitPlayer() != null
+                    && botUUID.equals(bot.getUniqueId())) {
                 return entry.getKey();
             }
         }
@@ -54,7 +54,7 @@ public class BotRegistry {
     public void removeBotByUUID(UUID botUUID) {
         spawnedBots
                 .entrySet()
-                .removeIf(entry -> entry.getValue().asPlayer().getUUID().equals(botUUID));
+                .removeIf(entry -> entry.getValue().getUniqueId().equals(botUUID));
     }
 
     public Map<UUID, ITrainingBot> getAllBots() {

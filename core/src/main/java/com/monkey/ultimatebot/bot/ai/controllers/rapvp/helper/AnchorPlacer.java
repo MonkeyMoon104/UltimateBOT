@@ -1,61 +1,46 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class AnchorPlacer {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotInventoryController inventory;
     private final BotRotationController rotation;
-    private final Level level;
 
-    public AnchorPlacer(Player bot, BotInventoryController inventory, BotRotationController rotation, Level level) {
+    public AnchorPlacer(ITrainingBot bot, BotInventoryController inventory, BotRotationController rotation) {
         this.bot = bot;
         this.inventory = inventory;
         this.rotation = rotation;
-        this.level = level;
     }
 
-    public boolean placeAnchor(BlockPos pos) {
+    public boolean placeAnchor(BlockVector pos) {
         try {
-            if (!isReachable(pos)) return false;
-            if (!hasLineOfSight(pos)) {
-                return false;
-            }
-
             ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || !Items.RESPAWN_ANCHOR.equals(stack.getItem())) return false;
-
-            Direction bestFace = findBestPlacementFace(pos);
-            if (bestFace == null) bestFace = Direction.UP;
-
-            BlockPos adjacentPos = pos.relative(bestFace.getOpposite());
-
-            BlockHitResult hitResult = new BlockHitResult(
-                    Vec3.atCenterOf(adjacentPos).relative(bestFace, 0.5), bestFace, adjacentPos, false);
-
-            InteractionResult result =
-                    NMSBridgeManager.get().useItemOnBlock(bot, stack, hitResult, InteractionHand.MAIN_HAND);
-
-            if (result.consumesAction()) {
-                rotation.lookAt(Vec3.atLowerCornerOf(pos));
-                bot.swing(InteractionHand.MAIN_HAND);
+            if (stack == null || stack.getType() != Material.RESPAWN_ANCHOR) return false;
+            BlockFace bestFace = findBestPlacementFace(pos);
+            if (bestFace == null) bestFace = BlockFace.UP;
+            BlockVector adjacentPos = relative(pos, bestFace.getOppositeFace());
+            Location hit = centerOf(adjacentPos).add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
+            boolean consumed = NMSBridgeManager.get()
+                    .useItemOnBlock(bot.asBukkitPlayer(), stack, blockAt(adjacentPos), bestFace, hit, EquipmentSlot.HAND);
+            if (consumed) {
+                rotation.lookAt(new Vector(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()));
+                bot.swingMainHand();
                 inventory.onItemUsed(BotInventoryController.ANCHOR_SLOT);
                 return true;
             }
@@ -67,65 +52,27 @@ public class AnchorPlacer {
         }
     }
 
-    private @Nullable Direction findBestPlacementFace(BlockPos targetPos) {
-        Vec3 botPos = bot.position();
-
-        for (Direction direction : Direction.Plane.HORIZONTAL) {
-            BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
-            BlockState adjacentState = bot.level().getBlockState(adjacentPos);
-
-            if (adjacentState.isSolidRender() && !adjacentState.isAir()) {
-                double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
-                if (distance <= 6.5) return direction;
+    private @Nullable BlockFace findBestPlacementFace(BlockVector targetPos) {
+        for (BlockFace face : new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN}) {
+            BlockVector adjacentPos = relative(targetPos, face.getOppositeFace());
+            Block adjacent = blockAt(adjacentPos);
+            if (adjacent.getType().isSolid() && bot.getLocation().distance(centerOf(adjacentPos)) <= 6.5D) {
+                return face;
             }
         }
-
-        for (Direction direction : new Direction[] {Direction.UP, Direction.DOWN}) {
-            BlockPos adjacentPos = targetPos.relative(direction.getOpposite());
-            BlockState adjacentState = bot.level().getBlockState(adjacentPos);
-
-            if (adjacentState.isSolidRender() && !adjacentState.isAir()) {
-                double distance = botPos.distanceTo(Vec3.atCenterOf(adjacentPos));
-                if (distance <= 6.5) return direction;
-            }
-        }
-
         return null;
     }
 
-    private boolean hasLineOfSight(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
-
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot);
-
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
-                || result.getBlockPos().equals(pos);
+    private Block blockAt(BlockVector pos) {
+        return bot.getWorld().getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
     }
 
-    private boolean isReachable(BlockPos pos) {
-        Vec3 botEyes = bot.getEyePosition(1.0F);
-        Vec3 targetPos = Vec3.atCenterOf(pos);
+    private Location centerOf(BlockVector pos) {
+        return new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+    }
 
-        double distance = botEyes.distanceTo(targetPos);
-        if (distance > 12.0) return false;
-
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                botEyes,
-                targetPos,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot);
-
-        net.minecraft.world.phys.BlockHitResult result = level.clip(context);
-
-        return result.getType() == net.minecraft.world.phys.HitResult.Type.MISS
-                || result.getBlockPos().equals(pos);
+    private static BlockVector relative(BlockVector pos, BlockFace face) {
+        return new BlockVector(
+                pos.getBlockX() + face.getModX(), pos.getBlockY() + face.getModY(), pos.getBlockZ() + face.getModZ());
     }
 }

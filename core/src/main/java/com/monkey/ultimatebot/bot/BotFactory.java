@@ -1,31 +1,27 @@
 package com.monkey.ultimatebot.bot;
 
-import com.mojang.authlib.GameProfile;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
+import com.monkey.ultimatebot.protocol.BotProfileData;
+import java.util.List;
 import java.util.UUID;
-import net.minecraft.server.level.ClientInformation;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
 public class BotFactory {
 
-    public static GameProfile createProfile(Player viewer, UUID botUUID, String botName) {
+    public static BotProfileData createProfile(Player viewer, UUID botUUID, String botName) {
         return NMSBridgeManager.get().copyProfileWithTextures(viewer, botUUID, botName);
     }
 
-    public static GameProfile createRandomProfile(UUID botUUID, String botName) {
-        return new GameProfile(botUUID, botName);
+    public static BotProfileData createRandomProfile(UUID botUUID, String botName) {
+        return new BotProfileData(botUUID, botName, List.of());
     }
 
-    public static GameProfile createProfileWithTexture(
+    public static BotProfileData createProfileWithTexture(
             UUID botUUID, String botName, @Nullable String textureValue, @Nullable String textureSignature) {
         if (textureValue == null || textureValue.isBlank()) {
             return createRandomProfile(botUUID, botName);
         }
         return NMSBridgeManager.get().createProfileWithTexture(botUUID, botName, textureValue, textureSignature);
-    }
-
-    public static ClientInformation createClientInformation() {
-        return NMSBridgeManager.get().createClientInformation();
     }
 }

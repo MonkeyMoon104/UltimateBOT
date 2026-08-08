@@ -6,8 +6,8 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 
 public final class CartPvPStrategy extends AbstractCombatModeStrategy {
     private static final int RAIL_SLOT = BotInventoryController.OBSIDIAN_SLOT;
@@ -23,11 +23,11 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.CART,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_SWORD)
-                        .slot(CartBowController.BOW_SLOT, Items.BOW)
-                        .slot(RAIL_SLOT, Items.RAIL, 64)
-                        .slot(CART_SLOT, Items.TNT_MINECART, 64)
-                        .slot(CartBowController.ARROW_SLOT, Items.ARROW, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(CartBowController.BOW_SLOT, Material.BOW)
+                        .slot(RAIL_SLOT, Material.RAIL, 64)
+                        .slot(CART_SLOT, Material.TNT_MINECART, 64)
+                        .slot(CartBowController.ARROW_SLOT, Material.ARROW, 64)
                         .build());
     }
 
@@ -72,7 +72,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         double distance = context.motion().distanceTo(target);
         boolean opportunity = ModeCombatPolicy.isCartOpportunity(
                 distance,
-                context.bot().getY(),
+                context.motion().botY(),
                 target.getY(),
                 context.actions().targetHealthRatio(target),
                 currentTick() >= nextCartTick);

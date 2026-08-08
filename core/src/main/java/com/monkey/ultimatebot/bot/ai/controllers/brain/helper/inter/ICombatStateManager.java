@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import org.bukkit.entity.Player;
 
 public interface ICombatStateManager {
 

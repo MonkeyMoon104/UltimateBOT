@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter;
 
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public interface IHealActionManager {
 
-    void startHealAction(Player bot);
+    void startHealAction(ITrainingBot bot);
 
-    void updateHealAction(Player bot);
+    void updateHealAction(ITrainingBot bot);
 
     boolean isHealing();
 
@@ -14,5 +14,5 @@ public interface IHealActionManager {
 
     boolean canStartNewHeal();
 
-    void applyGoldenAppleEffectsManually(Player bot);
+    void applyGoldenAppleEffectsManually(ITrainingBot bot);
 }

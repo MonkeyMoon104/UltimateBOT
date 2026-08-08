@@ -24,6 +24,6 @@ public class PlayerTagListener implements Listener {
         if (bot == null) return;
 
         Entity enemy = event.getEnemy();
-        if (enemy != null && enemy.getUniqueId().equals(bot.asPlayer().getUUID())) event.setCancelled(true);
+        if (enemy != null && enemy.getUniqueId().equals(bot.getUniqueId())) event.setCancelled(true);
     }
 }

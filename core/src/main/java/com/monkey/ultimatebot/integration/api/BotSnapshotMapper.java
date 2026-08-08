@@ -30,7 +30,7 @@ public final class BotSnapshotMapper {
             return null;
         }
 
-        UUID botUUID = bot.asPlayer() != null ? bot.asPlayer().getUUID() : null;
+        UUID botUUID = bot.asBukkitPlayer() != null ? bot.asBukkitPlayer().getUniqueId() : null;
 
         BotMode botMode = BotMode.SINGLE;
         DifficultyTier difficulty = DifficultyTier.EASY;

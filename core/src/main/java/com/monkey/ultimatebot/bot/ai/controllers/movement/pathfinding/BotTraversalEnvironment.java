@@ -1,20 +1,20 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 
 /** Defines the movements a player-sized training bot can physically perform. */
 public interface BotTraversalEnvironment {
     int MAX_STEP_UP = 1;
     int MAX_SAFE_DROP = 3;
 
-    boolean canStandAt(BlockPos position);
+    boolean canStandAt(BlockVector position);
 
-    boolean canOccupy(BlockPos position);
+    boolean canOccupy(BlockVector position);
 
-    default boolean canTraverse(BlockPos from, BlockPos to) {
-        int dx = to.getX() - from.getX();
-        int dy = to.getY() - from.getY();
-        int dz = to.getZ() - from.getZ();
+    default boolean canTraverse(BlockVector from, BlockVector to) {
+        int dx = to.getBlockX() - from.getBlockX();
+        int dy = to.getBlockY() - from.getBlockY();
+        int dz = to.getBlockZ() - from.getBlockZ();
 
         if ((dx == 0 && dz == 0)
                 || Math.abs(dx) > 1
@@ -26,16 +26,16 @@ public interface BotTraversalEnvironment {
         }
 
         if (dy < 0) {
-            for (int y = to.getY() + 1; y <= from.getY(); y++) {
-                if (!canOccupy(new BlockPos(to.getX(), y, to.getZ()))) {
+            for (int y = to.getBlockY() + 1; y <= from.getBlockY(); y++) {
+                if (!canOccupy(new BlockVector(to.getBlockX(), y, to.getBlockZ()))) {
                     return false;
                 }
             }
         }
 
         if (dx != 0 && dz != 0) {
-            BlockPos xSide = new BlockPos(from.getX() + dx, to.getY(), from.getZ());
-            BlockPos zSide = new BlockPos(from.getX(), to.getY(), from.getZ() + dz);
+            BlockVector xSide = new BlockVector(from.getBlockX() + dx, to.getBlockY(), from.getBlockZ());
+            BlockVector zSide = new BlockVector(from.getBlockX(), to.getBlockY(), from.getBlockZ() + dz);
             if (!canOccupy(xSide) || !canOccupy(zSide)) {
                 return false;
             }
@@ -44,10 +44,10 @@ public interface BotTraversalEnvironment {
         return true;
     }
 
-    default double additionalTraversalCost(BlockPos from, BlockPos to) {
-        int dy = to.getY() - from.getY();
-        int dx = Math.abs(to.getX() - from.getX());
-        int dz = Math.abs(to.getZ() - from.getZ());
+    default double additionalTraversalCost(BlockVector from, BlockVector to) {
+        int dy = to.getBlockY() - from.getBlockY();
+        int dx = Math.abs(to.getBlockX() - from.getBlockX());
+        int dz = Math.abs(to.getBlockZ() - from.getBlockZ());
 
         double cost = dx != 0 && dz != 0 ? 0.05D : 0.0D;
         if (dy > 0) {

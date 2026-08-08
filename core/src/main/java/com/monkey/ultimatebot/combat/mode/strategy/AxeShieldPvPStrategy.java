@@ -6,9 +6,9 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.inventory.EquipmentSlot;
 
 public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private static final double GUARD_APPROACH_RANGE = 6.0D;
@@ -23,9 +23,9 @@ public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.AXE_SHIELD,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Items.NETHERITE_AXE)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Items.GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFFHAND, Items.SHIELD)
+                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_AXE)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
+                        .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)
                         .build());
     }
 
@@ -55,7 +55,7 @@ public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private void guard(CombatModeContext context, LivingEntity target) {
         context.inventory().switchToSlot(BotInventoryController.SWORD_SLOT);
         double distance = context.motion().distanceTo(target);
-        boolean shieldImpact = context.signals().consumeShieldImpact(target.getUUID());
+        boolean shieldImpact = context.signals().consumeShieldImpact(target.getUniqueId());
         if (distance > GUARD_APPROACH_RANGE) {
             guardedTicks = 0;
             shieldHoldTicks = 0;

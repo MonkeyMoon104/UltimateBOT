@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.combat.mode.water.UnderwaterMotionPlanner;
@@ -7,25 +8,28 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.Location;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 
 public final class ModeMotionService {
-    private final Player bot;
+    private final ITrainingBot bot;
+    private final Player bukkitBot;
     private final BotMovementController movement;
     private final BotRotationController rotation;
     private final Supplier<CombatTuning> tuning;
     private final RandomGenerator random;
 
     ModeMotionService(
-            Player bot,
+            ITrainingBot bot,
+            Player bukkitBot,
             BotMovementController movement,
             BotRotationController rotation,
             Supplier<CombatTuning> tuning,
             RandomGenerator random) {
         this.bot = Objects.requireNonNull(bot, "bot");
+        this.bukkitBot = Objects.requireNonNull(bukkitBot, "bukkitBot");
         this.movement = Objects.requireNonNull(movement, "movement");
         this.rotation = Objects.requireNonNull(rotation, "rotation");
         this.tuning = Objects.requireNonNull(tuning, "tuning");
@@ -37,16 +41,16 @@ public final class ModeMotionService {
     }
 
     public double distanceTo(LivingEntity target) {
-        return bot.distanceTo(target);
+        return botLocation().distance(entityLocation(target));
     }
 
     public double horizontalDistanceTo(LivingEntity target) {
-        Vec3 delta = target.position().subtract(bot.position());
-        return Math.hypot(delta.x, delta.z);
+        Vector delta = entityLocation(target).toVector().subtract(botLocation().toVector());
+        return Math.hypot(delta.getX(), delta.getZ());
     }
 
     public double heightAbove(LivingEntity target) {
-        return bot.getY() - target.getY();
+        return bukkitBot.getY() - target.getY();
     }
 
     public void approach(LivingEntity target, double desiredDistance) {
@@ -58,35 +62,36 @@ public final class ModeMotionService {
     }
 
     public void strafe(LivingEntity target, double strength) {
-        Vec3 direction = target.position().subtract(bot.position()).normalize();
+        Vector direction = entityLocation(target).toVector().subtract(botLocation().toVector()).normalize();
         double side = random.nextBoolean() ? 1.0D : -1.0D;
-        movement.moveToPosition(bot.position().add(new Vec3(-direction.z, 0.0D, direction.x).scale(strength * side)));
+        movement.moveToPosition(botLocation()
+                .toVector()
+                .add(new Vector(-direction.getZ(), 0.0D, direction.getX()).multiply(strength * side)));
     }
 
     public void steerVelocityTowards(LivingEntity target, double horizontalSpeed, double verticalSpeed) {
-        Vec3 delta = target.position().subtract(bot.position());
-        double horizontalLength = Math.hypot(delta.x, delta.z);
+        Vector delta = entityLocation(target).toVector().subtract(botLocation().toVector());
+        double horizontalLength = Math.hypot(delta.getX(), delta.getZ());
         if (horizontalLength < 0.001D) {
-            bot.setDeltaMovement(0.0D, verticalSpeed, 0.0D);
+            bot.setBukkitVelocity(new Vector(0.0D, verticalSpeed, 0.0D));
             return;
         }
-        bot.setDeltaMovement(
-                delta.x / horizontalLength * horizontalSpeed,
+        bot.setBukkitVelocity(new Vector(
+                delta.getX() / horizontalLength * horizontalSpeed,
                 verticalSpeed,
-                delta.z / horizontalLength * horizontalSpeed);
-        bot.hurtMarked = true;
+                delta.getZ() / horizontalLength * horizontalSpeed));
     }
 
     public void swimTowards(LivingEntity target, double speed) {
         applySwimmingVelocity(UnderwaterMotionPlanner.pursue(
-                bot.getEyePosition(), target.getEyePosition(), bot.getDeltaMovement(), speed));
+                bukkitBot.getEyeLocation().toVector(), target.getEyeLocation().toVector(), bukkitBot.getVelocity(), speed));
     }
 
     public void swimOrbit(LivingEntity target, double radialSpeed, double strafeSpeed, double strafeDirection) {
         applySwimmingVelocity(UnderwaterMotionPlanner.orbit(
-                bot.getEyePosition(),
-                target.getEyePosition(),
-                bot.getDeltaMovement(),
+                bukkitBot.getEyeLocation().toVector(),
+                target.getEyeLocation().toVector(),
+                bukkitBot.getVelocity(),
                 radialSpeed,
                 strafeSpeed,
                 strafeDirection));
@@ -98,16 +103,15 @@ public final class ModeMotionService {
     }
 
     public void knockAway(LivingEntity target, double horizontalStrength, double verticalStrength) {
-        Vec3 away = target.position().subtract(bot.position());
-        double horizontalLength = Math.hypot(away.x, away.z);
+        Vector away = entityLocation(target).toVector().subtract(botLocation().toVector());
+        double horizontalLength = Math.hypot(away.getX(), away.getZ());
         if (horizontalLength < 0.001D) {
             return;
         }
-        target.setDeltaMovement(
-                away.x / horizontalLength * horizontalStrength,
+        target.setVelocity(new Vector(
+                away.getX() / horizontalLength * horizontalStrength,
                 verticalStrength,
-                away.z / horizontalLength * horizontalStrength);
-        target.hurtMarked = true;
+                away.getZ() / horizontalLength * horizontalStrength));
     }
 
     public void stop() {
@@ -115,31 +119,29 @@ public final class ModeMotionService {
     }
 
     public boolean isBotInWater() {
-        return bot.isInWater();
+        return bukkitBot.isInWater();
     }
 
     public boolean isTargetInWater(LivingEntity target) {
         return target.isInWater();
     }
 
+    @SuppressWarnings("deprecation")
     public void setSwimming(boolean swimming) {
-        bot.setSprinting(swimming);
-        bot.setSwimming(swimming);
+        bukkitBot.setSprinting(swimming);
+        bukkitBot.setSwimming(swimming);
     }
 
     public boolean hasVerticalClearance(LivingEntity entity, int clearanceBlocks) {
-        double radius = Math.min(0.35D, entity.getBbWidth() * 0.45D);
-        double startY = entity.getY() + entity.getBbHeight() + 0.05D;
+        double radius = Math.min(0.35D, entity.getBoundingBox().getWidthX() * 0.45D);
+        double startY = entity.getBoundingBox().getMaxY() + 0.05D;
         double[] offsets = {-radius, radius};
         for (double xOffset : offsets) {
             for (double zOffset : offsets) {
-                BlockPos start = BlockPos.containing(entity.getX() + xOffset, startY, entity.getZ() + zOffset);
                 for (int height = 0; height < clearanceBlocks; height++) {
-                    BlockPos position = start.above(height);
-                    if (!entity.level()
-                            .getBlockState(position)
-                            .getCollisionShape(entity.level(), position)
-                            .isEmpty()) {
+                    Location position = new Location(
+                            entity.getWorld(), entity.getX() + xOffset, startY + height, entity.getZ() + zOffset);
+                    if (position.getBlock().getType().isSolid()) {
                         return false;
                     }
                 }
@@ -148,9 +150,13 @@ public final class ModeMotionService {
         return true;
     }
 
+    public boolean hasVerticalClearance(ITrainingBot entity, int clearanceBlocks) {
+        return hasVerticalClearance(entity.asBukkitPlayer(), clearanceBlocks);
+    }
+
     private void moveRelativeTo(LivingEntity target, double desiredDistance, boolean away) {
-        Vec3 delta = target.position().subtract(bot.position());
-        double horizontalDistance = Math.hypot(delta.x, delta.z);
+        Vector delta = entityLocation(target).toVector().subtract(botLocation().toVector());
+        double horizontalDistance = Math.hypot(delta.getX(), delta.getZ());
         if (horizontalDistance < 0.001D) {
             movement.stopMovement();
             return;
@@ -159,18 +165,38 @@ public final class ModeMotionService {
         double travel = away
                 ? Math.max(1.0D, desiredDistance - horizontalDistance)
                 : Math.max(0.0D, horizontalDistance - desiredDistance);
-        Vec3 destination = bot.position()
-                .add(
-                        delta.x / horizontalDistance * travel * direction,
+        Vector destination = botLocation()
+                .toVector()
+                .add(new Vector(
+                        delta.getX() / horizontalDistance * travel * direction,
                         0.0D,
-                        delta.z / horizontalDistance * travel * direction);
+                        delta.getZ() / horizontalDistance * travel * direction));
         movement.setMovementSpeed(tuning.get().movementSpeed());
         movement.moveToPosition(destination);
     }
 
-    private void applySwimmingVelocity(Vec3 velocity) {
+    private Location botLocation() {
+        return Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
+    }
+
+    private static Location entityLocation(LivingEntity entity) {
+        return Objects.requireNonNull(entity.getLocation(), "entity location");
+    }
+
+    public boolean isBotOnGround() {
+        return bot.isOnGround();
+    }
+
+    public double botVerticalVelocity() {
+        return bukkitBot.getVelocity().getY();
+    }
+
+    public double botY() {
+        return bukkitBot.getY();
+    }
+
+    private void applySwimmingVelocity(Vector velocity) {
         movement.clearPath();
-        bot.setDeltaMovement(velocity);
-        bot.hurtMarked = true;
+        bot.setBukkitVelocity(velocity);
     }
 }

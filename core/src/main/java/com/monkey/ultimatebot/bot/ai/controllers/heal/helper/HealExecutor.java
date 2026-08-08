@@ -2,8 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class HealExecutor implements IHealExecutor {
 
@@ -14,15 +13,15 @@ public class HealExecutor implements IHealExecutor {
     }
 
     @Override
-    public void consumeGoldenApple(Player bot) {
+    public void consumeGoldenApple(ITrainingBot bot) {
         if (!inventoryController.hasInfiniteResources()) return;
 
         inventoryController.switchToGoldenApple();
 
         try {
-            inventoryController.startUsingItem(InteractionHand.MAIN_HAND);
+            inventoryController.startUsingMainHand();
         } catch (IllegalStateException exception) {
-            bot.swing(InteractionHand.MAIN_HAND);
+            bot.swingMainHand();
         }
     }
 }

@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 
 /** Pure path planning layer. Entity movement remains the responsibility of the bot controller. */
 public final class PatheticPathPlanner {
@@ -34,7 +34,7 @@ public final class PatheticPathPlanner {
 
         NavigationPointProvider provider = (position, context) -> navigationPoint(position);
         ValidationProcessor traversalValidator = context -> {
-            BlockPos current = toBlockPos(context.getCurrentPathPosition());
+            BlockVector current = toBlockPos(context.getCurrentPathPosition());
             boolean currentTraversable = context.getNavigationPointProvider()
                     .getNavigationPoint(context.getCurrentPathPosition(), context.getEnvironmentContext())
                     .isTraversable();
@@ -64,19 +64,19 @@ public final class PatheticPathPlanner {
         this.pathfinder = new AStarPathfinderFactory().createPathfinder(configuration);
     }
 
-    public List<BlockPos> findPath(BlockPos start, BlockPos target) {
+    public List<BlockVector> findPath(BlockVector start, BlockVector target) {
         return findPath(start, target, Set.of());
     }
 
-    public List<BlockPos> findPath(BlockPos start, BlockPos target, Set<BlockPos> excluded) {
+    public List<BlockVector> findPath(BlockVector start, BlockVector target, Set<BlockVector> excluded) {
         Objects.requireNonNull(start, "start");
         Objects.requireNonNull(target, "target");
         Objects.requireNonNull(excluded, "excluded");
 
         Set<Long> previousExcludedPositions = excludedPositions;
         excludedPositions = new HashSet<>(excluded.size());
-        for (BlockPos position : excluded) {
-            excludedPositions.add(position.asLong());
+        for (BlockVector position : excluded) {
+            excludedPositions.add(blockKey(position));
         }
 
         PathfinderResult result;
@@ -92,7 +92,7 @@ public final class PatheticPathPlanner {
             return List.of();
         }
 
-        List<BlockPos> path = result.getPath().collect().stream()
+        List<BlockVector> path = result.getPath().collect().stream()
                 .map(PatheticPathPlanner::toBlockPos)
                 .distinct()
                 .toList();
@@ -100,9 +100,9 @@ public final class PatheticPathPlanner {
     }
 
     private NavigationPoint navigationPoint(PathPosition position) {
-        BlockPos blockPosition = toBlockPos(position);
+        BlockVector blockPosition = toBlockPos(position);
         boolean traversable =
-                !excludedPositions.contains(blockPosition.asLong()) && environment.canStandAt(blockPosition);
+                !excludedPositions.contains(blockKey(blockPosition)) && environment.canStandAt(blockPosition);
         return () -> traversable;
     }
 
@@ -124,11 +124,18 @@ public final class PatheticPathPlanner {
         return List.copyOf(offsets);
     }
 
-    private static PathPosition toPathPosition(BlockPos position) {
-        return PathPosition.of(position.getX(), position.getY(), position.getZ());
+    private static PathPosition toPathPosition(BlockVector position) {
+        return PathPosition.of(position.getBlockX(), position.getBlockY(), position.getBlockZ());
     }
 
-    private static BlockPos toBlockPos(PathPosition position) {
-        return new BlockPos(position.getFlooredX(), position.getFlooredY(), position.getFlooredZ());
+    private static BlockVector toBlockPos(PathPosition position) {
+        return new BlockVector(position.getFlooredX(), position.getFlooredY(), position.getFlooredZ());
+    }
+
+    private static long blockKey(BlockVector position) {
+        long x = position.getBlockX() & 0x3FFFFFFL;
+        long y = position.getBlockY() & 0xFFFL;
+        long z = position.getBlockZ() & 0x3FFFFFFL;
+        return x << 38 | z << 12 | y;
     }
 }

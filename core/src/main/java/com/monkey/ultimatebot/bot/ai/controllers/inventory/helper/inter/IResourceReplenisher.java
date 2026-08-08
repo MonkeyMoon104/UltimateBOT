@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter;
 
 import java.util.Map;
-import net.minecraft.world.item.ItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public interface IResourceReplenisher {
 

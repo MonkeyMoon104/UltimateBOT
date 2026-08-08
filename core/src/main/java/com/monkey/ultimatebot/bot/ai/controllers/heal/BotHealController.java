@@ -8,11 +8,11 @@ import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import net.minecraft.world.entity.player.Player;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class BotHealController {
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final BotInventoryController inventoryController;
 
     private final IHealthChecker healthChecker;
@@ -20,7 +20,7 @@ public class BotHealController {
     private final HealActionManager actionManager;
     private final IHealStrategy healStrategy;
 
-    public BotHealController(Player bot, BotInventoryController inventoryController) {
+    public BotHealController(ITrainingBot bot, BotInventoryController inventoryController) {
         this.bot = bot;
         this.inventoryController = inventoryController;
 

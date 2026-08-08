@@ -1,15 +1,15 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf;
 
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.MovementPattern;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.Vector;
 
 public interface IMovementPatternSelector {
     MovementPattern selectOptimalPattern(
-            Player target,
+            LivingEntity target,
             double targetDistance,
-            Vec3 botPos,
-            Vec3 targetPos,
+            Vector botPos,
+            Vector targetPos,
             boolean isUnderFire,
             int consecutiveHits);
 

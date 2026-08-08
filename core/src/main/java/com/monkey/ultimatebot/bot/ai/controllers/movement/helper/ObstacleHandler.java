@@ -2,16 +2,16 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.Vec3;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
 public class ObstacleHandler implements IObstacleHandler {
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
+    private final World world;
     private final IBlockStateValidator blockValidator;
     private final double movementSpeed;
     private final double jumpVelocity;
@@ -21,9 +21,9 @@ public class ObstacleHandler implements IObstacleHandler {
     private boolean isUnderFire = false;
 
     public ObstacleHandler(
-            Player bot, Level level, IBlockStateValidator blockValidator, double movementSpeed, double jumpVelocity) {
+            ITrainingBot bot, IBlockStateValidator blockValidator, double movementSpeed, double jumpVelocity) {
         this.bot = bot;
-        this.level = level;
+        this.world = bot.getWorld();
         this.blockValidator = blockValidator;
         this.movementSpeed = movementSpeed;
         this.jumpVelocity = jumpVelocity;
@@ -32,28 +32,28 @@ public class ObstacleHandler implements IObstacleHandler {
     @Override
     public boolean handleObstacles(
             double dx, double dz, double botX, double botY, double botZ, double moveX, double moveZ) {
-        BlockPos immediate = BlockPos.containing(botX + dx * 0.7, botY, botZ + dz * 0.7);
-        BlockPos immediateHead = immediate.above();
-        if (isCobweb(immediate) || isCobweb(immediateHead) || isCobweb(immediate.below())) {
+        BlockVector immediate = blockAt(botX + dx * 0.7, botY, botZ + dz * 0.7);
+        BlockVector immediateHead = above(immediate);
+        if (isCobweb(immediate) || isCobweb(immediateHead) || isCobweb(below(immediate))) {
             handleHighObstacle(dx, dz);
             return true;
         }
         if (!blockValidator.isPositionPassableCached(immediate)) {
-            if (bot.onGround() && blockValidator.isPositionPassableCached(immediateHead)) {
-                bot.setDeltaMovement(moveX * 1.15, jumpVelocity, moveZ * 1.15);
+            if (bot.isOnGround() && blockValidator.isPositionPassableCached(immediateHead)) {
+                setVelocity(moveX * 1.15, jumpVelocity, moveZ * 1.15);
             } else {
                 handleHighObstacle(dx, dz);
             }
             return true;
         }
 
-        BlockPos front = BlockPos.containing(botX + dx * 2, botY, botZ + dz * 2);
-        BlockPos above = front.above();
-        BlockPos below = front.below();
+        BlockVector front = blockAt(botX + dx * 2, botY, botZ + dz * 2);
+        BlockVector above = above(front);
+        BlockVector below = below(front);
 
         boolean frontBlocked = !blockValidator.isPositionPassableCached(front);
         boolean aboveClear = blockValidator.isPositionPassableCached(above);
-        boolean belowSolid = !level.getBlockState(below).isAir();
+        boolean belowSolid = !world.getBlockAt(below.getBlockX(), below.getBlockY(), below.getBlockZ()).isEmpty();
 
         boolean canStepUp = frontBlocked && aboveClear && belowSolid;
         boolean tooHigh = frontBlocked && !aboveClear;
@@ -63,8 +63,8 @@ public class ObstacleHandler implements IObstacleHandler {
             return true;
         }
 
-        if (canStepUp && bot.onGround()) {
-            bot.setDeltaMovement(moveX * 1.2, jumpVelocity, moveZ * 1.2);
+        if (canStepUp && bot.isOnGround()) {
+            setVelocity(moveX * 1.2, jumpVelocity, moveZ * 1.2);
             return true;
         }
 
@@ -82,9 +82,9 @@ public class ObstacleHandler implements IObstacleHandler {
             double altDx = diversionDirection[0];
             double altDz = diversionDirection[1];
             double diversionSpeed = isUnderFire ? movementSpeed * 1.3 : movementSpeed;
-            bot.setDeltaMovement(altDx * diversionSpeed, bot.getDeltaMovement().y, altDz * diversionSpeed);
+            setVelocity(altDx * diversionSpeed, bot.bukkitVelocity().getY(), altDz * diversionSpeed);
         } else {
-            bot.setDeltaMovement(0, bot.getDeltaMovement().y, 0);
+            setVelocity(0, bot.bukkitVelocity().getY(), 0);
         }
 
         if (diversionTicks <= 0) {
@@ -111,25 +111,27 @@ public class ObstacleHandler implements IObstacleHandler {
     }
 
     private boolean isPathClearOptimized(double dx, double dz) {
-        BlockPos checkPos = BlockPos.containing(bot.getX() + dx * 2, bot.getY(), bot.getZ() + dz * 2);
+        Vector position = bot.bukkitPosition();
+        BlockVector checkPos = blockAt(position.getX() + dx * 2, position.getY(), position.getZ() + dz * 2);
         return !isCobweb(checkPos)
-                && !isCobweb(checkPos.above())
-                && !isCobweb(checkPos.below())
+                && !isCobweb(above(checkPos))
+                && !isCobweb(below(checkPos))
                 && blockValidator.isPositionPassableCached(checkPos);
     }
 
-    private boolean isCobweb(BlockPos position) {
-        return level.getBlockState(position).is(Blocks.COBWEB);
+    private boolean isCobweb(BlockVector position) {
+        return world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ()).getType()
+                == Material.COBWEB;
     }
 
     @Override
-    public boolean hasComplexTerrain(Vec3 position) {
-        BlockPos centerPos = BlockPos.containing(position);
+    public boolean hasComplexTerrain(Vector position) {
+        BlockVector centerPos = blockAt(position);
         int solidBlocks = 0;
 
-        BlockPos[] checkPositions = {centerPos.north(), centerPos.south(), centerPos.east(), centerPos.west()};
+        BlockVector[] checkPositions = {north(centerPos), south(centerPos), east(centerPos), west(centerPos)};
 
-        for (BlockPos checkPos : checkPositions) {
+        for (BlockVector checkPos : checkPositions) {
             if (!blockValidator.isPositionPassableCached(checkPos)) {
                 solidBlocks++;
             }
@@ -139,14 +141,14 @@ public class ObstacleHandler implements IObstacleHandler {
     }
 
     @Override
-    public boolean hasObstacles(Vec3 from, Vec3 to) {
-        Vec3 direction = to.subtract(from).normalize();
-        double distance = from.distanceTo(to);
+    public boolean hasObstacles(Vector from, Vector to) {
+        Vector direction = to.clone().subtract(from).normalize();
+        double distance = from.distance(to);
         int steps = Math.min((int) (distance / 3.0), 5);
 
         for (int i = 1; i <= steps; i++) {
-            Vec3 checkPos = from.add(direction.scale(i * 3.0));
-            BlockPos blockPos = BlockPos.containing(checkPos);
+            Vector checkPos = from.clone().add(direction.clone().multiply(i * 3.0));
+            BlockVector blockPos = blockAt(checkPos);
 
             if (!blockValidator.isPositionPassableCached(blockPos)) {
                 return true;
@@ -169,5 +171,41 @@ public class ObstacleHandler implements IObstacleHandler {
     public void clearDiversion() {
         diversionDirection = null;
         diversionTicks = 0;
+    }
+
+    private void setVelocity(double x, double y, double z) {
+        bot.setBukkitVelocity(new Vector(x, y, z));
+    }
+
+    private static BlockVector blockAt(Vector position) {
+        return blockAt(position.getX(), position.getY(), position.getZ());
+    }
+
+    private static BlockVector blockAt(double x, double y, double z) {
+        return new BlockVector((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
+    }
+
+    private static BlockVector above(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY() + 1, position.getBlockZ());
+    }
+
+    private static BlockVector below(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY() - 1, position.getBlockZ());
+    }
+
+    private static BlockVector north(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY(), position.getBlockZ() - 1);
+    }
+
+    private static BlockVector south(BlockVector position) {
+        return new BlockVector(position.getBlockX(), position.getBlockY(), position.getBlockZ() + 1);
+    }
+
+    private static BlockVector east(BlockVector position) {
+        return new BlockVector(position.getBlockX() + 1, position.getBlockY(), position.getBlockZ());
+    }
+
+    private static BlockVector west(BlockVector position) {
+        return new BlockVector(position.getBlockX() - 1, position.getBlockY(), position.getBlockZ());
     }
 }

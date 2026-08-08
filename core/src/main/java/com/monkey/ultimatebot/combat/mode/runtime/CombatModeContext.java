@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.ICombatStrategyExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.cpvp.BotCPVPController;
@@ -13,14 +14,12 @@ import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.random.RandomGenerator;
-import net.minecraft.world.entity.player.Player;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Entity;
 
 public final class CombatModeContext implements AutoCloseable {
-    private final Player bot;
+    private final ITrainingBot bot;
     private final org.bukkit.entity.Player bukkitBot;
     private final BotOptions options;
     private final BotMovementController movement;
@@ -39,7 +38,7 @@ public final class CombatModeContext implements AutoCloseable {
     private final RandomGenerator random;
 
     public CombatModeContext(
-            Player bot,
+            ITrainingBot bot,
             BotOptions options,
             BotMovementController movement,
             BotRotationController rotation,
@@ -50,10 +49,7 @@ public final class CombatModeContext implements AutoCloseable {
             ICombatStrategyExecutor legacyCombat,
             WorldProtectionService worldProtection) {
         this.bot = Objects.requireNonNull(bot, "bot");
-        if (!(bot.getBukkitEntity() instanceof org.bukkit.entity.Player player)) {
-            throw new IllegalArgumentException("Combat bot must expose a Bukkit player entity");
-        }
-        this.bukkitBot = player;
+        this.bukkitBot = bot.asBukkitPlayer();
         this.options = Objects.requireNonNull(options, "options");
         this.movement = Objects.requireNonNull(movement, "movement");
         this.inventory = Objects.requireNonNull(inventory, "inventory");
@@ -65,9 +61,9 @@ public final class CombatModeContext implements AutoCloseable {
         this.entities = new ModeEntityTracker();
         this.blocks = new ModeBlockTracker();
         this.random = new SplittableRandom(
-                bot.getUUID().getMostSignificantBits() ^ bot.getUUID().getLeastSignificantBits());
+                bot.getUniqueId().getMostSignificantBits() ^ bot.getUniqueId().getLeastSignificantBits());
         this.projectiles = new ModeProjectileService(bukkitBot, entities, random);
-        this.motion = new ModeMotionService(bot, movement, rotation, this::tuning, random);
+        this.motion = new ModeMotionService(bot, bukkitBot, movement, rotation, this::tuning, random);
         this.actions = new ModeCombatActions(bot, bukkitBot, attack, inventory, this::tuning);
         this.signals = new ModeCombatSignals();
     }
@@ -80,7 +76,7 @@ public final class CombatModeContext implements AutoCloseable {
         return options;
     }
 
-    public Player bot() {
+    public ITrainingBot bot() {
         return bot;
     }
 
@@ -176,7 +172,7 @@ public final class CombatModeContext implements AutoCloseable {
     public boolean breakCombatBlock(Location location, int toolSlot) {
         inventory.switchToSlot(toolSlot);
         boolean broken = worldProtection.breakCombatBlock(
-                location, bukkitBot, CraftItemStack.asBukkitCopy(inventory.getItem(toolSlot)));
+                location, bukkitBot, inventory.getItem(toolSlot));
         if (broken) {
             actions.swingMainHand();
             invalidateMovementForWorldChange();
@@ -200,7 +196,7 @@ public final class CombatModeContext implements AutoCloseable {
         blocks.restore(location);
     }
 
-    public void legacyCombat(Player target) {
+    public void legacyCombat(org.bukkit.entity.Player target) {
         legacyCombat.executeCombatStrategy(target);
     }
 

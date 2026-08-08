@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rotation.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IAngleNormalizer;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.helper.inter.IRotationApplier;
-import net.minecraft.world.entity.player.Player;
 
 public class RotationApplier implements IRotationApplier {
 
@@ -13,18 +13,15 @@ public class RotationApplier implements IRotationApplier {
     }
 
     @Override
-    public void applyRotation(Player bot, float yaw, float pitch) {
+    public void applyRotation(ITrainingBot bot, float yaw, float pitch) {
         yaw = angleNormalizer.normalizeAngle(yaw);
         pitch = angleNormalizer.normalizePitch(pitch);
 
-        bot.setYRot(yaw);
-        bot.yHeadRot = yaw;
-        bot.yBodyRot = yaw;
-        bot.setXRot(pitch);
+        bot.setRotation(yaw, pitch);
     }
 
     @Override
-    public void resetRotation(Player bot) {
+    public void resetRotation(ITrainingBot bot) {
         applyRotation(bot, 0f, 0f);
     }
 }

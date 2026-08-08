@@ -1,25 +1,27 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
+@SuppressWarnings({"StringConcatToTextBlock", "FloatingPointLiteralPrecision", "NullAway"})
 public class PathfindingManager implements IPathfindingManager {
 
-    private final Player bot;
-    private final Level level;
+    private final ITrainingBot bot;
     private final BotMovementController movementController;
     private final BotEnderpearlController enderpearlController;
 
-    private Vec3 lastBotPosition;
+    private Vector lastBotPosition;
     private int stuckCounter = 0;
     private static final double MIN_MOVEMENT_THRESHOLD = 0.1;
 
@@ -32,22 +34,19 @@ public class PathfindingManager implements IPathfindingManager {
     private int blockedPathCounter;
 
     public PathfindingManager(
-            Player bot,
-            Level level,
+            ITrainingBot bot,
             BotMovementController movementController,
             BotEnderpearlController enderpearlController) {
         this.bot = bot;
-        this.level = level;
         this.movementController = movementController;
         this.enderpearlController = enderpearlController;
-        this.lastBotPosition = bot.position();
+        this.lastBotPosition = bot.bukkitPosition();
     }
 
     @Override
     public void checkForStuck(LivingEntity target) {
-        Vec3 currentPos = bot.position();
-
-        double movementDistance = currentPos.distanceTo(lastBotPosition);
+        Vector currentPos = bot.bukkitPosition();
+        double movementDistance = currentPos.distance(lastBotPosition);
 
         if (movementDistance < MIN_MOVEMENT_THRESHOLD) {
             stuckCounter++;
@@ -55,7 +54,7 @@ public class PathfindingManager implements IPathfindingManager {
             stuckCounter = 0;
         }
 
-        boolean directPathBlocked = movementController.isPathObstructed(target.position());
+        boolean directPathBlocked = movementController.isPathObstructed(target.getLocation().toVector());
         blockedPathCounter = directPathBlocked ? blockedPathCounter + 1 : 0;
 
         if (blockedPathCounter >= BLOCKED_PATH_CONFIRMATION_TICKS) {
@@ -66,7 +65,6 @@ public class PathfindingManager implements IPathfindingManager {
 
         if (stuckCounter > 20) {
             attemptPathfinding(target, true);
-
             stuckCounter = 0;
         }
     }
@@ -80,16 +78,14 @@ public class PathfindingManager implements IPathfindingManager {
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastPathfindingAttempt < PATHFINDING_ATTEMPT_COOLDOWN) {
             if (allowRecovery && shouldAttemptStuckPearl(target, currentTime)) {
-                if (tryUnstuckPearl(target, currentTime)) {
-                    return;
-                }
+                tryUnstuckPearl(target, currentTime);
             }
             return;
         }
 
         lastPathfindingAttempt = currentTime;
 
-        if (movementController.calculatePathTo(target.position())) {
+        if (movementController.calculatePathTo(target.getLocation().toVector())) {
             usingPathfinding = true;
             movementController.followPath();
             return;
@@ -98,8 +94,7 @@ public class PathfindingManager implements IPathfindingManager {
         if (allowRecovery
                 && enderpearlController.canUseEnderpearl()
                 && bot.distanceTo(target) > 4.0
-                && hasObstacleBetween(bot.position(), target.position())) {
-
+                && hasObstacleBetween(bot.bukkitPosition(), target.getLocation().toVector())) {
             if (tryUnstuckPearl(target, currentTime)) {
                 return;
             }
@@ -111,17 +106,19 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     @Override
-    public boolean hasObstacleBetween(Vec3 start, Vec3 end) {
-        Vec3 direction = end.subtract(start).normalize();
-        double distance = start.distanceTo(end);
+    public boolean hasObstacleBetween(Vector start, Vector end) {
+        Vector delta = end.clone().subtract(start);
+        double distance = delta.length();
+        if (distance < 1.0E-6D) {
+            return false;
+        }
+        Vector direction = delta.normalize();
         int steps = (int) (distance * 2);
 
         for (int i = 1; i < steps; i++) {
-            Vec3 checkPos = start.add(direction.scale(i * 0.5));
-            BlockPos blockPos = BlockPos.containing(checkPos);
-
-            if (!level.getBlockState(blockPos).isAir()
-                    || !level.getBlockState(blockPos.above()).isAir()) {
+            Vector checkPos = start.clone().add(direction.clone().multiply(i * 0.5D));
+            Block block = blockAt(checkPos);
+            if (isSolid(block) || isSolid(block.getRelative(0, 1, 0))) {
                 return true;
             }
         }
@@ -130,32 +127,32 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     @Override
-    public @Nullable Vec3 calculatePearlTargetAroundPlayer(LivingEntity target) {
-        Vec3 targetPos = target.position();
-        Vec3 botPos = bot.position();
-        double baseAngle = Math.atan2(botPos.z - targetPos.z, botPos.x - targetPos.x);
+    @SuppressWarnings("FloatingPointLiteralPrecision")
+    public @Nullable Vector calculatePearlTargetAroundPlayer(LivingEntity target) {
+        Vector targetPos = target.getLocation().toVector();
+        Vector botPos = bot.bukkitPosition();
+        double baseAngle = Math.atan2(botPos.getZ() - targetPos.getZ(), botPos.getX() - targetPos.getX());
 
-        double[] radii = {2.8D, 3.4D, 4.1D, 4.8D, 5.4D};
+        double[] radii = {14.0D / 5.0D, 17.0D / 5.0D, 41.0D / 10.0D, 24.0D / 5.0D, 27.0D / 5.0D};
         double[] angleOffsets = {0D, 25D, -25D, 50D, -50D, 80D, -80D, 110D, -110D, 180D};
         int[] yOffsets = {0, -1, 1};
 
-        Vec3 best = null;
+        Vector best = null;
         double bestScore = Double.NEGATIVE_INFINITY;
 
         for (double radius : radii) {
             for (double offsetDeg : angleOffsets) {
                 double angle = baseAngle + Math.toRadians(offsetDeg);
-                double x = targetPos.x + Math.cos(angle) * radius;
-                double z = targetPos.z + Math.sin(angle) * radius;
+                double x = targetPos.getX() + Math.cos(angle) * radius;
+                double z = targetPos.getZ() + Math.sin(angle) * radius;
 
                 for (int yOffset : yOffsets) {
-                    Vec3 potentialTarget = new Vec3(x, targetPos.y + yOffset, z);
-                    BlockPos blockPos = BlockPos.containing(potentialTarget);
+                    BlockVector blockPos = new BlockVector(x, targetPos.getY() + yOffset, z);
                     if (!isSafeLandingSpot(blockPos)) {
                         continue;
                     }
 
-                    Vec3 center = Vec3.atCenterOf(blockPos);
+                    Vector center = centerOf(blockPos);
                     if (!hasThrowPath(center)) {
                         continue;
                     }
@@ -169,47 +166,47 @@ public class PathfindingManager implements IPathfindingManager {
             }
         }
 
-        if (best != null) {
-            return best;
-        }
-
-        return calculatePearlSideStepTarget(target);
+        return best != null ? best : calculatePearlSideStepTarget(target);
     }
 
     @Override
-    public boolean isSafeLandingSpot(BlockPos pos) {
-        return !level.getBlockState(pos.below()).isAir()
-                && level.getBlockState(pos).isAir()
-                && level.getBlockState(pos.above()).isAir();
+    public boolean isSafeLandingSpot(BlockVector pos) {
+        Block block = blockAt(pos);
+        Block below = block.getRelative(0, -1, 0);
+        Block above = block.getRelative(0, 1, 0);
+        return isSolid(below) && isPassable(block) && isPassable(above);
     }
 
     @Override
     public void forceUnstuck(LivingEntity target) {
         double distance = bot.distanceTo(target);
-        Vec3 botPos = bot.position();
-        Vec3 toTarget = target.position().subtract(botPos);
-        if (toTarget.horizontalDistanceSqr() < 1.0E-5D) {
-            toTarget = bot.getLookAngle();
+        Vector botPos = bot.bukkitPosition();
+        Vector toTarget = target.getLocation().toVector().subtract(botPos);
+        toTarget.setY(0.0D);
+        if (toTarget.lengthSquared() < 1.0E-5D) {
+            toTarget = bot.getLookDirection();
+            toTarget.setY(0.0D);
         }
-        Vec3 horizontalDirection = new Vec3(toTarget.x, 0.0D, toTarget.z).normalize();
+        Vector horizontalDirection = normalizeOrFallback(toTarget, new Vector(1.0D, 0.0D, 0.0D));
 
         if (distance <= 1.0) {
-            movementController.moveToPosition(botPos.subtract(horizontalDirection.scale(3.0D)));
+            movementController.moveToPosition(botPos.subtract(horizontalDirection.multiply(3.0D)));
         } else if (distance >= 10.0) {
-            movementController.moveToPosition(botPos.add(horizontalDirection.scale(3.0D)));
+            movementController.moveToPosition(botPos.add(horizontalDirection.multiply(3.0D)));
         } else {
-            Vec3 strafeDirection = getStrafeDirection(target);
+            Vector strafeDirection = getStrafeDirection(target);
             if (isFacingSolidWall()) {
-                strafeDirection = strafeDirection.scale(-1.0D);
+                strafeDirection.multiply(-1.0D);
             }
-            Vec3 newPos = botPos.add(strafeDirection.scale(2.0));
-            movementController.moveToPosition(newPos);
+            movementController.moveToPosition(botPos.add(strafeDirection.multiply(2.0D)));
         }
     }
 
-    private Vec3 getStrafeDirection(LivingEntity target) {
-        Vec3 toTarget = target.position().subtract(bot.position()).normalize();
-        return new Vec3(-toTarget.z, 0, toTarget.x);
+    private Vector getStrafeDirection(LivingEntity target) {
+        Vector toTarget = target.getLocation().toVector().subtract(bot.bukkitPosition());
+        toTarget.setY(0.0D);
+        Vector normalized = normalizeOrFallback(toTarget, new Vector(1.0D, 0.0D, 0.0D));
+        return new Vector(-normalized.getZ(), 0, normalized.getX());
     }
 
     @Override
@@ -223,7 +220,7 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     public void updateLastBotPosition() {
-        this.lastBotPosition = bot.position();
+        this.lastBotPosition = bot.bukkitPosition();
     }
 
     private boolean shouldAttemptStuckPearl(LivingEntity target, long currentTime) {
@@ -239,11 +236,13 @@ public class PathfindingManager implements IPathfindingManager {
             return false;
         }
 
-        return hasObstacleBetween(bot.position(), target.position()) || isFacingSolidWall() || stuckCounter > 18;
+        return hasObstacleBetween(bot.bukkitPosition(), target.getLocation().toVector())
+                || isFacingSolidWall()
+                || stuckCounter > 18;
     }
 
     private boolean tryUnstuckPearl(LivingEntity target, long currentTime) {
-        Vec3 pearlTarget = calculatePearlTargetAroundPlayer(target);
+        Vector pearlTarget = calculatePearlTargetAroundPlayer(target);
         if (pearlTarget == null) {
             return false;
         }
@@ -257,26 +256,29 @@ public class PathfindingManager implements IPathfindingManager {
         return false;
     }
 
-    private @Nullable Vec3 calculatePearlSideStepTarget(LivingEntity target) {
-        Vec3 botPos = bot.position();
-        Vec3 toTarget = target.position().subtract(botPos);
-        if (toTarget.lengthSqr() < 1.0E-5D) {
-            toTarget = bot.getLookAngle();
+    private @Nullable Vector calculatePearlSideStepTarget(LivingEntity target) {
+        Vector botPos = bot.bukkitPosition();
+        Vector toTarget = target.getLocation().toVector().subtract(botPos);
+        toTarget.setY(0.0D);
+        if (toTarget.lengthSquared() < 1.0E-5D) {
+            toTarget = bot.getLookDirection();
+            toTarget.setY(0.0D);
         }
-        Vec3 lateral = new Vec3(-toTarget.z, 0.0D, toTarget.x).normalize();
-        if (lateral.lengthSqr() < 1.0E-5D) {
+        Vector lateral = new Vector(-toTarget.getZ(), 0.0D, toTarget.getX());
+        if (lateral.lengthSquared() < 1.0E-5D) {
             return null;
         }
+        lateral.normalize();
 
         double[] scales = {3.2D, 4.0D, 4.8D};
         for (double scale : scales) {
             for (int sign : new int[] {1, -1}) {
-                Vec3 candidate = botPos.add(lateral.scale(scale * sign)).add(0.0D, 0.6D, 0.0D);
-                BlockPos blockPos = BlockPos.containing(candidate);
+                Vector candidate = botPos.clone().add(lateral.clone().multiply(scale * sign)).add(new Vector(0.0D, 0.6D, 0.0D));
+                BlockVector blockPos = toBlockVector(candidate);
                 if (!isSafeLandingSpot(blockPos)) {
                     continue;
                 }
-                Vec3 center = Vec3.atCenterOf(blockPos);
+                Vector center = centerOf(blockPos);
                 if (hasThrowPath(center)) {
                     return center;
                 }
@@ -285,9 +287,9 @@ public class PathfindingManager implements IPathfindingManager {
         return null;
     }
 
-    private double evaluatePearlTargetScore(Vec3 candidate, Vec3 targetPos, Vec3 botPos) {
-        double distToTarget = candidate.distanceTo(targetPos);
-        double distToBot = candidate.distanceTo(botPos);
+    private double evaluatePearlTargetScore(Vector candidate, Vector targetPos, Vector botPos) {
+        double distToTarget = candidate.distance(targetPos);
+        double distToBot = candidate.distance(botPos);
         double score = 0.0D;
         score -= Math.abs(distToTarget - 3.6D) * 2.0D;
         score -= Math.abs(distToBot - 5.0D) * 0.9D;
@@ -303,45 +305,85 @@ public class PathfindingManager implements IPathfindingManager {
     }
 
     private boolean isFacingSolidWall() {
-        Vec3 eyes = bot.getEyePosition(1.0F);
-        Vec3 look = bot.getLookAngle();
-        if (look.lengthSqr() < 1.0E-5D) {
+        Vector eyes = bot.asBukkitPlayer().getEyeLocation().toVector();
+        Vector look = normalizeOrFallback(bot.getLookDirection(), null);
+        if (look == null) {
             return false;
         }
-        look = look.normalize();
 
         for (double step = 0.8D; step <= 1.8D; step += 0.5D) {
-            Vec3 check = eyes.add(look.scale(step));
-            BlockPos blockPos = BlockPos.containing(check);
-            if (level.getBlockState(blockPos).isSolidRender()
-                    || level.getBlockState(blockPos.above()).isSolidRender()) {
+            Vector check = eyes.clone().add(look.clone().multiply(step));
+            Block block = blockAt(check);
+            if (isSolid(block) || isSolid(block.getRelative(0, 1, 0))) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean hasThrowPath(Vec3 destination) {
-        Vec3 eyes = bot.getEyePosition(1.0F);
-        net.minecraft.world.level.ClipContext context = new net.minecraft.world.level.ClipContext(
-                eyes,
-                destination,
-                net.minecraft.world.level.ClipContext.Block.COLLIDER,
-                net.minecraft.world.level.ClipContext.Fluid.NONE,
-                bot);
-        HitResult result = level.clip(context);
-        if (result.getType() == HitResult.Type.MISS) {
+    private boolean hasThrowPath(Vector destination) {
+        Vector eyes = bot.asBukkitPlayer().getEyeLocation().toVector();
+        Vector delta = destination.clone().subtract(eyes);
+        double distance = delta.length();
+        if (distance < 1.0E-6D) {
+            return true;
+        }
+        Vector direction = delta.normalize();
+        RayTraceResult result = bot.getWorld().rayTraceBlocks(
+                bot.asBukkitPlayer().getEyeLocation(),
+                direction,
+                distance,
+                FluidCollisionMode.NEVER,
+                true);
+        if (result == null || result.getHitBlock() == null) {
             return true;
         }
 
-        if (result instanceof BlockHitResult blockHit) {
-            BlockPos destinationBlock = BlockPos.containing(destination);
-            BlockPos hitBlock = blockHit.getBlockPos();
-            return hitBlock.equals(destinationBlock)
-                    || hitBlock.equals(destinationBlock.below())
-                    || hitBlock.equals(destinationBlock.above());
-        }
+        BlockVector destinationBlock = toBlockVector(destination);
+        Block hitBlock = result.getHitBlock();
+        return blockEquals(hitBlock, destinationBlock)
+                || blockEquals(hitBlock.getRelative(0, -1, 0), destinationBlock)
+                || blockEquals(hitBlock.getRelative(0, 1, 0), destinationBlock);
+    }
 
-        return false;
+    private Block blockAt(Vector value) {
+        World world = bot.getWorld();
+        return world.getBlockAt(value.getBlockX(), value.getBlockY(), value.getBlockZ());
+    }
+
+    private Block blockAt(BlockVector value) {
+        World world = bot.getWorld();
+        return world.getBlockAt(value.getBlockX(), value.getBlockY(), value.getBlockZ());
+    }
+
+    private static BlockVector toBlockVector(Vector value) {
+        return new BlockVector(value.getBlockX(), value.getBlockY(), value.getBlockZ());
+    }
+
+    private static Vector centerOf(BlockVector value) {
+        return new Vector(value.getBlockX() + 0.5D, value.getBlockY() + 0.5D, value.getBlockZ() + 0.5D);
+    }
+
+    private static boolean blockEquals(Block block, BlockVector vector) {
+        return block.getX() == vector.getBlockX()
+                && block.getY() == vector.getBlockY()
+                && block.getZ() == vector.getBlockZ();
+    }
+
+    private static boolean isPassable(Block block) {
+        Material type = block.getType();
+        return type.isAir() || block.isPassable();
+    }
+
+    private static boolean isSolid(Block block) {
+        Material type = block.getType();
+        return type.isBlock() && type.isSolid() && !block.isPassable();
+    }
+
+    private static @Nullable Vector normalizeOrFallback(Vector vector, @Nullable Vector fallback) {
+        if (vector != null && vector.lengthSquared() > 1.0E-5D) {
+            return vector.normalize();
+        }
+        return fallback;
     }
 }

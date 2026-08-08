@@ -13,7 +13,7 @@ import com.monkey.ultimatebot.extension.runtime.ModeKitAdapter;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.random.RandomGenerator;
-import net.minecraft.world.entity.LivingEntity;
+import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 final class ExternalCombatModeSessionManager implements AutoCloseable {
@@ -81,7 +81,7 @@ final class ExternalCombatModeSessionManager implements AutoCloseable {
         }
         nativeAccess.target(Objects.requireNonNull(target, "target"));
         try {
-            active.tick(new CombatModeTick(sequence++, (org.bukkit.entity.LivingEntity) target.getBukkitEntity()));
+            active.tick(new CombatModeTick(sequence++, target));
             failures = 0;
         } catch (RuntimeException | LinkageError error) {
             fail(error);
@@ -151,7 +151,7 @@ final class ExternalCombatModeSessionManager implements AutoCloseable {
     private void closeSession() {
         CombatModeSession active = session;
         session = null;
-        nativeAccess.target(null);
+        nativeAccess.clearTarget();
         if (active == null) {
             return;
         }

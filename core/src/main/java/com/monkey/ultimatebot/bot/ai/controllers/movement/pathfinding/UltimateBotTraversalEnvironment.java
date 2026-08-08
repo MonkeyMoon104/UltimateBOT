@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import java.util.Objects;
-import net.minecraft.core.BlockPos;
+import org.bukkit.util.BlockVector;
 
 public final class UltimateBotTraversalEnvironment implements BotTraversalEnvironment {
     private final IBlockStateValidator blockValidator;
@@ -12,12 +12,12 @@ public final class UltimateBotTraversalEnvironment implements BotTraversalEnviro
     }
 
     @Override
-    public boolean canStandAt(BlockPos position) {
+    public boolean canStandAt(BlockVector position) {
         return blockValidator.isPositionPassableCached(position);
     }
 
     @Override
-    public boolean canOccupy(BlockPos position) {
+    public boolean canOccupy(BlockVector position) {
         return blockValidator.isBodySpaceClearCached(position);
     }
 }

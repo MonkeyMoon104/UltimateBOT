@@ -23,8 +23,8 @@ public class ArmorPlaceholder implements IBotPlaceholder {
     @Override
     public String getValue(Player player) {
         ITrainingBot bot = helper.getBotForPlaceholder(player);
-        if (bot != null && bot.asPlayer().getBukkitEntity() != null) {
-            ItemStack[] armor = bot.asPlayer().getBukkitEntity().getEquipment().getArmorContents();
+        if (bot != null && bot.asBukkitPlayer() != null && bot.asBukkitPlayer().getEquipment() != null) {
+            ItemStack[] armor = bot.asBukkitPlayer().getEquipment().getArmorContents();
             int armorPieces = 0;
             for (ItemStack item : armor) {
                 if (item != null && !item.getType().isAir()) {

@@ -1,28 +1,28 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
 import java.util.Map;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import org.bukkit.Material;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 
 public class ItemManager implements IItemManager {
 
     public static final int ENDERPEARL_SLOT = 1;
     public static final int TOTEM_SLOT = 2;
 
-    private final Player bot;
+    private final ITrainingBot bot;
     private final Map<Integer, ItemStack> hotbarSlots;
     private final IResourceReplenisher resourceReplenisher;
     private final IEquipmentBroadcaster equipmentBroadcaster;
     private final ISlotManager slotManager;
 
     public ItemManager(
-            Player bot,
+            ITrainingBot bot,
             Map<Integer, ItemStack> hotbarSlots,
             IResourceReplenisher resourceReplenisher,
             IEquipmentBroadcaster equipmentBroadcaster,
@@ -38,9 +38,9 @@ public class ItemManager implements IItemManager {
     public void addEnderpearls(int count) {
         ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
         if (enderpearlStack == null || enderpearlStack.isEmpty()) {
-            hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Items.ENDER_PEARL, count));
+            hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Material.ENDER_PEARL, count));
         } else {
-            enderpearlStack.grow(count);
+            enderpearlStack.setAmount(enderpearlStack.getAmount() + count);
         }
     }
 
@@ -55,7 +55,7 @@ public class ItemManager implements IItemManager {
 
         if (slotManager.getCurrentSlot() == slot) {
             ItemStack stack = hotbarSlots.get(slot);
-            bot.setItemSlot(EquipmentSlot.MAINHAND, stack);
+            bot.setItem(EquipmentSlot.HAND, stack);
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }

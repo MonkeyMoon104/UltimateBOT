@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.combat.mode.trident;
 
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import java.util.Objects;
-import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 final class TridentUtilityActions {
@@ -36,7 +36,7 @@ final class TridentUtilityActions {
     }
 
     double riptideVerticalVelocity(CombatModeContext context, LivingEntity target) {
-        return Math.clamp((target.getY() - context.bot().getY()) * 0.22D + 0.24D, 0.12D, 0.52D);
+        return Math.clamp((target.getY() - context.motion().botY()) * 0.22D + 0.24D, 0.12D, 0.52D);
     }
 
     void restoreWater(CombatModeContext context) {

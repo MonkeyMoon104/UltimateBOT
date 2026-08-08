@@ -13,8 +13,8 @@ import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import java.util.UUID;
-import net.minecraft.world.damagesource.DamageSource;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -39,7 +39,7 @@ public class BotDeathService {
         this.deadBotEventMessage = deadBotEventMessage;
     }
 
-    public void handleDeath(DamageSource cause) {
+    public void handleDeath(@Nullable LivingEntity killer) {
         BotOptions options =
                 bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
         boolean isEventBot = options != null && options.getBotType() == BotType.EVENT;
@@ -47,19 +47,16 @@ public class BotDeathService {
         Player owner = getOwnerPlayer(options);
         UUID ownerUUID = options != null
                 ? options.getOwnerUUID()
-                : plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.asPlayer().getUUID());
+                : plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
         BotSnapshot deathSnapshot =
                 ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
         if (deathSnapshot != null) {
-            org.bukkit.entity.Entity killer = cause == null || cause.getEntity() == null
-                    ? null
-                    : cause.getEntity().getBukkitEntity();
             plugin.getBotEventDispatcher()
                     .publish(new BotDeathEvent(
                             plugin.getBotEventDispatcher()
-                                    .nextSequence(bot.asPlayer().getUUID()),
+                                    .nextSequence(bot.asBukkitPlayer().getUniqueId()),
                             deathSnapshot,
-                            cause == null ? "unknown" : cause.typeHolder().getRegisteredName(),
+                            "unknown",
                             killer));
         }
 
@@ -97,19 +94,20 @@ public class BotDeathService {
             }
         }
 
-        bot.asPlayer().discard();
-        NMSBridgeManager.get().removeFromProfileCache(bot.asPlayer().getUUID());
-        plugin.forgetCompatibilityBot(bot.asPlayer().getUUID());
-        plugin.getBotRegistry().removeBotByUUID(bot.asPlayer().getUUID());
+        Player bukkitBot = bot.asBukkitPlayer();
+        bukkitBot.remove();
+        NMSBridgeManager.get().removeFromProfileCache(bukkitBot.getUniqueId());
+        plugin.forgetCompatibilityBot(bukkitBot.getUniqueId());
+        plugin.getBotRegistry().removeBotByUUID(bukkitBot.getUniqueId());
         if (deathSnapshot != null) {
             plugin.getBotEventDispatcher()
                     .publish(new BotDespawnEvent(
                             plugin.getBotEventDispatcher()
-                                    .nextSequence(bot.asPlayer().getUUID()),
+                                    .nextSequence(bukkitBot.getUniqueId()),
                             deathSnapshot,
                             BotEventSource.SYSTEM,
                             BotDespawnReason.BOT_DEATH));
-            plugin.getBotEventDispatcher().forget(bot.asPlayer().getUUID());
+            plugin.getBotEventDispatcher().forget(bukkitBot.getUniqueId());
         }
     }
 
