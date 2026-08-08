@@ -7,18 +7,28 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.TrainingBot_v1_21_5;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.protocol.BotProfileData;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
-import net.minecraft.server.level.ClientInformation;
-import net.minecraft.server.level.ParticleStatus;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -27,128 +37,55 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 public class NMSBridge_v1_21_5 implements INMSBridge {
 
-    @Override
-    public void hurtEntity(LivingEntity target, ServerLevel level, DamageSource source, float amount) {
-        target.hurtServer(level, source, amount);
-    }
+    private static final Set<PlatformCapability> CAPABILITIES = EnumSet.allOf(PlatformCapability.class);
 
     @Override
-    public boolean actuallyHurt(
-            Player bot, ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        if (bot instanceof com.monkey.ultimatebot.bot.ai.ITrainingBot trainingBot) {
-            return trainingBot.callSuperActuallyHurt(level, source, amount, event);
-        }
-        return false;
-    }
-
-    @Override
-    public void explode(Level level, Player cause, double x, double y, double z, float power, boolean blockDamage) {
-        level.explode(
-                cause,
-                x,
-                y,
-                z,
-                power,
-                blockDamage ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
-    }
-
-    @Override
-    public void playSound(Level level, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
-        level.playSeededSound(
-                null,
-                pos.getX() + 0.5,
-                pos.getY() + 0.5,
-                pos.getZ() + 0.5,
-                sound,
-                source,
-                volume,
-                pitch,
-                level.random.nextLong());
-    }
-
-    @Override
-    public void playSoundOnPlayer(Player player, SoundEvent sound, float volume, float pitch) {
-        player.level()
-                .playSeededSound(
-                        null,
-                        player.getX(),
-                        player.getY(),
-                        player.getZ(),
-                        sound,
-                        net.minecraft.sounds.SoundSource.PLAYERS,
-                        volume,
-                        pitch,
-                        player.level().random.nextLong());
-    }
-
-    @Override
-    public ClientInformation createClientInformation() {
-        return new ClientInformation(
-                "it_IT", 10, ChatVisiblity.FULL, true, 0, HumanoidArm.RIGHT, false, true, ParticleStatus.ALL);
-    }
-
-    @Override
-    public ClientboundPlayerInfoUpdatePacket createAddPlayerPacket(UUID uuid, GameProfile profile, String displayName) {
-        ClientboundPlayerInfoUpdatePacket.Entry entry = new ClientboundPlayerInfoUpdatePacket.Entry(
-                uuid, profile, true, 0, GameType.SURVIVAL, Component.literal(displayName), true, 0, null);
-        return new ClientboundPlayerInfoUpdatePacket(
-                java.util.EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER), List.of(entry));
-    }
-
-    @Override
-    public ClientboundAddEntityPacket createSpawnPlayerPacket(
-            int entityId, UUID uuid, double x, double y, double z, float xRot, float yRot, double yHeadRot) {
-        return new ClientboundAddEntityPacket(
-                entityId, uuid, x, y, z, xRot, yRot, EntityType.PLAYER, 0, new Vec3(0, 0, 0), yHeadRot);
-    }
-
-    @Override
-    public ClientboundSetEquipmentPacket createEquipmentPacket(
-            int entityId, List<Pair<EquipmentSlot, ItemStack>> equipment) {
-        return new ClientboundSetEquipmentPacket(entityId, equipment);
-    }
-
-    @Override
-    public ServerLevel getServerLevel(ServerPlayer player) {
-        return player.serverLevel();
+    public Set<PlatformCapability> capabilities() {
+        return CAPABILITIES;
     }
 
     @Override
     public ITrainingBot createTrainingBot(
-            ServerLevel level,
-            BlockPos pos,
-            float yRot,
-            GameProfile gameProfile,
+            Location spawn,
+            BotProfileData profile,
             org.bukkit.entity.Player targetPlayer,
             boolean follow,
             UltimateBot plugin,
             String deadBotMessage,
             String deadBotEventMessage,
             BotOptions botOptions) {
+        ServerLevel level = ((CraftWorld) spawn.getWorld()).getHandle();
+        BlockPos pos = BlockPos.containing(spawn.getX(), spawn.getY(), spawn.getZ());
         return new TrainingBot_v1_21_5(
                 level,
                 pos,
-                yRot,
-                gameProfile,
+                spawn.getYaw(),
+                toGameProfile(profile),
                 targetPlayer,
                 follow,
                 plugin,
@@ -158,61 +95,25 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     }
 
     @Override
-    public void moveBot(Player bot, double x, double y, double z) {
-        bot.snapTo(x, y, z);
-    }
-
-    @Override
-    public GameProfile copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName) {
-        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
-        GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
+    public void registerBotEntity(ITrainingBot bot) {
+        Player nativeBot = nativeBot(bot);
+        if (nativeBot.level() instanceof ServerLevel level) {
+            level.addFreshEntity(nativeBot);
         }
-        return profile;
     }
 
     @Override
-    public GameProfile createProfileWithTexture(
-            UUID botUUID,
-            String botName,
-            String textureValue,
-            @org.jspecify.annotations.Nullable String textureSignature) {
-        GameProfile profile = new GameProfile(botUUID, botName);
-        Property property = textureSignature == null || textureSignature.isBlank()
-                ? new Property("textures", textureValue)
-                : new Property("textures", textureValue, textureSignature);
-        profile.getProperties().put("textures", property);
-        return profile;
-    }
-
-    @Override
-    public BotProfileData getProfileData(GameProfile profile) {
-        List<BotProfileData.Texture> textures = profile.getProperties().get("textures").stream()
-                .map(property -> new BotProfileData.Texture(property.name(), property.value(), property.signature()))
-                .toList();
-        return new BotProfileData(profile.getId(), profile.getName(), textures);
-    }
-
-    @Override
-    public void addToProfileCache(net.minecraft.world.entity.player.Player bot) {
+    public void addToProfileCache(ITrainingBot bot) {
         var cache = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
         if (cache != null) {
-            cache.add(bot.getGameProfile());
+            cache.add(nativeBot(bot).getGameProfile());
         }
     }
 
     @Override
     public void removeFromProfileCache(UUID botUUID) {
-        Object cache =
-                ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
+        Object cache = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
         removeProfileCacheEntry(cache, botUUID, new GameProfile(botUUID, ""));
-    }
-
-    @Override
-    public String getProfileName(com.mojang.authlib.GameProfile profile) {
-        return profile.getName();
     }
 
     private void removeProfileCacheEntry(
@@ -248,36 +149,306 @@ public class NMSBridge_v1_21_5 implements INMSBridge {
     }
 
     @Override
-    public InteractionResult useItemOnBlock(
-            Player bot, ItemStack stack, BlockHitResult hitResult, InteractionHand hand) {
-        return stack.getItem().useOn(new UseOnContext(bot.level(), bot, hand, stack, hitResult));
+    public void moveBot(org.bukkit.entity.Player bot, double x, double y, double z) {
+        nativePlayer(bot).snapTo(x, y, z);
     }
 
     @Override
-    public void throwEnderpearl(Player bot, Vec3 targetPos) {
-        ThrownEnderpearl enderpearl =
-                new ThrownEnderpearl(net.minecraft.world.entity.EntityType.ENDER_PEARL, bot.level());
-        enderpearl.setOwner(bot);
+    public BotProfileData copyProfileWithTextures(org.bukkit.entity.Player viewer, UUID botUUID, String botName) {
+        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
+        Collection<Property> textures = viewerProfile.getProperties().get("textures");
+        GameProfile profile = new GameProfile(botUUID, botName);
+        if (!textures.isEmpty()) {
+            profile.getProperties().put("textures", textures.iterator().next());
+        }
+        return toProfileData(profile);
+    }
 
+    @Override
+    public BotProfileData createProfileWithTexture(
+            UUID botUUID, String botName, String textureValue, @org.jspecify.annotations.Nullable String textureSignature) {
+        GameProfile profile = new GameProfile(botUUID, botName);
+        Property property = textureSignature == null || textureSignature.isBlank()
+                ? new Property("textures", textureValue)
+                : new Property("textures", textureValue, textureSignature);
+        profile.getProperties().put("textures", property);
+        return toProfileData(profile);
+    }
+
+    @Override
+    public String getProfileName(BotProfileData profile) {
+        return profile.name();
+    }
+
+    private BotProfileData toProfileData(GameProfile profile) {
+        List<BotProfileData.Texture> textures = profile.getProperties().get("textures").stream()
+                .map(property -> new BotProfileData.Texture(property.name(), property.value(), property.signature()))
+                .toList();
+        return new BotProfileData(profile.getId(), profile.getName(), textures);
+    }
+
+    private GameProfile toGameProfile(BotProfileData profile) {
+        GameProfile gameProfile = new GameProfile(profile.id(), profile.name());
+        for (BotProfileData.Texture texture : profile.textures()) {
+            Property property = texture.signature() == null || texture.signature().isBlank()
+                    ? new Property(texture.name(), texture.value())
+                    : new Property(texture.name(), texture.value(), texture.signature());
+            gameProfile.getProperties().put(texture.name(), property);
+        }
+        return gameProfile;
+    }
+
+    @Override
+    public boolean actuallyHurt(org.bukkit.entity.Player bot, float amount, EntityDamageEvent event) {
+        return event != null && !event.isCancelled();
+    }
+
+    @Override
+    public void hurt(org.bukkit.entity.LivingEntity target, org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker, float amount, DamageKind kind) {
+        net.minecraft.world.entity.LivingEntity nativeTarget = ((CraftLivingEntity) target).getHandle();
+        if (!(nativeTarget.level() instanceof ServerLevel level)) {
+            return;
+        }
+        nativeTarget.hurtServer(level, damageSource(nativeTarget, attacker, kind), amount);
+    }
+
+    @Override
+    public void explode(Location location, org.bukkit.entity.@org.jspecify.annotations.Nullable Player cause, float power, boolean blockDamage) {
+        Level level = ((CraftWorld) location.getWorld()).getHandle();
+        Player nativeCause = cause == null ? null : nativePlayer(cause);
+        level.explode(
+                nativeCause,
+                location.getX(),
+                location.getY(),
+                location.getZ(),
+                power,
+                blockDamage ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE);
+    }
+
+    @Override
+    public void playSound(Location location, String soundKey, String source, float volume, float pitch) {
+        Level level = ((CraftWorld) location.getWorld()).getHandle();
+        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(ResourceLocation.parse(soundKey));
+        if (sound == null) {
+            return;
+        }
+        SoundSource soundSource = SoundSource.valueOf(source.toUpperCase(Locale.ROOT));
+        playSound(level, BlockPos.containing(location.getX(), location.getY(), location.getZ()), sound, soundSource, volume, pitch);
+    }
+
+    @Override
+    public void playSoundOnPlayer(org.bukkit.entity.Player player, String soundKey, float volume, float pitch) {
+        SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(ResourceLocation.parse(soundKey));
+        if (sound == null) {
+            return;
+        }
+        playSoundOnPlayer(nativePlayer(player), sound, volume, pitch);
+    }
+
+    @Override
+    public boolean useItemOnBlock(
+            org.bukkit.entity.Player bot,
+            ItemStack stack,
+            Block clicked,
+            BlockFace face,
+            Location hitLocation,
+            org.bukkit.inventory.EquipmentSlot hand) {
+        Player nativeBot = nativePlayer(bot);
+        net.minecraft.world.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+        BlockPos pos = BlockPos.containing(clicked.getX(), clicked.getY(), clicked.getZ());
+        Vec3 hit = new Vec3(hitLocation.getX(), hitLocation.getY(), hitLocation.getZ());
+        InteractionResult result = nmsStack.getItem()
+                .useOn(new UseOnContext(
+                        nativeBot.level(),
+                        nativeBot,
+                        toInteractionHand(hand),
+                        nmsStack,
+                        new BlockHitResult(hit, toDirection(face), pos, false)));
+        return !result.equals(InteractionResult.PASS);
+    }
+
+    @Override
+    public void throwEnderpearl(org.bukkit.entity.Player bot, Vector targetPos) {
+        throwEnderpearl(nativePlayer(bot), new Vec3(targetPos.getX(), targetPos.getY(), targetPos.getZ()));
+    }
+
+    @Override
+    public void sendTabListAdd(org.bukkit.entity.Player viewer, ITrainingBot bot) {
+        Player nativeBot = nativeBot(bot);
+        GameProfile profile = nativeBot.getGameProfile();
+        ClientboundPlayerInfoUpdatePacket.Entry entry = new ClientboundPlayerInfoUpdatePacket.Entry(
+                nativeBot.getUUID(), profile, true, 0, GameType.SURVIVAL, Component.literal(getProfileName(toProfileData(profile))), true, 0, null);
+        ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(
+                java.util.EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER), List.of(entry));
+        ((CraftPlayer) viewer).getHandle().connection.send(packet);
+    }
+
+    @Override
+    public void sendSpawnAndMeta(org.bukkit.entity.Player viewer, ITrainingBot bot) {
+        Player nativeBot = nativeBot(bot);
+        ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
+        handle.connection.send(new ClientboundAddEntityPacket(
+                nativeBot.getId(),
+                nativeBot.getUUID(),
+                nativeBot.getX(),
+                nativeBot.getY(),
+                nativeBot.getZ(),
+                nativeBot.getXRot(),
+                nativeBot.getYRot(),
+                EntityType.PLAYER,
+                0,
+                new Vec3(0, 0, 0),
+                nativeBot.getYHeadRot()));
+        byte yHeadRot = packDegrees(nativeBot.getYHeadRot());
+        byte yBodyRot = packDegrees(nativeBot.getYRot());
+        byte xRot = packDegrees(nativeBot.getXRot());
+        handle.connection.send(new ClientboundRotateHeadPacket(nativeBot, yHeadRot));
+        handle.connection.send(new ClientboundMoveEntityPacket.Rot(nativeBot.getId(), yBodyRot, xRot, nativeBot.onGround()));
+        sendMetadata(handle, nativeBot);
+    }
+
+    @Override
+    public void sendEquipment(org.bukkit.entity.Player viewer, ITrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
+        if (!converted.isEmpty()) {
+            ((CraftPlayer) viewer).getHandle().connection.send(new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted));
+        }
+    }
+
+    @Override
+    public void broadcastEquipment(ITrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
+        if (converted.isEmpty()) {
+            return;
+        }
+        ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted);
+        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            ((CraftPlayer) online).getHandle().connection.send(packet);
+        }
+    }
+
+    @Override
+    public void broadcastMetadata(ITrainingBot bot) {
+        Player nativeBot = nativeBot(bot);
+        for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
+            sendMetadata(((CraftPlayer) online).getHandle(), nativeBot);
+        }
+    }
+
+    public net.minecraft.server.level.ClientInformation createClientInformation() {
+        return new net.minecraft.server.level.ClientInformation(
+                "it_IT", 10, ChatVisiblity.FULL, true, 0, HumanoidArm.RIGHT, false, true, net.minecraft.server.level.ParticleStatus.ALL);
+    }
+
+    public ServerLevel getServerLevel(ServerPlayer player) {
+        return player.serverLevel();
+    }
+
+    private void playSound(Level level, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
+        level.playSound(null, pos, sound, source, volume, pitch);
+    }
+
+    private void playSoundOnPlayer(Player player, SoundEvent sound, float volume, float pitch) {
+        player.playSound(sound, volume, pitch);
+    }
+
+    private void throwEnderpearl(Player bot, Vec3 targetPos) {
+        ThrownEnderpearl enderpearl = new ThrownEnderpearl(EntityType.ENDER_PEARL, bot.level());
+        enderpearl.setOwner(bot);
         Vec3 botPos = bot.position().add(0, bot.getEyeHeight(), 0);
         Vec3 direction = targetPos.subtract(botPos);
         double distance = direction.length();
-
         double velocityScale = distance < 15 ? Math.min(distance * 0.08, 1.2) : Math.min(distance * 0.06, 1.8);
-
         Vec3 velocity = direction.normalize().scale(velocityScale);
         velocity = velocity.add(0, 0.2 + distance * 0.02, 0);
-
         enderpearl.setPos(botPos.x, botPos.y, botPos.z);
         enderpearl.setDeltaMovement(velocity);
         bot.level().addFreshEntity(enderpearl);
+        bot.swing(InteractionHand.MAIN_HAND);
+        playSoundOnPlayer(
+                bot,
+                net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW,
+                0.5f,
+                0.4f / (bot.level().getRandom().nextFloat() * 0.4f + 0.8f));
+    }
 
-        bot.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-        NMSBridgeManager.get()
-                .playSoundOnPlayer(
-                        bot,
-                        net.minecraft.sounds.SoundEvents.ENDER_PEARL_THROW,
-                        0.5f,
-                        0.4f / (bot.level().getRandom().nextFloat() * 0.4f + 0.8f));
+    private DamageSource damageSource(
+            net.minecraft.world.entity.LivingEntity target,
+            org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker,
+            DamageKind kind) {
+        return switch (kind) {
+            case PLAYER_ATTACK -> attacker == null
+                    ? target.damageSources().generic()
+                    : nativePlayer(attacker).damageSources().playerAttack(nativePlayer(attacker));
+            case LAVA -> target.damageSources().lava();
+            case GENERIC -> target.damageSources().generic();
+        };
+    }
+
+    private static Player nativeBot(ITrainingBot bot) {
+        if (bot instanceof Player nativeBot) {
+            return nativeBot;
+        }
+        return nativePlayer(bot.asBukkitPlayer());
+    }
+
+    private static Player nativePlayer(org.bukkit.entity.Player player) {
+        if (player instanceof CraftPlayer craftPlayer) {
+            return craftPlayer.getHandle();
+        }
+        if (player instanceof CraftHumanEntity craftHuman) {
+            return craftHuman.getHandle();
+        }
+        throw new IllegalArgumentException("Unsupported player implementation: " + player.getClass().getName());
+    }
+
+    private static InteractionHand toInteractionHand(org.bukkit.inventory.EquipmentSlot hand) {
+        return hand == org.bukkit.inventory.EquipmentSlot.OFF_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+    }
+
+    private static Direction toDirection(BlockFace face) {
+        return switch (face) {
+            case DOWN -> Direction.DOWN;
+            case UP -> Direction.UP;
+            case NORTH -> Direction.NORTH;
+            case SOUTH -> Direction.SOUTH;
+            case WEST -> Direction.WEST;
+            case EAST -> Direction.EAST;
+            default -> Direction.UP;
+        };
+    }
+
+    private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable EquipmentSlot toNmsSlot(org.bukkit.inventory.EquipmentSlot slot) {
+        return switch (slot) {
+            case HAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
+            case OFF_HAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;
+            case FEET -> net.minecraft.world.entity.EquipmentSlot.FEET;
+            case LEGS -> net.minecraft.world.entity.EquipmentSlot.LEGS;
+            case CHEST -> net.minecraft.world.entity.EquipmentSlot.CHEST;
+            case HEAD -> net.minecraft.world.entity.EquipmentSlot.HEAD;
+            default -> null;
+        };
+    }
+
+    private static List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> toNmsEquipment(
+            Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+        return equipment.entrySet().stream()
+                .map(entry -> {
+                    net.minecraft.world.entity.EquipmentSlot slot = toNmsSlot(entry.getKey());
+                    return slot == null ? null : Pair.of(slot, CraftItemStack.asNMSCopy(entry.getValue()));
+                })
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
+    private static void sendMetadata(ServerPlayer viewer, Player bot) {
+        List<SynchedEntityData.DataValue<?>> metadata = bot.getEntityData().getNonDefaultValues();
+        if (metadata != null && !metadata.isEmpty()) {
+            viewer.connection.send(new ClientboundSetEntityDataPacket(bot.getId(), metadata));
+        }
+    }
+
+    private static byte packDegrees(float value) {
+        return (byte) (value * 256.0F / 360.0F);
     }
 }

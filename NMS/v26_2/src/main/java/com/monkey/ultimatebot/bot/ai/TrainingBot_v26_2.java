@@ -62,12 +62,16 @@ public final class TrainingBot_v26_2 extends Player implements ITrainingBot {
     public void die(DamageSource cause) {
         this.getInventory().clearContent();
         super.die(cause);
-        logic.onDeath(cause);
+        logic.onDeath(bukkitKiller(cause));
     }
 
     @Override
     protected boolean actuallyHurt(ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        return logic.onActuallyHurt(level, source, amount, event);
+        boolean handled = logic.onDamaged(amount, event);
+        if (!handled) {
+            return false;
+        }
+        return super.actuallyHurt(level, source, amount, event);
     }
 
     @Override
@@ -178,14 +182,30 @@ public final class TrainingBot_v26_2 extends Player implements ITrainingBot {
     }
 
     @Override
-    public Player asPlayer() {
-        return this;
+    public org.bukkit.entity.Player asBukkitPlayer() {
+        craftEntity.setHandle(this);
+        return craftEntity;
     }
 
     @Override
-    public boolean callSuperActuallyHurt(
-            ServerLevel level, DamageSource source, float amount, EntityDamageEvent event) {
-        return super.actuallyHurt(level, source, amount, event);
+    public void onDamaged(EntityDamageEvent event) {
+        if (logic.getBrainController().getBotAI().usesCustomBrain()) {
+            logic.getBrainController().getBotAI().customBrainDamaged(event);
+        }
+    }
+
+    @Override
+    public void onDeath(org.bukkit.entity.@org.jspecify.annotations.Nullable LivingEntity killer) {
+        logic.onDeath(killer);
+    }
+
+    private org.bukkit.entity.@org.jspecify.annotations.Nullable LivingEntity bukkitKiller(DamageSource cause) {
+        net.minecraft.world.entity.Entity killer = cause.getEntity();
+        if (killer == null) {
+            return null;
+        }
+        org.bukkit.entity.Entity bukkitEntity = killer.getBukkitEntity();
+        return bukkitEntity instanceof org.bukkit.entity.LivingEntity livingEntity ? livingEntity : null;
     }
 
     @Override

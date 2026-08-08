@@ -24,6 +24,7 @@ val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-26_2").get().requiredVersion)
     compileOnly(project(":core"))
+    compileOnly(project(":common"))
     compileOnly(project(":api"))
     implementation(libsCatalog.findLibrary("invui-v2-2").get())
 }

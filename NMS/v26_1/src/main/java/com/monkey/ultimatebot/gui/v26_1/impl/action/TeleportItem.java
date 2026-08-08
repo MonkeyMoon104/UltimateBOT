@@ -48,7 +48,7 @@ public class TeleportItem extends AbstractItem {
             return;
         }
 
-        NMSBridgeManager.get().moveBot(bot.asPlayer(), player.getX(), player.getY(), player.getZ());
+        NMSBridgeManager.get().moveBot(bot.asBukkitPlayer(), player.getX(), player.getY(), player.getZ());
     }
 
     private UUID resolveBotOwnerUUID(Player player) {

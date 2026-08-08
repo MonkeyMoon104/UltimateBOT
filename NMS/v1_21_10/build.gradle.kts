@@ -14,4 +14,5 @@ val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_10").get().requiredVersion)
     compileOnly(project(":core"))
+    compileOnly(project(":common"))
 }
