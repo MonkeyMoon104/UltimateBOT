@@ -5,35 +5,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
+import com.monkey.ultimatebot.common.util.TextValues;
 import org.jspecify.annotations.Nullable;
 
 /** Public description of an available combat mode and its difficulty profiles. */
-public record CombatModeDefinition(
-        CombatMode mode,
-        String displayName,
-        boolean enabled,
-        String iconMaterial,
-        Set<CombatCapability> capabilities,
-        Map<DifficultyTier, CombatTuning> profiles,
-        String provider,
-        List<String> description,
-        String permission,
-        int order,
-        @Nullable BrainKey brain) {
+public final class CombatModeDefinition {
+    private final CombatMode mode;
+    private final String displayName;
+    private final boolean enabled;
+    private final String iconMaterial;
+    private final Set<CombatCapability> capabilities;
+    private final Map<DifficultyTier, CombatTuning> profiles;
+    private final String provider;
+    private final List<String> description;
+    private final String permission;
+    private final int order;
+    private final @Nullable BrainKey brain;
 
-    public CombatModeDefinition {
-        Objects.requireNonNull(mode, "mode");
-        displayName = requireText(displayName, "displayName");
-        iconMaterial = requireText(iconMaterial, "iconMaterial");
-        provider = requireText(provider, "provider");
-        description = List.copyOf(Objects.requireNonNull(description, "description"));
-        permission = Objects.requireNonNull(permission, "permission").trim();
-        capabilities = Set.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
-        EnumMap<DifficultyTier, CombatTuning> profileCopy = new EnumMap<>(Objects.requireNonNull(profiles, "profiles"));
+    public CombatModeDefinition(
+            CombatMode mode,
+            String displayName,
+            boolean enabled,
+            String iconMaterial,
+            Set<CombatCapability> capabilities,
+            Map<DifficultyTier, CombatTuning> profiles,
+            String provider,
+            List<String> description,
+            String permission,
+            int order,
+            @Nullable BrainKey brain) {
+        this.mode = Objects.requireNonNull(mode, "mode");
+        this.displayName = requireText(displayName, "displayName");
+        this.enabled = enabled;
+        this.iconMaterial = requireText(iconMaterial, "iconMaterial");
+        this.provider = requireText(provider, "provider");
+        this.description = ImmutableCollections.copyOf(Objects.requireNonNull(description, "description"));
+        this.permission = Objects.requireNonNull(permission, "permission").trim();
+        this.capabilities = ImmutableCollections.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
+        EnumMap<DifficultyTier, CombatTuning> profileCopy =
+                new EnumMap<>(Objects.requireNonNull(profiles, "profiles"));
         for (DifficultyTier difficulty : DifficultyTier.values()) {
             Objects.requireNonNull(profileCopy.get(difficulty), "profiles[" + difficulty + "]");
         }
-        profiles = Map.copyOf(profileCopy);
+        this.profiles = ImmutableCollections.copyOf(profileCopy);
+        this.order = order;
+        this.brain = brain;
     }
 
     public CombatModeDefinition(
@@ -51,10 +68,54 @@ public record CombatModeDefinition(
                 capabilities,
                 profiles,
                 mode.namespace(),
-                List.of(),
+                ImmutableCollections.emptyList(),
                 "",
                 0,
                 null);
+    }
+
+    public CombatMode mode() {
+        return mode;
+    }
+
+    public String displayName() {
+        return displayName;
+    }
+
+    public boolean enabled() {
+        return enabled;
+    }
+
+    public String iconMaterial() {
+        return iconMaterial;
+    }
+
+    public Set<CombatCapability> capabilities() {
+        return capabilities;
+    }
+
+    public Map<DifficultyTier, CombatTuning> profiles() {
+        return profiles;
+    }
+
+    public String provider() {
+        return provider;
+    }
+
+    public List<String> description() {
+        return description;
+    }
+
+    public String permission() {
+        return permission;
+    }
+
+    public int order() {
+        return order;
+    }
+
+    public @Nullable BrainKey brain() {
+        return brain;
     }
 
     /** Returns the configured profile for a difficulty tier. */
@@ -66,9 +127,74 @@ public record CombatModeDefinition(
         return tuning;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CombatModeDefinition)) {
+            return false;
+        }
+        CombatModeDefinition other = (CombatModeDefinition) obj;
+        return enabled == other.enabled
+                && order == other.order
+                && mode.equals(other.mode)
+                && displayName.equals(other.displayName)
+                && iconMaterial.equals(other.iconMaterial)
+                && capabilities.equals(other.capabilities)
+                && profiles.equals(other.profiles)
+                && provider.equals(other.provider)
+                && description.equals(other.description)
+                && permission.equals(other.permission)
+                && Objects.equals(brain, other.brain);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                mode,
+                displayName,
+                enabled,
+                iconMaterial,
+                capabilities,
+                profiles,
+                provider,
+                description,
+                permission,
+                order,
+                brain);
+    }
+
+    @Override
+    public String toString() {
+        return "CombatModeDefinition[mode="
+                + mode
+                + ", displayName="
+                + displayName
+                + ", enabled="
+                + enabled
+                + ", iconMaterial="
+                + iconMaterial
+                + ", capabilities="
+                + capabilities
+                + ", profiles="
+                + profiles
+                + ", provider="
+                + provider
+                + ", description="
+                + description
+                + ", permission="
+                + permission
+                + ", order="
+                + order
+                + ", brain="
+                + brain
+                + ']';
+    }
+
     private static String requireText(String value, String name) {
         Objects.requireNonNull(value, name);
-        if (value.isBlank()) {
+        if (TextValues.isBlank(value)) {
             throw new IllegalArgumentException(name + " cannot be blank");
         }
         return value;

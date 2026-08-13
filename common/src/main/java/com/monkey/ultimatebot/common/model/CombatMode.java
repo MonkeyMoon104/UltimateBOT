@@ -1,13 +1,16 @@
 package com.monkey.ultimatebot.common.model;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 
 /** Stable namespaced identifier for built-in and addon-provided combat modes. */
-public record CombatMode(String namespace, String value) implements Comparable<CombatMode> {
+public final class CombatMode implements Comparable<CombatMode> {
     private static final Pattern PART_PATTERN = Pattern.compile("[a-z0-9][a-z0-9._-]{0,63}");
     private static final String BUILTIN_NAMESPACE = "ultimatebot";
 
@@ -22,12 +25,15 @@ public record CombatMode(String namespace, String value) implements Comparable<C
     public static final CombatMode SMP = builtin("smp");
     public static final CombatMode TRIDENT = builtin("trident");
 
-    private static final List<CombatMode> BUILTIN_MODES =
-            List.of(SWORD, UHC, CART, CRYSTAL, MACE, WATER, AXE_SHIELD, NETHERITE_POT, SMP, TRIDENT);
+    private static final List<CombatMode> BUILTIN_MODES = Collections.unmodifiableList(Arrays.asList(
+            SWORD, UHC, CART, CRYSTAL, MACE, WATER, AXE_SHIELD, NETHERITE_POT, SMP, TRIDENT));
 
-    public CombatMode {
-        namespace = validatePart(namespace, "namespace");
-        value = validatePart(value, "value");
+    private final String namespace;
+    private final String value;
+
+    public CombatMode(String namespace, String value) {
+        this.namespace = validatePart(namespace, "namespace");
+        this.value = validatePart(value, "value");
     }
 
     /** Creates a validated namespaced combat-mode identifier. */
@@ -54,7 +60,15 @@ public record CombatMode(String namespace, String value) implements Comparable<C
 
     /** Returns the built-in modes in their canonical GUI order. */
     public static CombatMode[] values() {
-        return BUILTIN_MODES.toArray(CombatMode[]::new);
+        return BUILTIN_MODES.toArray(new CombatMode[0]);
+    }
+
+    public String namespace() {
+        return namespace;
+    }
+
+    public String value() {
+        return value;
     }
 
     /** Returns whether this identifier belongs to UltimateBot itself. */
@@ -79,7 +93,7 @@ public record CombatMode(String namespace, String value) implements Comparable<C
 
     /** Returns the default capabilities of a built-in mode. */
     public Set<CombatCapability> capabilities() {
-        return builtIn() ? BuiltInCombatModeCatalog.capabilities(value) : Set.of();
+        return builtIn() ? BuiltInCombatModeCatalog.capabilities(value) : ImmutableCollections.emptySet();
     }
 
     /** Returns whether the built-in defaults include a capability. */
@@ -87,11 +101,44 @@ public record CombatMode(String namespace, String value) implements Comparable<C
         return capabilities().contains(Objects.requireNonNull(capability, "capability"));
     }
 
+    /**
+     * Returns platform features that must all be present for this built-in mode.
+     *
+     * <p>Custom (non-built-in) modes declare no built-in platform requirements.
+     */
+    public Set<PlatformCapability> requiredPlatformCapabilities() {
+        return builtIn()
+                ? BuiltInCombatModeCatalog.requiredPlatformCapabilities(value)
+                : ImmutableCollections.emptySet();
+    }
+
+    /** Returns whether every required platform capability is present in {@code available}. */
+    public boolean supportedBy(Set<PlatformCapability> available) {
+        return Objects.requireNonNull(available, "available").containsAll(requiredPlatformCapabilities());
+    }
+
     @Override
     public int compareTo(CombatMode other) {
         CombatMode checked = Objects.requireNonNull(other, "other");
         int builtinComparison = Integer.compare(orderOf(this), orderOf(checked));
         return builtinComparison != 0 ? builtinComparison : key().compareTo(checked.key());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CombatMode)) {
+            return false;
+        }
+        CombatMode other = (CombatMode) obj;
+        return namespace.equals(other.namespace) && value.equals(other.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(namespace, value);
     }
 
     @Override
@@ -122,7 +169,7 @@ public record CombatMode(String namespace, String value) implements Comparable<C
         for (int index = 0; index < value.length(); index++) {
             char character = value.charAt(index);
             if (character == '-' || character == '_' || character == '.') {
-                if (!result.isEmpty() && result.charAt(result.length() - 1) != ' ') {
+                if (result.length() > 0 && result.charAt(result.length() - 1) != ' ') {
                     result.append(' ');
                 }
                 capitalize = true;

@@ -5,12 +5,15 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 /** Stable namespaced identifier for a bot brain implementation. */
-public record BrainKey(String namespace, String value) implements Comparable<BrainKey> {
+public final class BrainKey implements Comparable<BrainKey> {
     private static final Pattern PART_PATTERN = Pattern.compile("[a-z0-9][a-z0-9._-]{0,63}");
 
-    public BrainKey {
-        namespace = validate(namespace, "namespace");
-        value = validate(value, "value");
+    private final String namespace;
+    private final String value;
+
+    public BrainKey(String namespace, String value) {
+        this.namespace = validate(namespace, "namespace");
+        this.value = validate(value, "value");
     }
 
     public static BrainKey of(String namespace, String value) {
@@ -26,6 +29,14 @@ public record BrainKey(String namespace, String value) implements Comparable<Bra
         return of(checked.substring(0, separator), checked.substring(separator + 1));
     }
 
+    public String namespace() {
+        return namespace;
+    }
+
+    public String value() {
+        return value;
+    }
+
     public String key() {
         return namespace + ':' + value;
     }
@@ -33,6 +44,23 @@ public record BrainKey(String namespace, String value) implements Comparable<Bra
     @Override
     public int compareTo(BrainKey other) {
         return key().compareTo(Objects.requireNonNull(other, "other").key());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof BrainKey)) {
+            return false;
+        }
+        BrainKey other = (BrainKey) obj;
+        return namespace.equals(other.namespace) && value.equals(other.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(namespace, value);
     }
 
     @Override

@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.junit.jupiter.api.Test;
@@ -45,8 +44,7 @@ class AddonLoaderTest {
     }
 
     private static byte[] descriptor() throws Exception {
-        String sha256 =
-                HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ADDON_BYTES));
+        String sha256 = toHex(MessageDigest.getInstance("SHA-256").digest(ADDON_BYTES));
         return ("version=2.0.0\n"
                         + "url=https://example.invalid/Test-Addon.jar\n"
                         + "sha256="
@@ -57,6 +55,16 @@ class AddonLoaderTest {
                         + TestFactory.class.getName()
                         + "\n")
                 .getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String toHex(byte[] bytes) {
+        char[] hex = new char[bytes.length * 2];
+        for (int index = 0; index < bytes.length; index++) {
+            int value = bytes[index] & 0xFF;
+            hex[index * 2] = Character.forDigit(value >>> 4, 16);
+            hex[index * 2 + 1] = Character.forDigit(value & 0x0F, 16);
+        }
+        return new String(hex);
     }
 
     public static final class TestFactory {

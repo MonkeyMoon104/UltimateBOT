@@ -23,10 +23,15 @@ public enum BotTargetMode {
     }
 
     public BotTargetMode next() {
-        return switch (this) {
-            case PLAYERS -> MOBS;
-            case MOBS -> PLAYERS_AND_MOBS;
-            case PLAYERS_AND_MOBS -> PLAYERS;
-        };
+        switch (this) {
+            case PLAYERS:
+                return MOBS;
+            case MOBS:
+                return PLAYERS_AND_MOBS;
+            case PLAYERS_AND_MOBS:
+                return PLAYERS;
+            default:
+                throw new IllegalStateException("Unexpected value: " + this);
+        }
     }
 }

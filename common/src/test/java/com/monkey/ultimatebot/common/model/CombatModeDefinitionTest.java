@@ -31,14 +31,15 @@ class CombatModeDefinitionTest {
 
     @Test
     void rejectsAnIncompleteProfileCatalog() {
+        EnumMap<DifficultyTier, CombatTuning> incomplete = new EnumMap<>(DifficultyTier.class);
+        incomplete.put(DifficultyTier.EASY, CombatTuning.builder().build());
         assertThatThrownBy(() -> new CombatModeDefinition(
                         CombatMode.SWORD,
                         "Sword PvP",
                         true,
                         "DIAMOND_SWORD",
                         CombatMode.SWORD.capabilities(),
-                        java.util.Map.of(
-                                DifficultyTier.EASY, CombatTuning.builder().build())))
+                        incomplete))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("profiles");
     }

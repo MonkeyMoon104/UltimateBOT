@@ -11,7 +11,7 @@ public final class EnumValues {
     public static <E extends Enum<E>> @Nullable E parse(
             Class<E> enumType, @Nullable String value, @Nullable E fallback) {
         Objects.requireNonNull(enumType, "enumType");
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             return fallback;
         }
         try {
