@@ -99,20 +99,94 @@ subprojects {
     }
 
     extensions.configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        // Compile with JDK 21+ so Paper 1.21+/26 APIs resolve; emit Java 8 for common/core
+        // (MC 1.8 floor / Java 8 JVMs). NMS modules keep a higher --release and load only on
+        // matching modern servers.
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
     }
 
     tasks.withType<JavaCompile>().configureEach {
         options.encoding = "UTF-8"
-        options.release.set(21)
-        options.compilerArgs.addAll(listOf("-parameters", "-Xlint:all", "-Xlint:-processing", "-Werror"))
+        // Do not set options.release at configuration time: Gradle would stamp TargetJvmVersion
+        // on compileClasspath and reject Paper APIs that require 21+.
+        // Inject --release in doFirst so dependency resolution stays on the toolchain JVM.
+        options.release.unset()
+        options.compilerArgs.addAll(
+                // -Xlint:-classfile: deps may reference ElementType.MODULE (Java 9+); --release 8
+            // cannot resolve that enum constant and would fail under -Werror.
+            listOf(
+                "-parameters",
+                "-Xlint:all",
+                "-Xlint:-processing",
+                "-Xlint:-options",
+                "-Xlint:-classfile",
+                "-Xlint:-deprecation",
+                "-Werror"))
         options.errorprone {
-            allSuggestionsAsWarnings.set(true)
+            allSuggestionsAsWarnings.set(false)
             check("NullAway", CheckSeverity.ERROR)
             check("RequireExplicitNullMarking", CheckSeverity.OFF)
+            // Java 8 emission: keep checks that assume newer language features off.
+            check("PatternMatchingInstanceof", CheckSeverity.OFF)
+            check("StatementSwitchToExpressionSwitch", CheckSeverity.OFF)
+            // Record→class desugar left class-level @param tags; method @params stay documented in source.
+            check("InvalidParam", CheckSeverity.OFF)
             option("NullAway:OnlyNullMarked", "true")
             option("NullAway:JSpecifyMode", "true")
+        }
+        doFirst {
+            val path = project.path
+            if (path == ":NMS:v26_1" || path == ":NMS:v26_2") {
+                return@doFirst
+            }
+            val releaseTarget =
+                when {
+                    // Legacy Spigot NMS (v1_*_R*): emit Java 8 so Class.forName works on Java 8 JVMs.
+                    path.matches(Regex(""":NMS:v1_\d+_R\d+""")) -> "8"
+                    // Paper 1.17 / 1.17.1 run on Java 16.
+                    path == ":NMS:v1_17" || path == ":NMS:v1_17_1" -> "16"
+                    path.startsWith(":NMS:") -> "17"
+                    // Phase 1: shared modules (api/common/core/sdk/addons) emit Java 8 for the MC 1.8 floor.
+                    else -> "8"
+                }
+            val args = options.compilerArgs
+            val cleaned = ArrayList<String>(args.size)
+            var skipNext = false
+            for (arg in args) {
+                if (skipNext) {
+                    skipNext = false
+                    continue
+                }
+                if (arg == "--release") {
+                    skipNext = true
+                    continue
+                }
+                cleaned.add(arg)
+            }
+            args.clear()
+            args.addAll(listOf("--release", releaseTarget))
+            args.addAll(cleaned)
+            // jspecify @NullMarked @Target includes ElementType.MODULE; --release 8 cannot resolve it.
+            // -Xlint:-classfile / -Xlint:none do not suppress that diagnostic; -nowarn does, while
+            // Error Prone / NullAway still report real issues (NullAway remains ERROR).
+            if (releaseTarget == "8") {
+                args.removeAll(listOf("-Werror"))
+                args.add("-Xlint:-classfile")
+                args.add("-nowarn")
+            }
+        }
+    }
+
+    // it.monkeymoon104.api-publish forces options.release 21 at config time; clear it so
+    // compileClasspath TargetJvmVersion stays on the toolchain (21+). v26 sets its own release.
+    afterEvaluate {
+        if (path == ":NMS:v26_1" || path == ":NMS:v26_2") {
+            return@afterEvaluate
+        }
+        tasks.withType<JavaCompile>().configureEach {
+            options.release.unset()
         }
     }
 
@@ -151,7 +225,13 @@ subprojects {
 
     plugins.withId("io.papermc.paperweight.userdev") {
         val toolchains = extensions.getByType<JavaToolchainService>()
-        val targetVersion = if (project.path == ":NMS:v26_1" || project.path == ":NMS:v26_2") 25 else 21
+        // Pre-1.19.3 paperweight setup needs JDK 17 for reproducible decomp/patching.
+        val targetVersion =
+            when (project.path) {
+                ":NMS:v26_1", ":NMS:v26_2" -> 25
+                ":NMS:v1_17_1", ":NMS:v1_18_1", ":NMS:v1_18_2", ":NMS:v1_19", ":NMS:v1_19_2" -> 17
+                else -> 21
+            }
 
         tasks.withType<JavaLauncherTask>().configureEach {
             launcher.set(

@@ -18,10 +18,13 @@ dependencies {
     implementation(project(":common"))
     paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_4").get().requiredVersion)
 
-    compileOnly(libs.bstats.bukkit)
-    compileOnly(libs.jackson.databind)
-    compileOnly(libs.jackson.datatype.jsr310)
-    compileOnly(libs.caffeine)
+    // Must be shaded+relocated; Paper libraries keep org.bstats and bStats refuses that package.
+    implementation(libs.bstats.bukkit)
+    // Shade+relocate: Paper 1.21.x ships jackson-databind 2.13 on the server classpath,
+    // which collides with plugin.yml library jackson 2.22 (jsr310 NoSuchFieldError).
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.datatype.jsr310)
+    compileOnly(libs.caffeine.legacy)
     compileOnly(libs.pathetic.engine)
     compileOnly(libs.configurate.yaml)
     compileOnly(libs.lamp.common)
@@ -46,9 +49,6 @@ tasks.named<Test>("test") {
 tasks.named<ProcessResources>("processResources") {
     val props = mapOf(
         "version" to version,
-        "bstats" to libs.versions.bstats.get(),
-        "jackson" to libs.versions.jackson.get(),
-        "caffeine" to libs.versions.caffeine.get(),
         "pathetic" to libs.versions.pathetic.get(),
         "configurate" to libs.versions.configurate.get(),
         "lamp" to libs.versions.lamp.get(),

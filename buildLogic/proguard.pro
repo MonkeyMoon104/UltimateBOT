@@ -44,11 +44,14 @@
 -keep class com.monkey.ultimatebot.libs.inventoryaccess.a2.** { *; }
 
 -keep class com.fasterxml.jackson.** { *; }
+-keep class com.monkey.ultimatebot.libs.jackson.** { *; }
 
 -keep class com.monkey.ultimatebot.libs.bstats.** { *; }
 
-# Caffeine selects generated cache and node implementations by their runtime class names.
-# Obfuscating this package breaks LocalCacheFactory/NodeFactory reflective lookups.
+# Caffeine selects generated cache/node implementations by runtime class name.
+# Dual shaded lines: cafe2 = Java 8, cafe3 = Java 11+.
+-keep class com.monkey.ultimatebot.cafe2.cache.** { *; }
+-keep class com.monkey.ultimatebot.cafe3.cache.** { *; }
 -keep class com.monkey.ultimatebot.libs.caffeine.cache.** { *; }
 
 # Keep the shaded pathfinding engine stable for its extension interfaces and reflective smoke test.
