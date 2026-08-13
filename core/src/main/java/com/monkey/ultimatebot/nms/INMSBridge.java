@@ -4,15 +4,19 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
-import com.monkey.ultimatebot.gui.NewBotGUI;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.gui.LegacyBotGui;
 import com.monkey.ultimatebot.protocol.BotProfileData;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,8 +33,21 @@ public interface INMSBridge {
 
     Set<PlatformCapability> capabilities();
 
+    /**
+     * Whether this bridge can spawn and drive fake-player bots. Stub bridges for unmapped
+     * pre-1.17 revisions return {@code false}; {@code v1_8_R3}, {@code v1_16_R3}, and 1.17.1+
+     * modules return {@code true} (legacy modules are minimal — see their package-info).
+     */
+    default boolean isBotRuntimeSupported() {
+        return true;
+    }
+
     default boolean supports(PlatformCapability capability) {
         return capabilities().contains(capability);
+    }
+
+    default boolean supportsCombatMode(CombatMode mode) {
+        return Objects.requireNonNull(mode, "mode").supportedBy(capabilities());
     }
 
     ITrainingBot createTrainingBot(
@@ -50,6 +67,29 @@ public interface INMSBridge {
     void removeFromProfileCache(UUID botUUID);
 
     void moveBot(Player bot, double x, double y, double z);
+
+    /**
+     * Pushes the bot's current server position/rotation to nearby viewers. Needed on packet-spawned
+     * fake players (especially pre-1.17) whose entity tracker does not send move packets.
+     */
+    default void broadcastBotPosition(Player bot) {}
+
+    /**
+     * Updates look direction without teleporting, and broadcasts head/body look to nearby viewers
+     * when the bridge can send packets.
+     *
+     * <p>Paper &lt;1.17 cannot use {@code CraftPlayer#setRotation}; teleporting to apply yaw/pitch
+     * cancels velocity and makes follow stutter. Default sets NMS fields only; legacy bot bridges
+     * override to also send look packets.
+     */
+    default void setBotRotation(Player bot, float yaw, float pitch) {
+        Objects.requireNonNull(bot, "bot");
+        if (MinecraftVersionAccess.isAtLeast(1, 17)) {
+            bot.setRotation(yaw, pitch);
+            return;
+        }
+        com.monkey.ultimatebot.compat.CraftEntityLookAccess.setYawPitch(bot, yaw, pitch);
+    }
 
     BotProfileData copyProfileWithTextures(Player viewer, UUID botUUID, String botName);
 
@@ -79,6 +119,12 @@ public interface INMSBridge {
     void throwEnderpearl(Player bot, Vector targetPos);
 
     void sendTabListAdd(Player viewer, ITrainingBot bot);
+
+    /**
+     * Clears packet-injected player-info for this bot on {@code viewer}. Default no-op for bridges
+     * that do not inject PlayerInfo outside the entity tracker.
+     */
+    default void sendTabListRemove(Player viewer, ITrainingBot bot) {}
 
     void sendSpawnAndMeta(Player viewer, ITrainingBot bot);
 
@@ -122,7 +168,63 @@ public interface INMSBridge {
     /** Native {@code Player#attack} so mace smash and item attributes apply. */
     void attackTarget(ITrainingBot bot, LivingEntity target);
 
+    /**
+     * Spawns an inert TNT minecart.
+     *
+     * <p>Default is Bukkit {@code World#spawn} (correct on 1.17+). Pre-1.17 bridges override because
+     * Paper 1.16 often cancels {@code VehicleCreateEvent} for {@code World#spawn}.
+     */
+    default Entity spawnExplosiveMinecart(Location location) {
+        Objects.requireNonNull(location, "location");
+        org.bukkit.World world = Objects.requireNonNull(location.getWorld(), "location world");
+        return world.spawn(location, org.bukkit.entity.minecart.ExplosiveMinecart.class);
+    }
+
+    /**
+     * Sets TNT-minecart fuse ticks. {@code -1} = inert; {@code 1} = detonate next tick.
+     *
+     * <p>Default: Bukkit explosion fallback when arming, because older Paper lacks {@code
+     * ExplosiveMinecart#setFuseTicks} and Spigot-mapped NMS field names are not reflectable.
+     */
+    default void setExplosiveMinecartFuseTicks(Entity minecart, int ticks) {
+        if (minecart == null || ticks < 0) {
+            return;
+        }
+        org.bukkit.Location location = minecart.getLocation();
+        org.bukkit.World world = location.getWorld();
+        minecart.remove();
+        if (world != null) {
+            world.createExplosion(location, 4.0F, false, true);
+        }
+    }
+
+    /**
+     * Opens the bot configuration UI.
+     *
+     * <p>InvUI 1.49 supports MC 1.14–1.21.11 but is compiled for <strong>Java 11+</strong>. On Java
+     * 8 (common for Paper 1.16.5) we must not even class-load InvUI — use {@link LegacyBotGui}
+     * instead. {@code NewBotGuiLauncher} is loaded reflectively so verification never pulls InvUI
+     * on Java 8.
+     */
     default void openBotGui(Player player, UltimateBot plugin, BotType botType) {
-        new NewBotGUI(player, plugin, botType).open();
+        if (MinecraftVersionAccess.isAtLeast(1, 14)
+                && com.monkey.ultimatebot.compat.JavaRuntimeAccess.isAtLeast(11)) {
+            try {
+                Class<?> launcher = Class.forName("com.monkey.ultimatebot.gui.NewBotGuiLauncher");
+                launcher
+                        .getMethod("open", Player.class, UltimateBot.class, BotType.class)
+                        .invoke(null, player, plugin, botType);
+                return;
+            } catch (ReflectiveOperationException | LinkageError error) {
+                plugin.getLogger()
+                        .warning(
+                                "InvUI GUI unavailable ("
+                                        + error.getClass().getSimpleName()
+                                        + ": "
+                                        + error.getMessage()
+                                        + "); falling back to legacy kit GUI.");
+            }
+        }
+        new LegacyBotGui(player, plugin, botType).open();
     }
 }
