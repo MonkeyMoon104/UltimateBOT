@@ -8,7 +8,32 @@ package com.monkey.ultimatebot.api.model.configuration;
  * @param chest {@code true} to enable blast protection on chestplate
  * @param head {@code true} to enable blast protection on helmet
  */
-public record BotBlastProtection(boolean feet, boolean legs, boolean chest, boolean head) {
+public final class BotBlastProtection {
+    private final boolean feet;
+    private final boolean legs;
+    private final boolean chest;
+    private final boolean head;
+
+    public BotBlastProtection(boolean feet, boolean legs, boolean chest, boolean head) {
+        this.feet = feet;
+        this.legs = legs;
+        this.chest = chest;
+        this.head = head;
+    }
+
+    public boolean feet() {
+        return feet;
+    }
+    public boolean legs() {
+        return legs;
+    }
+    public boolean chest() {
+        return chest;
+    }
+    public boolean head() {
+        return head;
+    }
+
     /**
      * Creates a profile where all armor pieces share the same state.
      *
@@ -86,5 +111,27 @@ public record BotBlastProtection(boolean feet, boolean legs, boolean chest, bool
             return true;
         }
         throw new IllegalArgumentException(field + " blast value must be 0 or 1");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof BotBlastProtection)) {
+            return false;
+        }
+        BotBlastProtection other = (BotBlastProtection) obj;
+        return feet == other.feet && legs == other.legs && chest == other.chest && head == other.head;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(feet, legs, chest, head);
+    }
+
+    @Override
+    public String toString() {
+        return "BotBlastProtection[feet=" + feet + ", legs=" + legs + ", chest=" + chest + ", head=" + head + "]";
     }
 }

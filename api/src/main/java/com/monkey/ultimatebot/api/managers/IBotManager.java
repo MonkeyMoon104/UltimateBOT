@@ -57,10 +57,10 @@ public interface IBotManager {
     /** Returns a snapshot using the runtime bot entity UUID. */
     Optional<BotSnapshot> getBotByBotUUID(UUID botUUID);
 
-    /** Returns every configured combat mode, including disabled modes. */
+    /** Returns configured combat modes supported by this server platform (omits unsupported). */
     List<CombatModeDefinition> getCombatModes();
 
-    /** Returns the complete server definition for one combat mode. */
+    /** Returns the complete server definition for one combat mode when supported. */
     Optional<CombatModeDefinition> getCombatMode(CombatMode combatMode);
 
     /** Returns every custom brain currently registered on the server. */

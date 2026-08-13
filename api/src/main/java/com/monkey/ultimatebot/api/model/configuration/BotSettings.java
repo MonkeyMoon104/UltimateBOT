@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.api.model.configuration;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
@@ -124,8 +126,8 @@ public final class BotSettings {
         this.killMessage = builder.killMessage;
         this.armorContents = copyItemMap(builder.armorContents);
         this.equipmentContents = copyItemMap(builder.equipmentContents);
-        this.armorTrimPatternKeys = Map.copyOf(builder.armorTrimPatternKeys);
-        this.armorTrimMaterialKeys = Map.copyOf(builder.armorTrimMaterialKeys);
+        this.armorTrimPatternKeys = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimPatternKeys);
+        this.armorTrimMaterialKeys = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimMaterialKeys);
     }
 
     /**
@@ -427,11 +429,11 @@ public final class BotSettings {
     }
 
     public Map<EquipmentSlot, String> armorTrimPatternKeys() {
-        return Map.copyOf(armorTrimPatternKeys);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimPatternKeys);
     }
 
     public Map<EquipmentSlot, String> armorTrimMaterialKeys() {
-        return Map.copyOf(armorTrimMaterialKeys);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimMaterialKeys);
     }
 
     /**
@@ -1233,12 +1235,12 @@ public final class BotSettings {
         public BuildStep armorTrim(
                 @Nullable EquipmentSlot slot, @Nullable String patternKey, @Nullable String materialKey) {
             if (slot != null) {
-                if (patternKey == null || patternKey.isBlank()) {
+                if (patternKey == null || patternKey.trim().isEmpty()) {
                     this.armorTrimPatternKeys.remove(slot);
                 } else {
                     this.armorTrimPatternKeys.put(slot, patternKey);
                 }
-                if (materialKey == null || materialKey.isBlank()) {
+                if (materialKey == null || materialKey.trim().isEmpty()) {
                     this.armorTrimMaterialKeys.remove(slot);
                 } else {
                     this.armorTrimMaterialKeys.put(slot, materialKey);
@@ -1258,7 +1260,7 @@ public final class BotSettings {
             Objects.requireNonNull(maxDifficulty, "maxDifficulty");
             Objects.requireNonNull(combatMode, "combatMode");
             Objects.requireNonNull(botSkin, "botSkin");
-            if (botNameTemplate == null || botNameTemplate.isBlank()) {
+            if (botNameTemplate == null || botNameTemplate.trim().isEmpty()) {
                 throw new IllegalArgumentException("botNameTemplate cannot be blank");
             }
             validateArmorRange(minArmorType, maxArmorType);
@@ -1340,7 +1342,7 @@ public final class BotSettings {
 
     private static <K> Map<K, ItemStack> copyItemMap(@Nullable Map<K, ItemStack> source) {
         if (source == null || source.isEmpty()) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         Map<K, ItemStack> copy = new HashMap<>();
         for (Map.Entry<K, ItemStack> entry : source.entrySet()) {
@@ -1348,6 +1350,6 @@ public final class BotSettings {
                 copy.put(entry.getKey(), entry.getValue().clone());
             }
         }
-        return Map.copyOf(copy);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(copy);
     }
 }

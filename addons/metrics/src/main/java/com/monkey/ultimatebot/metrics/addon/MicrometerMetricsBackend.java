@@ -16,7 +16,6 @@ import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /** Micrometer implementation kept outside the main plugin classpath. */
@@ -116,7 +115,7 @@ final class MicrometerMetricsBackend implements MetricsBackend {
     }
 
     private static String normalizedTag(String value) {
-        String normalized = Objects.requireNonNullElse(value, "unknown").trim();
+        String normalized = (value != null ? value : "unknown").trim();
         return normalized.isEmpty() ? "unknown" : normalized;
     }
 }

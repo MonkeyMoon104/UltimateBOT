@@ -14,124 +14,123 @@ import org.jspecify.annotations.Nullable;
  * @param textureSignature optional Mojang texture signature for signed payloads
  * @param textureUrl texture URL (for {@link BotSkinSource#TEXTURE_URL})
  */
-public record BotSkin(
-        BotSkinSource source,
-        @Nullable String playerReference,
-        @Nullable String textureValue,
-        @Nullable String textureSignature,
-        @Nullable String textureUrl) {
-    /**
-     * Canonical constructor with source-specific normalization and validation.
-     *
-     * <p>Unused fields are nulled according to the selected source. Required fields
-     * are validated and may throw {@link IllegalArgumentException}.</p>
-     */
-    public BotSkin {
+public final class BotSkin {
+    private final BotSkinSource source;
+    private final @Nullable String playerReference;
+    private final @Nullable String textureValue;
+    private final @Nullable String textureSignature;
+    private final @Nullable String textureUrl;
+
+    public BotSkin(
+            BotSkinSource source,
+            @Nullable String playerReference,
+            @Nullable String textureValue,
+            @Nullable String textureSignature,
+            @Nullable String textureUrl) {
         Objects.requireNonNull(source, "source");
 
-        playerReference = TextValues.trimToNull(playerReference);
-        textureValue = TextValues.trimToNull(textureValue);
-        textureSignature = TextValues.trimToNull(textureSignature);
-        textureUrl = TextValues.trimToNull(textureUrl);
+        String normalizedPlayerReference = TextValues.trimToNull(playerReference);
+        String normalizedTextureValue = TextValues.trimToNull(textureValue);
+        String normalizedTextureSignature = TextValues.trimToNull(textureSignature);
+        String normalizedTextureUrl = TextValues.trimToNull(textureUrl);
 
         switch (source) {
-            case RANDOM, OWNER, FIRST_TEAM_OWNER -> {
-                playerReference = null;
-                textureValue = null;
-                textureSignature = null;
-                textureUrl = null;
-            }
-            case PLAYER_REFERENCE -> {
-                if (playerReference == null) {
-                    throw new IllegalArgumentException("playerReference is required for PLAYER_REFERENCE skin source");
+            case RANDOM:
+            case OWNER:
+            case FIRST_TEAM_OWNER:
+                normalizedPlayerReference = null;
+                normalizedTextureValue = null;
+                normalizedTextureSignature = null;
+                normalizedTextureUrl = null;
+                break;
+            case PLAYER_REFERENCE:
+                if (normalizedPlayerReference == null) {
+                    throw new IllegalArgumentException(
+                            "playerReference is required for PLAYER_REFERENCE skin source");
                 }
-                textureValue = null;
-                textureSignature = null;
-                textureUrl = null;
-            }
-            case TEXTURE_VALUE -> {
-                if (textureValue == null) {
-                    throw new IllegalArgumentException("textureValue is required for TEXTURE_VALUE skin source");
+                normalizedTextureValue = null;
+                normalizedTextureSignature = null;
+                normalizedTextureUrl = null;
+                break;
+            case TEXTURE_VALUE:
+                if (normalizedTextureValue == null) {
+                    throw new IllegalArgumentException(
+                            "textureValue is required for TEXTURE_VALUE skin source");
                 }
-                playerReference = null;
-                textureUrl = null;
-            }
-            case TEXTURE_URL -> {
-                if (textureUrl == null) {
+                normalizedPlayerReference = null;
+                normalizedTextureUrl = null;
+                break;
+            case TEXTURE_URL:
+                if (normalizedTextureUrl == null) {
                     throw new IllegalArgumentException("textureUrl is required for TEXTURE_URL skin source");
                 }
-                validateUrl(textureUrl);
-                playerReference = null;
-                textureValue = null;
-                textureSignature = null;
-            }
+                validateUrl(normalizedTextureUrl);
+                normalizedPlayerReference = null;
+                normalizedTextureValue = null;
+                normalizedTextureSignature = null;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected skin source: " + source);
         }
+
+        this.source = source;
+        this.playerReference = normalizedPlayerReference;
+        this.textureValue = normalizedTextureValue;
+        this.textureSignature = normalizedTextureSignature;
+        this.textureUrl = normalizedTextureUrl;
     }
 
-    /**
-     * Creates a random skin configuration.
-     *
-     * @return random skin config
-     */
+    public BotSkinSource source() {
+        return source;
+    }
+
+    public @Nullable String playerReference() {
+        return playerReference;
+    }
+
+    public @Nullable String textureValue() {
+        return textureValue;
+    }
+
+    public @Nullable String textureSignature() {
+        return textureSignature;
+    }
+
+    public @Nullable String textureUrl() {
+        return textureUrl;
+    }
+
+    /** Creates a random skin configuration. */
     public static BotSkin random() {
         return new BotSkin(BotSkinSource.RANDOM, null, null, null, null);
     }
 
-    /**
-     * Creates a skin configuration that uses the primary owner skin.
-     *
-     * @return owner skin config
-     */
+    /** Creates a skin configuration that uses the primary owner skin. */
     public static BotSkin owner() {
         return new BotSkin(BotSkinSource.OWNER, null, null, null, null);
     }
 
-    /**
-     * Creates a TEAM_ALLY skin configuration that uses the first online team owner.
-     *
-     * @return first-team-owner skin config
-     */
+    /** Creates a TEAM_ALLY skin configuration that uses the first online team owner. */
     public static BotSkin firstTeamOwner() {
         return new BotSkin(BotSkinSource.FIRST_TEAM_OWNER, null, null, null, null);
     }
 
-    /**
-     * Creates a skin configuration resolved from an online player reference.
-     *
-     * @param playerReference player name or UUID string
-     * @return player-reference skin config
-     */
+    /** Creates a skin configuration resolved from an online player reference. */
     public static BotSkin player(String playerReference) {
         return new BotSkin(BotSkinSource.PLAYER_REFERENCE, playerReference, null, null, null);
     }
 
-    /**
-     * Creates a skin configuration from an unsigned texture payload.
-     *
-     * @param textureValue texture value payload
-     * @return texture-value skin config
-     */
+    /** Creates a skin configuration from an unsigned texture payload. */
     public static BotSkin texture(String textureValue) {
         return new BotSkin(BotSkinSource.TEXTURE_VALUE, null, textureValue, null, null);
     }
 
-    /**
-     * Creates a skin configuration from a signed texture payload.
-     *
-     * @param textureValue texture value payload
-     * @param textureSignature texture signature payload
-     * @return texture-value skin config
-     */
+    /** Creates a skin configuration from a signed texture payload. */
     public static BotSkin texture(String textureValue, String textureSignature) {
         return new BotSkin(BotSkinSource.TEXTURE_VALUE, null, textureValue, textureSignature, null);
     }
 
-    /**
-     * Creates a skin configuration from a texture URL.
-     *
-     * @param textureUrl texture URL with {@code http} or {@code https} scheme
-     * @return texture-url skin config
-     */
+    /** Creates a skin configuration from a texture URL. */
     public static BotSkin url(String textureUrl) {
         return new BotSkin(BotSkinSource.TEXTURE_URL, null, null, null, textureUrl);
     }
@@ -146,5 +145,41 @@ public record BotSkin(
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("textureUrl is not a valid URL", ex);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof BotSkin)) {
+            return false;
+        }
+        BotSkin other = (BotSkin) obj;
+        return Objects.equals(source, other.source)
+                && Objects.equals(playerReference, other.playerReference)
+                && Objects.equals(textureValue, other.textureValue)
+                && Objects.equals(textureSignature, other.textureSignature)
+                && Objects.equals(textureUrl, other.textureUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(source, playerReference, textureValue, textureSignature, textureUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "BotSkin[source="
+                + source
+                + ", playerReference="
+                + playerReference
+                + ", textureValue="
+                + textureValue
+                + ", textureSignature="
+                + textureSignature
+                + ", textureUrl="
+                + textureUrl
+                + "]";
     }
 }

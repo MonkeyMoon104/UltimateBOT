@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.sdk;
 
+
+import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.sdk.event.BotEventEnvelope;
 import com.monkey.ultimatebot.sdk.event.BotEventSubscription;
@@ -38,13 +40,13 @@ public final class UltimateBotEventBus implements AutoCloseable {
     }
 
     public BotEventSubscription subscribe(Consumer<BotEventEnvelope> listener) {
-        return subscribe(Set.of(), listener);
+        return subscribe(Collections.emptySet(), listener);
     }
 
     public BotEventSubscription subscribe(Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Objects.requireNonNull(types, "types");
         Objects.requireNonNull(listener, "listener");
-        Subscription subscription = new Subscription(Set.copyOf(types), null, null, listener);
+        Subscription subscription = new Subscription(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types), null, null, listener);
         subscriptions.add(subscription);
         subscription.start();
         return subscription;
@@ -53,7 +55,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
     public BotEventSubscription subscribeForOwner(
             UUID ownerUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Subscription subscription = new Subscription(
-                Set.copyOf(types),
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types),
                 Objects.requireNonNull(ownerUUID, "ownerUUID"),
                 null,
                 Objects.requireNonNull(listener, "listener"));
@@ -65,7 +67,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
     public BotEventSubscription subscribeForBot(
             UUID botUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Subscription subscription = new Subscription(
-                Set.copyOf(types),
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types),
                 null,
                 Objects.requireNonNull(botUUID, "botUUID"),
                 Objects.requireNonNull(listener, "listener"));
@@ -76,7 +78,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
 
     @Override
     public void close() {
-        for (Subscription subscription : List.copyOf(subscriptions)) subscription.close();
+        for (Subscription subscription : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(subscriptions)) subscription.close();
     }
 
     private final class Subscription implements BotEventSubscription {

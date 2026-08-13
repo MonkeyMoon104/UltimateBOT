@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.api.extension.combat;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatCapability;
 import com.monkey.ultimatebot.common.model.CombatMode;
@@ -15,30 +17,74 @@ import org.bukkit.Material;
 import org.jspecify.annotations.Nullable;
 
 /** Complete public metadata and defaults for one dynamically registered combat mode. */
-public record CombatModeDescriptor(
-        CombatMode mode,
-        String displayName,
-        List<String> description,
-        Material icon,
-        String permission,
-        int order,
-        Set<CombatCapability> capabilities,
-        Map<DifficultyTier, CombatTuning> profiles,
-        ModeKit kit,
-        @Nullable BrainKey brain) {
-    public CombatModeDescriptor {
+public final class CombatModeDescriptor {
+    private final CombatMode mode;
+    private final String displayName;
+    private final List<String> description;
+    private final Material icon;
+    private final String permission;
+    private final int order;
+    private final Set<CombatCapability> capabilities;
+    private final Map<DifficultyTier, CombatTuning> profiles;
+    private final ModeKit kit;
+    private final @Nullable BrainKey brain;
+
+    public CombatModeDescriptor(CombatMode mode, String displayName, List<String> description, Material icon, String permission, int order, Set<CombatCapability> capabilities, Map<DifficultyTier, CombatTuning> profiles, ModeKit kit, @Nullable BrainKey brain) {
+
+
         Objects.requireNonNull(mode, "mode");
         displayName = requireText(displayName, "displayName");
-        description = List.copyOf(Objects.requireNonNull(description, "description"));
+        description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(description, "description"));
         Objects.requireNonNull(icon, "icon");
         permission = Objects.requireNonNull(permission, "permission").trim();
-        capabilities = Set.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
+        capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
         EnumMap<DifficultyTier, CombatTuning> profileCopy = new EnumMap<>(Objects.requireNonNull(profiles, "profiles"));
         for (DifficultyTier difficulty : DifficultyTier.values()) {
             Objects.requireNonNull(profileCopy.get(difficulty), "profiles[" + difficulty + "]");
         }
-        profiles = Map.copyOf(profileCopy);
+        profiles = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profileCopy);
         Objects.requireNonNull(kit, "kit");
+        this.mode = mode;
+        this.displayName = displayName;
+        this.description = description;
+        this.icon = icon;
+        this.permission = permission;
+        this.order = order;
+        this.capabilities = capabilities;
+        this.profiles = profiles;
+        this.kit = kit;
+        this.brain = brain;
+    }
+
+    public CombatMode mode() {
+        return mode;
+    }
+    public String displayName() {
+        return displayName;
+    }
+    public List<String> description() {
+        return description;
+    }
+    public Material icon() {
+        return icon;
+    }
+    public String permission() {
+        return permission;
+    }
+    public int order() {
+        return order;
+    }
+    public Set<CombatCapability> capabilities() {
+        return capabilities;
+    }
+    public Map<DifficultyTier, CombatTuning> profiles() {
+        return profiles;
+    }
+    public ModeKit kit() {
+        return kit;
+    }
+    public @Nullable BrainKey brain() {
+        return brain;
     }
 
     public Optional<BrainKey> brainKey() {
@@ -68,10 +114,10 @@ public record CombatModeDescriptor(
         private final String displayName;
         private final Material icon;
         private final EnumMap<DifficultyTier, CombatTuning> profiles = new EnumMap<>(DifficultyTier.class);
-        private List<String> description = List.of();
+        private List<String> description = Collections.emptyList();
         private String permission = "";
         private int order;
-        private Set<CombatCapability> capabilities = Set.of();
+        private Set<CombatCapability> capabilities = Collections.emptySet();
         private ModeKit kit = ModeKit.empty();
         private @Nullable BrainKey brain;
 
@@ -85,7 +131,7 @@ public record CombatModeDescriptor(
         }
 
         public Builder description(List<String> description) {
-            this.description = List.copyOf(Objects.requireNonNull(description, "description"));
+            this.description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(description, "description"));
             return this;
         }
 
@@ -100,7 +146,7 @@ public record CombatModeDescriptor(
         }
 
         public Builder capabilities(Set<CombatCapability> capabilities) {
-            this.capabilities = Set.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
+            this.capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
             return this;
         }
 
@@ -128,5 +174,27 @@ public record CombatModeDescriptor(
             return new CombatModeDescriptor(
                     mode, displayName, description, icon, permission, order, capabilities, profiles, kit, brain);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CombatModeDescriptor)) {
+            return false;
+        }
+        CombatModeDescriptor other = (CombatModeDescriptor) obj;
+        return java.util.Objects.equals(mode, other.mode) && java.util.Objects.equals(displayName, other.displayName) && java.util.Objects.equals(description, other.description) && java.util.Objects.equals(icon, other.icon) && java.util.Objects.equals(permission, other.permission) && order == other.order && java.util.Objects.equals(capabilities, other.capabilities) && java.util.Objects.equals(profiles, other.profiles) && java.util.Objects.equals(kit, other.kit) && java.util.Objects.equals(brain, other.brain);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(mode, displayName, description, icon, permission, order, capabilities, profiles, kit, brain);
+    }
+
+    @Override
+    public String toString() {
+        return "CombatModeDescriptor[mode=" + mode + ", displayName=" + displayName + ", description=" + description + ", icon=" + icon + ", permission=" + permission + ", order=" + order + ", capabilities=" + capabilities + ", profiles=" + profiles + ", kit=" + kit + ", brain=" + brain + "]";
     }
 }

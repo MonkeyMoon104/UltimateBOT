@@ -68,4 +68,9 @@ public final class ModeKit {
             return new ModeKit(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "ModeKit[inventorySlots=" + inventory.size() + ", equipmentSlots=" + equipment.size() + "]";
+    }
 }

@@ -478,7 +478,7 @@ public final class UltimateBotClient implements AutoCloseable {
         }
 
         public UltimateBotClient build() {
-            if (token == null || token.isBlank()) {
+            if (token == null || token.trim().isEmpty()) {
                 throw new IllegalArgumentException("token is required");
             }
             return new UltimateBotClient(this);

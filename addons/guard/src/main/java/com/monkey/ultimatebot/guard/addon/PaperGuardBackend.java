@@ -44,9 +44,10 @@ final class PaperGuardBackend implements GuardBackend, Listener {
 
     @Override
     public void markBot(Object entityHandle) {
-        if (!(entityHandle instanceof Entity entity)) {
+        if (!(entityHandle instanceof Entity)) {
             return;
         }
+        Entity entity = (Entity) entityHandle;
 
         UUID uuid = entity.getUniqueId();
         markedBots.add(uuid);
@@ -177,7 +178,7 @@ final class PaperGuardBackend implements GuardBackend, Listener {
         Object luckPerms = providerClass.getMethod("get").invoke(null);
         Object userManager = luckPerms.getClass().getMethod("getUserManager").invoke(luckPerms);
         Object future = userManager.getClass().getMethod("loadUser", UUID.class).invoke(userManager, uuid);
-        return future instanceof CompletableFuture<?> completableFuture ? completableFuture : null;
+        return future instanceof CompletableFuture ? (CompletableFuture<?>) future : null;
     }
 
     private static boolean hasTruthyMetadata(Entity entity, String metadataKey) {
@@ -192,8 +193,8 @@ final class PaperGuardBackend implements GuardBackend, Listener {
     }
 
     private static Plugin requirePlugin(Object pluginHandle) {
-        if (pluginHandle instanceof Plugin plugin) {
-            return plugin;
+        if (pluginHandle instanceof Plugin) {
+            return (Plugin) pluginHandle;
         }
         throw new IllegalArgumentException("Guard addon requires a Bukkit Plugin handle");
     }
