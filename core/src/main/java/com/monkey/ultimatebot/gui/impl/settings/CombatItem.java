@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -8,13 +9,14 @@ import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -34,11 +36,12 @@ public class CombatItem extends AbstractItem {
     public ItemProvider getItemProvider() {
         boolean status = options.isCombat();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.combat-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.combat-button.material", "DIAMOND_SWORD"), Material.DIAMOND_SWORD));
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.combat-button.name")));
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
+        builder.setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP"));
 
-        var loreLines = training.getLangStringList("gui.combat-button.lore");
+        java.util.List<String> loreLines = training.getLangStringList("gui.combat-button.lore");
 
         for (String line : loreLines) {
             String processedLine = line.replace("%type%", status ? "ON" : "OFF")
@@ -71,7 +74,7 @@ public class CombatItem extends AbstractItem {
                 return;
             }
 
-            var proposed = BotSettingEvents.propose(
+            java.util.Optional<Boolean> proposed = BotSettingEvents.propose(
                     training,
                     managedOwnerUUID,
                     BotEventSource.GUI,
@@ -79,7 +82,7 @@ public class CombatItem extends AbstractItem {
                     oldStatus,
                     newStatus,
                     Boolean.class);
-            if (proposed.isEmpty()) return;
+            if (!proposed.isPresent()) return;
             newStatus = proposed.get();
             options.setCombat(newStatus);
             training.getBotManager().updateCombat(managedOwnerUUID, newStatus);
@@ -113,7 +116,7 @@ public class CombatItem extends AbstractItem {
 
             DifficultyLevel currentDifficulty = options.getDifficulty();
             DifficultyLevel newDifficulty = options.nextAllowedDifficulty(currentDifficulty, true);
-            var proposed = BotSettingEvents.propose(
+            java.util.Optional<com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel> proposed = BotSettingEvents.propose(
                     training,
                     managedOwnerUUID,
                     BotEventSource.GUI,
@@ -121,7 +124,7 @@ public class CombatItem extends AbstractItem {
                     currentDifficulty,
                     newDifficulty,
                     DifficultyLevel.class);
-            if (proposed.isEmpty()) return;
+            if (!proposed.isPresent()) return;
             newDifficulty = proposed.get();
             options.setDifficulty(newDifficulty);
 

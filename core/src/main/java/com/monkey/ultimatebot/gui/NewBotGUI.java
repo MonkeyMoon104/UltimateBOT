@@ -5,12 +5,19 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.gui.impl.navigation.BotTabItem;
-import com.monkey.ultimatebot.gui.tab.*;
+import com.monkey.ultimatebot.gui.tab.BotGuiTabContext;
+import com.monkey.ultimatebot.gui.tab.CombatSettingsTab;
+import com.monkey.ultimatebot.gui.tab.KitTab;
+import com.monkey.ultimatebot.gui.tab.OwnersTab;
+import com.monkey.ultimatebot.gui.tab.TargetsTab;
+import com.monkey.ultimatebot.gui.tab.TemplatesTab;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
-import java.util.Arrays;
-import java.util.Locale;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -22,6 +29,17 @@ import xyz.xenondevs.invui.item.impl.SimpleItem;
 import xyz.xenondevs.invui.window.Window;
 
 public class NewBotGUI {
+
+    /** Lang key index for Kit tab (`gui.tab-item.tab-0`). */
+    public static final int LANG_TAB_KIT = 0;
+    /** Lang key index for Templates tab (`gui.tab-item.tab-1`). */
+    public static final int LANG_TAB_TEMPLATES = 1;
+    /** Lang key index for Owners tab (`gui.tab-item.tab-2`). */
+    public static final int LANG_TAB_OWNERS = 2;
+    /** Lang key index for Targets tab (`gui.tab-item.tab-3`). */
+    public static final int LANG_TAB_TARGETS = 3;
+    /** Lang key index for Combat Settings tab (`gui.tab-item.tab-4`). */
+    public static final int LANG_TAB_COMBAT = 4;
 
     private final Player player;
     private final UltimateBot training;
@@ -63,28 +81,26 @@ public class NewBotGUI {
 
         String borderMatName = training.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
         String borderName = training.getLangString("gui.tab-border.name", " ");
-        Material borderMat;
-        try {
-            borderMat = Material.valueOf(borderMatName.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            borderMat = Material.BLACK_STAINED_GLASS_PANE;
-        }
+        Material borderMat = MaterialCatalog.optional(borderMatName, Material.BLACK_STAINED_GLASS_PANE);
         SimpleItem borderItem = new SimpleItem(new ItemBuilder(borderMat)
                 .setDisplayName(ChatColorUtils.translate(borderName))
                 .get(String.valueOf(1)));
 
         BotGuiTabContext tabContext = new BotGuiTabContext(player, training, options, botType);
         String translatedBorderName = ChatColorUtils.translate(borderName);
+        boolean armorTrim = MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM);
 
-        TemplatesTab templatesTab = new TemplatesTab(tabContext);
-        Gui tab1 = templatesTab.build(borderMat, translatedBorderName);
-        Gui tab0 = new KitTab(tabContext, templatesTab::refreshArmorItems).build(borderMat, translatedBorderName);
-        Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab4 = new CombatSettingsTab(tabContext, templatesTab::refreshArmorItems)
-                .build(borderMat, translatedBorderName);
+        TemplatesTab templatesTab = new TemplatesTab(tabContext, armorTrim);
+        Runnable refreshArmor = templatesTab::refreshArmorItems;
 
-        Gui tabGui = TabGui.normal()
+        List<Gui> tabs = new ArrayList<>();
+        tabs.add(new KitTab(tabContext, refreshArmor).build(borderMat, translatedBorderName));
+        tabs.add(templatesTab.build(borderMat, translatedBorderName));
+        tabs.add(new OwnersTab(tabContext).build(borderMat, translatedBorderName));
+        tabs.add(new TargetsTab(tabContext).build(borderMat, translatedBorderName));
+        tabs.add(new CombatSettingsTab(tabContext, refreshArmor).build(borderMat, translatedBorderName));
+
+        TabGui.Builder tabGuiBuilder = TabGui.normal()
                 .setStructure(
                         ". . 0 . 1 . 4 . .",
                         ". x x x x x x x x",
@@ -93,14 +109,21 @@ public class NewBotGUI {
                         "3 x x x x x x x x",
                         ". x x x x x x x x")
                 .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
-                .addIngredient('.', borderItem)
-                .addIngredient('0', new BotTabItem(0, training))
-                .addIngredient('1', new BotTabItem(1, training))
-                .addIngredient('2', new BotTabItem(2, training))
-                .addIngredient('3', new BotTabItem(3, training))
-                .addIngredient('4', new BotTabItem(4, training))
-                .setTabs(Arrays.asList(tab0, tab1, tab2, tab3, tab4))
-                .build();
+                .addIngredient('.', borderItem);
+
+        int invuiIndex = 0;
+        tabGuiBuilder.addIngredient(
+                '0', new BotTabItem(invuiIndex++, LANG_TAB_KIT, training));
+        tabGuiBuilder.addIngredient(
+                '1', new BotTabItem(invuiIndex++, LANG_TAB_TEMPLATES, training));
+        tabGuiBuilder.addIngredient(
+                '2', new BotTabItem(invuiIndex++, LANG_TAB_OWNERS, training));
+        tabGuiBuilder.addIngredient(
+                '3', new BotTabItem(invuiIndex++, LANG_TAB_TARGETS, training));
+        tabGuiBuilder.addIngredient(
+                '4', new BotTabItem(invuiIndex, LANG_TAB_COMBAT, training));
+
+        Gui tabGui = tabGuiBuilder.setTabs(tabs).build();
 
         BotOptions finalOptions = options;
         Window window = Window.single()

@@ -2,8 +2,10 @@ package com.monkey.ultimatebot.gui.impl.action;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,9 +26,10 @@ public class TeleportItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        Material mat = Material.valueOf(training.getLangString("gui.teleport-button.material"));
+        Material mat = MaterialCatalog.optional(
+                training.getLangString("gui.teleport-button.material", "ENDER_PEARL"), Material.ENDER_PEARL);
         String name = training.getLangString("gui.teleport-button.name");
-        var lore = training.getLangStringList("gui.teleport-button.lore");
+        java.util.List<String> lore = training.getLangStringList("gui.teleport-button.lore");
 
         ItemBuilder builder = new ItemBuilder(mat);
         builder.setDisplayName(ChatColorUtils.translate(name));
@@ -48,7 +51,7 @@ public class TeleportItem extends AbstractItem {
             return;
         }
 
-        NMSBridgeManager.get().moveBot(bot.asBukkitPlayer(), player.getX(), player.getY(), player.getZ());
+        NMSBridgeManager.get().moveBot(bot.asBukkitPlayer(), EntityCoordsAccess.getX(player), EntityCoordsAccess.getY(player), EntityCoordsAccess.getZ(player));
     }
 
     private UUID resolveBotOwnerUUID(Player player) {

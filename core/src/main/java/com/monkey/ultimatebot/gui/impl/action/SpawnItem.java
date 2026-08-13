@@ -1,11 +1,14 @@
 package com.monkey.ultimatebot.gui.impl.action;
 
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -41,19 +43,21 @@ public class SpawnItem extends AbstractItem {
         boolean status = isManagedBotSpawned();
 
         Material mat = status
-                ? Material.valueOf(training.getLangString("gui.despawn-button.material"))
-                : Material.valueOf(training.getLangString("gui.spawn-button.material"));
+                ? MaterialCatalog.optional(
+                        training.getLangString("gui.despawn-button.material", "BARRIER"), Material.BARRIER)
+                : MaterialCatalog.optional(
+                        training.getLangString("gui.spawn-button.material", "PLAYER_HEAD"), Material.PLAYER_HEAD);
 
         String name = status
                 ? training.getLangString("gui.despawn-button.name")
                 : training.getLangString("gui.spawn-button.name");
 
-        var lore = status
+        java.util.List<String> lore = status
                 ? training.getLangStringList("gui.despawn-button.lore")
                 : training.getLangStringList("gui.spawn-button.lore");
 
         ItemBuilder builder = new ItemBuilder(mat);
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP));
+        builder.setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP"));
         builder.setDisplayName(ChatColorUtils.translate(name));
         for (String line : lore) {
             builder.addLoreLines(ChatColorUtils.translate(line));

@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Material;
@@ -30,13 +31,14 @@ public class TotemItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.totem-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.totem-button.material", "TOTEM_OF_UNDYING"), Material.TOTEM_OF_UNDYING));
 
         String unlimitedText = Objects.requireNonNull(
                 training.getLangString("gui.totem-button.unlimited-text"), "gui.totem-button.unlimited-text");
         String countLine = options.getTotems() == -1 ? unlimitedText : String.valueOf(options.getTotems());
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.totem-button.name")));
-        var loreLines = training.getLangStringList("gui.totem-button.lore");
+        java.util.List<String> loreLines = training.getLangStringList("gui.totem-button.lore");
 
         for (String line : loreLines) {
             String replaced = line.replace("%count%", countLine);
@@ -64,7 +66,7 @@ public class TotemItem extends AbstractItem {
         if (clickType.isRightClick() && currentTotem > minTotem) nextTotem--;
         if (nextTotem == currentTotem) return;
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposed = BotSettingEvents.propose(
+        java.util.Optional<Integer> proposed = BotSettingEvents.propose(
                 training,
                 managedOwnerUUID,
                 BotEventSource.GUI,
@@ -72,7 +74,7 @@ public class TotemItem extends AbstractItem {
                 currentTotem,
                 nextTotem,
                 Integer.class);
-        if (training.getBotRegistry().getBot(managedOwnerUUID) != null && proposed.isEmpty()) return;
+        if (training.getBotRegistry().getBot(managedOwnerUUID) != null && !proposed.isPresent()) return;
         if (proposed.isPresent()) nextTotem = proposed.get();
         options.setTotems(nextTotem);
         training.getBotManager().updateTotem(managedOwnerUUID, nextTotem);

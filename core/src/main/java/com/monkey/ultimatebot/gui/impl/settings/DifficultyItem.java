@@ -1,5 +1,8 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
+import java.util.stream.Collectors;
+
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -8,6 +11,8 @@ import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -16,7 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -47,14 +51,14 @@ public class DifficultyItem extends AbstractItem {
         ItemBuilder builder = new ItemBuilder(difficultyMaterial);
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.difficulty-button.name")));
         builder.setItemFlags(
-                List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES));
+                ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENCHANTS", "HIDE_ATTRIBUTES"));
 
-        var loreLines = training.getLangStringList("gui.difficulty-button.lore");
+        java.util.List<String> loreLines = training.getLangStringList("gui.difficulty-button.lore");
         List<String> difficulties = options.getAllowedDifficulties().stream()
                 .map(botDifficulty -> botDifficulty == options.getDifficulty()
                         ? botDifficulty.getSelectedName()
                         : botDifficulty.getDisplayName())
-                .toList();
+                .collect(Collectors.toList());
 
         for (String line : loreLines) {
             if (line.contains("%difficulties%")) {
@@ -73,25 +77,17 @@ public class DifficultyItem extends AbstractItem {
         String configPath =
                 "gui.difficulty-button.difficulties-mat." + difficulty.name().toLowerCase(Locale.ROOT);
         String materialName = training.getLangString(configPath);
-
-        if (materialName != null) {
-            try {
-                return Material.valueOf(materialName.toUpperCase(Locale.ROOT));
-            } catch (IllegalArgumentException e) {
-                training.getLogger()
-                        .warning("Invalid material '" + materialName + "' for difficulty " + difficulty.name()
-                                + " in config. Using fallback");
+        if (materialName != null && !materialName.trim().isEmpty()) {
+            Material matched = MaterialCatalog.optional(materialName, Material.AIR);
+            if (matched != Material.AIR) {
+                return matched;
             }
-        }
-
-        String defaultMaterial = training.getLangString("gui.difficulty-button.material", "DIAMOND_SWORD");
-        try {
-            return Material.valueOf(defaultMaterial.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
             training.getLogger()
-                    .warning("Invalid fallback material '" + defaultMaterial + "' in config. Using DIAMOND_SWORD");
-            return Material.DIAMOND_SWORD;
+                    .warning("Invalid material '" + materialName + "' for difficulty " + difficulty.name()
+                            + " in config. Using fallback");
         }
+        return MaterialCatalog.optional(
+                training.getLangString("gui.difficulty-button.material", "DIAMOND_SWORD"), Material.DIAMOND_SWORD);
     }
 
     @Override
@@ -114,7 +110,7 @@ public class DifficultyItem extends AbstractItem {
         }
 
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel> proposed = BotSettingEvents.propose(
                 training,
                 managedOwnerUUID,
                 BotEventSource.GUI,
@@ -122,7 +118,7 @@ public class DifficultyItem extends AbstractItem {
                 currentDifficulty,
                 newDifficulty,
                 DifficultyLevel.class);
-        if (proposed.isEmpty()) return;
+        if (!proposed.isPresent()) return;
         newDifficulty = proposed.get();
         options.setDifficulty(newDifficulty);
 

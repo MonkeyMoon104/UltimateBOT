@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.gui.tab;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.impl.customization.ArmorItem;
 import com.monkey.ultimatebot.gui.impl.customization.TrimMaterialSelectorItem;
@@ -15,10 +17,16 @@ import xyz.xenondevs.invui.item.impl.SimpleItem;
 public class TemplatesTab {
 
     private final BotGuiTabContext context;
-    private List<ArmorItem> armorItems = List.of();
+    private final boolean armorTrim;
+    private List<ArmorItem> armorItems = Collections.emptyList();
 
     public TemplatesTab(BotGuiTabContext context) {
+        this(context, true);
+    }
+
+    public TemplatesTab(BotGuiTabContext context, boolean armorTrim) {
         this.context = Objects.requireNonNull(context, "context");
+        this.armorTrim = armorTrim;
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -31,9 +39,26 @@ public class TemplatesTab {
                 context.getTraining(), EquipmentSlot.LEGS, requireArmor(options, EquipmentSlot.LEGS), options);
         ArmorItem bootsItem = new ArmorItem(
                 context.getTraining(), EquipmentSlot.FEET, requireArmor(options, EquipmentSlot.FEET), options);
-        armorItems = List.of(helmetItem, chestItem, legsItem, bootsItem);
+        armorItems = Collections.unmodifiableList(java.util.Arrays.asList(helmetItem, chestItem, legsItem, bootsItem));
 
-        Gui gui = Gui.normal()
+        if (!armorTrim) {
+            // Pre-1.20: no trim columns — border sits flush against armor (same armor column as modern).
+            return Gui.normal()
+                    .setStructure(
+                            "# # # # # # # #",
+                            "# # # a # # # #",
+                            "# # # d # # # #",
+                            "# # # e # # # #",
+                            "# # # f # # # #")
+                    .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
+                    .addIngredient('a', helmetItem)
+                    .addIngredient('d', chestItem)
+                    .addIngredient('e', legsItem)
+                    .addIngredient('f', bootsItem)
+                    .build();
+        }
+
+        return Gui.normal()
                 .setStructure(
                         "# # # # # # # #", "# # h a j # # #", "# # c d k # # #", "# # l e m # # #", "# # n f p # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
@@ -64,8 +89,6 @@ public class TemplatesTab {
                 .addIngredient('e', legsItem)
                 .addIngredient('f', bootsItem)
                 .build();
-
-        return gui;
     }
 
     public void refreshArmorItems() {

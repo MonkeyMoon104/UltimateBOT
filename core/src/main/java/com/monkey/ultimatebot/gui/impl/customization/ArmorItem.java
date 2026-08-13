@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui.impl.customization;
 
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
@@ -7,6 +8,7 @@ import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -15,7 +17,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
@@ -44,9 +45,9 @@ public class ArmorItem extends AbstractItem {
         BotEquipmentUtils.applyArmorEnchants(displayPiece, isBlastEnabled());
 
         ItemBuilder builder = new ItemBuilder(displayPiece);
-        builder.setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ENCHANTS));
+        builder.setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENCHANTS"));
 
-        var loreLines = training.getLangStringList("gui.default-armor.lore.set-type");
+        java.util.List<String> loreLines = training.getLangStringList("gui.default-armor.lore.set-type");
 
         String typeName = formatMaterialName(piece.getType());
         String blastState = ChatColorUtils.translate(

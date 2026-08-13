@@ -21,7 +21,7 @@ public final class CombatSettingsTab {
     }
 
     public Gui build(Material borderMaterial, String borderName) {
-        var options = context.getOptions();
+        com.monkey.ultimatebot.bot.BotOptions options = context.getOptions();
         CombatModeItem combatModeItem = new CombatModeItem(context.getTraining(), options, refreshModeDependents);
         Map<CombatTuningProperty, CombatTuningItem> tuningItems = new EnumMap<>(CombatTuningProperty.class);
         for (CombatTuningProperty property : CombatTuningProperty.values()) {

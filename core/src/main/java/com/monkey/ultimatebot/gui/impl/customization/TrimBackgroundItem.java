@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.gui.impl.customization;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import xyz.xenondevs.invui.item.ItemProvider;
@@ -18,11 +19,9 @@ public class TrimBackgroundItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider() {
-        Material material = Material.matchMaterial(
-                training.getLangString("gui.templates-background.material", "LIGHT_GRAY_STAINED_GLASS_PANE"));
-        if (material == null) {
-            material = Material.LIGHT_GRAY_STAINED_GLASS_PANE;
-        }
+        Material material = MaterialCatalog.optional(
+                training.getLangString("gui.templates-background.material", "LIGHT_GRAY_STAINED_GLASS_PANE"),
+                Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 
         ItemBuilder builder = new ItemBuilder(material);
         builder.setDisplayName(

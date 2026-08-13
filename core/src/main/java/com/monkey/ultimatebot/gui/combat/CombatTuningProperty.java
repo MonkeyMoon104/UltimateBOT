@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.gui.combat;
 
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Locale;
 import java.util.Objects;
 import org.bukkit.Material;
@@ -15,7 +16,7 @@ public enum CombatTuningProperty {
     AGGRESSION("Aggression", Material.BLAZE_POWDER, 0.05D, 0.0D, 1.0D, false),
     RETREAT_HEALTH("Retreat health", Material.REDSTONE, 0.05D, 0.0D, 1.0D, false),
     HEALING_HEALTH("Healing health", Material.GOLDEN_APPLE, 0.05D, 0.0D, 1.0D, false),
-    SPECIAL_COOLDOWN("Special cooldown", Material.RECOVERY_COMPASS, 1.0D, 0.0D, 400.0D, true),
+    SPECIAL_COOLDOWN("Special cooldown", Material.COMPASS, 1.0D, 0.0D, 400.0D, true),
     PEARL_DISTANCE("Pearl distance", Material.ENDER_PEARL, 0.5D, 0.0D, 64.0D, false),
     ACTIONS_PER_TICK("Actions per tick", Material.COMPARATOR, 1.0D, 1.0D, 8.0D, true),
     DEFENSIVE_CHANCE("Defensive chance", Material.SHIELD, 0.05D, 0.0D, 1.0D, false),
@@ -43,6 +44,10 @@ public enum CombatTuningProperty {
     }
 
     public Material material() {
+        // RECOVERY_COMPASS is 1.19+; keep COMPASS as the enum constant so 1.18 class-init succeeds.
+        if (this == SPECIAL_COOLDOWN) {
+            return MaterialCatalog.optional("RECOVERY_COMPASS", Material.COMPASS);
+        }
         return material;
     }
 
@@ -74,40 +79,83 @@ public enum CombatTuningProperty {
     }
 
     private double value(CombatTuning tuning) {
-        return switch (this) {
-            case ATTACK_RANGE -> tuning.attackRange();
-            case ATTACK_COOLDOWN -> tuning.attackCooldownTicks();
-            case REACTION_TIME -> tuning.reactionTicks();
-            case MOVEMENT_SPEED -> tuning.movementSpeed();
-            case STRAFE_STRENGTH -> tuning.strafeStrength();
-            case AIM_ACCURACY -> tuning.aimAccuracy();
-            case AGGRESSION -> tuning.aggression();
-            case RETREAT_HEALTH -> tuning.retreatHealthRatio();
-            case HEALING_HEALTH -> tuning.healingHealthRatio();
-            case SPECIAL_COOLDOWN -> tuning.specialActionCooldownTicks();
-            case PEARL_DISTANCE -> tuning.pearlTriggerDistance();
-            case ACTIONS_PER_TICK -> tuning.maxActionsPerTick();
-            case DEFENSIVE_CHANCE -> tuning.defensiveChance();
-            case SPRINT_RESET_CHANCE -> tuning.sprintResetChance();
-        };
+                switch (this) {
+            case ATTACK_RANGE:
+                return tuning.attackRange();
+            case ATTACK_COOLDOWN:
+                return tuning.attackCooldownTicks();
+            case REACTION_TIME:
+                return tuning.reactionTicks();
+            case MOVEMENT_SPEED:
+                return tuning.movementSpeed();
+            case STRAFE_STRENGTH:
+                return tuning.strafeStrength();
+            case AIM_ACCURACY:
+                return tuning.aimAccuracy();
+            case AGGRESSION:
+                return tuning.aggression();
+            case RETREAT_HEALTH:
+                return tuning.retreatHealthRatio();
+            case HEALING_HEALTH:
+                return tuning.healingHealthRatio();
+            case SPECIAL_COOLDOWN:
+                return tuning.specialActionCooldownTicks();
+            case PEARL_DISTANCE:
+                return tuning.pearlTriggerDistance();
+            case ACTIONS_PER_TICK:
+                return tuning.maxActionsPerTick();
+            case DEFENSIVE_CHANCE:
+                return tuning.defensiveChance();
+            case SPRINT_RESET_CHANCE:
+                return tuning.sprintResetChance();
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 
     private void write(CombatTuning.Builder builder, double value) {
-        switch (this) {
-            case ATTACK_RANGE -> builder.attackRange(value);
-            case ATTACK_COOLDOWN -> builder.attackCooldownTicks((int) Math.round(value));
-            case REACTION_TIME -> builder.reactionTicks((int) Math.round(value));
-            case MOVEMENT_SPEED -> builder.movementSpeed(value);
-            case STRAFE_STRENGTH -> builder.strafeStrength(value);
-            case AIM_ACCURACY -> builder.aimAccuracy(value);
-            case AGGRESSION -> builder.aggression(value);
-            case RETREAT_HEALTH -> builder.retreatHealthRatio(value);
-            case HEALING_HEALTH -> builder.healingHealthRatio(value);
-            case SPECIAL_COOLDOWN -> builder.specialActionCooldownTicks((int) Math.round(value));
-            case PEARL_DISTANCE -> builder.pearlTriggerDistance(value);
-            case ACTIONS_PER_TICK -> builder.maxActionsPerTick((int) Math.round(value));
-            case DEFENSIVE_CHANCE -> builder.defensiveChance(value);
-            case SPRINT_RESET_CHANCE -> builder.sprintResetChance(value);
+                switch (this) {
+            case ATTACK_RANGE:
+                builder.attackRange(value);
+                break;
+            case ATTACK_COOLDOWN:
+                builder.attackCooldownTicks((int) Math.round(value));
+                break;
+            case REACTION_TIME:
+                builder.reactionTicks((int) Math.round(value));
+                break;
+            case MOVEMENT_SPEED:
+                builder.movementSpeed(value);
+                break;
+            case STRAFE_STRENGTH:
+                builder.strafeStrength(value);
+                break;
+            case AIM_ACCURACY:
+                builder.aimAccuracy(value);
+                break;
+            case AGGRESSION:
+                builder.aggression(value);
+                break;
+            case RETREAT_HEALTH:
+                builder.retreatHealthRatio(value);
+                break;
+            case HEALING_HEALTH:
+                builder.healingHealthRatio(value);
+                break;
+            case SPECIAL_COOLDOWN:
+                builder.specialActionCooldownTicks((int) Math.round(value));
+                break;
+            case PEARL_DISTANCE:
+                builder.pearlTriggerDistance(value);
+                break;
+            case ACTIONS_PER_TICK:
+                builder.maxActionsPerTick((int) Math.round(value));
+                break;
+            case DEFENSIVE_CHANCE:
+                builder.defensiveChance(value);
+                break;
+            case SPRINT_RESET_CHANCE:
+                builder.sprintResetChance(value);
+                break;
         }
     }
 

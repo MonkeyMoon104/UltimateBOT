@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -8,12 +9,12 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -35,7 +36,7 @@ public final class CombatTuningItem extends AbstractItem {
         CombatTuning tuning = options.getCombatTuning();
         return new ItemBuilder(property.material())
                 .setDisplayName(ChatColorUtils.translate("&e" + property.displayName()))
-                .setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES))
+                .setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ATTRIBUTES"))
                 .addLoreLines(
                         ChatColorUtils.translate("&7Value: &f" + property.formattedValue(tuning)),
                         "",
@@ -51,7 +52,7 @@ public final class CombatTuningItem extends AbstractItem {
         }
         CombatTuning currentTuning = options.getCombatTuning();
         CombatTuning nextTuning = property.adjust(currentTuning, clickType.isLeftClick(), clickType.isShiftClick());
-        var proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.common.model.CombatTuning> proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
                 BotEventSource.GUI,
@@ -59,7 +60,7 @@ public final class CombatTuningItem extends AbstractItem {
                 currentTuning,
                 nextTuning,
                 CombatTuning.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return;
         }
         options.setCustomCombatTuning(proposed.get());

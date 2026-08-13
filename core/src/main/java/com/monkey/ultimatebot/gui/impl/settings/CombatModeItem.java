@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -8,13 +9,14 @@ import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -34,13 +36,10 @@ public final class CombatModeItem extends AbstractItem {
     @Override
     public ItemProvider getItemProvider() {
         String configuredMaterial = options.getCombatModeIconMaterial();
-        Material material = Material.matchMaterial(configuredMaterial);
-        if (material == null) {
-            material = Material.DIAMOND_SWORD;
-        }
+        Material material = MaterialCatalog.optional(configuredMaterial, Material.DIAMOND_SWORD);
         ItemBuilder builder = new ItemBuilder(material)
                 .setDisplayName(ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
-                .setItemFlags(List.of(ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ATTRIBUTES));
+                .setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ATTRIBUTES"));
         builder.addLoreLines(
                 ChatColorUtils.translate(
                         "&7Difficulty: &f" + options.getDifficulty().name()),
@@ -64,7 +63,7 @@ public final class CombatModeItem extends AbstractItem {
         }
         CombatMode currentMode = options.getCombatMode();
         CombatMode nextMode = options.nextCombatMode(player, clickType.isLeftClick());
-        var proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.common.model.CombatMode> proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
                 BotEventSource.GUI,
@@ -72,7 +71,7 @@ public final class CombatModeItem extends AbstractItem {
                 currentMode,
                 nextMode,
                 CombatMode.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return;
         }
         options.setCombatMode(proposed.get());

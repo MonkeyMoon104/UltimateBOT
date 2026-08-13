@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -39,10 +40,11 @@ public class FollowItem extends AbstractItem {
     public ItemProvider getItemProvider() {
         boolean status = options.isFollow();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.follow-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.follow-button.material", "LEAD"), Material.LEAD));
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.follow-button.name")));
 
-        var loreLines = training.getLangStringList("gui.follow-button.lore");
+        java.util.List<String> loreLines = training.getLangStringList("gui.follow-button.lore");
 
         for (String line : loreLines) {
             String processedLine = line.replace("%type%", status ? "ON" : "OFF");
@@ -73,8 +75,8 @@ public class FollowItem extends AbstractItem {
             return;
         }
 
-        var managedOwnerUUID = resolveManagedOwnerUUID(player);
-        var proposedFollow = BotSettingEvents.propose(
+        java.util.UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
+        java.util.Optional<Boolean> proposedFollow = BotSettingEvents.propose(
                 training,
                 managedOwnerUUID,
                 BotEventSource.GUI,
@@ -82,14 +84,14 @@ public class FollowItem extends AbstractItem {
                 oldFollowStatus,
                 newFollowStatus,
                 Boolean.class);
-        if (proposedFollow.isEmpty()) return;
+        if (!proposedFollow.isPresent()) return;
         newFollowStatus = proposedFollow.get();
 
         java.util.Optional<Boolean> proposedCombat = java.util.Optional.empty();
         if (!newFollowStatus && combatStatus) {
             proposedCombat = BotSettingEvents.propose(
                     training, managedOwnerUUID, BotEventSource.GUI, BotSettingKey.COMBAT, true, false, Boolean.class);
-            if (proposedCombat.isEmpty()) return;
+            if (!proposedCombat.isPresent()) return;
         }
 
         options.setFollow(newFollowStatus);
