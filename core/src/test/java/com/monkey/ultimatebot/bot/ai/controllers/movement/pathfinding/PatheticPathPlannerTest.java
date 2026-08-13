@@ -23,8 +23,8 @@ class PatheticPathPlannerTest {
                 .findPath(new BlockVector(0, 0, 0), new BlockVector(8, 0, 0));
 
         assertThat(path).isNotEmpty();
-        assertThat(path.getFirst()).isEqualTo(new BlockVector(0, 0, 0));
-        assertThat(path.getLast()).isEqualTo(new BlockVector(8, 0, 0));
+        assertThat(path.get(0)).isEqualTo(new BlockVector(0, 0, 0));
+        assertThat(path.get(path.size() - 1)).isEqualTo(new BlockVector(8, 0, 0));
         assertThat(path).noneMatch(environment::isBlocked);
         assertThat(path).anyMatch(position -> Math.abs(position.getBlockZ()) >= 2);
     }
@@ -77,8 +77,8 @@ class PatheticPathPlannerTest {
         List<BlockVector> path = new PatheticPathPlanner(environment).findPath(start, target);
 
         assertThat(path).isNotEmpty();
-        assertThat(path.getFirst()).isEqualTo(start);
-        assertThat(path.getLast()).isEqualTo(target);
+        assertThat(path.get(0)).isEqualTo(start);
+        assertThat(path.get(path.size() - 1)).isEqualTo(target);
         assertThat(path).noneMatch(environment::isBlocked);
         assertThat(path).anyMatch(position -> position.getBlockX() <= -2);
     }
@@ -89,11 +89,11 @@ class PatheticPathPlannerTest {
         BlockVector failedWaypoint = new BlockVector(2, 0, 0);
 
         List<BlockVector> path = new PatheticPathPlanner(environment)
-                .findPath(new BlockVector(0, 0, 0), new BlockVector(5, 0, 0), Set.of(failedWaypoint));
+                .findPath(new BlockVector(0, 0, 0), new BlockVector(5, 0, 0), java.util.Collections.singleton(failedWaypoint));
 
         assertThat(path).isNotEmpty();
         assertThat(path).doesNotContain(failedWaypoint);
-        assertThat(path.getLast()).isEqualTo(new BlockVector(5, 0, 0));
+        assertThat(path.get(path.size() - 1)).isEqualTo(new BlockVector(5, 0, 0));
         assertThat(path).anyMatch(position -> position.getBlockZ() != 0);
     }
 
@@ -114,7 +114,7 @@ class PatheticPathPlannerTest {
 
     @Test
     void skipsOnlyConsecutivelyReachableWaypoints() {
-        List<Integer> path = List.of(0, 1, 2, 3, 4, 5);
+        List<Integer> path = java.util.Arrays.asList(0, 1, 2, 3, 4, 5);
 
         int selected = PathWaypointSelector.furthestReachable(path, 1, 3, waypoint -> waypoint <= 3);
 
@@ -123,7 +123,7 @@ class PatheticPathPlannerTest {
 
     @Test
     void doesNotSkipPastFirstUnsafeWaypoint() {
-        List<Integer> path = List.of(0, 1, 2, 3, 4);
+        List<Integer> path = java.util.Arrays.asList(0, 1, 2, 3, 4);
 
         int selected = PathWaypointSelector.furthestReachable(path, 1, 3, waypoint -> waypoint != 2);
 

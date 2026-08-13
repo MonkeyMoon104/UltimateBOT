@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.update;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.compat.PluginMetaAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.wrapper.WrapperTask;
 import java.io.IOException;
@@ -136,11 +137,11 @@ public final class UpdateManager implements Listener {
 
     private PluginUpdateCheckResponse checkRemote() throws IOException {
         return updateHttpClient.check(new PluginUpdateCheckRequest(
-                PRODUCT_CODE, plugin.getPluginMeta().getVersion()));
+                PRODUCT_CODE, PluginMetaAccess.version(plugin)));
     }
 
     private UpdateState toState(PluginUpdateCheckResponse response) {
-        String url = response.downloadUrl() == null || response.downloadUrl().isBlank()
+        String url = response.downloadUrl() == null || response.downloadUrl().trim().isEmpty()
                 ? DEFAULT_DOWNLOAD_URL
                 : response.downloadUrl();
 
@@ -167,6 +168,6 @@ public final class UpdateManager implements Listener {
     }
 
     private String safeMessage(@Nullable String value) {
-        return value == null || value.isBlank() ? "n/a" : value;
+        return value == null || value.trim().isEmpty() ? "n/a" : value;
     }
 }

@@ -1,5 +1,9 @@
 package com.monkey.ultimatebot.addon.runtime;
 
+import java.util.stream.Collectors;
+
+
+import java.util.Collections;
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,8 +86,8 @@ final class AddonDescriptorParser {
 
     private static List<String> list(Properties properties, String key) {
         String value = properties.getProperty(key, "");
-        if (value.isBlank()) {
-            return List.of();
+        if (value.trim().isEmpty()) {
+            return Collections.emptyList();
         }
         List<String> values = new ArrayList<>();
         StringTokenizer tokenizer = new StringTokenizer(value, ",");
@@ -94,14 +98,14 @@ final class AddonDescriptorParser {
             }
         }
         if ("dependencies".equals(key) || "soft-dependencies".equals(key)) {
-            return values.stream().map(item -> item.toLowerCase(Locale.ROOT)).toList();
+            return values.stream().map(item -> item.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
         }
-        return List.copyOf(values);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(values);
     }
 
     private static String required(Properties properties, String key) throws AddonLoadException {
         String value = properties.getProperty(key);
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             throw new AddonLoadException("descriptor is missing " + key);
         }
         return value.trim();

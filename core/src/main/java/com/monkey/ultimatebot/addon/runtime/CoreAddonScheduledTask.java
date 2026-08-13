@@ -46,16 +46,19 @@ final class CoreAddonScheduledTask implements AddonTask {
         }
         PlatformWrapper scheduler = plugin.getWrapperManager().active();
         Runnable invocation = this::invoke;
-        activeTask = switch (execution) {
-            case GLOBAL ->
-                delayTicks == 0L ? scheduler.runSync(invocation) : scheduler.runSyncLater(invocation, delayTicks);
-            case ENTITY ->
-                delayTicks == 0L
+                switch (execution) {
+            case GLOBAL:
+                activeTask = delayTicks == 0L ? scheduler.runSync(invocation) : scheduler.runSyncLater(invocation, delayTicks);
+                break;
+            case ENTITY:
+                activeTask = delayTicks == 0L
                         ? scheduler.runEntity(Objects.requireNonNull(player, "player"), invocation)
                         : scheduler.runEntityLater(Objects.requireNonNull(player, "player"), delayTicks, invocation);
-            case ASYNC ->
-                delayTicks == 0L ? scheduler.runAsync(invocation) : scheduler.runAsyncLater(invocation, delayTicks);
-        };
+                break;
+            case ASYNC:
+                activeTask = delayTicks == 0L ? scheduler.runAsync(invocation) : scheduler.runAsyncLater(invocation, delayTicks);
+                break;
+        }
     }
 
     private void invoke() {

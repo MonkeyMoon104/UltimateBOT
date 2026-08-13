@@ -33,8 +33,10 @@ final class CustomBrainSignalDispatcher {
         if (active == null) {
             return;
         }
-        org.bukkit.entity.Entity source =
-                checked instanceof EntityDamageByEntityEvent byEntity ? byEntity.getDamager() : null;
+        final org.bukkit.entity.Entity source =
+                checked instanceof EntityDamageByEntityEvent
+                        ? ((EntityDamageByEntityEvent) checked).getDamager()
+                        : null;
         invoke(() -> active.onDamage(new BrainDamage(checked.getFinalDamage(), checked.getCause(), source)), "damage");
     }
 

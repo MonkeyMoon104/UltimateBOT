@@ -3,19 +3,26 @@ package com.monkey.ultimatebot.extension.runtime;
 import com.monkey.ultimatebot.api.extension.nativeaccess.NativeBotAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.INMSBridge;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import org.bukkit.craftbukkit.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Version-agnostic native access for custom brains / combat modes.
+ *
+ * <p>Must not hard-reference Mojang-mapped {@code net.minecraft.*} or unversioned
+ * {@code org.bukkit.craftbukkit.*}: Paper &lt;1.20.5 uses Spigot mappings and versioned CraftBukkit
+ * packages, and loading those symbols fails with {@code NoClassDefFoundError} on 1.17–1.20.4.
+ * Handles are resolved reflectively via CraftEntity {@code getHandle()} so the same class works on
+ * both Spigot-mapped and Mojang-mapped servers (including 1.21.x).
+ */
 public final class CoreNativeBotAccess implements NativeBotAccess {
     private final String minecraftVersion;
     private final ITrainingBot bot;
     private final INMSBridge bridge;
-    private @Nullable LivingEntity target;
+    private @Nullable Object target;
 
     public CoreNativeBotAccess(String minecraftVersion, ITrainingBot bot, INMSBridge bridge) {
         this.minecraftVersion = Objects.requireNonNull(minecraftVersion, "minecraftVersion");
@@ -28,10 +35,7 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
             clearTarget();
             return;
         }
-        if (!(target instanceof CraftLivingEntity craftTarget)) {
-            throw new IllegalArgumentException("target does not expose a CraftBukkit handle");
-        }
-        this.target = craftTarget.getHandle();
+        this.target = requireHandle(target, "target");
     }
 
     public void clearTarget() {
@@ -51,7 +55,7 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
     @Override
     public <T> Optional<T> targetHandle(Class<T> type) {
         Class<T> checkedType = Objects.requireNonNull(type, "type");
-        LivingEntity current = target;
+        Object current = target;
         return current == null || !checkedType.isInstance(current)
                 ? Optional.empty()
                 : Optional.of(checkedType.cast(current));
@@ -59,12 +63,82 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
 
     @Override
     public <T> T requireLevelHandle(Class<T> type) {
-        return cast(type, botHandle().level(), "level handle");
+        return cast(type, resolveLevel(botHandle()), "level handle");
     }
 
     @Override
     public <T> T requireBridge(Class<T> type) {
         return cast(type, bridge, "NMS bridge");
+    }
+
+    private Object botHandle() {
+        return requireHandle(bot.asBukkitPlayer(), "bot");
+    }
+
+    private static Object requireHandle(Object entity, String label) {
+        try {
+            Method getHandle = entity.getClass().getMethod("getHandle");
+            Object handle = getHandle.invoke(entity);
+            if (handle == null) {
+                throw new IllegalStateException(label + " getHandle() returned null");
+            }
+            return handle;
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(label + " does not expose a CraftBukkit handle", e);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("failed to resolve " + label + " NMS handle", e);
+        }
+    }
+
+    private static Object resolveLevel(Object nmsHandle) {
+        Object level = invokeNoArg(nmsHandle, "level");
+        if (level != null) {
+            return level;
+        }
+        level = invokeNoArg(nmsHandle, "getLevel");
+        if (level != null) {
+            return level;
+        }
+        level = invokeNoArg(nmsHandle, "getWorld");
+        if (level != null) {
+            return level;
+        }
+        level = readField(nmsHandle, "level");
+        if (level != null) {
+            return level;
+        }
+        throw new IllegalStateException(
+                "unable to resolve level handle from " + nmsHandle.getClass().getName());
+    }
+
+    private static @Nullable Object invokeNoArg(Object target, String methodName) {
+        try {
+            Method method = target.getClass().getMethod(methodName);
+            return method.invoke(target);
+        } catch (NoSuchMethodException ignored) {
+            return null;
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(
+                    "failed to invoke " + methodName + " on " + target.getClass().getName(), e);
+        }
+    }
+
+    private static @Nullable Object readField(Object target, String fieldName) {
+        Class<?> type = target.getClass();
+        while (type != null && type != Object.class) {
+            try {
+                Field field = type.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                return field.get(target);
+            } catch (NoSuchFieldException ignored) {
+                type = type.getSuperclass();
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(
+                        "failed to read field " + fieldName + " on " + target.getClass().getName(),
+                        e);
+            }
+        }
+        return null;
     }
 
     private static <T> T cast(Class<T> type, Object value, String label) {
@@ -74,13 +148,5 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
                     label + " is " + value.getClass().getName() + ", not " + checkedType.getName());
         }
         return checkedType.cast(value);
-    }
-
-    private Player botHandle() {
-        org.bukkit.entity.Player bukkitBot = bot.asBukkitPlayer();
-        if (!(bukkitBot instanceof CraftPlayer craftBot)) {
-            throw new IllegalStateException("bot does not expose a CraftBukkit handle");
-        }
-        return craftBot.getHandle();
     }
 }

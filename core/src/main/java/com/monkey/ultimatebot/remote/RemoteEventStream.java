@@ -1,7 +1,12 @@
 package com.monkey.ultimatebot.remote;
 
+import java.util.stream.Collectors;
+
+
+import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.api.event.action.BotHealEvent;
 import com.monkey.ultimatebot.api.event.action.BotTeleportEvent;
 import com.monkey.ultimatebot.api.event.base.BotEvent;
@@ -22,6 +27,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +37,7 @@ import org.jspecify.annotations.Nullable;
 
 /** Bounded replayable Server-Sent Events bridge for SDK clients. */
 final class RemoteEventStream implements AutoCloseable {
-    private static final System.Logger LOGGER = System.getLogger(RemoteEventStream.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(RemoteEventStream.class.getName());
     private static final int BUFFER_SIZE = 256;
     private final ObjectMapper mapper;
     private final AtomicLong ids = new AtomicLong();
@@ -98,14 +105,19 @@ final class RemoteEventStream implements AutoCloseable {
     private RemoteBotEvent map(BotEvent event) {
         Map<String, Object> payload = new LinkedHashMap<>();
         String type = typeOf(event);
-        if (event instanceof BotDespawnEvent value)
+        if (event instanceof BotDespawnEvent) {
+            BotDespawnEvent value = (BotDespawnEvent) event;
             payload.put("reason", value.getReason().name());
-        if (event instanceof BotDeathEvent value) payload.put("damageType", value.getDamageType());
-        if (event instanceof BotKillEntityEvent value) {
+        }
+        if (event instanceof BotDeathEvent) {
+            BotDeathEvent value = (BotDeathEvent) event;
+            payload.put("damageType", value.getDamageType());
+        }
+        if (event instanceof BotKillEntityEvent) { BotKillEntityEvent value = (BotKillEntityEvent) event;
             payload.put("victimUUID", value.getVictim().getUniqueId());
             payload.put("victimType", value.getVictim().getType().name());
         }
-        if (event instanceof BotTargetChangeEvent value) {
+        if (event instanceof BotTargetChangeEvent) { BotTargetChangeEvent value = (BotTargetChangeEvent) event;
             payload.put(
                     "previousTargetUUID",
                     value.getPreviousTarget() == null
@@ -120,48 +132,48 @@ final class RemoteEventStream implements AutoCloseable {
                             ? null
                             : value.getNewTarget().getType().name());
         }
-        if (event instanceof BotSettingsChangeEvent value) {
+        if (event instanceof BotSettingsChangeEvent) { BotSettingsChangeEvent value = (BotSettingsChangeEvent) event;
             payload.put("setting", value.getSetting().name());
             payload.put("oldValue", value.getOldValue());
             payload.put("newValue", value.getNewValue());
         }
-        if (event instanceof BotAttackEvent value) {
+        if (event instanceof BotAttackEvent) { BotAttackEvent value = (BotAttackEvent) event;
             payload.put("attackType", value.getAttackType().name());
             payload.put("targetUUID", value.getTarget().getUniqueId());
             payload.put("targetType", value.getTarget().getType().name());
         }
-        if (event instanceof BotExplosionEvent value) {
+        if (event instanceof BotExplosionEvent) { BotExplosionEvent value = (BotExplosionEvent) event;
             payload.put("explosionType", value.getExplosionType().name());
             payload.put("blockDamage", value.isBlockDamage());
             payload.put(
                     "world",
                     value.getLocation().getWorld() == null
                             ? null
-                            : value.getLocation().getWorld().getName());
+                            : WorldAccess.name(value.getLocation().getWorld()));
             payload.put("x", value.getLocation().getX());
             payload.put("y", value.getLocation().getY());
             payload.put("z", value.getLocation().getZ());
         }
-        if (event instanceof BotDamageEvent value) {
+        if (event instanceof BotDamageEvent) { BotDamageEvent value = (BotDamageEvent) event;
             payload.put("cause", value.getCause());
             payload.put("damage", value.getDamage());
         }
-        if (event instanceof BotHealEvent value) {
+        if (event instanceof BotHealEvent) { BotHealEvent value = (BotHealEvent) event;
             payload.put("reason", value.getReason());
             payload.put("amount", value.getAmount());
         }
-        if (event instanceof BotTeleportEvent value) {
+        if (event instanceof BotTeleportEvent) { BotTeleportEvent value = (BotTeleportEvent) event;
             payload.put("cause", value.getCause());
             payload.put(
                     "world",
                     value.getTo().getWorld() == null
                             ? null
-                            : value.getTo().getWorld().getName());
+                            : WorldAccess.name(value.getTo().getWorld()));
             payload.put("x", value.getTo().getX());
             payload.put("y", value.getTo().getY());
             payload.put("z", value.getTo().getZ());
         }
-        if (event instanceof BotTotemUseEvent value) {
+        if (event instanceof BotTotemUseEvent) { BotTotemUseEvent value = (BotTotemUseEvent) event;
             payload.put("consumed", value.getConsumed());
             payload.put("remaining", value.getRemaining());
         }
@@ -206,7 +218,7 @@ final class RemoteEventStream implements AutoCloseable {
 
     private List<RemoteBotEvent> replayAfter(long lastId) {
         synchronized (replay) {
-            return replay.stream().filter(event -> event.id() > lastId).toList();
+            return replay.stream().filter(event -> event.id() > lastId).collect(Collectors.toList());
         }
     }
 
@@ -219,25 +231,29 @@ final class RemoteEventStream implements AutoCloseable {
     }
 
     private static Set<String> parseTypes(@Nullable String value) {
-        if (value == null || value.isBlank()) return Set.of();
+        if (value == null || value.trim().isEmpty()) return Collections.emptySet();
         Set<String> result = new HashSet<>();
         for (String type : value.split(",", -1)) result.add(type.trim().toUpperCase(Locale.ROOT));
-        return Set.copyOf(result);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(result);
     }
 
     private static Map<String, String> parseFilters(@Nullable String query) {
-        if (query == null || query.isBlank()) return Map.of();
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyMap();
+        }
         Map<String, String> result = new HashMap<>();
         for (String part : query.split("&", -1)) {
             int separator = part.indexOf('=');
-            if (separator > 0) result.put(part.substring(0, separator), part.substring(separator + 1));
+            if (separator > 0) {
+                result.put(part.substring(0, separator), part.substring(separator + 1));
+            }
         }
-        return result;
+        return Collections.unmodifiableMap(result);
     }
 
     private static @Nullable UUID parseUuid(@Nullable String value) {
         try {
-            return value == null || value.isBlank() ? null : UUID.fromString(value);
+            return value == null || value.trim().isEmpty() ? null : UUID.fromString(value);
         } catch (IllegalArgumentException ignored) {
             return null;
         }
@@ -248,7 +264,7 @@ final class RemoteEventStream implements AutoCloseable {
         try {
             observer.close();
         } catch (Exception closeError) {
-            LOGGER.log(System.Logger.Level.WARNING, "Failed to close the core event observer", closeError);
+            LOGGER.log(Level.WARNING, "Failed to close the core event observer", closeError);
         }
         clients.clear();
         synchronized (replay) {

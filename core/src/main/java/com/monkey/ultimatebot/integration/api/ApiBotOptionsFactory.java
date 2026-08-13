@@ -106,23 +106,35 @@ final class ApiBotOptionsFactory {
 
     static com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel toCoreDifficulty(DifficultyTier difficulty) {
         DifficultyTier resolved = difficulty == null ? DifficultyTier.EASY : difficulty;
-        return switch (resolved) {
-            case EASY -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.EASY;
-            case NORMAL -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.NORMAL;
-            case MEDIUM -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.MEDIUM;
-            case HARD -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.HARD;
-            case GOD -> com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.GOD;
-        };
+                switch (resolved) {
+            case EASY:
+                return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.EASY;
+            case NORMAL:
+                return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.NORMAL;
+            case MEDIUM:
+                return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.MEDIUM;
+            case HARD:
+                return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.HARD;
+            case GOD:
+                return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.GOD;
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 
     private static ArmorTier toCoreArmor(BotArmorTier armorType) {
         BotArmorTier resolved = armorType == null ? BotArmorTier.LEATHER : armorType;
-        return switch (resolved) {
-            case LEATHER -> ArmorTier.LEATHER;
-            case IRON -> ArmorTier.IRON;
-            case GOLDEN -> ArmorTier.GOLDEN;
-            case DIAMOND -> ArmorTier.DIAMOND;
-            case NETHERITE -> ArmorTier.NETHERITE;
-        };
+                switch (resolved) {
+            case LEATHER:
+                return ArmorTier.LEATHER;
+            case IRON:
+                return ArmorTier.IRON;
+            case GOLDEN:
+                return ArmorTier.GOLDEN;
+            case DIAMOND:
+                return ArmorTier.DIAMOND;
+            case NETHERITE:
+                return ArmorTier.NETHERITE;
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 }

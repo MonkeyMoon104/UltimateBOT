@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.event;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -49,7 +51,7 @@ public final class BotSettingEvents {
             Set<UUID> oldValue,
             Set<UUID> newValue) {
         if (Objects.equals(oldValue, newValue)) {
-            return Optional.of(Set.copyOf(newValue));
+            return Optional.of(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(newValue));
         }
         ITrainingBot bot = plugin.getBotRegistry().getBot(ownerUUID);
         BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -62,19 +64,19 @@ public final class BotSettingEvents {
                         snapshot,
                         source,
                         key,
-                        Set.copyOf(oldValue),
-                        Set.copyOf(newValue)));
-        if (event.isCancelled() || !(event.getNewValue() instanceof Set<?> proposedValues)) {
+                        com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(oldValue),
+                        com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(newValue)));
+        if (event.isCancelled() || !(event.getNewValue() instanceof Set<?>)) {
             return Optional.empty();
         }
         LinkedHashSet<UUID> validatedValues = new LinkedHashSet<>();
-        for (Object proposedValue : proposedValues) {
-            if (!(proposedValue instanceof UUID uuid)) {
+        for (Object proposedValue : (Set<?>) event.getNewValue()) {
+            if (!(proposedValue instanceof UUID)) {
                 return Optional.empty();
             }
-            validatedValues.add(uuid);
+            validatedValues.add((UUID) proposedValue);
         }
-        return Optional.of(Set.copyOf(validatedValues));
+        return Optional.of(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(validatedValues));
     }
 
     public static <T> NullableProposal<T> proposeNullable(
@@ -108,14 +110,51 @@ public final class BotSettingEvents {
         return NullableProposal.accepted(proposed == null ? null : valueType.cast(proposed));
     }
 
-    public record NullableProposal<T>(
-            boolean accepted, @Nullable T value) {
+    public static final class NullableProposal<T> {
+        private final boolean accepted;
+        private final @Nullable T value;
+
+        public NullableProposal(boolean accepted, @Nullable T value) {
+            this.accepted = accepted;
+            this.value = value;
+        }
+
         private static <T> NullableProposal<T> accepted(@Nullable T value) {
             return new NullableProposal<>(true, value);
         }
 
         private static <T> NullableProposal<T> rejected() {
             return new NullableProposal<>(false, null);
+        }
+
+        public boolean accepted() {
+            return accepted;
+        }
+
+        public @Nullable T value() {
+            return value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof NullableProposal)) {
+                return false;
+            }
+            NullableProposal<?> other = (NullableProposal<?>) obj;
+            return accepted == other.accepted && Objects.equals(value, other.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(accepted, value);
+        }
+
+        @Override
+        public String toString() {
+            return "NullableProposal[accepted=" + accepted + ", value=" + value + "]";
         }
     }
 }

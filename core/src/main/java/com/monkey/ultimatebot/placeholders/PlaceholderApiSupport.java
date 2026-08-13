@@ -32,7 +32,7 @@ public final class PlaceholderApiSupport {
             Class<?> coordinatorClass =
                     Class.forName(PLACEHOLDER_COORDINATOR_CLASS, true, PlaceholderApiSupport.class.getClassLoader());
             Object instance = coordinatorClass.getConstructor(UltimateBot.class).newInstance(plugin);
-            if (instance instanceof PlaceholderRegistration registration) {
+            if (instance instanceof PlaceholderRegistration) { PlaceholderRegistration registration = (PlaceholderRegistration) instance;
                 return registration;
             }
 
@@ -45,14 +45,14 @@ public final class PlaceholderApiSupport {
     }
 
     public static String apply(Player owner, String input) {
-        if (input.isBlank() || !isAvailable()) {
+        if (input.trim().isEmpty() || !isAvailable()) {
             return input;
         }
 
         try {
             Method method = resolveSetPlaceholdersMethod();
             Object result = method.invoke(null, owner, input);
-            return result instanceof String resolved ? resolved : input;
+            return result instanceof String ? (String) result : input;
         } catch (Throwable ignored) {
             return input;
         }

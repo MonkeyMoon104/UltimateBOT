@@ -15,14 +15,14 @@ public final class InstallationIdStore {
         Path file = dataDirectory.resolve(FILE_NAME);
 
         if (Files.exists(file)) {
-            String existing = Files.readString(file, StandardCharsets.UTF_8).trim();
-            if (!existing.isBlank()) {
+            String existing = new String(Files.readAllBytes(file), StandardCharsets.UTF_8).trim();
+            if (!existing.trim().isEmpty()) {
                 return existing;
             }
         }
 
         String installationId = UUID.randomUUID().toString();
-        Files.writeString(file, installationId, StandardCharsets.UTF_8);
+        Files.write(file, installationId.getBytes(StandardCharsets.UTF_8));
         return installationId;
     }
 }

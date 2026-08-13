@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.addon.runtime;
 
+import java.util.stream.Collectors;
+
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import com.monkey.ultimatebot.api.addon.AddonSnapshot;
 import com.monkey.ultimatebot.api.addon.AddonState;
@@ -35,7 +37,7 @@ final class AddonDiscoveryService {
             for (Path jar : files.filter(Files::isRegularFile)
                     .filter(AddonDiscoveryService::isJar)
                     .sorted()
-                    .toList()) {
+                    .collect(Collectors.toList())) {
                 discover(jar, discovered);
             }
         }
@@ -75,7 +77,7 @@ final class AddonDiscoveryService {
         boolean removed;
         do {
             removed = false;
-            var iterator = discovered.entrySet().iterator();
+            java.util.Iterator<java.util.Map.Entry<String, AddonDependencyResolver.DiscoveredAddon>> iterator = discovered.entrySet().iterator();
             while (iterator.hasNext()) {
                 AddonDependencyResolver.DiscoveredAddon candidate =
                         iterator.next().getValue();

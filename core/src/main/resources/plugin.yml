@@ -1,7 +1,7 @@
 name: UltimateBot
 version: '${version}'
 main: com.monkey.ultimatebot.UltimateBot
-api-version: '1.21'
+api-version: '1.13'
 folia-supported: true
 authors: [ MonkeyMoon104 ]
 description: Advanced, standalone PvP training bots
@@ -11,10 +11,6 @@ softdepend:
   - WorldGuard
 
 libraries:
-  - org.bstats:bstats-bukkit:${bstats}
-  - com.fasterxml.jackson.core:jackson-databind:${jackson}
-  - com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson}
-  - com.github.ben-manes.caffeine:caffeine:${caffeine}
   - de.bsommerfeld.pathetic:engine:${pathetic}
   - org.spongepowered:configurate-yaml:${configurate}
   - io.github.revxrsal:lamp.common:${lamp}
@@ -36,6 +32,10 @@ commands:
   ultimatebotreload:
     description: Reload configuration or remove bots/maps
     usage: /ultimatebotreload <config|bot|maps|all>
+    permission: ultimatebot.admin.use
+  ubagent:
+    description: Agent/CI smoke tests (console)
+    usage: /ubagent smoke
     permission: ultimatebot.admin.use
 
 permissions:

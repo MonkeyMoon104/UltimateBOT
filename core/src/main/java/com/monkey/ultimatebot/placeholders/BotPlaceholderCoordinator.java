@@ -1,6 +1,9 @@
 package com.monkey.ultimatebot.placeholders;
 
+import java.util.stream.Collectors;
+
 import com.monkey.ultimatebot.UltimateBot;
+import com.monkey.ultimatebot.compat.PluginMetaAccess;
 import com.monkey.ultimatebot.placeholders.list.combat.ArmorPlaceholder;
 import com.monkey.ultimatebot.placeholders.list.combat.CombatPlaceholder;
 import com.monkey.ultimatebot.placeholders.list.combat.CombatStatePlaceholder;
@@ -65,7 +68,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
 
     @Override
     public List<String> getRegisteredPlaceholderKeys() {
-        return placeholders.keySet().stream().sorted().toList();
+        return placeholders.keySet().stream().sorted().collect(Collectors.toList());
     }
 
     @Override
@@ -75,7 +78,7 @@ public class BotPlaceholderCoordinator extends PlaceholderExpansion implements P
 
     @Override
     public String getAuthor() {
-        return plugin.getPluginMeta().getAuthors().toString();
+        return PluginMetaAccess.authors(plugin).toString();
     }
 
     @Override

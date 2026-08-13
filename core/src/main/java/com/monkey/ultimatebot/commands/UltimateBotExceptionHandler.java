@@ -18,7 +18,7 @@ public final class UltimateBotExceptionHandler extends BukkitExceptionHandler {
     @Override
     public void onNoPermission(@NotNull NoPermissionException e, @NotNull BukkitCommandActor actor) {
         String msg = plugin.getLangString("messages.reload-no-permission", "");
-        if (msg == null || msg.isBlank()) {
+        if (msg == null || msg.trim().isEmpty()) {
             super.onNoPermission(e, actor);
             return;
         }

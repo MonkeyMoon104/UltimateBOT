@@ -35,7 +35,10 @@ public final class BotRuntimeEventListener implements Listener {
     public void onDamage(EntityDamageEvent event) {
         BotContext context = findBot(event.getEntity().getUniqueId());
         if (context == null) return;
-        Entity damager = event instanceof EntityDamageByEntityEvent byEntity ? byEntity.getDamager() : null;
+        Entity damager = null;
+        if (event instanceof EntityDamageByEntityEvent) {
+            damager = ((EntityDamageByEntityEvent) event).getDamager();
+        }
         if (damager != null && context.bot.asBukkitPlayer().isBlocking()) {
             context.bot.getBotAI().recordShieldImpact(damager.getUniqueId());
         }
@@ -107,5 +110,13 @@ public final class BotRuntimeEventListener implements Listener {
         return snapshot == null ? null : new BotContext(bot, snapshot);
     }
 
-    private record BotContext(ITrainingBot bot, BotSnapshot snapshot) {}
+    private static final class BotContext {
+        private final ITrainingBot bot;
+        private final BotSnapshot snapshot;
+
+        private BotContext(ITrainingBot bot, BotSnapshot snapshot) {
+            this.bot = bot;
+            this.snapshot = snapshot;
+        }
+    }
 }

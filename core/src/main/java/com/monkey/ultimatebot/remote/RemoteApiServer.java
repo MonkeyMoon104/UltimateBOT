@@ -1,7 +1,14 @@
 package com.monkey.ultimatebot.remote;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
+
+import java.util.stream.Collectors;
+
+
+import java.util.Collections;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
@@ -57,7 +64,7 @@ public final class RemoteApiServer {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.api = Objects.requireNonNull(api, "api");
         this.objectMapper = new ObjectMapper()
-                .findAndRegisterModules()
+                .registerModule(new JavaTimeModule())
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
@@ -67,7 +74,7 @@ public final class RemoteApiServer {
         }
 
         token = plugin.getConfig().getString("remote-api.token", "");
-        if (token == null || token.isBlank() || "change-me".equalsIgnoreCase(token)) {
+        if (token == null || token.trim().isEmpty() || "change-me".equalsIgnoreCase(token)) {
             plugin.getLogger()
                     .warning(
                             "Remote API is enabled but remote-api.token is not configured. Remote API will not start.");
@@ -84,7 +91,7 @@ public final class RemoteApiServer {
             server = createdServer;
             eventStream = createdEventStream;
             createdServer.createContext(basePath, this::handle);
-            createdServer.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
+            createdServer.setExecutor(Executors.newCachedThreadPool());
             createdServer.start();
             plugin.getLogger().info("Remote API started on http://" + host + ":" + port + basePath);
         } catch (IOException ex) {
@@ -177,7 +184,7 @@ public final class RemoteApiServer {
                                         snapshot.descriptor().authors(),
                                         snapshot.descriptor().dependencies(),
                                         snapshot.failure()))
-                                .toList());
+                                .collect(Collectors.toList()));
                 return;
             }
 
@@ -189,7 +196,7 @@ public final class RemoteApiServer {
                 } catch (IllegalArgumentException exception) {
                     definition = Optional.empty();
                 }
-                if (definition.isEmpty()) {
+                if (!definition.isPresent()) {
                     writeJson(exchange, 404, RemoteOperationResponse.failure("Brain not found."));
                 } else {
                     writeJson(exchange, 200, definition.get());
@@ -200,10 +207,10 @@ public final class RemoteApiServer {
             if ("GET".equals(method) && relativePath.startsWith("/combat-modes/")) {
                 String requestedMode = relativePath.substring("/combat-modes/".length());
                 CombatMode combatMode = parseCombatMode(requestedMode, null);
-                var definition = combatMode == null
+                Optional<com.monkey.ultimatebot.common.model.CombatModeDefinition> definition = combatMode == null
                         ? Optional.empty()
                         : api.getBotManager().getCombatMode(combatMode);
-                if (definition.isEmpty()) {
+                if (!definition.isPresent()) {
                     writeJson(exchange, 404, RemoteOperationResponse.failure("Combat mode not found."));
                 } else {
                     writeJson(exchange, 200, definition.get());
@@ -212,7 +219,7 @@ public final class RemoteApiServer {
             }
 
             if ("GET".equals(method) && "/bots/count".equals(relativePath)) {
-                writeJson(exchange, 200, Map.of("count", api.getBotManager().getActiveBotCount()));
+                writeJson(exchange, 200, ImmutableCollections.mapOf("count", api.getBotManager().getActiveBotCount()));
                 return;
             }
 
@@ -250,7 +257,7 @@ public final class RemoteApiServer {
                     exchange,
                     400,
                     RemoteOperationResponse.failure(
-                            Objects.requireNonNullElse(ex.getMessage(), "Invalid remote API request")));
+                            ex.getMessage() != null ? ex.getMessage() : "Invalid remote API request"));
         } catch (Exception ex) {
             plugin.getLogger().warning("Remote API request failed: " + ex.getMessage());
             writeJson(exchange, 500, RemoteOperationResponse.failure("Internal remote API error."));
@@ -478,7 +485,7 @@ public final class RemoteApiServer {
 
         if ("targets".equals(parts[2]) || "team-owners".equals(parts[2])) {
             UuidSetPayload payload = readJson(exchange, UuidSetPayload.class);
-            Set<UUID> uuids = payload == null || payload.uuids == null ? Set.of() : Set.copyOf(payload.uuids);
+            Set<UUID> uuids = payload == null || payload.uuids == null ? Collections.emptySet() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(payload.uuids);
             boolean teamOwners = "team-owners".equals(parts[2]);
             boolean updated = runSync(() -> teamOwners
                     ? ownerUUID != null
@@ -494,9 +501,9 @@ public final class RemoteApiServer {
         if ("kill-message".equals(parts[2])) {
             KillMessagePayload payload = readJson(exchange, KillMessagePayload.class);
             String requestedMessage = payload == null ? null : payload.message;
-            String requiredMessage = Objects.requireNonNullElse(requestedMessage, "");
+            String requiredMessage = requestedMessage != null ? requestedMessage : "";
             boolean updated = requestedMessage != null
-                    && !requiredMessage.isBlank()
+                    && !requiredMessage.trim().isEmpty()
                     && runSync(() -> ownerUUID != null
                             ? manager.updateKillMessage(ownerUUID, requiredMessage)
                             : manager.updateKillMessageByBotUUID(requestedUUID, requiredMessage));
@@ -507,6 +514,13 @@ public final class RemoteApiServer {
         if ("combat-mode".equals(parts[2])) {
             CombatModePayload payload = readJson(exchange, CombatModePayload.class);
             CombatMode mode = payload == null ? null : payload.combatMode;
+            if (mode != null && mode.builtIn() && !api.getBotManager().getCombatMode(mode).isPresent()) {
+                writeJson(
+                        exchange,
+                        400,
+                        RemoteOperationResponse.failure("Combat mode unsupported on this platform: " + mode.name()));
+                return;
+            }
             boolean updated = mode != null
                     && runSync(() -> ownerUUID != null
                             ? manager.updateCombatMode(ownerUUID, mode)
@@ -542,50 +556,62 @@ public final class RemoteApiServer {
             return;
         }
         boolean enabled = payload.enabled;
-        boolean updated =
-                switch (parts[2]) {
-                    case "crystal-pvp" ->
-                        runSync(() -> ownerUUID != null
+        boolean updated;
+                                switch (parts[2]) {
+                    case "crystal-pvp":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateCrystalPvp(ownerUUID, enabled)
                                 : manager.updateCrystalPvpByBotUUID(requestedUUID, enabled));
-                    case "explosions" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "explosions":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateExplosions(ownerUUID, enabled)
                                 : manager.updateExplosionsByBotUUID(requestedUUID, enabled));
-                    case "explosion-block-damage" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "explosion-block-damage":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateExplosionBlockDamage(ownerUUID, enabled)
                                 : manager.updateExplosionBlockDamageByBotUUID(requestedUUID, enabled));
-                    case "ender-pearls" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "ender-pearls":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateEnderPearls(ownerUUID, enabled)
                                 : manager.updateEnderPearlsByBotUUID(requestedUUID, enabled));
-                    case "healing" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "healing":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateHealing(ownerUUID, enabled)
                                 : manager.updateHealingByBotUUID(requestedUUID, enabled));
-                    case "attack-bots" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "attack-bots":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateAttackBots(ownerUUID, enabled)
                                 : manager.updateAttackBotsByBotUUID(requestedUUID, enabled));
-                    case "follow" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "follow":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateFollow(ownerUUID, enabled)
                                 : manager.updateFollowByBotUUID(requestedUUID, enabled));
-                    case "combat" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "combat":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateCombat(ownerUUID, enabled)
                                 : manager.updateCombatByBotUUID(requestedUUID, enabled));
-                    case "world-guard-pvp" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "world-guard-pvp":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateWorldGuardPvpRespect(ownerUUID, enabled)
                                 : manager.updateWorldGuardPvpRespectByBotUUID(requestedUUID, enabled));
-                    case "stay-after-owner-death" ->
-                        runSync(() -> ownerUUID != null
+                        break;
+                    case "stay-after-owner-death":
+                        updated = runSync(() -> ownerUUID != null
                                 ? manager.updateStayAfterOwnerDeath(ownerUUID, enabled)
                                 : manager.updateStayAfterOwnerDeathByBotUUID(requestedUUID, enabled));
-                    default -> false;
-                };
+                        break;
+                    default:
+                        updated = false;
+                        break;
+                }
         BotSnapshot snapshot = runSync(() -> ownerUUID != null
                 ? manager.getBot(ownerUUID).orElse(null)
                 : manager.getBotByBotUUID(requestedUUID).orElse(null));
@@ -693,7 +719,7 @@ public final class RemoteApiServer {
     private Map<BotEquipmentSlot, BotEquipmentSlotSetting> toEquipmentSettings(
             @Nullable Map<String, EquipmentSlotPayload> payloads) {
         if (payloads == null || payloads.isEmpty()) {
-            return Map.of();
+            return Collections.emptyMap();
         }
         EnumMap<BotEquipmentSlot, BotEquipmentSlotSetting> settings = new EnumMap<>(BotEquipmentSlot.class);
         for (Map.Entry<String, EquipmentSlotPayload> entry : payloads.entrySet()) {
@@ -706,7 +732,7 @@ public final class RemoteApiServer {
                 settings.put(slot, setting);
             }
         }
-        return Map.copyOf(settings);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(settings);
     }
 
     private @Nullable BotEquipmentSlotSetting toEquipmentSetting(@Nullable EquipmentSlotPayload payload) {
@@ -717,18 +743,21 @@ public final class RemoteApiServer {
         if (mode == null) {
             return null;
         }
-        return switch (mode) {
-            case DEFAULT -> BotEquipmentSlotSetting.defaultSlot();
-            case EMPTY -> BotEquipmentSlotSetting.empty();
-            case ITEM -> {
+        switch (mode) {
+            case DEFAULT:
+                return BotEquipmentSlotSetting.defaultSlot();
+            case EMPTY:
+                return BotEquipmentSlotSetting.empty();
+            case ITEM:
                 org.bukkit.Material material = org.bukkit.Material.matchMaterial(defaultString(payload.material, ""));
                 int amount = defaultInt(payload.amount, 1);
                 if (material == null || material.isAir() || amount < 1 || amount > material.getMaxStackSize()) {
                     throw new IllegalArgumentException("ITEM mode requires a valid material and stack amount");
                 }
-                yield BotEquipmentSlotSetting.item(new org.bukkit.inventory.ItemStack(material, amount));
-            }
-        };
+                return BotEquipmentSlotSetting.item(new org.bukkit.inventory.ItemStack(material, amount));
+            default:
+                throw new IllegalArgumentException("Unsupported equipment slot mode: " + mode);
+        }
     }
 
     private @Nullable UUID resolveOwnerUUID(IBotManager manager, @Nullable UUID requestedUUID) {
@@ -762,7 +791,7 @@ public final class RemoteApiServer {
     private String relativePath(HttpExchange exchange) {
         String path = exchange.getRequestURI().getPath();
         String relative = path.length() <= basePath.length() ? "/" : path.substring(basePath.length());
-        return relative.isBlank() ? "/" : relative;
+        return relative.trim().isEmpty() ? "/" : relative;
     }
 
     private <T> T readJson(HttpExchange exchange, Class<T> type) throws IOException {
@@ -807,7 +836,7 @@ public final class RemoteApiServer {
     }
 
     private static String normalizeBasePath(String configured) {
-        String path = configured == null || configured.isBlank() ? DEFAULT_BASE_PATH : configured.trim();
+        String path = configured == null || configured.trim().isEmpty() ? DEFAULT_BASE_PATH : configured.trim();
         if (!path.startsWith("/")) {
             path = "/" + path;
         }
@@ -820,41 +849,51 @@ public final class RemoteApiServer {
             if (parts.length < 3) {
                 return "/bots/{bot}";
             }
-            return switch (parts[2]) {
-                case "equipment" -> "/bots/{bot}/equipment/{slot}";
-                case "target-mode",
-                        "totems",
-                        "difficulty",
-                        "armor",
-                        "auto-target",
-                        "idle-wander",
-                        "targets",
-                        "team-owners",
-                        "kill-message",
-                        "combat-mode",
-                        "combat-tuning",
-                        "crystal-pvp",
-                        "explosions",
-                        "explosion-block-damage",
-                        "ender-pearls",
-                        "healing",
-                        "attack-bots",
-                        "follow",
-                        "combat",
-                        "blast-protection",
-                        "world-guard-pvp",
-                        "stay-after-owner-death" -> "/bots/{bot}/" + parts[2];
-                default -> "/bots/{bot}/unmatched";
-            };
+                        switch (parts[2]) {
+                case "equipment":
+                    return "/bots/{bot}/equipment/{slot}";
+                case "target-mode":
+                case "totems":
+                case "difficulty":
+                case "armor":
+                case "auto-target":
+                case "idle-wander":
+                case "targets":
+                case "team-owners":
+                case "kill-message":
+                case "combat-mode":
+                case "combat-tuning":
+                case "crystal-pvp":
+                case "explosions":
+                case "explosion-block-damage":
+                case "ender-pearls":
+                case "healing":
+                case "attack-bots":
+                case "follow":
+                case "combat":
+                case "blast-protection":
+                case "world-guard-pvp":
+                case "stay-after-owner-death":
+                    return "/bots/{bot}/" + parts[2];
+                default:
+                    return "/bots/{bot}/unmatched";
+            }
         }
-        return switch (relativePath) {
-            case "/health", "/metrics", "/events", "/bots", "/bots/count", "/combat-modes" -> relativePath;
-            default -> relativePath.startsWith("/combat-modes/") ? "/combat-modes/{mode}" : "/unmatched";
-        };
+                switch (relativePath) {
+            case "/health":
+            case "/metrics":
+            case "/events":
+            case "/bots":
+            case "/bots/count":
+            case "/combat-modes":
+                return relativePath;
+            default:
+                return relativePath.startsWith("/combat-modes/") ? "/combat-modes/{mode}" : "/unmatched";
+        }
     }
 
     private static String defaultString(@Nullable String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
+        return value == null || value.trim().isEmpty() ? fallback : value;
     }
 
     private static boolean defaultBoolean(@Nullable Boolean value, boolean fallback) {
@@ -871,7 +910,7 @@ public final class RemoteApiServer {
 
     private static <E extends Enum<E>> E parseEnumOrDefault(
             Class<E> enumType, @Nullable String value, E fallback, String fieldName) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             return fallback;
         }
         E parsed = EnumValues.parse(enumType, value, null);
@@ -882,7 +921,7 @@ public final class RemoteApiServer {
     }
 
     private static @Nullable CombatMode parseCombatMode(@Nullable String value, @Nullable CombatMode fallback) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.trim().isEmpty()) {
             return fallback;
         }
         try {
@@ -899,11 +938,27 @@ public final class RemoteApiServer {
         return value == null ? fallback : value;
     }
 
-    private record RemoteOperationResponse(
-            boolean success,
-            String message,
-            @Nullable BotSnapshot snapshot,
-            @Nullable Integer removedCount) {
+    private static final class RemoteOperationResponse {
+        @com.fasterxml.jackson.annotation.JsonProperty
+        private final boolean success;
+
+        @com.fasterxml.jackson.annotation.JsonProperty
+        private final String message;
+
+        @com.fasterxml.jackson.annotation.JsonProperty
+        private final @Nullable BotSnapshot snapshot;
+
+        @com.fasterxml.jackson.annotation.JsonProperty
+        private final @Nullable Integer removedCount;
+
+        private RemoteOperationResponse(
+                boolean success, String message, @Nullable BotSnapshot snapshot, @Nullable Integer removedCount) {
+            this.success = success;
+            this.message = message;
+            this.snapshot = snapshot;
+            this.removedCount = removedCount;
+        }
+
         static RemoteOperationResponse success(String message, @Nullable BotSnapshot snapshot) {
             return new RemoteOperationResponse(true, message, snapshot, null);
         }
@@ -918,6 +973,39 @@ public final class RemoteApiServer {
 
         static RemoteOperationResponse from(BotOperationResult result) {
             return new RemoteOperationResponse(result.success(), result.message(), result.snapshot(), null);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof RemoteOperationResponse)) {
+                return false;
+            }
+            RemoteOperationResponse other = (RemoteOperationResponse) obj;
+            return success == other.success
+                    && java.util.Objects.equals(message, other.message)
+                    && java.util.Objects.equals(snapshot, other.snapshot)
+                    && java.util.Objects.equals(removedCount, other.removedCount);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(success, message, snapshot, removedCount);
+        }
+
+        @Override
+        public String toString() {
+            return "RemoteOperationResponse[success="
+                    + success
+                    + ", message="
+                    + message
+                    + ", snapshot="
+                    + snapshot
+                    + ", removedCount="
+                    + removedCount
+                    + "]";
         }
     }
 

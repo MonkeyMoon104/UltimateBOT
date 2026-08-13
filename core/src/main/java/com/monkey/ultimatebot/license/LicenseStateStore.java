@@ -25,7 +25,7 @@ public final class LicenseStateStore {
                 return Optional.empty();
             }
             return Optional.of(
-                    objectMapper.readValue(Files.readString(file, StandardCharsets.UTF_8), LicenseState.class));
+                    objectMapper.readValue(new String(Files.readAllBytes(file), StandardCharsets.UTF_8), LicenseState.class));
         } catch (Exception ignored) {
             return Optional.empty();
         }
@@ -34,10 +34,12 @@ public final class LicenseStateStore {
     public void saveSuccess(Path dataDirectory, Instant timestamp) throws IOException {
         Files.createDirectories(dataDirectory);
         Path file = dataDirectory.resolve(FILE_NAME);
-        Files.writeString(
+        Files.write(
                 file,
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(new LicenseState(timestamp)),
-                StandardCharsets.UTF_8);
+                objectMapper
+                        .writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(new LicenseState(timestamp))
+                        .getBytes(StandardCharsets.UTF_8));
     }
 
     public boolean hasValidGrace(Path dataDirectory, Duration gracePeriod, Instant now) {

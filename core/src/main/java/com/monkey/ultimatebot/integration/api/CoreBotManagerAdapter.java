@@ -1,5 +1,11 @@
 package com.monkey.ultimatebot.integration.api;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
+import java.util.stream.Collectors;
+
+
+import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -81,11 +87,14 @@ public final class CoreBotManagerAdapter implements IBotManager {
     @Override
     public List<CombatModeDefinition> getCombatModes() {
         List<CombatModeDefinition> definitions = new ArrayList<>();
-        Arrays.stream(CombatMode.values()).map(this::combatModeDefinition).forEach(definitions::add);
+        Arrays.stream(CombatMode.values())
+                .filter(mode -> plugin.getCombatProfileCatalog().supports(mode))
+                .map(this::combatModeDefinition)
+                .forEach(definitions::add);
         plugin.getExtensionRegistry().combatModes().stream()
                 .map(provider -> combatModeDefinition(provider.descriptor()))
                 .forEach(definitions::add);
-        return List.copyOf(definitions);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(definitions);
     }
 
     @Override
@@ -94,6 +103,9 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return Optional.empty();
         }
         if (combatMode.builtIn()) {
+            if (!plugin.getCombatProfileCatalog().supports(combatMode)) {
+                return Optional.empty();
+            }
             return Optional.of(combatModeDefinition(combatMode));
         }
         return plugin.getExtensionRegistry()
@@ -105,7 +117,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
     public List<BrainDefinition> getBrains() {
         return plugin.getExtensionRegistry().brains().stream()
                 .map(provider -> brainDefinition(provider.descriptor()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -262,7 +274,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
 
         UUID ownerUUID = null;
-        if (ownerReference != null && !ownerReference.isBlank()) {
+        if (ownerReference != null && !ownerReference.trim().isEmpty()) {
             ownerUUID = parsePlayerReference(ownerReference).orElse(null);
             if (ownerUUID == null) {
                 return spawnFailure("Cannot parse owner reference: " + ownerReference);
@@ -306,7 +318,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
     @Override
     public Optional<UUID> parsePlayerReference(@Nullable String playerReference) {
-        if (playerReference == null || playerReference.isBlank()) {
+        if (playerReference == null || playerReference.trim().isEmpty()) {
             return Optional.empty();
         }
 
@@ -371,7 +383,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         Optional<Integer> proposed =
                 proposedChange(managedOwner, BotSettingKey.TOTEM_COUNT, options.getTotems(), totemCount, Integer.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setTotems(proposed.get());
         botManager.updateTotem(managedOwner, proposed.get());
         return true;
@@ -402,7 +414,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         Optional<Boolean> proposed =
                 proposedChange(managedOwner, BotSettingKey.FOLLOW, options.isFollow(), follow, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setFollow(proposed.get());
         botManager.updateFollow(managedOwner, proposed.get());
         return true;
@@ -433,7 +445,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
 
         Optional<Boolean> proposed =
                 proposedChange(managedOwner, BotSettingKey.COMBAT, options.isCombat(), combat, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setCombat(proposed.get());
         botManager.updateCombat(managedOwner, proposed.get());
         if (proposed.get()) {
@@ -476,7 +488,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.HEAD, false));
         Optional<BlastProtectionSettings> proposed = proposedChange(
                 managedOwner, BotSettingKey.BLAST_PROTECTION, current, blastProtection, BlastProtectionSettings.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         BlastProtectionSettings accepted = proposed.get();
@@ -529,7 +541,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.getDifficulty(),
                 coreDifficulty,
                 com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.class);
-        if (proposed.isEmpty() || !options.isDifficultyAllowed(proposed.get())) return false;
+        if (!proposed.isPresent() || !options.isDifficultyAllowed(proposed.get())) return false;
         options.setDifficulty(proposed.get());
         botManager.setDifficultyLevel(managedOwner, proposed.get());
         return true;
@@ -550,13 +562,14 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
         boolean available = combatMode.builtIn()
                 ? plugin.getCombatProfileCatalog().configuration(combatMode).enabled()
+                        && plugin.getCombatProfileCatalog().supports(combatMode)
                 : plugin.getExtensionRegistry().combatMode(combatMode).isPresent();
         if (!available) {
             return false;
         }
         Optional<CombatMode> proposed = proposedChange(
                 managedOwner, BotSettingKey.COMBAT_MODE, options.getCombatMode(), combatMode, CombatMode.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setCombatMode(proposed.get());
@@ -575,7 +588,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         BotOptions options = getLiveOptions(managedOwner);
         if (options == null
                 || brainKey == null
-                || plugin.getExtensionRegistry().brain(brainKey).isEmpty()) {
+                || !plugin.getExtensionRegistry().brain(brainKey).isPresent()) {
             return false;
         }
         BotSettingEvents.NullableProposal<BrainKey> proposed = BotSettingEvents.proposeNullable(
@@ -588,7 +601,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 BrainKey.class);
         if (!proposed.accepted()
                 || (proposed.value() != null
-                        && plugin.getExtensionRegistry().brain(proposed.value()).isEmpty())) {
+                        && !plugin.getExtensionRegistry().brain(proposed.value()).isPresent())) {
             return false;
         }
         options.setBrainKey(proposed.value());
@@ -638,7 +651,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         }
         Optional<CombatTuning> proposed = proposedChange(
                 managedOwner, BotSettingKey.COMBAT_TUNING, options.getCombatTuning(), combatTuning, CombatTuning.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setCustomCombatTuning(proposed.get());
@@ -705,7 +718,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 currentArmorTier(options),
                 requestedTier,
                 com.monkey.ultimatebot.utils.armor.ArmorTier.class);
-        if (proposed.isEmpty() || !options.isArmorTierAllowed(proposed.get())) {
+        if (!proposed.isPresent() || !options.isArmorTierAllowed(proposed.get())) {
             return false;
         }
         options.setArmorType(proposed.get());
@@ -814,7 +827,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 current,
                 new AutoTargetSettings(autoTarget, range),
                 AutoTargetSettings.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setAutoTarget(proposed.get().enabled());
@@ -840,7 +853,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.isAttackBots(),
                 attackBots,
                 Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setAttackBots(proposed.get());
         return true;
     }
@@ -860,7 +873,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         Optional<BotTargetMode> proposed = proposedChange(
                 managedOwner, BotSettingKey.TARGET_MODE, options.getTargetMode(), targetMode, BotTargetMode.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setTargetMode(proposed.get());
         return true;
     }
@@ -878,7 +891,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || targetUUIDs == null) {
             return false;
         }
-        Set<UUID> requestedTargets = Set.copyOf(targetUUIDs);
+        Set<UUID> requestedTargets = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
         Optional<Set<UUID>> proposed = BotSettingEvents.proposeUuidSet(
                 plugin,
                 managedOwner,
@@ -886,7 +899,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 BotSettingKey.TARGETS,
                 options.getTargetUUIDs(),
                 requestedTargets);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setTargetUUIDs(proposed.get());
@@ -906,7 +919,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || options.getBotType() != BotType.TEAM_ALLY || teamOwnerUUIDs == null) {
             return false;
         }
-        Set<UUID> requestedOwners = Set.copyOf(teamOwnerUUIDs);
+        Set<UUID> requestedOwners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
         if (requestedOwners.isEmpty()) {
             return false;
         }
@@ -917,7 +930,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 BotSettingKey.TEAM_OWNERS,
                 options.getTeamOwnerUUIDs(),
                 requestedOwners);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         LinkedHashSet<UUID> validatedOwners = new LinkedHashSet<>();
@@ -954,7 +967,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.isRespectWorldGuardPvp(),
                 respectWorldGuardPvp,
                 Boolean.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setRespectWorldGuardPvp(proposed.get());
@@ -980,7 +993,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.isStayAfterOwnerDeath(),
                 stayAfterOwnerDeath,
                 Boolean.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setStayAfterOwnerDeath(proposed.get());
@@ -1016,7 +1029,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 current,
                 new IdleWanderSettings(idleWander, idleWanderRadius, idleReturnDistance, idleReturnDelayMs),
                 IdleWanderSettings.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setIdleWander(proposed.get().enabled());
@@ -1054,7 +1067,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         Optional<Boolean> proposed = proposedChange(
                 managedOwner, BotSettingKey.CRYSTAL_PVP, options.isCrystalPvp(), crystalPvp, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         crystalPvp = proposed.get();
         options.setCrystalPvp(crystalPvp);
         bot.getBotAI().getCPVPController().setEnabled(crystalPvp);
@@ -1062,7 +1075,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        crystalPvp ? new ItemStack(Material.END_CRYSTAL, 64) : ItemStack.empty());
+                        crystalPvp ? new ItemStack(Material.END_CRYSTAL, 64) : ItemStackAccess.empty());
         return true;
     }
 
@@ -1086,7 +1099,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         Optional<Boolean> proposed = proposedChange(
                 managedOwner, BotSettingKey.EXPLOSIONS, options.isExplosions(), explosions, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         explosions = proposed.get();
         options.setExplosions(explosions);
         if (!explosions) {
@@ -1117,7 +1130,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 options.isExplosionBlockDamage(),
                 explosionBlockDamage,
                 Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setExplosionBlockDamage(proposed.get());
         return true;
     }
@@ -1141,7 +1154,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         Optional<Boolean> proposed = proposedChange(
                 managedOwner, BotSettingKey.ENDER_PEARLS, options.isEnderPearls(), enderPearls, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setEnderPearls(proposed.get());
         bot.getBotAI().getEnderpearlController().setEnabled(proposed.get());
         return true;
@@ -1166,7 +1179,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         Optional<Boolean> proposed =
                 proposedChange(managedOwner, BotSettingKey.HEALING, options.isHealing(), healing, Boolean.class);
-        if (proposed.isEmpty()) return false;
+        if (!proposed.isPresent()) return false;
         options.setHealing(proposed.get());
         if (!proposed.get()) {
             bot.getBotAI().getHealController().resetHealState();
@@ -1184,7 +1197,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
     public boolean updateKillMessage(UUID ownerUUID, String killMessage) {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         BotOptions options = getLiveOptions(managedOwner);
-        if (options == null || killMessage == null || killMessage.isBlank()) {
+        if (options == null || killMessage == null || killMessage.trim().isEmpty()) {
             return false;
         }
         Optional<KillMessageSettings> proposed = proposedChange(
@@ -1193,7 +1206,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 new KillMessageSettings(options.isKillMessageEnabled(), options.getCustomKillMessage()),
                 new KillMessageSettings(true, killMessage),
                 KillMessageSettings.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setKillMessageEnabled(proposed.get().enabled());
@@ -1220,7 +1233,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 new KillMessageSettings(options.isKillMessageEnabled(), options.getCustomKillMessage()),
                 KillMessageSettings.disabled(),
                 KillMessageSettings.class);
-        if (proposed.isEmpty()) {
+        if (!proposed.isPresent()) {
             return false;
         }
         options.setKillMessageEnabled(proposed.get().enabled());
@@ -1321,16 +1334,17 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     private CombatModeDefinition combatModeDefinition(CombatMode combatMode) {
-        var configuration = plugin.getCombatProfileCatalog().configuration(combatMode);
+        com.monkey.ultimatebot.combat.profile.CombatModeConfiguration configuration = plugin.getCombatProfileCatalog().configuration(combatMode);
+        boolean enabled = configuration.enabled() && plugin.getCombatProfileCatalog().supports(combatMode);
         return new CombatModeDefinition(
                 combatMode,
                 combatMode.displayName(),
-                configuration.enabled(),
+                enabled,
                 configuration.iconMaterial(),
                 combatMode.capabilities(),
                 configuration.profiles(),
                 "ultimatebot",
-                List.of(),
+                Collections.emptyList(),
                 "",
                 Arrays.asList(CombatMode.values()).indexOf(combatMode),
                 null);
@@ -1486,17 +1500,17 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
     }
 
     private @Nullable BotType getOwnerBusyType(UUID ownerUUID, @Nullable UUID allowedTeamPrimaryOwner) {
@@ -1569,8 +1583,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (source == BotSkinSource.PLAYER_REFERENCE) {
             String reference = skin.playerReference();
             if (reference == null
-                    || reference.isBlank()
-                    || parsePlayerReference(reference).isEmpty()) {
+                    || reference.trim().isEmpty()
+                    || !parsePlayerReference(reference).isPresent()) {
                 return "BotSkin.player(\"...\") requires an online valid player reference.";
             }
         }
@@ -1579,7 +1593,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     private BotOperationResult spawnFailure(@Nullable String reason) {
-        return BotOperationResult.failure(Objects.requireNonNullElse(reason, "Bot operation failed."));
+        return BotOperationResult.failure(reason != null ? reason : "Bot operation failed.");
     }
 
     private static BotType toCoreType(BotMode mode) {

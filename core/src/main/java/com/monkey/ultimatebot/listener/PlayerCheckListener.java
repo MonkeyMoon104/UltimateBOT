@@ -9,15 +9,11 @@ import com.monkey.ultimatebot.bot.BotManager;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.bot.ai.fakeplayer.BotCraftPlayer;
 import com.monkey.ultimatebot.integration.api.BotSnapshotMapper;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import java.util.Map;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,16 +26,44 @@ import org.jspecify.annotations.Nullable;
 
 public class PlayerCheckListener implements Listener {
 
-    private static final LegacyComponentSerializer LEGACY_SECTION_SERIALIZER =
-            LegacyComponentSerializer.legacySection();
-    private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
-
     private final UltimateBot plugin;
     private final BotManager botManager;
     private final PlayerOptions playerOptions;
 
-    private record BotKillContext(
-            UUID ownerUUID, ITrainingBot bot, @Nullable BotOptions options) {}
+    private static final class BotKillContext {
+        private final UUID ownerUUID;
+        private final ITrainingBot bot;
+        private final @Nullable BotOptions options;
+
+        private BotKillContext(UUID ownerUUID, ITrainingBot bot, @Nullable BotOptions options) {
+            this.ownerUUID = ownerUUID;
+            this.bot = bot;
+            this.options = options;
+        }
+
+        UUID ownerUUID() {
+            return ownerUUID;
+        }
+
+        ITrainingBot bot() {
+            return bot;
+        }
+
+        @Nullable BotOptions options() {
+            return options;
+        }
+
+        @Override
+        public String toString() {
+            return "BotKillContext[ownerUUID="
+                    + ownerUUID
+                    + ", botUUID="
+                    + bot.getUniqueId()
+                    + ", optionsOwner="
+                    + (options == null ? null : options.getOwnerUUID())
+                    + "]";
+        }
+    }
 
     public PlayerCheckListener(UltimateBot plugin) {
         this.plugin = plugin;
@@ -85,7 +109,8 @@ public class PlayerCheckListener implements Listener {
 
     @EventHandler
     public void onDead(PlayerDeathEvent event) {
-        Player player = event.getPlayer();
+        // Paper 1.16.5 has getEntity():Player only — getPlayer() was added later (NoSuchMethodError).
+        Player player = event.getEntity();
         if (plugin.getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null) {
             event.getDrops().clear();
             event.setDroppedExp(0);
@@ -122,11 +147,6 @@ public class PlayerCheckListener implements Listener {
             return;
         }
 
-        if (killer instanceof BotCraftPlayer) {
-            setBotDeathMessage(event, player, options);
-            return;
-        }
-
         if (killer instanceof ITrainingBot) {
             setBotDeathMessage(event, player, options);
             return;
@@ -143,7 +163,8 @@ public class PlayerCheckListener implements Listener {
 
     private void setBotDeathMessage(PlayerDeathEvent event, Player player, @Nullable BotOptions options) {
         if (options != null && !options.isKillMessageEnabled()) {
-            event.deathMessage(null);
+            // String API works on Paper 1.16.5 (no Adventure plain serializer) and modern Paper.
+            event.setDeathMessage(null);
             return;
         }
 
@@ -152,12 +173,11 @@ public class PlayerCheckListener implements Listener {
                 ? plugin.getLangString("messages.dead-bot-message", player.getName() + " was killed by his Bot")
                 : configured;
         String formatted = ChatColorUtils.translate(deathMessage.replace("{player}", player.getName()));
-        event.deathMessage(LEGACY_SECTION_SERIALIZER.deserialize(formatted));
+        event.setDeathMessage(formatted);
     }
 
     private @Nullable String getDeathMessageText(PlayerDeathEvent event) {
-        Component deathMessage = event.deathMessage();
-        return deathMessage == null ? null : PLAIN_TEXT_SERIALIZER.serialize(deathMessage);
+        return event.getDeathMessage();
     }
 
     private @Nullable BotKillContext resolveBotKillContext(

@@ -1,12 +1,13 @@
 package com.monkey.ultimatebot.utils.equipment;
 
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -21,7 +22,7 @@ import org.jspecify.annotations.Nullable;
 
 public final class ArmorTrimUtils {
 
-    private static final List<String> PATTERN_ORDER = List.of(
+    private static final List<String> PATTERN_ORDER = ImmutableCollections.listOf(
             "sentry",
             "dune",
             "coast",
@@ -41,7 +42,7 @@ public final class ArmorTrimUtils {
             "flow",
             "bolt");
 
-    private static final List<String> MATERIAL_ORDER = List.of(
+    private static final List<String> MATERIAL_ORDER = ImmutableCollections.listOf(
             "quartz",
             "iron",
             "netherite",
@@ -57,10 +58,16 @@ public final class ArmorTrimUtils {
     private ArmorTrimUtils() {}
 
     public static List<String> getTrimPatternKeys() {
+        if (!trimsEnabled()) {
+            return Collections.emptyList();
+        }
         return resolveOrderedKeys(PATTERN_ORDER, trimPatternRegistry());
     }
 
     public static List<String> getTrimMaterialKeys() {
+        if (!trimsEnabled()) {
+            return Collections.emptyList();
+        }
         return resolveOrderedKeys(MATERIAL_ORDER, trimMaterialRegistry());
     }
 
@@ -74,6 +81,9 @@ public final class ArmorTrimUtils {
 
     public static void applyTrimSelection(
             Map<EquipmentSlot, ItemStack> armorMap, @Nullable String patternKey, @Nullable String materialKey) {
+        if (!trimsEnabled()) {
+            return;
+        }
         for (Map.Entry<EquipmentSlot, ItemStack> entry : armorMap.entrySet()) {
             ItemStack piece = entry.getValue();
             if (piece == null) {
@@ -87,14 +97,18 @@ public final class ArmorTrimUtils {
     }
 
     public static void applyTrim(ItemStack item, @Nullable String patternKey, @Nullable String materialKey) {
+        if (!trimsEnabled()) {
+            return;
+        }
         if (item == null || item.getType() == Material.AIR) {
             return;
         }
 
         ItemMeta itemMeta = item.getItemMeta();
-        if (!(itemMeta instanceof ArmorMeta armorMeta)) {
+        if (!(itemMeta instanceof ArmorMeta)) {
             return;
         }
+        ArmorMeta armorMeta = (ArmorMeta) itemMeta;
 
         TrimPattern pattern = resolveTrimPattern(patternKey);
         TrimMaterial material = resolveTrimMaterial(materialKey);
@@ -109,10 +123,16 @@ public final class ArmorTrimUtils {
     }
 
     public static boolean isCompleteSelection(@Nullable String patternKey, @Nullable String materialKey) {
+        if (!trimsEnabled()) {
+            return false;
+        }
         return resolveTrimPattern(patternKey) != null && resolveTrimMaterial(materialKey) != null;
     }
 
     public static boolean isTrimApplicable(ItemStack item) {
+        if (!trimsEnabled()) {
+            return false;
+        }
         if (item == null || item.getType() == Material.AIR) {
             return false;
         }
@@ -120,46 +140,79 @@ public final class ArmorTrimUtils {
     }
 
     public static Material resolvePatternDisplayMaterial(@Nullable String patternKey) {
-        String normalized = Objects.requireNonNullElse(normalizeKey(patternKey), "");
-        return switch (normalized) {
-            case "sentry" -> materialOrDefault("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "dune" -> materialOrDefault("DUNE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "coast" -> materialOrDefault("COAST_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "wild" -> materialOrDefault("WILD_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "ward" -> materialOrDefault("WARD_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "eye" -> materialOrDefault("EYE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "vex" -> materialOrDefault("VEX_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "tide" -> materialOrDefault("TIDE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "snout" -> materialOrDefault("SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "rib" -> materialOrDefault("RIB_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "spire" -> materialOrDefault("SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "wayfinder" -> materialOrDefault("WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "shaper" -> materialOrDefault("SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "silence" -> materialOrDefault("SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "raiser" -> materialOrDefault("RAISER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "host" -> materialOrDefault("HOST_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "flow" -> materialOrDefault("FLOW_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            case "bolt" -> materialOrDefault("BOLT_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
-            default -> Material.GUNPOWDER;
-        };
+        String key = normalizeKey(patternKey);
+        final String normalized = key == null ? "" : key;
+                switch (normalized) {
+            case "sentry":
+                return materialOrDefault("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "dune":
+                return materialOrDefault("DUNE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "coast":
+                return materialOrDefault("COAST_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "wild":
+                return materialOrDefault("WILD_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "ward":
+                return materialOrDefault("WARD_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "eye":
+                return materialOrDefault("EYE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "vex":
+                return materialOrDefault("VEX_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "tide":
+                return materialOrDefault("TIDE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "snout":
+                return materialOrDefault("SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "rib":
+                return materialOrDefault("RIB_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "spire":
+                return materialOrDefault("SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "wayfinder":
+                return materialOrDefault("WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "shaper":
+                return materialOrDefault("SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "silence":
+                return materialOrDefault("SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "raiser":
+                return materialOrDefault("RAISER_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "host":
+                return materialOrDefault("HOST_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "flow":
+                return materialOrDefault("FLOW_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            case "bolt":
+                return materialOrDefault("BOLT_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+            default:
+                return Material.GUNPOWDER;
+        }
     }
 
     public static Material resolveTrimMaterialDisplayMaterial(@Nullable String materialKey) {
-        String normalized = Objects.requireNonNullElse(normalizeKey(materialKey), "");
-        return switch (normalized) {
-            case "quartz" -> Material.QUARTZ;
-            case "iron" -> Material.IRON_INGOT;
-            case "netherite" -> Material.NETHERITE_INGOT;
-            case "redstone" -> Material.REDSTONE;
-            case "copper" -> Material.COPPER_INGOT;
-            case "gold" -> Material.GOLD_INGOT;
-            case "emerald" -> Material.EMERALD;
-            case "diamond" -> Material.DIAMOND;
-            case "lapis" -> Material.LAPIS_LAZULI;
-            case "amethyst" -> materialOrDefault("AMETHYST_SHARD", Material.AMETHYST_CLUSTER);
-            case "resin" -> materialOrDefault("RESIN_BRICK", Material.BRICK);
-            default -> Material.IRON_INGOT;
-        };
+        String key = normalizeKey(materialKey);
+        final String normalized = key == null ? "" : key;
+                switch (normalized) {
+            case "quartz":
+                return Material.QUARTZ;
+            case "iron":
+                return Material.IRON_INGOT;
+            case "netherite":
+                return Material.NETHERITE_INGOT;
+            case "redstone":
+                return Material.REDSTONE;
+            case "copper":
+                return Material.COPPER_INGOT;
+            case "gold":
+                return Material.GOLD_INGOT;
+            case "emerald":
+                return Material.EMERALD;
+            case "diamond":
+                return Material.DIAMOND;
+            case "lapis":
+                return Material.LAPIS_LAZULI;
+            case "amethyst":
+                return materialOrDefault("AMETHYST_SHARD", Material.AMETHYST_CLUSTER);
+            case "resin":
+                return materialOrDefault("RESIN_BRICK", Material.BRICK);
+            default:
+                return Material.IRON_INGOT;
+        }
     }
 
     public static String formatKey(@Nullable String key) {
@@ -189,12 +242,12 @@ public final class ArmorTrimUtils {
 
         String normalizedCurrent = normalizeKey(currentKey);
         if (normalizedCurrent == null) {
-            return forward ? values.getFirst() : values.getLast();
+            return forward ? values.get(0) : values.get(values.size() - 1);
         }
 
         int index = values.indexOf(normalizedCurrent);
         if (index < 0) {
-            return forward ? values.getFirst() : values.getLast();
+            return forward ? values.get(0) : values.get(values.size() - 1);
         }
 
         int nextIndex = forward ? (index + 1) % values.size() : (index - 1 + values.size()) % values.size();
@@ -212,11 +265,11 @@ public final class ArmorTrimUtils {
     }
 
     private static Registry<TrimPattern> trimPatternRegistry() {
-        return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_PATTERN);
+        return TrimRegistriesLookup.get().patterns();
     }
 
     private static Registry<TrimMaterial> trimMaterialRegistry() {
-        return RegistryAccess.registryAccess().getRegistry(RegistryKey.TRIM_MATERIAL);
+        return TrimRegistriesLookup.get().materials();
     }
 
     private static <T extends org.bukkit.Keyed> List<String> resolveOrderedKeys(
@@ -241,8 +294,11 @@ public final class ArmorTrimUtils {
         return normalized.isEmpty() ? null : normalized;
     }
 
+    private static boolean trimsEnabled() {
+        return MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM);
+    }
+
     private static Material materialOrDefault(String materialName, Material fallback) {
-        Material material = Material.matchMaterial(materialName);
-        return material == null ? fallback : material;
+        return com.monkey.ultimatebot.utils.material.MaterialCatalog.optional(materialName, fallback);
     }
 }

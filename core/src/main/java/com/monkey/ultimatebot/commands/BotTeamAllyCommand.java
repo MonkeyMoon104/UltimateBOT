@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.LinkedHashSet;
@@ -51,6 +52,11 @@ public class BotTeamAllyCommand {
         BotOptions sharedOptions = activeTeamAlly.options();
         sharedOptions.setBotType(BotType.TEAM_ALLY);
         plugin.getPlayerOptions().put(player.getUniqueId(), sharedOptions);
+        if (!NMSBridgeManager.isBotRuntimeSupported()) {
+            player.sendMessage(ChatColorUtils.translate(
+                    "&cUltimateBot fake-player bots require Minecraft 1.17.1 or newer on this build."));
+            return;
+        }
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
         sendConfigured(player, "messages.team-ally.gui-opened");
     }
@@ -113,6 +119,12 @@ public class BotTeamAllyCommand {
         options.setTeamOwnerUUIDs(owners);
         options.setOwnerUUID(owners.iterator().next());
         plugin.getPlayerOptions().put(player.getUniqueId(), options);
+
+        if (!NMSBridgeManager.isBotRuntimeSupported()) {
+            player.sendMessage(ChatColorUtils.translate(
+                    "&cUltimateBot fake-player bots require Minecraft 1.17.1 or newer on this build."));
+            return;
+        }
 
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
         sendConfigured(player, "messages.team-ally.gui-opened");
@@ -246,7 +258,7 @@ public class BotTeamAllyCommand {
     private boolean guardCommon(Player player) {
         World world = player.getWorld();
         java.util.List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
-        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
+        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(WorldAccess.name(world)))) {
             String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return false;
@@ -319,7 +331,7 @@ public class BotTeamAllyCommand {
     private boolean isEventBotActive() {
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
-                var botOptions = bot.getBrainController().getBotOptions();
+                com.monkey.ultimatebot.bot.BotOptions botOptions = bot.getBrainController().getBotOptions();
                 if (botOptions != null && botOptions.getBotType() == BotType.EVENT) {
                     return true;
                 }
@@ -351,14 +363,14 @@ public class BotTeamAllyCommand {
 
     private void sendConfigured(Player player, String path) {
         String msg = plugin.getLangString(path);
-        if (msg != null && !msg.isBlank()) {
+        if (msg != null && !msg.trim().isEmpty()) {
             player.sendMessage(ChatColorUtils.translate(msg));
         }
     }
 
     private void sendConfigured(Player player, String path, String placeholder, String value) {
         String msg = plugin.getLangString(path);
-        if (msg != null && !msg.isBlank()) {
+        if (msg != null && !msg.trim().isEmpty()) {
             player.sendMessage(ChatColorUtils.translate(msg.replace(placeholder, value)));
         }
     }
@@ -366,11 +378,54 @@ public class BotTeamAllyCommand {
     private void sendConfigured(
             Player player, String path, String placeholderA, String valueA, String placeholderB, String valueB) {
         String msg = plugin.getLangString(path);
-        if (msg != null && !msg.isBlank()) {
+        if (msg != null && !msg.trim().isEmpty()) {
             player.sendMessage(
                     ChatColorUtils.translate(msg.replace(placeholderA, valueA).replace(placeholderB, valueB)));
         }
     }
 
-    private record ActiveTeamAlly(UUID registryOwner, BotOptions options) {}
+    private static final class ActiveTeamAlly {
+        private final UUID registryOwner;
+        private final BotOptions options;
+
+        private ActiveTeamAlly(UUID registryOwner, BotOptions options) {
+            this.registryOwner = registryOwner;
+            this.options = options;
+        }
+
+        UUID registryOwner() {
+            return registryOwner;
+        }
+
+        BotOptions options() {
+            return options;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof ActiveTeamAlly)) {
+                return false;
+            }
+            ActiveTeamAlly other = (ActiveTeamAlly) obj;
+            return java.util.Objects.equals(registryOwner, other.registryOwner)
+                    && java.util.Objects.equals(options, other.options);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(registryOwner, options);
+        }
+
+        @Override
+        public String toString() {
+            return "ActiveTeamAlly[registryOwner="
+                    + registryOwner
+                    + ", optionsOwner="
+                    + options.getOwnerUUID()
+                    + "]";
+        }
+    }
 }

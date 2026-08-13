@@ -164,7 +164,7 @@ public final class LanguageManager {
 
         final Path pluginPath;
         try {
-            pluginPath = Path.of(codeSource.getLocation().toURI());
+            pluginPath = java.nio.file.Paths.get(codeSource.getLocation().toURI());
         } catch (URISyntaxException | IllegalArgumentException ex) {
             plugin.getLogger().log(Level.WARNING, "Cannot resolve plugin jar path for language extraction.", ex);
             return false;
@@ -177,7 +177,7 @@ public final class LanguageManager {
         boolean copiedAny = false;
 
         try (JarFile jarFile = new JarFile(pluginPath.toFile())) {
-            var entries = jarFile.entries();
+            java.util.Enumeration<java.util.jar.JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 if (entry.isDirectory()) {
@@ -190,7 +190,7 @@ public final class LanguageManager {
                 }
 
                 String languageFileName = entryName.substring((LANGS_DIRECTORY + "/").length());
-                if (languageFileName.isBlank() || languageFileName.contains("/") || languageFileName.contains("\\")) {
+                if (languageFileName.trim().isEmpty() || languageFileName.contains("/") || languageFileName.contains("\\")) {
                     continue;
                 }
 
@@ -302,7 +302,7 @@ public final class LanguageManager {
     }
 
     private String normalizeLanguageFileName(String configured) {
-        if (configured == null || configured.isBlank()) {
+        if (configured == null || configured.trim().isEmpty()) {
             return DEFAULT_LANG_FILE;
         }
 

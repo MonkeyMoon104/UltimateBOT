@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.utils.armor;
 
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.jspecify.annotations.Nullable;
@@ -11,12 +13,21 @@ public enum ArmorTier {
     DIAMOND,
     NETHERITE;
 
+    /** Highest tier available on this platform (clamps when netherite is unsupported / missing). */
+    public static ArmorTier maxAvailable() {
+        if (com.monkey.ultimatebot.nms.NMSBridgeManager.isInitialized()
+                && !com.monkey.ultimatebot.nms.NMSBridgeManager.supports(PlatformCapability.NETHERITE)) {
+            return DIAMOND;
+        }
+        return MaterialCatalog.available("NETHERITE_HELMET") ? NETHERITE : DIAMOND;
+    }
+
     public Material toMaterial(EquipmentSlot slot) {
         String suffix = suffixFor(slot);
         if (suffix.isEmpty()) {
             return Material.AIR;
         }
-        return Material.valueOf(name() + suffix);
+        return MaterialCatalog.optional(name() + suffix, Material.AIR);
     }
 
     public static @Nullable ArmorTier fromMaterial(@Nullable Material material, @Nullable EquipmentSlot slot) {
@@ -46,12 +57,17 @@ public enum ArmorTier {
         if (slot == null) {
             return "";
         }
-        return switch (slot) {
-            case HEAD -> "_HELMET";
-            case CHEST -> "_CHESTPLATE";
-            case LEGS -> "_LEGGINGS";
-            case FEET -> "_BOOTS";
-            default -> "";
-        };
+                switch (slot) {
+            case HEAD:
+                return "_HELMET";
+            case CHEST:
+                return "_CHESTPLATE";
+            case LEGS:
+                return "_LEGGINGS";
+            case FEET:
+                return "_BOOTS";
+            default:
+                return "";
+        }
     }
 }

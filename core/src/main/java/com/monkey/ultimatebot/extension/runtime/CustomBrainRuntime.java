@@ -14,7 +14,6 @@ import com.monkey.ultimatebot.extension.registry.CoreExtensionRegistry;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import java.util.logging.Level;
-import java.util.random.RandomGenerator;
 import org.jspecify.annotations.Nullable;
 
 public final class CustomBrainRuntime implements AutoCloseable {
@@ -26,7 +25,7 @@ public final class CustomBrainRuntime implements AutoCloseable {
     private final CoreExtensionRegistry extensions;
     private final CoreBotControl control;
     private final CoreNativeBotAccess nativeAccess;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
     private final ModeInventorySession kitSession;
     private final CustomBrainSignalDispatcher signals;
 
@@ -123,7 +122,7 @@ public final class CustomBrainRuntime implements AutoCloseable {
             transition(selected, selectedMode);
             return;
         }
-        if (selected != null && extensions.brain(selected).isEmpty()) {
+        if (selected != null && !extensions.brain(selected).isPresent()) {
             closeSession();
             kitSession.close();
             disabled = true;

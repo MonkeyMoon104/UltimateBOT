@@ -26,14 +26,21 @@ public class CombatStatePlaceholder implements IBotPlaceholder {
         if (bot == null || !bot.isCombat()) return "None";
 
         BotAI.CombatState state = bot.getBotAI().getCurrentState();
-        return switch (state) {
-            case AGGRESSIVE -> "AGGRESSIVE";
-            case DEFENSIVE -> "DEFENSIVE";
-            case REPOSITIONING -> "REPOSITIONING";
-            case ANCHOR_SETUP -> "ANCHOR_SETUP";
-            case CRYSTAL_SETUP -> "CRYSTAL_SETUP";
-            case RETREATING -> "RETREATING";
-            default -> "UNKNOWN";
-        };
+                switch (state) {
+            case AGGRESSIVE:
+                return "AGGRESSIVE";
+            case DEFENSIVE:
+                return "DEFENSIVE";
+            case REPOSITIONING:
+                return "REPOSITIONING";
+            case ANCHOR_SETUP:
+                return "ANCHOR_SETUP";
+            case CRYSTAL_SETUP:
+                return "CRYSTAL_SETUP";
+            case RETREATING:
+                return "RETREATING";
+            default:
+                return "UNKNOWN";
+        }
     }
 }

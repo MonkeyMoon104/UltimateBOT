@@ -36,7 +36,9 @@ public final class BotEventDispatcher {
     public <E extends BotEvent> E publish(E event) {
         plugin.getServer().getPluginManager().callEvent(event);
         metrics.recordEvent(event);
-        if (!(event instanceof org.bukkit.event.Cancellable cancellable) || !cancellable.isCancelled()) {
+        boolean cancelled = event instanceof org.bukkit.event.Cancellable
+                && ((org.bukkit.event.Cancellable) event).isCancelled();
+        if (!cancelled) {
             for (Consumer<BotEvent> observer : observers) {
                 try {
                     observer.accept(event);

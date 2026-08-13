@@ -28,15 +28,22 @@ public class StatusPlaceholder implements IBotPlaceholder {
         if (bot.getBotAI().getHealController().isHealing()) return "♥ Healing";
         if (bot.isCombat()) {
             BotAI.CombatState state = bot.getBotAI().getCurrentState();
-            return switch (state) {
-                case AGGRESSIVE -> "⚔ Aggressive";
-                case DEFENSIVE -> "◈ Defensive";
-                case REPOSITIONING -> "↗ Repositioning";
-                case ANCHOR_SETUP -> "▲ Anchor Setup";
-                case CRYSTAL_SETUP -> "◊ Crystal Setup";
-                case RETREATING -> "← Retreating";
-                default -> "⚔ Combat";
-            };
+                        switch (state) {
+                case AGGRESSIVE:
+                    return "⚔ Aggressive";
+                case DEFENSIVE:
+                    return "◈ Defensive";
+                case REPOSITIONING:
+                    return "↗ Repositioning";
+                case ANCHOR_SETUP:
+                    return "▲ Anchor Setup";
+                case CRYSTAL_SETUP:
+                    return "◊ Crystal Setup";
+                case RETREATING:
+                    return "← Retreating";
+                default:
+                    return "⚔ Combat";
+            }
         }
         if (bot.isFollow()) return "● Following";
         return "○ Idle";

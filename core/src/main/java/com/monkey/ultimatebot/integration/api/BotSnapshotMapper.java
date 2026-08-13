@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.integration.api;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
@@ -42,7 +44,7 @@ public final class BotSnapshotMapper {
         boolean customizedCombatTuning = false;
         int minTotemCount = -1;
         int maxTotemCount = -1;
-        Set<UUID> targetUUIDs = Set.of();
+        Set<UUID> targetUUIDs = Collections.emptySet();
         BotSource source = BotSource.CORE;
         boolean autoTarget = false;
         double autoTargetRange = 16.0D;
@@ -60,7 +62,7 @@ public final class BotSnapshotMapper {
         boolean enderPearls = true;
         boolean healing = true;
         boolean killMessageEnabled = true;
-        Set<UUID> teamOwnerUUIDs = Set.of();
+        Set<UUID> teamOwnerUUIDs = Collections.emptySet();
         String botNameTemplate = "UltimateBot";
         String botSkinSource = "RANDOM";
         BotArmorTier minArmor = BotArmorTier.LEATHER;
@@ -76,7 +78,7 @@ public final class BotSnapshotMapper {
         boolean changeableCombatMode = true;
         BotLocation spawnLocation = null;
         String killMessage = null;
-        Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots = Map.of();
+        Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlots = Collections.emptyMap();
         if (bot.getBrainController() != null) {
             BotOptions options = bot.getBrainController().getBotOptions();
             if (options != null && options.getBotType() != null) {
@@ -111,7 +113,8 @@ public final class BotSnapshotMapper {
                 healing = options.isHealing();
                 killMessageEnabled = options.isKillMessageEnabled();
                 teamOwnerUUIDs = options.getTeamOwnerUUIDs();
-                botNameTemplate = Objects.requireNonNullElse(options.getBotNameTemplate(), "UltimateBot");
+                botNameTemplate =
+                        options.getBotNameTemplate() != null ? options.getBotNameTemplate() : "UltimateBot";
                 botSkinSource = options.getBotSkin().source().name();
                 minArmor = BotArmorTier.valueOf(options.getMinArmorTier().name());
                 maxArmor = BotArmorTier.valueOf(options.getMaxArmorTier().name());

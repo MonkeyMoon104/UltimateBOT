@@ -12,6 +12,10 @@ public final class Packet {
         NMSBridgeManager.get().sendTabListAdd(viewer, bot);
     }
 
+    public static void sendRemovePlayerPacket(Player viewer, ITrainingBot bot) {
+        NMSBridgeManager.get().sendTabListRemove(viewer, bot);
+    }
+
     public static void sendSpawnPlayerPacket(Player viewer, ITrainingBot bot) {
         NMSBridgeManager.get().sendSpawnAndMeta(viewer, bot);
     }

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 class CombatProfileLoaderTest {
     @Test
     void loadsEveryModeAndDifficultyFromBundledConfiguration() throws URISyntaxException {
-        Path configurationPath = Path.of(
+        Path configurationPath = java.nio.file.Paths.get(
                 java.util.Objects.requireNonNull(getClass().getResource("/combat-modes.yml"), "combat-modes.yml")
                         .toURI());
 

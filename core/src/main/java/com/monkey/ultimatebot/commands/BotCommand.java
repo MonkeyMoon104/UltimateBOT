@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.commands;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;
@@ -31,7 +32,7 @@ public class BotCommand {
 
         World world = player.getWorld();
         List<String> blockedWorlds = plugin.getConfig().getStringList("bot.blocked-worlds");
-        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(world.getName()))) {
+        if (blockedWorlds.stream().anyMatch(blockedWorld -> blockedWorld.equalsIgnoreCase(WorldAccess.name(world)))) {
             String msg = plugin.getLangString("messages.bot-blocked-world", "&cYou cannot use this here!");
             player.sendMessage(ChatColorUtils.translate(msg));
             return;
@@ -51,13 +52,19 @@ public class BotCommand {
             return;
         }
 
+        if (!NMSBridgeManager.isBotRuntimeSupported()) {
+            player.sendMessage(ChatColorUtils.translate(
+                    "&cUltimateBot fake-player bots require Minecraft 1.17.1 or newer on this build."));
+            return;
+        }
+
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.SINGLE);
     }
 
     private boolean isEventBotActive() {
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
-                var botOptions = bot.getBrainController().getBotOptions();
+                com.monkey.ultimatebot.bot.BotOptions botOptions = bot.getBrainController().getBotOptions();
                 if (botOptions != null && botOptions.getBotType() == BotType.EVENT) {
                     return true;
                 }

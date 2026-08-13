@@ -78,7 +78,7 @@ public final class GuardAddonManager implements AutoCloseable {
     }
 
     private static Listener requireListener(Object listener) {
-        if (listener instanceof Listener bukkitListener) {
+        if (listener instanceof Listener) { Listener bukkitListener = (Listener) listener;
             return bukkitListener;
         }
         throw new IllegalArgumentException("Guard addon listener does not implement Bukkit Listener");

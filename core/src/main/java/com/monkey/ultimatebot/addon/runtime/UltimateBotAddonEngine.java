@@ -100,7 +100,9 @@ public final class UltimateBotAddonEngine implements AutoCloseable {
         }
         String entrypoint = descriptor
                 .nativeProviders()
-                .getOrDefault(plugin.getServer().getMinecraftVersion(), descriptor.mainClass());
+                .getOrDefault(
+                        com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion(),
+                        descriptor.mainClass());
         AddonClassLoader classLoader = null;
         UltimateBotAddon addon = null;
         boolean lifecycleStarted = false;
@@ -145,7 +147,7 @@ public final class UltimateBotAddonEngine implements AutoCloseable {
     }
 
     private void fail(AddonDescriptor descriptor, Path jar, @Nullable String message, @Nullable Throwable error) {
-        String reason = message == null || message.isBlank() ? "unknown startup failure" : message;
+        String reason = message == null || message.trim().isEmpty() ? "unknown startup failure" : message;
         publish(new AddonSnapshot(descriptor, AddonState.FAILED, jar, reason));
         plugin.getLogger().warning("Addon " + descriptor.id() + " failed -> " + reason);
         if (error != null) {

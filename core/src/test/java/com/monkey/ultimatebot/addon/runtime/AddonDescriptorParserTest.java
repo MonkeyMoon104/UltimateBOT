@@ -24,7 +24,8 @@ class AddonDescriptorParserTest {
         descriptor.setProperty("native.1.21.11", "example.NativeAddon");
         Path jar = createJar(descriptor, false);
 
-        var parsed = Objects.requireNonNull(AddonDescriptorParser.parse(jar), "parsed descriptor");
+        com.monkey.ultimatebot.api.addon.AddonDescriptor parsed =
+                Objects.requireNonNull(AddonDescriptorParser.parse(jar), "parsed descriptor");
 
         assertThat(parsed.id()).isEqualTo("example-ai");
         assertThat(parsed.nativeProviders()).containsEntry("1.21.11", "example.NativeAddon");

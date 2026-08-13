@@ -4,17 +4,37 @@ import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.*;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.Nullable;
 
 public class BotEquipmentUtils {
+    /**
+     * Resolves enchantments without linking against potentially-missing Bukkit enum/constant fields.
+     *
+     * <p>Some Paper/Bukkit builds can throw {@code NoSuchFieldError} for enchantment constants (e.g.
+     * older API builds) when compiled against a different API version. Using
+     * {@link Enchantment#getByKey(NamespacedKey)} avoids that.
+     */
+    public static @Nullable Enchantment resolveEnchantmentByKeyMinecraft(String key) {
+        if (key == null || key.isEmpty()) return null;
+        try {
+            return Enchantment.getByKey(NamespacedKey.minecraft(key));
+        } catch (NoSuchMethodError ignored) {
+            // Very old Bukkit API without getByKey; safest fallback is "no enchant".
+            return null;
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
     public static void applyEquipment(
             ITrainingBot bot,
             Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
             Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
-        for (var entry : armorMap.entrySet()) {
+        for (java.util.Map.Entry<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> entry : armorMap.entrySet()) {
             org.bukkit.inventory.EquipmentSlot slot = entry.getKey();
             if (slot == null || entry.getValue() == null) {
                 continue;
@@ -31,14 +51,22 @@ public class BotEquipmentUtils {
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.removeEnchant(Enchantment.BLAST_PROTECTION);
-            meta.removeEnchant(Enchantment.PROTECTION);
+            Enchantment blastProtection = resolveEnchantmentByKeyMinecraft("blast_protection");
+            Enchantment protection = resolveEnchantmentByKeyMinecraft("protection");
+
+            if (blastProtection != null) meta.removeEnchant(blastProtection);
+            if (protection != null) meta.removeEnchant(protection);
 
             if (hasBlastProtection) {
-                meta.addEnchant(Enchantment.BLAST_PROTECTION, 4, false);
+                // Prefer blast protection, but safely fall back to normal protection (or no enchant).
+                Enchantment toApply = blastProtection != null ? blastProtection : protection;
+                if (toApply != null) meta.addEnchant(toApply, 4, false);
             } else {
-                meta.addEnchant(Enchantment.PROTECTION, 4, false);
+                if (protection != null) meta.addEnchant(protection, 4, false);
             }
+
+            // Prevent durability ticks from re-equipping armor (armor equip sound spam on hit).
+            meta.setUnbreakable(true);
 
             item.setItemMeta(meta);
         }
@@ -51,7 +79,7 @@ public class BotEquipmentUtils {
         Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(
                 org.bukkit.inventory.EquipmentSlot.class);
 
-        for (var entry : armorMap.entrySet()) {
+        for (java.util.Map.Entry<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> entry : armorMap.entrySet()) {
             org.bukkit.inventory.EquipmentSlot slot = entry.getKey();
             if (slot == null || entry.getValue() == null) {
                 continue;

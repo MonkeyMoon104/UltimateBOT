@@ -36,10 +36,14 @@ class WorldProtectionPolicyTest {
     }
 
     @Test
-    void cobwebsRequireSolidGroundOrAnotherCobwebBelow() {
+    void cobwebsAndWaterRequireSolidGroundOrAnotherCobwebBelow() {
         assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.COBWEB, false))
                 .isFalse();
         assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.COBWEB, true))
+                .isTrue();
+        assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.WATER, false))
+                .isFalse();
+        assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.WATER, true))
                 .isTrue();
         assertThat(WorldProtectionPolicy.hasPlacementSupport(Material.SPONGE, false))
                 .isTrue();

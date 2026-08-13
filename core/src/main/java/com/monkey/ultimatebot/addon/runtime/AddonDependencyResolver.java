@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.addon.runtime;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -28,7 +30,7 @@ final class AddonDependencyResolver {
             Map.Entry<String, String> first = missing.entrySet().iterator().next();
             throw new AddonLoadException("addon " + first.getKey() + " requires missing addon " + first.getValue());
         }
-        return List.copyOf(ordered);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(ordered);
     }
 
     static Set<String> cyclicAddons(Map<String, DiscoveredAddon> addons) {
@@ -38,7 +40,7 @@ final class AddonDependencyResolver {
         for (String addonId : addons.keySet()) {
             detectCycles(addonId, addons, states, path, cyclic);
         }
-        return Set.copyOf(cyclic);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(cyclic);
     }
 
     private static void detectCycles(
@@ -110,10 +112,46 @@ final class AddonDependencyResolver {
         ordered.add(addon);
     }
 
-    record DiscoveredAddon(AddonDescriptor descriptor, Path jar) {
-        DiscoveredAddon {
+    static final class DiscoveredAddon {
+        private final AddonDescriptor descriptor;
+        private final Path jar;
+
+        DiscoveredAddon(AddonDescriptor descriptor, Path jar) {
+
+
             Objects.requireNonNull(descriptor, "descriptor");
             Objects.requireNonNull(jar, "jar");
+            this.descriptor = descriptor;
+            this.jar = jar;
+        }
+
+        public AddonDescriptor descriptor() {
+            return descriptor;
+        }
+        public Path jar() {
+            return jar;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof DiscoveredAddon)) {
+                return false;
+            }
+            DiscoveredAddon other = (DiscoveredAddon) obj;
+            return java.util.Objects.equals(descriptor, other.descriptor) && java.util.Objects.equals(jar, other.jar);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(descriptor, jar);
+        }
+
+        @Override
+        public String toString() {
+            return "DiscoveredAddon[descriptor=" + descriptor + ", jar=" + jar + "]";
         }
     }
 

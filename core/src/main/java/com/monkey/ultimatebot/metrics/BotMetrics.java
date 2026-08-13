@@ -93,7 +93,7 @@ public final class BotMetrics implements AutoCloseable {
         if (!enabled) {
             return;
         }
-        boolean cancelled = event instanceof Cancellable cancellable && cancellable.isCancelled();
+        boolean cancelled = event instanceof Cancellable && ((Cancellable) event).isCancelled();
         backend.recordEvent(event.getClass().getSimpleName(), cancelled);
     }
 

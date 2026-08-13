@@ -28,12 +28,18 @@ public class DifficultyPlaceholder implements IBotPlaceholder {
         DifficultyLevel difficulty = bot.getBotAI().getDifficulty();
         if (difficulty == null) return "○ Unknown Difficulty";
 
-        return switch (difficulty) {
-            case EASY -> "● Easy";
-            case NORMAL -> "◈ Normal";
-            case MEDIUM -> "⚔ Medium";
-            case HARD -> "▲ Hard";
-            case GOD -> "☠ God";
-        };
+                switch (difficulty) {
+            case EASY:
+                return "● Easy";
+            case NORMAL:
+                return "◈ Normal";
+            case MEDIUM:
+                return "⚔ Medium";
+            case HARD:
+                return "▲ Hard";
+            case GOD:
+                return "☠ God";
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 }

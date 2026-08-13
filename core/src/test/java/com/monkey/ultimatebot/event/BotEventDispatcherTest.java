@@ -46,7 +46,7 @@ class BotEventDispatcherTest {
 
     @Test
     void exposesMockBukkitHarnessOnTestClasspath() {
-        assertThat(MockBukkit.class.getPackageName()).isEqualTo("org.mockbukkit.mockbukkit");
+        assertThat(MockBukkit.class.getPackage().getName()).isEqualTo("org.mockbukkit.mockbukkit");
     }
 
     private static final class TestBotEvent extends BotEvent {

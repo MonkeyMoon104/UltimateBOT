@@ -18,7 +18,7 @@ public class EntityUtils {
 
     public static @Nullable LivingEntity findBotAsLivingEntity(@Nullable World world, UUID botUUID) {
         Entity entity = findBotByUUID(world, botUUID);
-        return entity instanceof LivingEntity livingEntity ? livingEntity : null;
+        return entity instanceof LivingEntity ? (LivingEntity) entity : null;
     }
 
     public static boolean removeEntity(@Nullable World world, UUID entityUUID) {

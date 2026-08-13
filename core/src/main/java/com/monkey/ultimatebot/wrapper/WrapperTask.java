@@ -2,12 +2,33 @@ package com.monkey.ultimatebot.wrapper;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.scheduler.BukkitTask;
 import org.jspecify.annotations.Nullable;
 
-public record WrapperTask(
-        String backend, @Nullable Object handle, @Nullable Runnable cancelAction) {
-    private static final System.Logger LOGGER = System.getLogger(WrapperTask.class.getName());
+public final class WrapperTask {
+    private final String backend;
+    private final @Nullable Object handle;
+    private final @Nullable Runnable cancelAction;
+
+    public WrapperTask(String backend, @Nullable Object handle, @Nullable Runnable cancelAction) {
+        this.backend = backend;
+        this.handle = handle;
+        this.cancelAction = cancelAction;
+    }
+
+    public String backend() {
+        return backend;
+    }
+    public @Nullable Object handle() {
+        return handle;
+    }
+    public @Nullable Runnable cancelAction() {
+        return cancelAction;
+    }
+
+    private static final Logger LOGGER = Logger.getLogger(WrapperTask.class.getName());
 
     public static WrapperTask none(String backend) {
         return new WrapperTask(backend, null, null);
@@ -34,20 +55,43 @@ public record WrapperTask(
     }
 
     private static void invokeCancel(Object taskHandle) {
-        if (taskHandle instanceof ScheduledTask scheduledTask) {
+        if (taskHandle instanceof ScheduledTask) { ScheduledTask scheduledTask = (ScheduledTask) taskHandle;
             scheduledTask.cancel();
             return;
         }
 
         try {
             Method cancel = taskHandle.getClass().getMethod("cancel");
-            if (!cancel.canAccess(taskHandle) && !cancel.trySetAccessible()) {
-                throw new IllegalAccessException(
-                        "Cannot access cancel() on " + taskHandle.getClass().getName());
+            try {
+                cancel.setAccessible(true);
+            } catch (SecurityException ignored) {
+                // best-effort on older JVMs
             }
             cancel.invoke(taskHandle);
         } catch (ReflectiveOperationException cancelError) {
-            LOGGER.log(System.Logger.Level.WARNING, "Failed to cancel reflective scheduler task", cancelError);
+            LOGGER.log(Level.WARNING, "Failed to cancel reflective scheduler task", cancelError);
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof WrapperTask)) {
+            return false;
+        }
+        WrapperTask other = (WrapperTask) obj;
+        return java.util.Objects.equals(backend, other.backend) && java.util.Objects.equals(handle, other.handle) && java.util.Objects.equals(cancelAction, other.cancelAction);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(backend, handle, cancelAction);
+    }
+
+    @Override
+    public String toString() {
+        return "WrapperTask[backend=" + backend + ", handle=" + handle + ", cancelAction=" + cancelAction + "]";
     }
 }

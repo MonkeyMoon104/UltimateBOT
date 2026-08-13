@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 
 public final class ModeKitAdapter {
     private ModeKitAdapter() {}
@@ -8,12 +9,12 @@ public final class ModeKitAdapter {
     public static ModeKit toInternal(com.monkey.ultimatebot.api.extension.combat.ModeKit kit) {
         ModeKit.Builder builder = ModeKit.builder();
         kit.inventory().forEach((slot, item) -> {
-            if (!item.isEmpty()) {
+            if (!ItemStackAccess.isEmpty(item)) {
                 builder.slot(slot, item);
             }
         });
         kit.equipment().forEach((slot, item) -> {
-            if (!item.isEmpty()) {
+            if (!ItemStackAccess.isEmpty(item)) {
                 builder.equipment(slot, item);
             }
         });

@@ -3,6 +3,7 @@ package com.monkey.ultimatebot;
 import com.monkey.ultimatebot.addon.GuardAddonManager;
 import com.monkey.ultimatebot.addon.runtime.CoreAddonRegistry;
 import com.monkey.ultimatebot.addon.runtime.UltimateBotAddonEngine;
+import com.monkey.ultimatebot.agent.AgentSmoke;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.api.event.lifecycle.UltimateBotReadyEvent;
@@ -12,6 +13,8 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
 import com.monkey.ultimatebot.commands.*;
+import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.compat.PluginMetaAccess;
 import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
 import com.monkey.ultimatebot.config.RuntimeSettings;
@@ -46,6 +49,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -146,6 +150,22 @@ public final class UltimateBot extends JavaPlugin {
 
             startup.beginPhase(4, "NMS", "Compatibility");
             NMSBridgeManager.init(getLogger());
+            Objects.requireNonNull(combatProfileCatalog, "combatProfileCatalog is not initialized")
+                    .bindPlatformCapabilities(NMSBridgeManager.capabilities());
+            if (!NMSBridgeManager.isBotRuntimeSupported()) {
+                startup.warn(
+                        "NMS",
+                        "Limited mode: fake-player bots are not implemented for this Minecraft revision yet."
+                                + " Plugin remains enabled.");
+            }
+            List<CombatMode> platformDisabled = combatProfileCatalog.platformDisabledModes();
+            if (!platformDisabled.isEmpty()) {
+                startup.detail(
+                        "Platform-disabled modes",
+                        platformDisabled.stream().map(CombatMode::name).collect(Collectors.joining(", ")));
+            } else {
+                startup.detail("Platform-disabled modes", "none");
+            }
             startup.markNmsBridge(
                     NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
             startup.detail("Catalog", UltimateBotLogging.catalogSummary());
@@ -161,8 +181,8 @@ public final class UltimateBot extends JavaPlugin {
             this.botMetrics = new BotMetrics(
                     getConfig().getBoolean("addons.metrics.enabled", false),
                     getConfig().getBoolean("addons.metrics.prometheus-endpoint-enabled", false),
-                    getPluginMeta().getVersion(),
-                    getServer().getMinecraftVersion(),
+                    PluginMetaAccess.version(this),
+                    com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion(),
                     botRegistry,
                     targetingService,
                     getDataFolder().toPath(),
@@ -208,7 +228,8 @@ public final class UltimateBot extends JavaPlugin {
 
             startup.beginPhase(7, "Hooks", "Commands and Listeners");
 
-            List<String> registeredCommands = List.of("bot", "botevent", "botally", "botteamally", "ultimatebotreload");
+            List<String> registeredCommands = Collections.unmodifiableList(java.util.Arrays.asList(
+                    "bot", "botevent", "botally", "botteamally", "ultimatebotreload", "ubagent"));
             BukkitLamp.builder(this)
                     .exceptionHandler(new UltimateBotExceptionHandler(this))
                     .build()
@@ -217,7 +238,8 @@ public final class UltimateBot extends JavaPlugin {
                             new BotEventCommand(this),
                             new BotAllyCommand(this),
                             new BotTeamAllyCommand(this),
-                            new ReloadCommand(this));
+                            new ReloadCommand(this),
+                            new AgentSmokeCommand(this));
             startup.markCommands(registeredCommands);
 
             List<String> registeredListeners = new ArrayList<>();
@@ -276,11 +298,11 @@ public final class UltimateBot extends JavaPlugin {
                         startup.warn("PlaceholderAPI", "hook failed");
                     }
                 } else {
-                    startup.markPlaceholders(true, false, List.of());
+                    startup.markPlaceholders(true, false, Collections.emptyList());
                     startup.warn("PlaceholderAPI", "hook initialization failed");
                 }
             } else {
-                startup.markPlaceholders(false, false, List.of());
+                startup.markPlaceholders(false, false, Collections.emptyList());
                 startup.warn("PlaceholderAPI", "not found");
             }
             startup.completePhase("placeholder phase completed");
@@ -296,7 +318,7 @@ public final class UltimateBot extends JavaPlugin {
             try {
                 Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
                 metrics.addCustomChart(
-                        new SimplePie("plugin_version", () -> getPluginMeta().getVersion()));
+                        new SimplePie("plugin_version", () -> PluginMetaAccess.version(this)));
                 startup.ready("bStats", "metrics enabled");
             } catch (Throwable metricsError) {
                 startup.warn("bStats", "metrics init failed -> " + formatListenerError(metricsError));
@@ -314,6 +336,17 @@ public final class UltimateBot extends JavaPlugin {
 
             startup.completeBootstrap();
             UltimateBotLogging.schedulePostEnableDiagnostics(this, startup);
+
+            if (AgentSmoke.envEnabled()) {
+                getServer().getScheduler().runTaskLater(this, () -> {
+                    getLogger().info("[agent-smoke] ULTIMATEBOT_AGENT_SMOKE enabled — running spawn smoke");
+                    AgentSmoke.run(this);
+                    getServer().getScheduler().runTaskLater(this, () -> {
+                        getLogger().info("[agent-smoke] requesting server stop");
+                        getServer().dispatchCommand(getServer().getConsoleSender(), "stop");
+                    }, 40L);
+                }, 60L);
+            }
         } catch (Throwable error) {
             startup.fail(error);
             cleanupRuntimeState();
@@ -336,6 +369,10 @@ public final class UltimateBot extends JavaPlugin {
 
     public BotRegistry getBotRegistry() {
         return Objects.requireNonNull(botRegistry, "botRegistry is not initialized");
+    }
+
+    public @Nullable BotRegistry getBotRegistryOrNull() {
+        return botRegistry;
     }
 
     public BotManager getBotManager() {
@@ -372,6 +409,10 @@ public final class UltimateBot extends JavaPlugin {
 
     public WrapperManager getWrapperManager() {
         return Objects.requireNonNull(wrapperManager, "wrapperManager is not initialized");
+    }
+
+    public @Nullable WrapperManager getWrapperManagerOrNull() {
+        return wrapperManager;
     }
 
     public WorldGuardPvpService getWorldGuardPvpService() {
@@ -413,6 +454,7 @@ public final class UltimateBot extends JavaPlugin {
                     new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
         }
         combatProfileCatalog = combatProfileLoader.load();
+        combatProfileCatalog.bindPlatformCapabilities(NMSBridgeManager.capabilities());
         if (targetingService != null) {
             targetingService.reconfigure(runtimeSettings.targetCache());
         }
@@ -499,7 +541,7 @@ public final class UltimateBot extends JavaPlugin {
 
     private String formatListenerError(Throwable error) {
         String message = error.getMessage();
-        if (message == null || message.isBlank()) {
+        if (message == null || message.trim().isEmpty()) {
             return error.getClass().getSimpleName();
         }
         return error.getClass().getSimpleName() + " -> " + message;
@@ -595,6 +637,6 @@ public final class UltimateBot extends JavaPlugin {
             return "none";
         }
         String joined = String.join(", ", values);
-        return joined.isBlank() ? "none" : joined;
+        return joined.trim().isEmpty() ? "none" : joined;
     }
 }

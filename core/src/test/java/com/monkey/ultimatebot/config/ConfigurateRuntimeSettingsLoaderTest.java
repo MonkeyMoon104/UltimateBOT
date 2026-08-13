@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -18,24 +19,28 @@ class ConfigurateRuntimeSettingsLoaderTest {
     @Test
     void loadsTypedCacheSettingsFromYaml() throws IOException {
         Path configuration = temporaryDirectory.resolve("config.yml");
-        Files.writeString(configuration, """
-                performance:
-                  caches:
-                    target:
-                      maximum-size: 512
-                      expire-after-write-ms: 125
-                    block-state:
-                      maximum-size: 4096
-                      expire-after-write-ms: 2000
-                protection-world:
-                  allow-bot-explosion-block-damage: true
-                  anti-dupe: false
-                  combat-block-lifetime-seconds: 45
-                  max-active-combat-blocks: 512
-                  combat-entity-lifetime-seconds: 90
-                  max-active-combat-entities: 128
-                  respect-protection-plugins: false
-                """);
+        Files.write(
+                configuration,
+                String.join(
+                                "\n",
+                                "performance:",
+                                "  caches:",
+                                "    target:",
+                                "      maximum-size: 512",
+                                "      expire-after-write-ms: 125",
+                                "    block-state:",
+                                "      maximum-size: 4096",
+                                "      expire-after-write-ms: 2000",
+                                "protection-world:",
+                                "  allow-bot-explosion-block-damage: true",
+                                "  anti-dupe: false",
+                                "  combat-block-lifetime-seconds: 45",
+                                "  max-active-combat-blocks: 512",
+                                "  combat-entity-lifetime-seconds: 90",
+                                "  max-active-combat-entities: 128",
+                                "  respect-protection-plugins: false",
+                                "")
+                        .getBytes(StandardCharsets.UTF_8));
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
                         configuration, Logger.getLogger(ConfigurateRuntimeSettingsLoaderTest.class.getName()))
@@ -52,10 +57,10 @@ class ConfigurateRuntimeSettingsLoaderTest {
     @Test
     void supportsLegacyExplosionBlockDamagePermission() throws IOException {
         Path configuration = temporaryDirectory.resolve("legacy-config.yml");
-        Files.writeString(configuration, """
-                protection-world:
-                  block-damage: true
-                """);
+        Files.write(
+                configuration,
+                String.join("\n", "protection-world:", "  block-damage: true", "")
+                        .getBytes(StandardCharsets.UTF_8));
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
                         configuration, Logger.getLogger(ConfigurateRuntimeSettingsLoaderTest.class.getName()))
@@ -67,18 +72,22 @@ class ConfigurateRuntimeSettingsLoaderTest {
     @Test
     void fallsBackPerInvalidValue() throws IOException {
         Path configuration = temporaryDirectory.resolve("invalid.yml");
-        Files.writeString(configuration, """
-                performance:
-                  caches:
-                    target:
-                      maximum-size: 0
-                      expire-after-write-ms: -1
-                protection-world:
-                  combat-block-lifetime-seconds: -1
-                  max-active-combat-blocks: 0
-                  combat-entity-lifetime-seconds: -1
-                  max-active-combat-entities: 0
-                """);
+        Files.write(
+                configuration,
+                String.join(
+                                "\n",
+                                "performance:",
+                                "  caches:",
+                                "    target:",
+                                "      maximum-size: 0",
+                                "      expire-after-write-ms: -1",
+                                "protection-world:",
+                                "  combat-block-lifetime-seconds: -1",
+                                "  max-active-combat-blocks: 0",
+                                "  combat-entity-lifetime-seconds: -1",
+                                "  max-active-combat-entities: 0",
+                                "")
+                        .getBytes(StandardCharsets.UTF_8));
 
         RuntimeSettings settings = new ConfigurateRuntimeSettingsLoader(
                         configuration, Logger.getLogger(ConfigurateRuntimeSettingsLoaderTest.class.getName()))

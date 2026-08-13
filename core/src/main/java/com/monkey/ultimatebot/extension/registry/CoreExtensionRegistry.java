@@ -104,7 +104,7 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
                 .map(OwnedMode::provider)
                 .sorted(Comparator.comparingInt(
                         provider -> provider.descriptor().order()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -112,7 +112,7 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
         return brains.values().stream()
                 .map(OwnedBrain::provider)
                 .sorted(Comparator.comparing(provider -> provider.descriptor().key()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public void unregisterOwner(String ownerId) {
@@ -120,7 +120,7 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
         Set<BrainKey> removedBrains = brains.entrySet().stream()
                 .filter(entry -> entry.getValue().ownerId().equalsIgnoreCase(checkedOwner))
                 .map(Map.Entry::getKey)
-                .collect(Collectors.toUnmodifiableSet());
+                .collect(Collectors.collectingAndThen(Collectors.toSet(), java.util.Collections::unmodifiableSet));
         modes.entrySet().removeIf(entry -> entry.getValue().ownerId().equalsIgnoreCase(checkedOwner));
         brains.entrySet().removeIf(entry -> entry.getValue().ownerId().equalsIgnoreCase(checkedOwner));
         if (!removedBrains.isEmpty()) {
@@ -152,12 +152,91 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
         return checked;
     }
 
-    private record OwnedMode(
-            String ownerId,
-            CombatModeProvider provider,
-            @Nullable BrainKey linkedBrain) {}
+    private static final class OwnedMode {
+        private final String ownerId;
+        private final CombatModeProvider provider;
+        private final @Nullable BrainKey linkedBrain;
 
-    private record OwnedBrain(String ownerId, BotBrainProvider provider) {}
+        private OwnedMode(String ownerId, CombatModeProvider provider, @Nullable BrainKey linkedBrain) {
+            this.ownerId = ownerId;
+            this.provider = provider;
+            this.linkedBrain = linkedBrain;
+        }
+
+        String ownerId() {
+            return ownerId;
+        }
+
+        CombatModeProvider provider() {
+            return provider;
+        }
+
+        @Nullable BrainKey linkedBrain() {
+            return linkedBrain;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof OwnedMode)) {
+                return false;
+            }
+            OwnedMode other = (OwnedMode) obj;
+            return java.util.Objects.equals(ownerId, other.ownerId) && java.util.Objects.equals(provider, other.provider) && java.util.Objects.equals(linkedBrain, other.linkedBrain);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(ownerId, provider, linkedBrain);
+        }
+
+        @Override
+        public String toString() {
+            return "OwnedMode[ownerId=" + ownerId + ", provider=" + provider + ", linkedBrain=" + linkedBrain + "]";
+        }
+    }
+
+    private static final class OwnedBrain {
+        private final String ownerId;
+        private final BotBrainProvider provider;
+
+        private OwnedBrain(String ownerId, BotBrainProvider provider) {
+            this.ownerId = ownerId;
+            this.provider = provider;
+        }
+
+        String ownerId() {
+            return ownerId;
+        }
+
+        BotBrainProvider provider() {
+            return provider;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof OwnedBrain)) {
+                return false;
+            }
+            OwnedBrain other = (OwnedBrain) obj;
+            return java.util.Objects.equals(ownerId, other.ownerId) && java.util.Objects.equals(provider, other.provider);
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(ownerId, provider);
+        }
+
+        @Override
+        public String toString() {
+            return "OwnedBrain[ownerId=" + ownerId + ", provider=" + provider + "]";
+        }
+    }
 
     private static final class Registration implements ExtensionRegistration {
         private final AtomicBoolean closed = new AtomicBoolean();

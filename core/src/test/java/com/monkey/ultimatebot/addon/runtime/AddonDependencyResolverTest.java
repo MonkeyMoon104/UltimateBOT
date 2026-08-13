@@ -13,9 +13,14 @@ import org.junit.jupiter.api.Test;
 class AddonDependencyResolverTest {
     @Test
     void ordersRequiredAndAvailableSoftDependenciesBeforeConsumers() throws Exception {
-        var base = discovered("base", List.of(), List.of());
-        var optional = discovered("optional", List.of(), List.of());
-        var feature = discovered("feature", List.of("base"), List.of("optional"));
+        AddonDependencyResolver.DiscoveredAddon base =
+                discovered("base", java.util.Collections.emptyList(), java.util.Collections.emptyList());
+        AddonDependencyResolver.DiscoveredAddon optional =
+                discovered("optional", java.util.Collections.emptyList(), java.util.Collections.emptyList());
+        AddonDependencyResolver.DiscoveredAddon feature = discovered(
+                "feature",
+                java.util.Collections.singletonList("base"),
+                java.util.Collections.singletonList("optional"));
         Map<String, AddonDependencyResolver.DiscoveredAddon> addons = new LinkedHashMap<>();
         addons.put(feature.descriptor().id(), feature);
         addons.put(optional.descriptor().id(), optional);
@@ -28,14 +33,18 @@ class AddonDependencyResolverTest {
 
     @Test
     void rejectsDependencyCycles() {
-        var first = discovered("first", List.of("second"), List.of());
-        var second = discovered("second", List.of("first"), List.of());
+        AddonDependencyResolver.DiscoveredAddon first =
+                discovered("first", java.util.Collections.singletonList("second"), java.util.Collections.emptyList());
+        AddonDependencyResolver.DiscoveredAddon second =
+                discovered("second", java.util.Collections.singletonList("first"), java.util.Collections.emptyList());
+        Map<String, AddonDependencyResolver.DiscoveredAddon> cycle = new LinkedHashMap<>();
+        cycle.put("first", first);
+        cycle.put("second", second);
 
-        assertThatThrownBy(() -> AddonDependencyResolver.resolve(Map.of("first", first, "second", second)))
+        assertThatThrownBy(() -> AddonDependencyResolver.resolve(cycle))
                 .isInstanceOf(AddonLoadException.class)
                 .hasMessageContaining("cyclic");
-        assertThat(AddonDependencyResolver.cyclicAddons(Map.of("first", first, "second", second)))
-                .containsExactlyInAnyOrder("first", "second");
+        assertThat(AddonDependencyResolver.cyclicAddons(cycle)).containsExactlyInAnyOrder("first", "second");
     }
 
     private static AddonDependencyResolver.DiscoveredAddon discovered(
@@ -46,10 +55,10 @@ class AddonDependencyResolverTest {
                 "1.0.0",
                 UltimateBotAddonEngine.API_VERSION,
                 "example.Addon",
-                List.of("Developer"),
+                java.util.Collections.singletonList("Developer"),
                 dependencies,
                 softDependencies,
-                Map.of());
-        return new AddonDependencyResolver.DiscoveredAddon(descriptor, Path.of(id + ".jar"));
+                java.util.Collections.emptyMap());
+        return new AddonDependencyResolver.DiscoveredAddon(descriptor, java.nio.file.Paths.get(id + ".jar"));
     }
 }

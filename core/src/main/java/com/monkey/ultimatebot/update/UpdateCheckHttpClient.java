@@ -1,24 +1,21 @@
 package com.monkey.ultimatebot.update;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.common.net.CompatHttp;
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
 
 public final class UpdateCheckHttpClient {
 
     private static final String DEFAULT_BASE_URL = "https://license.monkeymoon104.it";
+    private static final String USER_AGENT = "UltimateBot-UpdateClient";
+    private static final int CONNECT_TIMEOUT_MS = 3_000;
+    private static final int REQUEST_TIMEOUT_MS = 5_000;
     private final ObjectMapper objectMapper;
-    private final HttpClient httpClient;
     private final URI checkUri;
 
     public UpdateCheckHttpClient(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.httpClient =
-                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
 
         String baseUrl = System.getProperty(
                 "ultimatebot.update.base-url",
@@ -33,21 +30,12 @@ public final class UpdateCheckHttpClient {
     }
 
     public PluginUpdateCheckResponse check(PluginUpdateCheckRequest request) throws IOException {
-        try {
-            HttpRequest httpRequest = HttpRequest.newBuilder(checkUri)
-                    .timeout(Duration.ofSeconds(5))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(request)))
-                    .build();
-
-            HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() != 200) {
-                throw new IOException("Update endpoint returned HTTP " + response.statusCode());
-            }
-            return objectMapper.readValue(response.body(), PluginUpdateCheckResponse.class);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Interrupted while checking updates", ex);
+        byte[] payload = objectMapper.writeValueAsBytes(request);
+        CompatHttp.Response response =
+                CompatHttp.postJson(checkUri, payload, CONNECT_TIMEOUT_MS, REQUEST_TIMEOUT_MS, USER_AGENT);
+        if (response.statusCode() != 200) {
+            throw new IOException("Update endpoint returned HTTP " + response.statusCode());
         }
+        return objectMapper.readValue(response.body(), PluginUpdateCheckResponse.class);
     }
 }

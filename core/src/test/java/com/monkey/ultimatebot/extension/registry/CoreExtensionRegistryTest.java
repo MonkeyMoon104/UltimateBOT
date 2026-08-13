@@ -94,12 +94,12 @@ class CoreExtensionRegistryTest {
         CombatModeDescriptor descriptor = new CombatModeDescriptor(
                 mode,
                 "Custom Duels",
-                List.of("Test mode"),
+                java.util.Collections.singletonList("Test mode"),
                 Material.IRON_SWORD,
                 "",
                 100,
-                Set.of(),
-                Map.copyOf(profiles),
+                java.util.Collections.emptySet(),
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profiles),
                 ModeKit.empty(),
                 brain);
         return new CombatModeProvider() {
@@ -118,7 +118,7 @@ class CoreExtensionRegistryTest {
 
     private static BotBrainProvider brainProvider(BrainKey key) {
         BrainDescriptor descriptor =
-                new BrainDescriptor(key, "Example Brain", "Test brain", Set.of(BrainCapability.FULL_CONTROL), false);
+                new BrainDescriptor(key, "Example Brain", "Test brain", java.util.Collections.singleton(BrainCapability.FULL_CONTROL), false);
         return new BotBrainProvider() {
             @Override
             public BrainDescriptor descriptor() {

@@ -1,9 +1,13 @@
 package com.monkey.ultimatebot.logging;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.compat.PluginMetaAccess;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.INMSBridge;
 import java.util.*;
 import java.util.logging.Level;
@@ -141,7 +145,7 @@ public final class UltimateBotLogging {
     }
 
     private static void separator(Logger logger, String color, char symbol) {
-        logger.info(BOLD + color + String.valueOf(symbol).repeat(58) + RESET);
+        logger.info(BOLD + color + repeatChar(String.valueOf(symbol).charAt(0), 58) + RESET);
     }
 
     private static void emit(Logger logger, Level level, String module, String messageColor, String message) {
@@ -160,17 +164,26 @@ public final class UltimateBotLogging {
     }
 
     private static String moduleColor(String module) {
-        return switch (module) {
-            case "Boot" -> GOLD;
-            case "License" -> YELLOW;
-            case "Update" -> CYAN;
-            case "NMS" -> BLUE;
-            case "Core" -> CYAN;
-            case "API" -> GREEN;
-            case "Hooks" -> MAGENTA;
-            case "PAPI" -> YELLOW;
-            default -> WHITE;
-        };
+                switch (module) {
+            case "Boot":
+                return GOLD;
+            case "License":
+                return YELLOW;
+            case "Update":
+                return CYAN;
+            case "NMS":
+                return BLUE;
+            case "Core":
+                return CYAN;
+            case "API":
+                return GREEN;
+            case "Hooks":
+                return MAGENTA;
+            case "PAPI":
+                return YELLOW;
+            default:
+                return WHITE;
+        }
     }
 
     private static String joinOrNone(Collection<String> values) {
@@ -183,7 +196,7 @@ public final class UltimateBotLogging {
     private static String formatWorldSummary() {
         List<World> worlds = Bukkit.getWorlds();
         return worlds.size() + " -> "
-                + joinOrNone(worlds.stream().map(World::getName).toList());
+                + joinOrNone(worlds.stream().map(WorldAccess::name).collect(Collectors.toList()));
     }
 
     private static String formatMemorySnapshot() {
@@ -204,7 +217,7 @@ public final class UltimateBotLogging {
     }
 
     private static String safeMessage(Throwable error) {
-        return error.getMessage() == null || error.getMessage().isBlank()
+        return error.getMessage() == null || error.getMessage().trim().isEmpty()
                 ? error.getClass().getSimpleName()
                 : error.getMessage();
     }
@@ -229,10 +242,10 @@ public final class UltimateBotLogging {
         private String currentContext = "bootstrap";
         private String nmsBridgeName = "pending";
         private String nmsSupportedVersions = "pending";
-        private List<String> registeredCommands = List.of();
-        private List<String> registeredListeners = List.of();
-        private List<String> disabledListeners = List.of();
-        private List<String> registeredPlaceholders = List.of();
+        private List<String> registeredCommands = Collections.emptyList();
+        private List<String> registeredListeners = Collections.emptyList();
+        private List<String> disabledListeners = Collections.emptyList();
+        private List<String> registeredPlaceholders = Collections.emptyList();
         private boolean placeholderPresent;
         private boolean placeholderRegistered;
 
@@ -245,15 +258,15 @@ public final class UltimateBotLogging {
                     logger,
                     "Boot",
                     WHITE,
-                    plugin.getPluginMeta().getName() + " v"
-                            + plugin.getPluginMeta().getVersion(),
-                    "Authors: " + joinOrNone(plugin.getPluginMeta().getAuthors()),
+                    PluginMetaAccess.name(plugin) + " v" + PluginMetaAccess.version(plugin),
+                    "Authors: " + joinOrNone(PluginMetaAccess.authors(plugin)),
                     "Starting up...");
             UltimateBotLogging.detail(logger, "Boot", "Server -> " + Bukkit.getName() + " | " + Bukkit.getVersion());
             UltimateBotLogging.detail(
                     logger,
                     "Boot",
-                    "Minecraft -> " + Bukkit.getMinecraftVersion() + " | Java -> "
+                    "Minecraft -> " + com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion()
+                            + " | Java -> "
                             + System.getProperty("java.version"));
             UltimateBotLogging.detail(logger, "Boot", "Worlds -> " + formatWorldSummary());
             UltimateBotLogging.detail(logger, "Boot", "Memory -> " + formatMemorySnapshot());
@@ -286,19 +299,19 @@ public final class UltimateBotLogging {
         }
 
         public void markCommands(List<String> registeredCommands) {
-            this.registeredCommands = List.copyOf(registeredCommands);
+            this.registeredCommands = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredCommands);
         }
 
         public void markListeners(List<String> registeredListeners, List<String> disabledListeners) {
-            this.registeredListeners = List.copyOf(registeredListeners);
-            this.disabledListeners = List.copyOf(disabledListeners);
+            this.registeredListeners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredListeners);
+            this.disabledListeners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(disabledListeners);
         }
 
         public void markPlaceholders(
                 boolean placeholderPresent, boolean placeholderRegistered, List<String> placeholderKeys) {
             this.placeholderPresent = placeholderPresent;
             this.placeholderRegistered = placeholderRegistered;
-            this.registeredPlaceholders = List.copyOf(placeholderKeys);
+            this.registeredPlaceholders = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placeholderKeys);
         }
 
         public void completePhase(String summary) {
@@ -320,7 +333,7 @@ public final class UltimateBotLogging {
                     logger,
                     "Boot",
                     WHITE,
-                    plugin.getPluginMeta().getName() + " enabled",
+                    PluginMetaAccess.name(plugin) + " enabled",
                     "Startup time: " + formatDuration(totalDuration),
                     "NMS: " + nmsBridgeName + " | supported: " + nmsSupportedVersions,
                     "Commands: " + commandCount() + " | listeners: " + listenerStateCountSummary() + " | placeholders: "
@@ -349,7 +362,7 @@ public final class UltimateBotLogging {
                     logger,
                     "Boot",
                     RED,
-                    plugin.getPluginMeta().getName() + " failed to start",
+                    PluginMetaAccess.name(plugin) + " failed to start",
                     "Context: " + currentContext,
                     "Elapsed: " + formatDuration(System.nanoTime() - startedAtNanos));
             error(logger, "Boot", "Startup exception -> " + safeMessage(error), error);
@@ -410,5 +423,11 @@ public final class UltimateBotLogging {
         private long durationNanos() {
             return completedAtNanos - startedAtNanos;
         }
+    }
+
+    private static String repeatChar(char symbol, int count) {
+        char[] chars = new char[count];
+        java.util.Arrays.fill(chars, symbol);
+        return new String(chars);
     }
 }

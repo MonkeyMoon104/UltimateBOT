@@ -22,7 +22,7 @@ class BotMetricsTest {
                 "1.21.4",
                 new BotRegistry(),
                 new TargetingService(RuntimeSettings.defaults().targetCache()),
-                Path.of("unused"),
+                java.nio.file.Paths.get("unused"),
                 getClass().getClassLoader(),
                 Logger.getAnonymousLogger())) {
             assertThat(metrics.isEnabled()).isFalse();
