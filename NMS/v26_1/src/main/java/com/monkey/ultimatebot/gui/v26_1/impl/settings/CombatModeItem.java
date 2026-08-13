@@ -8,10 +8,15 @@ import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
+import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.AbstractItem;
@@ -31,12 +36,13 @@ public final class CombatModeItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider(Player viewer) {
-        Material material = Material.matchMaterial(options.getCombatModeIconMaterial());
-        if (material == null) {
-            material = Material.DIAMOND_SWORD;
-        }
+        String configuredMaterial = options.getCombatModeIconMaterial();
+        Material material = MaterialCatalog.optional(configuredMaterial, Material.DIAMOND_SWORD);
+        List<ItemFlag> flags = ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ATTRIBUTES");
+        // CUSTOM_NAME (not ITEM_NAME) so splash potions don't keep the vanilla "uncraftable" title.
         return new ItemBuilder(material)
-                .setLegacyName(ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
+                .setLegacyCustomName(
+                        ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
                 .addLegacyLoreLines(
                         ChatColorUtils.translate(
                                 "&7Difficulty: &f" + options.getDifficulty().name()),
@@ -44,7 +50,15 @@ public final class CombatModeItem extends AbstractItem {
                                 + (options.getCustomCombatTuning() == null ? "&aServer default" : "&eCustomized")),
                         "",
                         ChatColorUtils.translate("&eLeft click: &7next mode"),
-                        ChatColorUtils.translate("&eRight click: &7previous mode"));
+                        ChatColorUtils.translate("&eRight click: &7previous mode"))
+                .addModifier(stack -> {
+                    ItemMeta meta = stack.getItemMeta();
+                    if (meta != null && !flags.isEmpty()) {
+                        meta.addItemFlags(flags.toArray(new ItemFlag[0]));
+                        stack.setItemMeta(meta);
+                    }
+                    return stack;
+                });
     }
 
     @Override

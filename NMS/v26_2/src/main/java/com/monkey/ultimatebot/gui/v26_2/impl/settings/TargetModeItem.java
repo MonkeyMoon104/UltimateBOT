@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -40,14 +41,26 @@ public class TargetModeItem extends AbstractItem {
         if (!clickType.isLeftClick()) return;
         BotTargetMode next = options.getTargetMode().next();
         options.setTargetMode(next);
+        resetLiveBotNavigation(player);
         player.sendMessage(ChatColorUtils.translate("&aAttack mode: &e" + label(next)));
         notifyWindows();
+    }
+
+    private void resetLiveBotNavigation(Player player) {
+        java.util.UUID ownerUUID = plugin.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
+        if (ownerUUID == null) ownerUUID = player.getUniqueId();
+        com.monkey.ultimatebot.bot.ai.ITrainingBot bot = plugin.getBotManager().getBotSafe(ownerUUID);
+        if (bot == null || bot.getBotAI() == null) {
+            return;
+        }
+        bot.getBotAI().getMovementController().clearPath();
+        bot.getBotAI().clearActivePathfinding();
     }
 
     private static Material material(BotTargetMode mode) {
         return switch (mode) {
             case PLAYERS -> Material.PLAYER_HEAD;
-            case MOBS -> Material.PIGLIN_HEAD;
+            case MOBS -> MaterialCatalog.optional("PIGLIN_HEAD", Material.ZOMBIE_HEAD);
             case PLAYERS_AND_MOBS -> Material.TARGET;
         };
     }

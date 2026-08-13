@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -36,7 +37,8 @@ public class FollowItem extends AbstractItem {
     public ItemProvider getItemProvider(Player viewer) {
         boolean status = options.isFollow();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.follow-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.follow-button.material", "LEAD"), Material.LEAD));
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.follow-button.name")));
 
         var loreLines = training.getLangStringList("gui.follow-button.lore");

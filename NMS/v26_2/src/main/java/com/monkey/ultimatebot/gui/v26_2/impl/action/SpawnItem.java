@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -40,8 +41,10 @@ public class SpawnItem extends AbstractItem {
         boolean status = isManagedBotSpawned();
 
         Material mat = status
-                ? Material.valueOf(training.getLangString("gui.despawn-button.material"))
-                : Material.valueOf(training.getLangString("gui.spawn-button.material"));
+                ? MaterialCatalog.optional(
+                        training.getLangString("gui.despawn-button.material", "BARRIER"), Material.BARRIER)
+                : MaterialCatalog.optional(
+                        training.getLangString("gui.spawn-button.material", "PLAYER_HEAD"), Material.PLAYER_HEAD);
 
         String name = status
                 ? training.getLangString("gui.despawn-button.name")

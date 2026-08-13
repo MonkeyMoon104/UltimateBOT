@@ -15,10 +15,16 @@ import xyz.xenondevs.invui.item.Item;
 public class TemplatesTab {
 
     private final BotGuiTabContext context;
+    private final boolean armorTrim;
     private List<ArmorItem> armorItems = List.of();
 
     public TemplatesTab(BotGuiTabContext context) {
+        this(context, true);
+    }
+
+    public TemplatesTab(BotGuiTabContext context, boolean armorTrim) {
         this.context = context;
+        this.armorTrim = armorTrim;
     }
 
     public Gui build(Material borderMaterial, String borderName) {
@@ -33,9 +39,26 @@ public class TemplatesTab {
                 context.getTraining(), EquipmentSlot.FEET, requireArmor(options, EquipmentSlot.FEET), options);
         armorItems = List.of(helmetItem, chestItem, legsItem, bootsItem);
 
-        Gui gui = Gui.builder()
+        if (!armorTrim) {
+            return Gui.builder()
+                    .setStructure(
+                            "# # # # # # # #",
+                            "# # . a . # # #",
+                            "# # . d . # # #",
+                            "# # . e . # # #",
+                            "# # . f . # # #")
+                    .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
+                    .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
+                    .addIngredient('a', helmetItem)
+                    .addIngredient('d', chestItem)
+                    .addIngredient('e', legsItem)
+                    .addIngredient('f', bootsItem)
+                    .build();
+        }
+
+        return Gui.builder()
                 .setStructure(
-                        "# # # # # # # #", "# h a j . . . #", "# c d k . . . #", "# l e m . . . #", "# n f p . . . #")
+                        "# # # # # # # #", "# # h a j # # #", "# # c d k # # #", "# # l e m # # #", "# # n f p # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
                 .addIngredient('.', Item.simple(new ItemStack(Material.AIR)))
                 .addIngredient(
@@ -64,8 +87,6 @@ public class TemplatesTab {
                 .addIngredient('e', legsItem)
                 .addIngredient('f', bootsItem)
                 .build();
-
-        return gui;
     }
 
     public void refreshArmorItems() {

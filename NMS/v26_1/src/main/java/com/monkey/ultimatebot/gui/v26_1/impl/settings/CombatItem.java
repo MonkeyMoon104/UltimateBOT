@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,7 +30,8 @@ public class CombatItem extends AbstractItem {
     public ItemProvider getItemProvider(Player viewer) {
         boolean status = options.isCombat();
 
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.combat-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.combat-button.material", "DIAMOND_SWORD"), Material.DIAMOND_SWORD));
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.combat-button.name")));
         var loreLines = training.getLangStringList("gui.combat-button.lore");
 

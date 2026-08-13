@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -24,7 +25,8 @@ public class TeleportItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider(Player viewer) {
-        Material mat = Material.valueOf(training.getLangString("gui.teleport-button.material"));
+        Material mat = MaterialCatalog.optional(
+                training.getLangString("gui.teleport-button.material", "ENDER_PEARL"), Material.ENDER_PEARL);
         String name = training.getLangString("gui.teleport-button.name");
         var lore = training.getLangStringList("gui.teleport-button.lore");
 

@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.nms;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
@@ -63,7 +65,9 @@ import org.bukkit.util.Vector;
 
 public class NMSBridge_v26_2 implements INMSBridge {
 
-    private static final Set<PlatformCapability> CAPABILITIES = EnumSet.allOf(PlatformCapability.class);
+    /** 1.21+ / Paper 26.x: full set including MACE, WIND_CHARGE, and TNT_MINECART. */
+    private static final Set<PlatformCapability> CAPABILITIES =
+            Set.copyOf(EnumSet.allOf(PlatformCapability.class));
 
     @Override
     public Set<PlatformCapability> capabilities() {
@@ -231,7 +235,7 @@ public class NMSBridge_v26_2 implements INMSBridge {
 
     @Override
     public boolean actuallyHurt(org.bukkit.entity.Player bot, float amount, EntityDamageEvent event) {
-        return event != null && !event.isCancelled();
+        return event == null || !event.isCancelled();
     }
 
     @Override
@@ -361,7 +365,7 @@ public class NMSBridge_v26_2 implements INMSBridge {
     public ItemStack getBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot slot) {
         net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
-            return ItemStack.empty();
+            return ItemStackAccess.empty();
         }
         return CraftItemStack.asBukkitCopy(nativeBot(bot).getItemBySlot(nmsSlot));
     }
@@ -372,7 +376,7 @@ public class NMSBridge_v26_2 implements INMSBridge {
         if (nmsSlot == null) {
             return;
         }
-        nativeBot(bot).setItemSlot(nmsSlot, CraftItemStack.asNMSCopy(stack == null ? ItemStack.empty() : stack));
+        nativeBot(bot).setItemSlot(nmsSlot, CraftItemStack.asNMSCopy(stack == null ? ItemStackAccess.empty() : stack));
     }
 
     @Override

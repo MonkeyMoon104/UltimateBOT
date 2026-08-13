@@ -31,7 +31,8 @@ public class KitTab {
         FollowItem followItem = new FollowItem(context.getTraining(), options, combatItem);
 
         CombatModeItem combatModeItem = new CombatModeItem(context.getTraining(), options, refreshModeDependents);
-        Gui gui = Gui.builder()
+
+        return Gui.builder()
                 .setStructure(
                         "# r . . . . # #", "# . . t . . # #", "# . s g f . # #", "# c . o m . # #", "# # # # # # # #")
                 .addIngredient('#', context.createBorderItem(borderMaterial, borderName))
@@ -49,7 +50,5 @@ public class KitTab {
                 .addIngredient('o', combatModeItem)
                 .addIngredient('m', new TargetModeItem(context.getTraining(), options))
                 .build();
-
-        return gui;
     }
 }

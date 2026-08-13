@@ -4,12 +4,21 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.gui.NewBotGUI;
 import com.monkey.ultimatebot.gui.v26_2.impl.navigation.BotTabItem;
-import com.monkey.ultimatebot.gui.v26_2.tab.*;
+import com.monkey.ultimatebot.gui.v26_2.tab.BotGuiTabContext;
+import com.monkey.ultimatebot.gui.v26_2.tab.CombatSettingsTab;
+import com.monkey.ultimatebot.gui.v26_2.tab.KitTab;
+import com.monkey.ultimatebot.gui.v26_2.tab.OwnersTab;
+import com.monkey.ultimatebot.gui.v26_2.tab.TargetsTab;
+import com.monkey.ultimatebot.gui.v26_2.tab.TemplatesTab;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -54,6 +63,7 @@ public class NewBotGUI_v26_2 {
         if (options == null) {
             options = new BotOptions(
                     training, ArmorCycle.getDefaultArmorFromConfig(training.getLanguageConfig(), training));
+            CombatModeLoadoutDefaults.applyArmor(options, options.getCombatMode());
         }
 
         options.setBotType(botType);
@@ -61,27 +71,25 @@ public class NewBotGUI_v26_2 {
 
         String borderMatName = training.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
         String borderName = training.getLangString("gui.tab-border.name", " ");
-        Material borderMat;
-        try {
-            borderMat = Material.valueOf(borderMatName.toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            borderMat = Material.BLACK_STAINED_GLASS_PANE;
-        }
+        Material borderMat = MaterialCatalog.optional(borderMatName, Material.BLACK_STAINED_GLASS_PANE);
 
         String translatedBorderName = ChatColorUtils.translate(borderName);
         Item borderItem = Item.simple(new ItemBuilder(borderMat).setLegacyName(translatedBorderName));
 
         BotGuiTabContext tabContext = new BotGuiTabContext(player, training, options, botType);
+        boolean armorTrim = MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM);
 
-        TemplatesTab templatesTab = new TemplatesTab(tabContext);
-        Gui tab1 = templatesTab.build(borderMat, translatedBorderName);
-        Gui tab0 = new KitTab(tabContext, templatesTab::refreshArmorItems).build(borderMat, translatedBorderName);
-        Gui tab2 = new OwnersTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab3 = new TargetsTab(tabContext).build(borderMat, translatedBorderName);
-        Gui tab4 = new CombatSettingsTab(tabContext, templatesTab::refreshArmorItems)
-                .build(borderMat, translatedBorderName);
+        TemplatesTab templatesTab = new TemplatesTab(tabContext, armorTrim);
+        Runnable refreshArmor = templatesTab::refreshArmorItems;
 
-        Gui tabGui = TabGui.builder()
+        List<Gui> tabs = new ArrayList<>();
+        tabs.add(new KitTab(tabContext, refreshArmor).build(borderMat, translatedBorderName));
+        tabs.add(templatesTab.build(borderMat, translatedBorderName));
+        tabs.add(new OwnersTab(tabContext).build(borderMat, translatedBorderName));
+        tabs.add(new TargetsTab(tabContext).build(borderMat, translatedBorderName));
+        tabs.add(new CombatSettingsTab(tabContext, refreshArmor).build(borderMat, translatedBorderName));
+
+        var builder = TabGui.builder()
                 .setStructure(
                         ". . 0 . 1 . 4 . .",
                         ". x x x x x x x x",
@@ -90,14 +98,16 @@ public class NewBotGUI_v26_2 {
                         "3 x x x x x x x x",
                         ". x x x x x x x x")
                 .addIngredient('x', Markers.CONTENT_LIST_SLOT_HORIZONTAL)
-                .addIngredient('.', borderItem)
-                .addIngredient('0', new BotTabItem(0, training))
-                .addIngredient('1', new BotTabItem(1, training))
-                .addIngredient('2', new BotTabItem(2, training))
-                .addIngredient('3', new BotTabItem(3, training))
-                .addIngredient('4', new BotTabItem(4, training))
-                .setTabs(List.of(tab0, tab1, tab2, tab3, tab4))
-                .build();
+                .addIngredient('.', borderItem);
+
+        int invuiIndex = 0;
+        builder.addIngredient('0', new BotTabItem(invuiIndex++, NewBotGUI.LANG_TAB_KIT, training));
+        builder.addIngredient('1', new BotTabItem(invuiIndex++, NewBotGUI.LANG_TAB_TEMPLATES, training));
+        builder.addIngredient('2', new BotTabItem(invuiIndex++, NewBotGUI.LANG_TAB_OWNERS, training));
+        builder.addIngredient('3', new BotTabItem(invuiIndex++, NewBotGUI.LANG_TAB_TARGETS, training));
+        builder.addIngredient('4', new BotTabItem(invuiIndex, NewBotGUI.LANG_TAB_COMBAT, training));
+
+        Gui tabGui = builder.setTabs(tabs).build();
 
         BotOptions finalOptions = options;
         Window window = Window.builder()

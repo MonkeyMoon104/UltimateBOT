@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Material;
@@ -27,7 +28,8 @@ public class TotemItem extends AbstractItem {
 
     @Override
     public ItemProvider getItemProvider(Player viewer) {
-        ItemBuilder builder = new ItemBuilder(Material.valueOf(training.getLangString("gui.totem-button.material")));
+        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
+                training.getLangString("gui.totem-button.material", "TOTEM_OF_UNDYING"), Material.TOTEM_OF_UNDYING));
 
         String unlimitedText = Objects.requireNonNull(
                 training.getLangString("gui.totem-button.unlimited-text"), "gui.totem-button.unlimited-text");
