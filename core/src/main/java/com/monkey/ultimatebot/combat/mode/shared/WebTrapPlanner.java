@@ -1,10 +1,12 @@
 package com.monkey.ultimatebot.combat.mode.shared;
 
+
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -16,7 +18,7 @@ public final class WebTrapPlanner {
             Vector targetVelocity,
             boolean onGround,
             Vector lookDirection,
-            RandomGenerator random) {
+            SplittableRandom random) {
         Location current = blockLocation(Objects.requireNonNull(targetLocation, "targetLocation"));
         Vector velocity =
                 Objects.requireNonNull(targetVelocity, "targetVelocity").clone();
@@ -70,7 +72,7 @@ public final class WebTrapPlanner {
             Location candidateBlock = blockLocation(candidate);
             unique.putIfAbsent(Position.from(candidateBlock), candidateBlock);
         }
-        return List.copyOf(unique.values());
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(unique.values());
     }
 
     private static Location blockLocation(Location location) {
@@ -87,7 +89,32 @@ public final class WebTrapPlanner {
         return new Vector(x, 0.0D, z);
     }
 
-    public record Position(java.util.UUID worldUUID, int x, int y, int z) {
+    public static final class Position {
+        private final java.util.UUID worldUUID;
+        private final int x;
+        private final int y;
+        private final int z;
+
+        public Position(java.util.UUID worldUUID, int x, int y, int z) {
+            this.worldUUID = worldUUID;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public java.util.UUID worldUUID() {
+            return worldUUID;
+        }
+        public int x() {
+            return x;
+        }
+        public int y() {
+            return y;
+        }
+        public int z() {
+            return z;
+        }
+
         public static Position from(Location location) {
             return new Position(
                     Objects.requireNonNull(location.getWorld(), "location world")
@@ -95,6 +122,29 @@ public final class WebTrapPlanner {
                     location.getBlockX(),
                     location.getBlockY(),
                     location.getBlockZ());
+        }
+    
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Position)) {
+                return false;
+            }
+            Position other = (Position) obj;
+            return java.util.Objects.equals(worldUUID, other.worldUUID) && x == other.x && y == other.y && z == other.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(worldUUID, x, y, z);
+        }
+
+        @Override
+        public String toString() {
+            return "Position[worldUUID=" + worldUUID + ", x=" + x + ", y=" + y + ", z=" + z + "]";
         }
     }
 }

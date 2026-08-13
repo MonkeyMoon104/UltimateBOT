@@ -12,64 +12,97 @@ final class CrystalCombatPolicy {
     }
 
     int attackBurstAttempts() {
-        return switch (difficulty) {
-            case GOD -> 4;
-            case HARD -> 3;
-            case MEDIUM, NORMAL -> 2;
-            default -> 1;
-        };
+                switch (difficulty) {
+            case GOD:
+                return 4;
+            case HARD:
+                return 3;
+            case MEDIUM:
+            case NORMAL:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     int placementBurstAttempts() {
-        return switch (difficulty) {
-            case GOD, HARD -> 3;
-            case MEDIUM, NORMAL -> 2;
-            default -> 1;
-        };
+                switch (difficulty) {
+            case GOD:
+            case HARD:
+                return 3;
+            case MEDIUM:
+            case NORMAL:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     int actionCyclesPerTick() {
-        return switch (difficulty) {
-            case GOD, HARD, MEDIUM -> 2;
-            default -> 1;
-        };
+                switch (difficulty) {
+            case GOD:
+            case HARD:
+            case MEDIUM:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     long positionReuseDelayMs() {
-        return switch (difficulty) {
-            case GOD -> 300L;
-            case HARD -> 380L;
-            case MEDIUM -> 550L;
-            case NORMAL -> 700L;
-            default -> 900L;
-        };
+                switch (difficulty) {
+            case GOD:
+                return 300L;
+            case HARD:
+                return 380L;
+            case MEDIUM:
+                return 550L;
+            case NORMAL:
+                return 700L;
+            default:
+                return 900L;
+        }
     }
 
     double strongScoreOffset() {
-        return switch (difficulty) {
-            case GOD -> 0.9D;
-            case HARD -> 1.1D;
-            case MEDIUM -> 1.25D;
-            case NORMAL -> 1.4D;
-            default -> 1.65D;
-        };
+                switch (difficulty) {
+            case GOD:
+                return 0.9D;
+            case HARD:
+                return 1.1D;
+            case MEDIUM:
+                return 1.25D;
+            case NORMAL:
+                return 1.4D;
+            default:
+                return 1.65D;
+        }
     }
 
     int desiredStrongPositionCount() {
-        return switch (difficulty) {
-            case GOD -> 3;
-            case HARD, MEDIUM -> 2;
-            default -> 1;
-        };
+                switch (difficulty) {
+            case GOD:
+                return 3;
+            case HARD:
+            case MEDIUM:
+                return 2;
+            default:
+                return 1;
+        }
     }
 
     double maxUsefulTargetDistance() {
-        return switch (difficulty) {
-            case GOD -> 5.2D;
-            case HARD -> 5.8D;
-            case MEDIUM -> 6.3D;
-            case NORMAL -> 6.6D;
-            default -> 6.9D;
-        };
+                switch (difficulty) {
+            case GOD:
+                return 5.2D;
+            case HARD:
+                return 5.8D;
+            case MEDIUM:
+                return 6.3D;
+            case NORMAL:
+                return 6.6D;
+            default:
+                return 6.9D;
+        }
     }
 }

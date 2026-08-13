@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import java.util.Objects;
 import org.bukkit.entity.Player;
 
@@ -27,8 +28,8 @@ public final class FollowBehaviorController {
 
     public void tick(Player target) {
         Objects.requireNonNull(target, "target");
-        double deltaX = target.getX() - bot.bukkitPosition().getX();
-        double deltaZ = target.getZ() - bot.bukkitPosition().getZ();
+        double deltaX = EntityCoordsAccess.getX(target) - bot.bukkitPosition().getX();
+        double deltaZ = EntityCoordsAccess.getZ(target) - bot.bukkitPosition().getZ();
         double horizontalDistance = Math.hypot(deltaX, deltaZ);
         if (!distancePolicy.shouldAdvance(horizontalDistance)) {
             stop();

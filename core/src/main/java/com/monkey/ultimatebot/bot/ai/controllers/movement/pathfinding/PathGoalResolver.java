@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
+
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -57,12 +59,57 @@ final class PathGoalResolver {
             }
         }
         offsets.sort(Comparator.comparingDouble(GoalOffset::cost).thenComparingInt(offset -> Math.abs(offset.y())));
-        return List.copyOf(offsets);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(offsets);
     }
 
-    private record GoalOffset(int x, int y, int z) {
+    private static final class GoalOffset {
+        private final int x;
+        private final int y;
+        private final int z;
+
+        private GoalOffset(int x, int y, int z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        int x() {
+            return x;
+        }
+
+        int y() {
+            return y;
+        }
+
+        int z() {
+            return z;
+        }
+
         private double cost() {
             return (double) x * x + (double) z * z + Math.abs(y) * 1.75D;
+        }
+    
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof GoalOffset)) {
+                return false;
+            }
+            GoalOffset other = (GoalOffset) obj;
+            return x == other.x && y == other.y && z == other.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(x, y, z);
+        }
+
+        @Override
+        public String toString() {
+            return "GoalOffset[x=" + x + ", y=" + y + ", z=" + z + "]";
         }
     }
 }

@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
+import com.monkey.ultimatebot.compat.ParticleAccess;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -84,7 +85,7 @@ final class UhcSecondaryController {
         target.setFireTicks(Math.max(target.getFireTicks(), 80));
         target.getWorld()
                 .spawnParticle(
-                        org.bukkit.Particle.LAVA,
+                        ParticleAccess.lava(),
                         Objects.requireNonNull(target.getLocation(), "target location"),
                         12,
                         0.35D,

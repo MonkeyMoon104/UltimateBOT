@@ -1,5 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
+import java.util.stream.Collectors;
+
+
+import java.util.Collections;
 import de.bsommerfeld.pathetic.api.pathing.INeighborStrategy;
 import de.bsommerfeld.pathetic.api.pathing.Pathfinder;
 import de.bsommerfeld.pathetic.api.pathing.configuration.PathfinderConfiguration;
@@ -21,13 +25,13 @@ import org.bukkit.util.BlockVector;
 
 /** Pure path planning layer. Entity movement remains the responsibility of the bot controller. */
 public final class PatheticPathPlanner {
-    private static final int MAX_ITERATIONS = 12_000;
-    private static final int MAX_PATH_LENGTH = 192;
+    private static final int MAX_ITERATIONS = 4_000;
+    private static final int MAX_PATH_LENGTH = 96;
     private static final List<PathVector> WALKING_OFFSETS = createWalkingOffsets();
 
     private final BotTraversalEnvironment environment;
     private final Pathfinder pathfinder;
-    private Set<Long> excludedPositions = Set.of();
+    private Set<Long> excludedPositions = Collections.emptySet();
 
     public PatheticPathPlanner(BotTraversalEnvironment environment) {
         this.environment = Objects.requireNonNull(environment, "environment");
@@ -50,8 +54,8 @@ public final class PatheticPathPlanner {
                 .async(false)
                 .fallback(false)
                 .provider(provider)
-                .validationProcessors(List.of(traversalValidator))
-                .costProcessor(List.of(context -> context.getPreviousPathPosition() == null
+                .validationProcessors(Collections.unmodifiableList(java.util.Arrays.asList(traversalValidator)))
+                .costProcessor(java.util.Collections.singletonList(context -> context.getPreviousPathPosition() == null
                         ? Cost.ZERO
                         : Cost.of(environment.additionalTraversalCost(
                                 toBlockPos(context.getPreviousPathPosition()),
@@ -65,7 +69,7 @@ public final class PatheticPathPlanner {
     }
 
     public List<BlockVector> findPath(BlockVector start, BlockVector target) {
-        return findPath(start, target, Set.of());
+        return findPath(start, target, Collections.emptySet());
     }
 
     public List<BlockVector> findPath(BlockVector start, BlockVector target, Set<BlockVector> excluded) {
@@ -89,13 +93,13 @@ public final class PatheticPathPlanner {
         }
 
         if (!result.successful() || result.getPath().length() < 2) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         List<BlockVector> path = result.getPath().collect().stream()
                 .map(PatheticPathPlanner::toBlockPos)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
         return path;
     }
 
@@ -121,7 +125,7 @@ public final class PatheticPathPlanner {
                 }
             }
         }
-        return List.copyOf(offsets);
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(offsets);
     }
 
     private static PathPosition toPathPosition(BlockVector position) {

@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -40,7 +42,7 @@ public final class ModeEntityTracker implements AutoCloseable {
 
     @Override
     public void close() {
-        for (UUID entityId : Set.copyOf(entityIds)) {
+        for (UUID entityId : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(entityIds)) {
             remove(entityId);
         }
         entityIds.clear();

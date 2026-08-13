@@ -32,13 +32,25 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        switch (phase) {
-            case SPACING -> spacing(context, target);
-            case INITIATE -> initiate(context, target);
-            case CRIT_TRADE -> critTrade(context, target);
-            case COMBO -> combo(context, target);
-            case DEFLECT -> deflect(context, target);
-            case RESET -> reset(context, target);
+                switch (phase) {
+            case SPACING:
+                spacing(context, target);
+                break;
+            case INITIATE:
+                initiate(context, target);
+                break;
+            case CRIT_TRADE:
+                critTrade(context, target);
+                break;
+            case COMBO:
+                combo(context, target);
+                break;
+            case DEFLECT:
+                deflect(context, target);
+                break;
+            case RESET:
+                reset(context, target);
+                break;
         }
     }
 

@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.state.BotTargetChangeEvent;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
@@ -9,6 +11,7 @@ import com.monkey.ultimatebot.bot.ai.BotAI;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -112,7 +115,7 @@ public class BotBrainController {
 
     private void configureBotAI() {
         if (targetPlayer != null && follow) {
-            botAI.getRotationController().lookAt(targetPlayer.getX(), targetPlayer.getEyeLocation().getY(), targetPlayer.getZ());
+            botAI.getRotationController().lookAt(EntityCoordsAccess.getX(targetPlayer), targetPlayer.getEyeLocation().getY(), EntityCoordsAccess.getZ(targetPlayer));
         }
     }
 
@@ -151,10 +154,14 @@ public class BotBrainController {
         boolean allowCombat = playerTarget ? shouldUseCombatOnCurrentTarget() : combat;
 
         if (playerTarget && watchOnlyMode) {
+            // Watch-only: no chase, but still face the threat.
             botAI.getMovementController().clearPath();
+            botAI.getRotationController().updateRotation(selectedTarget);
             return;
         }
 
+        // follow=false + combat=false => idle (do not chase/look).
+        // follow=true => follow behavior; combat=true => combat movement/look/attack.
         if (follow || allowCombat) {
             botAI.tick(selectedTarget, allowCombat);
         } else {
@@ -169,11 +176,21 @@ public class BotBrainController {
 
     private @Nullable LivingEntity selectActiveTarget() {
         BotTargetMode mode = botOptions.getTargetMode();
-        boolean playerSelectable = mode.allowsPlayers()
-                && isTargetAvailable(targetPlayer)
-                && (!combat || shouldUseCombatOnCurrentTarget());
-        org.bukkit.entity.Player player = playerSelectable ? targetPlayer : null;
-        Mob mob = mode.allowsMobs() && combat ? targetingService.findClosestMob(bot, getMobTargetRange()) : null;
+
+        // Keep the configured player for look/follow whenever the mode allows players.
+        // Combat eligibility is applied later via allowCombat — do not drop the look target here.
+        org.bukkit.entity.Player player =
+                mode.allowsPlayers() && isTargetAvailable(targetPlayer) ? targetPlayer : null;
+
+        // Discover mobs whenever the mode allows them (not only when combat is ON),
+        // so the bot can face them; attacking stays gated by allowCombat in onTick.
+        Mob mob = null;
+        if (mode.allowsMobs()) {
+            mob = targetingService.findClosestMob(bot, getMobTargetRange());
+            if (mob != null && (!mob.isValid() || mob.isDead())) {
+                mob = null;
+            }
+        }
 
         if (player == null) {
             return mob;
@@ -181,7 +198,17 @@ public class BotBrainController {
         if (mob == null) {
             return player;
         }
-        return distanceSquaredFromBot(mob) < distanceSquaredFromBot(player) ? mob : player;
+        // Follow-only (no combat): stick to the player, ignore nearby animals.
+        if (follow && !combat) {
+            return player;
+        }
+        double mobDist = distanceSquaredFromBot(mob);
+        double playerDist = distanceSquaredFromBot(player);
+        // Prefer the player on near-ties so ambient animals do not steal look/combat focus.
+        if (mobDist + 1.0D < playerDist) {
+            return mob;
+        }
+        return player;
     }
 
     private boolean shouldFollowPlayerAnchor() {
@@ -193,18 +220,22 @@ public class BotBrainController {
     }
 
     private double getMobTargetRange() {
-        return switch (botOptions.getBotType()) {
-            case EVENT -> eventTargetRange;
-            case ALLY -> allyRange;
-            case TEAM_ALLY -> teamAllyRange;
-            default -> botOptions.getAutoTargetRange();
-        };
+                switch (botOptions.getBotType()) {
+            case EVENT:
+                return eventTargetRange;
+            case ALLY:
+                return allyRange;
+            case TEAM_ALLY:
+                return teamAllyRange;
+            default:
+                return botOptions.getAutoTargetRange();
+        }
     }
 
     private double distanceSquaredFromBot(LivingEntity entity) {
-        double dx = entity.getX() - bot.asBukkitPlayer().getX();
-        double dy = entity.getY() - bot.asBukkitPlayer().getY();
-        double dz = entity.getZ() - bot.asBukkitPlayer().getZ();
+        double dx = EntityCoordsAccess.getX(entity) - EntityCoordsAccess.getX(bot.asBukkitPlayer());
+        double dy = EntityCoordsAccess.getY(entity) - EntityCoordsAccess.getY(bot.asBukkitPlayer());
+        double dz = EntityCoordsAccess.getZ(entity) - EntityCoordsAccess.getZ(bot.asBukkitPlayer());
         return dx * dx + dy * dy + dz * dz;
     }
 
@@ -383,9 +414,9 @@ public class BotBrainController {
         if (botOptions.getBotType() == BotType.TEAM_ALLY) {
             ownerUUIDs = botOptions.getTeamOwnerUUIDs();
         } else if (ownerPlayer != null) {
-            ownerUUIDs = Set.of(ownerPlayer.getUniqueId());
+            ownerUUIDs = Collections.singleton(ownerPlayer.getUniqueId());
         } else {
-            ownerUUIDs = Set.of();
+            ownerUUIDs = Collections.emptySet();
         }
 
         double rangeSq = range * range;
@@ -429,9 +460,9 @@ public class BotBrainController {
                     continue;
                 }
 
-                double dx = candidate.getX() - owner.getX();
-                double dy = candidate.getY() - owner.getY();
-                double dz = candidate.getZ() - owner.getZ();
+                double dx = EntityCoordsAccess.getX(candidate) - EntityCoordsAccess.getX(owner);
+                double dy = EntityCoordsAccess.getY(candidate) - EntityCoordsAccess.getY(owner);
+                double dz = EntityCoordsAccess.getZ(candidate) - EntityCoordsAccess.getZ(owner);
                 double distanceSq = dx * dx + dy * dy + dz * dz;
 
                 if (distanceSq <= rangeSq && distanceSq < bestOwnerDistanceSq) {
@@ -548,7 +579,7 @@ public class BotBrainController {
         }
 
         String template = state == AllyAlertState.RANGE ? rangeMessage : preRangeMessage;
-        if (template != null && !template.isBlank()) {
+        if (template != null && !template.trim().isEmpty()) {
             String finalMessage = ChatColorUtils.translate(template.replace("%player%", threat.getName()));
             for (org.bukkit.entity.Player owner : owners) {
                 if (owner != null && owner.isOnline()) {
@@ -611,6 +642,7 @@ public class BotBrainController {
 
     public void setFollow(boolean follow) {
         this.follow = follow;
+        botOptions.setFollow(follow);
     }
 
     public boolean isFollow() {
@@ -619,6 +651,7 @@ public class BotBrainController {
 
     public void setCombat(boolean combat) {
         this.combat = combat;
+        botOptions.setCombat(combat);
     }
 
     public boolean isCombat() {

@@ -1,11 +1,14 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.stats.CacheStats;
+
+import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.bot.ai.services.cache.TargetCacheStats;
+import com.monkey.ultimatebot.bot.ai.services.cache.UuidCache;
+import com.monkey.ultimatebot.bot.ai.services.cache.UuidCaches;
 import com.monkey.ultimatebot.config.RuntimeSettings;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,21 +24,24 @@ import org.jspecify.annotations.Nullable;
 
 public class TargetingService {
 
-    private volatile Cache<UUID, TargetCache> targetCache;
-    private CacheStats retiredCacheStats = CacheStats.empty();
+    private static final long MOB_CACHE_TTL_MS = 250L;
+
+    private volatile UuidCache<TargetCache> targetCache;
+    private TargetCacheStats retiredCacheStats = TargetCacheStats.empty();
+    private final Map<UUID, MobCache> mobTargetCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     public TargetingService(RuntimeSettings.CacheSettings settings) {
-        this.targetCache = createCache(settings);
+        this.targetCache = UuidCaches.create(settings);
     }
 
     public synchronized void reconfigure(RuntimeSettings.CacheSettings settings) {
-        Cache<UUID, TargetCache> previousCache = targetCache;
+        UuidCache<TargetCache> previousCache = targetCache;
         retiredCacheStats = retiredCacheStats.plus(previousCache.stats());
-        targetCache = createCache(settings);
+        targetCache = UuidCaches.create(settings);
         previousCache.invalidateAll();
     }
 
-    public synchronized CacheStats cacheStats() {
+    public synchronized TargetCacheStats cacheStats() {
         return retiredCacheStats.plus(targetCache.stats());
     }
 
@@ -43,17 +49,26 @@ public class TargetingService {
         return targetCache.estimatedSize();
     }
 
-    private static Cache<UUID, TargetCache> createCache(RuntimeSettings.CacheSettings settings) {
-        return Caffeine.newBuilder()
-                .maximumSize(settings.maximumSize())
-                .expireAfterWrite(settings.expireAfterWrite())
-                .recordStats()
-                .build();
-    }
-
     public @Nullable Mob findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
         if (bot == null || bot.asBukkitPlayer() == null || maxRange <= 0.0D) {
             return null;
+        }
+
+        UUID botUUID = bot.getUniqueId();
+        MobCache cached = mobTargetCache.get(botUUID);
+        long now = System.currentTimeMillis();
+        if (cached != null
+                && now - cached.cachedAtMs < MOB_CACHE_TTL_MS
+                && Double.compare(cached.maxRange, maxRange) == 0
+                && cached.mob != null
+                && cached.mob.isValid()
+                && !cached.mob.isDead()
+                && cached.mob.getWorld() != null
+                && cached.mob.getWorld().equals(bot.asBukkitPlayer().getWorld())
+                && cached.mob.getLocation().distanceSquared(
+                        java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location"))
+                        <= maxRange * maxRange) {
+            return cached.mob;
         }
 
         org.bukkit.World world = bot.asBukkitPlayer().getWorld();
@@ -65,7 +80,11 @@ public class TargetingService {
         double closestDistanceSq = maxRange * maxRange;
         Mob closest = null;
         for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
-            if (!(entity instanceof Mob mob) || !mob.isValid() || mob.isDead() || mob.isInvulnerable()) {
+            if (!(entity instanceof Mob)) {
+                continue;
+            }
+            Mob mob = (Mob) entity;
+            if (!mob.isValid() || mob.isDead() || mob.isInvulnerable()) {
                 continue;
             }
             double distanceSq = mob.getLocation().distanceSquared(center);
@@ -74,7 +93,20 @@ public class TargetingService {
                 closest = mob;
             }
         }
+        mobTargetCache.put(botUUID, new MobCache(closest, maxRange, now));
         return closest;
+    }
+
+    private static final class MobCache {
+        private final @Nullable Mob mob;
+        private final double maxRange;
+        private final long cachedAtMs;
+
+        private MobCache(@Nullable Mob mob, double maxRange, long cachedAtMs) {
+            this.mob = mob;
+            this.maxRange = maxRange;
+            this.cachedAtMs = cachedAtMs;
+        }
     }
 
     private static class TargetCache {
@@ -113,11 +145,11 @@ public class TargetingService {
     }
 
     public @Nullable Player findClosestPlayer(ITrainingBot bot, double maxRange) {
-        return findClosestPlayerNearBot(bot, maxRange, null, Set.of());
+        return findClosestPlayerNearBot(bot, maxRange, null, Collections.emptySet());
     }
 
     public @Nullable Player findClosestPlayer(ITrainingBot bot, double maxRange, Predicate<Player> candidateFilter) {
-        return findClosestPlayerNearBot(bot, maxRange, null, Set.of(), candidateFilter);
+        return findClosestPlayerNearBot(bot, maxRange, null, Collections.emptySet(), candidateFilter);
     }
 
     public @Nullable Player findClosestPlayerFromList(ITrainingBot bot, double maxRange, Set<UUID> allowedTargets) {
@@ -125,12 +157,12 @@ public class TargetingService {
     }
 
     public @Nullable Player findClosestPlayerExcept(ITrainingBot bot, double maxRange, @Nullable UUID excludedPlayer) {
-        return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, Set.of());
+        return findClosestPlayerNearBot(bot, maxRange, excludedPlayer, Collections.emptySet());
     }
 
     public @Nullable Player findClosestPlayerNearPlayer(
             ITrainingBot bot, @Nullable Player centerPlayer, double maxRange, @Nullable UUID excludedPlayer) {
-        return findClosestPlayerNearPlayer(bot, centerPlayer, maxRange, excludedPlayer, Set.of());
+        return findClosestPlayerNearPlayer(bot, centerPlayer, maxRange, excludedPlayer, Collections.emptySet());
     }
 
     public @Nullable Player findClosestPlayerNearPlayer(
@@ -160,9 +192,9 @@ public class TargetingService {
         Player closestPlayer = null;
 
         org.bukkit.World centerWorld = centerPlayer.getWorld();
-        double centerX = centerPlayer.getX();
-        double centerY = centerPlayer.getY();
-        double centerZ = centerPlayer.getZ();
+        double centerX = EntityCoordsAccess.getX(centerPlayer);
+        double centerY = EntityCoordsAccess.getY(centerPlayer);
+        double centerZ = EntityCoordsAccess.getZ(centerPlayer);
 
         for (Player player : collectTargetCandidates(bot)) {
             if (!isValidCandidate(bot, player, centerWorld)) {
@@ -185,9 +217,9 @@ public class TargetingService {
                 continue;
             }
 
-            double dx = player.getX() - centerX;
-            double dy = player.getY() - centerY;
-            double dz = player.getZ() - centerZ;
+            double dx = EntityCoordsAccess.getX(player) - centerX;
+            double dy = EntityCoordsAccess.getY(player) - centerY;
+            double dz = EntityCoordsAccess.getZ(player) - centerZ;
             double distanceSq = dx * dx + dy * dy + dz * dz;
 
             if (distanceSq < closestDistanceSq) {
@@ -243,9 +275,9 @@ public class TargetingService {
             return null;
         }
 
-        double centerX = bot.asBukkitPlayer().getX();
-        double centerY = bot.asBukkitPlayer().getY();
-        double centerZ = bot.asBukkitPlayer().getZ();
+        double centerX = EntityCoordsAccess.getX(bot.asBukkitPlayer());
+        double centerY = EntityCoordsAccess.getY(bot.asBukkitPlayer());
+        double centerZ = EntityCoordsAccess.getZ(bot.asBukkitPlayer());
         double closestDistanceSq = maxRange * maxRange;
         Player closestPlayer = null;
 
@@ -274,9 +306,9 @@ public class TargetingService {
                 continue;
             }
 
-            double dx = player.getX() - centerX;
-            double dy = player.getY() - centerY;
-            double dz = player.getZ() - centerZ;
+            double dx = EntityCoordsAccess.getX(player) - centerX;
+            double dy = EntityCoordsAccess.getY(player) - centerY;
+            double dz = EntityCoordsAccess.getZ(player) - centerZ;
             double distanceSq = dx * dx + dy * dy + dz * dz;
 
             if (distanceSq < closestDistanceSq) {

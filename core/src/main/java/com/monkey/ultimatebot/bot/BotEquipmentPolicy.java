@@ -1,5 +1,9 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
+
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
@@ -29,7 +33,7 @@ public final class BotEquipmentPolicy {
 
             EquipmentSlot bukkitSlot = toBukkitSlot(entry.getKey());
             ItemStack desired = setting.mode() == BotEquipmentSlotMode.EMPTY
-                    ? ItemStack.empty()
+                    ? ItemStackAccess.empty()
                     : Objects.requireNonNull(setting.item(), "item").clone();
             ItemStack current = bot.getItem(bukkitSlot);
             if (current != null && current.isSimilar(desired) && current.getAmount() == desired.getAmount()) {
@@ -48,28 +52,34 @@ public final class BotEquipmentPolicy {
         Objects.requireNonNull(bot, "bot");
         Objects.requireNonNull(options, "options");
         Objects.requireNonNull(slot, "slot");
-        switch (slot) {
-            case MAIN_HAND -> {
+                switch (slot) {
+            case MAIN_HAND:
                 int selected = bot.getBotAI().getInventoryController().getCurrentSlot();
-                bot.getBotAI().getInventoryController().switchToSlot(selected);
-            }
-            case OFF_HAND -> bot.getBotAI().manageTotem();
-            case HEAD, CHEST, LEGS, FEET -> {
+                                bot.getBotAI().getInventoryController().switchToSlot(selected);
+                break;
+            case OFF_HAND:
+                bot.getBotAI().manageTotem();
+                break;
+            case HEAD:
+            case CHEST:
+            case LEGS:
+            case FEET:
                 EquipmentSlot bukkitSlot = toBukkitSlot(slot);
-                ItemStack configured = options.getArmor().get(bukkitSlot);
-                ItemStack restored;
-                if (configured == null) {
-                    restored = ItemStack.empty();
-                } else {
-                    ItemStack item = configured.clone();
-                    com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils.applyArmorEnchants(
-                            item, options.getBlast().getOrDefault(bukkitSlot, false));
-                    restored = item;
-                }
-                bot.setItem(bukkitSlot, restored.clone());
-                broadcast(bot, Map.of(bukkitSlot, restored.clone()));
-            }
+                                ItemStack configured = options.getArmor().get(bukkitSlot);
+                                ItemStack restored;
+                                if (configured == null) {
+                                    restored = ItemStackAccess.empty();
+                                } else {
+                                    ItemStack item = configured.clone();
+                                    com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils.applyArmorEnchants(
+                                            item, options.getBlast().getOrDefault(bukkitSlot, false));
+                                    restored = item;
+                                }
+                                bot.setItem(bukkitSlot, restored.clone());
+                                broadcast(bot, ImmutableCollections.mapOf(bukkitSlot, restored.clone()));
+                break;
         }
+        throw new IllegalStateException("Unexpected switch value");
     }
 
     private static void broadcast(ITrainingBot bot, Map<EquipmentSlot, ItemStack> changes) {
@@ -80,13 +90,21 @@ public final class BotEquipmentPolicy {
     }
 
     private static EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
-        return switch (slot) {
-            case MAIN_HAND -> EquipmentSlot.HAND;
-            case OFF_HAND -> EquipmentSlot.OFF_HAND;
-            case HEAD -> EquipmentSlot.HEAD;
-            case CHEST -> EquipmentSlot.CHEST;
-            case LEGS -> EquipmentSlot.LEGS;
-            case FEET -> EquipmentSlot.FEET;
-        };
+                switch (slot) {
+            case MAIN_HAND:
+                return EquipmentSlot.HAND;
+            case OFF_HAND:
+                return EquipmentSlot.OFF_HAND;
+            case HEAD:
+                return EquipmentSlot.HEAD;
+            case CHEST:
+                return EquipmentSlot.CHEST;
+            case LEGS:
+                return EquipmentSlot.LEGS;
+            case FEET:
+                return EquipmentSlot.FEET;
+            default:
+                throw new IllegalStateException("Unexpected equipment slot: " + slot);
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
+import java.util.stream.Collectors;
+
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
@@ -51,7 +53,7 @@ public class CrystalManager {
         return world.getNearbyEntities(bot.getLocation(), crystalAttackRange, crystalAttackRange, crystalAttackRange, EnderCrystal.class::isInstance)
                 .stream()
                 .map(EnderCrystal.class::cast)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public List<BlockVector> getValidCrystalPositions(

@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
@@ -19,7 +20,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public boolean hasTotemInSlot(ItemStack itemStack) {
-        return itemStack != null && !itemStack.isEmpty() && itemStack.getType() == Material.TOTEM_OF_UNDYING;
+        return itemStack != null
+                && !ItemStackAccess.isEmpty(itemStack)
+                && itemStack.getType() == Material.TOTEM_OF_UNDYING;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public void removeTotem(EquipmentSlot slot) {
-        if (updateSlot(slot, ItemStack.empty())) {
+        if (updateSlot(slot, ItemStackAccess.empty())) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }
@@ -49,9 +52,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
         count = Math.max(0, Math.min(2, count));
 
         boolean changed =
-                updateSlot(EquipmentSlot.OFF_HAND, count >= 1 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStack.empty());
+                updateSlot(EquipmentSlot.OFF_HAND, count >= 1 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStackAccess.empty());
         changed |= updateSlot(
-                EquipmentSlot.HAND, count >= 2 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStack.empty());
+                EquipmentSlot.HAND, count >= 2 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStackAccess.empty());
         if (changed) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }

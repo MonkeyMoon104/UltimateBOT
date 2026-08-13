@@ -3,6 +3,9 @@ package com.monkey.ultimatebot.combat.mode.cart;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
+import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -62,8 +65,11 @@ final class CartExplosiveSequence {
         }
         context.inventory().switchToSlot(CART_SLOT);
         Location spawn = rail.clone().add(0.5D, 0.1D, 0.5D);
-        ExplosiveMinecart cart = spawn.getWorld().spawn(spawn, ExplosiveMinecart.class);
-        cart.setFuseTicks(-1);
+        ExplosiveMinecart cart = spawnCart(spawn);
+        if (cart == null) {
+            return false;
+        }
+        ExplosiveMinecartAccess.setFuseTicks(cart, -1);
         cart.setInvulnerable(false);
         cart.setVelocity(new org.bukkit.util.Vector());
         if (!context.trackCombatEntity(cart, CART_SLOT)) {
@@ -73,6 +79,15 @@ final class CartExplosiveSequence {
         lifetimeTicks = 0;
         arrowFlightTicks = 0;
         return true;
+    }
+
+    /** 1.17+: same Bukkit spawn as before. 1.16: NMS bridge only. */
+    private static @Nullable ExplosiveMinecart spawnCart(Location spawn) {
+        if (MinecraftVersionAccess.isAtLeast(1, 17)) {
+            return spawn.getWorld().spawn(spawn, ExplosiveMinecart.class);
+        }
+        Entity spawned = NMSBridgeManager.get().spawnExplosiveMinecart(spawn);
+        return spawned instanceof ExplosiveMinecart ? (ExplosiveMinecart) spawned : null;
     }
 
     int requiredIgnitionDrawTicks(CombatModeContext context) {
@@ -162,8 +177,8 @@ final class CartExplosiveSequence {
     }
 
     private void armImmediateFuse(CombatModeContext context, Entity cart) {
-        if (cart instanceof ExplosiveMinecart explosiveMinecart) {
-            explosiveMinecart.setFuseTicks(1);
+        if (cart instanceof ExplosiveMinecart) {
+            ExplosiveMinecartAccess.setFuseTicks((ExplosiveMinecart) cart, 1);
         }
         release(context);
     }

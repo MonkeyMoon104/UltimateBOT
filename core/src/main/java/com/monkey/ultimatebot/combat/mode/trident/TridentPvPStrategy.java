@@ -45,18 +45,40 @@ public final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        switch (phase) {
-            case SELECT_ATTACK -> selectAttack(context, target);
-            case PREPARE_WATER -> prepareWater(context);
-            case CHARGE_RIPTIDE -> chargeRiptide(context, target);
-            case RIPTIDE_FLIGHT -> riptideFlight(context, target);
-            case AIR_HIT -> airHit(context, target);
-            case LOYALTY_DRAW -> loyaltyDraw(context, target);
-            case LOYALTY_RECOVERY -> loyaltyRecovery(context, target);
-            case GROUND_HIT -> groundHit(context, target);
-            case HOE_SWAP -> hoeSwap(context, target);
-            case SPONGE_WEB -> spongeWeb(context, target);
-            case RECOVER -> recover(context, target);
+                switch (phase) {
+            case SELECT_ATTACK:
+                selectAttack(context, target);
+                break;
+            case PREPARE_WATER:
+                prepareWater(context);
+                break;
+            case CHARGE_RIPTIDE:
+                chargeRiptide(context, target);
+                break;
+            case RIPTIDE_FLIGHT:
+                riptideFlight(context, target);
+                break;
+            case AIR_HIT:
+                airHit(context, target);
+                break;
+            case LOYALTY_DRAW:
+                loyaltyDraw(context, target);
+                break;
+            case LOYALTY_RECOVERY:
+                loyaltyRecovery(context, target);
+                break;
+            case GROUND_HIT:
+                groundHit(context, target);
+                break;
+            case HOE_SWAP:
+                hoeSwap(context, target);
+                break;
+            case SPONGE_WEB:
+                spongeWeb(context, target);
+                break;
+            case RECOVER:
+                recover(context, target);
+                break;
         }
     }
 

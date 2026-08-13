@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer;
 
+
+import java.util.Collections;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -197,7 +199,7 @@ public final class FakeOfflinePlayer implements OfflinePlayer {
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        return Map.of();
+        return Collections.emptyMap();
     }
 
     @Override

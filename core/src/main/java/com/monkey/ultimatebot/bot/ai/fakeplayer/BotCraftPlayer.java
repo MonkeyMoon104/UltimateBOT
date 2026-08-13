@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer;
 
+
+import java.util.Collections;
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.Title;
 import com.destroystokyo.paper.profile.PlayerProfile;
@@ -105,7 +107,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public PlayerGiveResult give(Collection<ItemStack> items, boolean dropIfFull) {
-        Collection<ItemStack> leftovers = List.copyOf(items);
+        Collection<ItemStack> leftovers = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(items);
         return new PlayerGiveResult() {
             @Override
             public Collection<ItemStack> leftovers() {
@@ -114,7 +116,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
             @Override
             public Collection<org.bukkit.entity.Item> drops() {
-                return List.of();
+                return Collections.emptyList();
             }
         };
     }
@@ -134,7 +136,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public @UnmodifiableView Iterable<? extends BossBar> activeBossBars() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
@@ -354,7 +356,8 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     private Player nativeHandle() {
-        return (Player) trainingBot;
+        // trainingBot is assigned after super(); CraftHumanEntity→PermissibleBase may call into overrides during ctor.
+        return trainingBot != null ? (Player) trainingBot : super.getHandle();
     }
 
     @Override
@@ -405,7 +408,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public Collection<EnderPearl> getEnderPearls() {
-        return List.of();
+        return Collections.emptyList();
     }
 
     @Override
@@ -1281,6 +1284,20 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
         return "";
     }
 
+    /**
+     * Fake players do not receive client look packets, so yaw/pitch alone leaves {@code yHeadRot}
+     * stale. Only NMS fields here — the entity tracker sends movement. Extra {@code MoveEntityPacket.Rot}
+     * (with a sticky {@code onGround}) was freezing 1.21.x clients in mid-air and desyncing look.
+     */
+    @Override
+    public void setRotation(float yaw, float pitch) {
+        Player handle = nativeHandle();
+        handle.setYRot(yaw);
+        handle.setXRot(pitch);
+        handle.setYHeadRot(yaw);
+        handle.yBodyRot = yaw;
+    }
+
     @Override
     public void lookAt(Entity entity, LookAnchor playerAnchor, LookAnchor entityAnchor) {}
 
@@ -1324,12 +1341,12 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public @Unmodifiable Set<Long> getSentChunkKeys() {
-        return Set.of();
+        return Collections.emptySet();
     }
 
     @Override
     public @Unmodifiable Set<Chunk> getSentChunks() {
-        return Set.of();
+        return Collections.emptySet();
     }
 
     @Override
@@ -1339,7 +1356,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof org.bukkit.entity.Player player) {
+        if (obj instanceof org.bukkit.entity.Player) { org.bukkit.entity.Player player = (org.bukkit.entity.Player) obj;
             return getUniqueId().equals(player.getUniqueId());
         }
         return super.equals(obj);
@@ -1359,7 +1376,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public @NotNull Map<String, Object> serialize() {
-        return Map.of();
+        return Collections.emptyMap();
     }
 
     @Override
@@ -1367,6 +1384,6 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public @NotNull Set<String> getListeningPluginChannels() {
-        return Set.of();
+        return Collections.emptySet();
     }
 }

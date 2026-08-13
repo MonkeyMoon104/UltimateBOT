@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.cart;
 
+
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -32,10 +34,22 @@ final class CartPlacementPlanner {
                 }
             }
         }
-        return List.copyOf(candidates.values());
+        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(candidates.values());
     }
 
-    private record Position(java.util.UUID worldId, int x, int y, int z) {
+    private static final class Position {
+        private final java.util.UUID worldId;
+        private final int x;
+        private final int y;
+        private final int z;
+
+        private Position(java.util.UUID worldId, int x, int y, int z) {
+            this.worldId = worldId;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
         private static Position from(Location location) {
             return new Position(
                     Objects.requireNonNull(location.getWorld(), "location world")
@@ -43,6 +57,29 @@ final class CartPlacementPlanner {
                     location.getBlockX(),
                     location.getBlockY(),
                     location.getBlockZ());
+        }
+    
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Position)) {
+                return false;
+            }
+            Position other = (Position) obj;
+            return java.util.Objects.equals(worldId, other.worldId) && x == other.x && y == other.y && z == other.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(worldId, x, y, z);
+        }
+
+        @Override
+        public String toString() {
+            return "Position[worldId=" + worldId + ", x=" + x + ", y=" + y + ", z=" + z + "]";
         }
     }
 }

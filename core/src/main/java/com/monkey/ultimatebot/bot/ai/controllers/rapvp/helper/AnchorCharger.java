@@ -31,7 +31,8 @@ public class AnchorCharger {
             ItemStack stack = inventory.getCurrentItem();
             if (stack == null || stack.getType() != Material.GLOWSTONE) return false;
             Block block = blockAt(anchorPos);
-            if (!(block.getBlockData() instanceof RespawnAnchor anchorData)) return false;
+            if (!(block.getBlockData() instanceof RespawnAnchor)) return false;
+            RespawnAnchor anchorData = (RespawnAnchor) block.getBlockData();
             if (anchorData.getCharges() >= anchorData.getMaximumCharges()) return false;
             anchorData.setCharges(anchorData.getMaximumCharges());
             block.setBlockData(anchorData, true);

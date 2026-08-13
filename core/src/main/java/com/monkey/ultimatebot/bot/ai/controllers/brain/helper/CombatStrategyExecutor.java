@@ -74,15 +74,30 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             return;
         }
 
-        boolean actionExecuted =
-                switch (combatStateManager.getCurrentState()) {
-                    case AGGRESSIVE -> executeAggressive(target, distance);
-                    case DEFENSIVE -> executeDefensive(target, distance);
-                    case REPOSITIONING -> executeRepositioning(target, distance);
-                    case ANCHOR_SETUP -> executeAnchorSetup(target, distance);
-                    case CRYSTAL_SETUP -> executeCrystalSetup(target, distance);
-                    case RETREATING -> executeRetreating(target, distance);
-                };
+        boolean actionExecuted = false;
+                                switch (combatStateManager.getCurrentState()) {
+                    case AGGRESSIVE:
+                        actionExecuted = executeAggressive(target, distance);
+                        break;
+                    case DEFENSIVE:
+                        actionExecuted = executeDefensive(target, distance);
+                        break;
+                    case REPOSITIONING:
+                        actionExecuted = executeRepositioning(target, distance);
+                        break;
+                    case ANCHOR_SETUP:
+                        actionExecuted = executeAnchorSetup(target, distance);
+                        break;
+                    case CRYSTAL_SETUP:
+                        actionExecuted = executeCrystalSetup(target, distance);
+                        break;
+                    case RETREATING:
+                        actionExecuted = executeRetreating(target, distance);
+                        break;
+                    default:
+                        actionExecuted = false;
+                        break;
+                }
 
         if (!actionExecuted) {
             moveToTarget(target, 3.0);

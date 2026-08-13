@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockSt
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IMovementExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -32,8 +33,8 @@ public class MovementExecutor implements IMovementExecutor {
 
     @Override
     public void executeDirectMovement(LivingEntity target, double targetDistance) {
-        double targetX = target.getX();
-        double targetZ = target.getZ();
+        double targetX = EntityCoordsAccess.getX(target);
+        double targetZ = EntityCoordsAccess.getZ(target);
         Vector botPos = bot.bukkitPosition();
         double botX = botPos.getX();
         double botZ = botPos.getZ();

@@ -27,11 +27,11 @@ final class BotProfileResolver {
         }
 
         String customTemplate = options.getBotNameTemplate();
-        return customTemplate == null || customTemplate.isBlank() ? configured : customTemplate;
+        return customTemplate == null || customTemplate.trim().isEmpty() ? configured : customTemplate;
     }
 
     private String resolveName(String nameTemplate, Player owner, Player target, BotOptions options) {
-        String template = nameTemplate == null || nameTemplate.isBlank() ? "CrystalBot" : nameTemplate;
+        String template = nameTemplate == null || nameTemplate.trim().isEmpty() ? "CrystalBot" : nameTemplate;
         Player firstOwner = resolveFirstTeamOwner(options);
         String firstOwnerName = firstOwner == null ? owner.getName() : firstOwner.getName();
         String ownersCount = options == null
@@ -68,31 +68,35 @@ final class BotProfileResolver {
             return BotFactory.createProfile(owner, botUUID, botName);
         }
 
-        return switch (source) {
-            case RANDOM -> BotFactory.createRandomProfile(botUUID, botName);
-            case OWNER -> BotFactory.createProfile(owner, botUUID, botName);
-            case FIRST_TEAM_OWNER -> profileFromPlayerOrOwner(resolveFirstTeamOwner(options), owner, botUUID, botName);
-            case PLAYER_REFERENCE ->
-                profileFromPlayerOrOwner(
+                switch (source) {
+            case RANDOM:
+                return BotFactory.createRandomProfile(botUUID, botName);
+            case OWNER:
+                return BotFactory.createProfile(owner, botUUID, botName);
+            case FIRST_TEAM_OWNER:
+                return profileFromPlayerOrOwner(resolveFirstTeamOwner(options), owner, botUUID, botName);
+            case PLAYER_REFERENCE:
+                return profileFromPlayerOrOwner(
                         resolvePlayerReference(java.util.Objects.requireNonNull(
                                 skin.playerReference(), "player-reference skin value")),
                         owner,
                         botUUID,
                         botName);
-            case TEXTURE_VALUE ->
-                BotFactory.createProfileWithTexture(
+            case TEXTURE_VALUE:
+                return BotFactory.createProfileWithTexture(
                         botUUID,
                         botName,
                         java.util.Objects.requireNonNull(skin.textureValue(), "texture skin value"),
                         skin.textureSignature());
-            case TEXTURE_URL ->
-                BotFactory.createProfileWithTexture(
+            case TEXTURE_URL:
+                return BotFactory.createProfileWithTexture(
                         botUUID,
                         botName,
                         BotProfileCodec.textureValueFromUrl(
                                 java.util.Objects.requireNonNull(skin.textureUrl(), "texture skin URL")),
                         null);
-        };
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 
     private BotProfileData profileFromPlayerOrOwner(
@@ -115,7 +119,7 @@ final class BotProfileResolver {
     }
 
     private @Nullable Player resolvePlayerReference(@Nullable String reference) {
-        if (reference == null || reference.isBlank()) {
+        if (reference == null || reference.trim().isEmpty()) {
             return null;
         }
 

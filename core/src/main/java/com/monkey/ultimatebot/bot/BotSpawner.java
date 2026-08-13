@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnEvent;
@@ -22,6 +24,7 @@ import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -121,7 +124,7 @@ public class BotSpawner {
                     .getInventoryController()
                     .setItem(
                             com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ENDERPEARL_SLOT,
-                            ItemStack.empty());
+                            ItemStackAccess.empty());
         }
 
         if (botOptions == null || botOptions.isCombat()) {
@@ -173,17 +176,17 @@ public class BotSpawner {
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.CRYSTAL_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.ANCHOR_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
         bot.getBotAI()
                 .getInventoryController()
                 .setItem(
                         com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController.GLOW_SLOT,
-                        ItemStack.empty());
+                        ItemStackAccess.empty());
     }
 
     private Location resolveSpawnLocation(Player registryOwner, BotOptions botOptions) {
@@ -204,10 +207,31 @@ public class BotSpawner {
             }
         }
 
-        Location loc = Objects.requireNonNull(registryOwner.getLocation(), "registry owner location");
+        Location loc = Objects.requireNonNull(registryOwner.getLocation(), "registry owner location").clone();
         World world = Objects.requireNonNull(loc.getWorld(), "registry owner world");
-        Block block = world.getHighestBlockAt(loc);
-        return new Location(world, block.getX(), block.getY(), block.getZ(), loc.getYaw(), loc.getPitch());
+        // Always spawn at the owner. Only nudge up if the feet block is a full solid (never use
+        // getHighestBlockAt — that put bots on roofs/trees far above the player).
+        Block feet = loc.getBlock();
+        if (isBlockingSpawnBlock(feet.getType())) {
+            Block above = feet.getRelative(0, 1, 0);
+            if (!isBlockingSpawnBlock(above.getType())) {
+                loc.setY(feet.getY() + 1.0D);
+            }
+        }
+        return loc;
+    }
+
+    private static boolean isBlockingSpawnBlock(Material material) {
+        if (material == null || material == Material.AIR || !material.isSolid()) {
+            return false;
+        }
+        // Cobwebs / passable solids must not force a Y bump or roof teleport.
+        String name = material.name();
+        return !"COBWEB".equals(name)
+                && !"STRING".equals(name)
+                && !name.endsWith("_CARPET")
+                && !name.endsWith("_SIGN")
+                && !name.contains("PRESSURE_PLATE");
     }
 
     private void applyCustomEquipment(ITrainingBot bot, BotOptions botOptions) {
@@ -360,8 +384,11 @@ public class BotSpawner {
 
     private void prepareBotDespawn(UUID ownerUUID) {
         ITrainingBot bot = registry.getBot(ownerUUID);
-        if (bot != null && bot.getBotAI() != null) {
-            bot.getBotAI().close();
+        if (bot != null) {
+            BotBroadcaster.broadcastDespawn(bot);
+            if (bot.getBotAI() != null) {
+                bot.getBotAI().close();
+            }
         }
     }
 

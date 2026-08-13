@@ -119,12 +119,18 @@ public class CombatStateManager implements ICombatStateManager {
 
     @Override
     public void onStateChange(Player target) {
-        switch (currentState) {
-            case AGGRESSIVE, CRYSTAL_SETUP, DEFENSIVE, REPOSITIONING, RETREATING -> {}
-            case ANCHOR_SETUP -> {
+                switch (currentState) {
+            case AGGRESSIVE:
+            case CRYSTAL_SETUP:
+            case DEFENSIVE:
+            case REPOSITIONING:
+            case RETREATING:
+
+                break;
+            case ANCHOR_SETUP:
                 rapvpController.enable(target);
-                lastAnchorAttempt = System.currentTimeMillis();
-            }
+                                lastAnchorAttempt = System.currentTimeMillis();
+                break;
         }
     }
 
@@ -163,13 +169,19 @@ public class CombatStateManager implements ICombatStateManager {
             return 8000L;
         }
 
-        return switch (difficulty) {
-            case EASY -> 8000L;
-            case NORMAL -> 5200L;
-            case MEDIUM -> 3200L;
-            case HARD -> 1800L;
-            case GOD -> 800L;
-        };
+                switch (difficulty) {
+            case EASY:
+                return 8000L;
+            case NORMAL:
+                return 5200L;
+            case MEDIUM:
+                return 3200L;
+            case HARD:
+                return 1800L;
+            case GOD:
+                return 800L;
+        }
+        throw new IllegalStateException("Unexpected switch value");
     }
 
     public void updateDamageData(int consecutiveDamageCount, long lastDamageTime) {

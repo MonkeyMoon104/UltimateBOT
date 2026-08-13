@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.world;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
@@ -174,6 +176,14 @@ public final class WorldProtectionService implements AutoCloseable {
         if (!settings.respectProtectionPlugins()) {
             return true;
         }
+        // Fake-player bots are not in the PlayerList; protection plugins often cancel their
+        // BlockPlaceEvent. Combat rails/webs still need to place for Cart/UHC modes.
+        if (plugin instanceof com.monkey.ultimatebot.UltimateBot) {
+            com.monkey.ultimatebot.UltimateBot ultimateBot = (com.monkey.ultimatebot.UltimateBot) plugin;
+            if (ultimateBot.getBotRegistry().getOwnerUUIDByBotUUID(placer.getUniqueId()) != null) {
+                return true;
+            }
+        }
         return WorldBlockEventDispatcher.placementAllowed(block, replacedState, placementItem, placer);
     }
 
@@ -267,7 +277,7 @@ public final class WorldProtectionService implements AutoCloseable {
     @Override
     public void close() {
         for (Map.Entry<WorldBlockKey, TrackedWorldBlock> entry :
-                Map.copyOf(placements).entrySet()) {
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placements).entrySet()) {
             TrackedWorldBlock placement = entry.getValue();
             placement.cancelExpiry();
             Block block = entry.getKey().block();
@@ -279,7 +289,7 @@ public final class WorldProtectionService implements AutoCloseable {
         }
         placements.clear();
         for (Map.Entry<UUID, TrackedWorldEntity> entry :
-                Map.copyOf(combatEntities).entrySet()) {
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(combatEntities).entrySet()) {
             entry.getValue().cancelExpiry();
             Entity entity = Bukkit.getEntity(entry.getKey());
             if (entity != null && WorldProtectionPolicy.shouldRemoveEntityOnShutdown(settings.antiDupe(), true)) {

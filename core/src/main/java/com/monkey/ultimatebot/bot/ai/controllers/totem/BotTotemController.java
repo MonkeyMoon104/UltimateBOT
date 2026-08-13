@@ -53,23 +53,23 @@ public class BotTotemController {
         TotemState totemState = stateAnalyzer.getTotemState(totemCount);
         TotemEquipmentState equipmentState = stateAnalyzer.analyzeCurrentEquipment(offhand, mainhand);
 
-        switch (totemState) {
-            case UNLIMITED -> {
+                switch (totemState) {
+            case UNLIMITED:
                 strategyHandler.handleUnlimitedTotems(equipmentState, isCombat);
-                notificationManager.resetWarning();
-            }
-            case NONE -> {
+                                notificationManager.resetWarning();
+                break;
+            case NONE:
                 strategyHandler.handleNoTotems(equipmentState);
-                handleNoTotemsWarning(bot);
-            }
-            case ONE -> {
+                                handleNoTotemsWarning(bot);
+                break;
+            case ONE:
                 strategyHandler.handleOneTotem(equipmentState, isCombat);
-                notificationManager.resetWarning();
-            }
-            case MULTIPLE -> {
+                                notificationManager.resetWarning();
+                break;
+            case MULTIPLE:
                 strategyHandler.handleMultipleTotems(totemCount, equipmentState, isCombat);
-                notificationManager.resetWarning();
-            }
+                                notificationManager.resetWarning();
+                break;
         }
     }
 

@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.cart;
 
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
@@ -26,7 +28,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
                         .slot(CartBowController.BOW_SLOT, Material.BOW)
                         .slot(RAIL_SLOT, Material.RAIL, 64)
-                        .slot(CART_SLOT, Material.TNT_MINECART, 64)
+                        .slot(CART_SLOT, "tnt_minecart", 64)
                         .slot(CartBowController.ARROW_SLOT, Material.ARROW, 64)
                         .build());
     }
@@ -53,18 +55,40 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         if (explosiveSequence.isActive()) {
             handleSequenceStatus(context, target, explosiveSequence.tick(context, target));
         }
-        switch (phase) {
-            case MELEE -> melee(context, target);
-            case CREATE_DISTANCE -> createDistance(context, target);
-            case DISTANCE_DRAW -> drawDistanceBow(context, target);
-            case DISTANCE_FIRE -> fireDistanceArrow(context, target);
-            case PLACE_RAIL -> placeRail(context, target);
-            case PLACE_CART -> placeCart(context);
-            case EVADE -> evade(context, target);
-            case IGNITION_DRAW -> drawIgnitionBow(context, target);
-            case IGNITION_FIRE -> fireCartArrow(context, target);
-            case WAIT_IMPACT -> waitForImpact(context, target);
-            case RECOVER -> recover(context, target);
+                switch (phase) {
+            case MELEE:
+                melee(context, target);
+                break;
+            case CREATE_DISTANCE:
+                createDistance(context, target);
+                break;
+            case DISTANCE_DRAW:
+                drawDistanceBow(context, target);
+                break;
+            case DISTANCE_FIRE:
+                fireDistanceArrow(context, target);
+                break;
+            case PLACE_RAIL:
+                placeRail(context, target);
+                break;
+            case PLACE_CART:
+                placeCart(context);
+                break;
+            case EVADE:
+                evade(context, target);
+                break;
+            case IGNITION_DRAW:
+                drawIgnitionBow(context, target);
+                break;
+            case IGNITION_FIRE:
+                fireCartArrow(context, target);
+                break;
+            case WAIT_IMPACT:
+                waitForImpact(context, target);
+                break;
+            case RECOVER:
+                recover(context, target);
+                break;
         }
     }
 
@@ -73,7 +97,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         boolean opportunity = ModeCombatPolicy.isCartOpportunity(
                 distance,
                 context.motion().botY(),
-                target.getY(),
+                EntityCoordsAccess.getY(target),
                 context.actions().targetHealthRatio(target),
                 currentTick() >= nextCartTick);
         if (opportunity && currentTick() >= nextCartTick) {
@@ -95,12 +119,15 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void drawIgnitionBow(CombatModeContext context, LivingEntity target) {
-        switch (bowController.drawIgnitionArrow(context, target, explosiveSequence, phaseTicks)) {
-            case CHARGING -> {
+                switch (bowController.drawIgnitionArrow(context, target, explosiveSequence, phaseTicks)) {
+            case CHARGING:
                 return;
-            }
-            case READY -> transitionTo(Phase.IGNITION_FIRE);
-            case ABORT -> abort(context);
+            case READY:
+                transitionTo(Phase.IGNITION_FIRE);
+                break;
+            case ABORT:
+                abort(context);
+                break;
         }
     }
 
@@ -175,19 +202,23 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
 
     private void handleSequenceStatus(
             CombatModeContext context, LivingEntity target, CartExplosiveSequence.Status status) {
-        switch (status) {
-            case ACTIVE -> {
+                switch (status) {
+            case ACTIVE:
                 return;
-            }
-            case NEEDS_IGNITION -> {
+            case NEEDS_IGNITION:
                 if (explosiveSequence.isTargetCloseForIgnition(target)) {
                     transitionTo(Phase.IGNITION_DRAW);
                     return;
                 }
                 abort(context);
-            }
-            case TARGET_ESCAPED, FINISHED -> abandonAndRetry(context);
-            case DETONATED -> transitionTo(Phase.RECOVER);
+                return;
+            case TARGET_ESCAPED:
+            case FINISHED:
+                abandonAndRetry(context);
+                break;
+            case DETONATED:
+                transitionTo(Phase.RECOVER);
+                break;
         }
     }
 

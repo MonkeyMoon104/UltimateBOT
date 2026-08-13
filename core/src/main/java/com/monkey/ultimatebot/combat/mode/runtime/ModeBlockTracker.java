@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -46,7 +48,7 @@ public final class ModeBlockTracker implements AutoCloseable {
 
     @Override
     public void close() {
-        for (BlockKey key : Set.copyOf(blocks)) {
+        for (BlockKey key : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(blocks)) {
             Block block = key.block();
             if (block != null) {
                 broadcast(block.getLocation(), block.getBlockData());
@@ -66,7 +68,19 @@ public final class ModeBlockTracker implements AutoCloseable {
         }
     }
 
-    private record BlockKey(UUID worldId, int x, int y, int z) {
+    private static final class BlockKey {
+        private final UUID worldId;
+        private final int x;
+        private final int y;
+        private final int z;
+
+        private BlockKey(UUID worldId, int x, int y, int z) {
+            this.worldId = worldId;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
         static BlockKey from(Block block) {
             return new BlockKey(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
         }
@@ -74,6 +88,29 @@ public final class ModeBlockTracker implements AutoCloseable {
         @Nullable Block block() {
             World world = org.bukkit.Bukkit.getWorld(worldId);
             return world == null ? null : world.getBlockAt(x, y, z);
+        }
+    
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof BlockKey)) {
+                return false;
+            }
+            BlockKey other = (BlockKey) obj;
+            return java.util.Objects.equals(worldId, other.worldId) && x == other.x && y == other.y && z == other.z;
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(worldId, x, y, z);
+        }
+
+        @Override
+        public String toString() {
+            return "BlockKey[worldId=" + worldId + ", x=" + x + ", y=" + y + ", z=" + z + "]";
         }
     }
 }

@@ -80,11 +80,19 @@ public final class BotRAPVPController {
         }
         for (int i = 0; i < getActionCyclesForDifficulty(); i++) {
             if (!enabled || currentTarget == null || currentTarget.isDead()) break;
-            switch (state) {
-                case PLACING_ANCHOR -> handlePlacingAnchor();
-                case CHARGING_ANCHOR -> handleChargingAnchor();
-                case WAITING_EXPLOSION -> handleWaitingExplosion();
-                case IDLE -> {}
+                        switch (state) {
+                case PLACING_ANCHOR:
+                    handlePlacingAnchor();
+                    break;
+                case CHARGING_ANCHOR:
+                    handleChargingAnchor();
+                    break;
+                case WAITING_EXPLOSION:
+                    handleWaitingExplosion();
+                    break;
+                case IDLE:
+
+                    break;
             }
         }
     }
@@ -101,7 +109,7 @@ public final class BotRAPVPController {
         }
         Player target = Objects.requireNonNull(currentTarget, "currentTarget");
         Optional<BlockVector> posOpt = positionFinder.findBestAnchorPos(target);
-        if (posOpt.isEmpty()) {
+        if (!posOpt.isPresent()) {
             if (!isHyperAggressiveDifficulty() && pearlController.canUseEnderpearl() && bot.distanceTo(target) > 10.0D) {
                 pearlController.tryUseEnderpearl(target);
             }
@@ -258,7 +266,8 @@ public final class BotRAPVPController {
     }
 
     private @Nullable RespawnAnchor anchorData(BlockVector pos) {
-        return blockAt(pos).getBlockData() instanceof RespawnAnchor anchor ? anchor : null;
+        org.bukkit.block.data.BlockData data = blockAt(pos).getBlockData();
+        return data instanceof RespawnAnchor ? (RespawnAnchor) data : null;
     }
 
     private Block blockAt(BlockVector pos) {

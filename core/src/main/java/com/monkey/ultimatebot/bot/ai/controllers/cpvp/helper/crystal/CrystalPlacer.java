@@ -30,18 +30,16 @@ public class CrystalPlacer {
         if (!inventoryController.hasItem(Material.END_CRYSTAL)) return false;
         if (!inventoryController.isHoldingCrystal()) {
             inventoryController.switchToCrystal();
-            return false;
         }
 
         try {
-            ItemStack crystalStack = inventoryController.getCurrentItem();
+            ItemStack crystalStack = inventoryController.getItem(BotInventoryController.CRYSTAL_SLOT);
             if (crystalStack.getType() != Material.END_CRYSTAL) return false;
             Location hit = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 1.0D, pos.getBlockZ() + 0.5D);
             boolean consumed = NMSBridgeManager.get()
                     .useItemOnBlock(bot.asBukkitPlayer(), crystalStack, blockAt(pos), BlockFace.UP, hit, EquipmentSlot.HAND);
 
             if (consumed) {
-                bot.swingMainHand();
                 inventoryController.onItemUsed(BotInventoryController.CRYSTAL_SLOT);
                 return true;
             }

@@ -1,15 +1,16 @@
 package com.monkey.ultimatebot.bot.ai;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
+import com.monkey.ultimatebot.compat.AttributeAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -114,11 +115,7 @@ public interface ITrainingBot {
     }
 
     default void setRotation(float yaw, float pitch) {
-        Player player = asBukkitPlayer();
-        Location location = Objects.requireNonNull(player.getLocation(), "bot location");
-        location.setYaw(yaw);
-        location.setPitch(pitch);
-        player.setRotation(yaw, pitch);
+        com.monkey.ultimatebot.compat.PlayerRotationAccess.set(asBukkitPlayer(), yaw, pitch);
     }
 
     default Vector getLookDirection() {
@@ -144,8 +141,7 @@ public interface ITrainingBot {
 
     /** Bukkit max-health accessor — named to avoid clashing with NMS {@code LivingEntity#getMaxHealth()}. */
     default double maxHealthValue() {
-        AttributeInstance attribute = asBukkitPlayer().getAttribute(Attribute.MAX_HEALTH);
-        return attribute != null ? attribute.getValue() : asBukkitPlayer().getHealth();
+        return AttributeAccess.maxHealthValue(asBukkitPlayer());
     }
 
     default void setHealthValue(double health) {
@@ -168,7 +164,7 @@ public interface ITrainingBot {
 
     default void attackEntity(Entity target) {
         Entity checked = Objects.requireNonNull(target, "target");
-        if (checked instanceof LivingEntity living) {
+        if (checked instanceof LivingEntity) { LivingEntity living = (LivingEntity) checked;
             prepareFullAttackStrength();
             NMSBridgeManager.get().attackTarget(this, living);
             return;
@@ -197,8 +193,7 @@ public interface ITrainingBot {
     }
 
     default double getAttackDamageAttribute() {
-        AttributeInstance attribute = asBukkitPlayer().getAttribute(Attribute.ATTACK_DAMAGE);
-        return attribute != null ? attribute.getValue() : 1.0D;
+        return AttributeAccess.attackDamageValue(asBukkitPlayer());
     }
 
     default boolean isBlocking() {
@@ -246,7 +241,7 @@ public interface ITrainingBot {
     }
 
     default ItemStack activeItemStack() {
-        return isUsingItem() ? getItemInMainHand() : ItemStack.empty();
+        return isUsingItem() ? getItemInMainHand() : ItemStackAccess.empty();
     }
 
     default void beginUsingItem(EquipmentSlot hand) {
@@ -285,7 +280,7 @@ public interface ITrainingBot {
         if (direction.lengthSquared() > 0.0D) {
             Location rotated = Objects.requireNonNull(player.getLocation(), "bot location");
             rotated.setDirection(direction);
-            player.setRotation(rotated.getYaw(), rotated.getPitch());
+            setRotation(rotated.getYaw(), rotated.getPitch());
         }
     }
 

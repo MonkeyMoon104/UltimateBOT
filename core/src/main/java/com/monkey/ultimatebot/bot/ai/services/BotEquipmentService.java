@@ -1,12 +1,14 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jspecify.annotations.Nullable;
 
 public class BotEquipmentService {
 
@@ -16,13 +18,18 @@ public class BotEquipmentService {
         this.bot = bot;
     }
 
-    public boolean handleDamage(float amount, EntityDamageEvent event) {
+    public boolean handleDamage(float amount, @Nullable EntityDamageEvent event) {
         try {
+            if (event == null) {
+                // NMS actuallyHurt can run before Bukkit attaches lastDamageCause.
+                applyArmorFix();
+                return true;
+            }
             boolean result = NMSBridgeManager.get().actuallyHurt(bot.asBukkitPlayer(), amount, event);
             if (result) applyArmorFix();
             return result;
         } catch (ClassCastException | NullPointerException e) {
-            if (event != null && !event.isCancelled()) {
+            if (event == null || !event.isCancelled()) {
                 applyArmorFix();
                 return true;
             }
@@ -37,12 +44,27 @@ public class BotEquipmentService {
             EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
         }) {
             ItemStack armorPiece = bot.getItem(slot);
-            if (armorPiece == null || armorPiece.isEmpty()) {
+            if (armorPiece == null || ItemStackAccess.isEmpty(armorPiece)) {
                 continue;
             }
             ItemMeta meta = armorPiece.getItemMeta();
-            if (meta instanceof Damageable damageable && damageable.hasDamage()) {
-                damageable.setDamage(0);
+            if (meta == null) {
+                continue;
+            }
+            boolean changed = false;
+            if (!meta.isUnbreakable()) {
+                meta.setUnbreakable(true);
+                changed = true;
+            }
+            if (meta instanceof Damageable) {
+                Damageable damageable = (Damageable) meta;
+                if (damageable.hasDamage()) {
+                    damageable.setDamage(0);
+                    changed = true;
+                }
+            }
+            // Re-equip only when durability actually changed; unbreakable stops repeat equip sounds.
+            if (changed) {
                 armorPiece.setItemMeta(meta);
                 bot.setItem(slot, armorPiece);
             }

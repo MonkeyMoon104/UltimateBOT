@@ -6,55 +6,56 @@ import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 public class DifficultyProfileFactory {
 
     public static RAPVPConfig buildRAPVPConfig(DifficultyLevel difficulty) {
-        return switch (difficulty) {
-            case EASY ->
-                new RAPVPConfig.Builder()
+                switch (difficulty) {
+            case EASY:
+                return new RAPVPConfig.Builder()
                         .maxDistance(4)
                         .predictionTicks(4)
                         .minMovement(0.01)
                         .minSafeDistance(1.2)
                         .anchorSearchCooldownMillis(700L)
                         .build();
-            case NORMAL ->
-                new RAPVPConfig.Builder()
+            case NORMAL:
+                return new RAPVPConfig.Builder()
                         .maxDistance(7)
                         .predictionTicks(6)
                         .minMovement(0.01)
                         .minSafeDistance(2.2)
                         .anchorSearchCooldownMillis(430L)
                         .build();
-            case MEDIUM ->
-                new RAPVPConfig.Builder()
+            case MEDIUM:
+                return new RAPVPConfig.Builder()
                         .maxDistance(10)
                         .predictionTicks(10)
                         .minMovement(0.05)
                         .minSafeDistance(2.8)
                         .anchorSearchCooldownMillis(220L)
                         .build();
-            case HARD ->
-                new RAPVPConfig.Builder()
+            case HARD:
+                return new RAPVPConfig.Builder()
                         .maxDistance(12)
                         .predictionTicks(12)
                         .minMovement(0.01)
                         .minSafeDistance(3.0)
                         .anchorSearchCooldownMillis(120L)
                         .build();
-            case GOD ->
-                new RAPVPConfig.Builder()
+            case GOD:
+                return new RAPVPConfig.Builder()
                         .maxDistance(14)
                         .predictionTicks(12)
                         .minMovement(0.01)
                         .minSafeDistance(2.2)
                         .anchorSearchCooldownMillis(40L)
                         .build();
-            default -> new RAPVPConfig.Builder().build();
-        };
+            default:
+                return new RAPVPConfig.Builder().build();
+        }
     }
 
     public static CPVPConfig buildCPVPConfig(DifficultyLevel difficulty) {
-        return switch (difficulty) {
-            case EASY ->
-                new CPVPConfig.Builder()
+                switch (difficulty) {
+            case EASY:
+                return new CPVPConfig.Builder()
                         .maxCrystalDistance(4.3)
                         .minCrystalDistance(1.8)
                         .crystalAttackRange(4.2)
@@ -73,8 +74,8 @@ public class DifficultyProfileFactory {
                         .minCrystalScore(7.0)
                         .minAttackScore(0.95)
                         .build();
-            case NORMAL ->
-                new CPVPConfig.Builder()
+            case NORMAL:
+                return new CPVPConfig.Builder()
                         .maxCrystalDistance(6.3)
                         .minCrystalDistance(2.2)
                         .crystalAttackRange(5.8)
@@ -93,8 +94,8 @@ public class DifficultyProfileFactory {
                         .minCrystalScore(5.6)
                         .minAttackScore(0.55)
                         .build();
-            case MEDIUM ->
-                new CPVPConfig.Builder()
+            case MEDIUM:
+                return new CPVPConfig.Builder()
                         .maxCrystalDistance(7.3)
                         .minCrystalDistance(2.25)
                         .crystalAttackRange(6.5)
@@ -113,8 +114,8 @@ public class DifficultyProfileFactory {
                         .minCrystalScore(4.4)
                         .minAttackScore(0.38)
                         .build();
-            case HARD ->
-                new CPVPConfig.Builder()
+            case HARD:
+                return new CPVPConfig.Builder()
                         .maxCrystalDistance(8.5)
                         .minCrystalDistance(2.2)
                         .crystalAttackRange(7.0)
@@ -133,8 +134,8 @@ public class DifficultyProfileFactory {
                         .minCrystalScore(4.4)
                         .minAttackScore(0.35)
                         .build();
-            case GOD ->
-                new CPVPConfig.Builder()
+            case GOD:
+                return new CPVPConfig.Builder()
                         .maxCrystalDistance(11.5)
                         .minCrystalDistance(1.8)
                         .crystalAttackRange(8.5)
@@ -153,7 +154,8 @@ public class DifficultyProfileFactory {
                         .minCrystalScore(1.6)
                         .minAttackScore(0.05)
                         .build();
-            default -> new CPVPConfig.Builder().build();
-        };
+            default:
+                return new CPVPConfig.Builder().build();
+        }
     }
 }

@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -56,12 +58,28 @@ public final class ModeKit {
             return this;
         }
 
+        /**
+         * Resolves materials by name so kits do not touch version-specific {@link Material} enum
+         * constants at class-init time (avoids {@code NoSuchFieldError} on older servers).
+         */
+        public Builder slot(int slot, String materialName, int count) {
+            return slot(slot, MaterialCatalog.require(Objects.requireNonNull(materialName, "materialName")), count);
+        }
+
+        public Builder slot(int slot, String materialName, Material fallback, int count) {
+            return slot(slot, MaterialCatalog.optional(materialName, fallback), count);
+        }
+
+        public Builder equipment(EquipmentSlot slot, String materialName, Material fallback) {
+            return equipment(slot, MaterialCatalog.optional(materialName, fallback));
+        }
+
         public Builder slot(int slot, ItemStack item) {
             if (slot < 0 || slot > 8) {
                 throw new IllegalArgumentException("Hotbar slot must be between 0 and 8: " + slot);
             }
             ItemStack checkedItem = Objects.requireNonNull(item, "item");
-            if (checkedItem.isEmpty()) {
+            if (ItemStackAccess.isEmpty(checkedItem)) {
                 throw new IllegalArgumentException("Mode kit item cannot be empty");
             }
             slots.put(slot, checkedItem.clone());
@@ -83,7 +101,7 @@ public final class ModeKit {
                 throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
             }
             ItemStack checkedItem = Objects.requireNonNull(item, "item");
-            if (checkedItem.isEmpty()) {
+            if (ItemStackAccess.isEmpty(checkedItem)) {
                 throw new IllegalArgumentException("Mode equipment item cannot be empty");
             }
             equipment.put(checkedSlot, checkedItem.clone());

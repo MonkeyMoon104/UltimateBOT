@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.utils.Packet;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
@@ -50,5 +51,28 @@ public class BotBroadcaster {
         Packet.sendAddPlayerPacket(viewer, bot);
         Packet.sendSpawnPlayerPacket(viewer, bot);
         BotEquipmentUtils.sendCurrentEquipmentToViewer(bot, viewer);
+        // Classic NPC flow: ADD_PLAYER is required for skins on older clients, then REMOVE_PLAYER
+        // hides the entry from the tab list while keeping the spawned entity visible.
+        UltimateBot plugin = bot.getPlugin();
+        if (plugin != null) {
+            Bukkit.getScheduler()
+                    .runTaskLater(
+                            plugin,
+                            () -> {
+                                if (viewer.isOnline() && !bot.isRemoved()) {
+                                    Packet.sendRemovePlayerPacket(viewer, bot);
+                                }
+                            },
+                            2L);
+        }
+    }
+
+    public static void broadcastDespawn(ITrainingBot bot) {
+        if (bot == null) {
+            return;
+        }
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            Packet.sendRemovePlayerPacket(online, bot);
+        }
     }
 }

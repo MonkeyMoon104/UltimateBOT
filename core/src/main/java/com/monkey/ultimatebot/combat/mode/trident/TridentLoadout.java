@@ -2,9 +2,11 @@ package com.monkey.ultimatebot.combat.mode.trident;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
+import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 final class TridentLoadout {
     static final int RIPTIDE_SLOT = BotInventoryController.SWORD_SLOT;
@@ -18,8 +20,12 @@ final class TridentLoadout {
 
     static ModeKit create() {
         return ModeKit.builder()
-                .slot(RIPTIDE_SLOT, enchantedTrident(Enchantment.RIPTIDE, 3))
-                .slot(LOYALTY_SLOT, enchantedTrident(Enchantment.LOYALTY, 3))
+                .slot(
+                        RIPTIDE_SLOT,
+                        enchantedTrident(BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("riptide"), 3))
+                .slot(
+                        LOYALTY_SLOT,
+                        enchantedTrident(BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("loyalty"), 3))
                 .slot(SPONGE_SLOT, Material.SPONGE, 32)
                 .slot(WATER_SLOT, Material.WATER_BUCKET, 4)
                 .slot(WEB_SLOT, Material.COBWEB, 16)
@@ -28,11 +34,15 @@ final class TridentLoadout {
                 .build();
     }
 
-    private static ItemStack enchantedTrident(Enchantment movementEnchantment, int level) {
+    private static ItemStack enchantedTrident(@Nullable Enchantment movementEnchantment, int level) {
         ItemStack trident = new ItemStack(Material.TRIDENT);
-        trident.addUnsafeEnchantment(movementEnchantment, level);
-        trident.addUnsafeEnchantment(Enchantment.IMPALING, 5);
-        trident.addUnsafeEnchantment(Enchantment.UNBREAKING, 3);
+        if (movementEnchantment != null) trident.addUnsafeEnchantment(movementEnchantment, level);
+
+        Enchantment impaling = BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("impaling");
+        if (impaling != null) trident.addUnsafeEnchantment(impaling, 5);
+
+        Enchantment unbreaking = BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("unbreaking");
+        if (unbreaking != null) trident.addUnsafeEnchantment(unbreaking, 3);
         return trident;
     }
 }

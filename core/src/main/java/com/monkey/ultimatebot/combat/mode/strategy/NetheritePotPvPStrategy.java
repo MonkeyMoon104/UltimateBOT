@@ -43,14 +43,28 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        switch (phase) {
-            case PREBUFF -> prebuff(context);
-            case TRADE -> trade(context, target);
-            case CREATE_DISTANCE -> createDistance(context, target);
-            case FIRST_SPLASH -> splash(context, FIRST_POTION_SLOT, Phase.SECOND_SPLASH);
-            case SECOND_SPLASH -> splash(context, SECOND_POTION_SLOT, Phase.REENTER);
-            case EAT_GAPPLE -> eatGapple(context);
-            case REENTER -> reenter(context, target);
+                switch (phase) {
+            case PREBUFF:
+                prebuff(context);
+                break;
+            case TRADE:
+                trade(context, target);
+                break;
+            case CREATE_DISTANCE:
+                createDistance(context, target);
+                break;
+            case FIRST_SPLASH:
+                splash(context, FIRST_POTION_SLOT, Phase.SECOND_SPLASH);
+                break;
+            case SECOND_SPLASH:
+                splash(context, SECOND_POTION_SLOT, Phase.REENTER);
+                break;
+            case EAT_GAPPLE:
+                eatGapple(context);
+                break;
+            case REENTER:
+                reenter(context, target);
+                break;
         }
     }
 

@@ -42,13 +42,25 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        switch (phase) {
-            case PRESSURE -> pressure(context, target);
-            case SHIELD_DEFEND -> shieldDefend(context, target);
-            case DISENGAGE -> disengage(context, target);
-            case PEARL_ESCAPE -> pearlEscape(context, target);
-            case HEAL -> heal(context);
-            case REENTER -> reenter(context, target);
+                switch (phase) {
+            case PRESSURE:
+                pressure(context, target);
+                break;
+            case SHIELD_DEFEND:
+                shieldDefend(context, target);
+                break;
+            case DISENGAGE:
+                disengage(context, target);
+                break;
+            case PEARL_ESCAPE:
+                pearlEscape(context, target);
+                break;
+            case HEAL:
+                heal(context);
+                break;
+            case REENTER:
+                reenter(context, target);
+                break;
         }
     }
 

@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;
@@ -24,8 +25,8 @@ public class BotNoobMovementController {
     }
 
     public void moveTowards(LivingEntity target, double targetDistance) {
-        double targetX = target.getX();
-        double targetZ = target.getZ();
+        double targetX = EntityCoordsAccess.getX(target);
+        double targetZ = EntityCoordsAccess.getZ(target);
 
         Vector botPos = bot.bukkitPosition();
         double botX = botPos.getX();
@@ -72,8 +73,8 @@ public class BotNoobMovementController {
     }
 
     public void moveAwayFrom(LivingEntity target, double targetDistance) {
-        double targetX = target.getX();
-        double targetZ = target.getZ();
+        double targetX = EntityCoordsAccess.getX(target);
+        double targetZ = EntityCoordsAccess.getZ(target);
 
         Vector botPos = bot.bukkitPosition();
         double botX = botPos.getX();

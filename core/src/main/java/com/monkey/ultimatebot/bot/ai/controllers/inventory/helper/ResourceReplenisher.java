@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -24,16 +25,30 @@ public class ResourceReplenisher implements IResourceReplenisher {
         if (!infiniteResources) return;
 
         ItemStack currentStack = hotbarSlots.get(slot);
-        if (currentStack == null || currentStack.isEmpty()) return;
+        if (currentStack == null || ItemStackAccess.isEmpty(currentStack)) return;
 
-        switch (slot) {
-            case OBSIDIAN_SLOT -> refill(currentStack, Material.OBSIDIAN, 64);
-            case CRYSTAL_SLOT -> refill(currentStack, Material.END_CRYSTAL, 64);
-            case ENDERPEARL_SLOT -> refill(currentStack, Material.ENDER_PEARL, 16);
-            case ANCHOR_SLOT -> refill(currentStack, Material.RESPAWN_ANCHOR, 64);
-            case GLOW_SLOT -> refill(currentStack, Material.GLOWSTONE, 64);
-            case GOLDEN_APPLE_SLOT -> refill(currentStack, Material.GOLDEN_APPLE, 64);
-            default -> {}
+                switch (slot) {
+            case OBSIDIAN_SLOT:
+                refill(currentStack, Material.OBSIDIAN, 64);
+                break;
+            case CRYSTAL_SLOT:
+                refill(currentStack, Material.END_CRYSTAL, 64);
+                break;
+            case ENDERPEARL_SLOT:
+                refill(currentStack, Material.ENDER_PEARL, 16);
+                break;
+            case ANCHOR_SLOT:
+                refill(currentStack, Material.RESPAWN_ANCHOR, 64);
+                break;
+            case GLOW_SLOT:
+                refill(currentStack, Material.GLOWSTONE, 64);
+                break;
+            case GOLDEN_APPLE_SLOT:
+                refill(currentStack, Material.GOLDEN_APPLE, 64);
+                break;
+            default:
+
+                break;
         }
     }
 

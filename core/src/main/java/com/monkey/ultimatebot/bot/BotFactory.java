@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.protocol.BotProfileData;
 import java.util.List;
@@ -14,12 +16,12 @@ public class BotFactory {
     }
 
     public static BotProfileData createRandomProfile(UUID botUUID, String botName) {
-        return new BotProfileData(botUUID, botName, List.of());
+        return new BotProfileData(botUUID, botName, Collections.emptyList());
     }
 
     public static BotProfileData createProfileWithTexture(
             UUID botUUID, String botName, @Nullable String textureValue, @Nullable String textureSignature) {
-        if (textureValue == null || textureValue.isBlank()) {
+        if (textureValue == null || textureValue.trim().isEmpty()) {
             return createRandomProfile(botUUID, botName);
         }
         return NMSBridgeManager.get().createProfileWithTexture(botUUID, botName, textureValue, textureSignature);

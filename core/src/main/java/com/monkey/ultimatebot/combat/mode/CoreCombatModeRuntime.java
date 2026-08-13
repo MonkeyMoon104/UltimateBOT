@@ -9,7 +9,7 @@ import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 
 final class CoreCombatModeRuntime implements CombatModeRuntime {
     private final CombatModeContext context;
@@ -17,7 +17,7 @@ final class CoreCombatModeRuntime implements CombatModeRuntime {
     private final Supplier<CombatMode> mode;
     private final CoreBotControl control;
     private final CoreNativeBotAccess nativeAccess;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
 
     CoreCombatModeRuntime(
             CombatModeContext context,
@@ -25,7 +25,7 @@ final class CoreCombatModeRuntime implements CombatModeRuntime {
             Supplier<CombatMode> mode,
             CoreBotControl control,
             CoreNativeBotAccess nativeAccess,
-            RandomGenerator random) {
+            SplittableRandom random) {
         this.context = Objects.requireNonNull(context, "context");
         this.options = Objects.requireNonNull(options, "options");
         this.mode = Objects.requireNonNull(mode, "mode");
@@ -60,7 +60,7 @@ final class CoreCombatModeRuntime implements CombatModeRuntime {
     }
 
     @Override
-    public RandomGenerator random() {
+    public SplittableRandom random() {
         return random;
     }
 }

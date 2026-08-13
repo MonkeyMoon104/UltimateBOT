@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import java.util.Objects;
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,9 +10,9 @@ import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.Trident;
-import org.bukkit.entity.WindCharge;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.util.Vector;
@@ -20,9 +20,9 @@ import org.bukkit.util.Vector;
 public final class ModeProjectileService {
     private final org.bukkit.entity.Player shooter;
     private final ModeEntityTracker tracker;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
 
-    ModeProjectileService(org.bukkit.entity.Player shooter, ModeEntityTracker tracker, RandomGenerator random) {
+    ModeProjectileService(org.bukkit.entity.Player shooter, ModeEntityTracker tracker, SplittableRandom random) {
         this.shooter = Objects.requireNonNull(shooter, "shooter");
         this.tracker = Objects.requireNonNull(tracker, "tracker");
         this.random = Objects.requireNonNull(random, "random");
@@ -50,7 +50,7 @@ public final class ModeProjectileService {
     }
 
     public void fireWindCharge(LivingEntity target, double accuracy) {
-        tracker.track(shooter.launchProjectile(WindCharge.class, velocity(target, accuracy, 1.6D)));
+        tracker.track(shooter.launchProjectile(windChargeType(), velocity(target, accuracy, 1.6D)));
     }
 
     public void fireEnderPearlAwayFrom(LivingEntity target) {
@@ -66,13 +66,29 @@ public final class ModeProjectileService {
     }
 
     public void launchSelfWindCharge() {
-        tracker.track(shooter.launchProjectile(WindCharge.class, new Vector(0.0D, -1.35D, 0.0D)));
+        tracker.track(shooter.launchProjectile(windChargeType(), new Vector(0.0D, -1.35D, 0.0D)));
+    }
+
+    /**
+     * Resolves {@code WindCharge} by name so this class can load on servers that predate 1.21.
+     */
+    @SuppressWarnings("unchecked")
+    private static Class<? extends Projectile> windChargeType() {
+        try {
+            Class<?> type = Class.forName("org.bukkit.entity.WindCharge");
+            if (!Projectile.class.isAssignableFrom(type)) {
+                throw new IllegalStateException("WindCharge is not a Projectile on this server");
+            }
+            return (Class<? extends Projectile>) type;
+        } catch (ClassNotFoundException exception) {
+            throw new IllegalStateException("WindCharge is unavailable on this server", exception);
+        }
     }
 
     public void throwSplashPotionDownward(Color color) {
         Objects.requireNonNull(color, "color");
         ItemStack item = new ItemStack(Material.SPLASH_POTION);
-        if (item.getItemMeta() instanceof PotionMeta potionMeta) {
+        if (item.getItemMeta() instanceof PotionMeta) { PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
             potionMeta.setColor(color);
             item.setItemMeta(potionMeta);
         }

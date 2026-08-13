@@ -10,10 +10,10 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.compat.BlockDamageAccess;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Objects;
 import java.util.SplittableRandom;
-import java.util.random.RandomGenerator;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -35,7 +35,7 @@ public final class CombatModeContext implements AutoCloseable {
     private final ModeMotionService motion;
     private final ModeCombatActions actions;
     private final ModeCombatSignals signals;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
 
     public CombatModeContext(
             ITrainingBot bot,
@@ -120,7 +120,7 @@ public final class CombatModeContext implements AutoCloseable {
         return signals;
     }
 
-    public RandomGenerator random() {
+    public SplittableRandom random() {
         return random;
     }
 
@@ -169,6 +169,12 @@ public final class CombatModeContext implements AutoCloseable {
                 entity, options.canExplosionDamageBlocks(), () -> inventory.consumeItem(inventorySlot));
     }
 
+    /** Tracks a combat entity without consuming inventory (caller already consumed / best-effort). */
+    public boolean trackCombatEntity(Entity entity) {
+        return worldProtection.trackCombatEntity(
+                entity, options.canExplosionDamageBlocks(), () -> true);
+    }
+
     public boolean breakCombatBlock(Location location, int toolSlot) {
         inventory.switchToSlot(toolSlot);
         boolean broken = worldProtection.breakCombatBlock(
@@ -182,8 +188,9 @@ public final class CombatModeContext implements AutoCloseable {
 
     public void showBlockBreakProgress(Location location, float progress) {
         Location checkedLocation = Objects.requireNonNull(location, "location");
+        int sourceId = bukkitBot.getEntityId();
         for (org.bukkit.entity.Player viewer : checkedLocation.getWorld().getPlayers()) {
-            viewer.sendBlockDamage(checkedLocation, Math.clamp(progress, 0.0F, 1.0F), bukkitBot.getEntityId());
+            BlockDamageAccess.send(viewer, checkedLocation, progress, sourceId);
         }
     }
 

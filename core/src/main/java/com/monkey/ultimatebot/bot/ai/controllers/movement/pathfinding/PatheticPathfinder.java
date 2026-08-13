@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IPathfinder;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public final class PatheticPathfinder implements IPathfinder {
     private final PatheticPathPlanner pathPlanner;
     private final PathGoalResolver goalResolver;
 
-    private List<Vector> currentPath = List.of();
+    private List<Vector> currentPath = Collections.emptyList();
     private int pathIndex;
     private long lastPathCalculation;
     private @Nullable Vector lastRequestedTarget;
@@ -60,7 +62,7 @@ public final class PatheticPathfinder implements IPathfinder {
         BlockVector start = blockAt(startPos);
         BlockVector requestedGoal = blockAt(limitToLocalGoal(startPos, targetPos));
         removeExpiredAvoidances(lastPathCalculation);
-        Set<BlockVector> excluded = Set.copyOf(avoidedWaypoints.keySet());
+        Set<BlockVector> excluded = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(avoidedWaypoints.keySet());
         BlockVector goal = goalResolver.resolve(start, requestedGoal, candidate -> !excluded.contains(candidate));
         if (goal == null) {
             clearPath();
@@ -78,7 +80,7 @@ public final class PatheticPathfinder implements IPathfinder {
             movementPath.add(bottomCenterOf(point));
         }
 
-        currentPath = List.copyOf(movementPath);
+        currentPath = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(movementPath);
         pathIndex = currentPath.size() > 1 ? 1 : 0;
         resetWaypointProgress();
         return hasActivePath();
@@ -106,7 +108,7 @@ public final class PatheticPathfinder implements IPathfinder {
 
     @Override
     public void clearPath() {
-        currentPath = List.of();
+        currentPath = Collections.emptyList();
         pathIndex = 0;
         resetWaypointProgress();
     }

@@ -14,11 +14,13 @@ public final class CombatModeLoadoutDefaults {
 
     public static ArmorTier armorTier(CombatMode mode) {
         CombatMode checked = Objects.requireNonNull(mode, "mode");
-        return checked.equals(CombatMode.SWORD)
+        ArmorTier preferred = checked.equals(CombatMode.SWORD)
                         || checked.equals(CombatMode.UHC)
                         || checked.equals(CombatMode.WATER)
                         || checked.equals(CombatMode.TRIDENT)
                 ? ArmorTier.DIAMOND
                 : ArmorTier.NETHERITE;
+        ArmorTier max = ArmorTier.maxAvailable();
+        return preferred.compareTo(max) > 0 ? max : preferred;
     }
 }

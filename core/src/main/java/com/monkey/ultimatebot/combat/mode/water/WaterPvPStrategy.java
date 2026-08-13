@@ -49,11 +49,19 @@ public final class WaterPvPStrategy extends AbstractCombatModeStrategy {
             return;
         }
         context.motion().setSwimming(true);
-        switch (phase) {
-            case WAIT_FOR_WATER -> transitionTo(Phase.SWIM_APPROACH);
-            case SWIM_APPROACH -> swimApproach(context, target);
-            case SWORD_TRADE -> swordTrade(context, target);
-            case RECOVER -> recover(context, target);
+                switch (phase) {
+            case WAIT_FOR_WATER:
+                transitionTo(Phase.SWIM_APPROACH);
+                break;
+            case SWIM_APPROACH:
+                swimApproach(context, target);
+                break;
+            case SWORD_TRADE:
+                swordTrade(context, target);
+                break;
+            case RECOVER:
+                recover(context, target);
+                break;
         }
     }
 

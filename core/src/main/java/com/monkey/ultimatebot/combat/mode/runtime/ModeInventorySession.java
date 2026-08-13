@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+
+import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
@@ -30,11 +32,13 @@ public final class ModeInventorySession implements AutoCloseable {
         Objects.requireNonNull(options, "options");
         capture();
         Map<Integer, ItemStack> hotbar = originalHotbar();
-        for (Map.Entry<Integer, ItemStack> entry : kit.slots().entrySet()) {
-            hotbar.put(entry.getKey(), entry.getValue());
-        }
+        // Player equipment prefs first; mode kit last so Cart/UHC/etc. keep required items
+        // (rails, TNT minecarts, webs) instead of being overwritten by crystal/obsidian loadouts.
         for (Map.Entry<Integer, ItemStack> entry : options.getEquipmentContents().entrySet()) {
             hotbar.put(entry.getKey(), entry.getValue().clone());
+        }
+        for (Map.Entry<Integer, ItemStack> entry : kit.slots().entrySet()) {
+            hotbar.put(entry.getKey(), entry.getValue());
         }
         inventory.applyBukkitHotbarLoadout(hotbar, BotInventoryController.SWORD_SLOT);
 
@@ -47,7 +51,7 @@ public final class ModeInventorySession implements AutoCloseable {
     }
 
     private void applyConfiguredArmor(BotOptions options, Map<EquipmentSlot, ItemStack> equipment) {
-        for (EquipmentSlot slot : java.util.List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+        for (EquipmentSlot slot : java.util.Collections.unmodifiableList(java.util.Arrays.asList(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET))) {
             ItemStack configured = options.getArmor().get(slot);
             if (configured == null) {
                 continue;

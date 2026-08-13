@@ -163,11 +163,21 @@ public class BotEnderpearlController {
         rotationController.lookAt(targetPos.getX(), targetPos.getY(), targetPos.getZ());
         lastPearlUseTime = System.currentTimeMillis();
 
-        switch (strategy) {
-            case COMBO_ESCAPE -> lastEmergencyPearl = System.currentTimeMillis();
-            case REPOSITION_LOW -> repositionPearlCooldown = 100;
-            case AGGRESSIVE_CLOSE -> aggressivePearlCooldown = 80;
-            case ESCAPE, MELEE_DISENGAGE, ANCHOR_POSITION -> {}
+                switch (strategy) {
+            case COMBO_ESCAPE:
+                lastEmergencyPearl = System.currentTimeMillis();
+                break;
+            case REPOSITION_LOW:
+                repositionPearlCooldown = 100;
+                break;
+            case AGGRESSIVE_CLOSE:
+                aggressivePearlCooldown = 80;
+                break;
+            case ESCAPE:
+            case MELEE_DISENGAGE:
+            case ANCHOR_POSITION:
+
+                break;
         }
     }
 
@@ -321,10 +331,19 @@ public class BotEnderpearlController {
     }
 
     private void handlePostPearlStrategy() {
-        switch (currentStrategy) {
-            case COMBO_ESCAPE, ESCAPE -> damageTracker.resetDamageState();
-            case AGGRESSIVE_CLOSE, MELEE_DISENGAGE, ANCHOR_POSITION -> {}
-            case REPOSITION_LOW -> repositionPearlCooldown = 100;
+                switch (currentStrategy) {
+            case COMBO_ESCAPE:
+            case ESCAPE:
+                damageTracker.resetDamageState();
+                break;
+            case AGGRESSIVE_CLOSE:
+            case MELEE_DISENGAGE:
+            case ANCHOR_POSITION:
+
+                break;
+            case REPOSITION_LOW:
+                repositionPearlCooldown = 100;
+                break;
         }
     }
 

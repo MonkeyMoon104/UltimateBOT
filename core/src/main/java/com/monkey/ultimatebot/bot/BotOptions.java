@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
+import java.util.stream.Collectors;
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
@@ -12,9 +14,12 @@ import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -340,7 +345,7 @@ public final class BotOptions {
     }
 
     public void setCustomKillMessage(@Nullable String customKillMessage) {
-        this.customKillMessage = customKillMessage == null || customKillMessage.isBlank() ? null : customKillMessage;
+        this.customKillMessage = customKillMessage == null || customKillMessage.trim().isEmpty() ? null : customKillMessage;
     }
 
     public Map<Integer, ItemStack> getEquipmentContents() {
@@ -441,7 +446,8 @@ public final class BotOptions {
         boolean builtInEnabled = requiredMode.builtIn()
                 && training.getCombatProfileCatalog()
                         .configuration(requiredMode)
-                        .enabled();
+                        .enabled()
+                && training.getCombatProfileCatalog().supports(requiredMode);
         boolean customEnabled =
                 training.getExtensionRegistry().combatMode(requiredMode).isPresent();
         if (!builtInEnabled && !customEnabled) {
@@ -460,10 +466,10 @@ public final class BotOptions {
                 .filter(mode -> training.getExtensionRegistry()
                         .combatMode(mode)
                         .map(provider -> provider.descriptor().permission())
-                        .filter(permission -> !permission.isBlank())
+                        .filter(permission -> !permission.trim().isEmpty())
                         .map(viewer::hasPermission)
                         .orElse(true))
-                .toList();
+                .collect(Collectors.toList());
         return nextCombatMode(visibleModes, forward);
     }
 
@@ -509,7 +515,7 @@ public final class BotOptions {
     }
 
     public void setBrainKey(@Nullable BrainKey brainKey) {
-        if (brainKey != null && training.getExtensionRegistry().brain(brainKey).isEmpty()) {
+        if (brainKey != null && !training.getExtensionRegistry().brain(brainKey).isPresent()) {
             throw new IllegalArgumentException("Brain is not registered: " + brainKey);
         }
         this.brainKey = brainKey;
@@ -639,7 +645,7 @@ public final class BotOptions {
             ItemStack currentPiece = armor.get(slot);
             ItemStack updated = currentPiece == null
                     ? new ItemStack(clampedTier.toMaterial(slot))
-                    : currentPiece.withType(clampedTier.toMaterial(slot));
+                    : ItemStackAccess.withType(currentPiece, clampedTier.toMaterial(slot));
             armor.put(slot, updated);
         }
         applyAllTrimSelections();
@@ -650,7 +656,8 @@ public final class BotOptions {
             ItemStack currentPiece = armor.get(slot);
             ItemStack updated = currentPiece == null
                     ? new ItemStack(minArmorTier.toMaterial(slot))
-                    : currentPiece.withType(
+                    : ItemStackAccess.withType(
+                            currentPiece,
                             ArmorCycle.clampArmor(currentPiece.getType(), slot, minArmorTier, maxArmorTier));
             armor.put(slot, updated);
         }
@@ -824,16 +831,25 @@ public final class BotOptions {
     }
 
     public boolean hasCompleteTrimSelection(EquipmentSlot slot) {
+        if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
+            return false;
+        }
         return ArmorTrimUtils.isCompleteSelection(getTrimPatternKey(slot), getTrimMaterialKey(slot));
     }
 
     private void applyAllTrimSelections() {
+        if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
+            return;
+        }
         for (EquipmentSlot slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             applyTrimSelection(slot);
         }
     }
 
     private void applyTrimSelection(EquipmentSlot slot) {
+        if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
+            return;
+        }
         ItemStack piece = armor.get(slot);
         if (piece == null) {
             return;
@@ -931,5 +947,10 @@ public final class BotOptions {
             return maxDifficulty;
         }
         return candidate;
+    }
+
+    @Override
+    public String toString() {
+        return "BotOptions[ownerUUID=" + ownerUUID + ", combatMode=" + combatMode + ", follow=" + follow + ", combat=" + combat + "]";
     }
 }

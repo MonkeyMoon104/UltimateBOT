@@ -1,13 +1,18 @@
 package com.monkey.ultimatebot.combat.mode.trident;
 
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import java.util.Objects;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
 final class TridentUtilityActions {
+    private static final int MAX_WATER_DROP_SEARCH = 6;
+
     private @Nullable Location waterLocation;
 
     void reset() {
@@ -19,9 +24,11 @@ final class TridentUtilityActions {
     }
 
     boolean placeWater(CombatModeContext context) {
-        Location placement = Objects.requireNonNull(context.bukkitBot().getLocation(), "bot location")
-                .getBlock()
-                .getLocation();
+        Location origin = Objects.requireNonNull(context.bukkitBot().getLocation(), "bot location");
+        Location placement = findSupportedWaterPlacement(origin);
+        if (placement == null) {
+            return false;
+        }
         boolean placed =
                 context.placeCombatBlock(placement, Material.WATER, Material.WATER_BUCKET, TridentLoadout.WATER_SLOT);
         if (placed) {
@@ -36,7 +43,7 @@ final class TridentUtilityActions {
     }
 
     double riptideVerticalVelocity(CombatModeContext context, LivingEntity target) {
-        return Math.clamp((target.getY() - context.motion().botY()) * 0.22D + 0.24D, 0.12D, 0.52D);
+        return Math.min(0.52D, Math.max(0.12D, (EntityCoordsAccess.getY(target) - context.motion().botY()) * 0.22D + 0.24D));
     }
 
     void restoreWater(CombatModeContext context) {
@@ -44,5 +51,24 @@ final class TridentUtilityActions {
             context.restoreCombatBlock(waterLocation);
             waterLocation = null;
         }
+    }
+
+    /**
+     * Prefer the bot's feet block when it has solid support; otherwise search downward so water is
+     * never left floating in mid-air after a jump/riptide.
+     */
+    private static @Nullable Location findSupportedWaterPlacement(Location origin) {
+        Block start = origin.getBlock();
+        for (int dy = 0; dy <= MAX_WATER_DROP_SEARCH; dy++) {
+            Block candidate = start.getRelative(0, -dy, 0);
+            if (!candidate.isPassable() || candidate.isLiquid()) {
+                continue;
+            }
+            Material below = candidate.getRelative(BlockFace.DOWN).getType();
+            if (below.isSolid() || below == Material.COBWEB) {
+                return candidate.getLocation();
+            }
+        }
+        return null;
     }
 }

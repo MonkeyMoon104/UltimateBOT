@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
@@ -7,7 +9,7 @@ import com.monkey.ultimatebot.combat.mode.water.UnderwaterMotionPlanner;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import java.util.Objects;
 import java.util.function.Supplier;
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -19,7 +21,7 @@ public final class ModeMotionService {
     private final BotMovementController movement;
     private final BotRotationController rotation;
     private final Supplier<CombatTuning> tuning;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
 
     ModeMotionService(
             ITrainingBot bot,
@@ -27,7 +29,7 @@ public final class ModeMotionService {
             BotMovementController movement,
             BotRotationController rotation,
             Supplier<CombatTuning> tuning,
-            RandomGenerator random) {
+            SplittableRandom random) {
         this.bot = Objects.requireNonNull(bot, "bot");
         this.bukkitBot = Objects.requireNonNull(bukkitBot, "bukkitBot");
         this.movement = Objects.requireNonNull(movement, "movement");
@@ -50,7 +52,7 @@ public final class ModeMotionService {
     }
 
     public double heightAbove(LivingEntity target) {
-        return bukkitBot.getY() - target.getY();
+        return EntityCoordsAccess.getY(bukkitBot) - EntityCoordsAccess.getY(target);
     }
 
     public void approach(LivingEntity target, double desiredDistance) {
@@ -140,7 +142,7 @@ public final class ModeMotionService {
             for (double zOffset : offsets) {
                 for (int height = 0; height < clearanceBlocks; height++) {
                     Location position = new Location(
-                            entity.getWorld(), entity.getX() + xOffset, startY + height, entity.getZ() + zOffset);
+                            entity.getWorld(), EntityCoordsAccess.getX(entity) + xOffset, startY + height, EntityCoordsAccess.getZ(entity) + zOffset);
                     if (position.getBlock().getType().isSolid()) {
                         return false;
                     }
@@ -192,7 +194,7 @@ public final class ModeMotionService {
     }
 
     public double botY() {
-        return bukkitBot.getY();
+        return EntityCoordsAccess.getY(bukkitBot);
     }
 
     private void applySwimmingVelocity(Vector velocity) {

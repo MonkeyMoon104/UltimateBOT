@@ -48,7 +48,7 @@ public final class ModeCombatPolicy {
 
     public static boolean shouldCounterShieldImpact(
             double distance, double attackRange, boolean attackReady, double aggression, double randomRoll) {
-        double counterChance = 0.35D + Math.clamp(aggression, 0.0D, 1.0D) * 0.5D;
+        double counterChance = 0.35D + Math.min(1.0D, Math.max(0.0D, aggression)) * 0.5D;
         return distance <= attackRange && attackReady && randomRoll < counterChance;
     }
 
@@ -57,7 +57,7 @@ public final class ModeCombatPolicy {
     }
 
     public static double bowPower(int drawTicks) {
-        double draw = Math.clamp(drawTicks, 0, 20) / 20.0D;
+        double draw = Math.min(20, Math.max(0, drawTicks)) / 20.0D;
         return Math.min(1.0D, (draw * draw + draw * 2.0D) / 3.0D);
     }
 
@@ -65,12 +65,12 @@ public final class ModeCombatPolicy {
         if (!Double.isFinite(distance) || distance < 0.0D) {
             throw new IllegalArgumentException("distance must be finite and non-negative");
         }
-        double requiredPower = Math.clamp(distance / 15.0D, 0.25D, 1.0D);
+        double requiredPower = Math.min(1.0D, Math.max(0.25D, distance / 15.0D));
         double normalizedDraw = Math.sqrt(1.0D + requiredPower * 3.0D) - 1.0D;
-        return Math.clamp((int) Math.ceil(normalizedDraw * 20.0D), 5, 20);
+        return Math.min(20, Math.max(5, (int) Math.ceil(normalizedDraw * 20.0D)));
     }
 
     public static double projectileSpread(double accuracy) {
-        return (1.0D - Math.clamp(accuracy, 0.0D, 1.0D)) * 0.24D;
+        return (1.0D - Math.min(1.0D, Math.max(0.0D, accuracy))) * 0.24D;
     }
 }

@@ -18,6 +18,9 @@ final class WorldProtectionPolicy {
     }
 
     static boolean hasPlacementSupport(Material material, boolean supportedBelow) {
-        return material != Material.COBWEB || supportedBelow;
+        if (material == Material.COBWEB || material == Material.WATER) {
+            return supportedBelow;
+        }
+        return true;
     }
 }

@@ -75,10 +75,10 @@ public class TrainingBotLogic {
         deathHandler.handleDeath(killer);
     }
 
-    public boolean onDamaged(float amount, EntityDamageEvent event) {
+    public boolean onDamaged(float amount, @Nullable EntityDamageEvent event) {
         boolean result = equipmentHandler.handleDamage(amount, event);
 
-        if (brainController.getBotAI().usesCustomBrain()) {
+        if (event != null && brainController.getBotAI().usesCustomBrain()) {
             brainController.getBotAI().customBrainDamaged(event);
         }
 
@@ -91,12 +91,13 @@ public class TrainingBotLogic {
             }
             org.bukkit.entity.Player currentTarget = bot.getTargetPlayer();
 
-            org.bukkit.entity.Entity attacker = event instanceof EntityDamageByEntityEvent byEntity
-                    ? byEntity.getDamager()
-                    : null;
-            if (attacker instanceof org.bukkit.entity.Player attackingPlayer
+            org.bukkit.entity.Entity attacker = null;
+            if (event instanceof EntityDamageByEntityEvent) {
+                attacker = ((EntityDamageByEntityEvent) event).getDamager();
+            }
+            if (attacker instanceof org.bukkit.entity.Player
                     && currentTarget != null
-                    && attackingPlayer.getUniqueId().equals(currentTarget.getUniqueId())) {
+                    && ((org.bukkit.entity.Player) attacker).getUniqueId().equals(currentTarget.getUniqueId())) {
                 if (!fireOrLavaDamage) {
                     brainController.getBotAI().getEnderpearlController().onDamageReceived();
                 }
@@ -130,11 +131,20 @@ public class TrainingBotLogic {
         onDamaged((float) event.getFinalDamage(), event);
     }
 
-    private boolean isFireOrLavaDamage(EntityDamageEvent event) {
-        return switch (event.getCause()) {
-            case FIRE, FIRE_TICK, LAVA, HOT_FLOOR -> true;
-            default -> false;
-        };
+    private boolean isFireOrLavaDamage(@Nullable EntityDamageEvent event) {
+        // Fake-player NMS often calls actuallyHurt before Bukkit sets lastDamageCause.
+        if (event == null) {
+            return false;
+        }
+        switch (event.getCause()) {
+            case FIRE:
+            case FIRE_TICK:
+            case LAVA:
+            case HOT_FLOOR:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public BotBrainController getBrainController() {

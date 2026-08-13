@@ -43,7 +43,7 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         context.crystal().setEnabled(context.options().isExplosions());
-        if (target instanceof Player playerTarget) {
+        if (target instanceof Player) { Player playerTarget = (Player) target;
             context.legacyCombat(playerTarget);
             return;
         }
@@ -72,7 +72,12 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
             return false;
         }
         Entity entity = org.bukkit.Bukkit.getEntity(mobCrystalId);
-        if (!(entity instanceof EnderCrystal crystal) || !crystal.isValid()) {
+        if (!(entity instanceof EnderCrystal)) {
+            mobCrystalId = null;
+            return false;
+        }
+        EnderCrystal crystal = (EnderCrystal) entity;
+        if (!crystal.isValid()) {
             mobCrystalId = null;
             return false;
         }

@@ -4,6 +4,9 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
@@ -40,20 +43,21 @@ public final class SlotManager implements ISlotManager {
 
     private void initializeDefaultItems() {
         hotbarSlots.put(SWORD_SLOT, createDefaultSword());
-        hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Material.ENDER_PEARL, 16));
-        hotbarSlots.put(TOTEM_SLOT, new ItemStack(Material.TOTEM_OF_UNDYING));
-        hotbarSlots.put(OBSIDIAN_SLOT, new ItemStack(Material.OBSIDIAN, 64));
-        hotbarSlots.put(CRYSTAL_SLOT, new ItemStack(Material.END_CRYSTAL, 64));
-        hotbarSlots.put(ANCHOR_SLOT, new ItemStack(Material.RESPAWN_ANCHOR, 64));
-        hotbarSlots.put(GLOW_SLOT, new ItemStack(Material.GLOWSTONE, 64));
-        hotbarSlots.put(GOLDEN_APPLE_SLOT, new ItemStack(Material.GOLDEN_APPLE, 64));
-        hotbarSlots.put(EMPTY_SLOT, ItemStack.empty());
+        hotbarSlots.put(ENDERPEARL_SLOT, MaterialCatalog.stack("ENDER_PEARL", Material.ENDER_PEARL, 16));
+        hotbarSlots.put(TOTEM_SLOT, MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE));
+        hotbarSlots.put(OBSIDIAN_SLOT, MaterialCatalog.stack("OBSIDIAN", Material.OBSIDIAN, 64));
+        hotbarSlots.put(CRYSTAL_SLOT, MaterialCatalog.stack("END_CRYSTAL", Material.GHAST_TEAR, 64));
+        hotbarSlots.put(ANCHOR_SLOT, MaterialCatalog.stack("RESPAWN_ANCHOR", Material.OBSIDIAN, 64));
+        hotbarSlots.put(GLOW_SLOT, MaterialCatalog.stack("GLOWSTONE", Material.GLOWSTONE, 64));
+        hotbarSlots.put(GOLDEN_APPLE_SLOT, MaterialCatalog.stack("GOLDEN_APPLE", Material.GOLDEN_APPLE, 64));
+        hotbarSlots.put(EMPTY_SLOT, new ItemStack(Material.AIR));
         switchToSlot(SWORD_SLOT);
     }
 
     private ItemStack createDefaultSword() {
-        ItemStack sword = new ItemStack(Material.NETHERITE_SWORD);
-        sword.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 2);
+        ItemStack sword = new ItemStack(MaterialCatalog.optional("NETHERITE_SWORD", Material.DIAMOND_SWORD));
+        Enchantment fireAspect = BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("fire_aspect");
+        if (fireAspect != null) sword.addUnsafeEnchantment(fireAspect, 2);
         return sword;
     }
 
@@ -64,20 +68,23 @@ public final class SlotManager implements ISlotManager {
 
         resourceReplenisher.replenishItem(hotbarSlots, slot);
         ItemStack item = hotbarSlots.get(slot);
-        if (currentSlot == slot && bot.getItem(EquipmentSlot.HAND).isSimilar(item)) {
+        if (currentSlot == slot) {
+            ItemStack hand = bot.getItem(EquipmentSlot.HAND);
+            if (hand.getType() != item.getType() || hand.getAmount() != item.getAmount()) {
+                bot.setItem(EquipmentSlot.HAND, item);
+            }
             return;
         }
 
         currentSlot = slot;
         bot.setItem(EquipmentSlot.HAND, item);
-
-        equipmentBroadcaster.broadcastEquipmentChange(bot);
+        equipmentBroadcaster.broadcastHandChange(bot);
     }
 
     @Override
     public void setItem(int slot, ItemStack item) {
         if (slot >= 0 && slot <= 8) {
-            ItemStack current = hotbarSlots.getOrDefault(slot, ItemStack.empty());
+            ItemStack current = hotbarSlots.getOrDefault(slot, new ItemStack(Material.AIR));
             if (current.isSimilar(item) && current.getAmount() == item.getAmount()) {
                 return;
             }
@@ -85,7 +92,7 @@ public final class SlotManager implements ISlotManager {
 
             if (slot == currentSlot) {
                 bot.setItem(EquipmentSlot.HAND, item);
-                equipmentBroadcaster.broadcastEquipmentChange(bot);
+                equipmentBroadcaster.broadcastHandChange(bot);
             }
         }
     }
@@ -98,7 +105,7 @@ public final class SlotManager implements ISlotManager {
 
         for (int slot = 0; slot <= 8; slot++) {
             ItemStack item = java.util.Objects.requireNonNull(
-                    checkedLoadout.getOrDefault(slot, ItemStack.empty()), "loadout item at slot " + slot);
+                    checkedLoadout.getOrDefault(slot, new ItemStack(Material.AIR)), "loadout item at slot " + slot);
             hotbarSlots.put(slot, item.clone());
         }
 
@@ -116,7 +123,7 @@ public final class SlotManager implements ISlotManager {
 
     @Override
     public ItemStack getItem(int slot) {
-        return hotbarSlots.getOrDefault(slot, ItemStack.empty());
+        return hotbarSlots.getOrDefault(slot, new ItemStack(Material.AIR));
     }
 
     @Override
@@ -128,11 +135,11 @@ public final class SlotManager implements ISlotManager {
     public ItemStack getCurrentItem() {
         ItemStack current = hotbarSlots.get(currentSlot);
 
-        if (current != null && !current.isEmpty()) {
+        if (current != null && !ItemStackAccess.isEmpty(current)) {
             resourceReplenisher.replenishItem(hotbarSlots, currentSlot);
         }
 
-        return current == null ? ItemStack.empty() : current;
+        return current == null ? new ItemStack(Material.AIR) : current;
     }
 
     @Override

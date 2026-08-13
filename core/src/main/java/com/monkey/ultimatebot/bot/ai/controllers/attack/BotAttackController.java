@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.attack;
 
+import com.monkey.ultimatebot.UltimateBot;
+
 import com.monkey.ultimatebot.api.event.combat.BotAttackEvent;
 import com.monkey.ultimatebot.api.event.combat.BotAttackType;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
@@ -56,8 +58,8 @@ public class BotAttackController {
 
     private boolean allowAttack(LivingEntity target, BotAttackType type) {
         if (target == null) return false;
-        var plugin = bot.getPlugin();
-        var ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
+        UltimateBot plugin = bot.getPlugin();
+        java.util.UUID ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
         if (ownerUUID == null) {
             return true;
         }

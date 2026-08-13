@@ -15,7 +15,7 @@ public class TotemNotificationManager implements ITotemNotificationManager {
 
     @Override
     public void sendTotemWarning(ITrainingBot trainingBot) {
-        var player = trainingBot.getTargetPlayer();
+        org.bukkit.entity.Player player = trainingBot.getTargetPlayer();
         if (player != null && player.isOnline()) {
             String msg = plugin.getLangString("messages.totem-finish", "[%botname%] Running out of totems");
             String rawName = plugin.getConfig().getString("bot.name", "CrystalBot");

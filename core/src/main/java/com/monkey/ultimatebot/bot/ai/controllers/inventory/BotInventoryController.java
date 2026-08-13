@@ -10,6 +10,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipme
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import java.util.Objects;
 import org.bukkit.Material;
@@ -224,13 +225,13 @@ public class BotInventoryController {
 
     public boolean consumeItem(int slot) {
         ItemStack stack = getItem(slot);
-        if (stack == null || stack.isEmpty()) {
+        if (stack == null || ItemStackAccess.isEmpty(stack)) {
             return false;
         }
         if (!resourceReplenisher.hasInfiniteResources()) {
             stack.setAmount(stack.getAmount() - 1);
-            if (stack.isEmpty()) {
-                setItem(slot, ItemStack.empty());
+            if (ItemStackAccess.isEmpty(stack)) {
+                setItem(slot, ItemStackAccess.empty());
             } else {
                 setItem(slot, stack);
             }

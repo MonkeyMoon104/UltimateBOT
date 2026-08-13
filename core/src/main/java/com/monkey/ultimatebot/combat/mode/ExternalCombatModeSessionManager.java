@@ -12,7 +12,7 @@ import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import com.monkey.ultimatebot.extension.runtime.ModeKitAdapter;
 import java.util.Objects;
 import java.util.logging.Level;
-import java.util.random.RandomGenerator;
+import java.util.SplittableRandom;
 import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 
@@ -24,7 +24,7 @@ final class ExternalCombatModeSessionManager implements AutoCloseable {
     private final CombatModeContext context;
     private final CoreBotControl control;
     private final CoreNativeBotAccess nativeAccess;
-    private final RandomGenerator random;
+    private final SplittableRandom random;
     private @Nullable CombatMode mode;
     private @Nullable CombatModeSession session;
     private boolean suspended;
@@ -38,7 +38,7 @@ final class ExternalCombatModeSessionManager implements AutoCloseable {
             CombatModeContext context,
             CoreBotControl control,
             CoreNativeBotAccess nativeAccess,
-            RandomGenerator random) {
+            SplittableRandom random) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.options = Objects.requireNonNull(options, "options");
         this.context = Objects.requireNonNull(context, "context");

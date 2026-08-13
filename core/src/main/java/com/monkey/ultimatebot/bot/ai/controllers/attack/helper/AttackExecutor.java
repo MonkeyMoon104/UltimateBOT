@@ -6,13 +6,15 @@ import com.monkey.ultimatebot.common.guard.GuardMetadata;
 import com.monkey.ultimatebot.nms.DamageKind;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
 
 public class AttackExecutor implements IAttackExecutor {
-    private static final System.Logger LOGGER = System.getLogger(AttackExecutor.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(AttackExecutor.class.getName());
 
     public static final String BOT_FIRE_ASPECT_METADATA = GuardMetadata.FIRE_ASPECT_UNTIL;
     private static final int FIRE_ASPECT_SECONDS = 4;
@@ -53,7 +55,7 @@ public class AttackExecutor implements IAttackExecutor {
             }
             target.setFireTicks(Math.max(target.getFireTicks(), FIRE_ASPECT_SECONDS * 20));
         } catch (RuntimeException fireAspectError) {
-            LOGGER.log(System.Logger.Level.DEBUG, "Could not apply bot fire aspect metadata", fireAspectError);
+            LOGGER.log(Level.FINE, "Could not apply bot fire aspect metadata", fireAspectError);
         }
     }
 
@@ -84,7 +86,7 @@ public class AttackExecutor implements IAttackExecutor {
             }
             scheduleLavaDamage(bot, target);
         } catch (RuntimeException lavaPreparationError) {
-            LOGGER.log(System.Logger.Level.DEBUG, "Could not prepare bot lava damage", lavaPreparationError);
+            LOGGER.log(Level.FINE, "Could not prepare bot lava damage", lavaPreparationError);
         }
     }
 
@@ -124,7 +126,7 @@ public class AttackExecutor implements IAttackExecutor {
                                                 DamageKind.LAVA);
                             } catch (RuntimeException lavaDamageError) {
                                 LOGGER.log(
-                                        System.Logger.Level.DEBUG,
+                                        Level.FINE,
                                         "Could not apply delayed bot lava damage",
                                         lavaDamageError);
                             }

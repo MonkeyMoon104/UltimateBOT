@@ -6,7 +6,6 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 
 public final class MacePvPStrategy extends AbstractCombatModeStrategy {
@@ -19,10 +18,10 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.MACE,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.MACE)
-                        .slot(BotInventoryController.ENDERPEARL_SLOT, Material.WIND_CHARGE, 64)
-                        .slot(BotInventoryController.OBSIDIAN_SLOT, Material.COBWEB, 64)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
+                        .slot(BotInventoryController.SWORD_SLOT, "mace", 1)
+                        .slot(BotInventoryController.ENDERPEARL_SLOT, "wind_charge", 64)
+                        .slot(BotInventoryController.OBSIDIAN_SLOT, "cobweb", 64)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, "golden_apple", 64)
                         .build());
     }
 
@@ -36,12 +35,22 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-        switch (phase) {
-            case APPROACH -> approachLaunchWindow(context, target);
-            case ASCEND -> ascendAboveTarget(context, target);
-            case ALIGN -> alignForDive(context, target);
-            case DIVE -> diveAndStrike(context, target);
-            case RECOVER -> recover(context, target);
+                switch (phase) {
+            case APPROACH:
+                approachLaunchWindow(context, target);
+                break;
+            case ASCEND:
+                ascendAboveTarget(context, target);
+                break;
+            case ALIGN:
+                alignForDive(context, target);
+                break;
+            case DIVE:
+                diveAndStrike(context, target);
+                break;
+            case RECOVER:
+                recover(context, target);
+                break;
         }
     }
 

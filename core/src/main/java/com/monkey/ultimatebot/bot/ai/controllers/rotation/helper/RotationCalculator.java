@@ -15,9 +15,9 @@ public class RotationCalculator implements IRotationCalculator {
     public float[] calculateRotationToTarget(ITrainingBot bot, LivingEntity target) {
         Vector botEye = bot.bukkitEyePosition();
         Location targetEye = target.getEyeLocation();
-        double dx = target.getX() - botEye.getX();
+        double dx = targetEye.getX() - botEye.getX();
         double dy = targetEye.getY() - botEye.getY();
-        double dz = target.getZ() - botEye.getZ();
+        double dz = targetEye.getZ() - botEye.getZ();
 
         return calculateRotationFromDeltas(dx, dy, dz);
     }

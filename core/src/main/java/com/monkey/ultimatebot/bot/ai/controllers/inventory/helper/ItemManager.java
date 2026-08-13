@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipme
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
@@ -37,7 +38,7 @@ public class ItemManager implements IItemManager {
     @Override
     public void addEnderpearls(int count) {
         ItemStack enderpearlStack = hotbarSlots.get(ENDERPEARL_SLOT);
-        if (enderpearlStack == null || enderpearlStack.isEmpty()) {
+        if (enderpearlStack == null || ItemStackAccess.isEmpty(enderpearlStack)) {
             hotbarSlots.put(ENDERPEARL_SLOT, new ItemStack(Material.ENDER_PEARL, count));
         } else {
             enderpearlStack.setAmount(enderpearlStack.getAmount() + count);
@@ -52,11 +53,16 @@ public class ItemManager implements IItemManager {
     @Override
     public void onItemUsed(int slot) {
         resourceReplenisher.onItemUsed(hotbarSlots, slot);
-
-        if (slotManager.getCurrentSlot() == slot) {
-            ItemStack stack = hotbarSlots.get(slot);
+        if (slotManager.getCurrentSlot() != slot) {
+            return;
+        }
+        ItemStack stack = hotbarSlots.get(slot);
+        if (stack == null || ItemStackAccess.isEmpty(stack)) {
+            return;
+        }
+        ItemStack hand = bot.getItem(EquipmentSlot.HAND);
+        if (hand.getType() != stack.getType()) {
             bot.setItem(EquipmentSlot.HAND, stack);
-            equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }
 }

@@ -29,7 +29,11 @@ public class AnchorExploder {
     public boolean explodeAnchor(BlockVector anchorPos) {
         try {
             Block block = blockAt(anchorPos);
-            if (!(block.getBlockData() instanceof RespawnAnchor anchorData) || anchorData.getCharges() <= 0) {
+            if (!(block.getBlockData() instanceof RespawnAnchor)) {
+                return false;
+            }
+            RespawnAnchor anchorData = (RespawnAnchor) block.getBlockData();
+            if (anchorData.getCharges() <= 0) {
                 return false;
             }
             inventory.switchToEmptySlot();

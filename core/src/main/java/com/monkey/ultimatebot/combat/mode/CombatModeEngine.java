@@ -16,6 +16,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeStrategy;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Map;
 import java.util.Objects;
@@ -62,7 +63,7 @@ public final class CombatModeEngine implements AutoCloseable {
                 Objects.requireNonNull(nativeAccess, "nativeAccess"),
                 new SplittableRandom(
                         bot.getUniqueId().getMostSignificantBits() ^ bot.getUniqueId().getLeastSignificantBits()));
-        this.strategies = BuiltInCombatModeStrategies.create();
+        this.strategies = BuiltInCombatModeStrategies.create(NMSBridgeManager.capabilities());
     }
 
     public void tick(LivingEntity target) {
@@ -135,13 +136,16 @@ public final class CombatModeEngine implements AutoCloseable {
     }
 
     private void transitionIfRequired() {
-        CombatMode selected = options.getCombatMode();
+        CombatMode selected = resolveSupportedMode(options.getCombatMode());
+        if (!selected.equals(options.getCombatMode())) {
+            options.setCombatMode(selected);
+        }
         if (external.isActive()
                 && Objects.equals(activeMode, selected)
-                && plugin.getExtensionRegistry().combatMode(selected).isEmpty()) {
+                && !plugin.getExtensionRegistry().combatMode(selected).isPresent()) {
             deactivate();
-            options.setCombatMode(CombatMode.SWORD);
-            selected = CombatMode.SWORD;
+            selected = resolveSupportedMode(CombatMode.SWORD);
+            options.setCombatMode(selected);
         }
         if (Objects.equals(activeMode, selected)) {
             return;
@@ -156,10 +160,27 @@ public final class CombatModeEngine implements AutoCloseable {
         }
         CombatModeStrategy selectedStrategy = strategies.get(selected);
         if (selectedStrategy == null) {
+            selected = CombatMode.SWORD;
+            options.setCombatMode(selected);
+            activeMode = selected;
+            selectedStrategy = strategies.get(CombatMode.SWORD);
+        }
+        if (selectedStrategy == null) {
             throw new IllegalStateException("No strategy registered for " + selected);
         }
         selectedStrategy.enter(context);
         activeStrategy = selectedStrategy;
+    }
+
+    private CombatMode resolveSupportedMode(CombatMode selected) {
+        CombatMode checked = Objects.requireNonNull(selected, "selected");
+        if (!checked.builtIn()) {
+            return checked;
+        }
+        if (NMSBridgeManager.supportsCombatMode(checked) && strategies.containsKey(checked)) {
+            return checked;
+        }
+        return CombatMode.SWORD;
     }
 
     private void resumeIfRequired() {

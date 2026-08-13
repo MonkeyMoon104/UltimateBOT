@@ -222,7 +222,7 @@ public class BotManager {
     }
 
     public void setDifficultyLevel(UUID uuid, DifficultyLevel difficulty) {
-        var bot = getBot(uuid);
+        com.monkey.ultimatebot.bot.ai.ITrainingBot bot = getBot(uuid);
         if (bot == null) return;
 
         bot.getBotAI().setDifficulty(difficulty);

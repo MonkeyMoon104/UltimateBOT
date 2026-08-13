@@ -38,7 +38,6 @@ public class ObsidianPlacer {
             boolean consumed = NMSBridgeManager.get()
                     .useItemOnBlock(bot.asBukkitPlayer(), obsidianStack, blockAt(adjacentPos), bestFace, hit, EquipmentSlot.HAND);
             if (consumed) {
-                bot.swingMainHand();
                 inventoryController.onItemUsed(BotInventoryController.OBSIDIAN_SLOT);
                 return true;
             }

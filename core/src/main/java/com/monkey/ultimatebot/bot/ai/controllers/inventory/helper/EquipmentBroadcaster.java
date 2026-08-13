@@ -22,6 +22,13 @@ public class EquipmentBroadcaster implements IEquipmentBroadcaster {
     }
 
     @Override
+    public void broadcastHandChange(ITrainingBot bot) {
+        Map<EquipmentSlot, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(EquipmentSlot.class);
+        equipment.put(EquipmentSlot.HAND, bot.getItem(EquipmentSlot.HAND));
+        NMSBridgeManager.get().broadcastEquipment(bot, equipment);
+    }
+
+    @Override
     public void broadcastMetadataChange(ITrainingBot bot) {
         NMSBridgeManager.get().broadcastMetadata(bot);
     }

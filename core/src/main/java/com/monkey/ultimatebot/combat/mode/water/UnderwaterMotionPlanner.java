@@ -36,7 +36,7 @@ public final class UnderwaterMotionPlanner {
         double checkedStrafeSpeed = requireNonNegative(strafeSpeed, "strafeSpeed");
         double side = strafeDirection < 0.0D ? -1.0D : 1.0D;
         Vector lateral = new Vector(-horizontal.getZ(), 0.0D, horizontal.getX()).multiply(checkedStrafeSpeed * side);
-        double verticalCorrection = Math.clamp(delta.getY() * 0.14D, -0.16D, 0.16D);
+        double verticalCorrection = Math.min(0.16D, Math.max(-0.16D, delta.getY() * 0.14D));
         Vector desired = horizontal.multiply(radialSpeed).add(lateral).add(new Vector(0.0D, verticalCorrection, 0.0D));
         double limit = Math.max(0.12D, Math.hypot(radialSpeed, checkedStrafeSpeed) + 0.04D);
         return blendAndLimit(currentVelocity, desired, limit);

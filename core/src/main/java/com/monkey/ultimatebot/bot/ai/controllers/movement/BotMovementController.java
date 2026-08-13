@@ -101,6 +101,8 @@ public class BotMovementController {
     }
 
     public boolean calculatePathTo(Vector targetPos) {
+        // Fresh scratch cache per search — avoids stale walkability and unbounded growth mid-fight.
+        blockValidator.clearCache();
         return pathfinder.calculatePathTo(targetPos);
     }
 
@@ -307,14 +309,28 @@ public class BotMovementController {
     }
 
     private void executeMovementPattern(LivingEntity target, double targetDistance, MovementPattern pattern) {
-        switch (pattern) {
-            case DIRECT -> movementExecutor.executeDirectMovement(target, targetDistance);
-            case STRAFE_CIRCLE -> movementExecutor.executeStrafeCircle(target, targetDistance);
-            case STRAFE_FIGURE8 -> movementExecutor.executeStrafeFigure8(target, targetDistance);
-            case EVASIVE_ZIG_ZAG -> movementExecutor.executeEvasiveZigZag(target, targetDistance);
-            case TERRAIN_ADAPTIVE -> movementExecutor.executeTerrainAdaptive(target, targetDistance);
-            case RETREAT_SPIRAL -> movementExecutor.executeRetreatSpiral(target, targetDistance);
-            case CRYSTAL_SPAM -> movementExecutor.executeCrystalSpamMovement(target, targetDistance);
+                switch (pattern) {
+            case DIRECT:
+                movementExecutor.executeDirectMovement(target, targetDistance);
+                break;
+            case STRAFE_CIRCLE:
+                movementExecutor.executeStrafeCircle(target, targetDistance);
+                break;
+            case STRAFE_FIGURE8:
+                movementExecutor.executeStrafeFigure8(target, targetDistance);
+                break;
+            case EVASIVE_ZIG_ZAG:
+                movementExecutor.executeEvasiveZigZag(target, targetDistance);
+                break;
+            case TERRAIN_ADAPTIVE:
+                movementExecutor.executeTerrainAdaptive(target, targetDistance);
+                break;
+            case RETREAT_SPIRAL:
+                movementExecutor.executeRetreatSpiral(target, targetDistance);
+                break;
+            case CRYSTAL_SPAM:
+                movementExecutor.executeCrystalSpamMovement(target, targetDistance);
+                break;
         }
     }
 

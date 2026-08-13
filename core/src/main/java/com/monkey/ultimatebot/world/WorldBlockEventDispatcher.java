@@ -32,5 +32,42 @@ final class WorldBlockEventDispatcher {
         return new BreakResult(event.isCancelled(), event.isDropItems());
     }
 
-    record BreakResult(boolean cancelled, boolean dropItems) {}
+    static final class BreakResult {
+        private final boolean cancelled;
+        private final boolean dropItems;
+
+        BreakResult(boolean cancelled, boolean dropItems) {
+            this.cancelled = cancelled;
+            this.dropItems = dropItems;
+        }
+
+        public boolean cancelled() {
+            return cancelled;
+        }
+        public boolean dropItems() {
+            return dropItems;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof BreakResult)) {
+                return false;
+            }
+            BreakResult other = (BreakResult) obj;
+            return cancelled == other.cancelled && dropItems == other.dropItems;
+        }
+
+        @Override
+        public int hashCode() {
+            return java.util.Objects.hash(cancelled, dropItems);
+        }
+
+        @Override
+        public String toString() {
+            return "BreakResult[cancelled=" + cancelled + ", dropItems=" + dropItems + "]";
+        }
+    }
 }

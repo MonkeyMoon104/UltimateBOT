@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -58,7 +59,9 @@ public class ItemChecker implements IItemChecker {
         if (infiniteResources) {
             return true;
         }
-        return enderpearlStack != null && !enderpearlStack.isEmpty() && enderpearlStack.getAmount() > 0;
+        return enderpearlStack != null
+                && !ItemStackAccess.isEmpty(enderpearlStack)
+                && enderpearlStack.getAmount() > 0;
     }
 
     @Override
@@ -86,6 +89,6 @@ public class ItemChecker implements IItemChecker {
     }
 
     private ItemStack getCurrentItem(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return hotbarSlots.getOrDefault(currentSlot, ItemStack.empty());
+        return hotbarSlots.getOrDefault(currentSlot, ItemStackAccess.empty());
     }
 }

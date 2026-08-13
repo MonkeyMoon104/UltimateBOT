@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import java.util.Objects;
 import java.util.Random;
 import org.bukkit.Bukkit;
@@ -112,8 +113,8 @@ public final class IdleBehaviorController {
 
     private int findSafeY(int x, int baseY, int z) {
         World world = bot.getWorld();
-        int minBuildHeight = world.getMinHeight();
-        int maxBuildHeight = world.getMaxHeight();
+        int minBuildHeight = WorldAccess.minHeight(world);
+        int maxBuildHeight = WorldAccess.maxHeight(world);
         int minY = Math.max(minBuildHeight, baseY - 6);
         int maxY = Math.min(maxBuildHeight - 2, baseY + 6);
         for (int y = maxY; y >= minY; y--) {

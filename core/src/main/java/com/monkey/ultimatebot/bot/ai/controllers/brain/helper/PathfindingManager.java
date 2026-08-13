@@ -26,7 +26,7 @@ public class PathfindingManager implements IPathfindingManager {
     private static final double MIN_MOVEMENT_THRESHOLD = 0.1;
 
     private long lastPathfindingAttempt = 0;
-    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 750;
+    private static final long PATHFINDING_ATTEMPT_COOLDOWN = 2_500;
     private static final int BLOCKED_PATH_CONFIRMATION_TICKS = 2;
     private long lastStuckPearlAttempt = 0;
     private static final long STUCK_PEARL_COOLDOWN = 1200;

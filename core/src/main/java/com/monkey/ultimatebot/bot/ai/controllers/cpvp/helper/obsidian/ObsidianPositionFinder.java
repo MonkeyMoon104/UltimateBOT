@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import java.util.stream.Collectors;
+
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ public class ObsidianPositionFinder {
         }
 
         validPositions.sort((pos1, pos2) -> Double.compare(evaluateObsidianScore(pos2, target), evaluateObsidianScore(pos1, target)));
-        return validPositions.stream().limit(maxPositions).toList();
+        return validPositions.stream().limit(maxPositions).collect(Collectors.toList());
     }
 
     private void cleanupRecentPlacements(Map<BlockVector, Long> recentPlacements, long positionCooldownMs) {

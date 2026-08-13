@@ -78,15 +78,31 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         } else if (containment.nearlyExiting() && phase != Phase.SECONDARY && specialActionReady()) {
             transitionTo(Phase.SECONDARY);
         }
-        switch (phase) {
-            case PREGAP -> pregap(context);
-            case ENCOUNTER -> encounter(context, target);
-            case SWORD_TRADE -> swordTrade(context, target);
-            case DISENGAGE -> disengage(context, target);
-            case CROSSBOW -> crossbow(context, target);
-            case SECONDARY -> secondary(context, target);
-            case HEAL -> heal(context);
-            case WEB_PRESSURE -> webPressureController.tick(context, target);
+                switch (phase) {
+            case PREGAP:
+                pregap(context);
+                break;
+            case ENCOUNTER:
+                encounter(context, target);
+                break;
+            case SWORD_TRADE:
+                swordTrade(context, target);
+                break;
+            case DISENGAGE:
+                disengage(context, target);
+                break;
+            case CROSSBOW:
+                crossbow(context, target);
+                break;
+            case SECONDARY:
+                secondary(context, target);
+                break;
+            case HEAL:
+                heal(context);
+                break;
+            case WEB_PRESSURE:
+                webPressureController.tick(context, target);
+                break;
         }
     }
 
@@ -175,7 +191,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     private boolean breakRestrainingWeb(CombatModeContext context) {
         java.util.List<org.bukkit.Location> occupiedWebs = CobwebCombatAwareness.occupiedWebs(context.bukkitBot());
         if (!occupiedWebs.isEmpty()) {
-            return blockBreakSequence.tick(context, occupiedWebs.getFirst(), BotInventoryController.SWORD_SLOT);
+            return blockBreakSequence.tick(context, occupiedWebs.get(0), BotInventoryController.SWORD_SLOT);
         }
         blockBreakSequence.reset(context);
         return false;

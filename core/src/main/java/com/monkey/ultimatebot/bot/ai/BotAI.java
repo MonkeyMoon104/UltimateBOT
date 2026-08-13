@@ -1,5 +1,7 @@
 package com.monkey.ultimatebot.bot.ai;
 
+import com.monkey.ultimatebot.compat.ItemStackAccess;
+
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.behavior.FollowBehaviorController;
@@ -126,7 +128,10 @@ public class BotAI {
         CoreBotControl extensionControl =
                 new CoreBotControl(bot, movementController, rotationController, attackController, inventoryController);
         CoreNativeBotAccess nativeAccess =
-                new CoreNativeBotAccess(plugin.getServer().getMinecraftVersion(), bot, NMSBridgeManager.get());
+                new CoreNativeBotAccess(
+                        com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion(),
+                        bot,
+                        NMSBridgeManager.get());
         this.combatModeEngine = new CombatModeEngine(
                 plugin,
                 bot,
@@ -159,7 +164,8 @@ public class BotAI {
         idleBehaviorController.recordTargetSeen();
 
         boolean combatEnabled = bot.isCombat() && allowCombat;
-        if (customBrainRuntime.tick(targetBukkitPlayer, options.isFollow(), combatEnabled)) {
+        boolean followEnabled = bot.isFollow() || options.isFollow();
+        if (customBrainRuntime.tick(targetBukkitPlayer, followEnabled, combatEnabled)) {
             return;
         }
 
@@ -168,15 +174,16 @@ public class BotAI {
         }
         boolean isCurrentlyHealing = options.isHealing() && healController.isHealing();
 
-        if (!(targetBukkitPlayer instanceof Player playerTarget)) {
+        if (!(targetBukkitPlayer instanceof Player)) {
             tickMobTarget(targetBukkitPlayer, combatEnabled);
             return;
         }
+        Player playerTarget = (Player) targetBukkitPlayer;
 
         combatDataManager.updateCombatData(
                 playerTarget, combatEnabled && options.getCombatMode().equals(CombatMode.CRYSTAL));
 
-        if (combatStateManager instanceof CombatStateManager stateManager) {
+        if (combatStateManager instanceof CombatStateManager) { CombatStateManager stateManager = (CombatStateManager) combatStateManager;
             stateManager.updateDamageData(
                     combatDataManager.getConsecutiveDamageCount(), combatDataManager.getLastDamageTime());
         }
@@ -222,7 +229,7 @@ public class BotAI {
                     }
                 }
             }
-        } else {
+        } else if (followEnabled) {
             combatModeEngine.suspend();
             if (!isCurrentlyHealing) {
                 followBehaviorController.tick((org.bukkit.entity.Player) targetBukkitPlayer);
@@ -230,9 +237,15 @@ public class BotAI {
                 followBehaviorController.reset();
                 executeHealingMovement(targetBukkitPlayer);
             }
+        } else {
+            combatModeEngine.suspend();
+            followBehaviorController.reset();
+            clearActivePathfinding();
+            movementController.stopMovement();
+            return;
         }
 
-        if (pathfindingManager instanceof PathfindingManager manager) {
+        if (pathfindingManager instanceof PathfindingManager) { PathfindingManager manager = (PathfindingManager) pathfindingManager;
             manager.updateLastBotPosition();
         }
 
@@ -365,20 +378,11 @@ public class BotAI {
             }
             return;
         }
-        if (combatModeEngine.controlsNavigation(bukkitTarget)) {
-            clearActivePathfinding();
-            combatModeEngine.tick(bukkitTarget);
-        } else if (!followActivePath(bukkitTarget)) {
-            pathfindingManager.checkForStuck(bukkitTarget);
-            if (pathfindingManager.isUsingPathfinding()) {
-                followActivePath(bukkitTarget);
-            } else {
-                combatModeEngine.tick(bukkitTarget);
-            }
-        }
-        if (pathfindingManager instanceof PathfindingManager manager) {
-            manager.updateLastBotPosition();
-        }
+
+        // Never run synchronous Pathetic A* against mobs — Spark shows it owning the server thread
+        // (isValidByCustomProcessors). Combat strategies already approach/strafe the target.
+        clearActivePathfinding();
+        combatModeEngine.tick(bukkitTarget);
     }
 
     private boolean followActivePath(LivingEntity target) {
@@ -402,7 +406,7 @@ public class BotAI {
         return true;
     }
 
-    private void clearActivePathfinding() {
+    public void clearActivePathfinding() {
         if (!pathfindingManager.isUsingPathfinding() && !movementController.hasActivePath()) {
             return;
         }
@@ -422,9 +426,13 @@ public class BotAI {
         }
 
         rapvpController.disable();
-        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, org.bukkit.inventory.ItemStack.empty());
-        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, org.bukkit.inventory.ItemStack.empty());
-        inventoryController.setItem(BotInventoryController.GLOW_SLOT, org.bukkit.inventory.ItemStack.empty());
+        // CART uses CRYSTAL_SLOT for TNT minecart — never wipe non-crystal mode kits.
+        if (!crystalMode) {
+            return;
+        }
+        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
+        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
+        inventoryController.setItem(BotInventoryController.GLOW_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
     }
 
     private boolean handleSustainFood() {
