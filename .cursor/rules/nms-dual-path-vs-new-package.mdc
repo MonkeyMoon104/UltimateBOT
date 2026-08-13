@@ -1,0 +1,30 @@
+---
+description: When to use dual-path compat vs a new NMS package module
+alwaysApply: true
+---
+
+# Dual-path vs new NMS package
+
+When fixing version gaps in UltimateBot, choose the path by **what actually differs**:
+
+## Dual-path (no new `NMS/` module)
+
+Use when **NMS / Craft revision is the same** and only Bukkit/Paper API or classpath access differs.
+
+- Put version-neutral access in `core` (`*Access`, Modern/Legacy ops).
+- Bridge may add a small default/`setX` helper; do **not** clone an entire NMS package.
+- Examples: missing `ExplosiveMinecart#setFuseTicks` on 1.19.1 while sharing Craft `v1_19_R1` with 1.19.2; reflection fallbacks; API-only gaps.
+
+## New NMS package (`NMS/vX_Y_Z`)
+
+Use when **NMS bytecode / Spigot remapping / Craft API surface differs** so one reobfuscated jar cannot safely run on both versions.
+
+- Same Craft revision letter (`v1_19_R1`) is **not** enough if intermediate names or Player stubs diverge (e.g. Paper **1.19** vs **1.19.2** → `EntityHuman.co()` / Warden API).
+- Compile the module against that exact `paperDevBundle`; map only the versions that match in `NMSBridgeManager`.
+- Do **not** paper over remapping mismatches with ThreadLocal/reflection hacks inside a shared module meant for another patch.
+
+## Quick check
+
+1. Same Craft + same Spigot mappings + only Bukkit method missing? → **dual-path**.
+2. `NoSuchMethodError` on remapped NMS (`EntityHuman.xy()`, wrong packet ctor, etc.) or compile fails against the other patch’s API? → **new package** (Paper userdev when available; otherwise CodeMC Spigot remapped-mojang + official Spigot maps, e.g. pure **1.17**).
+3. `NoClassDefFoundError: WorldInfo` (or similar) from `World#getName` / height APIs when compiled against modern Paper? → **dual-path** via `WorldAccess` — not a new NMS package.

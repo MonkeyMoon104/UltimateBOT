@@ -1,6 +1,7 @@
 
 Save New Duplicate & Edit Just Text Twitter
 .gradle
+.nms-probe/
 build/
 **/logs/
 !gradle/wrapper/gradle-wrapper.jar
