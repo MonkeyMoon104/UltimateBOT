@@ -32,6 +32,7 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.common.util.EnumValues;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.metrics.BotMetrics;
 import com.sun.net.httpserver.HttpExchange;
@@ -751,7 +752,7 @@ public final class RemoteApiServer {
             case ITEM:
                 org.bukkit.Material material = org.bukkit.Material.matchMaterial(defaultString(payload.material, ""));
                 int amount = defaultInt(payload.amount, 1);
-                if (material == null || material.isAir() || amount < 1 || amount > material.getMaxStackSize()) {
+                if (material == null || MaterialAirAccess.isAir(material) || amount < 1 || amount > material.getMaxStackSize()) {
                     throw new IllegalArgumentException("ITEM mode requires a valid material and stack amount");
                 }
                 return BotEquipmentSlotSetting.item(new org.bukkit.inventory.ItemStack(material, amount));

@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
@@ -372,7 +373,7 @@ public class PathfindingManager implements IPathfindingManager {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return type.isAir() || block.isPassable();
+        return MaterialAirAccess.isAir(type) || block.isPassable();
     }
 
     private static boolean isSolid(Block block) {

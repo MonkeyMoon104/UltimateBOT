@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.world;
 
 import java.util.Collections;
 import com.monkey.ultimatebot.compat.BlockBreakAccess;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
@@ -102,7 +103,7 @@ public final class WorldProtectionService implements AutoCloseable {
         Objects.requireNonNull(breaker, "breaker");
         Objects.requireNonNull(tool, "tool");
         Block block = location.getBlock();
-        if (block.getType().isAir()) {
+        if (MaterialAirAccess.isAir(block.getType())) {
             return false;
         }
         TrackedWorldBlock placement = placements.get(WorldBlockKey.from(block));

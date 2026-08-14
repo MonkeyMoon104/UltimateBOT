@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 import java.util.stream.Collectors;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class ObsidianPositionFinder {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return type.isAir() || block.isPassable();
+        return MaterialAirAccess.isAir(type) || block.isPassable();
     }
 
     private static boolean isSolid(Block block) {

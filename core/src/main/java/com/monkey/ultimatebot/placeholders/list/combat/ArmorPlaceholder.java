@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.placeholders.list.combat;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.placeholders.IBotPlaceholder;
 import com.monkey.ultimatebot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;
@@ -27,7 +28,7 @@ public class ArmorPlaceholder implements IBotPlaceholder {
             ItemStack[] armor = bot.asBukkitPlayer().getEquipment().getArmorContents();
             int armorPieces = 0;
             for (ItemStack item : armor) {
-                if (item != null && !item.getType().isAir()) {
+                if (item != null && !MaterialAirAccess.isAir(item.getType())) {
                     armorPieces++;
                 }
             }

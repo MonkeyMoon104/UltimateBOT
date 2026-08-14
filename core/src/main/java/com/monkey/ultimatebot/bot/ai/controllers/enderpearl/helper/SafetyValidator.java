@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -67,7 +68,7 @@ public class SafetyValidator implements ISafetyValidator {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return type.isAir() || block.isPassable();
+        return MaterialAirAccess.isAir(type) || block.isPassable();
     }
 
     private static boolean isSolid(Block block) {
