@@ -135,6 +135,23 @@ public interface INMSBridge {
     void broadcastMetadata(ITrainingBot bot);
 
     /**
+     * Sprint + swim flag for Water/Trident PvP.
+     *
+     * <p>Default uses Bukkit APIs (enough on 1.17+ where the entity tracker syncs pose). Packet-spawned
+     * 1.16 bots must also force {@code EntityPose.SWIMMING} and {@link #broadcastMetadata} or viewers
+     * never see the swim animation.
+     */
+    default void setBotSwimming(ITrainingBot bot, boolean swimming) {
+        Player player = Objects.requireNonNull(bot, "bot").asBukkitPlayer();
+        player.setSprinting(swimming);
+        try {
+            player.setSwimming(swimming);
+        } catch (NoSuchMethodError | UnsupportedOperationException ignored) {
+            // Pre-1.13 swim API
+        }
+    }
+
+    /**
      * Reads equipment from the native fake-player inventory.
      *
      * <p>Must not go through {@code CraftInventoryPlayer}: {@code BotCraftPlayer} is not a
