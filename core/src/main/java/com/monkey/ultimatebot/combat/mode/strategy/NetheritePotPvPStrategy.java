@@ -23,7 +23,7 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.NETHERITE_POT,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_SWORD", Material.DIAMOND_SWORD, 1)
                         .slot(FIRST_POTION_SLOT, Material.SPLASH_POTION, 64)
                         .slot(SECOND_POTION_SLOT, Material.SPLASH_POTION, 64)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Material.ENDER_PEARL, 16)

@@ -31,7 +31,8 @@ class PlatformCapabilityEraSetsTest {
     void through1_9AllowsUhcButNotTridentOrNetheriteModes() {
         assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_9())).isTrue();
         assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_9())).isFalse();
-        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_9())).isFalse();
+        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_9())).isTrue();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_9())).isFalse();
         assertThat(PlatformCapability.through1_9())
                 .contains(
                         PlatformCapability.OFFHAND,
@@ -50,13 +51,17 @@ class PlatformCapabilityEraSetsTest {
     }
 
     @Test
-    void through1_13AddsTrident() {
+    void through1_13AddsTridentAndEndCrystal() {
         assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_13())).isTrue();
+        assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_13())).isTrue();
+        assertThat(CombatMode.SMP.supportedBy(PlatformCapability.through1_13())).isTrue();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_13())).isTrue();
+        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_13())).isTrue();
         assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_13())).isFalse();
         assertThat(PlatformCapability.through1_13())
                 .containsAll(PlatformCapability.through1_11())
-                .contains(PlatformCapability.TRIDENT)
-                .doesNotContain(PlatformCapability.NETHERITE);
+                .contains(PlatformCapability.TRIDENT, PlatformCapability.END_CRYSTAL)
+                .doesNotContain(PlatformCapability.NETHERITE, PlatformCapability.RESPAWN_ANCHOR);
     }
 
     @Test

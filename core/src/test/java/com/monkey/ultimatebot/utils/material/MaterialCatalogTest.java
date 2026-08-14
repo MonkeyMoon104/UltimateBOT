@@ -82,11 +82,16 @@ class MaterialCatalogTest {
     }
 
     @Test
+    void isComparesByNameWithoutRequiringEnumField() {
+        assertThat(MaterialCatalog.is(Material.DIAMOND_SWORD, "DIAMOND_SWORD")).isTrue();
+        assertThat(MaterialCatalog.is(Material.STICK, "DIAMOND_SWORD")).isFalse();
+        assertThat(MaterialCatalog.is(Material.STICK, "THIS_MATERIAL_DOES_NOT_EXIST_XYZ")).isFalse();
+    }
+
+    @Test
     void alwaysPresentOn117PlusAreAvailableOnCompileTarget() {
-        // Sanity: totem / netherite exist throughout the 1.17+ support range on this API.
+        // Sanity on this compile target; older runtimes resolve via optional()/is() instead of enum fields.
         assertThat(MaterialCatalog.available("TOTEM_OF_UNDYING")).isTrue();
-        assertThat(MaterialCatalog.available("NETHERITE_SWORD")).isTrue();
         assertThat(MaterialCatalog.available("END_CRYSTAL")).isTrue();
-        assertThat(MaterialCatalog.available("RESPAWN_ANCHOR")).isTrue();
     }
 }

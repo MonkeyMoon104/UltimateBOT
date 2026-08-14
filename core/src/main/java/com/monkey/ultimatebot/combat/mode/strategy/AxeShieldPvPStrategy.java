@@ -23,7 +23,7 @@ public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.AXE_SHIELD,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_AXE)
+                        .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_AXE", Material.DIAMOND_AXE, 1)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)
                         .build());

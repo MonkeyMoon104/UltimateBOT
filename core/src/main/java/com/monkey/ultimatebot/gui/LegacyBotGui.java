@@ -646,7 +646,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
             player.sendMessage(ChatColorUtils.translate(
                     plugin.getLangString("messages.despawn-bot", "&cBot removed!")));
-            closeQuietly();
+            closeQuietly(false);
             return;
         }
         if (options.getBotType() == BotType.EVENT) {
@@ -1070,8 +1070,14 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void closeQuietly() {
+        closeQuietly(true);
+    }
+
+    private void closeQuietly(boolean persistDraft) {
         closing = true;
-        plugin.getPlayerOptions().put(player.getUniqueId(), options);
+        if (persistDraft) {
+            plugin.getPlayerOptions().put(player.getUniqueId(), options);
+        }
         player.closeInventory();
         unregisterListener();
     }

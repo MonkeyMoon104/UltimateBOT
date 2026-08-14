@@ -34,9 +34,8 @@ public enum PlatformCapability {
     /**
      * Features available on Minecraft 1.8.x for UltimateBot's catalog.
      *
-     * <p>No offhand, shield, totem, netherite, combat cooldown, trident, crystal-era kit pieces, or
-     * mace. {@link #TNT_MINECART} existed historically but cart mode also requires {@link
-     * #NETHERITE}, so cart still stays gated until {@link #through1_16()}.
+     * <p>No offhand, shield, totem, netherite, combat cooldown, trident, end crystal item, or mace.
+     * {@link #TNT_MINECART} is present so cart kits can fall back to diamond.
      */
     public static Set<PlatformCapability> through1_8() {
         return Collections.unmodifiableSet(EnumSet.of(TNT_MINECART));
@@ -58,23 +57,26 @@ public enum PlatformCapability {
         return Collections.unmodifiableSet(set);
     }
 
-    /** Features from Minecraft 1.13 through 1.15.x: {@link #through1_11()} plus {@link #TRIDENT}. */
+    /**
+     * Features from Minecraft 1.13 through 1.15.x: {@link #through1_11()} plus {@link #TRIDENT} and
+     * {@link #END_CRYSTAL} (crystal item + obsidian; respawn anchors stay 1.16+).
+     */
     public static Set<PlatformCapability> through1_13() {
         EnumSet<PlatformCapability> set = EnumSet.copyOf(through1_11());
         set.add(TRIDENT);
+        set.add(END_CRYSTAL);
         return Collections.unmodifiableSet(set);
     }
 
     /**
-     * Features from Minecraft 1.16 through 1.16.x (netherite / crystal-era gates): {@link
-     * #through1_13()} plus {@link #NETHERITE}, {@link #END_CRYSTAL}, {@link #RESPAWN_ANCHOR}.
+     * Features from Minecraft 1.16 through 1.16.x: {@link #through1_13()} plus {@link #NETHERITE}
+     * and {@link #RESPAWN_ANCHOR}.
      *
      * <p>Same membership as {@link #through1_19()} — no new enum members appear until 1.20.
      */
     public static Set<PlatformCapability> through1_16() {
         EnumSet<PlatformCapability> set = EnumSet.copyOf(through1_13());
         set.add(NETHERITE);
-        set.add(END_CRYSTAL);
         set.add(RESPAWN_ANCHOR);
         return Collections.unmodifiableSet(set);
     }

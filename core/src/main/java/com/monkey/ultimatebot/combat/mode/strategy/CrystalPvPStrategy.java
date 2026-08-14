@@ -22,11 +22,11 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.CRYSTAL,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_SWORD", Material.DIAMOND_SWORD, 1)
                         .slot(BotInventoryController.ENDERPEARL_SLOT, Material.ENDER_PEARL, 16)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Material.OBSIDIAN, 64)
-                        .slot(BotInventoryController.CRYSTAL_SLOT, Material.END_CRYSTAL, 64)
-                        .slot(BotInventoryController.ANCHOR_SLOT, Material.RESPAWN_ANCHOR, 64)
+                        .slot(BotInventoryController.CRYSTAL_SLOT, "END_CRYSTAL", Material.GHAST_TEAR, 64)
+                        .slot(BotInventoryController.ANCHOR_SLOT, "RESPAWN_ANCHOR", Material.OBSIDIAN, 64)
                         .slot(BotInventoryController.GLOW_SLOT, Material.GLOWSTONE, 64)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.ENCHANTED_GOLDEN_APPLE, 64)
                         .build());

@@ -24,17 +24,28 @@ class CombatModePlatformRequirementsTest {
     }
 
     @Test
-    void cartRequiresNetheriteAndTntMinecart() {
+    void cartRequiresTntMinecartOnly() {
         assertThat(CombatMode.CART.requiredPlatformCapabilities())
-                .containsExactlyInAnyOrder(PlatformCapability.NETHERITE, PlatformCapability.TNT_MINECART);
+                .containsExactly(PlatformCapability.TNT_MINECART);
     }
 
     @Test
-    void crystalRequiresCrystalAnchorAndNetherite() {
+    void crystalRequiresEndCrystalOnly() {
         assertThat(CombatMode.CRYSTAL.requiredPlatformCapabilities())
+                .containsExactly(PlatformCapability.END_CRYSTAL);
+    }
+
+    @Test
+    void axeShieldAndSmpDoNotRequireNetherite() {
+        assertThat(CombatMode.AXE_SHIELD.requiredPlatformCapabilities())
                 .containsExactlyInAnyOrder(
-                        PlatformCapability.END_CRYSTAL,
-                        PlatformCapability.RESPAWN_ANCHOR,
-                        PlatformCapability.NETHERITE);
+                        PlatformCapability.SHIELD,
+                        PlatformCapability.OFFHAND,
+                        PlatformCapability.COMBAT_COOLDOWN);
+        assertThat(CombatMode.SMP.requiredPlatformCapabilities())
+                .containsExactlyInAnyOrder(
+                        PlatformCapability.SHIELD, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
+        assertThat(CombatMode.NETHERITE_POT.requiredPlatformCapabilities())
+                .contains(PlatformCapability.NETHERITE);
     }
 }

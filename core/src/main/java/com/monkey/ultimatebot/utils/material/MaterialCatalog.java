@@ -16,13 +16,13 @@ import org.jspecify.annotations.Nullable;
  * <p><b>Capability vs catalog:</b> {@link PlatformCapability} answers “can this server offer a
  * feature/mode/API?” (trim UI, mace combat kit, etc.). This catalog answers “what is the Bukkit
  * name / is the item present / what icon substitute if absent?”. Do <em>not</em> use capability to
- * decide material presence for items that exist across the whole 1.17+ support range (totem,
- * end crystal, respawn anchor, netherite, …).
+ * decide material presence. Pre-1.16 servers lack netherite and respawn anchors: never mention
+ * those {@link Material} enum fields in core (they are {@code NoSuchFieldError} at runtime).
  *
- * <p>Prefer {@link #optional(String, Material)} with an ancient fallback ({@link Material#STONE},
- * {@link Material#ZOMBIE_HEAD}, {@link Material#DIAMOND_SWORD}, …) over {@link Material} enum
- * constants that may be missing at runtime. {@link #of(Material, Material)} is fragile because the
- * preferred constant is already linked at class load.
+ * <p>Prefer {@link #optional(String, Material)} / {@link #is(Material, String)} with an ancient
+ * fallback ({@link Material#STONE}, {@link Material#ZOMBIE_HEAD}, {@link Material#DIAMOND_SWORD},
+ * …) over {@link Material} enum constants that may be missing at runtime. {@link #of(Material,
+ * Material)} is fragile because the preferred constant is already linked at class load.
  */
 public final class MaterialCatalog {
 
@@ -42,9 +42,9 @@ public final class MaterialCatalog {
     };
 
     /**
-     * Substitutes only for materials that are genuinely absent on some eras in the 1.17+ range
-     * (added later). Not for renames (use alias groups) and not for always-present items (totem,
-     * crystal, anchor, netherite).
+     * Substitutes for materials absent on some supported eras (added later). Not for Bukkit
+     * renames (use alias groups). Netherite armor is not mapped here: the armor cycle must skip
+     * the missing tier instead of showing a duplicate diamond piece.
      */
     private static final Map<String, String> FALLBACKS;
     static {
@@ -68,6 +68,18 @@ public final class MaterialCatalog {
     /** Whether the named material resolves on this server (after aliases). */
     public static boolean available(String name) {
         return matchPreferred(name) != null;
+    }
+
+    /**
+     * True when {@code type} is the named material on this server. Safe on versions that lack the
+     * Bukkit enum field ({@code Material.RESPAWN_ANCHOR} would {@code NoSuchFieldError} on 1.15).
+     */
+    public static boolean is(@Nullable Material type, String name) {
+        if (type == null) {
+            return false;
+        }
+        Material expected = matchPreferred(name);
+        return expected != null && type == expected;
     }
 
     /**

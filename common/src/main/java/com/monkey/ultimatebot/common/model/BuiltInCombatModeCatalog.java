@@ -50,28 +50,21 @@ final class BuiltInCombatModeCatalog {
                 required = EnumSet.of(
                         PlatformCapability.SHIELD,
                         PlatformCapability.OFFHAND,
-                        PlatformCapability.NETHERITE,
                         PlatformCapability.COMBAT_COOLDOWN);
                 break;
             case "smp":
                 required = EnumSet.of(
-                        PlatformCapability.NETHERITE,
-                        PlatformCapability.SHIELD,
-                        PlatformCapability.TOTEM,
-                        PlatformCapability.OFFHAND);
+                        PlatformCapability.SHIELD, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
                 break;
             case "netherite-pot":
                 required = EnumSet.of(
                         PlatformCapability.NETHERITE, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
                 break;
             case "cart":
-                required = EnumSet.of(PlatformCapability.NETHERITE, PlatformCapability.TNT_MINECART);
+                required = EnumSet.of(PlatformCapability.TNT_MINECART);
                 break;
             case "crystal":
-                required = EnumSet.of(
-                        PlatformCapability.END_CRYSTAL,
-                        PlatformCapability.RESPAWN_ANCHOR,
-                        PlatformCapability.NETHERITE);
+                required = EnumSet.of(PlatformCapability.END_CRYSTAL);
                 break;
             case "trident":
                 required = EnumSet.of(PlatformCapability.TRIDENT);

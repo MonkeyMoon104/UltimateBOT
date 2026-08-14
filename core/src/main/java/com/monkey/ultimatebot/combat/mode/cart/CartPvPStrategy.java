@@ -25,7 +25,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.CART,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
+                        .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_SWORD", Material.DIAMOND_SWORD, 1)
                         .slot(CartBowController.BOW_SLOT, Material.BOW)
                         .slot(RAIL_SLOT, Material.RAIL, 64)
                         .slot(CART_SLOT, "tnt_minecart", 64)

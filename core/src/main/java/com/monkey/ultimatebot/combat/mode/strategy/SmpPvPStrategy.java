@@ -22,8 +22,8 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
         super(
                 CombatMode.SMP,
                 ModeKit.builder()
-                        .slot(BotInventoryController.SWORD_SLOT, Material.NETHERITE_SWORD)
-                        .slot(AXE_SLOT, Material.NETHERITE_AXE)
+                        .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_SWORD", Material.DIAMOND_SWORD, 1)
+                        .slot(AXE_SLOT, "NETHERITE_AXE", Material.DIAMOND_AXE, 1)
                         .slot(SHIELD_SLOT, Material.SHIELD)
                         .slot(PEARL_SLOT, Material.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.ENCHANTED_GOLDEN_APPLE, 64)

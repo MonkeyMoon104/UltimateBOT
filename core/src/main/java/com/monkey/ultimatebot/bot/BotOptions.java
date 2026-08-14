@@ -58,7 +58,7 @@ public final class BotOptions {
     private DifficultyLevel minDifficulty = DifficultyLevel.EASY;
     private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
     private ArmorTier minArmorTier = ArmorTier.LEATHER;
-    private ArmorTier maxArmorTier = ArmorTier.NETHERITE;
+    private ArmorTier maxArmorTier = ArmorTier.maxAvailable();
     private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
     private final Map<EquipmentSlot, String> trimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
     private @Nullable BotLocation spawnLocation;
@@ -613,9 +613,16 @@ public final class BotOptions {
     }
 
     public void setArmorRange(ArmorTier minArmorTier, ArmorTier maxArmorTier) {
-        validateArmorRange(minArmorTier, maxArmorTier);
-        this.minArmorTier = minArmorTier;
-        this.maxArmorTier = maxArmorTier;
+        ArmorTier platformMax = ArmorTier.maxAvailable();
+        ArmorTier resolvedMax =
+                maxArmorTier != null && maxArmorTier.compareTo(platformMax) > 0 ? platformMax : maxArmorTier;
+        ArmorTier resolvedMin = minArmorTier;
+        if (resolvedMin != null && resolvedMax != null && resolvedMin.compareTo(resolvedMax) > 0) {
+            resolvedMin = ArmorTier.LEATHER;
+        }
+        validateArmorRange(resolvedMin, resolvedMax);
+        this.minArmorTier = resolvedMin;
+        this.maxArmorTier = resolvedMax;
         clampCurrentArmor();
     }
 
@@ -623,18 +630,23 @@ public final class BotOptions {
         if (armorTier == null) {
             return false;
         }
+        if (armorTier.compareTo(ArmorTier.maxAvailable()) > 0) {
+            return false;
+        }
         return armorTier.compareTo(minArmorTier) >= 0 && armorTier.compareTo(maxArmorTier) <= 0;
     }
 
     public ArmorTier clampArmorTier(ArmorTier armorTier) {
+        ArmorTier platformMax = ArmorTier.maxAvailable();
+        ArmorTier resolvedMax = maxArmorTier.compareTo(platformMax) > 0 ? platformMax : maxArmorTier;
         if (armorTier == null) {
-            return minArmorTier;
+            return minArmorTier.compareTo(resolvedMax) > 0 ? resolvedMax : minArmorTier;
         }
         if (armorTier.compareTo(minArmorTier) < 0) {
             return minArmorTier;
         }
-        if (armorTier.compareTo(maxArmorTier) > 0) {
-            return maxArmorTier;
+        if (armorTier.compareTo(resolvedMax) > 0) {
+            return resolvedMax;
         }
         return armorTier;
     }
