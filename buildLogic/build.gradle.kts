@@ -224,6 +224,9 @@ if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(path = ":NMS:v1_14_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
     implementation(project(path = ":NMS:v1_15_R1", configuration = "runtimeElements")) {
         isTransitive = false
     }
