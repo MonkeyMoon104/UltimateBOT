@@ -3,12 +3,12 @@ package com.monkey.ultimatebot.bot.ai.controllers.attack.helper;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.ultimatebot.common.guard.GuardMetadata;
+import com.monkey.ultimatebot.compat.CombatSwordAccess;
 import com.monkey.ultimatebot.nms.DamageKind;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -41,7 +41,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (target == null) {
             return;
         }
-        if (bot.getItemInMainHand().getType() != Material.NETHERITE_SWORD) {
+        if (!CombatSwordAccess.isKitSword(bot.getItemInMainHand().getType())) {
             return;
         }
 
@@ -63,7 +63,7 @@ public class AttackExecutor implements IAttackExecutor {
         if (target == null) {
             return;
         }
-        if (bot.getItemInMainHand().getType() != Material.NETHERITE_SWORD || bot.distanceTo(target) > 3.7D) {
+        if (!CombatSwordAccess.isKitSword(bot.getItemInMainHand().getType()) || bot.distanceTo(target) > 3.7D) {
             return;
         }
 

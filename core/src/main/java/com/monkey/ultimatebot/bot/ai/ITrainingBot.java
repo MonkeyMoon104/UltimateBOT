@@ -6,6 +6,10 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
 import com.monkey.ultimatebot.compat.AttributeAccess;
+import com.monkey.ultimatebot.compat.PlayerAttackAccess;
+import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.compat.PlayerSwingAccess;
+import com.monkey.ultimatebot.compat.VelocityAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
@@ -87,11 +91,12 @@ public interface ITrainingBot {
     }
 
     default Vector bukkitVelocity() {
-        return NMSBridgeManager.get().getBotVelocity(this);
+        return VelocityAccess.finite(NMSBridgeManager.get().getBotVelocity(this));
     }
 
     default void setBukkitVelocity(Vector velocity) {
-        NMSBridgeManager.get().setBotVelocity(this, Objects.requireNonNull(velocity, "velocity"));
+        NMSBridgeManager.get()
+                .setBotVelocity(this, VelocityAccess.finite(Objects.requireNonNull(velocity, "velocity")));
     }
 
     default boolean isOnGround() {
@@ -164,12 +169,12 @@ public interface ITrainingBot {
 
     default void attackEntity(Entity target) {
         Entity checked = Objects.requireNonNull(target, "target");
+        prepareFullAttackStrength();
         if (checked instanceof LivingEntity) { LivingEntity living = (LivingEntity) checked;
-            prepareFullAttackStrength();
             NMSBridgeManager.get().attackTarget(this, living);
             return;
         }
-        asBukkitPlayer().attack(checked);
+        PlayerAttackAccess.attack(asBukkitPlayer(), checked);
     }
 
     default float fallDistanceValue() {
@@ -181,15 +186,15 @@ public interface ITrainingBot {
     }
 
     default void swingMainHand() {
-        asBukkitPlayer().swingMainHand();
+        PlayerSwingAccess.swingMainHand(asBukkitPlayer());
     }
 
     default void swingOffHand() {
-        asBukkitPlayer().swingOffHand();
+        PlayerSwingAccess.swingOffHand(asBukkitPlayer());
     }
 
     default float getAttackStrengthScale(float advance) {
-        return asBukkitPlayer().getAttackCooldown();
+        return PlayerAttackCooldownAccess.get(asBukkitPlayer(), advance);
     }
 
     default double getAttackDamageAttribute() {

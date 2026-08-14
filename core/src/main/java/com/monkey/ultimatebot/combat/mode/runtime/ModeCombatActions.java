@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.compat.AttributeAccess;
 import com.monkey.ultimatebot.compat.ParticleAccess;
+import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
 import com.monkey.ultimatebot.compat.PotionEffectTypeAccess;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -83,7 +84,7 @@ public final class ModeCombatActions {
         double facingDot = look.lengthSquared() < 0.001D ? 0.0D : look.normalize().dot(direction);
         return ModeCombatPolicy.isIncomingPlayerAttack(
                 distance,
-                player.getAttackCooldown(),
+                PlayerAttackCooldownAccess.get(player),
                 player.isBlocking(),
                 player.isHandRaised(),
                 closingSpeed,
@@ -103,12 +104,20 @@ public final class ModeCombatActions {
     }
 
     public void swingMainHand() {
-        bukkitBot.swingMainHand();
+        bot.swingMainHand();
     }
 
     public void applyInstantHealth(int amplifier) {
+        int safeAmplifier = Math.max(0, amplifier);
+        double before = bot.healthValue();
         bukkitBot.addPotionEffect(
-                new PotionEffect(PotionEffectTypeAccess.instantHealth(), 1, amplifier, false, false, false));
+                new PotionEffect(
+                        PotionEffectTypeAccess.instantHealth(), 1, safeAmplifier, false, false, false));
+        // Splash items are color-only. Instant Health as an effect can no-op on fake players
+        // (RegainHealth cancelled, or heal() skipped at 0 HP). Gapple already uses setHealth.
+        if (bot.healthValue() <= before + 0.01D) {
+            bot.setHealthValue(before + (double) (4 << Math.min(safeAmplifier, 8)));
+        }
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
         bukkitBot.getWorld().spawnParticle(ParticleAccess.heart(), location, 18, 0.4D, 0.5D, 0.4D, 0.1D);
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.0F);

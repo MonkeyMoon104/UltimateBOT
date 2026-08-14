@@ -1,7 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
+import com.monkey.ultimatebot.compat.CombatSwordAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -20,7 +22,8 @@ public class ItemChecker implements IItemChecker {
 
     @Override
     public boolean isHoldingSword(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == SWORD_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.NETHERITE_SWORD;
+        return currentSlot == SWORD_SLOT
+                && CombatSwordAccess.isKitSword(getCurrentItem(currentSlot, hotbarSlots).getType());
     }
 
     @Override
@@ -35,12 +38,14 @@ public class ItemChecker implements IItemChecker {
 
     @Override
     public boolean isHoldingCrystal(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == CRYSTAL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.END_CRYSTAL;
+        return currentSlot == CRYSTAL_SLOT
+                && MaterialCatalog.is(getCurrentItem(currentSlot, hotbarSlots).getType(), "END_CRYSTAL");
     }
 
     @Override
     public boolean isHoldingAnchor(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ANCHOR_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.RESPAWN_ANCHOR;
+        return currentSlot == ANCHOR_SLOT
+                && MaterialCatalog.is(getCurrentItem(currentSlot, hotbarSlots).getType(), "RESPAWN_ANCHOR");
     }
 
     @Override
@@ -67,8 +72,11 @@ public class ItemChecker implements IItemChecker {
     @Override
     public int getItemCount(Map<Integer, ItemStack> hotbarSlots, Material material, boolean infiniteResources) {
         if (infiniteResources) {
-            if (material == Material.OBSIDIAN || material == Material.END_CRYSTAL || material == Material.RESPAWN_ANCHOR
-                    || material == Material.GLOWSTONE || material == Material.GOLDEN_APPLE) {
+            if (material == Material.OBSIDIAN
+                    || MaterialCatalog.is(material, "END_CRYSTAL")
+                    || MaterialCatalog.is(material, "RESPAWN_ANCHOR")
+                    || material == Material.GLOWSTONE
+                    || material == Material.GOLDEN_APPLE) {
                 return 64;
             } else if (material == Material.ENDER_PEARL) {
                 return 16;

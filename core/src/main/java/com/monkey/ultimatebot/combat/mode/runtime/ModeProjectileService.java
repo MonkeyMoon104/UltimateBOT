@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
+import com.monkey.ultimatebot.compat.PlayerSwingAccess;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import org.bukkit.Color;
@@ -95,7 +96,7 @@ public final class ModeProjectileService {
         ThrownPotion potion =
                 tracker.track(shooter.launchProjectile(ThrownPotion.class, new Vector(0.0D, -0.85D, 0.0D)));
         potion.setItem(item);
-        shooter.swingMainHand();
+        PlayerSwingAccess.swingMainHand(shooter);
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {

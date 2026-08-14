@@ -3,14 +3,11 @@ package com.monkey.ultimatebot.update;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.compat.PluginMetaAccess;
+import com.monkey.ultimatebot.compat.UpdateNotifyAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.wrapper.WrapperTask;
 import java.io.IOException;
 import java.util.Collection;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -106,7 +103,8 @@ public final class UpdateManager implements Listener {
         if (state == null || !state.updateAvailable()) {
             return;
         }
-        player.sendMessage(buildUpdateMessage(state));
+        UpdateNotifyAccess.sendUpdateAvailable(
+                player, state.currentVersion(), state.latestVersion(), state.downloadUrl());
     }
 
     private void runPeriodicCheck() {
@@ -130,7 +128,8 @@ public final class UpdateManager implements Listener {
         Collection<? extends Player> players = Bukkit.getOnlinePlayers();
         for (Player player : players) {
             if (isAdmin(player)) {
-                player.sendMessage(buildUpdateMessage(state));
+                UpdateNotifyAccess.sendUpdateAvailable(
+                player, state.currentVersion(), state.latestVersion(), state.downloadUrl());
             }
         }
     }
@@ -151,16 +150,6 @@ public final class UpdateManager implements Listener {
                 safeMessage(response.latestVersion()),
                 url,
                 safeMessage(response.message()));
-    }
-
-    private Component buildUpdateMessage(UpdateState state) {
-        return Component.text("[UltimateBot] ", NamedTextColor.GOLD)
-                .append(Component.text("New version available: ", NamedTextColor.YELLOW))
-                .append(Component.text(state.latestVersion(), NamedTextColor.GREEN))
-                .append(Component.text(" (actually " + state.currentVersion() + ") ", NamedTextColor.GRAY))
-                .append(Component.text("[Click to open link]", NamedTextColor.AQUA)
-                        .clickEvent(ClickEvent.openUrl(state.downloadUrl()))
-                        .hoverEvent(HoverEvent.showText(Component.text("Open download page", NamedTextColor.GREEN))));
     }
 
     private boolean isAdmin(Player player) {

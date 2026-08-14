@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.world;
 
 
 import java.util.Collections;
+import com.monkey.ultimatebot.compat.BlockBreakAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
@@ -114,7 +115,7 @@ public final class WorldProtectionService implements AutoCloseable {
         if (WorldProtectionPolicy.shouldSuppressDrops(settings.antiDupe(), tracked)) {
             block.setBlockData(Objects.requireNonNull(originalData, "tracked block data"), false);
         } else if (result.dropItems()) {
-            block.breakNaturally(tool, true);
+            BlockBreakAccess.breakNaturally(block, tool, true);
         } else {
             block.setType(Material.AIR, false);
         }

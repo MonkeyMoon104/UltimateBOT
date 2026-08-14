@@ -12,7 +12,7 @@ public enum CombatTuningProperty {
     REACTION_TIME("Reaction time", Material.REPEATER, 1.0D, 0.0D, 100.0D, true),
     MOVEMENT_SPEED("Movement speed", Material.SUGAR, 0.01D, 0.05D, 1.0D, false),
     STRAFE_STRENGTH("Strafe strength", Material.FEATHER, 0.05D, 0.0D, 1.0D, false),
-    AIM_ACCURACY("Aim accuracy", Material.TARGET, 0.05D, 0.0D, 1.0D, false),
+    AIM_ACCURACY("Aim accuracy", Material.ARROW, 0.05D, 0.0D, 1.0D, false),
     AGGRESSION("Aggression", Material.BLAZE_POWDER, 0.05D, 0.0D, 1.0D, false),
     RETREAT_HEALTH("Retreat health", Material.REDSTONE, 0.05D, 0.0D, 1.0D, false),
     HEALING_HEALTH("Healing health", Material.GOLDEN_APPLE, 0.05D, 0.0D, 1.0D, false),
@@ -44,9 +44,11 @@ public enum CombatTuningProperty {
     }
 
     public Material material() {
-        // RECOVERY_COMPASS is 1.19+; keep COMPASS as the enum constant so 1.18 class-init succeeds.
         if (this == SPECIAL_COOLDOWN) {
             return MaterialCatalog.optional("RECOVERY_COMPASS", Material.COMPASS);
+        }
+        if (this == AIM_ACCURACY) {
+            return MaterialCatalog.optional("TARGET", Material.ARROW);
         }
         return material;
     }

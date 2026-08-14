@@ -14,6 +14,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.MovementPattern
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.compat.CombatSwordAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Random;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -102,7 +104,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         if (!actionExecuted) {
             moveToTarget(target, 3.0);
             if (distance <= 3.5 && bot.isCombat()) {
-                attackController.handleAttack(target);
+                handleCombatAttack(target);
             }
         }
 
@@ -122,7 +124,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance <= 3.5 && bot.isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
         double targetDistance = 2.5;
 
@@ -145,20 +147,22 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             }
         }
 
-        if (distance <= 1.8) {
+        if (CombatSwordAccess.mustHoldKitSwordToMelee() && cpvpController.isEnabled()) {
+            moveToTarget(target, crystalMeleeHoldDistance());
+        } else if (distance <= 1.8) {
             Vector strafeDirection = getStrafeDirection(target);
             movementController.moveToPosition(bot.bukkitPosition().add(strafeDirection.multiply(1.9D)));
         } else {
             moveToTarget(target, targetDistance);
         }
 
-        if (!inventoryController.isHoldingSword() && distance <= 4.0) {
+        if (!inventoryController.isHoldingSword() && distance <= 4.0 && !shouldKeepCrystalHotbar()) {
             inventoryController.switchToSword();
         }
 
         if (distance <= 3.5 && bot.isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
 
         return true;
@@ -178,13 +182,13 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             moveToTarget(target, anchorBreakoutDistance);
             if (distance <= 3.4D) {
                 maybeBoostMeleeTempo(hyperAggressive);
-                attackController.handleAttack(target);
+                handleCombatAttack(target);
             }
             return true;
         }
 
         if (distance <= 3.2) {
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
 
         if (!hyperAggressive
@@ -211,8 +215,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         int yDiff = targetY - botY;
 
         if (yDiff < 2) {
-            if (!inventoryController.isHoldingAnchor()
-                    && inventoryController.hasItem(Material.RESPAWN_ANCHOR)) {
+            if (!inventoryController.isHoldingAnchor() && hasAnchor()) {
                 inventoryController.switchToAnchor();
             }
         } else {
@@ -223,7 +226,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance <= 3.5 && bot.isCombat()) {
             maybeBoostMeleeTempo(hyperAggressive);
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
 
         return true;
@@ -258,7 +261,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         if (distance < 3.0) {
             movementController.moveAwayFrom(target, optimalDistance);
             maybeBoostMeleeTempo(hyperAggressive);
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         } else if (distance > 8.0) {
             movementController.moveTowards(target, optimalDistance);
         } else {
@@ -267,7 +270,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             movementController.moveToPosition(newPos);
             if (distance <= 3.8) {
                 maybeBoostMeleeTempo(hyperAggressive);
-                attackController.handleAttack(target);
+                handleCombatAttack(target);
             }
         }
         repositionTimer--;
@@ -316,7 +319,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance <= 3.2) {
             maybeBoostMeleeTempo(hyperAggressive);
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
 
         if (!hyperAggressive && enderpearlController.canUseEnderpearl()) {
@@ -327,7 +330,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         if (hyperAggressive) {
             moveToTarget(target, 4.0);
             if (distance <= 4.0) {
-                attackController.handleAttack(target);
+                handleCombatAttack(target);
             }
         } else {
             movementController.moveAwayFrom(target, 10.0);
@@ -380,6 +383,38 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         return difficulty == DifficultyLevel.GOD || difficulty == DifficultyLevel.HARD;
     }
 
+    /**
+     * 1.17+ attacks with the current hand (original CPvP timing). 1.16 must not punch the player
+     * with crystal/obsidian/anchor and must not steal that hotbar slot back to the sword.
+     */
+    private void handleCombatAttack(LivingEntity target) {
+        if (CombatSwordAccess.mustHoldKitSwordToMelee()) {
+            if (cpvpController.isDoingCrystalAction() || rapvpController.isActive() || isHoldingCrystalCombatItem()) {
+                return;
+            }
+        }
+        attackController.handleAttack(target);
+    }
+
+    private boolean shouldKeepCrystalHotbar() {
+        return CombatSwordAccess.mustHoldKitSwordToMelee()
+                && cpvpController.isEnabled()
+                && (cpvpController.isDoingCrystalAction() || isHoldingCrystalCombatItem());
+    }
+
+    private boolean isHoldingCrystalCombatItem() {
+        return inventoryController.isHoldingObsidian()
+                || inventoryController.isHoldingCrystal()
+                || inventoryController.isHoldingAnchor()
+                || inventoryController.isHoldingGlow();
+    }
+
+    private double crystalMeleeHoldDistance() {
+        double min = cpvpController.getConfig().getMinCrystalDistance();
+        double max = cpvpController.getConfig().getMaxCrystalDistance();
+        return Math.min(max - 0.4D, Math.max(4.0D, min + 1.8D));
+    }
+
     private void maybeBoostMeleeTempo(boolean hyperAggressive) {
         if (!hyperAggressive) {
             return;
@@ -397,8 +432,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
             return false;
         }
 
-        if (!inventoryController.hasItem(Material.RESPAWN_ANCHOR)
-                || !inventoryController.hasItem(Material.GLOWSTONE)) {
+        if (!hasAnchor() || !inventoryController.hasItem(Material.GLOWSTONE)) {
             return false;
         }
 
@@ -435,7 +469,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance <= 3.5D) {
             maybeBoostMeleeTempo(isHyperAggressiveDifficulty());
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
 
         if (distance > 1.45D) {
@@ -446,7 +480,7 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
 
         if (distance <= 3.5D) {
             maybeBoostMeleeTempo(isHyperAggressiveDifficulty());
-            attackController.handleAttack(target);
+            handleCombatAttack(target);
         }
     }
 
@@ -464,5 +498,10 @@ public class CombatStrategyExecutor implements ICombatStrategyExecutor {
         Vector horizontalDirection = toTarget.multiply(1.0D / horizontalDistance);
         Vector destination = targetPos.subtract(horizontalDirection.multiply(targetDistance));
         movementController.moveToPosition(destination);
+    }
+
+    private boolean hasAnchor() {
+        Material anchor = MaterialCatalog.optional("RESPAWN_ANCHOR", Material.AIR);
+        return anchor != Material.AIR && inventoryController.hasItem(anchor);
     }
 }

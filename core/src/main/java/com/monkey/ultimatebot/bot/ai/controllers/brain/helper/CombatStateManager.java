@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -137,7 +138,8 @@ public class CombatStateManager implements ICombatStateManager {
     @Override
     public boolean shouldAttemptAnchor(Player target, long currentTime) {
         if (currentTime - lastAnchorAttempt < getAnchorAttemptCooldown()) return false;
-        if (!inventoryController.hasItem(Material.RESPAWN_ANCHOR)) return false;
+        Material anchor = MaterialCatalog.optional("RESPAWN_ANCHOR", Material.AIR);
+        if (anchor == Material.AIR || !inventoryController.hasItem(anchor)) return false;
         if (!inventoryController.hasItem(Material.GLOWSTONE)) return false;
 
         DifficultyLevel difficulty = cpvpController.getDifficulty();

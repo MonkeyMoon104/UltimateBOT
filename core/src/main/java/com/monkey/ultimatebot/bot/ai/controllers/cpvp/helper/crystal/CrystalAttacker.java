@@ -34,7 +34,7 @@ public class CrystalAttacker {
                         return true;
                     },
                     false);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             UltimateBotLogging.warn(
                     UltimateBot.getInstance().getLogger(), "Combat", "Crystal attack failed -> " + e.getMessage());
             return false;

@@ -6,8 +6,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.EquipmentSlot;
@@ -31,7 +31,7 @@ public class AnchorPlacer {
     public boolean placeAnchor(BlockVector pos) {
         try {
             ItemStack stack = inventory.getCurrentItem();
-            if (stack == null || stack.getType() != Material.RESPAWN_ANCHOR) return false;
+            if (stack == null || !MaterialCatalog.is(stack.getType(), "RESPAWN_ANCHOR")) return false;
             BlockFace bestFace = findBestPlacementFace(pos);
             if (bestFace == null) bestFace = BlockFace.UP;
             BlockVector adjacentPos = relative(pos, bestFace.getOppositeFace());

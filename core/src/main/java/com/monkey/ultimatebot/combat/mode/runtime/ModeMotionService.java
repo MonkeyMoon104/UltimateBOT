@@ -1,6 +1,8 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.compat.EntityFluidAccess;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
@@ -86,14 +88,17 @@ public final class ModeMotionService {
 
     public void swimTowards(LivingEntity target, double speed) {
         applySwimmingVelocity(UnderwaterMotionPlanner.pursue(
-                bukkitBot.getEyeLocation().toVector(), target.getEyeLocation().toVector(), bukkitBot.getVelocity(), speed));
+                bukkitBot.getEyeLocation().toVector(),
+                target.getEyeLocation().toVector(),
+                bot.bukkitVelocity(),
+                speed));
     }
 
     public void swimOrbit(LivingEntity target, double radialSpeed, double strafeSpeed, double strafeDirection) {
         applySwimmingVelocity(UnderwaterMotionPlanner.orbit(
                 bukkitBot.getEyeLocation().toVector(),
                 target.getEyeLocation().toVector(),
-                bukkitBot.getVelocity(),
+                bot.bukkitVelocity(),
                 radialSpeed,
                 strafeSpeed,
                 strafeDirection));
@@ -121,17 +126,15 @@ public final class ModeMotionService {
     }
 
     public boolean isBotInWater() {
-        return bukkitBot.isInWater();
+        return EntityFluidAccess.isInWater(bukkitBot);
     }
 
     public boolean isTargetInWater(LivingEntity target) {
-        return target.isInWater();
+        return EntityFluidAccess.isInWater(target);
     }
 
-    @SuppressWarnings("deprecation")
     public void setSwimming(boolean swimming) {
-        bukkitBot.setSprinting(swimming);
-        bukkitBot.setSwimming(swimming);
+        NMSBridgeManager.get().setBotSwimming(bot, swimming);
     }
 
     public boolean hasVerticalClearance(LivingEntity entity, int clearanceBlocks) {

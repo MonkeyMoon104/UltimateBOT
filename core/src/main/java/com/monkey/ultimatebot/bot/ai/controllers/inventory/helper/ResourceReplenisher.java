@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -27,18 +28,18 @@ public class ResourceReplenisher implements IResourceReplenisher {
         ItemStack currentStack = hotbarSlots.get(slot);
         if (currentStack == null || ItemStackAccess.isEmpty(currentStack)) return;
 
-                switch (slot) {
+        switch (slot) {
             case OBSIDIAN_SLOT:
                 refill(currentStack, Material.OBSIDIAN, 64);
                 break;
             case CRYSTAL_SLOT:
-                refill(currentStack, Material.END_CRYSTAL, 64);
+                refillNamed(currentStack, "END_CRYSTAL", 64);
                 break;
             case ENDERPEARL_SLOT:
                 refill(currentStack, Material.ENDER_PEARL, 16);
                 break;
             case ANCHOR_SLOT:
-                refill(currentStack, Material.RESPAWN_ANCHOR, 64);
+                refillNamed(currentStack, "RESPAWN_ANCHOR", 64);
                 break;
             case GLOW_SLOT:
                 refill(currentStack, Material.GLOWSTONE, 64);
@@ -47,7 +48,6 @@ public class ResourceReplenisher implements IResourceReplenisher {
                 refill(currentStack, Material.GOLDEN_APPLE, 64);
                 break;
             default:
-
                 break;
         }
     }
@@ -72,6 +72,14 @@ public class ResourceReplenisher implements IResourceReplenisher {
     @Override
     public boolean hasInfiniteResources() {
         return infiniteResources;
+    }
+
+    private static void refillNamed(ItemStack stack, String materialName, int count) {
+        Material expected = MaterialCatalog.optional(materialName, Material.AIR);
+        if (expected == Material.AIR) {
+            return;
+        }
+        refill(stack, expected, count);
     }
 
     private static void refill(ItemStack stack, Material expectedMaterial, int count) {
