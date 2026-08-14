@@ -224,6 +224,9 @@ if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(path = ":NMS:v1_15_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
     implementation(project(path = ":NMS:v1_16_R1", configuration = "runtimeElements")) {
         isTransitive = false
     }
@@ -266,6 +269,10 @@ dependencies {
     add(invuiV2_2Shade.name, libsCatalog.findLibrary("invui-v2-2").get())
     add(caffeineLegacyShade.name, libsCatalog.findLibrary("caffeine-legacy").get())
     add(caffeineModernShade.name, libsCatalog.findLibrary("caffeine-modern").get())
+    // Paper before the plugin.yml Library Loader (1.16.4 and earlier) cannot download at runtime.
+    implementation(libs.lamp.bukkit)
+    implementation(libs.pathetic.engine)
+    implementation(libs.configurate.yaml)
 }
 
 val relocateInvuiV2_1Task = tasks.register<ShadowJar>("relocateInvuiV2_1") {
@@ -345,6 +352,10 @@ tasks.named<ShadowJar>("shadowJar") {
     }
     relocate("org.bstats", "com.monkey.ultimatebot.libs.bstats")
     relocate("com.fasterxml.jackson", "com.monkey.ultimatebot.libs.jackson")
+    relocate("revxrsal.commands", "com.monkey.ultimatebot.libs.lamp")
+    relocate("de.bsommerfeld.pathetic", "com.monkey.ultimatebot.libs.pathetic")
+    relocate("org.spongepowered.configurate", "com.monkey.ultimatebot.libs.configurate")
+    relocate("io.leangen.geantyref", "com.monkey.ultimatebot.libs.geantyref")
     relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.v1") {
         exclude("com/monkey/ultimatebot/gui/v26_1/**")
         exclude("com/monkey/ultimatebot/gui/v26_2/**")

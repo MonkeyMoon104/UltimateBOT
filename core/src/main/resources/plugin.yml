@@ -10,12 +10,6 @@ softdepend:
   - LuckPerms
   - WorldGuard
 
-libraries:
-  - de.bsommerfeld.pathetic:engine:${pathetic}
-  - org.spongepowered:configurate-yaml:${configurate}
-  - io.github.revxrsal:lamp.common:${lamp}
-  - io.github.revxrsal:lamp.bukkit:${lamp}
-
 commands:
   bot:
     description: Open the normal bot settings GUI

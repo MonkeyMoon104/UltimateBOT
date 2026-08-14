@@ -56,6 +56,9 @@
 
 # Keep the shaded pathfinding engine stable for its extension interfaces and reflective smoke test.
 -keep class com.monkey.ultimatebot.libs.pathetic.** { *; }
+-keep class com.monkey.ultimatebot.libs.lamp.** { *; }
+-keep class com.monkey.ultimatebot.libs.configurate.** { *; }
+-keep class com.monkey.ultimatebot.libs.geantyref.** { *; }
 
 -keepclassmembers enum * {
     public static **[] values();

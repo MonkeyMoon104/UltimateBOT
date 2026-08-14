@@ -49,9 +49,6 @@ tasks.named<Test>("test") {
 tasks.named<ProcessResources>("processResources") {
     val props = mapOf(
         "version" to version,
-        "pathetic" to libs.versions.pathetic.get(),
-        "configurate" to libs.versions.configurate.get(),
-        "lamp" to libs.versions.lamp.get(),
     )
     inputs.properties(props)
     filteringCharset = "UTF-8"
