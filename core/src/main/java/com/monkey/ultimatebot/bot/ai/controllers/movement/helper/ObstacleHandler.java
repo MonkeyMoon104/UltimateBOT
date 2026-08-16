@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import org.bukkit.Material;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.World;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -120,8 +120,9 @@ public class ObstacleHandler implements IObstacleHandler {
     }
 
     private boolean isCobweb(BlockVector position) {
-        return world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ()).getType()
-                == Material.COBWEB;
+        return MaterialCatalog.is(
+                world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ()).getType(),
+                "COBWEB");
     }
 
     @Override

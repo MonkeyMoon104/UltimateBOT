@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.ItemMetaDamageAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.Nullable;
 
@@ -52,16 +52,16 @@ public class BotEquipmentService {
                 continue;
             }
             boolean changed = false;
-            if (!meta.isUnbreakable()) {
-                meta.setUnbreakable(true);
-                changed = true;
-            }
-            if (meta instanceof Damageable) {
-                Damageable damageable = (Damageable) meta;
-                if (damageable.hasDamage()) {
-                    damageable.setDamage(0);
+            try {
+                if (!meta.isUnbreakable()) {
+                    meta.setUnbreakable(true);
                     changed = true;
                 }
+            } catch (NoSuchMethodError ignored) {
+                // pre-unbreakable API
+            }
+            if (ItemMetaDamageAccess.clearDamage(armorPiece, meta)) {
+                changed = true;
             }
             // Re-equip only when durability actually changed; unbreakable stops repeat equip sounds.
             if (changed) {

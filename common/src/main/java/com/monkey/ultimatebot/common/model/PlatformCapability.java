@@ -42,12 +42,18 @@ public enum PlatformCapability {
     }
 
     /**
-     * Features from Minecraft 1.9 through 1.10.x: offhand, shield, combat cooldown, sweep, plus
-     * legacy TNT minecart.
+     * Features from Minecraft 1.9 through 1.10.x: offhand, shield, combat cooldown, sweep, end
+     * crystal (placeable crystal item + obsidian CPvP), plus legacy TNT minecart.
      */
     public static Set<PlatformCapability> through1_9() {
         return Collections.unmodifiableSet(
-                EnumSet.of(OFFHAND, SHIELD, COMBAT_COOLDOWN, SWEEP_ATTACK, TNT_MINECART));
+                EnumSet.of(
+                        OFFHAND,
+                        SHIELD,
+                        COMBAT_COOLDOWN,
+                        SWEEP_ATTACK,
+                        END_CRYSTAL,
+                        TNT_MINECART));
     }
 
     /** Features from Minecraft 1.11 through 1.12.x: {@link #through1_9()} plus {@link #TOTEM}. */
@@ -58,13 +64,12 @@ public enum PlatformCapability {
     }
 
     /**
-     * Features from Minecraft 1.13 through 1.15.x: {@link #through1_11()} plus {@link #TRIDENT} and
-     * {@link #END_CRYSTAL} (crystal item + obsidian; respawn anchors stay 1.16+).
+     * Features from Minecraft 1.13 through 1.15.x: {@link #through1_11()} plus {@link #TRIDENT}
+     * (respawn anchors stay 1.16+).
      */
     public static Set<PlatformCapability> through1_13() {
         EnumSet<PlatformCapability> set = EnumSet.copyOf(through1_11());
         set.add(TRIDENT);
-        set.add(END_CRYSTAL);
         return Collections.unmodifiableSet(set);
     }
 

@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
 import com.monkey.ultimatebot.compat.ParticleAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -66,10 +67,11 @@ final class UhcSecondaryController {
                 targetLocation.getDirection(),
                 context.random())) {
             WebTrapPlanner.Position position = WebTrapPlanner.Position.from(candidate);
-            if (placedWebs.contains(position) || !context.canPlaceCombatBlock(candidate, Material.COBWEB)) {
+            Material cobweb = MaterialCatalog.optional("COBWEB", Material.STRING);
+            if (placedWebs.contains(position) || !context.canPlaceCombatBlock(candidate, cobweb)) {
                 continue;
             }
-            if (context.placeCombatBlock(candidate, Material.COBWEB, WEB_SLOT)) {
+            if (context.placeCombatBlock(candidate, cobweb, WEB_SLOT)) {
                 placedWebs.add(position);
                 context.actions().swingMainHand();
                 return;

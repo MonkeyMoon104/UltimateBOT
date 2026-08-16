@@ -144,7 +144,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void fillChrome() {
-        ItemStack border = namedItem(borderMaterial(), " ", Collections.<String>emptyList());
+        ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         inventory.clear();
         // Match NewBotGUI TabGui chrome: border everywhere except content `x` cells.
         int[] content = contentSlots();
@@ -160,22 +160,26 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void placeTabs() {
-        inventory.setItem(SLOT_TAB_KIT, tabItem(TAB_KIT, "&aKit", Material.DIAMOND_SWORD));
-        inventory.setItem(SLOT_TAB_ARMOR, tabItem(TAB_ARMOR, "&bArmor", Material.IRON_CHESTPLATE));
-        inventory.setItem(SLOT_TAB_COMBAT, tabItem(TAB_COMBAT, "&6Combat", Material.GOLDEN_SWORD));
-        inventory.setItem(SLOT_TAB_OWNERS, tabItem(TAB_OWNERS, "&eOwners", material("PLAYER_HEAD", "SKULL_ITEM", Material.STONE)));
+        inventory.setItem(SLOT_TAB_KIT, tabItem(TAB_KIT, "&aKit", new ItemStack(Material.DIAMOND_SWORD)));
+        inventory.setItem(SLOT_TAB_ARMOR, tabItem(TAB_ARMOR, "&bArmor", new ItemStack(Material.IRON_CHESTPLATE)));
         inventory.setItem(
-                SLOT_TAB_TARGETS, tabItem(TAB_TARGETS, "&cTargets", material("PLAYER_HEAD", "SKULL_ITEM", Material.STONE)));
+                SLOT_TAB_COMBAT,
+                tabItem(TAB_COMBAT, "&6Combat", MaterialCatalog.stack("GOLDEN_SWORD", Material.IRON_SWORD)));
+        inventory.setItem(
+                SLOT_TAB_OWNERS, tabItem(TAB_OWNERS, "&eOwners", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
+        inventory.setItem(
+                SLOT_TAB_TARGETS,
+                tabItem(TAB_TARGETS, "&cTargets", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
     }
 
-    private ItemStack tabItem(int tab, String name, Material mat) {
+    private ItemStack tabItem(int tab, String name, ItemStack icon) {
         boolean selected = activeTab == tab;
         List<String> lore = Collections.singletonList(selected ? "&aSelected" : "&7Click to open");
-        return namedItem(mat, (selected ? "&l" : "") + name, lore);
+        return namedItem(icon, (selected ? "&l" : "") + name, lore);
     }
 
     private void renderKit() {
-        ItemStack border = namedItem(borderMaterial(), " ", Collections.<String>emptyList());
+        ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         // KitTab nested borders (`#` in structure).
         int[] kitBorders = {
             10, 16, 17, 19, 25, 26, 28, 34, 35, 37, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53
@@ -198,7 +202,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void renderArmor() {
-        ItemStack border = namedItem(borderMaterial(), " ", Collections.<String>emptyList());
+        ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         for (int slot : contentSlots()) {
             inventory.setItem(slot, border);
         }
@@ -220,7 +224,12 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             inventory.setItem(slots[index++], headItem(ownerUUID, "&e", "Owner"));
         }
         if (owners.isEmpty()) {
-            inventory.setItem(slots[0], namedItem(Material.BARRIER, "&cNo owners", Collections.singletonList("&7Spawn a bot first")));
+            inventory.setItem(
+                    slots[0],
+                    namedItem(
+                            MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK),
+                            "&cNo owners",
+                            Collections.singletonList("&7Spawn a bot first")));
         }
     }
 
@@ -237,12 +246,15 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         if (targets.isEmpty()) {
             inventory.setItem(
                     slots[0],
-                    namedItem(Material.BARRIER, "&cNo targets", Collections.singletonList("&7Targets appear when the bot has one")));
+                    namedItem(
+                            MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK),
+                            "&cNo targets",
+                            Collections.singletonList("&7Targets appear when the bot has one")));
         }
     }
 
     private void renderCombat() {
-        ItemStack border = namedItem(borderMaterial(), " ", Collections.<String>emptyList());
+        ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         int[] combatBorders = {10, 17, 19, 26, 28, 35, 37, 44, 46, 47, 48, 49, 50, 51, 52, 53};
         for (int slot : combatBorders) {
             inventory.setItem(slot, border);
@@ -726,18 +738,19 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
 
     private ItemStack followItem() {
         boolean on = options.isFollow();
-        Material mat = material("LEAD", "LEASH", Material.STRING);
+        ItemStack icon = MaterialCatalog.stack("LEAD", Material.STRING);
         List<String> lore = Arrays.asList("&7Status: " + (on ? "&aON" : "&cOFF"), "&eClick: &7toggle");
-        return namedItem(mat, plugin.getLangString("gui.follow-button.name", "&aFollow"), lore);
+        return namedItem(icon, plugin.getLangString("gui.follow-button.name", "&aFollow"), lore);
     }
 
     private ItemStack totemItem() {
-        Material mat = material("TOTEM_OF_UNDYING", "GOLDEN_APPLE", Material.GOLDEN_APPLE);
+        // Spigot 1.12.2: TOTEM (not TOTEM_OF_UNDYING); GOLDEN_APPLE only pre-1.11 fallback.
+        ItemStack icon = MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE);
         String unlimited = plugin.getLangString("gui.totem-button.unlimited-text", "Unlimited");
         String count = options.getTotems() == -1 ? unlimited : String.valueOf(options.getTotems());
         List<String> lore =
                 Arrays.asList("&7Count: &e" + count, "&eLeft click: &7+", "&eRight click: &7-");
-        return namedItem(mat, plugin.getLangString("gui.totem-button.name", "&6Totems"), lore);
+        return namedItem(icon, plugin.getLangString("gui.totem-button.name", "&6Totems"), lore);
     }
 
     private ItemStack targetModeItem() {
@@ -747,16 +760,16 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
                         .replace("%mode%", targetModeLabel(mode)),
                 plugin.getLangString("gui.target-mode-button.click", "&aClick to change"));
         return namedItem(
-                targetModeMaterial(mode),
+                targetModeStack(mode),
                 plugin.getLangString("gui.target-mode-button.name", "&bAttack mode"),
                 lore);
     }
 
     private ItemStack spawnItem() {
         boolean spawned = isManagedBotSpawned();
-        Material mat = spawned
-                ? material("BARRIER", "REDSTONE_BLOCK", Material.REDSTONE_BLOCK)
-                : material("PLAYER_HEAD", "SKULL_ITEM", Material.STONE);
+        ItemStack icon = spawned
+                ? MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK)
+                : MaterialCatalog.stack("PLAYER_HEAD", Material.STONE);
         String name = spawned
                 ? plugin.getLangString("gui.despawn-button.name", "&cDespawn bot")
                 : plugin.getLangString("gui.spawn-button.name", "&aSpawn bot");
@@ -766,7 +779,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         if (lore == null || lore.isEmpty()) {
             lore = Collections.singletonList(spawned ? "&7Click to remove the bot" : "&7Click to spawn the bot");
         }
-        return namedItem(mat, name, lore);
+        return namedItem(icon, name, lore);
     }
 
     private ItemStack teleportItem() {
@@ -796,7 +809,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
 
     private ItemStack resetTuningItem() {
         return namedItem(
-                Material.BARRIER,
+                MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK),
                 "&cReset combat profile",
                 Collections.singletonList("&7Restore default tuning for this mode/difficulty"));
     }
@@ -814,7 +827,8 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private ItemStack headItem(UUID uuid, String colorPrefix, String role) {
         OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
         String name = offline.getName() != null ? offline.getName() : uuid.toString();
-        ItemStack skull = new ItemStack(material("PLAYER_HEAD", "SKULL_ITEM", Material.STONE));
+        // Spigot 1.12.2: SKULL_ITEM + durability 3 = player head (not skeleton = 0).
+        ItemStack skull = MaterialCatalog.stack("PLAYER_HEAD", Material.STONE);
         ItemMeta meta = skull.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(ChatColorUtils.translate(colorPrefix + name));
@@ -822,11 +836,24 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
                     ChatColorUtils.translate("&7" + role),
                     ChatColorUtils.translate("&8" + uuid.toString())));
             if (meta instanceof SkullMeta) {
-                ((SkullMeta) meta).setOwningPlayer(offline);
+                applySkullOwner((SkullMeta) meta, offline, name);
             }
             skull.setItemMeta(meta);
         }
         return skull;
+    }
+
+    private static void applySkullOwner(SkullMeta meta, OfflinePlayer offline, String name) {
+        try {
+            meta.setOwningPlayer(offline);
+        } catch (NoSuchMethodError | AbstractMethodError ignored) {
+            // Pre-1.12 SkullMeta: setOwner(String).
+            try {
+                SkullMeta.class.getMethod("setOwner", String.class).invoke(meta, name);
+            } catch (ReflectiveOperationException ignoredAgain) {
+                // Leave default skull texture.
+            }
+        }
     }
 
     private List<UUID> resolveOwners() {
@@ -894,21 +921,22 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
                 plugin.getLangString("gui.difficulty-button.material", "DIAMOND_SWORD"), Material.DIAMOND_SWORD);
     }
 
-    private Material borderMaterial() {
-        return MaterialCatalog.optional(
-                plugin.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE"),
-                material("BLACK_STAINED_GLASS_PANE", "STAINED_GLASS_PANE", Material.STONE));
+    private ItemStack borderStack() {
+        String configured =
+                plugin.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
+        // Spigot 1.12.2: STAINED_GLASS_PANE + data 15 = black (data 0 = white).
+        return MaterialCatalog.stack(configured, Material.STONE);
     }
 
-    private static Material targetModeMaterial(BotTargetMode mode) {
+    private static ItemStack targetModeStack(BotTargetMode mode) {
         switch (mode) {
             case PLAYERS:
-                return MaterialCatalog.optional("PLAYER_HEAD", Material.STONE);
+                return MaterialCatalog.stack("PLAYER_HEAD", Material.STONE);
             case MOBS:
-                return MaterialCatalog.optional("ZOMBIE_HEAD", Material.ROTTEN_FLESH);
+                return MaterialCatalog.stack("ZOMBIE_HEAD", Material.ROTTEN_FLESH);
             case PLAYERS_AND_MOBS:
             default:
-                return MaterialCatalog.optional("IRON_SWORD", Material.IRON_SWORD);
+                return new ItemStack(Material.IRON_SWORD);
         }
     }
 
@@ -940,20 +968,12 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return builder.toString();
     }
 
-    private static Material material(String preferred, String legacyAlias, Material ancientFallback) {
-        Material matched = MaterialCatalog.optional(preferred, Material.AIR);
-        if (matched != Material.AIR) {
-            return matched;
-        }
-        matched = MaterialCatalog.optional(legacyAlias, Material.AIR);
-        if (matched != Material.AIR) {
-            return matched;
-        }
-        return ancientFallback;
+    private ItemStack namedItem(Material material, String name, List<String> lore) {
+        return namedItem(new ItemStack(material == null ? Material.STONE : material), name, lore);
     }
 
-    private ItemStack namedItem(Material material, String name, List<String> lore) {
-        ItemStack stack = new ItemStack(material == null ? Material.STONE : material);
+    private ItemStack namedItem(ItemStack base, String name, List<String> lore) {
+        ItemStack stack = base == null ? new ItemStack(Material.STONE) : base.clone();
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(ChatColorUtils.translate(name));

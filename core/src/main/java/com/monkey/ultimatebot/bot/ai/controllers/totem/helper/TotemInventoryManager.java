@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
@@ -22,12 +23,12 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     public boolean hasTotemInSlot(ItemStack itemStack) {
         return itemStack != null
                 && !ItemStackAccess.isEmpty(itemStack)
-                && itemStack.getType() == Material.TOTEM_OF_UNDYING;
+                && MaterialCatalog.is(itemStack.getType(), "TOTEM_OF_UNDYING");
     }
 
     @Override
     public void equipTotem(EquipmentSlot slot) {
-        if (updateSlot(slot, new ItemStack(Material.TOTEM_OF_UNDYING))) {
+        if (updateSlot(slot, MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE))) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }
@@ -52,9 +53,16 @@ public class TotemInventoryManager implements ITotemInventoryManager {
         count = Math.max(0, Math.min(2, count));
 
         boolean changed =
-                updateSlot(EquipmentSlot.OFF_HAND, count >= 1 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStackAccess.empty());
+                updateSlot(
+                        EquipmentSlot.OFF_HAND,
+                        count >= 1
+                                ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
+                                : ItemStackAccess.empty());
         changed |= updateSlot(
-                EquipmentSlot.HAND, count >= 2 ? new ItemStack(Material.TOTEM_OF_UNDYING) : ItemStackAccess.empty());
+                EquipmentSlot.HAND,
+                count >= 2
+                        ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
+                        : ItemStackAccess.empty());
         if (changed) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }

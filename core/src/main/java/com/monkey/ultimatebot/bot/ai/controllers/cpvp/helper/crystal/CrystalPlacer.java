@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.compat.RayTraceAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,7 +34,7 @@ public class CrystalPlacer {
 
         try {
             ItemStack crystalStack = inventoryController.getItem(BotInventoryController.CRYSTAL_SLOT);
-            if (crystalStack.getType() != Material.END_CRYSTAL) return false;
+            if (!MaterialCatalog.is(crystalStack.getType(), "END_CRYSTAL")) return false;
             Location hit = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 1.0D, pos.getBlockZ() + 0.5D);
             boolean consumed = NMSBridgeManager.get()
                     .useItemOnBlock(bot.asBukkitPlayer(), crystalStack, blockAt(pos), BlockFace.UP, hit, EquipmentSlot.HAND);

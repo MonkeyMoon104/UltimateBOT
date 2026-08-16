@@ -32,7 +32,7 @@ public class TotemItem extends AbstractItem {
     @Override
     public ItemProvider getItemProvider() {
         ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
-                training.getLangString("gui.totem-button.material", "TOTEM_OF_UNDYING"), Material.TOTEM_OF_UNDYING));
+                training.getLangString("gui.totem-button.material", "TOTEM_OF_UNDYING"), Material.GOLDEN_APPLE));
 
         String unlimitedText = Objects.requireNonNull(
                 training.getLangString("gui.totem-button.unlimited-text"), "gui.totem-button.unlimited-text");

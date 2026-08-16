@@ -54,7 +54,7 @@ public class BotTeamAllyCommand {
         plugin.getPlayerOptions().put(player.getUniqueId(), sharedOptions);
         if (!NMSBridgeManager.isBotRuntimeSupported()) {
             player.sendMessage(ChatColorUtils.translate(
-                    "&cUltimateBot fake-player bots require Minecraft 1.17.1 or newer on this build."));
+                    "&cUltimateBot fake-player bots are not available on this Minecraft version in this build."));
             return;
         }
         NMSBridgeManager.get().openBotGui(player, plugin, BotType.TEAM_ALLY);
@@ -122,7 +122,7 @@ public class BotTeamAllyCommand {
 
         if (!NMSBridgeManager.isBotRuntimeSupported()) {
             player.sendMessage(ChatColorUtils.translate(
-                    "&cUltimateBot fake-player bots require Minecraft 1.17.1 or newer on this build."));
+                    "&cUltimateBot fake-player bots are not available on this Minecraft version in this build."));
             return;
         }
 

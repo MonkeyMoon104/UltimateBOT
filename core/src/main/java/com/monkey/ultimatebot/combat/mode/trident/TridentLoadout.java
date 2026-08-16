@@ -28,7 +28,7 @@ final class TridentLoadout {
                         enchantedTrident(BotEquipmentUtils.resolveEnchantmentByKeyMinecraft("loyalty"), 3))
                 .slot(SPONGE_SLOT, Material.SPONGE, 32)
                 .slot(WATER_SLOT, Material.WATER_BUCKET, 4)
-                .slot(WEB_SLOT, Material.COBWEB, 16)
+                .slot(WEB_SLOT, "COBWEB", Material.STRING, 16)
                 .slot(HOE_SLOT, "NETHERITE_HOE", Material.DIAMOND_HOE, 1)
                 .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                 .build();

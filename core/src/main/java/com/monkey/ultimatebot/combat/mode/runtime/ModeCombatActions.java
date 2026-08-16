@@ -8,6 +8,7 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.compat.AttributeAccess;
 import com.monkey.ultimatebot.compat.ParticleAccess;
 import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.compat.PotionEffectAccess;
 import com.monkey.ultimatebot.compat.PotionEffectTypeAccess;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -16,7 +17,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 public final class ModeCombatActions {
@@ -111,8 +111,7 @@ public final class ModeCombatActions {
         int safeAmplifier = Math.max(0, amplifier);
         double before = bot.healthValue();
         bukkitBot.addPotionEffect(
-                new PotionEffect(
-                        PotionEffectTypeAccess.instantHealth(), 1, safeAmplifier, false, false, false));
+                PotionEffectAccess.of(PotionEffectTypeAccess.instantHealth(), 1, safeAmplifier, false, false, false));
         // Splash items are color-only. Instant Health as an effect can no-op on fake players
         // (RegainHealth cancelled, or heal() skipped at 0 HP). Gapple already uses setHealth.
         if (bot.healthValue() <= before + 0.01D) {
@@ -124,9 +123,9 @@ public final class ModeCombatActions {
     }
 
     public void applyCombatBuffs() {
-        bukkitBot.addPotionEffect(new PotionEffect(PotionEffectTypeAccess.speed(), 3600, 1, false, false, false));
+        bukkitBot.addPotionEffect(PotionEffectAccess.of(PotionEffectTypeAccess.speed(), 3600, 1, false, false, false));
         bukkitBot.addPotionEffect(
-                new PotionEffect(PotionEffectTypeAccess.strength(), 3600, 0, false, false, false));
+                PotionEffectAccess.of(PotionEffectTypeAccess.strength(), 3600, 0, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
         bukkitBot.getWorld().spawnParticle(ParticleAccess.witch(), location, 24, 0.35D, 0.7D, 0.35D, 0.08D);
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_SPLASH_POTION_BREAK, 0.8F, 1.15F);
@@ -139,9 +138,9 @@ public final class ModeCombatActions {
         inventory.switchToSlot(slot);
         bot.setHealthValue(Math.min(bot.maxHealthValue(), bot.healthValue() + 4.0D));
         bukkitBot.addPotionEffect(
-                new PotionEffect(PotionEffectTypeAccess.regeneration(), 100, 1, false, false, false));
+                PotionEffectAccess.of(PotionEffectTypeAccess.regeneration(), 100, 1, false, false, false));
         bukkitBot.addPotionEffect(
-                new PotionEffect(PotionEffectTypeAccess.absorption(), 1200, 0, false, false, false));
+                PotionEffectAccess.of(PotionEffectTypeAccess.absorption(), 1200, 0, false, false, false));
         Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
         bukkitBot.getWorld().playSound(location, Sound.ENTITY_GENERIC_EAT, 0.8F, 1.0F);
     }

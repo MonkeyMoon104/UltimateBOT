@@ -4,12 +4,12 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.ultimatebot.compat.RespawnAnchorAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -31,11 +31,9 @@ public class AnchorCharger {
             ItemStack stack = inventory.getCurrentItem();
             if (stack == null || stack.getType() != Material.GLOWSTONE) return false;
             Block block = blockAt(anchorPos);
-            if (!(block.getBlockData() instanceof RespawnAnchor)) return false;
-            RespawnAnchor anchorData = (RespawnAnchor) block.getBlockData();
-            if (anchorData.getCharges() >= anchorData.getMaximumCharges()) return false;
-            anchorData.setCharges(anchorData.getMaximumCharges());
-            block.setBlockData(anchorData, true);
+            if (!RespawnAnchorAccess.chargeToMaximum(block)) {
+                return false;
+            }
             NMSBridgeManager.get()
                     .playSound(centerOf(anchorPos), "block.respawn_anchor.charge", "blocks", 1.0F, 1.0F);
             rotation.lookAt(new Vector(anchorPos.getBlockX(), anchorPos.getBlockY(), anchorPos.getBlockZ()));

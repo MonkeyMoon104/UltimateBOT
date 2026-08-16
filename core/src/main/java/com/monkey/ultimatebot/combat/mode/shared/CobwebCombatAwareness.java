@@ -4,8 +4,8 @@ package com.monkey.ultimatebot.combat.mode.shared;
 import java.util.Collections;
 import java.util.List;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 
@@ -32,13 +32,15 @@ public final class CobwebCombatAwareness {
     public static List<Location> occupiedWebs(LivingEntity entity) {
         Location base = entity.getLocation().getBlock().getLocation();
         Location head = base.clone().add(0.0D, 1.0D, 0.0D);
-        if (base.getBlock().getType() == Material.COBWEB && head.getBlock().getType() == Material.COBWEB) {
+        boolean baseWeb = isCobweb(base);
+        boolean headWeb = isCobweb(head);
+        if (baseWeb && headWeb) {
             return Collections.unmodifiableList(java.util.Arrays.asList(base, head));
         }
-        if (base.getBlock().getType() == Material.COBWEB) {
+        if (baseWeb) {
             return Collections.unmodifiableList(java.util.Arrays.asList(base));
         }
-        return head.getBlock().getType() == Material.COBWEB ? Collections.unmodifiableList(java.util.Arrays.asList(head)) : Collections.emptyList();
+        return headWeb ? Collections.unmodifiableList(java.util.Arrays.asList(head)) : Collections.emptyList();
     }
 
     public static boolean nearlyExiting(Vector position, Vector velocity) {
@@ -56,7 +58,7 @@ public final class CobwebCombatAwareness {
     }
 
     private static boolean isCobweb(Location position) {
-        return position.getBlock().getType() == Material.COBWEB;
+        return MaterialCatalog.is(position.getBlock().getType(), "COBWEB");
     }
 
     public static final class Containment {

@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
@@ -55,7 +56,7 @@ public class BlockStateValidator implements IBlockStateValidator {
 
             Block below = blockAt(pos.getBlockX(), y - 1, pos.getBlockZ());
             Material belowType = below.getType();
-            if (belowType == Material.COBWEB || !belowType.isSolid()) {
+            if (MaterialCatalog.is(belowType, "COBWEB") || !belowType.isSolid()) {
                 return false;
             }
             return isBodySpaceClearCached(pos);
@@ -90,8 +91,8 @@ public class BlockStateValidator implements IBlockStateValidator {
             Block head = blockAt(x, y + 1, z);
             Material feetType = feet.getType();
             Material headType = head.getType();
-            return feetType != Material.COBWEB
-                    && headType != Material.COBWEB
+            return !MaterialCatalog.is(feetType, "COBWEB")
+                    && !MaterialCatalog.is(headType, "COBWEB")
                     && BlockPassableAccess.isPassable(feet)
                     && BlockPassableAccess.isPassable(head)
                     && !feet.isLiquid()

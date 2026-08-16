@@ -26,8 +26,8 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(AXE_SLOT, "NETHERITE_AXE", Material.DIAMOND_AXE, 1)
                         .slot(SHIELD_SLOT, Material.SHIELD)
                         .slot(PEARL_SLOT, Material.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.ENCHANTED_GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFF_HAND, Material.TOTEM_OF_UNDYING)
+                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, "ENCHANTED_GOLDEN_APPLE", Material.GOLDEN_APPLE, 64)
+                        .equipment(EquipmentSlot.OFF_HAND, "TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
                         .build());
     }
 

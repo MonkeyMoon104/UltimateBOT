@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-
+import com.monkey.ultimatebot.compat.BlockDataAccess;
 import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import java.util.Collections;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -11,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.Nullable;
 
 public final class ModeBlockTracker implements AutoCloseable {
@@ -35,7 +34,7 @@ public final class ModeBlockTracker implements AutoCloseable {
             return false;
         }
         blocks.add(BlockKey.from(block));
-        broadcast(block.getLocation(), checkedMaterial.createBlockData());
+        BlockDataAccess.broadcastMaterial(block.getLocation(), checkedMaterial);
         return true;
     }
 
@@ -43,7 +42,7 @@ public final class ModeBlockTracker implements AutoCloseable {
         Objects.requireNonNull(location, "location");
         Block block = location.getBlock();
         if (blocks.remove(BlockKey.from(block))) {
-            broadcast(block.getLocation(), block.getBlockData());
+            BlockDataAccess.broadcastCurrent(block.getLocation());
         }
     }
 
@@ -52,21 +51,14 @@ public final class ModeBlockTracker implements AutoCloseable {
         for (BlockKey key : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(blocks)) {
             Block block = key.block();
             if (block != null) {
-                broadcast(block.getLocation(), block.getBlockData());
+                BlockDataAccess.broadcastCurrent(block.getLocation());
             }
         }
         blocks.clear();
     }
 
     private static boolean requiresSupport(Material material) {
-        return material == Material.RAIL;
-    }
-
-    private static void broadcast(Location location, BlockData blockData) {
-        World world = Objects.requireNonNull(location.getWorld(), "location world");
-        for (org.bukkit.entity.Player viewer : world.getPlayers()) {
-            viewer.sendBlockChange(location, blockData);
-        }
+        return MaterialCatalog.is(material, "RAIL");
     }
 
     private static final class BlockKey {
@@ -90,7 +82,6 @@ public final class ModeBlockTracker implements AutoCloseable {
             World world = org.bukkit.Bukkit.getWorld(worldId);
             return world == null ? null : world.getBlockAt(x, y, z);
         }
-    
 
         @Override
         public boolean equals(Object obj) {
@@ -101,12 +92,12 @@ public final class ModeBlockTracker implements AutoCloseable {
                 return false;
             }
             BlockKey other = (BlockKey) obj;
-            return java.util.Objects.equals(worldId, other.worldId) && x == other.x && y == other.y && z == other.z;
+            return Objects.equals(worldId, other.worldId) && x == other.x && y == other.y && z == other.z;
         }
 
         @Override
         public int hashCode() {
-            return java.util.Objects.hash(worldId, x, y, z);
+            return Objects.hash(worldId, x, y, z);
         }
 
         @Override

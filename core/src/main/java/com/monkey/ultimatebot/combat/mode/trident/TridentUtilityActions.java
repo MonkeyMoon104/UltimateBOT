@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.combat.mode.trident;
 import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -66,7 +67,7 @@ final class TridentUtilityActions {
                 continue;
             }
             Material below = candidate.getRelative(BlockFace.DOWN).getType();
-            if (below.isSolid() || below == Material.COBWEB) {
+            if (below.isSolid() || MaterialCatalog.is(below, "COBWEB")) {
                 return candidate.getLocation();
             }
         }

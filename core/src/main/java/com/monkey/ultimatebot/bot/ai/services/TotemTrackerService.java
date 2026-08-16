@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.bot.ai.services;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
-import org.bukkit.Material;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -84,7 +84,7 @@ public class TotemTrackerService {
     private boolean isTotem(ItemStack itemStack) {
         return itemStack != null
                 && !ItemStackAccess.isEmpty(itemStack)
-                && itemStack.getType() == Material.TOTEM_OF_UNDYING;
+                && MaterialCatalog.is(itemStack.getType(), "TOTEM_OF_UNDYING");
     }
 
     public int getTotemCount() {

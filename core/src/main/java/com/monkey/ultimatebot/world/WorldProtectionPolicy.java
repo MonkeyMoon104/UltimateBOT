@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.world;
 
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 
 final class WorldProtectionPolicy {
@@ -18,7 +19,7 @@ final class WorldProtectionPolicy {
     }
 
     static boolean hasPlacementSupport(Material material, boolean supportedBelow) {
-        if (material == Material.COBWEB || material == Material.WATER) {
+        if (MaterialCatalog.is(material, "COBWEB") || material == Material.WATER) {
             return supportedBelow;
         }
         return true;

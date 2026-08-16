@@ -6,11 +6,11 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.BotExplosionContext;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.ultimatebot.compat.RespawnAnchorAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.RespawnAnchor;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 
@@ -29,11 +29,10 @@ public class AnchorExploder {
     public boolean explodeAnchor(BlockVector anchorPos) {
         try {
             Block block = blockAt(anchorPos);
-            if (!(block.getBlockData() instanceof RespawnAnchor)) {
+            if (!RespawnAnchorAccess.isRespawnAnchor(block)) {
                 return false;
             }
-            RespawnAnchor anchorData = (RespawnAnchor) block.getBlockData();
-            if (anchorData.getCharges() <= 0) {
+            if (RespawnAnchorAccess.getCharges(block) <= 0) {
                 return false;
             }
             inventory.switchToEmptySlot();

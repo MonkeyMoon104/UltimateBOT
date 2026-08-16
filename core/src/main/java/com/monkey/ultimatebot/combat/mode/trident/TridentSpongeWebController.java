@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.combat.mode.trident;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -41,10 +42,11 @@ final class TridentSpongeWebController {
                 target.isOnGround(),
                 targetLocation.getDirection(),
                 context.random())) {
-            if (!context.canPlaceCombatBlock(candidate, Material.COBWEB)) {
+            Material cobweb = MaterialCatalog.optional("COBWEB", Material.STRING);
+            if (!context.canPlaceCombatBlock(candidate, cobweb)) {
                 continue;
             }
-            if (context.placeCombatBlock(candidate, Material.COBWEB, TridentLoadout.WEB_SLOT)) {
+            if (context.placeCombatBlock(candidate, cobweb, TridentLoadout.WEB_SLOT)) {
                 placed.add(WebTrapPlanner.Position.from(candidate));
                 context.actions().swingMainHand();
                 return true;

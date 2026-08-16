@@ -1,11 +1,12 @@
 package com.monkey.ultimatebot.world;
 
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import java.util.Collections;
 import com.monkey.ultimatebot.compat.BlockBreakAccess;
+import com.monkey.ultimatebot.compat.BlockDataAccess;
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import java.util.Map;
 import java.util.Objects;
@@ -17,12 +18,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
-
 public final class WorldProtectionService implements AutoCloseable {
     private final Plugin plugin;
     private final Map<WorldBlockKey, TrackedWorldBlock> placements = new ConcurrentHashMap<>();
@@ -49,7 +48,7 @@ public final class WorldProtectionService implements AutoCloseable {
                 && BlockPassableAccess.isPassable(block)
                 && !block.isLiquid()
                 && WorldProtectionPolicy.hasPlacementSupport(
-                        material, materialBelow == Material.COBWEB || materialBelow.isSolid());
+                        material, MaterialCatalog.is(materialBelow, "COBWEB") || materialBelow.isSolid());
     }
 
     public synchronized boolean placeCombatBlock(
@@ -73,28 +72,28 @@ public final class WorldProtectionService implements AutoCloseable {
         }
         Block block = location.getBlock();
         WorldBlockKey key = WorldBlockKey.from(block);
-        BlockData originalData = block.getBlockData();
+        Object originalSnapshot = BlockDataAccess.capture(block);
         BlockState replacedState = block.getState();
         block.setType(material, false);
         if (!placementAllowed(block, replacedState, placementItem, placer)) {
-            block.setBlockData(originalData, false);
+            BlockDataAccess.restore(block, originalSnapshot, false);
             return false;
         }
         ScheduledTask expiryTask;
         try {
             expiryTask = scheduleExpiry(key, location);
         } catch (RuntimeException schedulingError) {
-            block.setBlockData(originalData, false);
+            BlockDataAccess.restore(block, originalSnapshot, false);
             throw new IllegalStateException("Could not schedule combat block expiry", schedulingError);
         }
         if (!inventoryCommit.getAsBoolean()) {
             if (expiryTask != null) {
                 expiryTask.cancel();
             }
-            block.setBlockData(originalData, false);
+            BlockDataAccess.restore(block, originalSnapshot, false);
             return false;
         }
-        TrackedWorldBlock placement = new TrackedWorldBlock(originalData, material, expiryTask);
+        TrackedWorldBlock placement = new TrackedWorldBlock(originalSnapshot, material, expiryTask);
         placements.put(key, placement);
         return true;
     }
@@ -109,13 +108,13 @@ public final class WorldProtectionService implements AutoCloseable {
         }
         TrackedWorldBlock placement = placements.get(WorldBlockKey.from(block));
         boolean tracked = placement != null;
-        BlockData originalData = placement == null ? null : placement.originalData();
+        Object originalSnapshot = placement == null ? null : placement.originalSnapshot();
         WorldBlockEventDispatcher.BreakResult result = WorldBlockEventDispatcher.requestBreak(block, breaker);
         if (result.cancelled()) {
             return false;
         }
         if (WorldProtectionPolicy.shouldSuppressDrops(settings.antiDupe(), tracked)) {
-            block.setBlockData(Objects.requireNonNull(originalData, "tracked block data"), false);
+            BlockDataAccess.restore(block, Objects.requireNonNull(originalSnapshot, "tracked block data"), false);
         } else if (result.dropItems()) {
             BlockBreakAccess.breakNaturally(block, tool, true);
         } else {
@@ -134,7 +133,7 @@ public final class WorldProtectionService implements AutoCloseable {
         }
         placement.cancelExpiry();
         if (block.getType() == placement.material()) {
-            block.setBlockData(placement.originalData(), false);
+            BlockDataAccess.restore(block, placement.originalSnapshot(), false);
         }
     }
 
@@ -247,7 +246,7 @@ public final class WorldProtectionService implements AutoCloseable {
         TrackedWorldBlock placement = placements.remove(key);
         Block block = key.block();
         if (placement != null && block != null && block.getType() == placement.material()) {
-            block.setBlockData(placement.originalData(), false);
+            BlockDataAccess.restore(block, placement.originalSnapshot(), false);
         }
     }
 
@@ -287,7 +286,7 @@ public final class WorldProtectionService implements AutoCloseable {
             if (block != null
                     && WorldProtectionPolicy.shouldRestoreOnShutdown(
                             settings.antiDupe(), true, block.getType() == placement.material())) {
-                block.setBlockData(placement.originalData(), false);
+                BlockDataAccess.restore(block, placement.originalSnapshot(), false);
             }
         }
         placements.clear();

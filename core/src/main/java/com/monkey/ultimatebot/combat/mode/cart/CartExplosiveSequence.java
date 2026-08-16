@@ -7,6 +7,7 @@ import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -47,11 +48,12 @@ final class CartExplosiveSequence {
             if (containsExplosiveCart(placement)) {
                 continue;
             }
-            if (placement.getBlock().getType() == Material.RAIL) {
+            Material rail = MaterialCatalog.optional("RAIL", Material.IRON_INGOT);
+            if (MaterialCatalog.is(placement.getBlock().getType(), "RAIL")) {
                 railLocation = placement;
                 return true;
             }
-            if (context.placeCombatBlock(placement, Material.RAIL, RAIL_SLOT)) {
+            if (context.placeCombatBlock(placement, rail, RAIL_SLOT)) {
                 railLocation = placement;
                 return true;
             }

@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -33,10 +34,10 @@ public class SafetyValidator implements ISafetyValidator {
         }
 
         Material belowType = stateBelow.getType();
+        // MAGMA_BLOCK is MAGMA on Spigot 1.12.x; never hard-link the modern enum field.
         return belowType != Material.CACTUS
-                && belowType != Material.MAGMA_BLOCK
-                && belowType != Material.LAVA
-                && belowType != Material.WATER;
+                && !MaterialCatalog.is(belowType, "MAGMA_BLOCK")
+                && !isFluid(belowType);
     }
 
     @Override
@@ -75,5 +76,12 @@ public class SafetyValidator implements ISafetyValidator {
     private static boolean isSolid(Block block) {
         Material type = block.getType();
         return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
+    }
+
+    private static boolean isFluid(Material type) {
+        return type == Material.LAVA
+                || type == Material.WATER
+                || "STATIONARY_LAVA".equals(type.name())
+                || "STATIONARY_WATER".equals(type.name());
     }
 }

@@ -28,7 +28,7 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(SECOND_POTION_SLOT, Material.SPLASH_POTION, 64)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Material.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFF_HAND, Material.TOTEM_OF_UNDYING)
+                        .equipment(EquipmentSlot.OFF_HAND, "TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
                         .build());
     }
 

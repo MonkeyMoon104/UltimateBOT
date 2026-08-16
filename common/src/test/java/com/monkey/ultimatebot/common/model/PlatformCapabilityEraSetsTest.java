@@ -28,17 +28,18 @@ class PlatformCapabilityEraSetsTest {
     }
 
     @Test
-    void through1_9AllowsUhcButNotTridentOrNetheriteModes() {
+    void through1_9AllowsUhcCrystalButNotTridentOrNetheriteModes() {
         assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_9())).isTrue();
         assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_9())).isFalse();
         assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_9())).isTrue();
-        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_9())).isFalse();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_9())).isTrue();
         assertThat(PlatformCapability.through1_9())
                 .contains(
                         PlatformCapability.OFFHAND,
                         PlatformCapability.SHIELD,
                         PlatformCapability.COMBAT_COOLDOWN,
-                        PlatformCapability.SWEEP_ATTACK)
+                        PlatformCapability.SWEEP_ATTACK,
+                        PlatformCapability.END_CRYSTAL)
                 .doesNotContain(PlatformCapability.TOTEM, PlatformCapability.TRIDENT, PlatformCapability.NETHERITE);
     }
 
@@ -46,12 +47,12 @@ class PlatformCapabilityEraSetsTest {
     void through1_11AddsTotem() {
         assertThat(PlatformCapability.through1_11())
                 .containsAll(PlatformCapability.through1_9())
-                .contains(PlatformCapability.TOTEM)
+                .contains(PlatformCapability.TOTEM, PlatformCapability.END_CRYSTAL)
                 .doesNotContain(PlatformCapability.TRIDENT, PlatformCapability.NETHERITE);
     }
 
     @Test
-    void through1_13AddsTridentAndEndCrystal() {
+    void through1_13AddsTrident() {
         assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_13())).isTrue();
         assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_13())).isTrue();
         assertThat(CombatMode.SMP.supportedBy(PlatformCapability.through1_13())).isTrue();

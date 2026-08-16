@@ -18,7 +18,8 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.entity.Mob;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
@@ -49,7 +50,13 @@ public class TargetingService {
         return targetCache.estimatedSize();
     }
 
-    public @Nullable Mob findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
+    /**
+     * Closest hostile/neutral living non-player near the bot.
+     *
+     * <p>Uses {@link LivingEntity} instead of {@code org.bukkit.entity.Mob} — that interface does not
+     * exist before 1.13/1.14 and hard links crash 1.12 with {@code NoClassDefFoundError}.
+     */
+    public @Nullable LivingEntity findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
         if (bot == null || bot.asBukkitPlayer() == null || maxRange <= 0.0D) {
             return null;
         }
@@ -78,12 +85,12 @@ public class TargetingService {
 
         org.bukkit.Location center = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
         double closestDistanceSq = maxRange * maxRange;
-        Mob closest = null;
+        LivingEntity closest = null;
         for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
-            if (!(entity instanceof Mob)) {
+            if (!(entity instanceof LivingEntity) || entity instanceof Player || entity instanceof ArmorStand) {
                 continue;
             }
-            Mob mob = (Mob) entity;
+            LivingEntity mob = (LivingEntity) entity;
             if (!mob.isValid() || mob.isDead() || mob.isInvulnerable()) {
                 continue;
             }
@@ -98,11 +105,11 @@ public class TargetingService {
     }
 
     private static final class MobCache {
-        private final @Nullable Mob mob;
+        private final @Nullable LivingEntity mob;
         private final double maxRange;
         private final long cachedAtMs;
 
-        private MobCache(@Nullable Mob mob, double maxRange, long cachedAtMs) {
+        private MobCache(@Nullable LivingEntity mob, double maxRange, long cachedAtMs) {
             this.mob = mob;
             this.maxRange = maxRange;
             this.cachedAtMs = cachedAtMs;

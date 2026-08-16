@@ -1,27 +1,29 @@
 package com.monkey.ultimatebot.world;
 
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.util.Objects;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
 import org.jspecify.annotations.Nullable;
 
 final class TrackedWorldBlock {
-    private final BlockData originalData;
+    private final Object originalSnapshot;
     private final Material material;
     private final @Nullable ScheduledTask expiryTask;
 
-    TrackedWorldBlock(BlockData originalData, Material material, @Nullable ScheduledTask expiryTask) {
-        this.originalData = originalData;
-        this.material = material;
+    TrackedWorldBlock(Object originalSnapshot, Material material, @Nullable ScheduledTask expiryTask) {
+        this.originalSnapshot = Objects.requireNonNull(originalSnapshot, "originalSnapshot");
+        this.material = Objects.requireNonNull(material, "material");
         this.expiryTask = expiryTask;
     }
 
-    public BlockData originalData() {
-        return originalData;
+    public Object originalSnapshot() {
+        return originalSnapshot;
     }
+
     public Material material() {
         return material;
     }
+
     public @Nullable ScheduledTask expiryTask() {
         return expiryTask;
     }
@@ -41,16 +43,24 @@ final class TrackedWorldBlock {
             return false;
         }
         TrackedWorldBlock other = (TrackedWorldBlock) obj;
-        return java.util.Objects.equals(originalData, other.originalData) && java.util.Objects.equals(material, other.material) && java.util.Objects.equals(expiryTask, other.expiryTask);
+        return Objects.equals(originalSnapshot, other.originalSnapshot)
+                && Objects.equals(material, other.material)
+                && Objects.equals(expiryTask, other.expiryTask);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(originalData, material, expiryTask);
+        return Objects.hash(originalSnapshot, material, expiryTask);
     }
 
     @Override
     public String toString() {
-        return "TrackedWorldBlock[originalData=" + originalData + ", material=" + material + ", expiryTask=" + expiryTask + "]";
+        return "TrackedWorldBlock[originalSnapshot="
+                + originalSnapshot
+                + ", material="
+                + material
+                + ", expiryTask="
+                + expiryTask
+                + "]";
     }
 }

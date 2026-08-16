@@ -31,7 +31,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(CROSSBOW_SLOT, "CROSSBOW", Material.BOW, 1)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Material.WATER_BUCKET, 4)
                         .slot(BotInventoryController.CRYSTAL_SLOT, Material.LAVA_BUCKET, 2)
-                        .slot(BotInventoryController.ANCHOR_SLOT, Material.COBWEB, 16)
+                        .slot(BotInventoryController.ANCHOR_SLOT, "COBWEB", Material.STRING, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .slot(ARROW_SLOT, Material.ARROW, 64)
                         .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)

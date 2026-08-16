@@ -222,11 +222,9 @@ public interface INMSBridge {
             return;
         }
         org.bukkit.Location location = minecart.getLocation();
-        org.bukkit.World world = location.getWorld();
         minecart.remove();
-        if (world != null) {
-            world.createExplosion(location, 4.0F, false, true);
-        }
+        // Prefer NMS explode — Bukkit World#createExplosion(Location,F,ZZ) is missing on 1.12.
+        explode(location, null, 4.0F, true);
     }
 
     /**

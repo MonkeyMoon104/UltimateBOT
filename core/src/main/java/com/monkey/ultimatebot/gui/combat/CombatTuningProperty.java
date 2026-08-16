@@ -7,32 +7,37 @@ import java.util.Objects;
 import org.bukkit.Material;
 
 public enum CombatTuningProperty {
-    ATTACK_RANGE("Attack range", Material.IRON_SWORD, 0.1D, 1.0D, 6.0D, false),
-    ATTACK_COOLDOWN("Attack cooldown", Material.CLOCK, 1.0D, 0.0D, 40.0D, true),
-    REACTION_TIME("Reaction time", Material.REPEATER, 1.0D, 0.0D, 100.0D, true),
-    MOVEMENT_SPEED("Movement speed", Material.SUGAR, 0.01D, 0.05D, 1.0D, false),
-    STRAFE_STRENGTH("Strafe strength", Material.FEATHER, 0.05D, 0.0D, 1.0D, false),
-    AIM_ACCURACY("Aim accuracy", Material.ARROW, 0.05D, 0.0D, 1.0D, false),
-    AGGRESSION("Aggression", Material.BLAZE_POWDER, 0.05D, 0.0D, 1.0D, false),
-    RETREAT_HEALTH("Retreat health", Material.REDSTONE, 0.05D, 0.0D, 1.0D, false),
-    HEALING_HEALTH("Healing health", Material.GOLDEN_APPLE, 0.05D, 0.0D, 1.0D, false),
-    SPECIAL_COOLDOWN("Special cooldown", Material.COMPASS, 1.0D, 0.0D, 400.0D, true),
-    PEARL_DISTANCE("Pearl distance", Material.ENDER_PEARL, 0.5D, 0.0D, 64.0D, false),
-    ACTIONS_PER_TICK("Actions per tick", Material.COMPARATOR, 1.0D, 1.0D, 8.0D, true),
-    DEFENSIVE_CHANCE("Defensive chance", Material.SHIELD, 0.05D, 0.0D, 1.0D, false),
-    SPRINT_RESET_CHANCE("Sprint reset chance", Material.DIAMOND_BOOTS, 0.05D, 0.0D, 1.0D, false);
+    ATTACK_RANGE("Attack range", "IRON_SWORD", 0.1D, 1.0D, 6.0D, false),
+    ATTACK_COOLDOWN("Attack cooldown", "CLOCK", 1.0D, 0.0D, 40.0D, true),
+    REACTION_TIME("Reaction time", "REPEATER", 1.0D, 0.0D, 100.0D, true),
+    MOVEMENT_SPEED("Movement speed", "SUGAR", 0.01D, 0.05D, 1.0D, false),
+    STRAFE_STRENGTH("Strafe strength", "FEATHER", 0.05D, 0.0D, 1.0D, false),
+    AIM_ACCURACY("Aim accuracy", "ARROW", 0.05D, 0.0D, 1.0D, false),
+    AGGRESSION("Aggression", "BLAZE_POWDER", 0.05D, 0.0D, 1.0D, false),
+    RETREAT_HEALTH("Retreat health", "REDSTONE", 0.05D, 0.0D, 1.0D, false),
+    HEALING_HEALTH("Healing health", "GOLDEN_APPLE", 0.05D, 0.0D, 1.0D, false),
+    SPECIAL_COOLDOWN("Special cooldown", "COMPASS", 1.0D, 0.0D, 400.0D, true),
+    PEARL_DISTANCE("Pearl distance", "ENDER_PEARL", 0.5D, 0.0D, 64.0D, false),
+    ACTIONS_PER_TICK("Actions per tick", "COMPARATOR", 1.0D, 1.0D, 8.0D, true),
+    DEFENSIVE_CHANCE("Defensive chance", "SHIELD", 0.05D, 0.0D, 1.0D, false),
+    SPRINT_RESET_CHANCE("Sprint reset chance", "DIAMOND_BOOTS", 0.05D, 0.0D, 1.0D, false);
 
     private final String displayName;
-    private final Material material;
+    private final String materialName;
     private final double step;
     private final double minimum;
     private final double maximum;
     private final boolean integer;
 
     CombatTuningProperty(
-            String displayName, Material material, double step, double minimum, double maximum, boolean integer) {
+            String displayName,
+            String materialName,
+            double step,
+            double minimum,
+            double maximum,
+            boolean integer) {
         this.displayName = displayName;
-        this.material = material;
+        this.materialName = materialName;
         this.step = step;
         this.minimum = minimum;
         this.maximum = maximum;
@@ -50,7 +55,9 @@ public enum CombatTuningProperty {
         if (this == AIM_ACCURACY) {
             return MaterialCatalog.optional("TARGET", Material.ARROW);
         }
-        return material;
+        // Never link modern-only enum fields (CLOCK/REPEATER/COMPARATOR) — Spigot 1.12.2 uses
+        // WATCH/DIODE/REDSTONE_COMPARATOR (resolved via MaterialCatalog aliases).
+        return MaterialCatalog.optional(materialName, Material.STONE);
     }
 
     public String formattedValue(CombatTuning tuning) {

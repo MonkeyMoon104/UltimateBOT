@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Mob;
 import org.jspecify.annotations.Nullable;
 
 public class BotBrainController {
@@ -184,7 +183,7 @@ public class BotBrainController {
 
         // Discover mobs whenever the mode allows them (not only when combat is ON),
         // so the bot can face them; attacking stays gated by allowCombat in onTick.
-        Mob mob = null;
+        LivingEntity mob = null;
         if (mode.allowsMobs()) {
             mob = targetingService.findClosestMob(bot, getMobTargetRange());
             if (mob != null && (!mob.isValid() || mob.isDead())) {

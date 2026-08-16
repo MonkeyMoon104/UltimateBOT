@@ -55,6 +55,14 @@ class MaterialCatalogTest {
     }
 
     @Test
+    void goldenSwordAliasGroupResolvesBidirectionally() {
+        Material fromModern = MaterialCatalog.optional("GOLDEN_SWORD", Material.IRON_SWORD);
+        Material fromLegacy = MaterialCatalog.optional("GOLD_SWORD", Material.IRON_SWORD);
+        assertThat(fromModern).isNotNull().isNotEqualTo(Material.IRON_SWORD);
+        assertThat(fromLegacy).isEqualTo(fromModern);
+    }
+
+    @Test
     void ofNameBlankUsesFallback() {
         assertThat(MaterialCatalog.ofName("  ", Material.STONE)).isEqualTo(Material.STONE);
         assertThat(MaterialCatalog.ofName(null, Material.STONE)).isEqualTo(Material.STONE);
@@ -100,9 +108,51 @@ class MaterialCatalogTest {
     }
 
     @Test
+    void clockAliasGroupResolvesToWatchOrClock() {
+        Material resolved = MaterialCatalog.optional("CLOCK", Material.STONE);
+        Material clock = Material.matchMaterial("CLOCK");
+        Material watch = Material.matchMaterial("WATCH");
+        if (clock != null) {
+            assertThat(resolved).isEqualTo(clock);
+        } else if (watch != null) {
+            assertThat(resolved).isEqualTo(watch);
+        } else {
+            assertThat(resolved).isEqualTo(Material.STONE);
+        }
+    }
+
+    @Test
+    void totemAliasGroupResolvesToTotemOrTotemOfUndying() {
+        Material resolved = MaterialCatalog.optional("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE);
+        Material modern = Material.matchMaterial("TOTEM_OF_UNDYING");
+        Material legacy = Material.matchMaterial("TOTEM");
+        if (modern != null) {
+            assertThat(resolved).isEqualTo(modern);
+        } else if (legacy != null) {
+            assertThat(resolved).isEqualTo(legacy);
+        } else {
+            assertThat(resolved).isEqualTo(Material.GOLDEN_APPLE);
+        }
+    }
+
+    @Test
+    void cobwebAliasGroupResolvesToWebOrCobweb() {
+        Material resolved = MaterialCatalog.optional("COBWEB", Material.STRING);
+        Material modern = Material.matchMaterial("COBWEB");
+        Material legacy = Material.matchMaterial("WEB");
+        if (modern != null) {
+            assertThat(resolved).isEqualTo(modern);
+        } else if (legacy != null) {
+            assertThat(resolved).isEqualTo(legacy);
+        } else {
+            assertThat(resolved).isEqualTo(Material.STRING);
+        }
+    }
+
+    @Test
     void alwaysPresentOn117PlusAreAvailableOnCompileTarget() {
         // Sanity on this compile target; older runtimes resolve via optional()/is() instead of enum fields.
-        assertThat(MaterialCatalog.available("TOTEM_OF_UNDYING")).isTrue();
+        assertThat(MaterialCatalog.available("TOTEM_OF_UNDYING") || MaterialCatalog.available("TOTEM")).isTrue();
         assertThat(MaterialCatalog.available("END_CRYSTAL")).isTrue();
     }
 }
