@@ -224,6 +224,30 @@ if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(path = ":NMS:v1_8_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_8_R2", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_8_R3", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_9_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_9_R2", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_10_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_11_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
+    implementation(project(path = ":NMS:v1_12_R1", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
     implementation(project(path = ":NMS:v1_13_R1", configuration = "runtimeElements")) {
         isTransitive = false
     }

@@ -13,8 +13,7 @@ public class NMSBridgeManager {
 
     private static @Nullable INMSBridge instance;
     private static final String SUPPORTED_VERSIONS =
-            "1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x"
-                    + " (1.8–1.16.5: limited stub until legacy NMS modules ship)";
+            "1.8.x–1.16.5 (legacy NMS), 1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x";
 
     public static void init() {
         init(java.util.logging.Logger.getLogger("UltimateBot"));
