@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -20,7 +21,7 @@ public final class ModeBlockTracker implements AutoCloseable {
         Objects.requireNonNull(location, "location");
         Material checkedMaterial = Objects.requireNonNull(material, "material");
         Block block = location.getBlock();
-        return block.isPassable()
+        return BlockPassableAccess.isPassable(block)
                 && !block.isLiquid()
                 && (!requiresSupport(checkedMaterial)
                         || block.getRelative(0, -1, 0).getType().isSolid());

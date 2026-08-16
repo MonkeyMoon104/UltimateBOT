@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.trident;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import java.util.Objects;
@@ -61,7 +62,7 @@ final class TridentUtilityActions {
         Block start = origin.getBlock();
         for (int dy = 0; dy <= MAX_WATER_DROP_SEARCH; dy++) {
             Block candidate = start.getRelative(0, -dy, 0);
-            if (!candidate.isPassable() || candidate.isLiquid()) {
+            if (!BlockPassableAccess.isPassable(candidate) || candidate.isLiquid()) {
                 continue;
             }
             Material below = candidate.getRelative(BlockFace.DOWN).getType();

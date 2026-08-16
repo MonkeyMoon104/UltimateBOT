@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.teleport.helper;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleportValidator;
 import org.bukkit.block.Block;
@@ -15,8 +16,8 @@ public class BasicTeleportValidator implements ITeleportValidator {
 
         if (!below.getType().isSolid()) return false;
 
-        if (!feet.isPassable()) return false;
-        if (!head.isPassable()) return false;
+        if (!BlockPassableAccess.isPassable(feet)) return false;
+        if (!BlockPassableAccess.isPassable(head)) return false;
 
         return true;
     }
@@ -26,8 +27,8 @@ public class BasicTeleportValidator implements ITeleportValidator {
         Block feet = bot.getLocation().getBlock();
         Block head = feet.getRelative(0, 1, 0);
 
-        if (!feet.isPassable()) return true;
-        if (!head.isPassable()) return true;
+        if (!BlockPassableAccess.isPassable(feet)) return true;
+        if (!BlockPassableAccess.isPassable(head)) return true;
 
         return false;
     }

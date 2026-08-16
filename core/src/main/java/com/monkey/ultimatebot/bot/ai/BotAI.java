@@ -1,7 +1,6 @@
 package com.monkey.ultimatebot.bot.ai;
 
-import com.monkey.ultimatebot.compat.ItemStackAccess;
-
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.behavior.FollowBehaviorController;
@@ -29,6 +28,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import com.monkey.ultimatebot.extension.runtime.CustomBrainRuntime;
@@ -481,7 +481,7 @@ public class BotAI {
 
     private static boolean isSolid(Block block) {
         Material type = block.getType();
-        return type.isBlock() && type.isSolid() && !block.isPassable();
+        return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
     }
 
     public void close() {

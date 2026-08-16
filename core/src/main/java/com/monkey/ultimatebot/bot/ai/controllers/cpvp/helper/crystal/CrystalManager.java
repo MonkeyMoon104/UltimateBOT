@@ -1,10 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,23 +38,29 @@ public class CrystalManager {
     }
 
     public @Nullable EnderCrystal findCrystalAt(BlockVector pos, World world) {
-        return world.getNearbyEntities(
-                        new org.bukkit.Location(world, pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D),
+        for (EnderCrystal crystal :
+                WorldAccess.nearbyEntitiesOfType(
+                        world,
+                        new org.bukkit.Location(
+                                world, pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D),
                         1.5D,
                         1.5D,
                         1.5D,
-                        EnderCrystal.class::isInstance)
-                .stream()
-                .map(EnderCrystal.class::cast)
-                .findFirst()
-                .orElse(null);
+                        EnderCrystal.class)) {
+            return crystal;
+        }
+        return null;
     }
 
     public List<EnderCrystal> findNearbyCrystals(Player bot, World world, double crystalAttackRange) {
-        return world.getNearbyEntities(bot.getLocation(), crystalAttackRange, crystalAttackRange, crystalAttackRange, EnderCrystal.class::isInstance)
-                .stream()
-                .map(EnderCrystal.class::cast)
-                .collect(Collectors.toList());
+        return new ArrayList<>(
+                WorldAccess.nearbyEntitiesOfType(
+                        world,
+                        bot.getLocation(),
+                        crystalAttackRange,
+                        crystalAttackRange,
+                        crystalAttackRange,
+                        EnderCrystal.class));
     }
 
     public List<BlockVector> getValidCrystalPositions(
@@ -70,8 +77,12 @@ public class CrystalManager {
     private boolean isValidCrystalPos(BlockVector pos, Player target, Player bot, World world, double maxCrystalDistance) {
         Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()).getType();
         if (type != Material.OBSIDIAN && type != Material.BEDROCK) return false;
-        if (!world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()).isPassable()
-                || !world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 2, pos.getBlockZ()).isPassable()) return false;
+        if (!BlockPassableAccess.isPassable(world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()))
+                || !BlockPassableAccess.isPassable(world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 2, pos.getBlockZ()))) return false;
+        // 1.13 only: occupied pillars were re-clicked forever (interact-sound loop).
+        if (MinecraftVersionAccess.is1_13() && findCrystalAt(crystalStandPos(pos), world) != null) {
+            return false;
+        }
 
         org.bukkit.Location center = new org.bukkit.Location(world, pos.getBlockX() + 0.5D, pos.getBlockY() + 1.5D, pos.getBlockZ() + 0.5D);
         double distanceToBot = bot.getLocation().distance(center);
@@ -84,6 +95,11 @@ public class CrystalManager {
         int botY = bot.getLocation().getBlockY();
         int targetY = target.getLocation().getBlockY();
         return crystalY <= targetY + 2 && botY <= crystalY + 2;
+    }
+
+    /** Block position where the crystal entity stands (one above the obsidian/bedrock). */
+    public static BlockVector crystalStandPos(BlockVector obsidianPos) {
+        return new BlockVector(obsidianPos.getBlockX(), obsidianPos.getBlockY() + 1, obsidianPos.getBlockZ());
     }
 
     public void setConfig(CPVPConfig config) {

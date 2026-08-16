@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
@@ -84,11 +85,11 @@ public class AnchorPositionFinder {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return MaterialAirAccess.isAir(type) || block.isPassable();
+        return MaterialAirAccess.isAir(type) || BlockPassableAccess.isPassable(block);
     }
 
     private static boolean isSolid(Block block) {
         Material type = block.getType();
-        return type.isBlock() && type.isSolid() && !block.isPassable();
+        return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
     }
 }

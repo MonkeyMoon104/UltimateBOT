@@ -43,6 +43,7 @@ import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import com.monkey.ultimatebot.world.WorldProtectionListener;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import com.monkey.ultimatebot.wrapper.WrapperManager;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +60,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.Nullable;
 import revxrsal.commands.bukkit.BukkitLamp;
+import revxrsal.commands.bukkit.BukkitLampConfig;
+import revxrsal.commands.bukkit.actor.BukkitCommandActor;
 
 public final class UltimateBot extends JavaPlugin {
 
@@ -230,7 +233,8 @@ public final class UltimateBot extends JavaPlugin {
 
             List<String> registeredCommands = Collections.unmodifiableList(java.util.Arrays.asList(
                     "bot", "botevent", "botally", "botteamally", "ultimatebotreload", "ubagent"));
-            BukkitLamp.builder(this)
+            BukkitLampConfig<BukkitCommandActor> lampConfig = lampConfigForPlatform();
+            BukkitLamp.builder(lampConfig)
                     .exceptionHandler(new UltimateBotExceptionHandler(this))
                     .build()
                     .register(
@@ -528,6 +532,30 @@ public final class UltimateBot extends JavaPlugin {
     private boolean isCombatLogXListenerAvailable() {
         return getServer().getPluginManager().getPlugin("CombatLogX") != null
                 && hasRuntimeClass("com.github.sirblobman.combatlogx.api.event.PlayerPreTagEvent");
+    }
+
+    /**
+     * Lamp's reflection brigadier bridge registers a listener for {@code ServerLoadEvent}. That
+     * class is missing on Paper 1.13 ({@code v1_13_R1}), so PluginManager fails registration.
+     * Disable brigadier there; Bukkit command map registration still works.
+     *
+     * <p>Flip the flag via field access — {@code BukkitLampConfig.Builder} methods reference
+     * {@code BukkitAudiences}, which is not shaded and is not on legacy Paper classpaths.
+     */
+    private BukkitLampConfig<BukkitCommandActor> lampConfigForPlatform() {
+        BukkitLampConfig<BukkitCommandActor> config = BukkitLampConfig.createDefault(this);
+        if (hasRuntimeClass("org.bukkit.event.server.ServerLoadEvent")) {
+            return config;
+        }
+        getLogger().info("[UltimateBot] Lamp brigadier disabled (ServerLoadEvent unavailable)");
+        try {
+            Field field = BukkitLampConfig.class.getDeclaredField("disableBrigadier");
+            field.setAccessible(true);
+            field.setBoolean(config, true);
+        } catch (ReflectiveOperationException error) {
+            getLogger().warning("Failed to disable Lamp brigadier for legacy Paper: " + error);
+        }
+        return config;
     }
 
     private boolean hasRuntimeClass(String className) {

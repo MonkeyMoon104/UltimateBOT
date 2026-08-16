@@ -6,7 +6,6 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
 import com.monkey.ultimatebot.compat.AttributeAccess;
-import com.monkey.ultimatebot.compat.PlayerAttackAccess;
 import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
 import com.monkey.ultimatebot.compat.PlayerSwingAccess;
 import com.monkey.ultimatebot.compat.VelocityAccess;
@@ -21,7 +20,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
@@ -127,8 +125,8 @@ public interface ITrainingBot {
         return getLocation().getDirection();
     }
 
-    default BoundingBox bukkitBoundingBox() {
-        return asBukkitPlayer().getBoundingBox();
+    default com.monkey.ultimatebot.compat.EntityBoundsAccess.Box bukkitBoundingBox() {
+        return com.monkey.ultimatebot.compat.EntityBoundsAccess.of(asBukkitPlayer());
     }
 
     default boolean isAlive() {
@@ -170,11 +168,13 @@ public interface ITrainingBot {
     default void attackEntity(Entity target) {
         Entity checked = Objects.requireNonNull(target, "target");
         prepareFullAttackStrength();
-        if (checked instanceof LivingEntity) { LivingEntity living = (LivingEntity) checked;
+        if (checked instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) checked;
             NMSBridgeManager.get().attackTarget(this, living);
             return;
         }
-        PlayerAttackAccess.attack(asBukkitPlayer(), checked);
+        // Pre-1.15: Bukkit Player#attack is missing; 1.13 bridges override attackEntity.
+        NMSBridgeManager.get().attackEntity(this, checked);
     }
 
     default float fallDistanceValue() {

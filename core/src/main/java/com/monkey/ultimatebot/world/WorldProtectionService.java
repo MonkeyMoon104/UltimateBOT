@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.world;
 
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import java.util.Collections;
 import com.monkey.ultimatebot.compat.BlockBreakAccess;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
@@ -45,7 +46,7 @@ public final class WorldProtectionService implements AutoCloseable {
                 block.getRelative(org.bukkit.block.BlockFace.DOWN).getType();
         return placements.size() < settings.maxActiveCombatBlocks()
                 && !placements.containsKey(WorldBlockKey.from(block))
-                && block.isPassable()
+                && BlockPassableAccess.isPassable(block)
                 && !block.isLiquid()
                 && WorldProtectionPolicy.hasPlacementSupport(
                         material, materialBelow == Material.COBWEB || materialBelow.isSolid());

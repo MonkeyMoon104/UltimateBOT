@@ -13,6 +13,7 @@ import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -167,7 +168,12 @@ public final class BotCPVPController {
             if (attackCooldown > 0) break;
             double score = crystalPositionEvaluator.evaluateCrystalForAttack(
                     crystal, target, myPlacedCrystals, config.getCrystalAttackRange(), config.getMinCrystalDistance(), config.getOptimalDamageRange());
-            if (score < config.getMinAttackScore()) continue;
+            // 1.13: if scoring still fails, hit any in-range crystal instead of circling forever.
+            if (score < config.getMinAttackScore()
+                    && !(MinecraftVersionAccess.is1_13()
+                            && crystalAttacker.canAttackCrystal(crystal, config.getCrystalAttackRange()))) {
+                continue;
+            }
             if (config.getAttackPreparationTime() <= 0) {
                 executeCrystalAttackNow(crystal);
             } else {
@@ -278,7 +284,13 @@ public final class BotCPVPController {
 
     private boolean isStillValidCrystalPlacement(BlockVector pos) {
         Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()).getType();
-        return type == Material.OBSIDIAN || type == Material.BEDROCK;
+        if (type != Material.OBSIDIAN && type != Material.BEDROCK) {
+            return false;
+        }
+        if (MinecraftVersionAccess.is1_13()) {
+            return crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world) == null;
+        }
+        return true;
     }
 
     private void executeObsidianPlacementNow(BlockVector pos) {
@@ -291,17 +303,47 @@ public final class BotCPVPController {
     }
 
     private void executeCrystalPlacementNow(BlockVector pos) {
+        if (MinecraftVersionAccess.is1_13()) {
+            executeCrystalPlacementNowLegacy13(pos);
+            return;
+        }
         if (!crystalPlacer.hasLineOfSight(pos)) return;
         if (crystalPlacer.placeCrystal(pos)) {
             crystalPlaceCooldown = config.getCrystalPlaceCooldownTicks();
             crystalRecentUsage.put(pos, currentTime());
             crystalCountAtPosition.put(pos, crystalCountAtPosition.getOrDefault(pos, 0) + 1);
-            EnderCrystal placedCrystal = crystalManager.findCrystalAt(new BlockVector(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()), world);
+            EnderCrystal placedCrystal =
+                    crystalManager.findCrystalAt(
+                            new BlockVector(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()), world);
             if (placedCrystal != null) myPlacedCrystals.add(placedCrystal);
         } else if (isStillValidCrystalPlacement(pos)) {
             crystalRecentUsage.put(pos, currentTime());
             queuedCrystalPlacements.addLast(pos);
         }
+    }
+
+    /** 1.13: no place-retry loop; claim existing crystal instead of re-clicking. */
+    private void executeCrystalPlacementNowLegacy13(BlockVector pos) {
+        EnderCrystal existing =
+                crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
+        if (existing != null) {
+            myPlacedCrystals.add(existing);
+            crystalRecentUsage.put(pos, currentTime());
+            crystalPlaceCooldown = Math.max(1, config.getCrystalPlaceCooldownTicks());
+            return;
+        }
+        if (!crystalPlacer.hasLineOfSight(pos)) return;
+        if (crystalPlacer.placeCrystal(pos)) {
+            crystalPlaceCooldown = config.getCrystalPlaceCooldownTicks();
+            crystalRecentUsage.put(pos, currentTime());
+            crystalCountAtPosition.put(pos, crystalCountAtPosition.getOrDefault(pos, 0) + 1);
+            EnderCrystal placedCrystal =
+                    crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
+            if (placedCrystal != null) myPlacedCrystals.add(placedCrystal);
+            return;
+        }
+        crystalRecentUsage.put(pos, currentTime());
+        crystalPlaceCooldown = Math.max(1, config.getCrystalPlaceCooldownTicks());
     }
 
     private boolean executeCrystalAttackNow(EnderCrystal crystal) {

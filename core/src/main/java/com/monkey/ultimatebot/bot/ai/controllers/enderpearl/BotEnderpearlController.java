@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.DamageTracker;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.PearlStrategyCalculator;
@@ -16,13 +17,12 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ITarget
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.BotTeleportController;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import java.util.Objects;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
@@ -508,14 +508,13 @@ public class BotEnderpearlController {
             return true;
         }
 
-        RayTraceResult result = bukkitBot.getWorld().rayTraceBlocks(
-                bukkitBot.getEyeLocation(), delta.normalize(), distance, FluidCollisionMode.NEVER, true);
-        if (result == null || result.getHitBlock() == null) {
+        Block hitBlock = RayTraceAccess.firstHitBlock(
+                bukkitBot.getWorld(), bukkitBot.getEyeLocation(), delta.normalize(), distance);
+        if (hitBlock == null) {
             return true;
         }
 
         BlockVector destinationBlock = toBlockVector(destination);
-        Block hitBlock = result.getHitBlock();
         return blockEquals(hitBlock, destinationBlock)
                 || blockEquals(hitBlock.getRelative(0, -1, 0), destinationBlock)
                 || blockEquals(hitBlock.getRelative(0, 1, 0), destinationBlock);
@@ -541,7 +540,7 @@ public class BotEnderpearlController {
 
     private static boolean isSolid(Block block) {
         Material type = block.getType();
-        return type.isBlock() && type.isSolid() && !block.isPassable();
+        return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
     }
 
     private static boolean isOnGround(Player player) {

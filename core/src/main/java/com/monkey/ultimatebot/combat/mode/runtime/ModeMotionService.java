@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.compat.EntityBoundsAccess;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.compat.EntityFluidAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
@@ -138,8 +139,9 @@ public final class ModeMotionService {
     }
 
     public boolean hasVerticalClearance(LivingEntity entity, int clearanceBlocks) {
-        double radius = Math.min(0.35D, entity.getBoundingBox().getWidthX() * 0.45D);
-        double startY = entity.getBoundingBox().getMaxY() + 0.05D;
+        EntityBoundsAccess.Box box = EntityBoundsAccess.of(entity);
+        double radius = Math.min(0.35D, box.getWidthX() * 0.45D);
+        double startY = box.getMaxY() + 0.05D;
         double[] offsets = {-radius, radius};
         for (double xOffset : offsets) {
             for (double zOffset : offsets) {

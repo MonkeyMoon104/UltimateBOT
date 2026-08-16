@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
@@ -37,8 +38,8 @@ public class ObsidianScanner {
                     if (checkPos.getBlockY() >= targetY) continue;
                     Material type = world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY(), checkPos.getBlockZ()).getType();
                     if (type == Material.OBSIDIAN || type == Material.BEDROCK) {
-                        if (!world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY() + 1, checkPos.getBlockZ()).isPassable()
-                                || !world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY() + 2, checkPos.getBlockZ()).isPassable()) {
+                        if (!BlockPassableAccess.isPassable(world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY() + 1, checkPos.getBlockZ()))
+                                || !BlockPassableAccess.isPassable(world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY() + 2, checkPos.getBlockZ()))) {
                             continue;
                         }
                         org.bukkit.Location center = new org.bukkit.Location(world, checkPos.getBlockX() + 0.5D, checkPos.getBlockY() + 0.5D, checkPos.getBlockZ() + 0.5D);

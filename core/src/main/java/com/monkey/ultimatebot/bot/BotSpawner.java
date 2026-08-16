@@ -408,6 +408,9 @@ public class BotSpawner {
         }
 
         registry.removeBot(ownerUUID);
+        if (reason != BotDespawnReason.REPLACED) {
+            clearCachedOptions(ownerUUID, bot);
+        }
         if (snapshot != null) {
             BotEventSource source = BotEventSourceContext.currentOr(BotEventSource.GUI);
             plugin.getBotEventDispatcher()
@@ -420,6 +423,23 @@ public class BotSpawner {
                                     ? BotDespawnReason.API_REQUEST
                                     : reason));
             plugin.getBotEventDispatcher().forget(snapshot.requireBotUUID());
+        }
+    }
+
+    private void clearCachedOptions(UUID ownerUUID, @Nullable ITrainingBot bot) {
+        plugin.getPlayerOptions().remove(ownerUUID);
+        if (bot == null || bot.getBrainController() == null) {
+            return;
+        }
+        BotOptions options = bot.getBrainController().getBotOptions();
+        if (options == null) {
+            return;
+        }
+        if (options.getOwnerUUID() != null) {
+            plugin.getPlayerOptions().remove(options.getOwnerUUID());
+        }
+        for (UUID teamOwnerUUID : options.getTeamOwnerUUIDs()) {
+            plugin.getPlayerOptions().remove(teamOwnerUUID);
         }
     }
 

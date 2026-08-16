@@ -37,6 +37,11 @@ public final class MinecraftVersionAccess {
         return parts[1] >= minor;
     }
 
+    /** Craft {@code v1_13_R1}/{@code v1_13_R2} / Minecraft 1.13.x only. */
+    public static boolean is1_13() {
+        return isAtLeast(1, 13) && !isAtLeast(1, 14);
+    }
+
     /** True when bot NMS implementations exist (1.17.1+ / 26.x). */
     public static boolean isFullBotRuntimeEra() {
         if (CACHED.startsWith("26.")) {

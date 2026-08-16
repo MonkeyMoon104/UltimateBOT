@@ -1,17 +1,17 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
@@ -330,18 +330,13 @@ public class PathfindingManager implements IPathfindingManager {
             return true;
         }
         Vector direction = delta.normalize();
-        RayTraceResult result = bot.getWorld().rayTraceBlocks(
-                bot.asBukkitPlayer().getEyeLocation(),
-                direction,
-                distance,
-                FluidCollisionMode.NEVER,
-                true);
-        if (result == null || result.getHitBlock() == null) {
+        Block hitBlock = RayTraceAccess.firstHitBlock(
+                bot.getWorld(), bot.asBukkitPlayer().getEyeLocation(), direction, distance);
+        if (hitBlock == null) {
             return true;
         }
 
         BlockVector destinationBlock = toBlockVector(destination);
-        Block hitBlock = result.getHitBlock();
         return blockEquals(hitBlock, destinationBlock)
                 || blockEquals(hitBlock.getRelative(0, -1, 0), destinationBlock)
                 || blockEquals(hitBlock.getRelative(0, 1, 0), destinationBlock);
@@ -373,12 +368,12 @@ public class PathfindingManager implements IPathfindingManager {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return MaterialAirAccess.isAir(type) || block.isPassable();
+        return MaterialAirAccess.isAir(type) || BlockPassableAccess.isPassable(block);
     }
 
     private static boolean isSolid(Block block) {
         Material type = block.getType();
-        return type.isBlock() && type.isSolid() && !block.isPassable();
+        return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
     }
 
     private static @Nullable Vector normalizeOrFallback(Vector vector, @Nullable Vector fallback) {

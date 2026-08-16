@@ -50,6 +50,7 @@ public final class MaterialCatalog {
     static {
         Map<String, String> fallbacks = new java.util.HashMap<>();
         fallbacks.put("MACE", "DIAMOND_SWORD");
+        fallbacks.put("CROSSBOW", "BOW");
         fallbacks.put("WIND_CHARGE", "SNOWBALL");
         fallbacks.put("RECOVERY_COMPASS", "COMPASS");
         fallbacks.put("PIGLIN_HEAD", "ZOMBIE_HEAD");

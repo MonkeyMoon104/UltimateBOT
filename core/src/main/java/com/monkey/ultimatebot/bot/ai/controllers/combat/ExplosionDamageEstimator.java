@@ -1,10 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.combat;
 
-import org.bukkit.FluidCollisionMode;
+import com.monkey.ultimatebot.compat.EntityBoundsAccess;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.util.BoundingBox;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 @SuppressWarnings("NullAway")
@@ -41,7 +40,7 @@ public final class ExplosionDamageEstimator {
     }
 
     private static double estimateExposure(Location explosionLocation, Player entity) {
-        BoundingBox bb = entity.getBoundingBox();
+        EntityBoundsAccess.Box bb = EntityBoundsAccess.of(entity);
         int visible = 0;
         int total = 0;
         int steps = EXPOSURE_SAMPLES_PER_AXIS - 1;
@@ -57,12 +56,8 @@ public final class ExplosionDamageEstimator {
                     double distance = direction.length();
                     if (distance < 1.0E-6D) {
                         visible++;
-                    } else {
-                        RayTraceResult result = entity.getWorld().rayTraceBlocks(
-                                sample, direction.normalize(), distance, FluidCollisionMode.NEVER, true);
-                        if (result == null || result.getHitBlock() == null) {
-                            visible++;
-                        }
+                    } else if (RayTraceAccess.clearPath(entity.getWorld(), sample, direction, distance)) {
+                        visible++;
                     }
                     total++;
                 }

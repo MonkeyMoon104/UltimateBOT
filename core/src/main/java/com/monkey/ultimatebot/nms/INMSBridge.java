@@ -186,6 +186,20 @@ public interface INMSBridge {
     void attackTarget(ITrainingBot bot, LivingEntity target);
 
     /**
+     * Melee-hit any entity (including end crystals). Prefer this over Bukkit {@code Player#attack}
+     * on pre-1.15 Paper where that API is missing.
+     */
+    default void attackEntity(ITrainingBot bot, org.bukkit.entity.Entity target) {
+        Objects.requireNonNull(bot, "bot");
+        Objects.requireNonNull(target, "target");
+        if (target instanceof LivingEntity) {
+            attackTarget(bot, (LivingEntity) target);
+            return;
+        }
+        com.monkey.ultimatebot.compat.PlayerAttackAccess.attack(bot.asBukkitPlayer(), target);
+    }
+
+    /**
      * Spawns an inert TNT minecart.
      *
      * <p>Default is Bukkit {@code World#spawn} (correct on 1.17+). Pre-1.17 bridges override because

@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import com.monkey.ultimatebot.compat.WorldAccess;
@@ -91,8 +92,8 @@ public class BlockStateValidator implements IBlockStateValidator {
             Material headType = head.getType();
             return feetType != Material.COBWEB
                     && headType != Material.COBWEB
-                    && feet.isPassable()
-                    && head.isPassable()
+                    && BlockPassableAccess.isPassable(feet)
+                    && BlockPassableAccess.isPassable(head)
                     && !feet.isLiquid()
                     && !head.isLiquid();
         } catch (Exception e) {

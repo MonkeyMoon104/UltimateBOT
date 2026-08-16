@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.behavior;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.BotOptions;
@@ -120,8 +121,8 @@ public final class IdleBehaviorController {
         for (int y = maxY; y >= minY; y--) {
             Block feet = world.getBlockAt(x, y, z);
             if (feet.getRelative(0, -1, 0).getType().isSolid()
-                    && feet.isPassable()
-                    && feet.getRelative(0, 1, 0).isPassable()) {
+                    && BlockPassableAccess.isPassable(feet)
+                    && BlockPassableAccess.isPassable(feet.getRelative(0, 1, 0))) {
                 return y;
             }
         }

@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
@@ -203,8 +204,8 @@ final class CartExplosiveSequence {
 
     private static boolean containsExplosiveCart(Location rail) {
         Location center = rail.clone().add(0.5D, 0.25D, 0.5D);
-        return !center.getWorld()
-                .getNearbyEntities(center, 0.45D, 0.75D, 0.45D, ExplosiveMinecart.class::isInstance)
+        return !WorldAccess.nearbyEntitiesOfType(
+                        center.getWorld(), center, 0.45D, 0.75D, 0.45D, ExplosiveMinecart.class)
                 .isEmpty();
     }
 

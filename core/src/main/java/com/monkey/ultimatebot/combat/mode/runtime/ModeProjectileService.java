@@ -1,13 +1,13 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
+import com.monkey.ultimatebot.compat.ArrowPickupAccess;
 import com.monkey.ultimatebot.compat.PlayerSwingAccess;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.LivingEntity;
@@ -31,7 +31,7 @@ public final class ModeProjectileService {
 
     public Arrow fireArrow(LivingEntity target, double accuracy) {
         Arrow arrow = tracker.track(shooter.launchProjectile(Arrow.class, velocity(target, accuracy, 3.1D)));
-        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        ArrowPickupAccess.disallowPickup(arrow);
         arrow.setCritical(accuracy >= 0.85D);
         return arrow;
     }
@@ -40,14 +40,14 @@ public final class ModeProjectileService {
         double speed = Math.max(0.75D, ModeCombatPolicy.bowPower(drawTicks) * 3.0D);
         Arrow arrow = tracker.track(
                 shooter.launchProjectile(Arrow.class, ballisticVelocity(target, Math.max(0.96D, accuracy), speed)));
-        arrow.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        ArrowPickupAccess.disallowPickup(arrow);
         arrow.setFireTicks(100);
         return arrow;
     }
 
     public void fireTrident(LivingEntity target, double accuracy) {
         Trident trident = tracker.track(shooter.launchProjectile(Trident.class, velocity(target, accuracy, 2.5D)));
-        trident.setPickupStatus(AbstractArrow.PickupStatus.DISALLOWED);
+        ArrowPickupAccess.disallowPickup(trident);
     }
 
     public void fireWindCharge(LivingEntity target, double accuracy) {

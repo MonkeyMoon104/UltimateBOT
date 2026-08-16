@@ -44,6 +44,17 @@ class MaterialCatalogTest {
     }
 
     @Test
+    void requireUsesTableFallbackForCrossbowWhenNeeded() {
+        Material resolved = MaterialCatalog.require("CROSSBOW");
+        Material crossbow = Material.matchMaterial("CROSSBOW");
+        if (crossbow != null) {
+            assertThat(resolved).isEqualTo(crossbow);
+        } else {
+            assertThat(resolved).isEqualTo(Material.BOW);
+        }
+    }
+
+    @Test
     void ofNameBlankUsesFallback() {
         assertThat(MaterialCatalog.ofName("  ", Material.STONE)).isEqualTo(Material.STONE);
         assertThat(MaterialCatalog.ofName(null, Material.STONE)).isEqualTo(Material.STONE);

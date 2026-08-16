@@ -2,10 +2,9 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
-import org.bukkit.FluidCollisionMode;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
@@ -243,9 +242,8 @@ public class PositionCalculator implements IPositionCalculator {
         if (distance < 1.0E-6D) {
             return true;
         }
-        RayTraceResult result = bot.getWorld().rayTraceBlocks(
-                bot.getEyeLocation(), delta.normalize(), distance, FluidCollisionMode.NEVER, true);
-        return result == null || result.getHitBlock() == null;
+        return RayTraceAccess.clearPath(
+                bot.getWorld(), bot.getEyeLocation(), delta, distance);
     }
 
     private Vector normalizeOrFallback(Vector vector, Player bot) {

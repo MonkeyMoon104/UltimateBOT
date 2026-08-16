@@ -1,8 +1,14 @@
 package com.monkey.ultimatebot.compat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.function.Predicate;
+import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -13,6 +19,9 @@ import org.jspecify.annotations.Nullable;
  * against that API embeds {@code WorldInfo} in the constant pool; loading those call sites on Paper
  * 1.17 (no {@code WorldInfo}) throws {@link NoClassDefFoundError}. Always go through this helper
  * for those members — never hard-link them from shared code.
+ *
+ * <p>{@link #nearbyEntities} also dual-paths the Predicate overload of {@code getNearbyEntities},
+ * which is absent on Paper 1.13.1 (same Craft {@code v1_13_R2} as 1.13.2).
  */
 public final class WorldAccess {
 
@@ -20,6 +29,7 @@ public final class WorldAccess {
     private static final @Nullable Method GET_UID = resolve("getUID");
     private static final @Nullable Method GET_MIN_HEIGHT = resolve("getMinHeight");
     private static final @Nullable Method GET_MAX_HEIGHT = resolve("getMaxHeight");
+    private static final @Nullable Method NEARBY_WITH_PREDICATE = resolveNearbyWithPredicate();
 
     private WorldAccess() {}
 
@@ -54,9 +64,82 @@ public final class WorldAccess {
         return 256;
     }
 
+    /**
+     * Nearby entities in a box. Prefer the Predicate overload when present; otherwise filter the
+     * unfiltered {@code getNearbyEntities} result (Paper ≤1.13.1).
+     */
+    @SuppressWarnings("unchecked")
+    public static Collection<Entity> nearbyEntities(
+            World world,
+            Location center,
+            double x,
+            double y,
+            double z,
+            @Nullable Predicate<? super Entity> predicate) {
+        Objects.requireNonNull(world, "world");
+        Objects.requireNonNull(center, "center");
+        if (NEARBY_WITH_PREDICATE != null) {
+            try {
+                Object result =
+                        NEARBY_WITH_PREDICATE.invoke(
+                                world,
+                                center,
+                                Double.valueOf(x),
+                                Double.valueOf(y),
+                                Double.valueOf(z),
+                                predicate);
+                if (result instanceof Collection) {
+                    return (Collection<Entity>) result;
+                }
+            } catch (ReflectiveOperationException | LinkageError ignored) {
+                // fall through
+            }
+        }
+        Collection<Entity> nearby = world.getNearbyEntities(center, x, y, z);
+        if (predicate == null) {
+            return nearby;
+        }
+        Collection<Entity> filtered = new ArrayList<>();
+        for (Entity entity : nearby) {
+            if (predicate.test(entity)) {
+                filtered.add(entity);
+            }
+        }
+        return filtered;
+    }
+
+    /** Typed nearby lookup without linking the Predicate {@code getNearbyEntities} overload. */
+    public static <T extends Entity> Collection<T> nearbyEntitiesOfType(
+            World world, Location center, double x, double y, double z, Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        Collection<Entity> nearby = nearbyEntities(world, center, x, y, z, type::isInstance);
+        if (nearby.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Collection<T> typed = new ArrayList<>(nearby.size());
+        for (Entity entity : nearby) {
+            typed.add(type.cast(entity));
+        }
+        return typed;
+    }
+
     private static @Nullable Method resolve(String name) {
         try {
             return World.class.getMethod(name);
+        } catch (NoSuchMethodException ignored) {
+            return null;
+        }
+    }
+
+    private static @Nullable Method resolveNearbyWithPredicate() {
+        try {
+            return World.class.getMethod(
+                    "getNearbyEntities",
+                    Location.class,
+                    double.class,
+                    double.class,
+                    double.class,
+                    Predicate.class);
         } catch (NoSuchMethodException ignored) {
             return null;
         }

@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import org.bukkit.FluidCollisionMode;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -13,7 +13,6 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
@@ -65,8 +64,8 @@ public class ObsidianPlacer {
         Vector direction = target.toVector().subtract(eye.toVector());
         double distance = direction.length();
         if (distance < 1.0E-6D) return true;
-        RayTraceResult result = bot.getWorld().rayTraceBlocks(eye, direction.normalize(), distance, FluidCollisionMode.NEVER, true);
-        return result == null || result.getHitBlock() == null || blockEquals(result.getHitBlock(), pos);
+        return RayTraceAccess.clearOrHits(
+                bot.getWorld(), eye, direction, distance, blockAt(pos));
     }
 
     private Block blockAt(BlockVector pos) {
@@ -80,9 +79,5 @@ public class ObsidianPlacer {
     private static BlockVector relative(BlockVector pos, BlockFace face) {
         return new BlockVector(
                 pos.getBlockX() + face.getModX(), pos.getBlockY() + face.getModY(), pos.getBlockZ() + face.getModZ());
-    }
-
-    private static boolean blockEquals(Block block, BlockVector pos) {
-        return block.getX() == pos.getBlockX() && block.getY() == pos.getBlockY() && block.getZ() == pos.getBlockZ();
     }
 }

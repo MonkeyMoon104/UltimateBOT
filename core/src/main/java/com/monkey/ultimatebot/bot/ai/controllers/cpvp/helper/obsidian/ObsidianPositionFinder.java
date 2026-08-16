@@ -1,18 +1,18 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import java.util.stream.Collectors;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.compat.RayTraceAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
 @SuppressWarnings("NullAway")
@@ -94,9 +94,8 @@ public class ObsidianPositionFinder {
         Vector direction = end.clone().subtract(start);
         double distance = direction.length();
         if (distance < 1.0E-6D) return true;
-        RayTraceResult result = bot.getWorld().rayTraceBlocks(
-                start.toLocation(bot.getWorld()), direction.normalize(), distance, FluidCollisionMode.NEVER, true);
-        return result == null || result.getHitBlock() == null;
+        return RayTraceAccess.clearPath(
+                bot.getWorld(), start.toLocation(bot.getWorld()), direction, distance);
     }
 
     private Block blockAt(BlockVector pos) {
@@ -113,11 +112,11 @@ public class ObsidianPositionFinder {
 
     private static boolean isPassable(Block block) {
         Material type = block.getType();
-        return MaterialAirAccess.isAir(type) || block.isPassable();
+        return MaterialAirAccess.isAir(type) || BlockPassableAccess.isPassable(block);
     }
 
     private static boolean isSolid(Block block) {
         Material type = block.getType();
-        return type.isBlock() && type.isSolid() && !block.isPassable();
+        return type.isBlock() && type.isSolid() && !BlockPassableAccess.isPassable(block);
     }
 }
