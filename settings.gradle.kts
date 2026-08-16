@@ -17,6 +17,8 @@ include("addons")
 include("addons:metrics")
 include("addons:guard")
 
+include("NMS:v1_13_R1")
+include("NMS:v1_13_R2")
 include("NMS:v1_14_R1")
 include("NMS:v1_15_R1")
 include("NMS:v1_16_R1")
