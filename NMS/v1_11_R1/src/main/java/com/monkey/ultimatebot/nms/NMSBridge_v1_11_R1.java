@@ -9,8 +9,9 @@ import com.monkey.ultimatebot.bot.ai.TrainingBotHandle_v1_11_R1;
 import com.monkey.ultimatebot.bot.ai.TrainingBot_v1_11_R1;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.protocol.BotProfileData;
+import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +28,7 @@ import net.minecraft.server.v1_11_R1.PacketPlayOutEntity;
 import net.minecraft.server.v1_11_R1.PacketPlayOutEntityEquipment;
 import net.minecraft.server.v1_11_R1.PacketPlayOutEntityHeadRotation;
 import net.minecraft.server.v1_11_R1.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_11_R1.PacketPlayOutEntityTeleport;
 import net.minecraft.server.v1_11_R1.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_11_R1.PacketPlayOutPlayerInfo;
 import net.minecraft.server.v1_11_R1.PlayerInteractManager;
@@ -41,6 +43,8 @@ import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -120,17 +124,83 @@ public final class NMSBridge_v1_11_R1 implements INMSBridge {
 
     @Override
     public void moveBot(Player bot, double x, double y, double z) {
-        nativePlayer(bot).setPosition(x, y, z);
+        EntityPlayer nativeBot = nativePlayer(bot);
+        nativeBot.motX = 0.0D;
+        nativeBot.motY = 0.0D;
+        nativeBot.motZ = 0.0D;
+        nativeBot.fallDistance = 0.0F;
+        nativeBot.setPositionRotation(x, y, z, nativeBot.yaw, nativeBot.pitch);
+        broadcastBotPosition(bot);
+    }
+
+    @Override
+    public void broadcastBotPosition(Player bot) {
+        EntityPlayer nativeBot = nativePlayer(bot);
+        PacketPlayOutEntityTeleport teleportPacket = new PacketPlayOutEntityTeleport(nativeBot);
+        byte packedYaw = packDegrees(nativeBot.yaw);
+        PacketPlayOutEntityHeadRotation headPacket =
+                new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
+        Location botLoc = bot.getLocation();
+        double maxDistSq = 64.0D * 64.0D;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getEntityId() == bot.getEntityId()) {
+                continue;
+            }
+            if (online.getWorld() != bot.getWorld()) {
+                continue;
+            }
+            Location viewerLoc = online.getLocation();
+            double dx = viewerLoc.getX() - botLoc.getX();
+            double dz = viewerLoc.getZ() - botLoc.getZ();
+            if (dx * dx + dz * dz > maxDistSq) {
+                continue;
+            }
+            EntityPlayer handle = ((CraftPlayer) online).getHandle();
+            handle.playerConnection.sendPacket(teleportPacket);
+            handle.playerConnection.sendPacket(headPacket);
+        }
+    }
+
+    @Override
+    public void setBotRotation(Player bot, float yaw, float pitch) {
+        EntityPlayer nativeBot = nativePlayer(bot);
+        nativeBot.yaw = yaw;
+        nativeBot.pitch = pitch;
+        nativeBot.aN = yaw;
+        nativeBot.aP = yaw;
+        byte packedYaw = packDegrees(yaw);
+        byte packedPitch = packDegrees(pitch);
+        PacketPlayOutEntityHeadRotation headPacket =
+                new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
+        PacketPlayOutEntity.PacketPlayOutEntityLook lookPacket =
+                new PacketPlayOutEntity.PacketPlayOutEntityLook(
+                        nativeBot.getId(), packedYaw, packedPitch, nativeBot.onGround);
+        Location botLoc = bot.getLocation();
+        double maxDistSq = 64.0D * 64.0D;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getEntityId() == bot.getEntityId()) {
+                continue;
+            }
+            if (online.getWorld() != bot.getWorld()) {
+                continue;
+            }
+            Location viewerLoc = online.getLocation();
+            double dx = viewerLoc.getX() - botLoc.getX();
+            double dz = viewerLoc.getZ() - botLoc.getZ();
+            if (dx * dx + dz * dz > maxDistSq) {
+                continue;
+            }
+            EntityPlayer handle = ((CraftPlayer) online).getHandle();
+            handle.playerConnection.sendPacket(headPacket);
+            handle.playerConnection.sendPacket(lookPacket);
+        }
     }
 
     @Override
     public BotProfileData copyProfileWithTextures(Player viewer, UUID botUUID, String botName) {
-        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
+        GameProfile viewerProfile = nativePlayer(viewer).getProfile();
         GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
-        }
+        profile.getProperties().putAll(viewerProfile.getProperties());
         return toProfileData(profile);
     }
 
@@ -188,7 +258,63 @@ public final class NMSBridge_v1_11_R1 implements INMSBridge {
             BlockFace face,
             Location hitLocation,
             EquipmentSlot hand) {
+        EntityPlayer nativeBot = nativePlayer(bot);
+        nativeBot.abilities.mayBuild = true;
+        if (stack == null || stack.getType() == Material.AIR || stack.getAmount() <= 0) {
+            return false;
+        }
+        Material type = stack.getType();
+        // Fake-player interact often cancels; place directly like the 1.12 CPvP path.
+        if (type == Material.OBSIDIAN) {
+            return placeObsidianDirect(clicked, face);
+        }
+        if (MaterialCatalog.is(type, "END_CRYSTAL")) {
+            return placeEndCrystalDirect(clicked);
+        }
         return false;
+    }
+
+    private static boolean placeObsidianDirect(Block clicked, BlockFace face) {
+        Block placeAt = clicked.getRelative(face);
+        if (!isReplaceable(placeAt)) {
+            return false;
+        }
+        placeAt.setType(Material.OBSIDIAN, false);
+        return placeAt.getType() == Material.OBSIDIAN;
+    }
+
+    private static boolean placeEndCrystalDirect(Block clicked) {
+        Material base = clicked.getType();
+        if (base != Material.OBSIDIAN && base != Material.BEDROCK) {
+            return false;
+        }
+        Block above = clicked.getRelative(BlockFace.UP);
+        if (!isReplaceable(above)) {
+            return false;
+        }
+        Location spawn = above.getLocation().add(0.5D, 0.0D, 0.5D);
+        for (Entity nearby : above.getWorld().getNearbyEntities(spawn, 0.6D, 1.5D, 0.6D)) {
+            if (nearby instanceof EnderCrystal) {
+                return false;
+            }
+        }
+        EnderCrystal crystal = above.getWorld().spawn(spawn, EnderCrystal.class);
+        try {
+            crystal.setShowingBottom(false);
+        } catch (NoSuchMethodError ignored) {
+            // pre-API revisions
+        }
+        return crystal.isValid();
+    }
+
+    private static boolean isReplaceable(Block block) {
+        Material type = block.getType();
+        return MaterialAirAccess.isAir(type)
+                || type == Material.WATER
+                || "STATIONARY_WATER".equals(type.name())
+                || type == Material.LAVA
+                || "STATIONARY_LAVA".equals(type.name())
+                || !type.isSolid();
     }
 
     @Override
