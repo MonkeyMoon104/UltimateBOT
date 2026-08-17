@@ -416,7 +416,11 @@ public final class NMSBridge_v1_10_R1 implements INMSBridge {
             return;
         }
         ItemStack resolved = stack == null ? new ItemStack(Material.AIR) : stack;
-        nativeBot(bot).setSlot(nmsSlot, CraftItemStack.asNMSCopy(resolved));
+        EntityPlayer nativeBot = nativeBot(bot);
+        nativeBot.setSlot(nmsSlot, CraftItemStack.asNMSCopy(resolved));
+        if (nmsSlot == EnumItemSlot.MAINHAND || nmsSlot == EnumItemSlot.OFFHAND) {
+            applyHandItemAttributes(nativeBot, nmsSlot);
+        }
     }
 
     @Override
@@ -469,9 +473,25 @@ public final class NMSBridge_v1_10_R1 implements INMSBridge {
         nativeBot(bot).fallDistance = fallDistance;
     }
 
+    /**
+     * {@code EntityHuman.attack} uses {@code GenericAttributes.ATTACK_DAMAGE}, not the hotbar list.
+     * Silent hand writes skip AttributeMap updates, so re-apply the held item's modifiers here
+     * (remove+add of the current item is a no-op when living-tick already applied them).
+     */
+    private static void applyHandItemAttributes(EntityPlayer nativeBot, EnumItemSlot slot) {
+        net.minecraft.server.v1_10_R1.ItemStack held = nativeBot.getEquipment(slot);
+        if (held == null) {
+            return;
+        }
+        nativeBot.getAttributeMap().a(held.a(slot));
+        nativeBot.getAttributeMap().b(held.a(slot));
+    }
+
     @Override
     public void attackTarget(ITrainingBot bot, LivingEntity target) {
-        nativeBot(bot).attack(((CraftLivingEntity) target).getHandle());
+        EntityPlayer nativeBot = nativeBot(bot);
+        applyHandItemAttributes(nativeBot, EnumItemSlot.MAINHAND);
+        nativeBot.attack(((CraftLivingEntity) target).getHandle());
     }
 
     private DamageSource damageSource(@Nullable Player attacker, DamageKind kind) {

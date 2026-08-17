@@ -55,6 +55,9 @@ public final class TrainingBot_v1_10_R1 extends EntityPlayer {
         this.joining = false;
         setLocation(x, y, z, yaw, pitch);
         this.onGround = true;
+        // Vanilla player stepHeight is 0.6 — cannot climb a full block without a jump, and our
+        // jump is eaten while still intersecting the floor. 1.0 lets Entity.move step up 1 block.
+        this.P = 1.0F;
         this.abilities.isFlying = false;
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
@@ -80,6 +83,17 @@ public final class TrainingBot_v1_10_R1 extends EntityPlayer {
 
     public TrainingBotHandle_v1_10_R1 handle() {
         return handle;
+    }
+
+    /**
+     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
+     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
+     */
+    void forceFullAttackStrength() {
+        int delay = Math.max(1, (int) Math.ceil(this.dd()));
+        if (this.aF < delay) {
+            this.aF = delay;
+        }
     }
 
     @Override
@@ -147,11 +161,12 @@ public final class TrainingBot_v1_10_R1 extends EntityPlayer {
         }
 
         grounded = isStandingOnSolid();
-        this.onGround = grounded && my <= 0.0D;
+        boolean landed = grounded && my <= 0.04D;
+        this.onGround = landed;
 
-        double drag = grounded ? 0.6D : 0.91D;
+        double drag = landed ? 0.6D : 0.91D;
         double vy;
-        if (grounded) {
+        if (landed) {
             vy = 0.0D;
         } else {
             vy = my * 0.98D;
