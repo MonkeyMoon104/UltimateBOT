@@ -4,6 +4,7 @@ package com.monkey.ultimatebot.combat.mode.runtime;
 import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -84,8 +85,14 @@ public final class ModeInventorySession implements AutoCloseable {
     }
 
     private static EquipmentSlot[] managedEquipmentSlots() {
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        if (offHand == null) {
+            return new EquipmentSlot[] {
+                EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+            };
+        }
         return new EquipmentSlot[] {
-            EquipmentSlot.OFF_HAND, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+            offHand, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
         };
     }
 

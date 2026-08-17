@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.utils.equipment;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.EnchantmentAccess;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemMetaAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.*;
@@ -92,8 +93,10 @@ public class BotEquipmentUtils {
                 org.bukkit.inventory.EquipmentSlot.class);
 
         equipment.put(org.bukkit.inventory.EquipmentSlot.HAND, bot.getItem(org.bukkit.inventory.EquipmentSlot.HAND));
-        equipment.put(
-                org.bukkit.inventory.EquipmentSlot.OFF_HAND, bot.getItem(org.bukkit.inventory.EquipmentSlot.OFF_HAND));
+        org.bukkit.inventory.EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        if (offHand != null) {
+            equipment.put(offHand, bot.getItem(offHand));
+        }
         for (org.bukkit.inventory.EquipmentSlot slot : EquipmentConverter.getArmorSlots()) {
             equipment.put(slot, bot.getItem(slot));
         }

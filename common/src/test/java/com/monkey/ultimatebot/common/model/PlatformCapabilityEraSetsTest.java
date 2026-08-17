@@ -15,7 +15,7 @@ class PlatformCapabilityEraSetsTest {
     void through1_8AllowsSwordWaterButNotNetheriteOrMace() {
         assertThat(CombatMode.SWORD.supportedBy(PlatformCapability.through1_8())).isTrue();
         assertThat(CombatMode.WATER.supportedBy(PlatformCapability.through1_8())).isTrue();
-        assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_8())).isFalse();
+        assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_8())).isTrue();
         assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_8())).isFalse();
         assertThat(CombatMode.MACE.supportedBy(PlatformCapability.through1_8())).isFalse();
         assertThat(PlatformCapability.through1_8())

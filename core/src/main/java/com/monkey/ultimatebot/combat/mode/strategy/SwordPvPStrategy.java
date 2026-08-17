@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.compat.CombatCadenceAccess;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 
@@ -70,6 +71,16 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void initiate(CombatModeContext context, LivingEntity target) {
+        if (!CombatCadenceAccess.hasWeaponCooldown()) {
+            context.motion().approach(target, 2.0D);
+            if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
+                context.actions().attack(target, BotInventoryController.SWORD_SLOT);
+                transitionTo(Phase.COMBO);
+            } else if (phaseTicks >= 8) {
+                transitionTo(Phase.SPACING);
+            }
+            return;
+        }
         if (context.motion().isBotOnGround()) {
             context.motion().propelTowards(target, 0.34D, 0.34D);
         } else {

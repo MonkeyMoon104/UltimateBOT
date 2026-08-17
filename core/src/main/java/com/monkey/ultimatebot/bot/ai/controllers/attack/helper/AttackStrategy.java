@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackStra
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.CombatCadenceAccess;
 import org.bukkit.entity.LivingEntity;
 
 public class AttackStrategy implements IAttackStrategy {
@@ -24,6 +25,12 @@ public class AttackStrategy implements IAttackStrategy {
     public void executeAttack(ITrainingBot bot, LivingEntity target) {
         if (jumpAttackManager.isInJumpAttack()) {
             jumpAttackManager.handleJumpAttack(bot, target);
+            return;
+        }
+
+        if (!CombatCadenceAccess.hasWeaponCooldown()) {
+            attackExecutor.performNormalAttack(bot, target);
+            cooldownManager.setRandomCooldown(20, 11);
             return;
         }
 

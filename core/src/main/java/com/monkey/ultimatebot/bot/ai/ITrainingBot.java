@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai;
 
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 
 import com.monkey.ultimatebot.UltimateBot;
@@ -7,6 +8,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
 import com.monkey.ultimatebot.compat.AttributeAccess;
 import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.compat.PlayerHandRaisedAccess;
 import com.monkey.ultimatebot.compat.PlayerSwingAccess;
 import com.monkey.ultimatebot.compat.VelocityAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
@@ -168,6 +170,7 @@ public interface ITrainingBot {
     default void attackEntity(Entity target) {
         Entity checked = Objects.requireNonNull(target, "target");
         prepareFullAttackStrength();
+        com.monkey.ultimatebot.compat.AttackStrengthAccess.chargeFull(asBukkitPlayer());
         if (checked instanceof LivingEntity) {
             LivingEntity living = (LivingEntity) checked;
             NMSBridgeManager.get().attackTarget(this, living);
@@ -230,7 +233,8 @@ public interface ITrainingBot {
     }
 
     default ItemStack getItemInOffHand() {
-        return getItem(EquipmentSlot.OFF_HAND);
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        return offHand == null ? ItemStackAccess.empty() : getItem(offHand);
     }
 
     default void setItemInMainHand(@Nullable ItemStack stack) {
@@ -238,11 +242,14 @@ public interface ITrainingBot {
     }
 
     default void setItemInOffHand(@Nullable ItemStack stack) {
-        setItem(EquipmentSlot.OFF_HAND, stack);
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        if (offHand != null) {
+            setItem(offHand, stack);
+        }
     }
 
     default boolean isUsingItem() {
-        return asBukkitPlayer().isHandRaised();
+        return PlayerHandRaisedAccess.isRaised(asBukkitPlayer());
     }
 
     default ItemStack activeItemStack() {

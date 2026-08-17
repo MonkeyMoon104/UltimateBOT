@@ -9,6 +9,9 @@ import com.monkey.ultimatebot.bot.ai.services.cache.UuidCache;
 import com.monkey.ultimatebot.bot.ai.services.cache.UuidCaches;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.compat.EntityInvulnerableAccess;
+import com.monkey.ultimatebot.compat.GameModeAccess;
+import com.monkey.ultimatebot.compat.WorldAccess;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -86,12 +89,13 @@ public class TargetingService {
         org.bukkit.Location center = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
         double closestDistanceSq = maxRange * maxRange;
         LivingEntity closest = null;
-        for (org.bukkit.entity.Entity entity : world.getNearbyEntities(center, maxRange, maxRange, maxRange)) {
+        for (org.bukkit.entity.Entity entity :
+                WorldAccess.nearbyEntities(world, center, maxRange, maxRange, maxRange, null)) {
             if (!(entity instanceof LivingEntity) || entity instanceof Player || entity instanceof ArmorStand) {
                 continue;
             }
             LivingEntity mob = (LivingEntity) entity;
-            if (!mob.isValid() || mob.isDead() || mob.isInvulnerable()) {
+            if (!mob.isValid() || mob.isDead() || EntityInvulnerableAccess.isInvulnerable(mob)) {
                 continue;
             }
             double distanceSq = mob.getLocation().distanceSquared(center);
@@ -396,7 +400,7 @@ public class TargetingService {
         }
 
         GameMode gameMode = player.getGameMode();
-        return gameMode == null || !gameMode.isInvulnerable();
+        return gameMode == null || !GameModeAccess.isInvulnerable(gameMode);
     }
 
     private static boolean isCandidateOnline(ITrainingBot bot, Player player) {

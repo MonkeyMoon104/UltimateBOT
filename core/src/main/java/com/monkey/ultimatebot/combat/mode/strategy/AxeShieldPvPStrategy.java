@@ -8,7 +8,6 @@ import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.EquipmentSlot;
 
 public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
     private static final double GUARD_APPROACH_RANGE = 6.0D;
@@ -25,7 +24,7 @@ public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
                 ModeKit.builder()
                         .slot(BotInventoryController.SWORD_SLOT, "NETHERITE_AXE", Material.DIAMOND_AXE, 1)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)
+                        .offHand(Material.SHIELD)
                         .build());
     }
 

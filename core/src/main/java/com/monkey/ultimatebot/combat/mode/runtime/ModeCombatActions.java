@@ -6,8 +6,12 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.compat.AttributeAccess;
+import com.monkey.ultimatebot.compat.CombatCadenceAccess;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.compat.ParticleAccess;
 import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.compat.PlayerHandRaisedAccess;
 import com.monkey.ultimatebot.compat.PotionEffectAccess;
 import com.monkey.ultimatebot.compat.PotionEffectTypeAccess;
 import java.util.Objects;
@@ -52,7 +56,10 @@ public final class ModeCombatActions {
     }
 
     public void defendWithOffhand() {
-        inventory.startUsingItem(EquipmentSlot.OFF_HAND);
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        if (offHand != null) {
+            inventory.startUsingItem(offHand);
+        }
     }
 
     public boolean isDefendingWithOffhand() {
@@ -75,7 +82,7 @@ public final class ModeCombatActions {
         Location playerLocation = Objects.requireNonNull(player.getLocation(), "player location");
         Vector towardBot = botLocation.toVector().subtract(playerLocation.toVector()).setY(0.0D);
         if (towardBot.lengthSquared() < 0.001D) {
-            return distance <= 3.2D && !player.isHandRaised();
+            return distance <= 3.2D && !PlayerHandRaisedAccess.isRaised(player);
         }
         Vector direction = towardBot.normalize();
         double closingSpeed =
@@ -86,7 +93,7 @@ public final class ModeCombatActions {
                 distance,
                 PlayerAttackCooldownAccess.get(player),
                 player.isBlocking(),
-                player.isHandRaised(),
+                PlayerHandRaisedAccess.isRaised(player),
                 closingSpeed,
                 facingDot);
     }
@@ -141,8 +148,10 @@ public final class ModeCombatActions {
                 PotionEffectAccess.of(PotionEffectTypeAccess.regeneration(), 100, 1, false, false, false));
         bukkitBot.addPotionEffect(
                 PotionEffectAccess.of(PotionEffectTypeAccess.absorption(), 1200, 0, false, false, false));
-        Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
-        bukkitBot.getWorld().playSound(location, Sound.ENTITY_GENERIC_EAT, 0.8F, 1.0F);
+        if (MinecraftVersionAccess.isAtLeast(1, 9)) {
+            Location location = Objects.requireNonNull(bukkitBot.getLocation(), "bot location");
+            bukkitBot.getWorld().playSound(location, Sound.ENTITY_GENERIC_EAT, 0.8F, 1.0F);
+        }
     }
 
     public void attack(LivingEntity target, int slot) {
@@ -150,9 +159,7 @@ public final class ModeCombatActions {
             inventory.switchToSlot(slot);
         }
         attack.handleAttack(target);
-        if (attack.getAttackCooldown() > tuning.get().attackCooldownTicks()) {
-            attack.setAttackCooldown(tuning.get().attackCooldownTicks());
-        }
+        applySwingDelay();
     }
 
     public void attackNormally(LivingEntity target, int slot) {
@@ -164,9 +171,7 @@ public final class ModeCombatActions {
             return;
         }
         attack.performNormalAttack(target);
-        if (attack.getAttackCooldown() > tuning.get().attackCooldownTicks()) {
-            attack.setAttackCooldown(tuning.get().attackCooldownTicks());
-        }
+        applySwingDelay();
     }
 
     /** Direct melee without jump-crit orchestration (e.g. aerial mace smash). */
@@ -176,8 +181,13 @@ public final class ModeCombatActions {
         }
         attack.setAttackCooldown(0);
         attack.performNormalAttack(target);
-        if (attack.getAttackCooldown() > tuning.get().attackCooldownTicks()) {
-            attack.setAttackCooldown(tuning.get().attackCooldownTicks());
+        applySwingDelay();
+    }
+
+    private void applySwingDelay() {
+        int delay = CombatCadenceAccess.swingDelayTicks(tuning.get().attackCooldownTicks());
+        if (attack.getAttackCooldown() > delay) {
+            attack.setAttackCooldown(delay);
         }
     }
 }

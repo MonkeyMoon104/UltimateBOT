@@ -12,6 +12,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.compat.GameModeAccess;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -428,7 +429,7 @@ public class BotBrainController {
             }
 
             GameMode gameMode = candidate.getGameMode();
-            if (gameMode != null && gameMode.isInvulnerable()) {
+            if (gameMode != null && GameModeAccess.isInvulnerable(gameMode)) {
                 continue;
             }
 

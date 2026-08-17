@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
@@ -28,6 +29,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public void equipTotem(EquipmentSlot slot) {
+        if (slot == null) {
+            return;
+        }
         if (updateSlot(slot, MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE))) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
@@ -35,6 +39,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public void removeTotem(EquipmentSlot slot) {
+        if (slot == null) {
+            return;
+        }
         if (updateSlot(slot, ItemStackAccess.empty())) {
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
@@ -42,7 +49,8 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public int getEquippedTotemCount() {
-        ItemStack offhand = bot.getItem(EquipmentSlot.OFF_HAND);
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        ItemStack offhand = offHand == null ? ItemStackAccess.empty() : bot.getItem(offHand);
         ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
 
         return (hasTotemInSlot(offhand) ? 1 : 0) + (hasTotemInSlot(mainhand) ? 1 : 0);
@@ -52,12 +60,16 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     public void forceEquipTotems(int count) {
         count = Math.max(0, Math.min(2, count));
 
-        boolean changed =
-                updateSlot(
-                        EquipmentSlot.OFF_HAND,
-                        count >= 1
-                                ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
-                                : ItemStackAccess.empty());
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        boolean changed = false;
+        if (offHand != null) {
+            changed =
+                    updateSlot(
+                            offHand,
+                            count >= 1
+                                    ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
+                                    : ItemStackAccess.empty());
+        }
         changed |= updateSlot(
                 EquipmentSlot.HAND,
                 count >= 2

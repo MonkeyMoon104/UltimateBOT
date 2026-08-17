@@ -7,9 +7,9 @@ import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.CombatBlockBreakSequence;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.compat.CombatCadenceAccess;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.EquipmentSlot;
 
 public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
     private static final int AXE_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -34,7 +34,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.ANCHOR_SLOT, "COBWEB", Material.STRING, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
                         .slot(ARROW_SLOT, Material.ARROW, 64)
-                        .equipment(EquipmentSlot.OFF_HAND, Material.SHIELD)
+                        .offHand("SHIELD", Material.GOLDEN_APPLE)
                         .build());
     }
 
@@ -122,7 +122,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
             context.motion().approach(target, 2.1D);
             return;
         }
-        context.actions().attack(target, AXE_SLOT);
+        context.actions().attack(target, meleeSlot(context, target));
         transitionTo(Phase.SWORD_TRADE);
     }
 
@@ -138,8 +138,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         double distance = context.motion().distanceTo(target);
         if (distance <= context.tuning().attackRange()) {
             context.actions().releaseUseItem();
-            int weaponSlot = context.actions().isTargetBlocking(target) ? AXE_SLOT : BotInventoryController.SWORD_SLOT;
-            context.actions().attack(target, weaponSlot);
+            context.actions().attack(target, meleeSlot(context, target));
         } else {
             context.motion().approach(target, 2.0D);
             if (distance <= 4.5D && phaseTicks % 9 == 0) {
@@ -195,6 +194,13 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         }
         blockBreakSequence.reset(context);
         return false;
+    }
+
+    private int meleeSlot(CombatModeContext context, LivingEntity target) {
+        if (CombatCadenceAccess.hasWeaponCooldown() && context.actions().isTargetBlocking(target)) {
+            return AXE_SLOT;
+        }
+        return BotInventoryController.SWORD_SLOT;
     }
 
     private void transitionTo(Phase nextPhase) {

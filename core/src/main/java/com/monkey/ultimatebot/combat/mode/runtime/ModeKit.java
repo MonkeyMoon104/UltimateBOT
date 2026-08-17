@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
@@ -72,6 +73,22 @@ public final class ModeKit {
 
         public Builder equipment(EquipmentSlot slot, String materialName, Material fallback) {
             return equipment(slot, MaterialCatalog.optional(materialName, fallback));
+        }
+
+        public Builder offHand(Material item) {
+            EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+            if (offHand == null) {
+                return this;
+            }
+            return equipment(offHand, item);
+        }
+
+        public Builder offHand(String materialName, Material fallback) {
+            EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+            if (offHand == null) {
+                return this;
+            }
+            return equipment(offHand, materialName, fallback);
         }
 
         public Builder slot(int slot, ItemStack item) {

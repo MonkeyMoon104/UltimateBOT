@@ -44,7 +44,9 @@ final class BuiltInCombatModeCatalog {
                 required = EnumSet.noneOf(PlatformCapability.class);
                 break;
             case "uhc":
-                required = EnumSet.of(PlatformCapability.SHIELD, PlatformCapability.OFFHAND);
+                // Classic UHC is 1.8 (sword, gapple, cobweb). Shield/offhand are 1.9 kit extras, not
+                // a mode requirement — ModeKit.offHand already no-ops when the slot is missing.
+                required = EnumSet.noneOf(PlatformCapability.class);
                 break;
             case "axe-shield":
                 required = EnumSet.of(

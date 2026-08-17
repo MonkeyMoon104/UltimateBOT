@@ -16,6 +16,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemState
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStrategyHandler;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Objects;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +46,11 @@ public class BotTotemController {
             return;
         }
 
-        ItemStack offhand = bot.getItem(EquipmentSlot.OFF_HAND);
+        EquipmentSlot offHandSlot = EquipmentSlotAccess.offHand();
+        if (offHandSlot == null) {
+            return;
+        }
+        ItemStack offhand = bot.getItem(offHandSlot);
         ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
 
         int totemCount = bot.getTotemCount();

@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Test;
 
 class CombatModePlatformRequirementsTest {
     @Test
-    void swordAndWaterRequireNoPlatformCapabilities() {
+    void swordWaterAndUhcRequireNoPlatformCapabilities() {
         assertThat(CombatMode.SWORD.requiredPlatformCapabilities()).isEmpty();
         assertThat(CombatMode.WATER.requiredPlatformCapabilities()).isEmpty();
+        assertThat(CombatMode.UHC.requiredPlatformCapabilities()).isEmpty();
         assertThat(CombatMode.SWORD.supportedBy(EnumSet.noneOf(PlatformCapability.class))).isTrue();
+        assertThat(CombatMode.UHC.supportedBy(EnumSet.noneOf(PlatformCapability.class))).isTrue();
     }
 
     @Test

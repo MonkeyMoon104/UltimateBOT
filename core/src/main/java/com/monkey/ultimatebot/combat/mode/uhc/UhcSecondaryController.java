@@ -5,6 +5,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
 import com.monkey.ultimatebot.compat.ParticleAccess;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashSet;
 import java.util.Objects;
@@ -85,6 +86,9 @@ final class UhcSecondaryController {
             return;
         }
         target.setFireTicks(Math.max(target.getFireTicks(), 80));
+        if (!MinecraftVersionAccess.isAtLeast(1, 9)) {
+            return;
+        }
         target.getWorld()
                 .spawnParticle(
                         ParticleAccess.lava(),

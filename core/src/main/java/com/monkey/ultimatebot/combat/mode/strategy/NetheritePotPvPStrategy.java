@@ -9,7 +9,6 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.inventory.EquipmentSlot;
 
 public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     private static final int FIRST_POTION_SLOT = BotInventoryController.ENDERPEARL_SLOT;
@@ -28,7 +27,7 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(SECOND_POTION_SLOT, Material.SPLASH_POTION, 64)
                         .slot(BotInventoryController.OBSIDIAN_SLOT, Material.ENDER_PEARL, 16)
                         .slot(BotInventoryController.GOLDEN_APPLE_SLOT, Material.GOLDEN_APPLE, 64)
-                        .equipment(EquipmentSlot.OFF_HAND, "TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
+                        .offHand("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
                         .build());
     }
 

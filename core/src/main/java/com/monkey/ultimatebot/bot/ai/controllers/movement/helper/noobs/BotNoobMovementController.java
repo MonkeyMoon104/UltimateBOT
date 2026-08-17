@@ -125,8 +125,8 @@ public class BotNoobMovementController {
         }
 
         if (canStepUp && bot.isOnGround()) {
-            Vector velocity = bot.bukkitVelocity();
-            setVelocity(velocity.getX(), jumpVelocity, velocity.getZ());
+            setVelocity(dx * movementSpeed * 1.15D, jumpVelocity, dz * movementSpeed * 1.15D);
+            return true;
         }
 
         return false;

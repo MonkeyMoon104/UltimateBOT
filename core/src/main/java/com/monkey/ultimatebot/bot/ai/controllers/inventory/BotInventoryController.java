@@ -10,6 +10,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipme
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import java.util.Objects;
@@ -180,7 +181,10 @@ public class BotInventoryController {
     }
 
     public void startUsingOffHand() {
-        startUsingItem(EquipmentSlot.OFF_HAND);
+        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        if (offHand != null) {
+            startUsingItem(offHand);
+        }
     }
 
     public void releaseUsingItem() {

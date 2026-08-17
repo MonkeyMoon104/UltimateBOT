@@ -8,12 +8,14 @@ import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 /** Enforces fixed item and fixed-empty equipment settings after bot AI actions. */
 public final class BotEquipmentPolicy {
@@ -32,6 +34,9 @@ public final class BotEquipmentPolicy {
             }
 
             EquipmentSlot bukkitSlot = toBukkitSlot(entry.getKey());
+            if (bukkitSlot == null) {
+                continue;
+            }
             ItemStack desired = setting.mode() == BotEquipmentSlotMode.EMPTY
                     ? ItemStackAccess.empty()
                     : Objects.requireNonNull(setting.item(), "item").clone();
@@ -65,6 +70,9 @@ public final class BotEquipmentPolicy {
             case LEGS:
             case FEET:
                 EquipmentSlot bukkitSlot = toBukkitSlot(slot);
+                if (bukkitSlot == null) {
+                    break;
+                }
                                 ItemStack configured = options.getArmor().get(bukkitSlot);
                                 ItemStack restored;
                                 if (configured == null) {
@@ -89,12 +97,12 @@ public final class BotEquipmentPolicy {
         NMSBridgeManager.get().broadcastEquipment(bot, changes);
     }
 
-    private static EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
+    private static @Nullable EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
                 switch (slot) {
             case MAIN_HAND:
                 return EquipmentSlot.HAND;
             case OFF_HAND:
-                return EquipmentSlot.OFF_HAND;
+                return EquipmentSlotAccess.offHand();
             case HEAD:
                 return EquipmentSlot.HEAD;
             case CHEST:

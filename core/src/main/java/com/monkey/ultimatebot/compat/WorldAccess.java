@@ -20,8 +20,9 @@ import org.jspecify.annotations.Nullable;
  * 1.17 (no {@code WorldInfo}) throws {@link NoClassDefFoundError}. Always go through this helper
  * for those members — never hard-link them from shared code.
  *
- * <p>{@link #nearbyEntities} also dual-paths the Predicate overload of {@code getNearbyEntities},
- * which is absent on Paper 1.13.1 (same Craft {@code v1_13_R2} as 1.13.2).
+ * <p>{@link #nearbyEntities} dual-paths both {@code getNearbyEntities} overloads: the Location box
+ * method is missing on Spigot 1.8 R1, and the Predicate overload is missing on Paper 1.13.1 (same
+ * Craft {@code v1_13_R2} as 1.13.2). Never hard-link either.
  */
 public final class WorldAccess {
 
@@ -29,6 +30,7 @@ public final class WorldAccess {
     private static final @Nullable Method GET_UID = resolve("getUID");
     private static final @Nullable Method GET_MIN_HEIGHT = resolve("getMinHeight");
     private static final @Nullable Method GET_MAX_HEIGHT = resolve("getMaxHeight");
+    private static final @Nullable Method NEARBY = resolveNearby();
     private static final @Nullable Method NEARBY_WITH_PREDICATE = resolveNearbyWithPredicate();
 
     private WorldAccess() {}
@@ -95,7 +97,7 @@ public final class WorldAccess {
                 // fall through
             }
         }
-        Collection<Entity> nearby = world.getNearbyEntities(center, x, y, z);
+        Collection<Entity> nearby = nearbyUnfiltered(world, center, x, y, z);
         if (predicate == null) {
             return nearby;
         }
@@ -106,6 +108,66 @@ public final class WorldAccess {
             }
         }
         return filtered;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<Entity> nearbyUnfiltered(World world, Location center, double x, double y, double z) {
+        if (NEARBY != null) {
+            try {
+                Object result =
+                        NEARBY.invoke(
+                                world,
+                                center,
+                                Double.valueOf(x),
+                                Double.valueOf(y),
+                                Double.valueOf(z));
+                if (result instanceof Collection) {
+                    return (Collection<Entity>) result;
+                }
+            } catch (ReflectiveOperationException | LinkageError ignored) {
+                // Spigot 1.8 R1: method missing — scan loaded chunks.
+            }
+        }
+        return nearbyByChunks(world, center, x, y, z);
+    }
+
+    private static Collection<Entity> nearbyByChunks(
+            World world, Location center, double x, double y, double z) {
+        double minX = center.getX() - x;
+        double maxX = center.getX() + x;
+        double minY = center.getY() - y;
+        double maxY = center.getY() + y;
+        double minZ = center.getZ() - z;
+        double maxZ = center.getZ() + z;
+        int minChunkX = (int) Math.floor(minX / 16.0D);
+        int maxChunkX = (int) Math.floor(maxX / 16.0D);
+        int minChunkZ = (int) Math.floor(minZ / 16.0D);
+        int maxChunkZ = (int) Math.floor(maxZ / 16.0D);
+        Collection<Entity> nearby = new ArrayList<>();
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                if (!world.isChunkLoaded(chunkX, chunkZ)) {
+                    continue;
+                }
+                Entity[] entities = world.getChunkAt(chunkX, chunkZ).getEntities();
+                for (int i = 0; i < entities.length; i++) {
+                    Entity entity = entities[i];
+                    if (entity == null || !entity.isValid()) {
+                        continue;
+                    }
+                    Location location = entity.getLocation();
+                    if (location.getX() >= minX
+                            && location.getX() <= maxX
+                            && location.getY() >= minY
+                            && location.getY() <= maxY
+                            && location.getZ() >= minZ
+                            && location.getZ() <= maxZ) {
+                        nearby.add(entity);
+                    }
+                }
+            }
+        }
+        return nearby;
     }
 
     /** Typed nearby lookup without linking the Predicate {@code getNearbyEntities} overload. */
@@ -126,6 +188,15 @@ public final class WorldAccess {
     private static @Nullable Method resolve(String name) {
         try {
             return World.class.getMethod(name);
+        } catch (NoSuchMethodException ignored) {
+            return null;
+        }
+    }
+
+    private static @Nullable Method resolveNearby() {
+        try {
+            return World.class.getMethod(
+                    "getNearbyEntities", Location.class, double.class, double.class, double.class);
         } catch (NoSuchMethodException ignored) {
             return null;
         }

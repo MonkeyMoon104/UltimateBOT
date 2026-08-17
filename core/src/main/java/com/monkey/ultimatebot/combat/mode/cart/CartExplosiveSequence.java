@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.combat.mode.cart;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
+import com.monkey.ultimatebot.compat.EntityInvulnerableAccess;
 import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
 import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
@@ -73,7 +74,7 @@ final class CartExplosiveSequence {
             return false;
         }
         ExplosiveMinecartAccess.setFuseTicks(cart, -1);
-        cart.setInvulnerable(false);
+        EntityInvulnerableAccess.setInvulnerable(cart, false);
         cart.setVelocity(new org.bukkit.util.Vector());
         if (!context.trackCombatEntity(cart, CART_SLOT)) {
             return false;
