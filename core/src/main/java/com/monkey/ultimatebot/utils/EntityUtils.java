@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.utils;
 
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -12,7 +12,7 @@ public class EntityUtils {
         if (world == null || botUUID == null) {
             return null;
         }
-        Entity entity = Bukkit.getEntity(botUUID);
+        Entity entity = EntityLookupAccess.get(botUUID);
         return entity != null && entity.getWorld().getUID().equals(world.getUID()) ? entity : null;
     }
 
@@ -33,7 +33,7 @@ public class EntityUtils {
     }
 
     public static boolean removeEntityInLoadedWorlds(UUID entityUUID) {
-        Entity entity = Bukkit.getEntity(entityUUID);
+        Entity entity = EntityLookupAccess.get(entityUUID);
         if (entity != null) {
             entity.remove();
             return true;

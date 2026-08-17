@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.Location;
@@ -72,7 +73,7 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
         if (mobCrystalId == null) {
             return false;
         }
-        Entity entity = org.bukkit.Bukkit.getEntity(mobCrystalId);
+        Entity entity = EntityLookupAccess.get(mobCrystalId);
         if (!(entity instanceof EnderCrystal)) {
             mobCrystalId = null;
             return false;

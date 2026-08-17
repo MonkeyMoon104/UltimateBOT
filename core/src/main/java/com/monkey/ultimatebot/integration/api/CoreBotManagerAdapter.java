@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.integration.api;
 
 import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 
 import java.util.stream.Collectors;
 
@@ -256,7 +257,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (botRegistry.getOwnerUUIDByBotUUID(requestedBotUUID) != null) {
             return "Bot UUID is already assigned to an active UltimateBot.";
         }
-        if (Bukkit.getPlayer(requestedBotUUID) != null || Bukkit.getEntity(requestedBotUUID) != null) {
+        if (Bukkit.getPlayer(requestedBotUUID) != null || EntityLookupAccess.get(requestedBotUUID) != null) {
             return "Bot UUID is already used by a loaded player or entity.";
         }
         return null;

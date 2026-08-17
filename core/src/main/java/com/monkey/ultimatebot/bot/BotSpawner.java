@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
 import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
@@ -158,7 +159,7 @@ public class BotSpawner {
                 && !botUUID.equals(new UUID(0L, 0L))
                 && registry.getOwnerUUIDByBotUUID(botUUID) == null
                 && org.bukkit.Bukkit.getPlayer(botUUID) == null
-                && org.bukkit.Bukkit.getEntity(botUUID) == null;
+                && EntityLookupAccess.get(botUUID) == null;
     }
 
     private UUID resolveRegistryOwnerUUID(Player registryOwner, BotOptions botOptions) {

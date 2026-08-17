@@ -59,7 +59,7 @@ public final class EntityFluidAccess {
             return isWatery(eyes.getBlock());
         }
         Location feet = Objects.requireNonNull(entity.getLocation(), "location");
-        return isWatery(feet.clone().add(0.0D, Math.max(0.9D, entity.getHeight() * 0.9D), 0.0D).getBlock());
+        return isWatery(feet.clone().add(0.0D, Math.max(0.9D, EntityBoundsAccess.height(entity) * 0.9D), 0.0D).getBlock());
     }
 
     private static boolean isWatery(@Nullable Block block) {

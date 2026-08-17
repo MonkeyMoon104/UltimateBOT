@@ -23,6 +23,7 @@ public final class EntityBoundsAccess {
     private static final double ENTITY_HEIGHT = 1.8D;
 
     private static final @Nullable Method GET_BOUNDING_BOX = resolveGetBoundingBox();
+    private static final @Nullable Method GET_HEIGHT = resolveGetHeight();
     private static final @Nullable Method GET_MIN_X = resolveBoxGetter("getMinX");
     private static final @Nullable Method GET_MIN_Y = resolveBoxGetter("getMinY");
     private static final @Nullable Method GET_MIN_Z = resolveBoxGetter("getMinZ");
@@ -39,6 +40,26 @@ public final class EntityBoundsAccess {
             return modern;
         }
         return approximate(entity);
+    }
+
+    /**
+     * Standing height. {@link Entity#getHeight()} exists from 1.11.2; pure 1.11 crashes UHC cobweb
+     * ticks with {@code NoSuchMethodError}.
+     */
+    public static double height(Entity entity) {
+        Objects.requireNonNull(entity, "entity");
+        if (GET_HEIGHT != null) {
+            try {
+                Object result = GET_HEIGHT.invoke(entity);
+                if (result instanceof Number) {
+                    return ((Number) result).doubleValue();
+                }
+            } catch (ReflectiveOperationException | LinkageError ignored) {
+                // fall through
+            }
+        }
+        Box box = of(entity);
+        return Math.max(0.1D, box.getMaxY() - box.getMinY());
     }
 
     private static @Nullable Box modernBox(Entity entity) {
@@ -94,6 +115,18 @@ public final class EntityBoundsAccess {
             return Entity.class.getMethod("getBoundingBox");
         } catch (NoSuchMethodException ignored) {
             return null;
+        }
+    }
+
+    private static @Nullable Method resolveGetHeight() {
+        try {
+            return Entity.class.getMethod("getHeight");
+        } catch (NoSuchMethodException ignored) {
+            try {
+                return Class.forName("org.bukkit.entity.LivingEntity").getMethod("getHeight");
+            } catch (ClassNotFoundException | NoSuchMethodException missing) {
+                return null;
+            }
         }
     }
 

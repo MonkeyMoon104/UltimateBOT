@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.compat.ArrowPickupAccess;
+import com.monkey.ultimatebot.compat.EntityBoundsAccess;
 import com.monkey.ultimatebot.compat.PlayerSwingAccess;
 import java.util.Objects;
 import java.util.SplittableRandom;
@@ -100,7 +101,7 @@ public final class ModeProjectileService {
     }
 
     private Vector velocity(LivingEntity target, double accuracy, double speed) {
-        return velocity(target, target.getHeight() * 0.65D, accuracy, speed);
+        return velocity(target, EntityBoundsAccess.height(target) * 0.65D, accuracy, speed);
     }
 
     private Vector velocity(org.bukkit.entity.Entity target, double heightOffset, double accuracy, double speed) {
@@ -111,7 +112,7 @@ public final class ModeProjectileService {
 
     private Vector ballisticVelocity(org.bukkit.entity.Entity target, double accuracy, double speed) {
         Location origin = shooter.getEyeLocation();
-        Location destination = target.getLocation().add(0.0D, target.getHeight() * 0.5D, 0.0D);
+        Location destination = target.getLocation().add(0.0D, EntityBoundsAccess.height(target) * 0.5D, 0.0D);
         double flightTicks = origin.distance(destination) / speed;
         destination.add(0.0D, Math.min(2.0D, 0.025D * flightTicks * flightTicks), 0.0D);
         return velocity(origin, destination, accuracy, speed);

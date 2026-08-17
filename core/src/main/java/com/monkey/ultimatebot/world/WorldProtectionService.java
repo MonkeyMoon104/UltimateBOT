@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.world;
 
 
 import com.monkey.ultimatebot.compat.BlockBreakAccess;
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import com.monkey.ultimatebot.compat.BlockDataAccess;
 import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.compat.MaterialAirAccess;
@@ -252,7 +253,7 @@ public final class WorldProtectionService implements AutoCloseable {
 
     private synchronized void expireCombatEntity(UUID entityId) {
         TrackedWorldEntity tracked = combatEntities.remove(entityId);
-        Entity entity = Bukkit.getEntity(entityId);
+        Entity entity = EntityLookupAccess.get(entityId);
         if (tracked != null && entity != null) {
             entity.remove();
         }
@@ -267,7 +268,7 @@ public final class WorldProtectionService implements AutoCloseable {
 
     private void pruneCombatEntities() {
         combatEntities.entrySet().removeIf(entry -> {
-            Entity entity = Bukkit.getEntity(entry.getKey());
+            Entity entity = EntityLookupAccess.get(entry.getKey());
             if (entity != null && entity.isValid()) {
                 return false;
             }
@@ -293,7 +294,7 @@ public final class WorldProtectionService implements AutoCloseable {
         for (Map.Entry<UUID, TrackedWorldEntity> entry :
                 com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(combatEntities).entrySet()) {
             entry.getValue().cancelExpiry();
-            Entity entity = Bukkit.getEntity(entry.getKey());
+            Entity entity = EntityLookupAccess.get(entry.getKey());
             if (entity != null && WorldProtectionPolicy.shouldRemoveEntityOnShutdown(settings.antiDupe(), true)) {
                 entity.remove();
             }

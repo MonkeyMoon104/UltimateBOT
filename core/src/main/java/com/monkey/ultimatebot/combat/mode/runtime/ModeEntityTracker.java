@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 
 public final class ModeEntityTracker implements AutoCloseable {
@@ -20,7 +20,7 @@ public final class ModeEntityTracker implements AutoCloseable {
 
     public void prune() {
         entityIds.removeIf(entityId -> {
-            Entity entity = Bukkit.getEntity(entityId);
+            Entity entity = EntityLookupAccess.get(entityId);
             if (entity == null || !entity.isValid()) {
                 return true;
             }
@@ -34,7 +34,7 @@ public final class ModeEntityTracker implements AutoCloseable {
 
     public void remove(UUID entityId) {
         entityIds.remove(entityId);
-        Entity entity = Bukkit.getEntity(entityId);
+        Entity entity = EntityLookupAccess.get(entityId);
         if (entity != null) {
             entity.remove();
         }

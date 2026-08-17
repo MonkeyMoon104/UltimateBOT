@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.utils.equipment;
 
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.EnchantmentAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.*;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -12,22 +12,13 @@ import org.jspecify.annotations.Nullable;
 
 public class BotEquipmentUtils {
     /**
-     * Resolves enchantments without linking against potentially-missing Bukkit enum/constant fields.
+     * Resolves enchantments without linking {@code NamespacedKey} or missing Bukkit enum fields.
      *
-     * <p>Some Paper/Bukkit builds can throw {@code NoSuchFieldError} for enchantment constants (e.g.
-     * older API builds) when compiled against a different API version. Using
-     * {@link Enchantment#getByKey(NamespacedKey)} avoids that.
+     * <p>{@code Enchantment#getByKey} / {@code NamespacedKey} crash 1.11 and earlier. Dual-path
+     * lookup uses legacy names ({@code PROTECTION_ENVIRONMENTAL}) then modern keys.
      */
     public static @Nullable Enchantment resolveEnchantmentByKeyMinecraft(String key) {
-        if (key == null || key.isEmpty()) return null;
-        try {
-            return Enchantment.getByKey(NamespacedKey.minecraft(key));
-        } catch (NoSuchMethodError ignored) {
-            // Very old Bukkit API without getByKey; safest fallback is "no enchant".
-            return null;
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
+        return EnchantmentAccess.byMinecraftKey(key);
     }
 
     public static void applyEquipment(

@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.world;
 
+import com.monkey.ultimatebot.compat.BlockBreakAccess;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
@@ -26,8 +27,8 @@ public final class WorldProtectionListener implements Listener {
     public void suppressTrackedBlockDrops(BlockBreakEvent event) {
         if (WorldProtectionPolicy.shouldSuppressDrops(
                 protection.isAntiDupeEnabled(), protection.isTracked(event.getBlock()))) {
-            event.setDropItems(false);
-            event.setExpToDrop(0);
+            BlockBreakAccess.setDropItems(event, false);
+            BlockBreakAccess.setExpToDrop(event, 0);
         }
     }
 

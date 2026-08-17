@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.utils.Packet;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Collection;
@@ -47,24 +48,46 @@ public class BotBroadcaster {
         return sent;
     }
 
+    /**
+     * 1.11 and earlier apply skins from the tab-list entry; 2 ticks is too fast and the client
+     * spawns Steve. 1.12+ already works with a 2-tick hide.
+     */
+    private static long tabListRemoveDelayTicks() {
+        return MinecraftVersionAccess.isAtLeast(1, 12) ? 2L : 40L;
+    }
+
     private static void showBotToViewer(Player viewer, ITrainingBot bot) {
         Packet.sendAddPlayerPacket(viewer, bot);
-        Packet.sendSpawnPlayerPacket(viewer, bot);
-        BotEquipmentUtils.sendCurrentEquipmentToViewer(bot, viewer);
-        // Classic NPC flow: ADD_PLAYER is required for skins on older clients, then REMOVE_PLAYER
-        // hides the entry from the tab list while keeping the spawned entity visible.
         UltimateBot plugin = bot.getPlugin();
-        if (plugin != null) {
-            Bukkit.getScheduler()
-                    .runTaskLater(
-                            plugin,
-                            () -> {
-                                if (viewer.isOnline() && !bot.isRemoved()) {
-                                    Packet.sendRemovePlayerPacket(viewer, bot);
-                                }
-                            },
-                            2L);
+        Runnable spawnAndEquip =
+                () -> {
+                    if (!viewer.isOnline() || bot.isRemoved()) {
+                        return;
+                    }
+                    Packet.sendSpawnPlayerPacket(viewer, bot);
+                    BotEquipmentUtils.sendCurrentEquipmentToViewer(bot, viewer);
+                };
+        if (plugin == null) {
+            spawnAndEquip.run();
+            return;
         }
+        // 1.11 and earlier apply the skin from the tab-list entry; spawn one tick later so the
+        // client has registered ADD_PLAYER. 1.12+ already works with same-tick spawn.
+        long spawnDelay = MinecraftVersionAccess.isAtLeast(1, 12) ? 0L : 1L;
+        if (spawnDelay <= 0L) {
+            spawnAndEquip.run();
+        } else {
+            Bukkit.getScheduler().runTaskLater(plugin, spawnAndEquip, spawnDelay);
+        }
+        Bukkit.getScheduler()
+                .runTaskLater(
+                        plugin,
+                        () -> {
+                            if (viewer.isOnline() && !bot.isRemoved()) {
+                                Packet.sendRemovePlayerPacket(viewer, bot);
+                            }
+                        },
+                        tabListRemoveDelayTicks());
     }
 
     public static void broadcastDespawn(ITrainingBot bot) {

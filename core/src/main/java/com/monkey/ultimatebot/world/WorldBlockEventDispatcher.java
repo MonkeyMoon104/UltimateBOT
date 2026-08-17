@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.world;
 
+import com.monkey.ultimatebot.compat.BlockBreakAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,7 +30,7 @@ final class WorldBlockEventDispatcher {
     static BreakResult requestBreak(Block block, Player breaker) {
         BlockBreakEvent event = new BlockBreakEvent(block, breaker);
         Bukkit.getPluginManager().callEvent(event);
-        return new BreakResult(event.isCancelled(), event.isDropItems());
+        return new BreakResult(event.isCancelled(), BlockBreakAccess.isDropItems(event));
     }
 
     static final class BreakResult {

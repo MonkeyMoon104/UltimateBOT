@@ -4,6 +4,7 @@ package com.monkey.ultimatebot.combat.mode.shared;
 import java.util.Collections;
 import java.util.List;
 import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.compat.EntityBoundsAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
@@ -21,7 +22,7 @@ public final class CobwebCombatAwareness {
         Location head = new Location(
                 entity.getWorld(),
                 EntityCoordsAccess.getX(entity),
-                EntityCoordsAccess.getY(entity) + entity.getHeight() * 0.75D,
+                EntityCoordsAccess.getY(entity) + EntityBoundsAccess.height(entity) * 0.75D,
                 EntityCoordsAccess.getZ(entity));
         boolean feetWeb = isCobweb(feet);
         boolean headWeb = isCobweb(head);

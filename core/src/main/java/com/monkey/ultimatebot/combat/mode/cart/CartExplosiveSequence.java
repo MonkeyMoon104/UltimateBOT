@@ -4,13 +4,13 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
+import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import java.util.UUID;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
@@ -130,7 +130,7 @@ final class CartExplosiveSequence {
             armImmediateFuse(context, cart);
             return Status.DETONATED;
         }
-        Entity arrow = arrowId == null ? null : Bukkit.getEntity(arrowId);
+        Entity arrow = arrowId == null ? null : EntityLookupAccess.get(arrowId);
         if (arrowId != null) {
             arrowFlightTicks++;
             if (arrow == null || !arrow.isValid() || !arrow.getWorld().equals(cart.getWorld())) {
@@ -187,7 +187,7 @@ final class CartExplosiveSequence {
     }
 
     private @Nullable Entity cart() {
-        Entity cart = cartId == null ? null : Bukkit.getEntity(cartId);
+        Entity cart = cartId == null ? null : EntityLookupAccess.get(cartId);
         return cart != null && cart.isValid() ? cart : null;
     }
 
