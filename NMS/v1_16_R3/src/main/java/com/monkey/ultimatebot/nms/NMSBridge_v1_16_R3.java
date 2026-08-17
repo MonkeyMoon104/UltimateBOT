@@ -459,7 +459,14 @@ public final class NMSBridge_v1_16_R3 implements INMSBridge {
         // crystal/obsidian refill (CPvP spam). Armor must not be silent or attribute modifiers
         // (protection / toughness) never apply and the bot takes unarmored sword damage.
         boolean silent = nmsSlot == EnumItemSlot.MAINHAND || nmsSlot == EnumItemSlot.OFFHAND;
-        nativeBot(bot).setSlot(nmsSlot, CraftItemStack.asNMSCopy(resolved), silent);
+        EntityPlayer nativeBot = nativeBot(bot);
+        net.minecraft.server.v1_16_R3.ItemStack nms = CraftItemStack.asNMSCopy(resolved);
+        try {
+            nativeBot.setSlot(nmsSlot, nms, silent);
+        } catch (NoSuchMethodError ignored) {
+            // 1.16.4: 3-arg setSlot was added in 1.16.5 (SPIGOT-6289).
+            nativeBot.setSlot(nmsSlot, nms);
+        }
     }
 
     @Override
@@ -510,9 +517,24 @@ public final class NMSBridge_v1_16_R3 implements INMSBridge {
         nativeBot(bot).fallDistance = fallDistance;
     }
 
+    /**
+     * {@code EntityHuman.attack} uses {@code GenericAttributes.ATTACK_DAMAGE}, not the hotbar list.
+     * Remove+add of the current item is a no-op when living-tick already applied modifiers (1.16.5).
+     */
+    private static void applyHandItemAttributes(EntityPlayer nativeBot, EnumItemSlot slot) {
+        net.minecraft.server.v1_16_R3.ItemStack held = nativeBot.getEquipment(slot);
+        if (held == null) {
+            return;
+        }
+        nativeBot.getAttributeMap().a(held.a(slot));
+        nativeBot.getAttributeMap().b(held.a(slot));
+    }
+
     @Override
     public void attackTarget(ITrainingBot bot, LivingEntity target) {
-        nativeBot(bot).attack(((CraftLivingEntity) target).getHandle());
+        EntityPlayer nativeBot = nativeBot(bot);
+        applyHandItemAttributes(nativeBot, EnumItemSlot.MAINHAND);
+        nativeBot.attack(((CraftLivingEntity) target).getHandle());
     }
 
     @Override

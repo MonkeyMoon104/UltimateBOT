@@ -208,12 +208,9 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
 
     @Override
     public BotProfileData copyProfileWithTextures(Player viewer, UUID botUUID, String botName) {
-        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
+        GameProfile viewerProfile = nativePlayer(viewer).getProfile();
         GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
-        }
+        profile.getProperties().putAll(viewerProfile.getProperties());
         return toProfileData(profile);
     }
 
@@ -326,11 +323,14 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
 
     private static void setHeldSilently(
             EntityPlayer nativeBot, EnumHand hand, net.minecraft.server.v1_16_R2.ItemStack stack) {
+        EnumItemSlot slot = hand == EnumHand.OFF_HAND ? EnumItemSlot.OFFHAND : EnumItemSlot.MAINHAND;
+        nativeBot.getAttributeMap().a(nativeBot.getEquipment(slot).a(slot));
         if (hand == EnumHand.OFF_HAND) {
             nativeBot.inventory.extraSlots.set(0, stack);
         } else {
             nativeBot.inventory.items.set(nativeBot.inventory.itemInHandIndex, stack);
         }
+        nativeBot.getAttributeMap().b(stack.a(slot));
     }
 
     private static void restoreHeldCount(net.minecraft.server.v1_16_R2.ItemStack nmsStack, int previousCount) {
@@ -529,9 +529,25 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
         nativeBot(bot).fallDistance = fallDistance;
     }
 
+    /**
+     * {@code EntityHuman.attack} uses {@code GenericAttributes.ATTACK_DAMAGE}, not the hotbar list.
+     * Silent hand writes skip AttributeMap updates, so re-apply the held item's modifiers here
+     * (remove+add of the current item is a no-op when living-tick already applied them).
+     */
+    private static void applyHandItemAttributes(EntityPlayer nativeBot, EnumItemSlot slot) {
+        net.minecraft.server.v1_16_R2.ItemStack held = nativeBot.getEquipment(slot);
+        if (held == null) {
+            return;
+        }
+        nativeBot.getAttributeMap().a(held.a(slot));
+        nativeBot.getAttributeMap().b(held.a(slot));
+    }
+
     @Override
     public void attackTarget(ITrainingBot bot, LivingEntity target) {
-        nativeBot(bot).attack(((CraftLivingEntity) target).getHandle());
+        EntityPlayer nativeBot = nativeBot(bot);
+        applyHandItemAttributes(nativeBot, EnumItemSlot.MAINHAND);
+        nativeBot.attack(((CraftLivingEntity) target).getHandle());
     }
 
     @Override

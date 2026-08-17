@@ -68,6 +68,17 @@ public final class TrainingBot_v1_15_R1 extends EntityPlayer {
     }
 
     /**
+     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
+     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
+     */
+    void forceFullAttackStrength() {
+        int delay = Math.max(1, (int) Math.ceil(this.ex()));
+        if (this.aB < delay) {
+            this.aB = delay;
+        }
+    }
+
+    /**
      * {@code Entity#setPose} is protected on this revision; the bridge cannot call it. Water/Trident
      * PvP must force pose + {@code inWater} or vanilla {@code super.tick()} keeps STANDING and viewers
      * never see the swim animation.

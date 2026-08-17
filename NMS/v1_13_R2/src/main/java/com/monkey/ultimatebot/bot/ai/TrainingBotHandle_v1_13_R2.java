@@ -97,6 +97,11 @@ public final class TrainingBotHandle_v1_13_R2 implements ITrainingBot {
     }
 
     @Override
+    public void prepareFullAttackStrength() {
+        entity.forceFullAttackStrength();
+    }
+
+    @Override
     public BotAI getBotAI() {
         return logic.getBrainController().getBotAI();
     }

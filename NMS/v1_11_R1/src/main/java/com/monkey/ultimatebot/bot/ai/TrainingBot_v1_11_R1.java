@@ -66,6 +66,17 @@ public final class TrainingBot_v1_11_R1 extends EntityPlayer {
         return handle;
     }
 
+    /**
+     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
+     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
+     */
+    void forceFullAttackStrength() {
+        int delay = Math.max(1, (int) Math.ceil(this.dg()));
+        if (this.aE < delay) {
+            this.aE = delay;
+        }
+    }
+
     @Override
     public void A_() {
         try {
