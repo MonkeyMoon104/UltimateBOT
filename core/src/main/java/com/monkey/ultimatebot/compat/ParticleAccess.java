@@ -8,7 +8,8 @@ import org.jspecify.annotations.Nullable;
  * Resolves {@link Particle} constants across Paper renames (1.20.5 particle cleanup).
  *
  * <p>Hard references to newer names (e.g. {@code WITCH}) throw {@link NoSuchFieldError} on 1.20.4
- * and earlier — always resolve via this helper for cross-version FX.
+ * and earlier — always resolve via this helper for cross-version FX. Version-gated particles
+ * (totem, 1.11+) must include a 1.9-era alias so class init does not fail on 1.9–1.10.
  */
 public final class ParticleAccess {
 
@@ -27,7 +28,9 @@ public final class ParticleAccess {
     private static final Particle EXPLOSION = require("EXPLOSION", "EXPLOSION_LARGE", "EXPLOSION_NORMAL");
     private static final Particle EXPLOSION_EMITTER = require("EXPLOSION_EMITTER", "EXPLOSION_HUGE");
     private static final Particle FIREWORK = require("FIREWORK", "FIREWORKS_SPARK");
-    private static final Particle TOTEM = require("TOTEM_OF_UNDYING", "TOTEM");
+    // Totem burst exists from 1.11. 1.9–1.10 have Particle but not TOTEM — keep clinit alive.
+    private static final Particle TOTEM =
+            require("TOTEM_OF_UNDYING", "TOTEM", "SPELL_WITCH", "CRIT_MAGIC");
     private static final Particle HAPPY_VILLAGER = require("HAPPY_VILLAGER", "VILLAGER_HAPPY");
     private static final Particle ANGRY_VILLAGER = require("ANGRY_VILLAGER", "VILLAGER_ANGRY");
     private static final Particle POOF = require("POOF", "EXPLOSION_NORMAL", "CLOUD");
