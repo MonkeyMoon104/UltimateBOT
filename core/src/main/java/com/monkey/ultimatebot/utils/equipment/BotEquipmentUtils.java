@@ -3,6 +3,7 @@ package com.monkey.ultimatebot.utils.equipment;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.EnchantmentAccess;
+import com.monkey.ultimatebot.compat.ItemMetaAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.*;
 import org.bukkit.Material;
@@ -57,7 +58,7 @@ public class BotEquipmentUtils {
             }
 
             // Prevent durability ticks from re-equipping armor (armor equip sound spam on hit).
-            meta.setUnbreakable(true);
+            ItemMetaAccess.setUnbreakable(meta, true);
 
             item.setItemMeta(meta);
         }

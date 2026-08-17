@@ -2,6 +2,7 @@ package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.ItemMetaDamageAccess;
+import com.monkey.ultimatebot.compat.ItemMetaAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -52,13 +53,9 @@ public class BotEquipmentService {
                 continue;
             }
             boolean changed = false;
-            try {
-                if (!meta.isUnbreakable()) {
-                    meta.setUnbreakable(true);
-                    changed = true;
-                }
-            } catch (NoSuchMethodError ignored) {
-                // pre-unbreakable API
+            if (!ItemMetaAccess.isUnbreakable(meta)) {
+                ItemMetaAccess.setUnbreakable(meta, true);
+                changed = true;
             }
             if (ItemMetaDamageAccess.clearDamage(armorPiece, meta)) {
                 changed = true;
