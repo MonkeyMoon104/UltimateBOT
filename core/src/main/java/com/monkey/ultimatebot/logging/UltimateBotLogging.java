@@ -160,7 +160,34 @@ public final class UltimateBotLogging {
     }
 
     private static String format(String module, String accentColor, String message, String messageColor) {
-        return BOLD + accentColor + "[" + module + "]" + RESET + " " + messageColor + message + RESET;
+        return BOLD
+                + accentColor
+                + "["
+                + module
+                + "]"
+                + RESET
+                + " "
+                + messageColor
+                + consoleSafe(message)
+                + RESET;
+    }
+
+    /**
+     * Legacy Windows/Spigot consoles use OEM code pages (e.g. CP437). Unicode en-dash {@code –}
+     * encodes as CP1252 {@code 0x96}, which those consoles render as {@code û}.
+     */
+    private static String consoleSafe(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+        return message
+                .replace('\u2013', '-')
+                .replace('\u2014', '-')
+                .replace('\u2011', '-')
+                .replace('\u2212', '-')
+                .replace("\u2192", "->")
+                .replace("\u2190", "<-")
+                .replace('\u2026', '.');
     }
 
     private static String moduleColor(String module) {
