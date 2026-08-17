@@ -10,7 +10,6 @@ import com.monkey.ultimatebot.bot.ai.TrainingBot_v1_8_R3;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.protocol.BotProfileData;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +24,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntity;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityEquipment;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityHeadRotation;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import net.minecraft.server.v1_8_R3.PlayerInteractManager;
@@ -118,17 +118,83 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
 
     @Override
     public void moveBot(Player bot, double x, double y, double z) {
-        nativePlayer(bot).setPosition(x, y, z);
+        EntityPlayer nativeBot = nativePlayer(bot);
+        nativeBot.motX = 0.0D;
+        nativeBot.motY = 0.0D;
+        nativeBot.motZ = 0.0D;
+        nativeBot.fallDistance = 0.0F;
+        nativeBot.setPositionRotation(x, y, z, nativeBot.yaw, nativeBot.pitch);
+        broadcastBotPosition(bot);
+    }
+
+    @Override
+    public void broadcastBotPosition(Player bot) {
+        EntityPlayer nativeBot = nativePlayer(bot);
+        PacketPlayOutEntityTeleport teleportPacket = new PacketPlayOutEntityTeleport(nativeBot);
+        byte packedYaw = packDegrees(nativeBot.yaw);
+        PacketPlayOutEntityHeadRotation headPacket =
+                new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
+        Location botLoc = bot.getLocation();
+        double maxDistSq = 64.0D * 64.0D;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getEntityId() == bot.getEntityId()) {
+                continue;
+            }
+            if (online.getWorld() != bot.getWorld()) {
+                continue;
+            }
+            Location viewerLoc = online.getLocation();
+            double dx = viewerLoc.getX() - botLoc.getX();
+            double dz = viewerLoc.getZ() - botLoc.getZ();
+            if (dx * dx + dz * dz > maxDistSq) {
+                continue;
+            }
+            EntityPlayer handle = ((CraftPlayer) online).getHandle();
+            handle.playerConnection.sendPacket(teleportPacket);
+            handle.playerConnection.sendPacket(headPacket);
+        }
+    }
+
+    @Override
+    public void setBotRotation(Player bot, float yaw, float pitch) {
+        EntityPlayer nativeBot = nativePlayer(bot);
+        nativeBot.yaw = yaw;
+        nativeBot.pitch = pitch;
+        nativeBot.aI = yaw;
+        nativeBot.aK = yaw;
+        byte packedYaw = packDegrees(yaw);
+        byte packedPitch = packDegrees(pitch);
+        PacketPlayOutEntityHeadRotation headPacket =
+                new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
+        PacketPlayOutEntity.PacketPlayOutEntityLook lookPacket =
+                new PacketPlayOutEntity.PacketPlayOutEntityLook(
+                        nativeBot.getId(), packedYaw, packedPitch, nativeBot.onGround);
+        Location botLoc = bot.getLocation();
+        double maxDistSq = 64.0D * 64.0D;
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            if (online.getEntityId() == bot.getEntityId()) {
+                continue;
+            }
+            if (online.getWorld() != bot.getWorld()) {
+                continue;
+            }
+            Location viewerLoc = online.getLocation();
+            double dx = viewerLoc.getX() - botLoc.getX();
+            double dz = viewerLoc.getZ() - botLoc.getZ();
+            if (dx * dx + dz * dz > maxDistSq) {
+                continue;
+            }
+            EntityPlayer handle = ((CraftPlayer) online).getHandle();
+            handle.playerConnection.sendPacket(headPacket);
+            handle.playerConnection.sendPacket(lookPacket);
+        }
     }
 
     @Override
     public BotProfileData copyProfileWithTextures(Player viewer, UUID botUUID, String botName) {
-        GameProfile viewerProfile = ((CraftPlayer) viewer).getProfile();
-        Collection<Property> textures = viewerProfile.getProperties().get("textures");
+        GameProfile viewerProfile = nativePlayer(viewer).getProfile();
         GameProfile profile = new GameProfile(botUUID, botName);
-        if (!textures.isEmpty()) {
-            profile.getProperties().put("textures", textures.iterator().next());
-        }
+        profile.getProperties().putAll(viewerProfile.getProperties());
         return toProfileData(profile);
     }
 
@@ -288,12 +354,26 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
 
     @Override
     public void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack) {
-        Integer index = toEquipmentIndex(slot);
-        if (index == null) {
+        ItemStack resolved = stack == null ? new ItemStack(Material.AIR) : stack;
+        net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(resolved);
+        EntityPlayer nativeBot = nativeBot(bot);
+        String name = slot.name();
+        // EntityHuman.setEquipment stores armor[i] (length 4). Packet/getEquipment(int) use
+        // 0=hand, 1=boots, 4=helmet — HEAD as 4 AIOOBE; HAND as 0 overwrites boots.
+        if ("HAND".equals(name)) {
+            int hotbar = nativeBot.inventory.itemInHandIndex;
+            if (hotbar >= 0 && hotbar < 9) {
+                applyHeldItemAttributes(nativeBot, nativeBot.inventory.getItemInHand(), false);
+                nativeBot.inventory.items[hotbar] = nms;
+                applyHeldItemAttributes(nativeBot, nms, true);
+            }
             return;
         }
-        ItemStack resolved = stack == null ? new ItemStack(Material.AIR) : stack;
-        nativeBot(bot).setEquipment(index.intValue(), CraftItemStack.asNMSCopy(resolved));
+        int armorIndex = toArmorIndex(name);
+        if (armorIndex < 0) {
+            return;
+        }
+        nativeBot.inventory.armor[armorIndex] = nms;
     }
 
     @Override
@@ -346,7 +426,32 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
 
     @Override
     public void attackTarget(ITrainingBot bot, LivingEntity target) {
-        nativeBot(bot).attack(((CraftLivingEntity) target).getHandle());
+        EntityPlayer nativeBot = nativeBot(bot);
+        syncMainHandAttackAttributes(nativeBot);
+        nativeBot.attack(((CraftLivingEntity) target).getHandle());
+    }
+
+    /**
+     * EntityPlayer.t_() on 1.8 never runs EntityLiving equipment-change detection, so ItemSword
+     * {@code ATTACK_DAMAGE} modifiers stay off the map (fist 1.0). {@code ItemStack#B()} is the
+     * item modifier multimap; remove+add of the current item is a no-op when already applied.
+     */
+    private static void syncMainHandAttackAttributes(EntityPlayer nativeBot) {
+        net.minecraft.server.v1_8_R3.ItemStack held = nativeBot.inventory.getItemInHand();
+        applyHeldItemAttributes(nativeBot, held, false);
+        applyHeldItemAttributes(nativeBot, held, true);
+    }
+
+    private static void applyHeldItemAttributes(
+            EntityPlayer nativeBot, net.minecraft.server.v1_8_R3.ItemStack stack, boolean add) {
+        if (stack == null || stack.getItem() == null) {
+            return;
+        }
+        if (add) {
+            nativeBot.getAttributeMap().b(stack.B());
+        } else {
+            nativeBot.getAttributeMap().a(stack.B());
+        }
     }
 
     private DamageSource damageSource(@Nullable Player attacker, DamageKind kind) {
@@ -419,6 +524,23 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
             return Integer.valueOf(4);
         }
         return null;
+    }
+
+    /** PlayerInventory.armor: 0 boots, 1 legs, 2 chest, 3 helmet. */
+    private static int toArmorIndex(String name) {
+        if ("FEET".equals(name)) {
+            return 0;
+        }
+        if ("LEGS".equals(name)) {
+            return 1;
+        }
+        if ("CHEST".equals(name)) {
+            return 2;
+        }
+        if ("HEAD".equals(name)) {
+            return 3;
+        }
+        return -1;
     }
 
     private static byte packDegrees(float value) {

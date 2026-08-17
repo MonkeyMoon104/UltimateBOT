@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer.v1_8_R2;
 
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -14,7 +15,8 @@ public final class EmptyNetworkManager extends NetworkManager {
 
     public EmptyNetworkManager() {
         super(EnumProtocolDirection.CLIENTBOUND);
-        this.k = new EmbeddedChannel();
+        // Spigot 1.8 Netty rejects EmbeddedChannel() with no handlers.
+        this.k = new EmbeddedChannel(new ChannelHandlerAdapter() {});
         this.l = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
     }
 

@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer.v1_8_R1;
 
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -17,7 +18,8 @@ public final class EmptyNetworkManager extends NetworkManager {
         try {
             java.lang.reflect.Field channelField = NetworkManager.class.getDeclaredField("i");
             channelField.setAccessible(true);
-            channelField.set(this, new EmbeddedChannel());
+            // Spigot 1.8 Netty rejects EmbeddedChannel() with no handlers.
+            channelField.set(this, new EmbeddedChannel(new ChannelHandlerAdapter() {}));
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to init empty NetworkManager channel", e);
         }
