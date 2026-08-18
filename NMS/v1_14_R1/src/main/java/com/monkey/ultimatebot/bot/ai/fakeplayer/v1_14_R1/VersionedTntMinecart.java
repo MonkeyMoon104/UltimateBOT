@@ -4,10 +4,6 @@ import net.minecraft.server.v1_14_R1.EntityMinecartTNT;
 import net.minecraft.server.v1_14_R1.World;
 import org.jspecify.annotations.NullUnmarked;
 
-/**
- * Vanilla {@code explode(double)} is protected {@code c(double)} on this mapping (1.15 uses
- * {@code h(double)}). Subclass so the 1.14.4 bridge can detonate without reflection.
- */
 @NullUnmarked
 public final class VersionedTntMinecart extends EntityMinecartTNT {
 

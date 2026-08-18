@@ -19,12 +19,6 @@ import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.16.1 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_16_R1}.
- *
- * <p>Same motion path as 1.16.3: Paper {@code EntityTrackerEntry} syncs Bukkit velocity from NMS
- * mot, so keep fly off and clamp to finite values.
- */
 public final class TrainingBot_v1_16_R1 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_16_R1 handle;
@@ -57,19 +51,14 @@ public final class TrainingBot_v1_16_R1 extends EntityPlayer {
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
         this.bukkitPlayer = new VersionedBotCraftPlayer(this);
-        this.handle =
-                new TrainingBotHandle_v1_16_R1(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+        this.handle = new TrainingBotHandle_v1_16_R1(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
     }
 
     public TrainingBotHandle_v1_16_R1 handle() {
         return handle;
     }
 
-    /**
-     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
-     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
-     */
     void forceFullAttackStrength() {
         int delay = Math.max(1, (int) Math.ceil(this.eR()));
         if (this.at < delay) {
@@ -77,7 +66,6 @@ public final class TrainingBot_v1_16_R1 extends EntityPlayer {
         }
     }
 
-    /** Public helper: {@code setOnGround} is absent on this revision. */
     public void setOnGroundFlag(boolean onGround) {
         this.onGround = onGround;
     }
@@ -98,17 +86,10 @@ public final class TrainingBot_v1_16_R1 extends EntityPlayer {
         NMSBridgeManager.get().broadcastBotPosition(getBukkitEntity());
     }
 
-    /**
-     * Applies AI velocity with gravity, cobweb drag, and friction.
-     *
-     * <p>Water: only skip land gravity when swimming or eyes are submerged (Water PvP). Feet-only
-     * water must keep gravity or the bot hovers at fixed Y in shallow ponds.
-     */
     private void applyBotMotion() {
         Vec3D motion = finiteMot(getMot());
-        net.minecraft.server.v1_16_R1.BlockPosition eyes =
-                new net.minecraft.server.v1_16_R1.BlockPosition(
-                        this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
+        net.minecraft.server.v1_16_R1.BlockPosition eyes = new net.minecraft.server.v1_16_R1.BlockPosition(
+                this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
         boolean eyesInWater = isWaterBlock(eyes);
         if (eyesInWater || this.isSwimming()) {
             applySwimMotion(motion);
@@ -165,8 +146,7 @@ public final class TrainingBot_v1_16_R1 extends EntityPlayer {
 
     private boolean isStandingOnSolid() {
         net.minecraft.server.v1_16_R1.BlockPosition below =
-                new net.minecraft.server.v1_16_R1.BlockPosition(
-                        this.locX(), this.locY() - 0.05D, this.locZ());
+                new net.minecraft.server.v1_16_R1.BlockPosition(this.locX(), this.locY() - 0.05D, this.locZ());
         net.minecraft.server.v1_16_R1.IBlockData data = this.world.getType(below);
         return data.getMaterial().isSolid();
     }

@@ -61,21 +61,17 @@ public final class TrainingBot_v1_19_2 extends Player implements ITrainingBot {
     @Override
     public void tick() {
         craftEntity.setHandle(this);
-        // AI first so setDeltaMovement is consumed by travel() inside super.tick().
+
         logic.onTick();
         try {
             super.tick();
         } catch (ClassCastException ignored) {
             plugin.getLogger().finest("Skipped the Bukkit compatibility tick during bot teardown");
         }
-        // Fake Player (not ServerPlayer): tracker may not push move packets reliably on 1.19.3.
+
         broadcastMotionToViewers();
     }
 
-    /**
-     * Vanilla slowly lerps head/body between AI updates; for fake players that breaks follow look on
-     * 1.19.3 (head drifts away from the target while the body stays still).
-     */
     @Override
     protected float tickHeadTurn(float bodyRotation, float headRotation) {
         this.yBodyRot = this.getYRot();

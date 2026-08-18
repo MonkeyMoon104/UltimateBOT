@@ -7,12 +7,12 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.TrainingBotHandle_v1_12_R1;
 import com.monkey.ultimatebot.bot.ai.TrainingBot_v1_12_R1;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.protocol.BotProfileData;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,16 +49,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Real bot runtime for Spigot 1.12.2 ({@code v1_12_R1}).
- *
- * <p>Source stays Java 8-compatible so the module can load on Java 8 JVMs hosting this revision.
- */
 public final class NMSBridge_v1_12_R1 implements INMSBridge {
 
     private static final Set<PlatformCapability> CAPABILITIES = PlatformCapability.through1_11();
@@ -73,7 +67,6 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         return true;
     }
 
-
     @Override
     public ITrainingBot createTrainingBot(
             Location spawn,
@@ -87,23 +80,22 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
         WorldServer world = ((CraftWorld) spawn.getWorld()).getHandle();
         PlayerInteractManager interactManager = new PlayerInteractManager(world);
-        TrainingBot_v1_12_R1 entity =
-                new TrainingBot_v1_12_R1(
-                        server,
-                        world,
-                        toGameProfile(profile),
-                        interactManager,
-                        spawn.getX(),
-                        spawn.getY(),
-                        spawn.getZ(),
-                        spawn.getYaw(),
-                        spawn.getPitch(),
-                        targetPlayer,
-                        follow,
-                        plugin,
-                        deadBotMessage,
-                        deadBotEventMessage,
-                        botOptions);
+        TrainingBot_v1_12_R1 entity = new TrainingBot_v1_12_R1(
+                server,
+                world,
+                toGameProfile(profile),
+                interactManager,
+                spawn.getX(),
+                spawn.getY(),
+                spawn.getZ(),
+                spawn.getYaw(),
+                spawn.getPitch(),
+                targetPlayer,
+                follow,
+                plugin,
+                deadBotMessage,
+                deadBotEventMessage,
+                botOptions);
         return entity.handle();
     }
 
@@ -115,13 +107,14 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
 
     @Override
     public void addToProfileCache(ITrainingBot bot) {
-        ((CraftServer) Bukkit.getServer()).getServer().getUserCache().a(nativeBot(bot).getProfile());
+        ((CraftServer) Bukkit.getServer())
+                .getServer()
+                .getUserCache()
+                .a(nativeBot(bot).getProfile());
     }
 
     @Override
-    public void removeFromProfileCache(UUID botUUID) {
-        // UserCache has no public remove-by-UUID on this revision.
-    }
+    public void removeFromProfileCache(UUID botUUID) {}
 
     @Override
     public void moveBot(Player bot, double x, double y, double z) {
@@ -139,8 +132,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         EntityPlayer nativeBot = nativePlayer(bot);
         PacketPlayOutEntityTeleport teleportPacket = new PacketPlayOutEntityTeleport(nativeBot);
         byte packedYaw = packDegrees(nativeBot.yaw);
-        PacketPlayOutEntityHeadRotation headPacket =
-                new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
+        PacketPlayOutEntityHeadRotation headPacket = new PacketPlayOutEntityHeadRotation(nativeBot, packedYaw);
         Location botLoc = bot.getLocation();
         double maxDistSq = 64.0D * 64.0D;
         for (Player online : Bukkit.getOnlinePlayers()) {
@@ -174,10 +166,9 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
     public BotProfileData createProfileWithTexture(
             UUID botUUID, String botName, String textureValue, @Nullable String textureSignature) {
         GameProfile profile = new GameProfile(botUUID, botName);
-        Property property =
-                textureSignature == null || textureSignature.isEmpty()
-                        ? new Property("textures", textureValue)
-                        : new Property("textures", textureValue, textureSignature);
+        Property property = textureSignature == null || textureSignature.isEmpty()
+                ? new Property("textures", textureValue)
+                : new Property("textures", textureValue, textureSignature);
         profile.getProperties().put("textures", property);
         return toProfileData(profile);
     }
@@ -207,30 +198,21 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
     }
 
     @Override
-    public void playSound(Location location, String soundKey, String source, float volume, float pitch) {
-        // SoundEffect registry lookup is version-awkward; skip rather than crash.
-    }
+    public void playSound(Location location, String soundKey, String source, float volume, float pitch) {}
 
     @Override
-    public void playSoundOnPlayer(Player player, String soundKey, float volume, float pitch) {
-
-    }
+    public void playSoundOnPlayer(Player player, String soundKey, float volume, float pitch) {}
 
     @Override
     public boolean useItemOnBlock(
-            Player bot,
-            ItemStack stack,
-            Block clicked,
-            BlockFace face,
-            Location hitLocation,
-            EquipmentSlotKind hand) {
+            Player bot, ItemStack stack, Block clicked, BlockFace face, Location hitLocation, EquipmentSlotKind hand) {
         EntityPlayer nativeBot = nativePlayer(bot);
         nativeBot.abilities.mayBuild = true;
         if (stack == null || stack.getType() == Material.AIR || stack.getAmount() <= 0) {
             return false;
         }
         Material type = stack.getType();
-        // Fake-player interact often cancels; place directly like modern bridges' fallback.
+
         if (type == Material.OBSIDIAN) {
             return placeObsidianDirect(clicked, face);
         }
@@ -268,7 +250,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         try {
             crystal.setShowingBottom(false);
         } catch (NoSuchMethodError ignored) {
-            // pre-API revisions
+
         }
         return crystal.isValid();
     }
@@ -292,9 +274,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         double dz = targetPos.getZ() - nativeBot.locZ;
         double distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
         float velocity =
-                distance < 15
-                        ? (float) Math.min(distance * 0.08, 1.2)
-                        : (float) Math.min(distance * 0.06, 1.8);
+                distance < 15 ? (float) Math.min(distance * 0.08, 1.2) : (float) Math.min(distance * 0.06, 1.8);
         pearl.shoot(dx, dy + 0.2 + distance * 0.02, dz, velocity, 0.0F);
         nativeBot.world.addEntity(pearl);
     }
@@ -305,9 +285,8 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         ((CraftPlayer) viewer)
                 .getHandle()
                 .playerConnection
-                .sendPacket(
-                        new PacketPlayOutPlayerInfo(
-                                PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, nativeBot));
+                .sendPacket(new PacketPlayOutPlayerInfo(
+                        PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, nativeBot));
     }
 
     @Override
@@ -316,9 +295,8 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         ((CraftPlayer) viewer)
                 .getHandle()
                 .playerConnection
-                .sendPacket(
-                        new PacketPlayOutPlayerInfo(
-                                PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, nativeBot));
+                .sendPacket(new PacketPlayOutPlayerInfo(
+                        PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, nativeBot));
     }
 
     @Override
@@ -329,7 +307,8 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         byte yaw = packDegrees(nativeBot.yaw);
         byte pitch = packDegrees(nativeBot.pitch);
         handle.playerConnection.sendPacket(new PacketPlayOutEntityHeadRotation(nativeBot, yaw));
-        handle.playerConnection.sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(nativeBot.getId(), yaw, pitch, nativeBot.onGround));
+        handle.playerConnection.sendPacket(
+                new PacketPlayOutEntity.PacketPlayOutEntityLook(nativeBot.getId(), yaw, pitch, nativeBot.onGround));
         handle.playerConnection.sendPacket(
                 new PacketPlayOutEntityMetadata(nativeBot.getId(), nativeBot.getDataWatcher(), true));
     }
@@ -344,8 +323,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
                 continue;
             }
             handle.playerConnection.sendPacket(
-                    new PacketPlayOutEntityEquipment(
-                            entityId, slot, CraftItemStack.asNMSCopy(entry.getValue())));
+                    new PacketPlayOutEntityEquipment(entityId, slot, CraftItemStack.asNMSCopy(entry.getValue())));
         }
     }
 
@@ -439,11 +417,6 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
         nativeBot(bot).fallDistance = fallDistance;
     }
 
-    /**
-     * {@code EntityHuman.attack} uses {@code GenericAttributes.ATTACK_DAMAGE}, not the hotbar list.
-     * Silent hand writes skip AttributeMap updates, so re-apply the held item's modifiers here
-     * (remove+add of the current item is a no-op when living-tick already applied them).
-     */
     private static void applyHandItemAttributes(EntityPlayer nativeBot, EnumItemSlot slot) {
         net.minecraft.server.v1_12_R1.ItemStack held = nativeBot.getEquipment(slot);
         if (held == null) {
@@ -463,9 +436,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
     private DamageSource damageSource(@Nullable Player attacker, DamageKind kind) {
         switch (kind) {
             case PLAYER_ATTACK:
-                return attacker == null
-                        ? DamageSource.GENERIC
-                        : DamageSource.playerAttack(nativePlayer(attacker));
+                return attacker == null ? DamageSource.GENERIC : DamageSource.playerAttack(nativePlayer(attacker));
             case LAVA:
                 return DamageSource.LAVA;
             case GENERIC:
@@ -477,8 +448,7 @@ public final class NMSBridge_v1_12_R1 implements INMSBridge {
     private BotProfileData toProfileData(GameProfile profile) {
         List<BotProfileData.Texture> textures = new ArrayList<BotProfileData.Texture>();
         for (Property property : profile.getProperties().get("textures")) {
-            textures.add(
-                    new BotProfileData.Texture(property.getName(), property.getValue(), property.getSignature()));
+            textures.add(new BotProfileData.Texture(property.getName(), property.getValue(), property.getSignature()));
         }
         return new BotProfileData(profile.getId(), profile.getName(), textures);
     }

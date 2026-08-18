@@ -8,12 +8,6 @@ import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Bukkit-facing handle for the 1.8.8 fake player.
- *
- * <p>Cannot be the {@link EntityPlayer} subclass itself: Spigot mappings expose {@code
- * Entity#getWorld()} returning NMS {@code World}, which clashes with {@link ITrainingBot#getWorld()}.
- */
 public final class TrainingBotHandle_v1_8_R3 implements ITrainingBot {
 
     private final TrainingBot_v1_8_R3 entity;

@@ -39,10 +39,9 @@ public final class CombatModeItem extends AbstractItem {
         String configuredMaterial = options.getCombatModeIconMaterial();
         Material material = MaterialCatalog.optional(configuredMaterial, Material.DIAMOND_SWORD);
         List<ItemFlag> flags = ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ATTRIBUTES");
-        // CUSTOM_NAME (not ITEM_NAME) so splash potions don't keep the vanilla "uncraftable" title.
+
         return new ItemBuilder(material)
-                .setLegacyCustomName(
-                        ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
+                .setLegacyCustomName(ChatColorUtils.translate("&6Combat mode: &e" + options.getCombatModeDisplayName()))
                 .addLegacyLoreLines(
                         ChatColorUtils.translate(
                                 "&7Difficulty: &f" + options.getDifficulty().name()),

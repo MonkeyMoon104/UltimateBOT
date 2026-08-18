@@ -8,10 +8,6 @@ import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.jspecify.annotations.NullUnmarked;
 
-/**
- * 1.16 {@link CraftPlayer#attack} delegates to {@code EntityLiving.attackEntity}, which only swings
- * and returns false. Crystals need {@code EntityHuman.attack} — same as 1.16.5.
- */
 @NullUnmarked
 public final class VersionedBotCraftPlayer extends CraftPlayer {
 

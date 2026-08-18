@@ -21,12 +21,6 @@ import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.11.2 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_11_R1}.
- *
- * <p>Packet-spawned fake players need explicit motion application and position broadcast — vanilla
- * tick ignores empty-connection velocity on this revision.
- */
 public final class TrainingBot_v1_11_R1 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_11_R1 handle;
@@ -57,19 +51,14 @@ public final class TrainingBot_v1_11_R1 extends EntityPlayer {
         this.abilities.isFlying = false;
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
-        this.handle =
-                new TrainingBotHandle_v1_11_R1(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+        this.handle = new TrainingBotHandle_v1_11_R1(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
     }
 
     public TrainingBotHandle_v1_11_R1 handle() {
         return handle;
     }
 
-    /**
-     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
-     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
-     */
     void forceFullAttackStrength() {
         int delay = Math.max(1, (int) Math.ceil(this.dg()));
         if (this.aE < delay) {

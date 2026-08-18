@@ -20,12 +20,6 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.15.2 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_15_R1}.
- *
- * <p>Packet-spawned fake players need explicit motion application and position broadcast — vanilla
- * tick ignores empty-connection velocity on this revision.
- */
 public final class TrainingBot_v1_15_R1 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_15_R1 handle;
@@ -58,19 +52,14 @@ public final class TrainingBot_v1_15_R1 extends EntityPlayer {
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
         this.bukkitPlayer = new VersionedBotCraftPlayer(this);
-        this.handle =
-                new TrainingBotHandle_v1_15_R1(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+        this.handle = new TrainingBotHandle_v1_15_R1(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
     }
 
     public TrainingBotHandle_v1_15_R1 handle() {
         return handle;
     }
 
-    /**
-     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
-     * by getAttackCooldown (~0.2 when the ticker is 0) — about one heart even with a diamond sword.
-     */
     void forceFullAttackStrength() {
         int delay = Math.max(1, (int) Math.ceil(this.ex()));
         if (this.aB < delay) {
@@ -78,11 +67,6 @@ public final class TrainingBot_v1_15_R1 extends EntityPlayer {
         }
     }
 
-    /**
-     * {@code Entity#setPose} is protected on this revision; the bridge cannot call it. Water/Trident
-     * PvP must force pose + {@code inWater} or vanilla {@code super.tick()} keeps STANDING and viewers
-     * never see the swim animation.
-     */
     public void applySwimState(boolean swimming) {
         setSprinting(swimming);
         setSwimming(swimming);
@@ -118,9 +102,8 @@ public final class TrainingBot_v1_15_R1 extends EntityPlayer {
 
     private void applyBotMotion() {
         Vec3D motion = finiteMot(getMot());
-        net.minecraft.server.v1_15_R1.BlockPosition eyes =
-                new net.minecraft.server.v1_15_R1.BlockPosition(
-                        this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
+        net.minecraft.server.v1_15_R1.BlockPosition eyes = new net.minecraft.server.v1_15_R1.BlockPosition(
+                this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
         boolean eyesInWater = isWaterBlock(eyes);
         if (eyesInWater || this.isSwimming()) {
             applySwimMotion(motion);
@@ -177,8 +160,7 @@ public final class TrainingBot_v1_15_R1 extends EntityPlayer {
 
     private boolean isStandingOnSolid() {
         net.minecraft.server.v1_15_R1.BlockPosition below =
-                new net.minecraft.server.v1_15_R1.BlockPosition(
-                        this.locX(), this.locY() - 0.05D, this.locZ());
+                new net.minecraft.server.v1_15_R1.BlockPosition(this.locX(), this.locY() - 0.05D, this.locZ());
         net.minecraft.server.v1_15_R1.IBlockData data = this.world.getType(below);
         return data.getMaterial().isSolid();
     }

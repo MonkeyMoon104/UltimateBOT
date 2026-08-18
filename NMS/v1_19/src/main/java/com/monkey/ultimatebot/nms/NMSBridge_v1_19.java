@@ -59,7 +59,6 @@ import org.bukkit.util.Vector;
 
 public class NMSBridge_v1_19 implements INMSBridge {
 
-    /** 1.17-1.19.x: no MACE, WIND_CHARGE, or ARMOR_TRIM. */
     private static final Set<PlatformCapability> CAPABILITIES = PlatformCapability.through1_19();
 
     @Override
@@ -78,8 +77,7 @@ public class NMSBridge_v1_19 implements INMSBridge {
             String deadBotEventMessage,
             BotOptions botOptions) {
         ServerLevel level = ((CraftWorld) spawn.getWorld()).getHandle();
-        // Player ctor places at (blockX+0.5, blockY+1, blockZ+0.5). Pass the ground BlockPos only —
-        // do not moveTo(spawn) with getHighestBlockAt Y or the bot ends up inside the surface block.
+
         BlockPos pos = new BlockPos(spawn.getX(), spawn.getY(), spawn.getZ());
         return new TrainingBot_v1_19(
                 level,
@@ -112,7 +110,8 @@ public class NMSBridge_v1_19 implements INMSBridge {
 
     @Override
     public void removeFromProfileCache(UUID botUUID) {
-        Object cache = ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
+        Object cache =
+                ((CraftServer) Bukkit.getServer()).getHandle().getServer().getProfileCache();
         removeProfileCacheEntry(cache, botUUID, new GameProfile(botUUID, ""));
     }
 
@@ -166,7 +165,10 @@ public class NMSBridge_v1_19 implements INMSBridge {
 
     @Override
     public BotProfileData createProfileWithTexture(
-            UUID botUUID, String botName, String textureValue, @org.jspecify.annotations.Nullable String textureSignature) {
+            UUID botUUID,
+            String botName,
+            String textureValue,
+            @org.jspecify.annotations.Nullable String textureSignature) {
         GameProfile profile = new GameProfile(botUUID, botName);
         Property property = textureSignature == null || textureSignature.isBlank()
                 ? new Property("textures", textureValue)
@@ -182,7 +184,8 @@ public class NMSBridge_v1_19 implements INMSBridge {
 
     private BotProfileData toProfileData(GameProfile profile) {
         List<BotProfileData.Texture> textures = profile.getProperties().get("textures").stream()
-                .map(property -> new BotProfileData.Texture(property.getName(), property.getValue(), property.getSignature()))
+                .map(property ->
+                        new BotProfileData.Texture(property.getName(), property.getValue(), property.getSignature()))
                 .toList();
         return new BotProfileData(profile.getId(), profile.getName(), textures);
     }
@@ -190,9 +193,10 @@ public class NMSBridge_v1_19 implements INMSBridge {
     private GameProfile toGameProfile(BotProfileData profile) {
         GameProfile gameProfile = new GameProfile(profile.id(), profile.name());
         for (BotProfileData.Texture texture : profile.textures()) {
-            Property property = texture.signature() == null || texture.signature().isBlank()
-                    ? new Property(texture.name(), texture.value())
-                    : new Property(texture.name(), texture.value(), texture.signature());
+            Property property =
+                    texture.signature() == null || texture.signature().isBlank()
+                            ? new Property(texture.name(), texture.value())
+                            : new Property(texture.name(), texture.value(), texture.signature());
             gameProfile.getProperties().put(texture.name(), property);
         }
         return gameProfile;
@@ -204,7 +208,11 @@ public class NMSBridge_v1_19 implements INMSBridge {
     }
 
     @Override
-    public void hurt(org.bukkit.entity.LivingEntity target, org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker, float amount, DamageKind kind) {
+    public void hurt(
+            org.bukkit.entity.LivingEntity target,
+            org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker,
+            float amount,
+            DamageKind kind) {
         net.minecraft.world.entity.LivingEntity nativeTarget = ((CraftLivingEntity) target).getHandle();
         if (!(nativeTarget.getLevel() instanceof ServerLevel)) {
             return;
@@ -213,7 +221,11 @@ public class NMSBridge_v1_19 implements INMSBridge {
     }
 
     @Override
-    public void explode(Location location, org.bukkit.entity.@org.jspecify.annotations.Nullable Player cause, float power, boolean blockDamage) {
+    public void explode(
+            Location location,
+            org.bukkit.entity.@org.jspecify.annotations.Nullable Player cause,
+            float power,
+            boolean blockDamage) {
         Level level = ((CraftWorld) location.getWorld()).getHandle();
         Player nativeCause = cause == null ? null : nativePlayer(cause);
         level.explode(
@@ -237,7 +249,13 @@ public class NMSBridge_v1_19 implements INMSBridge {
             return;
         }
         SoundSource soundSource = SoundSource.valueOf(source.toUpperCase(Locale.ROOT));
-        playSound(level, new BlockPos(location.getX(), location.getY(), location.getZ()), sound, soundSource, volume, pitch);
+        playSound(
+                level,
+                new BlockPos(location.getX(), location.getY(), location.getZ()),
+                sound,
+                soundSource,
+                volume,
+                pitch);
     }
 
     @Override
@@ -288,8 +306,8 @@ public class NMSBridge_v1_19 implements INMSBridge {
         MinecraftServer server = viewerHandle.server;
         ServerLevel level = viewerHandle.getLevel();
         ServerPlayer tabPlayer = new ServerPlayer(server, level, profile, null);
-        ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(
-                ClientboundPlayerInfoPacket.Action.ADD_PLAYER, tabPlayer);
+        ClientboundPlayerInfoPacket packet =
+                new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, tabPlayer);
         viewerHandle.connection.send(packet);
     }
 
@@ -306,31 +324,42 @@ public class NMSBridge_v1_19 implements INMSBridge {
     public void sendSpawnAndMeta(org.bukkit.entity.Player viewer, ITrainingBot bot) {
         Player nativeBot = nativeBot(bot);
         ServerPlayer handle = ((CraftPlayer) viewer).getHandle();
-        // Named-player spawn; AddEntity(PLAYER) does not render fake players on these clients.
+
         handle.connection.send(new ClientboundAddPlayerPacket(nativeBot));
         byte yHeadRot = packDegrees(nativeBot.getYHeadRot());
         byte yBodyRot = packDegrees(nativeBot.getYRot());
         byte xRot = packDegrees(nativeBot.getXRot());
         handle.connection.send(new ClientboundRotateHeadPacket(nativeBot, yHeadRot));
-        handle.connection.send(new ClientboundMoveEntityPacket.Rot(nativeBot.getId(), yBodyRot, xRot, nativeBot.isOnGround()));
+        handle.connection.send(
+                new ClientboundMoveEntityPacket.Rot(nativeBot.getId(), yBodyRot, xRot, nativeBot.isOnGround()));
         sendMetadata(handle, nativeBot);
     }
 
     @Override
-    public void sendEquipment(org.bukkit.entity.Player viewer, ITrainingBot bot, Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
-        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
+    public void sendEquipment(
+            org.bukkit.entity.Player viewer,
+            ITrainingBot bot,
+            Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
+        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted =
+                toNmsEquipment(equipment);
         if (!converted.isEmpty()) {
-            ((CraftPlayer) viewer).getHandle().connection.send(new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted));
+            ((CraftPlayer) viewer)
+                    .getHandle()
+                    .connection
+                    .send(new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted));
         }
     }
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
-        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
+    public void broadcastEquipment(
+            ITrainingBot bot, Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
+        List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted =
+                toNmsEquipment(equipment);
         if (converted.isEmpty()) {
             return;
         }
-        ClientboundSetEquipmentPacket packet = new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted);
+        ClientboundSetEquipmentPacket packet =
+                new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted);
         for (org.bukkit.entity.Player online : Bukkit.getOnlinePlayers()) {
             ((CraftPlayer) online).getHandle().connection.send(packet);
         }
@@ -354,12 +383,16 @@ public class NMSBridge_v1_19 implements INMSBridge {
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, com.monkey.ultimatebot.common.model.EquipmentSlotKind slot, org.bukkit.inventory.@org.jspecify.annotations.Nullable ItemStack stack) {
+    public void setBotItem(
+            ITrainingBot bot,
+            com.monkey.ultimatebot.common.model.EquipmentSlotKind slot,
+            org.bukkit.inventory.@org.jspecify.annotations.Nullable ItemStack stack) {
         net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return;
         }
-        nativeBot(bot).setItemSlot(nmsSlot, CraftItemStack.asNMSCopy(stack == null ? new ItemStack(Material.AIR) : stack));
+        nativeBot(bot)
+                .setItemSlot(nmsSlot, CraftItemStack.asNMSCopy(stack == null ? new ItemStack(Material.AIR) : stack));
     }
 
     @Override
@@ -391,7 +424,7 @@ public class NMSBridge_v1_19 implements INMSBridge {
     @Override
     public void setBotVelocity(ITrainingBot bot, org.bukkit.util.Vector velocity) {
         Player nativeBot = nativeBot(bot);
-        // TrainingBot_v1_19 runs AI before super.tick(), so travel() consumes this same tick.
+
         nativeBot.setDeltaMovement(velocity.getX(), velocity.getY(), velocity.getZ());
         nativeBot.hurtMarked = true;
     }
@@ -400,6 +433,7 @@ public class NMSBridge_v1_19 implements INMSBridge {
     public void setBotOnGround(ITrainingBot bot, boolean onGround) {
         nativeBot(bot).setOnGround(onGround);
     }
+
     @Override
     public float getBotFallDistance(ITrainingBot bot) {
         return nativeBot(bot).fallDistance;
@@ -417,15 +451,13 @@ public class NMSBridge_v1_19 implements INMSBridge {
 
     @Override
     public void setExplosiveMinecartFuseTicks(org.bukkit.entity.Entity minecart, int ticks) {
-        // Cannot write MinecartTNT.fuse from the plugin classloader (private → IllegalAccessError).
-        // Prefer Craft#setFuseTicks when present; otherwise inert (-1) is already the NMS default,
-        // and arming uses a Bukkit explosion.
+
         try {
             java.lang.reflect.Method method = minecart.getClass().getMethod("setFuseTicks", int.class);
             method.invoke(minecart, ticks);
             return;
         } catch (ReflectiveOperationException | LinkageError ignored) {
-            // fall through
+
         }
         if (ticks < 0) {
             return;
@@ -471,12 +503,10 @@ public class NMSBridge_v1_19 implements INMSBridge {
     }
 
     private DamageSource damageSource(
-            org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker,
-            DamageKind kind) {
+            org.bukkit.entity.@org.jspecify.annotations.Nullable Player attacker, DamageKind kind) {
         return switch (kind) {
-            case PLAYER_ATTACK -> attacker == null
-                    ? DamageSource.GENERIC
-                    : DamageSource.playerAttack(nativePlayer(attacker));
+            case PLAYER_ATTACK ->
+                attacker == null ? DamageSource.GENERIC : DamageSource.playerAttack(nativePlayer(attacker));
             case LAVA -> DamageSource.LAVA;
             case GENERIC -> DamageSource.GENERIC;
         };
@@ -496,11 +526,14 @@ public class NMSBridge_v1_19 implements INMSBridge {
         if (player instanceof CraftHumanEntity craftHuman) {
             return craftHuman.getHandle();
         }
-        throw new IllegalArgumentException("Unsupported player implementation: " + player.getClass().getName());
+        throw new IllegalArgumentException(
+                "Unsupported player implementation: " + player.getClass().getName());
     }
 
     private static InteractionHand toInteractionHand(com.monkey.ultimatebot.common.model.EquipmentSlotKind hand) {
-        return hand == com.monkey.ultimatebot.common.model.EquipmentSlotKind.OFF_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+        return hand == com.monkey.ultimatebot.common.model.EquipmentSlotKind.OFF_HAND
+                ? InteractionHand.OFF_HAND
+                : InteractionHand.MAIN_HAND;
     }
 
     private static Direction toDirection(BlockFace face) {
@@ -515,7 +548,8 @@ public class NMSBridge_v1_19 implements INMSBridge {
         };
     }
 
-    private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable EquipmentSlot toNmsSlot(com.monkey.ultimatebot.common.model.EquipmentSlotKind slot) {
+    private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable EquipmentSlot toNmsSlot(
+            com.monkey.ultimatebot.common.model.EquipmentSlotKind slot) {
         return switch (slot) {
             case HAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
             case OFF_HAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;
@@ -527,8 +561,8 @@ public class NMSBridge_v1_19 implements INMSBridge {
         };
     }
 
-    private static List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> toNmsEquipment(
-            Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
+    private static List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>>
+            toNmsEquipment(Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
         return equipment.entrySet().stream()
                 .map(entry -> {
                     net.minecraft.world.entity.EquipmentSlot slot = toNmsSlot(entry.getKey());

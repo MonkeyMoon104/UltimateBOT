@@ -21,8 +21,7 @@ public final class EmptyNetworkManager extends NetworkManager {
         InetSocketAddress loopback = new InetSocketAddress(InetAddress.getLoopbackAddress(), 0);
         try {
             boolean channelSet = setFirstAssignableField(NetworkManager.class, this, Channel.class, embedded);
-            boolean addressSet =
-                    setFirstAssignableField(NetworkManager.class, this, SocketAddress.class, loopback);
+            boolean addressSet = setFirstAssignableField(NetworkManager.class, this, SocketAddress.class, loopback);
 
             if (!channelSet) {
                 setByNameIfPresent(NetworkManager.class, this, "m", embedded);
@@ -30,13 +29,13 @@ public final class EmptyNetworkManager extends NetworkManager {
             if (!addressSet) {
                 setByNameIfPresent(NetworkManager.class, this, "n", loopback);
             }
-        } catch (RuntimeException ignored) {}
+        } catch (RuntimeException ignored) {
+        }
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void handle(Packet packet, GenericFutureListener... listeners) {
-    }
+    public void handle(Packet packet, GenericFutureListener... listeners) {}
 
     @Override
     public boolean isConnected() {
@@ -53,7 +52,8 @@ public final class EmptyNetworkManager extends NetworkManager {
                 field.setAccessible(true);
                 field.set(target, value);
                 return true;
-            } catch (ReflectiveOperationException ignored) {}
+            } catch (ReflectiveOperationException ignored) {
+            }
         }
         return false;
     }
@@ -63,6 +63,7 @@ public final class EmptyNetworkManager extends NetworkManager {
             Field field = ownerClass.getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
-        } catch (ReflectiveOperationException ignored) {}
+        } catch (ReflectiveOperationException ignored) {
+        }
     }
 }

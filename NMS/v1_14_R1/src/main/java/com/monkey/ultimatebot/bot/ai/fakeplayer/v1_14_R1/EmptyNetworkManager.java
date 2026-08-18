@@ -8,7 +8,6 @@ import net.minecraft.server.v1_14_R1.NetworkManager;
 import net.minecraft.server.v1_14_R1.Packet;
 import org.jspecify.annotations.NullUnmarked;
 
-/** Drop-all network manager so fake players can tick without a real client channel. */
 @NullUnmarked
 public final class EmptyNetworkManager extends NetworkManager {
 
@@ -19,9 +18,7 @@ public final class EmptyNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void sendPacket(Packet<?> packet) {
-        // Intentionally empty — bots never flush to a real connection.
-    }
+    public void sendPacket(Packet<?> packet) {}
 
     @Override
     public boolean isConnected() {

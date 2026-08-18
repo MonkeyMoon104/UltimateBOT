@@ -20,12 +20,6 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.8.8 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_8_R3}.
- *
- * <p>Packet-spawned fake players need explicit motion application and position broadcast — vanilla
- * tick ignores empty-connection velocity on this revision.
- */
 public final class TrainingBot_v1_8_R3 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_8_R3 handle;
@@ -56,30 +50,26 @@ public final class TrainingBot_v1_8_R3 extends EntityPlayer {
         this.collidesWithEntities = false;
         setLocation(x, y, z, yaw, pitch);
         this.onGround = true;
-        // Vanilla player stepHeight is 0.6 — cannot climb a full block without a jump, and our
-        // jump is eaten while still intersecting the floor. 1.0 lets Entity.move step up 1 block.
+
         this.S = 1.0F;
         this.abilities.isFlying = false;
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
-        this.handle =
-                new TrainingBotHandle_v1_8_R3(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
-        // World.tickEntities skips EntityPlayer; PlayerConnection.E_() is never invoked for a
-        // fake channel. Drive AI + motion from the Bukkit scheduler on this revision only.
-        this.tickTaskId =
-                plugin.getServer()
-                        .getScheduler()
-                        .scheduleSyncRepeatingTask(
-                                plugin,
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        runBotTick();
-                                    }
-                                },
-                                1L,
-                                1L);
+        this.handle = new TrainingBotHandle_v1_8_R3(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+
+        this.tickTaskId = plugin.getServer()
+                .getScheduler()
+                .scheduleSyncRepeatingTask(
+                        plugin,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                runBotTick();
+                            }
+                        },
+                        1L,
+                        1L);
     }
 
     public TrainingBotHandle_v1_8_R3 handle() {

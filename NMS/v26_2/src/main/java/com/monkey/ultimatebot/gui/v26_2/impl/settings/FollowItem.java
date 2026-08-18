@@ -37,8 +37,8 @@ public class FollowItem extends AbstractItem {
     public ItemProvider getItemProvider(Player viewer) {
         boolean status = options.isFollow();
 
-        ItemBuilder builder = new ItemBuilder(MaterialCatalog.optional(
-                training.getLangString("gui.follow-button.material", "LEAD"), Material.LEAD));
+        ItemBuilder builder = new ItemBuilder(
+                MaterialCatalog.optional(training.getLangString("gui.follow-button.material", "LEAD"), Material.LEAD));
         builder.setLegacyName(ChatColorUtils.translate(training.getLangString("gui.follow-button.name")));
 
         var loreLines = training.getLangStringList("gui.follow-button.lore");

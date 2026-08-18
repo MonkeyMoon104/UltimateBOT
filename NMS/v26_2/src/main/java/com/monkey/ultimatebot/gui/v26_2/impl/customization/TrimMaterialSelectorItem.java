@@ -22,7 +22,8 @@ public class TrimMaterialSelectorItem extends AbstractItem {
     private final EquipmentSlotKind slot;
     private final ArmorItem armorItem;
 
-    public TrimMaterialSelectorItem(UltimateBot training, BotOptions options, EquipmentSlotKind slot, ArmorItem armorItem) {
+    public TrimMaterialSelectorItem(
+            UltimateBot training, BotOptions options, EquipmentSlotKind slot, ArmorItem armorItem) {
         this.training = training;
         this.options = options;
         this.slot = slot;

@@ -6,10 +6,6 @@ import org.bukkit.craftbukkit.v1_14_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_14_R1.entity.CraftPlayer;
 import org.jspecify.annotations.NullUnmarked;
 
-/**
- * Dedicated CraftPlayer for the fake EntityPlayer. 1.14 has no {@code CraftLivingEntity#attack};
- * crystal hits go through {@code PlayerAttackAccess} → NMS {@code EntityHuman#attack}.
- */
 @NullUnmarked
 public final class VersionedBotCraftPlayer extends CraftPlayer {
 

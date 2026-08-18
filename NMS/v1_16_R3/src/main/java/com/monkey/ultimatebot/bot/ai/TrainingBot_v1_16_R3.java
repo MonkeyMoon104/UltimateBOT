@@ -19,9 +19,6 @@ import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.16.5 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_16_R3}.
- */
 public final class TrainingBot_v1_16_R3 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_16_R3 handle;
@@ -53,19 +50,14 @@ public final class TrainingBot_v1_16_R3 extends EntityPlayer {
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
         this.bukkitPlayer = new VersionedBotCraftPlayer(this);
-        this.handle =
-                new TrainingBotHandle_v1_16_R3(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+        this.handle = new TrainingBotHandle_v1_16_R3(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
     }
 
     public TrainingBotHandle_v1_16_R3 handle() {
         return handle;
     }
 
-    /**
-     * Forces a fully charged attack (1.9+ cooldown). Without this, EntityHuman.attack scales damage
-     * by {@code getAttackCooldown} (~0.2 when {@code at} is 0) → ~1 heart even with a diamond sword.
-     */
     void forceFullAttackStrength() {
         int delay = Math.max(1, (int) Math.ceil(this.eR()));
         if (this.at < delay) {
@@ -80,35 +72,21 @@ public final class TrainingBot_v1_16_R3 extends EntityPlayer {
         } catch (ClassCastException ignored) {
             plugin.getLogger().finest("Skipped Bukkit compatibility tick during bot teardown");
         }
-        // Never allow creative-fly physics on fake players (EntityHuman.travel skips gravity when
-        // abilities.isFlying). Cobweb + raw move() without gravity caused permanent ascent in UHC.
+
         this.abilities.isFlying = false;
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
 
-        // AI sets velocity after the vanilla player tick (which ignores fake-connection motion).
         handle.onNativeTick();
         applyBotMotion();
-        // Packet-spawned fake players are not reliably tracker-synced — push pose to viewers.
+
         NMSBridgeManager.get().broadcastBotPosition(getBukkitEntity());
     }
 
-    /**
-     * Applies AI velocity with gravity, cobweb drag, and friction.
-     *
-     * <p>Important: {@link #move} uses a movement delta but does <strong>not</strong> write gravity
-     * back into {@code mot}. Saving {@code getMot()} afterward re-applied the pre-gravity jump
-     * forever (SwordPvP "every jump starts flying"). Also {@code EntityPlayer.onGround} is
-     * unreliable with an empty connection — derive support from the block below.
-     *
-     * <p>Water: only skip land gravity when swimming or eyes are submerged (Water PvP). Feet-only
-     * water must keep gravity or the bot hovers at fixed Y in shallow ponds.
-     */
     private void applyBotMotion() {
         Vec3D motion = getMot();
-        net.minecraft.server.v1_16_R3.BlockPosition eyes =
-                new net.minecraft.server.v1_16_R3.BlockPosition(
-                        this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
+        net.minecraft.server.v1_16_R3.BlockPosition eyes = new net.minecraft.server.v1_16_R3.BlockPosition(
+                this.locX(), this.locY() + this.getHeadHeight(), this.locZ());
         boolean eyesInWater = isWaterBlock(eyes);
         if (eyesInWater || this.isSwimming()) {
             applySwimMotion(motion);
@@ -135,7 +113,7 @@ public final class TrainingBot_v1_16_R3 extends EntityPlayer {
         if (grounded) {
             vy = 0.0D;
         } else {
-            // Persist the gravity-adjusted Y — never raw getMot() (pre-gravity jump).
+
             vy = motion.y * 0.98D;
         }
         if (vy > 0.6D) {
@@ -148,7 +126,7 @@ public final class TrainingBot_v1_16_R3 extends EntityPlayer {
     }
 
     private void applySwimMotion(Vec3D motion) {
-        // Idle mid-column: without a sink force, zero AI velocity freezes Y forever.
+
         if (motion.x * motion.x + motion.z * motion.z < 1.0E-6D && Math.abs(motion.y) < 0.02D) {
             motion = motion.add(0.0D, -0.03D, 0.0D);
         }
@@ -167,8 +145,7 @@ public final class TrainingBot_v1_16_R3 extends EntityPlayer {
 
     private boolean isStandingOnSolid() {
         net.minecraft.server.v1_16_R3.BlockPosition below =
-                new net.minecraft.server.v1_16_R3.BlockPosition(
-                        this.locX(), this.locY() - 0.05D, this.locZ());
+                new net.minecraft.server.v1_16_R3.BlockPosition(this.locX(), this.locY() - 0.05D, this.locZ());
         net.minecraft.server.v1_16_R3.IBlockData data = this.world.getType(below);
         return data.getMaterial().isSolid();
     }

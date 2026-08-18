@@ -8,10 +8,6 @@ import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.jspecify.annotations.NullUnmarked;
 
-/**
- * 1.15 {@link CraftLivingEntity#attack} calls {@code EntityLiving.B(Entity)}, which only swings.
- * Crystals need {@code EntityHuman#attack}.
- */
 @NullUnmarked
 public final class VersionedBotCraftPlayer extends CraftPlayer {
 

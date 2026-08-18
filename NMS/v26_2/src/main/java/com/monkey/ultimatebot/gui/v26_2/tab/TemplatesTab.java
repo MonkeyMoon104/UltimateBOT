@@ -32,7 +32,10 @@ public class TemplatesTab {
         ArmorItem helmetItem = new ArmorItem(
                 context.getTraining(), EquipmentSlotKind.HEAD, requireArmor(options, EquipmentSlotKind.HEAD), options);
         ArmorItem chestItem = new ArmorItem(
-                context.getTraining(), EquipmentSlotKind.CHEST, requireArmor(options, EquipmentSlotKind.CHEST), options);
+                context.getTraining(),
+                EquipmentSlotKind.CHEST,
+                requireArmor(options, EquipmentSlotKind.CHEST),
+                options);
         ArmorItem legsItem = new ArmorItem(
                 context.getTraining(), EquipmentSlotKind.LEGS, requireArmor(options, EquipmentSlotKind.LEGS), options);
         ArmorItem bootsItem = new ArmorItem(
@@ -66,19 +69,24 @@ public class TemplatesTab {
                         new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.HEAD, helmetItem))
                 .addIngredient(
                         'j',
-                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.HEAD, helmetItem))
+                        new TrimMaterialSelectorItem(
+                                context.getTraining(), options, EquipmentSlotKind.HEAD, helmetItem))
                 .addIngredient(
                         'c',
                         new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.CHEST, chestItem))
                 .addIngredient(
                         'k',
-                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.CHEST, chestItem))
+                        new TrimMaterialSelectorItem(
+                                context.getTraining(), options, EquipmentSlotKind.CHEST, chestItem))
                 .addIngredient(
-                        'l', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
+                        'l',
+                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
                 .addIngredient(
-                        'm', new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
+                        'm',
+                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
                 .addIngredient(
-                        'n', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.FEET, bootsItem))
+                        'n',
+                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.FEET, bootsItem))
                 .addIngredient(
                         'p',
                         new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.FEET, bootsItem))

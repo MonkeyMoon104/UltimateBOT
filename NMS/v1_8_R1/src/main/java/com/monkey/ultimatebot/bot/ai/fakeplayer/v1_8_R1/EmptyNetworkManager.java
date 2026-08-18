@@ -9,7 +9,6 @@ import net.minecraft.server.v1_8_R1.NetworkManager;
 import net.minecraft.server.v1_8_R1.Packet;
 import org.jspecify.annotations.NullUnmarked;
 
-/** Drop-all network manager so fake players can tick without a real client channel. */
 @NullUnmarked
 public final class EmptyNetworkManager extends NetworkManager {
 
@@ -18,7 +17,7 @@ public final class EmptyNetworkManager extends NetworkManager {
         try {
             java.lang.reflect.Field channelField = NetworkManager.class.getDeclaredField("i");
             channelField.setAccessible(true);
-            // Spigot 1.8 Netty rejects EmbeddedChannel() with no handlers.
+
             channelField.set(this, new EmbeddedChannel(new ChannelHandlerAdapter() {}));
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Failed to init empty NetworkManager channel", e);
@@ -28,9 +27,7 @@ public final class EmptyNetworkManager extends NetworkManager {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public void handle(Packet packet) {
-        // Intentionally empty — bots never flush to a real connection.
-    }
+    public void handle(Packet packet) {}
 
     @Override
     public boolean g() {

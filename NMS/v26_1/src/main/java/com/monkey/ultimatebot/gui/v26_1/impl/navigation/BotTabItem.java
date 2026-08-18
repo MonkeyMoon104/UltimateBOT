@@ -38,8 +38,7 @@ public class BotTabItem extends AbstractTabGuiBoundItem {
         String materialName = training.getLangString(basePath + ".material", selected ? "GLOWSTONE_DUST" : "GUNPOWDER");
         String displayName = resolveConfiguredDisplayName(basePath, selected);
 
-        Material mat = MaterialCatalog.optional(
-                materialName, selected ? Material.GLOWSTONE_DUST : Material.GUNPOWDER);
+        Material mat = MaterialCatalog.optional(materialName, selected ? Material.GLOWSTONE_DUST : Material.GUNPOWDER);
 
         return new ItemBuilder(mat).setLegacyName(ChatColorUtils.translate(displayName));
     }

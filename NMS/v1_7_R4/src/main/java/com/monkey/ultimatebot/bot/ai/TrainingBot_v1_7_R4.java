@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot.ai;
 
-import net.minecraft.util.com.mojang.authlib.GameProfile;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.fakeplayer.v1_7_R4.EmptyNetworkManager;
@@ -16,16 +15,11 @@ import net.minecraft.server.v1_7_R4.Packet;
 import net.minecraft.server.v1_7_R4.PlayerConnection;
 import net.minecraft.server.v1_7_R4.PlayerInteractManager;
 import net.minecraft.server.v1_7_R4.WorldServer;
+import net.minecraft.util.com.mojang.authlib.GameProfile;
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Minimal 1.7.10 fake {@link EntityPlayer}. AI state lives on {@link TrainingBotHandle_v1_7_R4}.
- *
- * <p>World does tick EntityPlayer on this revision, but empty-connection velocity still needs
- * explicit motion. Drive AI from both {@code h()} and the Bukkit scheduler with tick dedupe.
- */
 public final class TrainingBot_v1_7_R4 extends EntityPlayer {
 
     private final TrainingBotHandle_v1_7_R4 handle;
@@ -51,11 +45,10 @@ public final class TrainingBot_v1_7_R4 extends EntityPlayer {
             BotOptions botOptions) {
         super(server, world, profile, interactManager);
         this.plugin = plugin;
-        this.playerConnection =
-                new PlayerConnection(server, new EmptyNetworkManager(), this) {
-                    @Override
-                    public void sendPacket(Packet packet) {}
-                };
+        this.playerConnection = new PlayerConnection(server, new EmptyNetworkManager(), this) {
+            @Override
+            public void sendPacket(Packet packet) {}
+        };
         this.joining = false;
         this.onGround = true;
         this.W = 1.0F;
@@ -63,22 +56,20 @@ public final class TrainingBot_v1_7_R4 extends EntityPlayer {
         this.abilities.canFly = false;
         this.abilities.mayBuild = true;
         setPositionRotation(x, y, z, yaw, pitch);
-        this.handle =
-                new TrainingBotHandle_v1_7_R4(
-                        this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
-        this.tickTaskId =
-                plugin.getServer()
-                        .getScheduler()
-                        .scheduleSyncRepeatingTask(
-                                plugin,
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        runBotTick();
-                                    }
-                                },
-                                1L,
-                                1L);
+        this.handle = new TrainingBotHandle_v1_7_R4(
+                this, plugin, targetPlayer, follow, botOptions, deadBotMessage, deadBotEventMessage);
+        this.tickTaskId = plugin.getServer()
+                .getScheduler()
+                .scheduleSyncRepeatingTask(
+                        plugin,
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                runBotTick();
+                            }
+                        },
+                        1L,
+                        1L);
     }
 
     public TrainingBotHandle_v1_7_R4 handle() {

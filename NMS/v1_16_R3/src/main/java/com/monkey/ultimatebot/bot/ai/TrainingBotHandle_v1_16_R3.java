@@ -8,12 +8,6 @@ import net.minecraft.server.v1_16_R3.EntityPlayer;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Bukkit-facing handle for the 1.16.5 fake player.
- *
- * <p>Kept separate from {@link EntityPlayer} so Spigot-mapped methods such as {@code
- * getItemInOffHand()} do not clash with {@link ITrainingBot} defaults.
- */
 public final class TrainingBotHandle_v1_16_R3 implements ITrainingBot {
 
     private final TrainingBot_v1_16_R3 entity;
