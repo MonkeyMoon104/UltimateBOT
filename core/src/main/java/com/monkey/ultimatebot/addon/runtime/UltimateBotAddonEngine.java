@@ -101,7 +101,7 @@ public final class UltimateBotAddonEngine implements AutoCloseable {
         String entrypoint = descriptor
                 .nativeProviders()
                 .getOrDefault(
-                        com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion(),
+                        com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess.minecraftVersion(),
                         descriptor.mainClass());
         AddonClassLoader classLoader = null;
         UltimateBotAddon addon = null;

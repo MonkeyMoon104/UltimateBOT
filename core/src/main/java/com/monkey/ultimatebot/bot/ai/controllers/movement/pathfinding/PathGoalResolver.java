@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
-
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -10,7 +8,6 @@ import java.util.function.Predicate;
 import org.bukkit.util.BlockVector;
 import org.jspecify.annotations.Nullable;
 
-/** Projects airborne or obstructed targets onto nearby terrain that a walking bot can reach. */
 final class PathGoalResolver {
     private static final int HORIZONTAL_SEARCH_RADIUS = 6;
     private static final int VERTICAL_SEARCH_RADIUS = 12;
@@ -88,7 +85,6 @@ final class PathGoalResolver {
         private double cost() {
             return (double) x * x + (double) z * z + Math.abs(y) * 1.75D;
         }
-    
 
         @Override
         public boolean equals(Object obj) {

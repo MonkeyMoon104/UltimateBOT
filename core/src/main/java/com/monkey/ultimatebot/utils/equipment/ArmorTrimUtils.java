@@ -142,7 +142,7 @@ public final class ArmorTrimUtils {
     public static Material resolvePatternDisplayMaterial(@Nullable String patternKey) {
         String key = normalizeKey(patternKey);
         final String normalized = key == null ? "" : key;
-                switch (normalized) {
+        switch (normalized) {
             case "sentry":
                 return materialOrDefault("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
             case "dune":
@@ -187,7 +187,7 @@ public final class ArmorTrimUtils {
     public static Material resolveTrimMaterialDisplayMaterial(@Nullable String materialKey) {
         String key = normalizeKey(materialKey);
         final String normalized = key == null ? "" : key;
-                switch (normalized) {
+        switch (normalized) {
             case "quartz":
                 return Material.QUARTZ;
             case "iron":

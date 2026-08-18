@@ -11,8 +11,8 @@ import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import com.monkey.ultimatebot.extension.runtime.ModeKitAdapter;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.SplittableRandom;
+import java.util.logging.Level;
 import org.bukkit.entity.LivingEntity;
 import org.jspecify.annotations.Nullable;
 

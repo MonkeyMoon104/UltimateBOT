@@ -19,7 +19,8 @@ class CombatModeLoadoutDefaultsTest {
         assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.CRYSTAL)).isEqualTo(highTier);
         assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.MACE)).isEqualTo(highTier);
         assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.AXE_SHIELD)).isEqualTo(highTier);
-        assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.NETHERITE_POT)).isEqualTo(highTier);
+        assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.NETHERITE_POT))
+                .isEqualTo(highTier);
         assertThat(CombatModeLoadoutDefaults.armorTier(CombatMode.SMP)).isEqualTo(highTier);
     }
 }

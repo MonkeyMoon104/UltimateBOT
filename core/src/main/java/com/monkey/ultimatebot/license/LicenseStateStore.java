@@ -24,8 +24,8 @@ public final class LicenseStateStore {
             if (!Files.exists(file)) {
                 return Optional.empty();
             }
-            return Optional.of(
-                    objectMapper.readValue(new String(Files.readAllBytes(file), StandardCharsets.UTF_8), LicenseState.class));
+            return Optional.of(objectMapper.readValue(
+                    new String(Files.readAllBytes(file), StandardCharsets.UTF_8), LicenseState.class));
         } catch (Exception ignored) {
             return Optional.empty();
         }

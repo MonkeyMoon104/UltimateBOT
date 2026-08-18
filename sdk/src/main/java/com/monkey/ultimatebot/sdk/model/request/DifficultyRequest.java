@@ -9,7 +9,6 @@ public final class DifficultyRequest {
 
     public DifficultyRequest(DifficultyTier difficulty) {
 
-
         Objects.requireNonNull(difficulty, "difficulty");
         this.difficulty = difficulty;
     }

@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashMap;
@@ -112,8 +112,8 @@ public final class SlotManager implements ISlotManager {
         ItemStack selectedItem =
                 java.util.Objects.requireNonNull(hotbarSlots.get(selectedSlot), "selected hotbar item");
         ItemStack currentMainHand = bot.getItem(EquipmentSlotKind.HAND);
-        boolean visualChange = !currentMainHand.isSimilar(selectedItem)
-                || currentMainHand.getAmount() != selectedItem.getAmount();
+        boolean visualChange =
+                !currentMainHand.isSimilar(selectedItem) || currentMainHand.getAmount() != selectedItem.getAmount();
         currentSlot = selectedSlot;
         if (visualChange) {
             bot.setItem(EquipmentSlotKind.HAND, selectedItem);

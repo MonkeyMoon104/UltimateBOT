@@ -5,11 +5,11 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
 import java.util.UUID;
-import org.bukkit.Material;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -30,7 +30,11 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(BotInventoryController.CRYSTAL_SLOT, "END_CRYSTAL", Material.GHAST_TEAR, 64)
                         .slot(BotInventoryController.ANCHOR_SLOT, "RESPAWN_ANCHOR", Material.OBSIDIAN, 64)
                         .slot(BotInventoryController.GLOW_SLOT, Material.GLOWSTONE, 64)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, "ENCHANTED_GOLDEN_APPLE", Material.GOLDEN_APPLE, 64)
+                        .slot(
+                                BotInventoryController.GOLDEN_APPLE_SLOT,
+                                "ENCHANTED_GOLDEN_APPLE",
+                                Material.GOLDEN_APPLE,
+                                64)
                         .build());
     }
 
@@ -45,7 +49,8 @@ public final class CrystalPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         context.crystal().setEnabled(context.options().isExplosions());
-        if (target instanceof Player) { Player playerTarget = (Player) target;
+        if (target instanceof Player) {
+            Player playerTarget = (Player) target;
             context.legacyCombat(playerTarget);
             return;
         }

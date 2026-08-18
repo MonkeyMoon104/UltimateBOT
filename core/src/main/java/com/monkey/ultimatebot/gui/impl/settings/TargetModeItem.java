@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
@@ -74,12 +74,10 @@ public class TargetModeItem extends AbstractItem {
     }
 
     private static Material material(BotTargetMode mode) {
-                switch (mode) {
+        switch (mode) {
             case PLAYERS:
                 return Material.PLAYER_HEAD;
             case MOBS:
-                // Piglin heads are 1.20+; on 1.19.x the material can exist as a disabled stub
-                // and shows vanilla "Item disabled" / "Oggetto disattivato" in the lore.
                 if (MinecraftVersionAccess.isAtLeast(1, 20)) {
                     return MaterialCatalog.optional("PIGLIN_HEAD", Material.ZOMBIE_HEAD);
                 }
@@ -91,7 +89,7 @@ public class TargetModeItem extends AbstractItem {
     }
 
     private String label(BotTargetMode mode) {
-                switch (mode) {
+        switch (mode) {
             case PLAYERS:
                 return plugin.getLangString("gui.target-mode-button.players", "Players");
             case MOBS:

@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -34,10 +34,7 @@ public class SafetyValidator implements ISafetyValidator {
         }
 
         Material belowType = stateBelow.getType();
-        // MAGMA_BLOCK is MAGMA on Spigot 1.12.x; never hard-link the modern enum field.
-        return belowType != Material.CACTUS
-                && !MaterialCatalog.is(belowType, "MAGMA_BLOCK")
-                && !isFluid(belowType);
+        return belowType != Material.CACTUS && !MaterialCatalog.is(belowType, "MAGMA_BLOCK") && !isFluid(belowType);
     }
 
     @Override
@@ -46,10 +43,8 @@ public class SafetyValidator implements ISafetyValidator {
             for (int x = -radius; x <= radius; x++) {
                 for (int z = -radius; z <= radius; z++) {
                     for (int y = -1; y <= 2; y++) {
-                        BlockVector checkPos = new BlockVector(
-                                center.getBlockX() + x,
-                                center.getBlockY() + y,
-                                center.getBlockZ() + z);
+                        BlockVector checkPos =
+                                new BlockVector(center.getBlockX() + x, center.getBlockY() + y, center.getBlockZ() + z);
                         if (isSafeLandingSpot(checkPos)) {
                             return centerOf(checkPos);
                         }

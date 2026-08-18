@@ -1,11 +1,10 @@
 package com.monkey.ultimatebot.combat.mode.shared;
 
-
+import com.monkey.ultimatebot.access.entity.EntityBoundsAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Collections;
 import java.util.List;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
-import com.monkey.ultimatebot.compat.EntityBoundsAccess;
-import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
@@ -27,7 +26,8 @@ public final class CobwebCombatAwareness {
         boolean feetWeb = isCobweb(feet);
         boolean headWeb = isCobweb(head);
         boolean inside = feetWeb || headWeb;
-        return new Containment(inside, inside && nearlyExiting(entity.getLocation().toVector(), entity.getVelocity()));
+        return new Containment(
+                inside, inside && nearlyExiting(entity.getLocation().toVector(), entity.getVelocity()));
     }
 
     public static List<Location> occupiedWebs(LivingEntity entity) {
@@ -53,8 +53,8 @@ public final class CobwebCombatAwareness {
         double zFraction = position.getZ() - Math.floor(position.getZ());
         double xExit = velocity.getX() > 0.0D ? 1.0D - xFraction : xFraction;
         double zExit = velocity.getZ() > 0.0D ? 1.0D - zFraction : zFraction;
-        double nearestExit =
-                Math.min(Math.abs(velocity.getX()) > 0.001D ? xExit : 1.0D, Math.abs(velocity.getZ()) > 0.001D ? zExit : 1.0D);
+        double nearestExit = Math.min(
+                Math.abs(velocity.getX()) > 0.001D ? xExit : 1.0D, Math.abs(velocity.getZ()) > 0.001D ? zExit : 1.0D);
         return nearestExit <= 0.22D;
     }
 
@@ -74,6 +74,7 @@ public final class CobwebCombatAwareness {
         public boolean inside() {
             return inside;
         }
+
         public boolean nearlyExiting() {
             return nearlyExiting;
         }

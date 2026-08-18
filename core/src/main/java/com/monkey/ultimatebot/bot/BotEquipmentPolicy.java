@@ -1,15 +1,13 @@
 package com.monkey.ultimatebot.bot;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
-
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
-
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.EnumMap;
 import java.util.Map;
@@ -17,7 +15,6 @@ import java.util.Objects;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
-/** Enforces fixed item and fixed-empty equipment settings after bot AI actions. */
 public final class BotEquipmentPolicy {
     private BotEquipmentPolicy() {}
 
@@ -57,10 +54,10 @@ public final class BotEquipmentPolicy {
         Objects.requireNonNull(bot, "bot");
         Objects.requireNonNull(options, "options");
         Objects.requireNonNull(slot, "slot");
-                switch (slot) {
+        switch (slot) {
             case MAIN_HAND:
                 int selected = bot.getBotAI().getInventoryController().getCurrentSlot();
-                                bot.getBotAI().getInventoryController().switchToSlot(selected);
+                bot.getBotAI().getInventoryController().switchToSlot(selected);
                 break;
             case OFF_HAND:
                 bot.getBotAI().manageTotem();
@@ -73,18 +70,18 @@ public final class BotEquipmentPolicy {
                 if (bukkitSlot == null) {
                     break;
                 }
-                                ItemStack configured = options.getArmor().get(bukkitSlot);
-                                ItemStack restored;
-                                if (configured == null) {
-                                    restored = ItemStackAccess.empty();
-                                } else {
-                                    ItemStack item = configured.clone();
-                                    com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils.applyArmorEnchants(
-                                            item, options.getBlast().getOrDefault(bukkitSlot, false));
-                                    restored = item;
-                                }
-                                bot.setItem(bukkitSlot, restored.clone());
-                                broadcast(bot, ImmutableCollections.mapOf(bukkitSlot, restored.clone()));
+                ItemStack configured = options.getArmor().get(bukkitSlot);
+                ItemStack restored;
+                if (configured == null) {
+                    restored = ItemStackAccess.empty();
+                } else {
+                    ItemStack item = configured.clone();
+                    com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils.applyArmorEnchants(
+                            item, options.getBlast().getOrDefault(bukkitSlot, false));
+                    restored = item;
+                }
+                bot.setItem(bukkitSlot, restored.clone());
+                broadcast(bot, ImmutableCollections.mapOf(bukkitSlot, restored.clone()));
                 break;
         }
         throw new IllegalStateException("Unexpected switch value");
@@ -98,7 +95,7 @@ public final class BotEquipmentPolicy {
     }
 
     private static @Nullable EquipmentSlotKind toBukkitSlot(BotEquipmentSlot slot) {
-                switch (slot) {
+        switch (slot) {
             case MAIN_HAND:
                 return EquipmentSlotKind.HAND;
             case OFF_HAND:

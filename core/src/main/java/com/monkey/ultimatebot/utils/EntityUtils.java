@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.utils;
 
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
 import java.util.UUID;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;

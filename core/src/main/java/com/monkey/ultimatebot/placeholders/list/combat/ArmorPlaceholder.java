@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.placeholders.list.combat;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.placeholders.IBotPlaceholder;
 import com.monkey.ultimatebot.placeholders.PlaceholderHelper;
 import org.bukkit.entity.Player;

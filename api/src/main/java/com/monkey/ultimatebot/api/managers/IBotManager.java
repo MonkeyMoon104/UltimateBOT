@@ -18,6 +18,8 @@ import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.PlatformInfo;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +40,6 @@ public interface IBotManager {
     /**
      * Checks whether a bot is currently active for the given owner.
      *
-     * <p>For TEAM_ALLY bots, implementations may also return {@code true} for team members
-     * mapped to the same shared bot.</p>
-     *
      * @param ownerUUID owner UUID to check
      * @return {@code true} if an active bot exists for the owner context
      */
@@ -56,6 +55,12 @@ public interface IBotManager {
 
     /** Returns a snapshot using the runtime bot entity UUID. */
     Optional<BotSnapshot> getBotByBotUUID(UUID botUUID);
+
+    /** Returns the loaded Minecraft version and NMS feature flags for this server. */
+    PlatformInfo getPlatform();
+
+    /** Returns whether the loaded NMS bridge exposes the given platform feature. */
+    boolean supports(PlatformCapability capability);
 
     /** Returns configured combat modes supported by this server platform (omits unsupported). */
     List<CombatModeDefinition> getCombatModes();
@@ -78,7 +83,7 @@ public interface IBotManager {
     Optional<BotSnapshot> getTeamAllyBot(UUID teamOwnerUUID);
 
     /**
-     * Resolves the primary owner UUID used internally for a TEAM_ALLY bot.
+     * Resolves the primary owner UUID for a TEAM_ALLY bot.
      *
      * @param teamOwnerUUID one team member UUID
      * @return primary owner UUID when TEAM_ALLY mapping exists, otherwise empty
@@ -105,7 +110,7 @@ public interface IBotManager {
      * @param ownerReference owner reference (name or UUID string), may be null for TEAM_ALLY
      * @param targetReferences target references (name or UUID strings), may be null
      * @param teamOwnerReferences team owner references for TEAM_ALLY, may be null
-     * @param settings spawn settings; when null, implementation-defined defaults may be used
+     * @param settings spawn settings
      * @return operation result with success flag and details
      */
     BotOperationResult spawnByReferences(
@@ -117,9 +122,6 @@ public interface IBotManager {
 
     /**
      * Parses a single player reference into an online UUID.
-     *
-     * <p>Implementations commonly support exact name, fuzzy name and UUID string parsing,
-     * but usually resolve only online players.</p>
      *
      * @param playerReference player name or UUID string
      * @return resolved UUID when parsing succeeds and player is available, otherwise empty
@@ -165,8 +167,6 @@ public interface IBotManager {
 
     /**
      * Updates combat behavior for a managed bot.
-     *
-     * <p>Implementations typically enforce {@code combat=true} only when follow is enabled.</p>
      *
      * @param ownerUUID owner UUID
      * @param combat whether combat should be enabled

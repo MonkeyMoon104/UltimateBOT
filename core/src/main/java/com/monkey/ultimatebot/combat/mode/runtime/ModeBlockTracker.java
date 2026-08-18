@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-import com.monkey.ultimatebot.compat.BlockDataAccess;
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
+import com.monkey.ultimatebot.access.block.BlockDataAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashSet;
 import java.util.Objects;

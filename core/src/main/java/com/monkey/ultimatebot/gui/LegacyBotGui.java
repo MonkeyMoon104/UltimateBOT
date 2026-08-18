@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.gui;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -12,9 +11,14 @@ import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
 import com.monkey.ultimatebot.common.model.BotTargetMode;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
+import com.monkey.ultimatebot.gui.legacy.LegacyGuiActionHandler;
+import com.monkey.ultimatebot.gui.legacy.LegacyGuiItemFactory;
+import com.monkey.ultimatebot.gui.legacy.LegacyGuiRenderer;
+import com.monkey.ultimatebot.gui.legacy.LegacyGuiState;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
@@ -48,11 +52,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Bukkit chest GUI used when InvUI cannot run (Java 8 / pre-1.14). Mirrors {@link NewBotGUI} tabs
- * without InvUI: Kit, Armor, Owners, Targets, Combat. Hides capability-gated features (totem /
- * armor trim / unavailable combat modes via catalog).
- */
 public final class LegacyBotGui implements InventoryHolder, Listener {
 
     private static final int SIZE = 54;
@@ -86,19 +85,18 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private static final int SLOT_COMBAT_MODE_C = 11;
     private static final int SLOT_DIFFICULTY_C = 12;
     private static final int SLOT_RESET_TUNING = 15;
-    private static final int[] SLOT_TUNING = {
-        20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 37, 38
-    };
+    private static final int[] SLOT_TUNING = {20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 37, 38};
 
     private final Player player;
     private final UltimateBot plugin;
     private final BotType botType;
     private final BotOptions options;
     private final Inventory inventory;
-    private int activeTab = TAB_KIT;
-    private boolean closing;
-    private boolean listenerRegistered;
+    private final LegacyGuiState state = new LegacyGuiState(TAB_KIT);
     private final LegacyBotGuiListener eventListener;
+    private final LegacyGuiItemFactory itemFactory;
+    private final LegacyGuiRenderer sectionRenderer;
+    private final LegacyGuiActionHandler actionHandler;
 
     public LegacyBotGui(Player player, UltimateBot plugin, BotType botType) {
         this.player = player;
@@ -109,6 +107,9 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         this.options.clampCurrentTotemCount();
         this.inventory = Bukkit.createInventory(this, SIZE, title());
         this.eventListener = new LegacyBotGuiListener(this);
+        this.itemFactory = new LegacyGuiItemFactory(this);
+        this.sectionRenderer = new LegacyGuiRenderer(this);
+        this.actionHandler = new LegacyGuiActionHandler(this);
     }
 
     @Override
@@ -118,31 +119,18 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
 
     public void open() {
         render();
-        if (!listenerRegistered) {
+        if (!state.listenerRegistered()) {
             Bukkit.getPluginManager().registerEvents(eventListener, plugin);
-            listenerRegistered = true;
+            state.setListenerRegistered(true);
         }
         player.openInventory(inventory);
     }
 
-    private void render() {
-        inventory.clear();
-        fillChrome();
-        placeTabs();
-        if (activeTab == TAB_KIT) {
-            renderKit();
-        } else if (activeTab == TAB_ARMOR) {
-            renderArmor();
-        } else if (activeTab == TAB_OWNERS) {
-            renderOwners();
-        } else if (activeTab == TAB_TARGETS) {
-            renderTargets();
-        } else {
-            renderCombat();
-        }
+    public void render() {
+        sectionRenderer.render();
     }
 
-    private void fillChrome() {
+    public void fillChrome() {
         ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         inventory.clear();
         int[] content = contentSlots();
@@ -157,60 +145,60 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    private void placeTabs() {
-        inventory.setItem(SLOT_TAB_KIT, tabItem(TAB_KIT, "&aKit", new ItemStack(Material.DIAMOND_SWORD)));
-        inventory.setItem(SLOT_TAB_ARMOR, tabItem(TAB_ARMOR, "&bArmor", new ItemStack(Material.IRON_CHESTPLATE)));
+    public void placeTabs() {
+        inventory.setItem(SLOT_TAB_KIT, itemFactory.tabItem(TAB_KIT, "&aKit", new ItemStack(Material.DIAMOND_SWORD)));
+        inventory.setItem(
+                SLOT_TAB_ARMOR, itemFactory.tabItem(TAB_ARMOR, "&bArmor", new ItemStack(Material.IRON_CHESTPLATE)));
         inventory.setItem(
                 SLOT_TAB_COMBAT,
-                tabItem(TAB_COMBAT, "&6Combat", MaterialCatalog.stack("GOLDEN_SWORD", Material.IRON_SWORD)));
+                itemFactory.tabItem(TAB_COMBAT, "&6Combat", MaterialCatalog.stack("GOLDEN_SWORD", Material.IRON_SWORD)));
         inventory.setItem(
-                SLOT_TAB_OWNERS, tabItem(TAB_OWNERS, "&eOwners", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
+                SLOT_TAB_OWNERS,
+                itemFactory.tabItem(TAB_OWNERS, "&eOwners", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
         inventory.setItem(
                 SLOT_TAB_TARGETS,
-                tabItem(TAB_TARGETS, "&cTargets", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
+                itemFactory.tabItem(TAB_TARGETS, "&cTargets", MaterialCatalog.stack("PLAYER_HEAD", Material.STONE)));
     }
 
-    private ItemStack tabItem(int tab, String name, ItemStack icon) {
-        boolean selected = activeTab == tab;
+    public ItemStack tabItem(int tab, String name, ItemStack icon) {
+        boolean selected = state.activeTab() == tab;
         List<String> lore = Collections.singletonList(selected ? "&aSelected" : "&7Click to open");
         return namedItem(icon, (selected ? "&l" : "") + name, lore);
     }
 
-    private void renderKit() {
+    public void renderKit() {
         ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
-        // KitTab nested borders (`#` in structure).
-        int[] kitBorders = {
-            10, 16, 17, 19, 25, 26, 28, 34, 35, 37, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53
-        };
+
+        int[] kitBorders = {10, 16, 17, 19, 25, 26, 28, 34, 35, 37, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53};
         for (int slot : kitBorders) {
             inventory.setItem(slot, border);
         }
-        inventory.setItem(SLOT_DIFFICULTY, difficultyItem());
+        inventory.setItem(SLOT_DIFFICULTY, itemFactory.difficultyItem());
         if (MaterialCatalog.feature(PlatformCapability.TOTEM)) {
-            inventory.setItem(SLOT_TOTEM, totemItem());
+            inventory.setItem(SLOT_TOTEM, itemFactory.totemItem());
         }
-        inventory.setItem(SLOT_SPAWN, spawnItem());
+        inventory.setItem(SLOT_SPAWN, itemFactory.spawnItem());
         if (isManagedBotSpawned()) {
-            inventory.setItem(SLOT_TELEPORT, teleportItem());
+            inventory.setItem(SLOT_TELEPORT, itemFactory.teleportItem());
         }
-        inventory.setItem(SLOT_FOLLOW, followItem());
-        inventory.setItem(SLOT_COMBAT, combatToggleItem());
-        inventory.setItem(SLOT_COMBAT_MODE, combatModeItem());
-        inventory.setItem(SLOT_TARGET_MODE, targetModeItem());
+        inventory.setItem(SLOT_FOLLOW, itemFactory.followItem());
+        inventory.setItem(SLOT_COMBAT, itemFactory.combatToggleItem());
+        inventory.setItem(SLOT_COMBAT_MODE, itemFactory.combatModeItem());
+        inventory.setItem(SLOT_TARGET_MODE, itemFactory.targetModeItem());
     }
 
-    private void renderArmor() {
+    public void renderArmor() {
         ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         for (int slot : contentSlots()) {
             inventory.setItem(slot, border);
         }
-        inventory.setItem(SLOT_ARMOR_HEAD, armorPieceItem(EquipmentSlotKind.HEAD));
-        inventory.setItem(SLOT_ARMOR_CHEST, armorPieceItem(EquipmentSlotKind.CHEST));
-        inventory.setItem(SLOT_ARMOR_LEGS, armorPieceItem(EquipmentSlotKind.LEGS));
-        inventory.setItem(SLOT_ARMOR_FEET, armorPieceItem(EquipmentSlotKind.FEET));
+        inventory.setItem(SLOT_ARMOR_HEAD, itemFactory.armorPieceItem(EquipmentSlotKind.HEAD));
+        inventory.setItem(SLOT_ARMOR_CHEST, itemFactory.armorPieceItem(EquipmentSlotKind.CHEST));
+        inventory.setItem(SLOT_ARMOR_LEGS, itemFactory.armorPieceItem(EquipmentSlotKind.LEGS));
+        inventory.setItem(SLOT_ARMOR_FEET, itemFactory.armorPieceItem(EquipmentSlotKind.FEET));
     }
 
-    private void renderOwners() {
+    public void renderOwners() {
         List<UUID> owners = resolveOwners();
         int[] slots = contentSlots();
         int index = 0;
@@ -218,7 +206,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             if (index >= slots.length) {
                 break;
             }
-            inventory.setItem(slots[index++], headItem(ownerUUID, "&e", "Owner"));
+            inventory.setItem(slots[index++], itemFactory.headItem(ownerUUID, "&e", "Owner"));
         }
         if (owners.isEmpty()) {
             inventory.setItem(
@@ -230,7 +218,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    private void renderTargets() {
+    public void renderTargets() {
         List<UUID> targets = resolveTargets();
         int[] slots = contentSlots();
         int index = 0;
@@ -238,7 +226,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             if (index >= slots.length) {
                 break;
             }
-            inventory.setItem(slots[index++], headItem(targetUUID, "&c", "Target"));
+            inventory.setItem(slots[index++], itemFactory.headItem(targetUUID, "&c", "Target"));
         }
         if (targets.isEmpty()) {
             inventory.setItem(
@@ -250,18 +238,18 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    private void renderCombat() {
+    public void renderCombat() {
         ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         int[] combatBorders = {10, 17, 19, 26, 28, 35, 37, 44, 46, 47, 48, 49, 50, 51, 52, 53};
         for (int slot : combatBorders) {
             inventory.setItem(slot, border);
         }
-        inventory.setItem(SLOT_COMBAT_MODE_C, combatModeItem());
-        inventory.setItem(SLOT_DIFFICULTY_C, difficultyItem());
-        inventory.setItem(SLOT_RESET_TUNING, resetTuningItem());
+        inventory.setItem(SLOT_COMBAT_MODE_C, itemFactory.combatModeItem());
+        inventory.setItem(SLOT_DIFFICULTY_C, itemFactory.difficultyItem());
+        inventory.setItem(SLOT_RESET_TUNING, itemFactory.resetTuningItem());
         CombatTuningProperty[] properties = CombatTuningProperty.values();
         for (int i = 0; i < SLOT_TUNING.length && i < properties.length; i++) {
-            inventory.setItem(SLOT_TUNING[i], tuningItem(properties[i]));
+            inventory.setItem(SLOT_TUNING[i], itemFactory.tuningItem(properties[i]));
         }
     }
 
@@ -275,7 +263,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         };
     }
 
-    @EventHandler
     public void onClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player)) {
             return;
@@ -292,43 +279,54 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
         int slot = event.getRawSlot();
         ClickType click = event.getClick();
-
-        if (slot == SLOT_TAB_KIT) {
-            activeTab = TAB_KIT;
-            render();
-            return;
-        }
-        if (slot == SLOT_TAB_ARMOR) {
-            activeTab = TAB_ARMOR;
-            render();
-            return;
-        }
-        if (slot == SLOT_TAB_OWNERS) {
-            activeTab = TAB_OWNERS;
-            render();
-            return;
-        }
-        if (slot == SLOT_TAB_TARGETS) {
-            activeTab = TAB_TARGETS;
-            render();
-            return;
-        }
-        if (slot == SLOT_TAB_COMBAT) {
-            activeTab = TAB_COMBAT;
-            render();
-            return;
-        }
-
-        if (activeTab == TAB_KIT) {
-            handleKitClick(slot, click);
-        } else if (activeTab == TAB_ARMOR) {
-            handleArmorClick(slot, click);
-        } else if (activeTab == TAB_COMBAT) {
-            handleCombatClick(slot, click);
-        }
+        actionHandler.handleClick(slot, click);
     }
 
-    private void handleKitClick(int slot, ClickType click) {
+    public boolean tryHandleTabSelection(int slot) {
+        if (slot == SLOT_TAB_KIT) {
+            state.setActiveTab(TAB_KIT);
+            return true;
+        }
+        if (slot == SLOT_TAB_ARMOR) {
+            state.setActiveTab(TAB_ARMOR);
+            return true;
+        }
+        if (slot == SLOT_TAB_OWNERS) {
+            state.setActiveTab(TAB_OWNERS);
+            return true;
+        }
+        if (slot == SLOT_TAB_TARGETS) {
+            state.setActiveTab(TAB_TARGETS);
+            return true;
+        }
+        if (slot == SLOT_TAB_COMBAT) {
+            state.setActiveTab(TAB_COMBAT);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isKitTabActive() {
+        return state.activeTab() == TAB_KIT;
+    }
+
+    public boolean isArmorTabActive() {
+        return state.activeTab() == TAB_ARMOR;
+    }
+
+    public boolean isOwnersTabActive() {
+        return state.activeTab() == TAB_OWNERS;
+    }
+
+    public boolean isTargetsTabActive() {
+        return state.activeTab() == TAB_TARGETS;
+    }
+
+    public boolean isCombatTabActive() {
+        return state.activeTab() == TAB_COMBAT;
+    }
+
+    public void handleKitClick(int slot, ClickType click) {
         if (slot == SLOT_COMBAT_MODE) {
             cycleCombatMode(click);
         } else if (slot == SLOT_DIFFICULTY) {
@@ -348,7 +346,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    private void handleArmorClick(int slot, ClickType click) {
+    public void handleArmorClick(int slot, ClickType click) {
         EquipmentSlotKind piece = null;
         if (slot == SLOT_ARMOR_HEAD) {
             piece = EquipmentSlotKind.HEAD;
@@ -369,7 +367,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    private void handleCombatClick(int slot, ClickType click) {
+    public void handleCombatClick(int slot, ClickType click) {
         if (slot == SLOT_COMBAT_MODE_C) {
             cycleCombatMode(click);
             return;
@@ -393,19 +391,17 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    @EventHandler
     public void onDrag(InventoryDragEvent event) {
         if (isOurInventory(event.getInventory())) {
             event.setCancelled(true);
         }
     }
 
-    @EventHandler
     public void onClose(InventoryCloseEvent event) {
         if (!isOurInventory(event.getInventory()) || !player.equals(event.getPlayer())) {
             return;
         }
-        if (!closing) {
+        if (!state.closing()) {
             plugin.getPlayerOptions().put(player.getUniqueId(), options);
         }
         unregisterListener();
@@ -478,8 +474,8 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         boolean oldStatus = options.isCombat();
         boolean newStatus = !oldStatus;
         if (newStatus && !options.isFollow()) {
-            player.sendMessage(ChatColorUtils.translate(plugin.getLangString(
-                    "messages.combat-need-follow", "&cFollow must be ON to enable bot combat")));
+            player.sendMessage(ChatColorUtils.translate(
+                    plugin.getLangString("messages.combat-need-follow", "&cFollow must be ON to enable bot combat")));
             return;
         }
         UUID owner = resolveManagedOwnerUUID();
@@ -602,8 +598,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
         ItemStack current = options.getArmor().get(slot);
         Material currentMat = current == null ? Material.AIR : current.getType();
-        Material next =
-                ArmorCycle.getNextArmor(currentMat, slot, options.getMinArmorTier(), options.getMaxArmorTier());
+        Material next = ArmorCycle.getNextArmor(currentMat, slot, options.getMinArmorTier(), options.getMaxArmorTier());
         boolean blast = options.getBlast().getOrDefault(slot, Boolean.FALSE).booleanValue();
         ItemStack updated = new ItemStack(next);
         BotEquipmentUtils.applyArmorEnchants(updated, blast);
@@ -615,8 +610,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private void toggleBlast(EquipmentSlotKind slot) {
         if (!options.isChangeableBlast()) {
             player.sendMessage(ChatColorUtils.translate(plugin.getLangString(
-                    "messages.blast-locked",
-                    "&cBlast protection is locked: it cannot be modified for this bot.")));
+                    "messages.blast-locked", "&cBlast protection is locked: it cannot be modified for this bot.")));
             return;
         }
         boolean next = !options.getBlast().getOrDefault(slot, Boolean.FALSE).booleanValue();
@@ -638,8 +632,8 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         CombatTuning current = options.getCombatTuning();
         CombatTuning adjusted = property.adjust(current, click.isLeftClick(), click.isShiftClick());
         options.setCustomCombatTuning(adjusted);
-        player.sendMessage(ChatColorUtils.translate(
-                "&e" + property.displayName() + ": &f" + property.formattedValue(adjusted)));
+        player.sendMessage(
+                ChatColorUtils.translate("&e" + property.displayName() + ": &f" + property.formattedValue(adjusted)));
         render();
     }
 
@@ -650,31 +644,35 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
                 return;
             }
             clearCachedOptionsAfterDespawn(managedOwnerUUID);
-            player.sendMessage(ChatColorUtils.translate(
-                    plugin.getLangString("messages.despawn-bot", "&cBot removed!")));
+            player.sendMessage(
+                    ChatColorUtils.translate(plugin.getLangString("messages.despawn-bot", "&cBot removed!")));
             closeQuietly(false);
             return;
         }
         if (options.getBotType() == BotType.EVENT) {
             if (isBotEventActive()) {
-                player.sendMessage(ChatColorUtils.translate(
-                        plugin.getLangString("messages.event-bot-already-active")));
+                player.sendMessage(ChatColorUtils.translate(plugin.getLangString("messages.event-bot-already-active")));
                 return;
             }
             plugin.getBotManager().despawnAll();
             player.sendMessage(ChatColorUtils.translate(plugin.getLangString(
-                    "messages.all-normal-bots-despawned",
-                    "&eAll normal bots have been despawned for the event")));
+                    "messages.all-normal-bots-despawned", "&eAll normal bots have been despawned for the event")));
         } else if (isBotEventActive()) {
-            player.sendMessage(ChatColorUtils.translate(
-                    plugin.getLangString("messages.cannot-spawn-normal-during-event")));
+            player.sendMessage(
+                    ChatColorUtils.translate(plugin.getLangString("messages.cannot-spawn-normal-during-event")));
             return;
         }
 
         plugin.getPlayerOptions().put(player.getUniqueId(), options);
         closeQuietly();
         boolean spawned = plugin.getBotManager()
-                .spawn(player, options.getArmor(), options.getBlast(), options.isFollow(), options.getTotems(), options);
+                .spawn(
+                        player,
+                        options.getArmor(),
+                        options.getBlast(),
+                        options.isFollow(),
+                        options.getTotems(),
+                        options);
         if (!spawned) {
             return;
         }
@@ -701,7 +699,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         NMSBridgeManager.get().moveBot(bot.asBukkitPlayer(), loc.getX(), loc.getY(), loc.getZ());
     }
 
-    private ItemStack combatModeItem() {
+    public ItemStack combatModeItem() {
         Material mat = MaterialCatalog.optional(options.getCombatModeIconMaterial(), Material.DIAMOND_SWORD);
         List<String> lore = Arrays.asList(
                 "&7Difficulty: &f" + options.getDifficulty().name(),
@@ -710,7 +708,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(mat, "&6Combat mode: &e" + options.getCombatModeDisplayName(), lore);
     }
 
-    private ItemStack difficultyItem() {
+    public ItemStack difficultyItem() {
         Material mat = difficultyMaterial(options.getDifficulty());
         List<String> lore = new ArrayList<String>();
         lore.add("&7Current: &e" + options.getDifficulty().getSelectedName());
@@ -723,42 +721,38 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(mat, plugin.getLangString("gui.difficulty-button.name", "&eDifficulty"), lore);
     }
 
-    private ItemStack combatToggleItem() {
+    public ItemStack combatToggleItem() {
         boolean on = options.isCombat();
         List<String> lore = Arrays.asList("&7Status: " + (on ? "&aON" : "&cOFF"), "&eClick: &7toggle");
-        return namedItem(
-                Material.DIAMOND_SWORD, plugin.getLangString("gui.combat-button.name", "&cCombat"), lore);
+        return namedItem(Material.DIAMOND_SWORD, plugin.getLangString("gui.combat-button.name", "&cCombat"), lore);
     }
 
-    private ItemStack followItem() {
+    public ItemStack followItem() {
         boolean on = options.isFollow();
         ItemStack icon = MaterialCatalog.stack("LEAD", Material.STRING);
         List<String> lore = Arrays.asList("&7Status: " + (on ? "&aON" : "&cOFF"), "&eClick: &7toggle");
         return namedItem(icon, plugin.getLangString("gui.follow-button.name", "&aFollow"), lore);
     }
 
-    private ItemStack totemItem() {
+    public ItemStack totemItem() {
         ItemStack icon = MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE);
         String unlimited = plugin.getLangString("gui.totem-button.unlimited-text", "Unlimited");
         String count = options.getTotems() == -1 ? unlimited : String.valueOf(options.getTotems());
-        List<String> lore =
-                Arrays.asList("&7Count: &e" + count, "&eLeft click: &7+", "&eRight click: &7-");
+        List<String> lore = Arrays.asList("&7Count: &e" + count, "&eLeft click: &7+", "&eRight click: &7-");
         return namedItem(icon, plugin.getLangString("gui.totem-button.name", "&6Totems"), lore);
     }
 
-    private ItemStack targetModeItem() {
+    public ItemStack targetModeItem() {
         BotTargetMode mode = options.getTargetMode();
         List<String> lore = Arrays.asList(
                 plugin.getLangString("gui.target-mode-button.current", "&7Current: &e%mode%")
                         .replace("%mode%", targetModeLabel(mode)),
                 plugin.getLangString("gui.target-mode-button.click", "&aClick to change"));
         return namedItem(
-                targetModeStack(mode),
-                plugin.getLangString("gui.target-mode-button.name", "&bAttack mode"),
-                lore);
+                targetModeStack(mode), plugin.getLangString("gui.target-mode-button.name", "&bAttack mode"), lore);
     }
 
-    private ItemStack spawnItem() {
+    public ItemStack spawnItem() {
         boolean spawned = isManagedBotSpawned();
         ItemStack icon = spawned
                 ? MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK)
@@ -775,7 +769,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(icon, name, lore);
     }
 
-    private ItemStack teleportItem() {
+    public ItemStack teleportItem() {
         Material mat = MaterialCatalog.optional("ENDER_PEARL", Material.ENDER_PEARL);
         List<String> lore = plugin.getLangStringList("gui.teleport-button.lore");
         if (lore == null || lore.isEmpty()) {
@@ -784,7 +778,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(mat, plugin.getLangString("gui.teleport-button.name", "&bTeleport bot"), lore);
     }
 
-    private ItemStack armorPieceItem(EquipmentSlotKind slot) {
+    public ItemStack armorPieceItem(EquipmentSlotKind slot) {
         ItemStack piece = options.getArmor().get(slot);
         Material mat = piece == null ? Material.IRON_CHESTPLATE : piece.getType();
         boolean blast = options.getBlast().getOrDefault(slot, Boolean.FALSE).booleanValue();
@@ -800,14 +794,14 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return named;
     }
 
-    private ItemStack resetTuningItem() {
+    public ItemStack resetTuningItem() {
         return namedItem(
                 MaterialCatalog.stack("BARRIER", Material.REDSTONE_BLOCK),
                 "&cReset combat profile",
                 Collections.singletonList("&7Restore default tuning for this mode/difficulty"));
     }
 
-    private ItemStack tuningItem(CombatTuningProperty property) {
+    public ItemStack tuningItem(CombatTuningProperty property) {
         CombatTuning tuning = options.getCombatTuning();
         List<String> lore = Arrays.asList(
                 "&7Value: &f" + property.formattedValue(tuning),
@@ -817,7 +811,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(property.material(), "&e" + property.displayName(), lore);
     }
 
-    private ItemStack headItem(UUID uuid, String colorPrefix, String role) {
+    public ItemStack headItem(UUID uuid, String colorPrefix, String role) {
         OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
         String name = offline.getName() != null ? offline.getName() : uuid.toString();
         ItemStack skull = MaterialCatalog.stack("PLAYER_HEAD", Material.STONE);
@@ -825,8 +819,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         if (meta != null) {
             meta.setDisplayName(ChatColorUtils.translate(colorPrefix + name));
             meta.setLore(Arrays.asList(
-                    ChatColorUtils.translate("&7" + role),
-                    ChatColorUtils.translate("&8" + uuid.toString())));
+                    ChatColorUtils.translate("&7" + role), ChatColorUtils.translate("&8" + uuid.toString())));
             if (meta instanceof SkullMeta) {
                 applySkullOwner((SkullMeta) meta, offline, name);
             }
@@ -841,7 +834,8 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         } catch (NoSuchMethodError | AbstractMethodError ignored) {
             try {
                 SkullMeta.class.getMethod("setOwner", String.class).invoke(meta, name);
-            } catch (ReflectiveOperationException ignoredAgain) {}
+            } catch (ReflectiveOperationException ignoredAgain) {
+            }
         }
     }
 
@@ -911,8 +905,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private ItemStack borderStack() {
-        String configured =
-                plugin.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
+        String configured = plugin.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
         return MaterialCatalog.stack(configured, Material.STONE);
     }
 
@@ -989,8 +982,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             }
         }
         if (existing == null) {
-            existing = new BotOptions(
-                    plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
+            existing = new BotOptions(plugin, ArmorCycle.getDefaultArmorFromConfig(plugin.getLanguageConfig(), plugin));
             CombatModeLoadoutDefaults.applyArmor(existing, existing.getCombatMode());
         }
         return existing;
@@ -1036,8 +1028,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
             String name = Bukkit.getOfflinePlayer(ownerUUID).getName();
             ownerNames.add(name == null ? ownerUUID.toString() : name);
         }
-        String message = template
-                .replace("%playerowner%", player.getName())
+        String message = template.replace("%playerowner%", player.getName())
                 .replace("%playerlist%", String.join(", ", ownerNames));
         for (UUID ownerUUID : options.getTeamOwnerUUIDs()) {
             Player owner = Bukkit.getPlayer(ownerUUID);
@@ -1082,7 +1073,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void closeQuietly(boolean persistDraft) {
-        closing = true;
+        state.setClosing(true);
         if (persistDraft) {
             plugin.getPlayerOptions().put(player.getUniqueId(), options);
         }
@@ -1091,9 +1082,9 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void unregisterListener() {
-        if (listenerRegistered) {
+        if (state.listenerRegistered()) {
             HandlerList.unregisterAll(eventListener);
-            listenerRegistered = false;
+            state.setListenerRegistered(false);
         }
     }
 

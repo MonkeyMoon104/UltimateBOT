@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealActionManager;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.PotionEffectAccess;
-import com.monkey.ultimatebot.compat.PotionEffectTypeAccess;
+import com.monkey.ultimatebot.access.item.PotionEffectAccess;
+import com.monkey.ultimatebot.access.item.PotionEffectTypeAccess;
 
 public class HealActionManager implements IHealActionManager {
 
@@ -76,9 +76,11 @@ public class HealActionManager implements IHealActionManager {
     @Override
     public void applyGoldenAppleEffectsManually(ITrainingBot bot) {
         bot.asBukkitPlayer()
-                .addPotionEffect(PotionEffectAccess.of(PotionEffectTypeAccess.regeneration(), 100, 1, false, false, false));
+                .addPotionEffect(
+                        PotionEffectAccess.of(PotionEffectTypeAccess.regeneration(), 100, 1, false, false, false));
         bot.asBukkitPlayer()
-                .addPotionEffect(PotionEffectAccess.of(PotionEffectTypeAccess.absorption(), 2400, 0, false, false, false));
+                .addPotionEffect(
+                        PotionEffectAccess.of(PotionEffectTypeAccess.absorption(), 2400, 0, false, false, false));
         bot.setHealthValue(Math.min(bot.healthValue() + 4.0D, bot.maxHealthValue()));
     }
 

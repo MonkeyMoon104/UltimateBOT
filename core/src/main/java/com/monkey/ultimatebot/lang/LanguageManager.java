@@ -190,7 +190,9 @@ public final class LanguageManager {
                 }
 
                 String languageFileName = entryName.substring((LANGS_DIRECTORY + "/").length());
-                if (languageFileName.trim().isEmpty() || languageFileName.contains("/") || languageFileName.contains("\\")) {
+                if (languageFileName.trim().isEmpty()
+                        || languageFileName.contains("/")
+                        || languageFileName.contains("\\")) {
                     continue;
                 }
 

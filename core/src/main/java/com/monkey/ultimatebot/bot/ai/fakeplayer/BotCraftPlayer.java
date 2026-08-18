@@ -1,11 +1,13 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer;
 
-
-import java.util.Collections;
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.Title;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.bot.ai.fakeplayer.internal.InventoryDelegate;
+import com.monkey.ultimatebot.bot.ai.fakeplayer.internal.MessagingDelegate;
+import com.monkey.ultimatebot.bot.ai.fakeplayer.internal.ModerationDelegate;
+import com.monkey.ultimatebot.bot.ai.fakeplayer.internal.NavigationDelegate;
 import io.papermc.paper.entity.LookAnchor;
 import io.papermc.paper.entity.PlayerGiveResult;
 import io.papermc.paper.math.Position;
@@ -14,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -86,10 +89,18 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     };
 
     private final ITrainingBot trainingBot;
+    private final InventoryDelegate inventoryDelegate;
+    private final MessagingDelegate messagingDelegate;
+    private final ModerationDelegate moderationDelegate;
+    private final NavigationDelegate navigationDelegate;
 
     public BotCraftPlayer(ITrainingBot trainingBot) {
         super((CraftServer) Bukkit.getServer(), (Player) trainingBot);
         this.trainingBot = trainingBot;
+        this.inventoryDelegate = new InventoryDelegate();
+        this.messagingDelegate = new MessagingDelegate();
+        this.moderationDelegate = new ModerationDelegate();
+        this.navigationDelegate = new NavigationDelegate(this::getLocation, this::nativeHandle);
     }
 
     @Override
@@ -107,18 +118,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public PlayerGiveResult give(Collection<ItemStack> items, boolean dropIfFull) {
-        Collection<ItemStack> leftovers = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(items);
-        return new PlayerGiveResult() {
-            @Override
-            public Collection<ItemStack> leftovers() {
-                return leftovers;
-            }
-
-            @Override
-            public Collection<org.bukkit.entity.Item> drops() {
-                return Collections.emptyList();
-            }
-        };
+        return inventoryDelegate.give(items);
     }
 
     @Override
@@ -213,7 +213,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public org.bukkit.Location getCompassTarget() {
-        return getLocation();
+        return navigationDelegate.getCompassTarget();
     }
 
     @Override
@@ -294,41 +294,43 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Date expires, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Instant expires, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Duration duration, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public @Nullable BanEntry<InetAddress> banIp(
             @Nullable String reason, @Nullable Date expires, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.banIp();
     }
 
     @Override
     public @Nullable BanEntry<InetAddress> banIp(
             @Nullable String reason, @Nullable Instant expires, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.banIp();
     }
 
     @Override
     public @Nullable BanEntry<InetAddress> banIp(
             @Nullable String reason, @Nullable Duration duration, @Nullable String source, boolean kickPlayer) {
-        return null;
+        return moderationDelegate.banIp();
     }
 
     @Override
-    public void chat(String msg) {}
+    public void chat(String msg) {
+        messagingDelegate.chat(msg);
+    }
 
     @Override
     public boolean performCommand(String command) {
@@ -772,7 +774,9 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public void setCustomChatCompletions(Collection<String> completions) {}
 
     @Override
-    public void updateInventory() {}
+    public void updateInventory() {
+        inventoryDelegate.updateInventory();
+    }
 
     @Override
     public @Nullable GameMode getPreviousGameMode() {
@@ -1206,28 +1210,30 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Date expires, @Nullable String source) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Instant expires, @Nullable String source) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public <E extends BanEntry<? super PlayerProfile>> @Nullable E ban(
             @Nullable String reason, @Nullable Duration duration, @Nullable String source) {
-        return null;
+        return moderationDelegate.ban();
     }
 
     @Override
     public boolean isWhitelisted() {
-        return false;
+        return moderationDelegate.isWhitelisted();
     }
 
     @Override
-    public void setWhitelisted(boolean value) {}
+    public void setWhitelisted(boolean value) {
+        moderationDelegate.setWhitelisted(value);
+    }
 
     @Override
     public org.bukkit.entity.@Nullable Player getPlayer() {
@@ -1291,11 +1297,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
      */
     @Override
     public void setRotation(float yaw, float pitch) {
-        Player handle = nativeHandle();
-        handle.setYRot(yaw);
-        handle.setXRot(pitch);
-        handle.setYHeadRot(yaw);
-        handle.yBodyRot = yaw;
+        navigationDelegate.setRotation(yaw, pitch);
     }
 
     @Override
@@ -1356,7 +1358,8 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof org.bukkit.entity.Player) { org.bukkit.entity.Player player = (org.bukkit.entity.Player) obj;
+        if (obj instanceof org.bukkit.entity.Player) {
+            org.bukkit.entity.Player player = (org.bukkit.entity.Player) obj;
             return getUniqueId().equals(player.getUniqueId());
         }
         return super.equals(obj);
@@ -1386,4 +1389,5 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     public @NotNull Set<String> getListeningPluginChannels() {
         return Collections.emptySet();
     }
+
 }

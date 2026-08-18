@@ -4,7 +4,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-/** Stable namespaced identifier for a bot brain implementation. */
 public final class BrainKey implements Comparable<BrainKey> {
     private static final Pattern PART_PATTERN = Pattern.compile("[a-z0-9][a-z0-9._-]{0,63}");
 

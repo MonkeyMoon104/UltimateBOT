@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-/** Java-only callbacks exposed by the plugin core to the guard addon. */
 public final class GuardBackendContext {
     private final Object pluginHandle;
     private final Predicate<UUID> managedBotPredicate;

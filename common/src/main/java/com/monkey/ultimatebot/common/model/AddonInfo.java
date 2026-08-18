@@ -1,11 +1,10 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.List;
 import java.util.Objects;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import org.jspecify.annotations.Nullable;
 
-/** Platform-neutral installed-addon status exposed by the remote API and SDK. */
 public final class AddonInfo {
     private final String id;
     private final String name;

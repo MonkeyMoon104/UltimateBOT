@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import org.bukkit.World;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;
@@ -109,12 +109,12 @@ public class BotNoobMovementController {
         BlockVector above = above(front);
         BlockVector above2 = above(above);
 
-        boolean frontBlocked =
-                !BlockPassableAccess.isPassable(world.getBlockAt(front.getBlockX(), front.getBlockY(), front.getBlockZ()));
-        boolean aboveClear =
-                BlockPassableAccess.isPassable(world.getBlockAt(above.getBlockX(), above.getBlockY(), above.getBlockZ()));
-        boolean above2Clear =
-                BlockPassableAccess.isPassable(world.getBlockAt(above2.getBlockX(), above2.getBlockY(), above2.getBlockZ()));
+        boolean frontBlocked = !BlockPassableAccess.isPassable(
+                world.getBlockAt(front.getBlockX(), front.getBlockY(), front.getBlockZ()));
+        boolean aboveClear = BlockPassableAccess.isPassable(
+                world.getBlockAt(above.getBlockX(), above.getBlockY(), above.getBlockZ()));
+        boolean above2Clear = BlockPassableAccess.isPassable(
+                world.getBlockAt(above2.getBlockX(), above2.getBlockY(), above2.getBlockZ()));
 
         boolean canStepUp = frontBlocked && aboveClear;
         boolean tooHigh = frontBlocked && !aboveClear && !above2Clear;
@@ -179,12 +179,12 @@ public class BotNoobMovementController {
         BlockVector checkAbove = above(checkPos);
         BlockVector checkAbove2 = above(checkAbove);
 
-        boolean frontClear =
-                BlockPassableAccess.isPassable(world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY(), checkPos.getBlockZ()));
-        boolean aboveClear =
-                BlockPassableAccess.isPassable(world.getBlockAt(checkAbove.getBlockX(), checkAbove.getBlockY(), checkAbove.getBlockZ()));
-        boolean above2Clear = BlockPassableAccess.isPassable(world.getBlockAt(checkAbove2.getBlockX(), checkAbove2.getBlockY(), checkAbove2.getBlockZ())
-                );
+        boolean frontClear = BlockPassableAccess.isPassable(
+                world.getBlockAt(checkPos.getBlockX(), checkPos.getBlockY(), checkPos.getBlockZ()));
+        boolean aboveClear = BlockPassableAccess.isPassable(
+                world.getBlockAt(checkAbove.getBlockX(), checkAbove.getBlockY(), checkAbove.getBlockZ()));
+        boolean above2Clear = BlockPassableAccess.isPassable(
+                world.getBlockAt(checkAbove2.getBlockX(), checkAbove2.getBlockY(), checkAbove2.getBlockZ()));
 
         return frontClear && aboveClear && above2Clear;
     }

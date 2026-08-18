@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 /** Forward-compatible remote event envelope. Unknown types remain available through {@link #type()}. */
 public final class BotEventEnvelope {
@@ -23,8 +22,18 @@ public final class BotEventEnvelope {
     private final BotSnapshotResponse snapshot;
     private final Map<String, Object> payload;
 
-    public BotEventEnvelope(long id, int schemaVersion, String type, UUID eventId, long sequence, Instant occurredAt, UUID ownerUUID, UUID botUUID, String source, BotSnapshotResponse snapshot, Map<String, Object> payload) {
-
+    public BotEventEnvelope(
+            long id,
+            int schemaVersion,
+            String type,
+            UUID eventId,
+            long sequence,
+            Instant occurredAt,
+            UUID ownerUUID,
+            UUID botUUID,
+            String source,
+            BotSnapshotResponse snapshot,
+            Map<String, Object> payload) {
 
         payload = payload == null ? Collections.emptyMap() : Collections.unmodifiableMap(new LinkedHashMap<>(payload));
         this.id = id;
@@ -43,33 +52,43 @@ public final class BotEventEnvelope {
     public long id() {
         return id;
     }
+
     public int schemaVersion() {
         return schemaVersion;
     }
+
     public String type() {
         return type;
     }
+
     public UUID eventId() {
         return eventId;
     }
+
     public long sequence() {
         return sequence;
     }
+
     public Instant occurredAt() {
         return occurredAt;
     }
+
     public UUID ownerUUID() {
         return ownerUUID;
     }
+
     public UUID botUUID() {
         return botUUID;
     }
+
     public String source() {
         return source;
     }
+
     public BotSnapshotResponse snapshot() {
         return snapshot;
     }
+
     public Map<String, Object> payload() {
         return payload;
     }
@@ -91,16 +110,30 @@ public final class BotEventEnvelope {
             return false;
         }
         BotEventEnvelope other = (BotEventEnvelope) obj;
-        return id == other.id && schemaVersion == other.schemaVersion && java.util.Objects.equals(type, other.type) && java.util.Objects.equals(eventId, other.eventId) && sequence == other.sequence && java.util.Objects.equals(occurredAt, other.occurredAt) && java.util.Objects.equals(ownerUUID, other.ownerUUID) && java.util.Objects.equals(botUUID, other.botUUID) && java.util.Objects.equals(source, other.source) && java.util.Objects.equals(snapshot, other.snapshot) && java.util.Objects.equals(payload, other.payload);
+        return id == other.id
+                && schemaVersion == other.schemaVersion
+                && java.util.Objects.equals(type, other.type)
+                && java.util.Objects.equals(eventId, other.eventId)
+                && sequence == other.sequence
+                && java.util.Objects.equals(occurredAt, other.occurredAt)
+                && java.util.Objects.equals(ownerUUID, other.ownerUUID)
+                && java.util.Objects.equals(botUUID, other.botUUID)
+                && java.util.Objects.equals(source, other.source)
+                && java.util.Objects.equals(snapshot, other.snapshot)
+                && java.util.Objects.equals(payload, other.payload);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id, schemaVersion, type, eventId, sequence, occurredAt, ownerUUID, botUUID, source, snapshot, payload);
+        return java.util.Objects.hash(
+                id, schemaVersion, type, eventId, sequence, occurredAt, ownerUUID, botUUID, source, snapshot, payload);
     }
 
     @Override
     public String toString() {
-        return "BotEventEnvelope[id=" + id + ", schemaVersion=" + schemaVersion + ", type=" + type + ", eventId=" + eventId + ", sequence=" + sequence + ", occurredAt=" + occurredAt + ", ownerUUID=" + ownerUUID + ", botUUID=" + botUUID + ", source=" + source + ", snapshot=" + snapshot + ", payload=" + payload + "]";
+        return "BotEventEnvelope[id=" + id + ", schemaVersion=" + schemaVersion + ", type=" + type + ", eventId="
+                + eventId + ", sequence=" + sequence + ", occurredAt=" + occurredAt + ", ownerUUID=" + ownerUUID
+                + ", botUUID=" + botUUID + ", source=" + source + ", snapshot=" + snapshot + ", payload=" + payload
+                + "]";
     }
 }

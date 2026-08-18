@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.attack.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.Vector;
 

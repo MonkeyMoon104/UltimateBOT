@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.noobs.BotNoobMovementController;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import java.util.Objects;
 import org.bukkit.entity.Player;
 

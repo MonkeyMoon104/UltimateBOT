@@ -35,7 +35,7 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-                switch (phase) {
+        switch (phase) {
             case APPROACH:
                 approachLaunchWindow(context, target);
                 break;
@@ -72,7 +72,8 @@ public final class MacePvPStrategy extends AbstractCombatModeStrategy {
             context.motion().approach(target, 3.4D);
             return;
         }
-        if (!ModeCombatPolicy.canLaunchMace(horizontalDistance, context.motion().isBotOnGround(), specialActionReady())) {
+        if (!ModeCombatPolicy.canLaunchMace(
+                horizontalDistance, context.motion().isBotOnGround(), specialActionReady())) {
             context.motion().strafe(target, 0.9D);
             return;
         }

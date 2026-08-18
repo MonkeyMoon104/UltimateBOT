@@ -14,7 +14,7 @@ import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
-import com.monkey.ultimatebot.compat.RespawnAnchorAccess;
+import com.monkey.ultimatebot.access.world.RespawnAnchorAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.Optional;
@@ -61,8 +61,7 @@ public final class BotRAPVPController {
     }
 
     public void enable(Player target) {
-        if (!NMSBridgeManager.get().supports(PlatformCapability.RESPAWN_ANCHOR)
-                || !RespawnAnchorAccess.isAvailable()) {
+        if (!NMSBridgeManager.get().supports(PlatformCapability.RESPAWN_ANCHOR) || !RespawnAnchorAccess.isAvailable()) {
             disable();
             return;
         }
@@ -81,7 +80,7 @@ public final class BotRAPVPController {
         }
         for (int i = 0; i < getActionCyclesForDifficulty(); i++) {
             if (!enabled || currentTarget == null || currentTarget.isDead()) break;
-                        switch (state) {
+            switch (state) {
                 case PLACING_ANCHOR:
                     handlePlacingAnchor();
                     break;
@@ -92,7 +91,6 @@ public final class BotRAPVPController {
                     handleWaitingExplosion();
                     break;
                 case IDLE:
-
                     break;
             }
         }
@@ -110,7 +108,9 @@ public final class BotRAPVPController {
         Player target = Objects.requireNonNull(currentTarget, "currentTarget");
         Optional<BlockVector> posOpt = positionFinder.findBestAnchorPos(target);
         if (!posOpt.isPresent()) {
-            if (!isHyperAggressiveDifficulty() && pearlController.canUseEnderpearl() && bot.distanceTo(target) > 10.0D) {
+            if (!isHyperAggressiveDifficulty()
+                    && pearlController.canUseEnderpearl()
+                    && bot.distanceTo(target) > 10.0D) {
                 pearlController.tryUseEnderpearl(target);
             }
             return;
@@ -206,9 +206,17 @@ public final class BotRAPVPController {
         ownsAnchor = false;
     }
 
-    public boolean isActive() { return enabled; }
-    public RAPVPState getState() { return state; }
-    public @Nullable BlockVector getCurrentAnchorPos() { return anchorPos; }
+    public boolean isActive() {
+        return enabled;
+    }
+
+    public RAPVPState getState() {
+        return state;
+    }
+
+    public @Nullable BlockVector getCurrentAnchorPos() {
+        return anchorPos;
+    }
 
     public void setDifficulty(DifficultyLevel difficulty) {
         this.difficulty = difficulty;
@@ -216,8 +224,13 @@ public final class BotRAPVPController {
         this.positionFinder.setConfig(config);
     }
 
-    public DifficultyLevel getDifficulty() { return difficulty; }
-    public RAPVPConfig getConfig() { return config; }
+    public DifficultyLevel getDifficulty() {
+        return difficulty;
+    }
+
+    public RAPVPConfig getConfig() {
+        return config;
+    }
 
     public boolean hadRecentAnchorExplosion(long windowMs) {
         return lastAnchorExplosionTime > 0L && System.currentTimeMillis() - lastAnchorExplosionTime <= windowMs;
@@ -271,6 +284,7 @@ public final class BotRAPVPController {
     }
 
     private org.bukkit.Location centerOf(BlockVector pos) {
-        return new org.bukkit.Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+        return new org.bukkit.Location(
+                bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
     }
 }

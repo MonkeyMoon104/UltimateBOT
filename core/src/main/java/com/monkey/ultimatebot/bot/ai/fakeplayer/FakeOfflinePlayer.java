@@ -1,12 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.fakeplayer;
 
-
-import java.util.Collections;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 
-/** Bukkit compatibility adapter for deprecated and return-only generic {@link OfflinePlayer} signatures. */
 @SuppressWarnings({"deprecation", "TypeParameterUnusedInFormals"})
 public final class FakeOfflinePlayer implements OfflinePlayer {
 

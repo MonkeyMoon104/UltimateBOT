@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class HealStrategy implements IHealStrategy {
 

@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -23,7 +23,8 @@ public class PositionCalculator implements IPositionCalculator {
     @Override
     public @Nullable Vector calculateEmergencyEscape(Player bot, Player target) {
         Vector botPos = bot.getLocation().toVector();
-        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector awayDirection =
+                normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -44,7 +45,8 @@ public class PositionCalculator implements IPositionCalculator {
     @Override
     public @Nullable Vector calculateMeleeDisengage(Player bot, Player target) {
         Vector botPos = bot.getLocation().toVector();
-        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector awayDirection =
+                normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -65,7 +67,8 @@ public class PositionCalculator implements IPositionCalculator {
     @Override
     public @Nullable Vector calculateLowGroundPosition(Player bot, Player target) {
         Vector targetPos = target.getLocation().toVector();
-        Vector aroundDirection = normalizeOrFallback(bot.getLocation().toVector().subtract(targetPos), bot);
+        Vector aroundDirection =
+                normalizeOrFallback(bot.getLocation().toVector().subtract(targetPos), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -82,13 +85,18 @@ public class PositionCalculator implements IPositionCalculator {
                 ? best
                 : fallbackSafePosition(
                         bot,
-                        toBlockVector(targetPos.clone().add(aroundDirection.multiply(4.2D)).add(new Vector(0.0D, -2.4D, 0.0D))));
+                        toBlockVector(targetPos
+                                .clone()
+                                .add(aroundDirection.multiply(4.2D))
+                                .add(new Vector(0.0D, -2.4D, 0.0D))));
     }
 
     @Override
     public @Nullable Vector calculateAnchorPosition(Player bot, Player target) {
-        Vector predictedTarget = target.getLocation().toVector().add(target.getVelocity().multiply(PREDICT_TICKS / 20.0D));
-        Vector aroundDirection = normalizeOrFallback(predictedTarget.clone().subtract(bot.getLocation().toVector()), bot);
+        Vector predictedTarget =
+                target.getLocation().toVector().add(target.getVelocity().multiply(PREDICT_TICKS / 20.0D));
+        Vector aroundDirection = normalizeOrFallback(
+                predictedTarget.clone().subtract(bot.getLocation().toVector()), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -105,7 +113,8 @@ public class PositionCalculator implements IPositionCalculator {
                 ? best
                 : fallbackSafePosition(
                         bot,
-                        toBlockVector(predictedTarget.clone()
+                        toBlockVector(predictedTarget
+                                .clone()
                                 .add(aroundDirection.multiply(3.8D))
                                 .add(new Vector(0.0D, -1.2D, 0.0D))));
     }
@@ -117,7 +126,8 @@ public class PositionCalculator implements IPositionCalculator {
         Vector movement = predictedTargetMovement == null ? new Vector() : predictedTargetMovement.clone();
         Vector predictedPos = targetPos.clone().add(movement.multiply(PREDICT_TICKS / 20.0D));
 
-        Vector approachDirection = normalizeOrFallback(bot.getLocation().toVector().subtract(predictedPos), bot);
+        Vector approachDirection =
+                normalizeOrFallback(bot.getLocation().toVector().subtract(predictedPos), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -134,7 +144,8 @@ public class PositionCalculator implements IPositionCalculator {
                 ? best
                 : fallbackSafePosition(
                         bot,
-                        toBlockVector(predictedPos.clone()
+                        toBlockVector(predictedPos
+                                .clone()
                                 .add(approachDirection.multiply(2.7D))
                                 .add(new Vector(0.0D, 0.4D, 0.0D))));
     }
@@ -142,7 +153,8 @@ public class PositionCalculator implements IPositionCalculator {
     @Override
     public @Nullable Vector calculateStandardEscape(Player bot, Player target) {
         Vector botPos = bot.getLocation().toVector();
-        Vector awayDirection = normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
+        Vector awayDirection =
+                normalizeOrFallback(botPos.clone().subtract(target.getLocation().toVector()), bot);
         Vector best = findBestCandidate(
                 bot,
                 target,
@@ -180,7 +192,9 @@ public class PositionCalculator implements IPositionCalculator {
             for (double angleDeg : ANGLES_DEG) {
                 Vector direction = rotateVector(baseDirection, Math.toRadians(angleDeg));
                 for (double yOffset : yOffsets) {
-                    Vector candidate = origin.clone().add(direction.clone().multiply(distance)).add(new Vector(0.0D, yOffset, 0.0D));
+                    Vector candidate = origin.clone()
+                            .add(direction.clone().multiply(distance))
+                            .add(new Vector(0.0D, yOffset, 0.0D));
                     BlockVector candidateBlock = toBlockVector(candidate);
                     if (!safetyValidator.isSafeLandingSpot(candidateBlock)) {
                         continue;
@@ -242,8 +256,7 @@ public class PositionCalculator implements IPositionCalculator {
         if (distance < 1.0E-6D) {
             return true;
         }
-        return RayTraceAccess.clearPath(
-                bot.getWorld(), bot.getEyeLocation(), delta, distance);
+        return RayTraceAccess.clearPath(bot.getWorld(), bot.getEyeLocation(), delta, distance);
     }
 
     private Vector normalizeOrFallback(Vector vector, Player bot) {

@@ -49,7 +49,7 @@ public final class WaterPvPStrategy extends AbstractCombatModeStrategy {
             return;
         }
         context.motion().setSwimming(true);
-                switch (phase) {
+        switch (phase) {
             case WAIT_FOR_WATER:
                 transitionTo(Phase.SWIM_APPROACH);
                 break;

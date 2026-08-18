@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.compat.CombatCadenceAccess;
+import com.monkey.ultimatebot.access.combat.CombatCadenceAccess;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 
@@ -33,7 +33,7 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-                switch (phase) {
+        switch (phase) {
             case SPACING:
                 spacing(context, target);
                 break;
@@ -84,7 +84,8 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
         if (context.motion().isBotOnGround()) {
             context.motion().propelTowards(target, 0.34D, 0.34D);
         } else {
-            context.motion().steerVelocityTowards(target, 0.31D, context.motion().botVerticalVelocity());
+            context.motion()
+                    .steerVelocityTowards(target, 0.31D, context.motion().botVerticalVelocity());
         }
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
@@ -109,7 +110,9 @@ public final class SwordPvPStrategy extends AbstractCombatModeStrategy {
                 .steerVelocityTowards(
                         target,
                         0.29D,
-                        context.motion().isBotOnGround() ? 0.0D : context.motion().botVerticalVelocity());
+                        context.motion().isBotOnGround()
+                                ? 0.0D
+                                : context.motion().botVerticalVelocity());
         if (context.motion().distanceTo(target) <= context.tuning().attackRange()) {
             context.actions().attack(target, BotInventoryController.SWORD_SLOT);
         }

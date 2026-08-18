@@ -12,18 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import org.bukkit.plugin.java.JavaPlugin;
 
-/**
- * Machine / installation fingerprints for license binding.
- *
- * <p>Paper 1.17 (Java 16) vs 1.17.1+ often disagree on {@code NetworkInterface.isUp()/isVirtual()}
- * and on {@code java.vendor}. That minted a <em>new</em> host fingerprint and tripped
- * {@code HOST_LIMIT_REACHED} even on the same PC. Dual-path:
- *
- * <ul>
- *   <li>stable — JVM-agnostic (no vendor; all non-loopback MACs, ignore up/virtual)
- *   <li>legacy — exact pre-fix algorithm (vendor + strict NIC filters) for already-bound hosts
- * </ul>
- */
 public final class ServerFingerprintService {
 
     public String computeInstallationFingerprint(JavaPlugin plugin) {
@@ -38,7 +26,6 @@ public final class ServerFingerprintService {
         }
     }
 
-    /** Preferred host id: same machine across JVMs / MC versions (incl. pure 1.17). */
     public String computeHostFingerprint(JavaPlugin plugin) {
         try {
             return sha256Hex(String.join("|", stableHostSignals()));
@@ -47,10 +34,6 @@ public final class ServerFingerprintService {
         }
     }
 
-    /**
-     * Exact pre-fix host id ({@code java.vendor} + strict NIC filters). Fallback so hosts bound
-     * by 1.17.1+ before the stable algorithm keep validating.
-     */
     public String computeHostFingerprintLegacy(JavaPlugin plugin) {
         try {
             List<String> signals = new ArrayList<>();
@@ -74,7 +57,7 @@ public final class ServerFingerprintService {
         signals.add("host=" + safeHostName());
         signals.add("os=" + System.getProperty("os.name", ""));
         signals.add("arch=" + System.getProperty("os.arch", ""));
-        // Ignore isUp/isVirtual — Java 16 (Paper 1.17) disagrees with newer JVMs at boot.
+
         signals.add("macs=" + String.join(",", collectMacs(false)));
         return signals;
     }

@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.common.model;
 
-/** Immutable automatic-targeting configuration. */
 public final class AutoTargetSettings {
     private final boolean enabled;
     private final double range;

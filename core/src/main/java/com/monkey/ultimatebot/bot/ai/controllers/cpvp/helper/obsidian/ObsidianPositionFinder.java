@@ -1,14 +1,13 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -39,7 +38,9 @@ public class ObsidianPositionFinder {
             for (int x = -scanRadius; x <= scanRadius; x++) {
                 for (int z = -scanRadius; z <= scanRadius; z++) {
                     BlockVector checkPos = new BlockVector(
-                            targetBlockPos.getBlockX() + x, targetBlockPos.getBlockY() + y, targetBlockPos.getBlockZ() + z);
+                            targetBlockPos.getBlockX() + x,
+                            targetBlockPos.getBlockY() + y,
+                            targetBlockPos.getBlockZ() + z);
                     if (recentPlacements.containsKey(checkPos)) continue;
                     int obsidianY = checkPos.getBlockY();
                     int botY = bot.getLocation().getBlockY();
@@ -52,7 +53,8 @@ public class ObsidianPositionFinder {
             }
         }
 
-        validPositions.sort((pos1, pos2) -> Double.compare(evaluateObsidianScore(pos2, target), evaluateObsidianScore(pos1, target)));
+        validPositions.sort((pos1, pos2) ->
+                Double.compare(evaluateObsidianScore(pos2, target), evaluateObsidianScore(pos1, target)));
         return validPositions.stream().limit(maxPositions).collect(Collectors.toList());
     }
 
@@ -94,8 +96,7 @@ public class ObsidianPositionFinder {
         Vector direction = end.clone().subtract(start);
         double distance = direction.length();
         if (distance < 1.0E-6D) return true;
-        return RayTraceAccess.clearPath(
-                bot.getWorld(), start.toLocation(bot.getWorld()), direction, distance);
+        return RayTraceAccess.clearPath(bot.getWorld(), start.toLocation(bot.getWorld()), direction, distance);
     }
 
     private Block blockAt(BlockVector pos) {
@@ -107,7 +108,8 @@ public class ObsidianPositionFinder {
     }
 
     private org.bukkit.Location centerOf(BlockVector pos) {
-        return new org.bukkit.Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+        return new org.bukkit.Location(
+                bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
     }
 
     private static boolean isPassable(Block block) {

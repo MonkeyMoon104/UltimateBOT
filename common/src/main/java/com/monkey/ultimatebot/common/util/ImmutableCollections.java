@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/** Java 8 stand-ins for List/Set/Map.of and copyOf. */
 public final class ImmutableCollections {
     private ImmutableCollections() {}
 

@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot.ai.services.cache;
 
-/** Version-neutral cache counters (avoids linking Caffeine types into callers). */
 public final class TargetCacheStats {
 
     private static final TargetCacheStats EMPTY = new TargetCacheStats(0L, 0L, 0L);

@@ -102,8 +102,7 @@ public class BotDeathService {
         if (deathSnapshot != null) {
             plugin.getBotEventDispatcher()
                     .publish(new BotDespawnEvent(
-                            plugin.getBotEventDispatcher()
-                                    .nextSequence(bukkitBot.getUniqueId()),
+                            plugin.getBotEventDispatcher().nextSequence(bukkitBot.getUniqueId()),
                             deathSnapshot,
                             BotEventSource.SYSTEM,
                             BotDespawnReason.BOT_DEATH));

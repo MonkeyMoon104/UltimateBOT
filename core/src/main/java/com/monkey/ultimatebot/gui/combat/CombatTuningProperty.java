@@ -30,12 +30,7 @@ public enum CombatTuningProperty {
     private final boolean integer;
 
     CombatTuningProperty(
-            String displayName,
-            String materialName,
-            double step,
-            double minimum,
-            double maximum,
-            boolean integer) {
+            String displayName, String materialName, double step, double minimum, double maximum, boolean integer) {
         this.displayName = displayName;
         this.materialName = materialName;
         this.step = step;
@@ -55,8 +50,7 @@ public enum CombatTuningProperty {
         if (this == AIM_ACCURACY) {
             return MaterialCatalog.optional("TARGET", Material.ARROW);
         }
-        // Never link modern-only enum fields (CLOCK/REPEATER/COMPARATOR) — Spigot 1.12.2 uses
-        // WATCH/DIODE/REDSTONE_COMPARATOR (resolved via MaterialCatalog aliases).
+
         return MaterialCatalog.optional(materialName, Material.STONE);
     }
 
@@ -88,7 +82,7 @@ public enum CombatTuningProperty {
     }
 
     private double value(CombatTuning tuning) {
-                switch (this) {
+        switch (this) {
             case ATTACK_RANGE:
                 return tuning.attackRange();
             case ATTACK_COOLDOWN:
@@ -122,7 +116,7 @@ public enum CombatTuningProperty {
     }
 
     private void write(CombatTuning.Builder builder, double value) {
-                switch (this) {
+        switch (this) {
             case ATTACK_RANGE:
                 builder.attackRange(value);
                 break;

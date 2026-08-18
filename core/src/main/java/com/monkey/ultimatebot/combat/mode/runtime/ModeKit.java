@@ -1,13 +1,13 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
+import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
-import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -59,10 +59,6 @@ public final class ModeKit {
             return this;
         }
 
-        /**
-         * Resolves materials by name so kits do not touch version-specific {@link Material} enum
-         * constants at class-init time (avoids {@code NoSuchFieldError} on older servers).
-         */
         public Builder slot(int slot, String materialName, int count) {
             return slot(slot, MaterialCatalog.require(Objects.requireNonNull(materialName, "materialName")), count);
         }

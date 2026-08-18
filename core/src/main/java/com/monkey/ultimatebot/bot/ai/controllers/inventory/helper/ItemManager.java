@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotManager;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

@@ -30,6 +30,7 @@ class SdkSurfaceParityTest {
                 .contains(
                         "listBots",
                         "activeBotCount",
+                        "platform",
                         "listCombatModes",
                         "getCombatMode",
                         "listBrains",

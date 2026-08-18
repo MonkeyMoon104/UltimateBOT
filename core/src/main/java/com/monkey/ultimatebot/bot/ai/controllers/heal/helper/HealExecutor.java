@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class HealExecutor implements IHealExecutor {
 

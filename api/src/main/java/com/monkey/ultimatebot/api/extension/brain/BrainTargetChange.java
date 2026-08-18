@@ -17,6 +17,7 @@ public final class BrainTargetChange {
     public @Nullable LivingEntity previous() {
         return previous;
     }
+
     public @Nullable LivingEntity current() {
         return current;
     }

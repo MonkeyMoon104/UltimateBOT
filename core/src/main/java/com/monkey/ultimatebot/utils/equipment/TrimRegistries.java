@@ -4,7 +4,6 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-/** Version-specific access to armor-trim registries. */
 interface TrimRegistries {
 
     Registry<TrimPattern> patterns();

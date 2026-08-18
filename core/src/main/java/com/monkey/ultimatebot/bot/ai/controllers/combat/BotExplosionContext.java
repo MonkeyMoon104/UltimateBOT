@@ -10,9 +10,6 @@ import java.util.function.Supplier;
 import org.bukkit.Location;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Marks the synchronous Bukkit explosion event fired by a bot combat action.
- */
 public final class BotExplosionContext {
     private static final ThreadLocal<Integer> BLOCK_PROTECTION_DEPTH = ThreadLocal.withInitial(() -> 0);
 
@@ -36,7 +33,6 @@ public final class BotExplosionContext {
         }
     }
 
-    /** Runs a bot explosion after exposing its mutable policy to API listeners. */
     public static <T> T execute(
             @Nullable ITrainingBot bot,
             BotExplosionType type,
@@ -46,9 +42,7 @@ public final class BotExplosionContext {
             T cancelledResult) {
         boolean resolvedBlockDamage = blockDamage;
         if (bot != null && bot.getPlugin() != null) {
-            UUID ownerUUID = bot.getPlugin()
-                    .getBotRegistry()
-                    .getOwnerUUIDByBotUUID(bot.getUniqueId());
+            UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
             BotSnapshot snapshot = ownerUUID == null
                     ? null
                     : bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -56,9 +50,7 @@ public final class BotExplosionContext {
                 BotExplosionEvent event = bot.getPlugin()
                         .getBotEventDispatcher()
                         .publish(new BotExplosionEvent(
-                                bot.getPlugin()
-                                        .getBotEventDispatcher()
-                                        .nextSequence(bot.getUniqueId()),
+                                bot.getPlugin().getBotEventDispatcher().nextSequence(bot.getUniqueId()),
                                 snapshot,
                                 type,
                                 location,

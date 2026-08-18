@@ -24,9 +24,11 @@ public final class BotOperationResult {
     public boolean success() {
         return success;
     }
+
     public String message() {
         return message;
     }
+
     public @Nullable BotSnapshot snapshot() {
         return snapshot;
     }
@@ -70,7 +72,9 @@ public final class BotOperationResult {
             return false;
         }
         BotOperationResult other = (BotOperationResult) obj;
-        return success == other.success && java.util.Objects.equals(message, other.message) && java.util.Objects.equals(snapshot, other.snapshot);
+        return success == other.success
+                && java.util.Objects.equals(message, other.message)
+                && java.util.Objects.equals(snapshot, other.snapshot);
     }
 
     @Override

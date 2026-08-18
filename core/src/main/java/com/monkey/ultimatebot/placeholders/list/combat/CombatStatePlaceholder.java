@@ -26,7 +26,7 @@ public class CombatStatePlaceholder implements IBotPlaceholder {
         if (bot == null || !bot.isCombat()) return "None";
 
         BotAI.CombatState state = bot.getBotAI().getCurrentState();
-                switch (state) {
+        switch (state) {
             case AGGRESSIVE:
                 return "AGGRESSIVE";
             case DEFENSIVE:

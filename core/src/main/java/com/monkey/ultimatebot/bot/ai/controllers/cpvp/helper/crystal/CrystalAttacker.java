@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.combat.BotExplosionType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.BotExplosionContext;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import org.bukkit.entity.EnderCrystal;
 
@@ -19,7 +19,6 @@ public class CrystalAttacker {
 
     public boolean attackCrystal(EnderCrystal crystal) {
         if (crystal == null || crystal.isDead() || !crystal.isValid()) return false;
-        // 1.13 Bukkit LoS is unreliable for crystal hitboxes; NMS attack still works in range.
         if (!MinecraftVersionAccess.is1_13() && !bot.hasLineOfSight(crystal)) {
             return false;
         }

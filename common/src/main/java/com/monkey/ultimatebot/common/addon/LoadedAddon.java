@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Runtime addon instance together with its isolated class loader. */
 public final class LoadedAddon<A extends AutoCloseable> implements AutoCloseable {
     private final A instance;
     private final URLClassLoader classLoader;

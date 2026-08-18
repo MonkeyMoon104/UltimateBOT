@@ -1,8 +1,5 @@
 package com.monkey.ultimatebot.integration.api;
 
-
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import java.util.Collections;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
@@ -18,8 +15,9 @@ import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
@@ -114,13 +112,11 @@ public final class BotSnapshotMapper {
                 healing = options.isHealing();
                 killMessageEnabled = options.isKillMessageEnabled();
                 teamOwnerUUIDs = options.getTeamOwnerUUIDs();
-                botNameTemplate =
-                        options.getBotNameTemplate() != null ? options.getBotNameTemplate() : "UltimateBot";
+                botNameTemplate = options.getBotNameTemplate() != null ? options.getBotNameTemplate() : "UltimateBot";
                 botSkinSource = options.getBotSkin().source().name();
                 minArmor = BotArmorTier.valueOf(options.getMinArmorTier().name());
                 maxArmor = BotArmorTier.valueOf(options.getMaxArmorTier().name());
-                org.bukkit.inventory.ItemStack chestplate =
-                        options.getArmor().get(EquipmentSlotKind.CHEST);
+                org.bukkit.inventory.ItemStack chestplate = options.getArmor().get(EquipmentSlotKind.CHEST);
                 com.monkey.ultimatebot.utils.armor.ArmorTier currentArmor = chestplate == null
                         ? null
                         : com.monkey.ultimatebot.utils.armor.ArmorTier.fromMaterial(

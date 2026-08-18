@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.IPathfindingManager;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.BotEnderpearlController;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -35,9 +35,7 @@ public class PathfindingManager implements IPathfindingManager {
     private int blockedPathCounter;
 
     public PathfindingManager(
-            ITrainingBot bot,
-            BotMovementController movementController,
-            BotEnderpearlController enderpearlController) {
+            ITrainingBot bot, BotMovementController movementController, BotEnderpearlController enderpearlController) {
         this.bot = bot;
         this.movementController = movementController;
         this.enderpearlController = enderpearlController;
@@ -55,7 +53,8 @@ public class PathfindingManager implements IPathfindingManager {
             stuckCounter = 0;
         }
 
-        boolean directPathBlocked = movementController.isPathObstructed(target.getLocation().toVector());
+        boolean directPathBlocked =
+                movementController.isPathObstructed(target.getLocation().toVector());
         blockedPathCounter = directPathBlocked ? blockedPathCounter + 1 : 0;
 
         if (blockedPathCounter >= BLOCKED_PATH_CONFIRMATION_TICKS) {
@@ -274,7 +273,9 @@ public class PathfindingManager implements IPathfindingManager {
         double[] scales = {3.2D, 4.0D, 4.8D};
         for (double scale : scales) {
             for (int sign : new int[] {1, -1}) {
-                Vector candidate = botPos.clone().add(lateral.clone().multiply(scale * sign)).add(new Vector(0.0D, 0.6D, 0.0D));
+                Vector candidate = botPos.clone()
+                        .add(lateral.clone().multiply(scale * sign))
+                        .add(new Vector(0.0D, 0.6D, 0.0D));
                 BlockVector blockPos = toBlockVector(candidate);
                 if (!isSafeLandingSpot(blockPos)) {
                     continue;

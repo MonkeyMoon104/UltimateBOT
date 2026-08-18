@@ -21,7 +21,8 @@ class MaterialCatalogTest {
 
     @Test
     void availableIsFalseForUnknown() {
-        assertThat(MaterialCatalog.available("THIS_MATERIAL_DOES_NOT_EXIST_XYZ")).isFalse();
+        assertThat(MaterialCatalog.available("THIS_MATERIAL_DOES_NOT_EXIST_XYZ"))
+                .isFalse();
         assertThat(MaterialCatalog.available("DIAMOND_SWORD")).isTrue();
     }
 
@@ -70,7 +71,7 @@ class MaterialCatalogTest {
 
     @Test
     void grassAliasGroupResolvesBidirectionally() {
-        // On 1.20.3+ GRASS was renamed to SHORT_GRASS; either request must resolve.
+
         Material fromLegacy = MaterialCatalog.optional("GRASS", Material.STONE);
         Material fromModern = MaterialCatalog.optional("SHORT_GRASS", Material.STONE);
         assertThat(fromLegacy).isNotNull().isNotEqualTo(Material.STONE);
@@ -90,8 +91,7 @@ class MaterialCatalogTest {
 
     @Test
     void trimTemplateSuffixFallsBackToGunpowderWhenAbsent() {
-        Material resolved =
-                MaterialCatalog.optional("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
+        Material resolved = MaterialCatalog.optional("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE", Material.GUNPOWDER);
         Material trim = Material.matchMaterial("SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE");
         if (trim != null) {
             assertThat(resolved).isEqualTo(trim);
@@ -104,7 +104,8 @@ class MaterialCatalogTest {
     void isComparesByNameWithoutRequiringEnumField() {
         assertThat(MaterialCatalog.is(Material.DIAMOND_SWORD, "DIAMOND_SWORD")).isTrue();
         assertThat(MaterialCatalog.is(Material.STICK, "DIAMOND_SWORD")).isFalse();
-        assertThat(MaterialCatalog.is(Material.STICK, "THIS_MATERIAL_DOES_NOT_EXIST_XYZ")).isFalse();
+        assertThat(MaterialCatalog.is(Material.STICK, "THIS_MATERIAL_DOES_NOT_EXIST_XYZ"))
+                .isFalse();
     }
 
     @Test
@@ -151,8 +152,9 @@ class MaterialCatalogTest {
 
     @Test
     void alwaysPresentOn117PlusAreAvailableOnCompileTarget() {
-        // Sanity on this compile target; older runtimes resolve via optional()/is() instead of enum fields.
-        assertThat(MaterialCatalog.available("TOTEM_OF_UNDYING") || MaterialCatalog.available("TOTEM")).isTrue();
+
+        assertThat(MaterialCatalog.available("TOTEM_OF_UNDYING") || MaterialCatalog.available("TOTEM"))
+                .isTrue();
         assertThat(MaterialCatalog.available("END_CRYSTAL")).isTrue();
     }
 }

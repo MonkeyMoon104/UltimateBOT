@@ -3,9 +3,9 @@ package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
-import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,8 @@ public class CrystalManager {
     public void cleanupCrystalCounts(Map<BlockVector, Integer> crystalCountAtPosition, World world) {
         crystalCountAtPosition.entrySet().removeIf(entry -> {
             BlockVector pos = entry.getKey();
-            Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()).getType();
+            Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ())
+                    .getType();
             if (type != Material.OBSIDIAN && type != Material.BEDROCK) {
                 return true;
             }
@@ -38,29 +39,26 @@ public class CrystalManager {
     }
 
     public @Nullable EnderCrystal findCrystalAt(BlockVector pos, World world) {
-        for (EnderCrystal crystal :
-                WorldAccess.nearbyEntitiesOfType(
-                        world,
-                        new org.bukkit.Location(
-                                world, pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D),
-                        1.5D,
-                        1.5D,
-                        1.5D,
-                        EnderCrystal.class)) {
+        for (EnderCrystal crystal : WorldAccess.nearbyEntitiesOfType(
+                world,
+                new org.bukkit.Location(world, pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D),
+                1.5D,
+                1.5D,
+                1.5D,
+                EnderCrystal.class)) {
             return crystal;
         }
         return null;
     }
 
     public List<EnderCrystal> findNearbyCrystals(Player bot, World world, double crystalAttackRange) {
-        return new ArrayList<>(
-                WorldAccess.nearbyEntitiesOfType(
-                        world,
-                        bot.getLocation(),
-                        crystalAttackRange,
-                        crystalAttackRange,
-                        crystalAttackRange,
-                        EnderCrystal.class));
+        return new ArrayList<>(WorldAccess.nearbyEntitiesOfType(
+                world,
+                bot.getLocation(),
+                crystalAttackRange,
+                crystalAttackRange,
+                crystalAttackRange,
+                EnderCrystal.class));
     }
 
     public List<BlockVector> getValidCrystalPositions(
@@ -74,17 +72,20 @@ public class CrystalManager {
         return validObsidianPositions;
     }
 
-    private boolean isValidCrystalPos(BlockVector pos, Player target, Player bot, World world, double maxCrystalDistance) {
-        Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()).getType();
+    private boolean isValidCrystalPos(
+            BlockVector pos, Player target, Player bot, World world, double maxCrystalDistance) {
+        Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ())
+                .getType();
         if (type != Material.OBSIDIAN && type != Material.BEDROCK) return false;
         if (!BlockPassableAccess.isPassable(world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()))
-                || !BlockPassableAccess.isPassable(world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 2, pos.getBlockZ()))) return false;
-        // 1.13 only: occupied pillars were re-clicked forever (interact-sound loop).
+                || !BlockPassableAccess.isPassable(
+                        world.getBlockAt(pos.getBlockX(), pos.getBlockY() + 2, pos.getBlockZ()))) return false;
         if (MinecraftVersionAccess.is1_13() && findCrystalAt(crystalStandPos(pos), world) != null) {
             return false;
         }
 
-        org.bukkit.Location center = new org.bukkit.Location(world, pos.getBlockX() + 0.5D, pos.getBlockY() + 1.5D, pos.getBlockZ() + 0.5D);
+        org.bukkit.Location center =
+                new org.bukkit.Location(world, pos.getBlockX() + 0.5D, pos.getBlockY() + 1.5D, pos.getBlockZ() + 0.5D);
         double distanceToBot = bot.getLocation().distance(center);
         double distanceToTarget = target.getLocation().distance(center);
         double maxBotDistance = Math.max(maxCrystalDistance + 2.0, 8.0);
@@ -97,7 +98,6 @@ public class CrystalManager {
         return crystalY <= targetY + 2 && botY <= crystalY + 2;
     }
 
-    /** Block position where the crystal entity stands (one above the obsidian/bedrock). */
     public static BlockVector crystalStandPos(BlockVector obsidianPos) {
         return new BlockVector(obsidianPos.getBlockX(), obsidianPos.getBlockY() + 1, obsidianPos.getBlockZ());
     }

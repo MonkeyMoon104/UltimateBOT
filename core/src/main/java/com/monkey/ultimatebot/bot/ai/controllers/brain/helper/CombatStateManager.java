@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.helper.inter.ICombatStateManager;
 import com.monkey.ultimatebot.bot.ai.controllers.cpvp.BotCPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper.RAPVPState;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -120,17 +120,16 @@ public class CombatStateManager implements ICombatStateManager {
 
     @Override
     public void onStateChange(Player target) {
-                switch (currentState) {
+        switch (currentState) {
             case AGGRESSIVE:
             case CRYSTAL_SETUP:
             case DEFENSIVE:
             case REPOSITIONING:
             case RETREATING:
-
                 break;
             case ANCHOR_SETUP:
                 rapvpController.enable(target);
-                                lastAnchorAttempt = System.currentTimeMillis();
+                lastAnchorAttempt = System.currentTimeMillis();
                 break;
         }
     }
@@ -171,7 +170,7 @@ public class CombatStateManager implements ICombatStateManager {
             return 8000L;
         }
 
-                switch (difficulty) {
+        switch (difficulty) {
             case EASY:
                 return 8000L;
             case NORMAL:

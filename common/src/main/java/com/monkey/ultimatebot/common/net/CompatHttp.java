@@ -15,13 +15,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-/**
- * Java 8–safe HTTP POST helper.
- *
- * <p>On Java 11+ runtimes (Paper 1.17+ / 1.21), prefers {@code java.net.http.HttpClient} via
- * reflection — same stack as before the Java 8 migration (Happy Eyeballs, TLS, timeouts). Falls
- * back to a hardened {@link HttpURLConnection} path on Java 8.
- */
 public final class CompatHttp {
 
     private static final boolean JDK_HTTP_CLIENT_AVAILABLE = isJdkHttpClientAvailable();
@@ -47,8 +40,7 @@ public final class CompatHttp {
     }
 
     public static Response postJson(
-            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent)
-            throws IOException {
+            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent) throws IOException {
         Objects.requireNonNull(uri, "uri");
         Objects.requireNonNull(jsonBody, "jsonBody");
         if (JDK_HTTP_CLIENT_AVAILABLE) {
@@ -59,7 +51,6 @@ public final class CompatHttp {
                     throw ex;
                 }
             } catch (RuntimeException ex) {
-                // Reflective wiring failed — use HttpURLConnection.
             }
         }
         return postJsonWithUrlConnection(uri, jsonBody, connectTimeoutMs, requestTimeoutMs, userAgent);
@@ -84,7 +75,6 @@ public final class CompatHttp {
     }
 
     private static boolean shouldFallbackToUrlConnection(IOException ex) {
-        // Only fall back when the reflective client itself is unusable, not on normal HTTP errors.
         String message = ex.getMessage();
         return message != null && message.startsWith("JDK HttpClient unavailable:");
     }
@@ -99,8 +89,7 @@ public final class CompatHttp {
     }
 
     private static Response postJsonWithJdkHttpClient(
-            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent)
-            throws IOException {
+            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent) throws IOException {
         try {
             Class<?> httpClientClass = Class.forName("java.net.http.HttpClient");
             Class<?> httpClientBuilderClass = Class.forName("java.net.http.HttpClient$Builder");
@@ -118,55 +107,44 @@ public final class CompatHttp {
             Object requestTimeout = durationOfMillis.invoke(null, (long) requestTimeoutMs);
 
             Object clientBuilder = httpClientClass.getMethod("newBuilder").invoke(null);
-            clientBuilder =
-                    httpClientBuilderClass
-                            .getMethod("connectTimeout", durationClass)
-                            .invoke(clientBuilder, connectTimeout);
-            // Match previous HttpClient default: Redirect.NEVER
+            clientBuilder = httpClientBuilderClass
+                    .getMethod("connectTimeout", durationClass)
+                    .invoke(clientBuilder, connectTimeout);
             Class<?> redirectClass = Class.forName("java.net.http.HttpClient$Redirect");
             @SuppressWarnings({"unchecked", "rawtypes"})
             Object neverRedirect = Enum.valueOf((Class) redirectClass, "NEVER");
-            clientBuilder =
-                    httpClientBuilderClass
-                            .getMethod("followRedirects", redirectClass)
-                            .invoke(clientBuilder, neverRedirect);
+            clientBuilder = httpClientBuilderClass
+                    .getMethod("followRedirects", redirectClass)
+                    .invoke(clientBuilder, neverRedirect);
             Object httpClient = httpClientBuilderClass.getMethod("build").invoke(clientBuilder);
 
             Object bodyPublisher =
-                    bodyPublishersClass
-                            .getMethod("ofByteArray", byte[].class)
-                            .invoke(null, new Object[] {jsonBody});
+                    bodyPublishersClass.getMethod("ofByteArray", byte[].class).invoke(null, new Object[] {jsonBody});
 
-            Object requestBuilder = httpRequestClass.getMethod("newBuilder", URI.class).invoke(null, uri);
+            Object requestBuilder =
+                    httpRequestClass.getMethod("newBuilder", URI.class).invoke(null, uri);
             requestBuilder =
-                    httpRequestBuilderClass
-                            .getMethod("timeout", durationClass)
-                            .invoke(requestBuilder, requestTimeout);
-            requestBuilder =
-                    httpRequestBuilderClass
-                            .getMethod("header", String.class, String.class)
-                            .invoke(requestBuilder, "Content-Type", "application/json; charset=utf-8");
-            requestBuilder =
-                    httpRequestBuilderClass
-                            .getMethod("header", String.class, String.class)
-                            .invoke(requestBuilder, "Accept", "application/json");
+                    httpRequestBuilderClass.getMethod("timeout", durationClass).invoke(requestBuilder, requestTimeout);
+            requestBuilder = httpRequestBuilderClass
+                    .getMethod("header", String.class, String.class)
+                    .invoke(requestBuilder, "Content-Type", "application/json; charset=utf-8");
+            requestBuilder = httpRequestBuilderClass
+                    .getMethod("header", String.class, String.class)
+                    .invoke(requestBuilder, "Accept", "application/json");
             if (userAgent != null && !userAgent.trim().isEmpty()) {
-                requestBuilder =
-                        httpRequestBuilderClass
-                                .getMethod("header", String.class, String.class)
-                                .invoke(requestBuilder, "User-Agent", userAgent);
+                requestBuilder = httpRequestBuilderClass
+                        .getMethod("header", String.class, String.class)
+                        .invoke(requestBuilder, "User-Agent", userAgent);
             }
-            requestBuilder =
-                    httpRequestBuilderClass
-                            .getMethod("POST", bodyPublisherClass)
-                            .invoke(requestBuilder, bodyPublisher);
+            requestBuilder = httpRequestBuilderClass
+                    .getMethod("POST", bodyPublisherClass)
+                    .invoke(requestBuilder, bodyPublisher);
             Object httpRequest = httpRequestBuilderClass.getMethod("build").invoke(requestBuilder);
 
             Object bodyHandler = bodyHandlersClass.getMethod("ofString").invoke(null);
-            Object httpResponse =
-                    httpClientClass
-                            .getMethod("send", httpRequestClass, bodyHandlerClass)
-                            .invoke(httpClient, httpRequest, bodyHandler);
+            Object httpResponse = httpClientClass
+                    .getMethod("send", httpRequestClass, bodyHandlerClass)
+                    .invoke(httpClient, httpRequest, bodyHandler);
 
             int status = ((Integer) httpResponseClass.getMethod("statusCode").invoke(httpResponse)).intValue();
             String body = (String) httpResponseClass.getMethod("body").invoke(httpResponse);
@@ -193,13 +171,11 @@ public final class CompatHttp {
     }
 
     private static Response postJsonWithUrlConnection(
-            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent)
-            throws IOException {
+            URI uri, byte[] jsonBody, int connectTimeoutMs, int requestTimeoutMs, String userAgent) throws IOException {
         URL url = uri.toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(connectTimeoutMs);
         connection.setReadTimeout(requestTimeoutMs);
-        // Match java.net.http.HttpClient default (Redirect.NEVER).
         connection.setInstanceFollowRedirects(false);
         connection.setUseCaches(false);
         connection.setRequestMethod("POST");
@@ -210,8 +186,6 @@ public final class CompatHttp {
         if (userAgent != null && !userAgent.trim().isEmpty()) {
             connection.setRequestProperty("User-Agent", userAgent);
         }
-        // Do not use setFixedLengthStreamingMode: it disables auth/redirect handling and can throw
-        // HttpRetryException against CDN edges (Cloudflare) that differ from HttpClient behavior.
         connection.setRequestProperty("Content-Length", String.valueOf(jsonBody.length));
         try {
             try (OutputStream output = connection.getOutputStream()) {
@@ -219,8 +193,7 @@ public final class CompatHttp {
                 output.flush();
             }
             int status = connection.getResponseCode();
-            InputStream stream =
-                    status >= 400 ? connection.getErrorStream() : connection.getInputStream();
+            InputStream stream = status >= 400 ? connection.getErrorStream() : connection.getInputStream();
             return new Response(status, readFully(stream));
         } finally {
             connection.disconnect();
@@ -231,7 +204,6 @@ public final class CompatHttp {
         if (stream == null) {
             return "";
         }
-        // Decode once after full read — per-chunk new String() can split UTF-8 sequences.
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte[] chunk = new byte[4096];
         int read;

@@ -25,7 +25,11 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
                         .slot(AXE_SLOT, "NETHERITE_AXE", Material.DIAMOND_AXE, 1)
                         .slot(SHIELD_SLOT, Material.SHIELD)
                         .slot(PEARL_SLOT, Material.ENDER_PEARL, 16)
-                        .slot(BotInventoryController.GOLDEN_APPLE_SLOT, "ENCHANTED_GOLDEN_APPLE", Material.GOLDEN_APPLE, 64)
+                        .slot(
+                                BotInventoryController.GOLDEN_APPLE_SLOT,
+                                "ENCHANTED_GOLDEN_APPLE",
+                                Material.GOLDEN_APPLE,
+                                64)
                         .offHand("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
                         .build());
     }
@@ -41,7 +45,7 @@ public final class SmpPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-                switch (phase) {
+        switch (phase) {
             case PRESSURE:
                 pressure(context, target);
                 break;

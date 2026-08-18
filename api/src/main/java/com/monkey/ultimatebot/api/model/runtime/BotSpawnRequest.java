@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.api.model.runtime;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;

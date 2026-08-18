@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.api.extension.combat;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatCapability;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -28,22 +28,62 @@ public final class CombatModeDescriptor {
     private final Map<DifficultyTier, CombatTuning> profiles;
     private final ModeKit kit;
     private final @Nullable BrainKey brain;
+    private final Set<PlatformCapability> requiredPlatformCapabilities;
 
-    public CombatModeDescriptor(CombatMode mode, String displayName, List<String> description, Material icon, String permission, int order, Set<CombatCapability> capabilities, Map<DifficultyTier, CombatTuning> profiles, ModeKit kit, @Nullable BrainKey brain) {
+    public CombatModeDescriptor(
+            CombatMode mode,
+            String displayName,
+            List<String> description,
+            Material icon,
+            String permission,
+            int order,
+            Set<CombatCapability> capabilities,
+            Map<DifficultyTier, CombatTuning> profiles,
+            ModeKit kit,
+            @Nullable BrainKey brain) {
+        this(
+                mode,
+                displayName,
+                description,
+                icon,
+                permission,
+                order,
+                capabilities,
+                profiles,
+                kit,
+                brain,
+                Collections.emptySet());
+    }
 
+    public CombatModeDescriptor(
+            CombatMode mode,
+            String displayName,
+            List<String> description,
+            Material icon,
+            String permission,
+            int order,
+            Set<CombatCapability> capabilities,
+            Map<DifficultyTier, CombatTuning> profiles,
+            ModeKit kit,
+            @Nullable BrainKey brain,
+            Set<PlatformCapability> requiredPlatformCapabilities) {
 
         Objects.requireNonNull(mode, "mode");
         displayName = requireText(displayName, "displayName");
-        description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(description, "description"));
+        description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                Objects.requireNonNull(description, "description"));
         Objects.requireNonNull(icon, "icon");
         permission = Objects.requireNonNull(permission, "permission").trim();
-        capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
+        capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                Objects.requireNonNull(capabilities, "capabilities"));
         EnumMap<DifficultyTier, CombatTuning> profileCopy = new EnumMap<>(Objects.requireNonNull(profiles, "profiles"));
         for (DifficultyTier difficulty : DifficultyTier.values()) {
             Objects.requireNonNull(profileCopy.get(difficulty), "profiles[" + difficulty + "]");
         }
         profiles = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profileCopy);
         Objects.requireNonNull(kit, "kit");
+        requiredPlatformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                Objects.requireNonNull(requiredPlatformCapabilities, "requiredPlatformCapabilities"));
         this.mode = mode;
         this.displayName = displayName;
         this.description = description;
@@ -54,41 +94,55 @@ public final class CombatModeDescriptor {
         this.profiles = profiles;
         this.kit = kit;
         this.brain = brain;
+        this.requiredPlatformCapabilities = requiredPlatformCapabilities;
     }
 
     public CombatMode mode() {
         return mode;
     }
+
     public String displayName() {
         return displayName;
     }
+
     public List<String> description() {
         return description;
     }
+
     public Material icon() {
         return icon;
     }
+
     public String permission() {
         return permission;
     }
+
     public int order() {
         return order;
     }
+
     public Set<CombatCapability> capabilities() {
         return capabilities;
     }
+
     public Map<DifficultyTier, CombatTuning> profiles() {
         return profiles;
     }
+
     public ModeKit kit() {
         return kit;
     }
+
     public @Nullable BrainKey brain() {
         return brain;
     }
 
     public Optional<BrainKey> brainKey() {
         return Optional.ofNullable(brain);
+    }
+
+    public Set<PlatformCapability> requiredPlatformCapabilities() {
+        return requiredPlatformCapabilities;
     }
 
     /** Starts a descriptor builder with validated identity and presentation defaults. */
@@ -120,6 +174,7 @@ public final class CombatModeDescriptor {
         private Set<CombatCapability> capabilities = Collections.emptySet();
         private ModeKit kit = ModeKit.empty();
         private @Nullable BrainKey brain;
+        private Set<PlatformCapability> requiredPlatformCapabilities = Collections.emptySet();
 
         private Builder(CombatMode mode, String displayName, Material icon) {
             this.mode = Objects.requireNonNull(mode, "mode");
@@ -131,7 +186,8 @@ public final class CombatModeDescriptor {
         }
 
         public Builder description(List<String> description) {
-            this.description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(description, "description"));
+            this.description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                    Objects.requireNonNull(description, "description"));
             return this;
         }
 
@@ -146,7 +202,8 @@ public final class CombatModeDescriptor {
         }
 
         public Builder capabilities(Set<CombatCapability> capabilities) {
-            this.capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(capabilities, "capabilities"));
+            this.capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                    Objects.requireNonNull(capabilities, "capabilities"));
             return this;
         }
 
@@ -170,9 +227,25 @@ public final class CombatModeDescriptor {
             return this;
         }
 
+        public Builder requiredPlatformCapabilities(Set<PlatformCapability> requiredPlatformCapabilities) {
+            this.requiredPlatformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                    Objects.requireNonNull(requiredPlatformCapabilities, "requiredPlatformCapabilities"));
+            return this;
+        }
+
         public CombatModeDescriptor build() {
             return new CombatModeDescriptor(
-                    mode, displayName, description, icon, permission, order, capabilities, profiles, kit, brain);
+                    mode,
+                    displayName,
+                    description,
+                    icon,
+                    permission,
+                    order,
+                    capabilities,
+                    profiles,
+                    kit,
+                    brain,
+                    requiredPlatformCapabilities);
         }
     }
 
@@ -185,16 +258,40 @@ public final class CombatModeDescriptor {
             return false;
         }
         CombatModeDescriptor other = (CombatModeDescriptor) obj;
-        return java.util.Objects.equals(mode, other.mode) && java.util.Objects.equals(displayName, other.displayName) && java.util.Objects.equals(description, other.description) && java.util.Objects.equals(icon, other.icon) && java.util.Objects.equals(permission, other.permission) && order == other.order && java.util.Objects.equals(capabilities, other.capabilities) && java.util.Objects.equals(profiles, other.profiles) && java.util.Objects.equals(kit, other.kit) && java.util.Objects.equals(brain, other.brain);
+        return java.util.Objects.equals(mode, other.mode)
+                && java.util.Objects.equals(displayName, other.displayName)
+                && java.util.Objects.equals(description, other.description)
+                && java.util.Objects.equals(icon, other.icon)
+                && java.util.Objects.equals(permission, other.permission)
+                && order == other.order
+                && java.util.Objects.equals(capabilities, other.capabilities)
+                && java.util.Objects.equals(profiles, other.profiles)
+                && java.util.Objects.equals(kit, other.kit)
+                && java.util.Objects.equals(brain, other.brain)
+                && java.util.Objects.equals(requiredPlatformCapabilities, other.requiredPlatformCapabilities);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(mode, displayName, description, icon, permission, order, capabilities, profiles, kit, brain);
+        return java.util.Objects.hash(
+                mode,
+                displayName,
+                description,
+                icon,
+                permission,
+                order,
+                capabilities,
+                profiles,
+                kit,
+                brain,
+                requiredPlatformCapabilities);
     }
 
     @Override
     public String toString() {
-        return "CombatModeDescriptor[mode=" + mode + ", displayName=" + displayName + ", description=" + description + ", icon=" + icon + ", permission=" + permission + ", order=" + order + ", capabilities=" + capabilities + ", profiles=" + profiles + ", kit=" + kit + ", brain=" + brain + "]";
+        return "CombatModeDescriptor[mode=" + mode + ", displayName=" + displayName + ", description=" + description
+                + ", icon=" + icon + ", permission=" + permission + ", order=" + order + ", capabilities="
+                + capabilities + ", profiles=" + profiles + ", kit=" + kit + ", brain=" + brain
+                + ", requiredPlatformCapabilities=" + requiredPlatformCapabilities + "]";
     }
 }

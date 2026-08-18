@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -11,8 +10,9 @@ public final class UuidSetRequest {
 
     public UuidSetRequest(Set<UUID> uuids) {
 
-
-        uuids = uuids == null ? Collections.emptySet() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(uuids);
+        uuids = uuids == null
+                ? Collections.emptySet()
+                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(uuids);
         this.uuids = uuids;
     }
 

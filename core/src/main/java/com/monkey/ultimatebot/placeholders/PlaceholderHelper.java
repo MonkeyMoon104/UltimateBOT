@@ -26,7 +26,8 @@ public class PlaceholderHelper {
     private @Nullable ITrainingBot getActiveEventBot() {
         for (ITrainingBot bot : plugin.getBotRegistry().getAllBots().values()) {
             if (bot != null && bot.getBrainController() != null) {
-                com.monkey.ultimatebot.bot.BotOptions botOptions = bot.getBrainController().getBotOptions();
+                com.monkey.ultimatebot.bot.BotOptions botOptions =
+                        bot.getBrainController().getBotOptions();
                 if (botOptions != null && botOptions.getBotType() == BotType.EVENT) {
                     return bot;
                 }

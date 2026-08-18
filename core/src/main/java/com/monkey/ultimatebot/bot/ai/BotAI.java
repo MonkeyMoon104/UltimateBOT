@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot.ai;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.behavior.FollowBehaviorController;
@@ -28,7 +27,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.BotTotemController;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.combat.mode.CombatModeEngine;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import com.monkey.ultimatebot.extension.runtime.CustomBrainRuntime;
@@ -87,8 +86,8 @@ public class BotAI {
         java.util.Objects.requireNonNull(plugin, "plugin");
 
         this.noobMovementController = new BotNoobMovementController(bot);
-        this.movementController = new BotMovementController(
-                bot, plugin.getRuntimeSettings().blockStateCache());
+        this.movementController =
+                new BotMovementController(bot, plugin.getRuntimeSettings().blockStateCache());
         this.rotationController = new BotRotationController(bot);
         this.totemController = new BotTotemController(bot, plugin);
         this.attackController = new BotAttackController(bot);
@@ -127,11 +126,8 @@ public class BotAI {
                 new FollowBehaviorController(bot, movementController, noobMovementController, pathfindingManager);
         CoreBotControl extensionControl =
                 new CoreBotControl(bot, movementController, rotationController, attackController, inventoryController);
-        CoreNativeBotAccess nativeAccess =
-                new CoreNativeBotAccess(
-                        com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion(),
-                        bot,
-                        NMSBridgeManager.get());
+        CoreNativeBotAccess nativeAccess = new CoreNativeBotAccess(
+                com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess.minecraftVersion(), bot, NMSBridgeManager.get());
         this.combatModeEngine = new CombatModeEngine(
                 plugin,
                 bot,
@@ -183,14 +179,16 @@ public class BotAI {
         combatDataManager.updateCombatData(
                 playerTarget, combatEnabled && options.getCombatMode().equals(CombatMode.CRYSTAL));
 
-        if (combatStateManager instanceof CombatStateManager) { CombatStateManager stateManager = (CombatStateManager) combatStateManager;
+        if (combatStateManager instanceof CombatStateManager) {
+            CombatStateManager stateManager = (CombatStateManager) combatStateManager;
             stateManager.updateDamageData(
                     combatDataManager.getConsecutiveDamageCount(), combatDataManager.getLastDamageTime());
         }
 
         if (combatEnabled) {
             followBehaviorController.reset();
-            if (!isCurrentlyHealing && combatModeEngine.controlsNavigation((org.bukkit.entity.Player) targetBukkitPlayer)) {
+            if (!isCurrentlyHealing
+                    && combatModeEngine.controlsNavigation((org.bukkit.entity.Player) targetBukkitPlayer)) {
                 clearActivePathfinding();
                 combatStateManager.updateCombatState(playerTarget);
                 combatModeEngine.tick((org.bukkit.entity.Player) targetBukkitPlayer);
@@ -245,7 +243,8 @@ public class BotAI {
             return;
         }
 
-        if (pathfindingManager instanceof PathfindingManager) { PathfindingManager manager = (PathfindingManager) pathfindingManager;
+        if (pathfindingManager instanceof PathfindingManager) {
+            PathfindingManager manager = (PathfindingManager) pathfindingManager;
             manager.updateLastBotPosition();
         }
 
@@ -371,16 +370,16 @@ public class BotAI {
             healController.resetHealState();
         }
         if (options.isHealing() && healController.isHealing()) {
-            Vector away = bot.bukkitPosition().subtract(bukkitTarget.getLocation().toVector());
+            Vector away =
+                    bot.bukkitPosition().subtract(bukkitTarget.getLocation().toVector());
             away.setY(0.0D);
             if (away.lengthSquared() > 0.001D) {
-                movementController.moveToPosition(bot.bukkitPosition().add(away.normalize().multiply(5.0D)));
+                movementController.moveToPosition(
+                        bot.bukkitPosition().add(away.normalize().multiply(5.0D)));
             }
             return;
         }
 
-        // Never run synchronous Pathetic A* against mobs — Spark shows it owning the server thread
-        // (isValidByCustomProcessors). Combat strategies already approach/strafe the target.
         clearActivePathfinding();
         combatModeEngine.tick(bukkitTarget);
     }
@@ -426,13 +425,16 @@ public class BotAI {
         }
 
         rapvpController.disable();
-        // CART uses CRYSTAL_SLOT for TNT minecart — never wipe non-crystal mode kits.
+
         if (!crystalMode) {
             return;
         }
-        inventoryController.setItem(BotInventoryController.CRYSTAL_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
-        inventoryController.setItem(BotInventoryController.ANCHOR_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
-        inventoryController.setItem(BotInventoryController.GLOW_SLOT, com.monkey.ultimatebot.compat.ItemStackAccess.empty());
+        inventoryController.setItem(
+                BotInventoryController.CRYSTAL_SLOT, com.monkey.ultimatebot.access.item.ItemStackAccess.empty());
+        inventoryController.setItem(
+                BotInventoryController.ANCHOR_SLOT, com.monkey.ultimatebot.access.item.ItemStackAccess.empty());
+        inventoryController.setItem(
+                BotInventoryController.GLOW_SLOT, com.monkey.ultimatebot.access.item.ItemStackAccess.empty());
     }
 
     private boolean handleSustainFood() {

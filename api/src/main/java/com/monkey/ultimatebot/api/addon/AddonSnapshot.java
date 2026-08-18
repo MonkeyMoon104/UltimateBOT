@@ -13,7 +13,6 @@ public final class AddonSnapshot {
 
     public AddonSnapshot(AddonDescriptor descriptor, AddonState state, Path jar, @Nullable String failure) {
 
-
         Objects.requireNonNull(descriptor, "descriptor");
         Objects.requireNonNull(state, "state");
         Objects.requireNonNull(jar, "jar");
@@ -26,12 +25,15 @@ public final class AddonSnapshot {
     public AddonDescriptor descriptor() {
         return descriptor;
     }
+
     public AddonState state() {
         return state;
     }
+
     public Path jar() {
         return jar;
     }
+
     public @Nullable String failure() {
         return failure;
     }
@@ -45,7 +47,10 @@ public final class AddonSnapshot {
             return false;
         }
         AddonSnapshot other = (AddonSnapshot) obj;
-        return java.util.Objects.equals(descriptor, other.descriptor) && java.util.Objects.equals(state, other.state) && java.util.Objects.equals(jar, other.jar) && java.util.Objects.equals(failure, other.failure);
+        return java.util.Objects.equals(descriptor, other.descriptor)
+                && java.util.Objects.equals(state, other.state)
+                && java.util.Objects.equals(jar, other.jar)
+                && java.util.Objects.equals(failure, other.failure);
     }
 
     @Override
@@ -55,6 +60,7 @@ public final class AddonSnapshot {
 
     @Override
     public String toString() {
-        return "AddonSnapshot[descriptor=" + descriptor + ", state=" + state + ", jar=" + jar + ", failure=" + failure + "]";
+        return "AddonSnapshot[descriptor=" + descriptor + ", state=" + state + ", jar=" + jar + ", failure=" + failure
+                + "]";
     }
 }

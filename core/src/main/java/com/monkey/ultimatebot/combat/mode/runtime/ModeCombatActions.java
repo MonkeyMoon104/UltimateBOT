@@ -1,20 +1,20 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.compat.AttributeAccess;
-import com.monkey.ultimatebot.compat.CombatCadenceAccess;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
-import com.monkey.ultimatebot.compat.ParticleAccess;
-import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
-import com.monkey.ultimatebot.compat.PlayerHandRaisedAccess;
-import com.monkey.ultimatebot.compat.PotionEffectAccess;
-import com.monkey.ultimatebot.compat.PotionEffectTypeAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.entity.AttributeAccess;
+import com.monkey.ultimatebot.access.combat.CombatCadenceAccess;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.world.ParticleAccess;
+import com.monkey.ultimatebot.access.player.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.access.player.PlayerHandRaisedAccess;
+import com.monkey.ultimatebot.access.item.PotionEffectAccess;
+import com.monkey.ultimatebot.access.item.PotionEffectTypeAccess;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.bukkit.Location;
@@ -80,15 +80,16 @@ public final class ModeCombatActions {
         Player player = (Player) target;
 
         Location playerLocation = Objects.requireNonNull(player.getLocation(), "player location");
-        Vector towardBot = botLocation.toVector().subtract(playerLocation.toVector()).setY(0.0D);
+        Vector towardBot =
+                botLocation.toVector().subtract(playerLocation.toVector()).setY(0.0D);
         if (towardBot.lengthSquared() < 0.001D) {
             return distance <= 3.2D && !PlayerHandRaisedAccess.isRaised(player);
         }
         Vector direction = towardBot.normalize();
-        double closingSpeed =
-                player.getVelocity().clone().setY(0.0D).dot(direction);
+        double closingSpeed = player.getVelocity().clone().setY(0.0D).dot(direction);
         Vector look = playerLocation.getDirection().setY(0.0D);
-        double facingDot = look.lengthSquared() < 0.001D ? 0.0D : look.normalize().dot(direction);
+        double facingDot =
+                look.lengthSquared() < 0.001D ? 0.0D : look.normalize().dot(direction);
         return ModeCombatPolicy.isIncomingPlayerAttack(
                 distance,
                 PlayerAttackCooldownAccess.get(player),
@@ -119,8 +120,7 @@ public final class ModeCombatActions {
         double before = bot.healthValue();
         bukkitBot.addPotionEffect(
                 PotionEffectAccess.of(PotionEffectTypeAccess.instantHealth(), 1, safeAmplifier, false, false, false));
-        // Splash items are color-only. Instant Health as an effect can no-op on fake players
-        // (RegainHealth cancelled, or heal() skipped at 0 HP). Gapple already uses setHealth.
+
         if (bot.healthValue() <= before + 0.01D) {
             bot.setHealthValue(before + (double) (4 << Math.min(safeAmplifier, 8)));
         }
@@ -174,7 +174,6 @@ public final class ModeCombatActions {
         applySwingDelay();
     }
 
-    /** Direct melee without jump-crit orchestration (e.g. aerial mace smash). */
     public void forceMelee(LivingEntity target, int slot) {
         if (inventory.getCurrentSlot() != slot) {
             inventory.switchToSlot(slot);

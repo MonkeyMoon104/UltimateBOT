@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import org.bukkit.event.Listener;
 import org.jspecify.annotations.Nullable;
 
-/** Owns the lifecycle of the automatically installed guard addon. */
 public final class GuardAddonManager implements AutoCloseable {
     private static final AddonDefinition ADDON = new AddonDefinition(
             "guard",
@@ -78,7 +77,8 @@ public final class GuardAddonManager implements AutoCloseable {
     }
 
     private static Listener requireListener(Object listener) {
-        if (listener instanceof Listener) { Listener bukkitListener = (Listener) listener;
+        if (listener instanceof Listener) {
+            Listener bukkitListener = (Listener) listener;
             return bukkitListener;
         }
         throw new IllegalArgumentException("Guard addon listener does not implement Bukkit Listener");

@@ -101,7 +101,6 @@ public class BotMovementController {
     }
 
     public boolean calculatePathTo(Vector targetPos) {
-        // Fresh scratch cache per search — avoids stale walkability and unbounded growth mid-fight.
         blockValidator.clearCache();
         return pathfinder.calculatePathTo(targetPos);
     }
@@ -309,7 +308,7 @@ public class BotMovementController {
     }
 
     private void executeMovementPattern(LivingEntity target, double targetDistance, MovementPattern pattern) {
-                switch (pattern) {
+        switch (pattern) {
             case DIRECT:
                 movementExecutor.executeDirectMovement(target, targetDistance);
                 break;
@@ -337,5 +336,4 @@ public class BotMovementController {
     private void executeRetreatMovement(LivingEntity target, double targetDistance) {
         movementExecutor.executeRetreatSpiral(target, targetDistance);
     }
-
 }

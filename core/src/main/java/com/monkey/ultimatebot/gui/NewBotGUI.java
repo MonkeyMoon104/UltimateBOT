@@ -30,15 +30,14 @@ import xyz.xenondevs.invui.window.Window;
 
 public class NewBotGUI {
 
-    /** Lang key index for Kit tab (`gui.tab-item.tab-0`). */
     public static final int LANG_TAB_KIT = 0;
-    /** Lang key index for Templates tab (`gui.tab-item.tab-1`). */
+
     public static final int LANG_TAB_TEMPLATES = 1;
-    /** Lang key index for Owners tab (`gui.tab-item.tab-2`). */
+
     public static final int LANG_TAB_OWNERS = 2;
-    /** Lang key index for Targets tab (`gui.tab-item.tab-3`). */
+
     public static final int LANG_TAB_TARGETS = 3;
-    /** Lang key index for Combat Settings tab (`gui.tab-item.tab-4`). */
+
     public static final int LANG_TAB_COMBAT = 4;
 
     private final Player player;
@@ -112,16 +111,11 @@ public class NewBotGUI {
                 .addIngredient('.', borderItem);
 
         int invuiIndex = 0;
-        tabGuiBuilder.addIngredient(
-                '0', new BotTabItem(invuiIndex++, LANG_TAB_KIT, training));
-        tabGuiBuilder.addIngredient(
-                '1', new BotTabItem(invuiIndex++, LANG_TAB_TEMPLATES, training));
-        tabGuiBuilder.addIngredient(
-                '2', new BotTabItem(invuiIndex++, LANG_TAB_OWNERS, training));
-        tabGuiBuilder.addIngredient(
-                '3', new BotTabItem(invuiIndex++, LANG_TAB_TARGETS, training));
-        tabGuiBuilder.addIngredient(
-                '4', new BotTabItem(invuiIndex, LANG_TAB_COMBAT, training));
+        tabGuiBuilder.addIngredient('0', new BotTabItem(invuiIndex++, LANG_TAB_KIT, training));
+        tabGuiBuilder.addIngredient('1', new BotTabItem(invuiIndex++, LANG_TAB_TEMPLATES, training));
+        tabGuiBuilder.addIngredient('2', new BotTabItem(invuiIndex++, LANG_TAB_OWNERS, training));
+        tabGuiBuilder.addIngredient('3', new BotTabItem(invuiIndex++, LANG_TAB_TARGETS, training));
+        tabGuiBuilder.addIngredient('4', new BotTabItem(invuiIndex, LANG_TAB_COMBAT, training));
 
         Gui tabGui = tabGuiBuilder.setTabs(tabs).build();
 

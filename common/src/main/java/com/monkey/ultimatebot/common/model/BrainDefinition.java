@@ -1,10 +1,9 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.Objects;
 import java.util.Set;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
 
-/** Platform-neutral description of a custom brain exposed through the API and SDK. */
 public final class BrainDefinition {
     private final BrainKey key;
     private final String displayName;

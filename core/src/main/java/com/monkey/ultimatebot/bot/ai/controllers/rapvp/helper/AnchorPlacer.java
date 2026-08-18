@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
@@ -35,9 +35,11 @@ public class AnchorPlacer {
             BlockFace bestFace = findBestPlacementFace(pos);
             if (bestFace == null) bestFace = BlockFace.UP;
             BlockVector adjacentPos = relative(pos, bestFace.getOppositeFace());
-            Location hit = centerOf(adjacentPos).add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
+            Location hit = centerOf(adjacentPos)
+                    .add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
             boolean consumed = NMSBridgeManager.get()
-                    .useItemOnBlock(bot.asBukkitPlayer(), stack, blockAt(adjacentPos), bestFace, hit, EquipmentSlotKind.HAND);
+                    .useItemOnBlock(
+                            bot.asBukkitPlayer(), stack, blockAt(adjacentPos), bestFace, hit, EquipmentSlotKind.HAND);
             if (consumed) {
                 rotation.lookAt(new Vector(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()));
                 bot.swingMainHand();
@@ -53,7 +55,9 @@ public class AnchorPlacer {
     }
 
     private @Nullable BlockFace findBestPlacementFace(BlockVector targetPos) {
-        for (BlockFace face : new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN}) {
+        for (BlockFace face : new BlockFace[] {
+            BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST, BlockFace.UP, BlockFace.DOWN
+        }) {
             BlockVector adjacentPos = relative(targetPos, face.getOppositeFace());
             Block adjacent = blockAt(adjacentPos);
             if (adjacent.getType().isSolid() && bot.getLocation().distance(centerOf(adjacentPos)) <= 6.5D) {

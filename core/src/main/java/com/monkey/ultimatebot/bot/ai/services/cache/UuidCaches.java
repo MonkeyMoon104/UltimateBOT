@@ -1,15 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.services.cache;
 
-import com.monkey.ultimatebot.compat.JavaRuntimeAccess;
+import com.monkey.ultimatebot.access.runtime.JavaRuntimeAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import java.lang.reflect.Method;
 
-/**
- * Picks the shaded Caffeine line at runtime: 2.x on Java 8–10, 3.x on Java 11+.
- *
- * <p>Backends are loaded via {@link Class#forName(String)} so UltimateBot verification never pulls
- * Caffeine classes before the matching relocated implementation is chosen.
- */
 public final class UuidCaches {
 
     private UuidCaches() {}

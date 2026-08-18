@@ -1,12 +1,11 @@
 package com.monkey.ultimatebot.protocol;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import org.jspecify.annotations.Nullable;
 
-/** Version-neutral profile data used by the packet rendering layer. */
 public final class BotProfileData {
     private final UUID id;
     private final String name;
@@ -52,7 +51,6 @@ public final class BotProfileData {
         return "BotProfileData[id=" + id + ", name=" + name + ", textures=" + textures + "]";
     }
 
-    /** A signed or unsigned skin texture property. */
     public static final class Texture {
         private final String name;
         private final String value;
@@ -85,9 +83,7 @@ public final class BotProfileData {
                 return false;
             }
             Texture other = (Texture) obj;
-            return name.equals(other.name)
-                    && value.equals(other.value)
-                    && Objects.equals(signature, other.signature);
+            return name.equals(other.name) && value.equals(other.value) && Objects.equals(signature, other.signature);
         }
 
         @Override

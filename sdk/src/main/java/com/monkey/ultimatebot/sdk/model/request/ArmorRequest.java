@@ -9,7 +9,6 @@ public final class ArmorRequest {
 
     public ArmorRequest(BotArmorTier armor) {
 
-
         Objects.requireNonNull(armor, "armor");
         this.armor = armor;
     }

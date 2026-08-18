@@ -18,7 +18,6 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-/** Micrometer implementation kept outside the main plugin classpath. */
 final class MicrometerMetricsBackend implements MetricsBackend {
     private static final String METRIC_PREFIX = "ultimatebot";
 

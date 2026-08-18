@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.common.addon;
 
+import com.monkey.ultimatebot.common.util.TextValues;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,9 +18,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.logging.Logger;
-import com.monkey.ultimatebot.common.util.TextValues;
 
-/** Downloads, validates and loads optional addons without platform dependencies. */
 public final class AddonLoader {
     public static final String ADDON_DIRECTORY = "addon";
     private static final int CONNECT_TIMEOUT_MS = 4_000;

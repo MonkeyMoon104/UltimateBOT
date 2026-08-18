@@ -1,9 +1,7 @@
 package com.monkey.ultimatebot.placeholders;
 
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.compat.PluginMetaAccess;
+import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.placeholders.list.combat.ArmorPlaceholder;
 import com.monkey.ultimatebot.placeholders.list.combat.CombatPlaceholder;
 import com.monkey.ultimatebot.placeholders.list.combat.CombatStatePlaceholder;
@@ -23,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;

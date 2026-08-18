@@ -7,7 +7,7 @@ import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.CombatBlockBreakSequence;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.compat.CombatCadenceAccess;
+import com.monkey.ultimatebot.access.combat.CombatCadenceAccess;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 
@@ -78,7 +78,7 @@ public final class UhcPvPStrategy extends AbstractCombatModeStrategy {
         } else if (containment.nearlyExiting() && phase != Phase.SECONDARY && specialActionReady()) {
             transitionTo(Phase.SECONDARY);
         }
-                switch (phase) {
+        switch (phase) {
             case PREGAP:
                 pregap(context);
                 break;

@@ -2,7 +2,6 @@ package com.monkey.ultimatebot.common.model;
 
 import java.util.Objects;
 
-/** Fully resolved tuning for one combat mode and difficulty pair. */
 public final class ModeDifficultyProfile {
     private final CombatMode mode;
     private final DifficultyTier difficulty;

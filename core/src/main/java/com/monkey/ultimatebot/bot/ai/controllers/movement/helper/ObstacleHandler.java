@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.World;
 import org.bukkit.util.BlockVector;
@@ -53,7 +53,8 @@ public class ObstacleHandler implements IObstacleHandler {
 
         boolean frontBlocked = !blockValidator.isPositionPassableCached(front);
         boolean aboveClear = blockValidator.isPositionPassableCached(above);
-        boolean belowSolid = !world.getBlockAt(below.getBlockX(), below.getBlockY(), below.getBlockZ()).isEmpty();
+        boolean belowSolid = !world.getBlockAt(below.getBlockX(), below.getBlockY(), below.getBlockZ())
+                .isEmpty();
 
         boolean canStepUp = frontBlocked && aboveClear && belowSolid;
         boolean tooHigh = frontBlocked && !aboveClear;
@@ -121,7 +122,8 @@ public class ObstacleHandler implements IObstacleHandler {
 
     private boolean isCobweb(BlockVector position) {
         return MaterialCatalog.is(
-                world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ()).getType(),
+                world.getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ())
+                        .getType(),
                 "COBWEB");
     }
 

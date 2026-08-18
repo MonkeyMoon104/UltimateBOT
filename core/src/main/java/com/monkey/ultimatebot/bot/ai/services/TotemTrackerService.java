@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.inventory.ItemStack;
 
@@ -55,9 +55,7 @@ public class TotemTrackerService {
                                 .updateTotem(bot.getTargetPlayer().getUniqueId(), totemCount);
                     }
                 }
-                java.util.UUID ownerUUID = bot.getPlugin()
-                        .getBotRegistry()
-                        .getOwnerUUIDByBotUUID(bot.getUniqueId());
+                java.util.UUID ownerUUID = bot.getPlugin().getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
                 if (ownerUUID != null) {
                     com.monkey.ultimatebot.api.model.runtime.BotSnapshot snapshot =
                             bot.getPlugin().getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -65,9 +63,7 @@ public class TotemTrackerService {
                         bot.getPlugin()
                                 .getBotEventDispatcher()
                                 .publish(new com.monkey.ultimatebot.api.event.combat.BotTotemUseEvent(
-                                        bot.getPlugin()
-                                                .getBotEventDispatcher()
-                                                .nextSequence(bot.getUniqueId()),
+                                        bot.getPlugin().getBotEventDispatcher().nextSequence(bot.getUniqueId()),
                                         snapshot,
                                         consumedTotems,
                                         totemCount));

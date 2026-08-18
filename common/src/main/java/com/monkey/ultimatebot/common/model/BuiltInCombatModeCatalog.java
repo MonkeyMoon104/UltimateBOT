@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
 
 final class BuiltInCombatModeCatalog {
     private BuiltInCombatModeCatalog() {}
@@ -35,7 +35,6 @@ final class BuiltInCombatModeCatalog {
         }
     }
 
-    /** Platform features required for a built-in mode to be playable on the loaded server. */
     static Set<PlatformCapability> requiredPlatformCapabilities(String value) {
         EnumSet<PlatformCapability> required;
         switch (value) {
@@ -44,23 +43,18 @@ final class BuiltInCombatModeCatalog {
                 required = EnumSet.noneOf(PlatformCapability.class);
                 break;
             case "uhc":
-                // Classic UHC is 1.8 (sword, gapple, cobweb). Shield/offhand are 1.9 kit extras, not
-                // a mode requirement — ModeKit.offHand already no-ops when the slot is missing.
                 required = EnumSet.noneOf(PlatformCapability.class);
                 break;
             case "axe-shield":
                 required = EnumSet.of(
-                        PlatformCapability.SHIELD,
-                        PlatformCapability.OFFHAND,
-                        PlatformCapability.COMBAT_COOLDOWN);
+                        PlatformCapability.SHIELD, PlatformCapability.OFFHAND, PlatformCapability.COMBAT_COOLDOWN);
                 break;
             case "smp":
-                required = EnumSet.of(
-                        PlatformCapability.SHIELD, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
+                required = EnumSet.of(PlatformCapability.SHIELD, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
                 break;
             case "netherite-pot":
-                required = EnumSet.of(
-                        PlatformCapability.NETHERITE, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
+                required =
+                        EnumSet.of(PlatformCapability.NETHERITE, PlatformCapability.TOTEM, PlatformCapability.OFFHAND);
                 break;
             case "cart":
                 required = EnumSet.of(PlatformCapability.TNT_MINECART);

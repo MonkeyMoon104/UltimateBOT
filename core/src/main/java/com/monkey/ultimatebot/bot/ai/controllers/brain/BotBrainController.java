@@ -1,20 +1,21 @@
 package com.monkey.ultimatebot.bot.ai.controllers.brain;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.api.event.state.BotTargetChangeEvent;
-import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.BotAI;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
-import com.monkey.ultimatebot.compat.GameModeAccess;
+import com.monkey.ultimatebot.bot.ai.controllers.brain.steps.NoTargetTickStep;
+import com.monkey.ultimatebot.bot.ai.controllers.brain.steps.TargetChangeMediationStep;
+import com.monkey.ultimatebot.bot.ai.controllers.brain.steps.TargetResolutionStep;
+import com.monkey.ultimatebot.bot.ai.controllers.brain.steps.TickExecutionStep;
+import com.monkey.ultimatebot.bot.ai.controllers.brain.steps.WatchOnlyTickStep;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.player.GameModeAccess;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,100 +116,24 @@ public class BotBrainController {
 
     private void configureBotAI() {
         if (targetPlayer != null && follow) {
-            botAI.getRotationController().lookAt(EntityCoordsAccess.getX(targetPlayer), targetPlayer.getEyeLocation().getY(), EntityCoordsAccess.getZ(targetPlayer));
+            botAI.getRotationController()
+                    .lookAt(
+                            EntityCoordsAccess.getX(targetPlayer),
+                            targetPlayer.getEyeLocation().getY(),
+                            EntityCoordsAccess.getZ(targetPlayer));
         }
     }
 
     public void onTick() {
         updateTargetByType();
-
-        LivingEntity selectedTarget = selectActiveTarget();
-        if (!sameTarget(activeTarget, selectedTarget)) {
-            UUID ownerUUID =
-                    plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
-            BotSnapshot snapshot =
-                    ownerUUID == null ? null : plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
-            if (snapshot != null) {
-                BotTargetChangeEvent event = plugin.getBotEventDispatcher()
-                        .publish(new BotTargetChangeEvent(
-                                plugin.getBotEventDispatcher()
-                                        .nextSequence(bot.getUniqueId()),
-                                snapshot,
-                                activeTarget,
-                                selectedTarget));
-                selectedTarget = event.isCancelled() ? activeTarget : event.getNewTarget();
-            }
-            botAI.customBrainTargetChanged(activeTarget, selectedTarget);
-        }
+        LivingEntity selectedTarget = resolveTargetForTickStep();
         activeTarget = selectedTarget;
-        if (selectedTarget == null) {
-            if (shouldFollowPlayerAnchor()) {
-                botAI.tick(java.util.Objects.requireNonNull(targetPlayer, "follow target"), false);
-                return;
-            }
-            botAI.tickIdle();
-            return;
-        }
-
-        boolean playerTarget = selectedTarget instanceof org.bukkit.entity.Player;
-        boolean allowCombat = playerTarget ? shouldUseCombatOnCurrentTarget() : combat;
-
-        if (playerTarget && watchOnlyMode) {
-            // Watch-only: no chase, but still face the threat.
-            botAI.getMovementController().clearPath();
-            botAI.getRotationController().updateRotation(selectedTarget);
-            return;
-        }
-
-        // follow=false + combat=false => idle (do not chase/look).
-        // follow=true => follow behavior; combat=true => combat movement/look/attack.
-        if (follow || allowCombat) {
-            botAI.tick(selectedTarget, allowCombat);
-        } else {
-            botAI.tickIdle();
-        }
+        executeTickStep(selectedTarget);
     }
 
     private boolean sameTarget(@Nullable LivingEntity first, @Nullable LivingEntity second) {
         if (first == null || second == null) return first == null && second == null;
         return first.getUniqueId().equals(second.getUniqueId());
-    }
-
-    private @Nullable LivingEntity selectActiveTarget() {
-        BotTargetMode mode = botOptions.getTargetMode();
-
-        // Keep the configured player for look/follow whenever the mode allows players.
-        // Combat eligibility is applied later via allowCombat — do not drop the look target here.
-        org.bukkit.entity.Player player =
-                mode.allowsPlayers() && isTargetAvailable(targetPlayer) ? targetPlayer : null;
-
-        // Discover mobs whenever the mode allows them (not only when combat is ON),
-        // so the bot can face them; attacking stays gated by allowCombat in onTick.
-        LivingEntity mob = null;
-        if (mode.allowsMobs()) {
-            mob = targetingService.findClosestMob(bot, getMobTargetRange());
-            if (mob != null && (!mob.isValid() || mob.isDead())) {
-                mob = null;
-            }
-        }
-
-        if (player == null) {
-            return mob;
-        }
-        if (mob == null) {
-            return player;
-        }
-        // Follow-only (no combat): stick to the player, ignore nearby animals.
-        if (follow && !combat) {
-            return player;
-        }
-        double mobDist = distanceSquaredFromBot(mob);
-        double playerDist = distanceSquaredFromBot(player);
-        // Prefer the player on near-ties so ambient animals do not steal look/combat focus.
-        if (mobDist + 1.0D < playerDist) {
-            return mob;
-        }
-        return player;
     }
 
     private boolean shouldFollowPlayerAnchor() {
@@ -217,26 +142,6 @@ public class BotBrainController {
         }
         BotType type = botOptions.getBotType();
         return type == BotType.SINGLE || type == BotType.ALLY || type == BotType.TEAM_ALLY;
-    }
-
-    private double getMobTargetRange() {
-                switch (botOptions.getBotType()) {
-            case EVENT:
-                return eventTargetRange;
-            case ALLY:
-                return allyRange;
-            case TEAM_ALLY:
-                return teamAllyRange;
-            default:
-                return botOptions.getAutoTargetRange();
-        }
-    }
-
-    private double distanceSquaredFromBot(LivingEntity entity) {
-        double dx = EntityCoordsAccess.getX(entity) - EntityCoordsAccess.getX(bot.asBukkitPlayer());
-        double dy = EntityCoordsAccess.getY(entity) - EntityCoordsAccess.getY(bot.asBukkitPlayer());
-        double dz = EntityCoordsAccess.getZ(entity) - EntityCoordsAccess.getZ(bot.asBukkitPlayer());
-        return dx * dx + dy * dy + dz * dz;
     }
 
     private boolean shouldUseCombatOnCurrentTarget() {
@@ -279,50 +184,101 @@ public class BotBrainController {
         Set<UUID> targetFilters = botOptions.getTargetUUIDs();
 
         if (botType == BotType.EVENT) {
-            watchOnlyMode = false;
-            clearAlertState();
-
-            targetingService.invalidateCache(bot.getUniqueId());
-            setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange, this::isValidPvpTarget));
+            handleEventTargetingStep();
             return;
         }
 
         if (botType == BotType.ALLY) {
-            List<org.bukkit.entity.Player> owners = getOwnersForAlly();
-            handleOwnerGroupTargeting(
-                    owners,
-                    allyRange,
-                    allyPreRange,
-                    allyReturnTeleportDistance,
-                    allyReturnTeleportCooldownMs,
-                    allyPreRangeAlertMessage,
-                    allyRangeAlertMessage,
-                    targetFilters);
+            handleAllyTargetingStep(targetFilters);
             return;
         }
 
         if (botType == BotType.TEAM_ALLY) {
-            List<org.bukkit.entity.Player> owners = getOwnersForTeamAlly();
-            handleOwnerGroupTargeting(
-                    owners,
-                    teamAllyRange,
-                    teamAllyPreRange,
-                    teamAllyReturnTeleportDistance,
-                    teamAllyReturnTeleportCooldownMs,
-                    teamAllyPreRangeAlertMessage,
-                    teamAllyRangeAlertMessage,
-                    targetFilters);
+            handleTeamAllyTargetingStep(targetFilters);
             return;
         }
 
         if (botType == BotType.SINGLE && botOptions.isAutoTarget()) {
-            watchOnlyMode = false;
-            clearAlertState();
-            setTargetIfChanged(
-                    targetingService.findClosestPlayer(bot, botOptions.getAutoTargetRange(), this::isValidPvpTarget));
+            handleSingleAutoTargetingStep();
             return;
         }
 
+        resetWatchAndAlerts();
+    }
+
+    private @Nullable LivingEntity resolveTargetForTickStep() {
+        LivingEntity selectedTarget = new TargetResolutionStep(
+                        bot,
+                        botOptions,
+                        targetingService,
+                        eventTargetRange,
+                        allyRange,
+                        teamAllyRange,
+                        follow,
+                        combat,
+                        targetPlayer,
+                        this::isTargetAvailable)
+                .resolve();
+        if (!sameTarget(activeTarget, selectedTarget)) {
+            LivingEntity previousTarget = activeTarget;
+            selectedTarget = new TargetChangeMediationStep(plugin, bot).mediate(previousTarget, selectedTarget);
+            botAI.customBrainTargetChanged(previousTarget, selectedTarget);
+        }
+        return selectedTarget;
+    }
+
+    private void executeTickStep(@Nullable LivingEntity selectedTarget) {
+        NoTargetTickStep noTargetTickStep = new NoTargetTickStep(botAI, targetPlayer, this::shouldFollowPlayerAnchor);
+        WatchOnlyTickStep watchOnlyTickStep = new WatchOnlyTickStep(botAI);
+        new TickExecutionStep(
+                        botAI,
+                        follow,
+                        combat,
+                        watchOnlyMode,
+                        this::shouldUseCombatOnCurrentTarget,
+                        noTargetTickStep,
+                        watchOnlyTickStep)
+                .execute(selectedTarget);
+    }
+
+    private void handleEventTargetingStep() {
+        resetWatchAndAlerts();
+        targetingService.invalidateCache(bot.getUniqueId());
+        setTargetIfChanged(targetingService.findClosestPlayer(bot, eventTargetRange, this::isValidPvpTarget));
+    }
+
+    private void handleAllyTargetingStep(Set<UUID> targetFilters) {
+        List<org.bukkit.entity.Player> owners = getOwnersForAlly();
+        handleOwnerGroupTargeting(
+                owners,
+                allyRange,
+                allyPreRange,
+                allyReturnTeleportDistance,
+                allyReturnTeleportCooldownMs,
+                allyPreRangeAlertMessage,
+                allyRangeAlertMessage,
+                targetFilters);
+    }
+
+    private void handleTeamAllyTargetingStep(Set<UUID> targetFilters) {
+        List<org.bukkit.entity.Player> owners = getOwnersForTeamAlly();
+        handleOwnerGroupTargeting(
+                owners,
+                teamAllyRange,
+                teamAllyPreRange,
+                teamAllyReturnTeleportDistance,
+                teamAllyReturnTeleportCooldownMs,
+                teamAllyPreRangeAlertMessage,
+                teamAllyRangeAlertMessage,
+                targetFilters);
+    }
+
+    private void handleSingleAutoTargetingStep() {
+        resetWatchAndAlerts();
+        setTargetIfChanged(targetingService.findClosestPlayer(bot, botOptions.getAutoTargetRange(), this::isValidPvpTarget));
+    }
+
+    private void resetWatchAndAlerts() {
         watchOnlyMode = false;
         clearAlertState();
     }
@@ -552,7 +508,8 @@ public class BotBrainController {
                 continue;
             }
 
-            double distanceSq = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location")
+            double distanceSq = java.util.Objects.requireNonNull(
+                            bot.asBukkitPlayer().getLocation(), "bot location")
                     .distanceSquared(java.util.Objects.requireNonNull(owner.getLocation(), "owner location"));
             if (distanceSq < bestDistanceSq) {
                 bestDistanceSq = distanceSq;

@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.combat;
 
-import com.monkey.ultimatebot.compat.EntityBoundsAccess;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
+import com.monkey.ultimatebot.access.entity.EntityBoundsAccess;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;

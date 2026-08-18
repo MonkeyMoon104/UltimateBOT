@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot.ai.controllers.enderpearl;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.DamageTracker;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.PearlStrategyCalculator;
@@ -10,14 +9,15 @@ import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.SafetyValidat
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.TargetTracker;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IDamageTracker;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
-import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlThrower;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator.PearlStrategy;
+import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlThrower;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ISafetyValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.ITargetTracker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.BotTeleportController;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -89,46 +89,22 @@ public class BotEnderpearlController {
     }
 
     public boolean tryUseEnderpearl(Player target, IPearlStrategyCalculator.@Nullable PearlStrategy forcedStrategy) {
-        if (!enabled) return false;
-        if (isPreparingPearl) return false;
-        if (!inventoryController.hasEnderpearls()) return false;
+        if (!canStartPearlUse()) return false;
 
         this.currentTarget = target;
         targetTracker.updateTargetTracking(target);
 
-        double dist = bot.distanceTo(target);
-        if (dist < MIN_USE_DISTANCE && forcedStrategy != PearlStrategy.COMBO_ESCAPE) return false;
-        if (dist > MAX_USE_DISTANCE && forcedStrategy != PearlStrategy.AGGRESSIVE_CLOSE) return false;
-
-        if (!isOnGround(bukkitBot) && forcedStrategy == null) return false;
+        if (!isValidTargetDistance(target, forcedStrategy)) return false;
+        if (!isGroundedWhenRequired(forcedStrategy)) return false;
         if (!canUseEnderpearl()) return false;
 
-        PearlStrategy strategy = forcedStrategy != null
-                ? forcedStrategy
-                : strategyCalculator.determineOptimalStrategy(
-                        bukkitBot,
-                        target,
-                        damageTracker.wasRecentlyDamaged(),
-                        damageTracker.getDamageComboCount(),
-                        damageTracker.getComboStartTime(),
-                        repositionPearlCooldown,
-                        aggressivePearlCooldown);
+        PearlStrategy strategy = resolvePearlStrategy(target, forcedStrategy);
 
-        if (!strategyCalculator.shouldUsePearlForStrategy(
-                strategy,
-                bukkitBot,
-                target,
-                damageTracker.wasRecentlyDamaged(),
-                lastEmergencyPearl,
-                repositionPearlCooldown,
-                aggressivePearlCooldown)) return false;
+        if (!shouldUsePearlForStrategy(strategy, target)) return false;
 
-        if (!inventoryController.isHoldingEnderpearl()) {
-            inventoryController.switchToEnderpearl();
-        }
+        ensureHoldingEnderpearl();
 
-        Vector targetPos = strategyCalculator.calculateTargetForStrategy(
-                strategy, bukkitBot, target, targetTracker.getPredictedTargetMovement());
+        Vector targetPos = calculatePearlTarget(strategy, target);
         if (targetPos == null) return false;
 
         startPearlPreparation(targetPos, strategy);
@@ -136,9 +112,8 @@ public class BotEnderpearlController {
     }
 
     public boolean tryUseEnderpearlToPosition(Vector targetPos) {
-        if (!enabled) return false;
-        if (!canUseEnderpearl() || isPreparingPearl) return false;
-        if (!inventoryController.hasEnderpearls()) return false;
+        if (!canStartPearlUse()) return false;
+        if (!canUseEnderpearl()) return false;
         if (targetPos == null) return false;
 
         Vector validatedTarget = validatePearlTarget(targetPos);
@@ -146,9 +121,7 @@ public class BotEnderpearlController {
             return false;
         }
 
-        if (!inventoryController.isHoldingEnderpearl()) {
-            inventoryController.switchToEnderpearl();
-        }
+        ensureHoldingEnderpearl();
 
         startPearlPreparation(validatedTarget, PearlStrategy.ESCAPE);
         return true;
@@ -163,7 +136,7 @@ public class BotEnderpearlController {
         rotationController.lookAt(targetPos.getX(), targetPos.getY(), targetPos.getZ());
         lastPearlUseTime = System.currentTimeMillis();
 
-                switch (strategy) {
+        switch (strategy) {
             case COMBO_ESCAPE:
                 lastEmergencyPearl = System.currentTimeMillis();
                 break;
@@ -176,55 +149,22 @@ public class BotEnderpearlController {
             case ESCAPE:
             case MELEE_DISENGAGE:
             case ANCHOR_POSITION:
-
                 break;
         }
     }
 
     public boolean tryPearlToObsidianSide(BlockVector obsidianPos, Player target) {
-        if (!enabled) return false;
-        if (!canUseEnderpearl() || isPreparingPearl) return false;
-        if (!inventoryController.hasEnderpearls()) return false;
+        if (!canStartPearlUse()) return false;
+        if (!canUseEnderpearl()) return false;
 
         Vector targetPos = target.getLocation().toVector();
         Vector predictedTargetPos = targetPos.clone().add(target.getVelocity().multiply(8 / 20.0D));
 
-        BlockVector bestSide = null;
-        double bestScore = Double.NEGATIVE_INFINITY;
-
-        int[][] horizontal = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-        for (int[] offset : horizontal) {
-            BlockVector sidePos = new BlockVector(
-                    obsidianPos.getBlockX() + offset[0], obsidianPos.getBlockY(), obsidianPos.getBlockZ() + offset[1]);
-
-            if (!safetyValidator.isSafeLandingSpot(sidePos)) continue;
-
-            Vector sideCenter = centerOf(sidePos);
-            double distToTarget = sideCenter.distance(predictedTargetPos);
-            double distToBot = sideCenter.distance(bot.bukkitPosition());
-
-            double score = 0;
-            if (distToTarget < 8.0) {
-                score += (8.0 - distToTarget) * 10;
-            }
-            if (distToBot > 6.0) {
-                score += 20;
-            }
-            if (sidePos.getBlockY() <= target.getLocation().getBlockY()) {
-                score += 15;
-            }
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestSide = sidePos;
-            }
-        }
+        BlockVector bestSide = findBestObsidianSide(obsidianPos, target, predictedTargetPos);
 
         if (bestSide == null) return false;
 
-        if (!inventoryController.isHoldingEnderpearl()) {
-            inventoryController.switchToEnderpearl();
-        }
+        ensureHoldingEnderpearl();
 
         this.currentTarget = target;
         startPearlPreparation(centerOf(bestSide), PearlStrategy.ANCHOR_POSITION);
@@ -237,32 +177,17 @@ public class BotEnderpearlController {
         if (!canAutoTeleport()) return false;
 
         Vector botPos = bot.bukkitPosition();
-        Vector targetPos = Objects.requireNonNull(target.getLocation(), "target location").toVector();
+        Vector targetPos =
+                Objects.requireNonNull(target.getLocation(), "target location").toVector();
 
-        double horizontalDistance =
-                Math.sqrt(Math.pow(botPos.getX() - targetPos.getX(), 2) + Math.pow(botPos.getZ() - targetPos.getZ(), 2));
-        double verticalDistance = Math.abs(botPos.getY() - targetPos.getY());
-        double totalDistance = botPos.distance(targetPos);
-
-        boolean needsTeleport = false;
-        boolean requiresObstacleCheck = false;
-
-        if (totalDistance > EMERGENCY_TELEPORT_DISTANCE) {
-            needsTeleport = true;
-            requiresObstacleCheck = totalDistance < EXTREME_EMERGENCY_TELEPORT_DISTANCE;
-        } else if (horizontalDistance > AUTO_TELEPORT_HORIZONTAL_DISTANCE) {
-            needsTeleport = true;
-            requiresObstacleCheck = true;
-        } else if (verticalDistance > AUTO_TELEPORT_VERTICAL_DISTANCE) {
-            needsTeleport = true;
-            requiresObstacleCheck = true;
-        }
-
-        if (needsTeleport && requiresObstacleCheck && !hasSolidObstacleBetween(botPos, targetPos)) {
+        AutoTeleportDecision decision = evaluateAutoTeleportDecision(botPos, targetPos);
+        if (!decision.needsTeleport) {
             return false;
         }
-
-        return needsTeleport && performAutoTeleport(target);
+        if (decision.requiresObstacleCheck && !hasSolidObstacleBetween(botPos, targetPos)) {
+            return false;
+        }
+        return performAutoTeleport(target);
     }
 
     private boolean performAutoTeleport(Player target) {
@@ -331,7 +256,7 @@ public class BotEnderpearlController {
     }
 
     private void handlePostPearlStrategy() {
-                switch (currentStrategy) {
+        switch (currentStrategy) {
             case COMBO_ESCAPE:
             case ESCAPE:
                 damageTracker.resetDamageState();
@@ -339,7 +264,6 @@ public class BotEnderpearlController {
             case AGGRESSIVE_CLOSE:
             case MELEE_DISENGAGE:
             case ANCHOR_POSITION:
-
                 break;
             case REPOSITION_LOW:
                 repositionPearlCooldown = 100;
@@ -349,30 +273,13 @@ public class BotEnderpearlController {
 
     public void tick() {
         if (!enabled) {
-            isPreparingPearl = false;
-            pendingThrowTarget = null;
-            preparationTicks = 0;
+            cancelPearlPreparation();
             return;
         }
-        if (enderpearlCooldown > 0) enderpearlCooldown--;
-        if (aggressivePearlCooldown > 0) aggressivePearlCooldown--;
-        if (repositionPearlCooldown > 0) repositionPearlCooldown--;
+        tickCooldowns();
 
         damageTracker.tick();
-
-        if (isPreparingPearl && pendingThrowTarget != null) {
-            preparationTicks++;
-
-            rotationController.lookAt(pendingThrowTarget.getX(), pendingThrowTarget.getY(), pendingThrowTarget.getZ());
-
-            if (preparationTicks >= PREPARATION_TIME) {
-                throwEnderpearl(pendingThrowTarget);
-
-                isPreparingPearl = false;
-                pendingThrowTarget = null;
-                preparationTicks = 0;
-            }
-        }
+        processPearlPreparationTick();
     }
 
     public boolean canUseEnderpearl() {
@@ -424,9 +331,7 @@ public class BotEnderpearlController {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (!enabled) {
-            isPreparingPearl = false;
-            pendingThrowTarget = null;
-            preparationTicks = 0;
+            cancelPearlPreparation();
         }
     }
 
@@ -545,5 +450,150 @@ public class BotEnderpearlController {
 
     private static boolean isOnGround(Player player) {
         return Math.abs(player.getVelocity().getY()) < 1.0E-3D;
+    }
+
+    private boolean canStartPearlUse() {
+        return enabled && !isPreparingPearl && inventoryController.hasEnderpearls();
+    }
+
+    private boolean isValidTargetDistance(Player target, @Nullable PearlStrategy forcedStrategy) {
+        double distance = bot.distanceTo(target);
+        if (distance < MIN_USE_DISTANCE && forcedStrategy != PearlStrategy.COMBO_ESCAPE) {
+            return false;
+        }
+        return distance <= MAX_USE_DISTANCE || forcedStrategy == PearlStrategy.AGGRESSIVE_CLOSE;
+    }
+
+    private boolean isGroundedWhenRequired(@Nullable PearlStrategy forcedStrategy) {
+        return forcedStrategy != null || isOnGround(bukkitBot);
+    }
+
+    private PearlStrategy resolvePearlStrategy(Player target, @Nullable PearlStrategy forcedStrategy) {
+        if (forcedStrategy != null) {
+            return forcedStrategy;
+        }
+        return strategyCalculator.determineOptimalStrategy(
+                bukkitBot,
+                target,
+                damageTracker.wasRecentlyDamaged(),
+                damageTracker.getDamageComboCount(),
+                damageTracker.getComboStartTime(),
+                repositionPearlCooldown,
+                aggressivePearlCooldown);
+    }
+
+    private boolean shouldUsePearlForStrategy(PearlStrategy strategy, Player target) {
+        return strategyCalculator.shouldUsePearlForStrategy(
+                strategy,
+                bukkitBot,
+                target,
+                damageTracker.wasRecentlyDamaged(),
+                lastEmergencyPearl,
+                repositionPearlCooldown,
+                aggressivePearlCooldown);
+    }
+
+    private @Nullable Vector calculatePearlTarget(PearlStrategy strategy, Player target) {
+        return strategyCalculator.calculateTargetForStrategy(
+                strategy, bukkitBot, target, targetTracker.getPredictedTargetMovement());
+    }
+
+    private void ensureHoldingEnderpearl() {
+        if (!inventoryController.isHoldingEnderpearl()) {
+            inventoryController.switchToEnderpearl();
+        }
+    }
+
+    private @Nullable BlockVector findBestObsidianSide(
+            BlockVector obsidianPos, Player target, Vector predictedTargetPos) {
+        BlockVector bestSide = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        int[][] horizontal = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+        for (int[] offset : horizontal) {
+            BlockVector sidePos = new BlockVector(
+                    obsidianPos.getBlockX() + offset[0], obsidianPos.getBlockY(), obsidianPos.getBlockZ() + offset[1]);
+            if (!safetyValidator.isSafeLandingSpot(sidePos)) {
+                continue;
+            }
+
+            double score = scoreObsidianSide(sidePos, target, predictedTargetPos);
+            if (score > bestScore) {
+                bestScore = score;
+                bestSide = sidePos;
+            }
+        }
+
+        return bestSide;
+    }
+
+    private double scoreObsidianSide(BlockVector sidePos, Player target, Vector predictedTargetPos) {
+        Vector sideCenter = centerOf(sidePos);
+        double distToTarget = sideCenter.distance(predictedTargetPos);
+        double distToBot = sideCenter.distance(bot.bukkitPosition());
+        double score = 0;
+
+        if (distToTarget < 8.0) {
+            score += (8.0 - distToTarget) * 10;
+        }
+        if (distToBot > 6.0) {
+            score += 20;
+        }
+        if (sidePos.getBlockY() <= target.getLocation().getBlockY()) {
+            score += 15;
+        }
+
+        return score;
+    }
+
+    private AutoTeleportDecision evaluateAutoTeleportDecision(Vector botPos, Vector targetPos) {
+        double horizontalDistance = Math.sqrt(
+                Math.pow(botPos.getX() - targetPos.getX(), 2) + Math.pow(botPos.getZ() - targetPos.getZ(), 2));
+        double verticalDistance = Math.abs(botPos.getY() - targetPos.getY());
+        double totalDistance = botPos.distance(targetPos);
+
+        if (totalDistance > EMERGENCY_TELEPORT_DISTANCE) {
+            return new AutoTeleportDecision(true, totalDistance < EXTREME_EMERGENCY_TELEPORT_DISTANCE);
+        }
+        if (horizontalDistance > AUTO_TELEPORT_HORIZONTAL_DISTANCE || verticalDistance > AUTO_TELEPORT_VERTICAL_DISTANCE) {
+            return new AutoTeleportDecision(true, true);
+        }
+        return AutoTeleportDecision.NO_TELEPORT;
+    }
+
+    private void tickCooldowns() {
+        if (enderpearlCooldown > 0) enderpearlCooldown--;
+        if (aggressivePearlCooldown > 0) aggressivePearlCooldown--;
+        if (repositionPearlCooldown > 0) repositionPearlCooldown--;
+    }
+
+    private void processPearlPreparationTick() {
+        if (!isPreparingPearl || pendingThrowTarget == null) {
+            return;
+        }
+        preparationTicks++;
+        rotationController.lookAt(pendingThrowTarget.getX(), pendingThrowTarget.getY(), pendingThrowTarget.getZ());
+        if (preparationTicks >= PREPARATION_TIME) {
+            throwEnderpearl(pendingThrowTarget);
+            cancelPearlPreparation();
+        }
+    }
+
+    private void cancelPearlPreparation() {
+        isPreparingPearl = false;
+        pendingThrowTarget = null;
+        preparationTicks = 0;
+    }
+
+    private static final class AutoTeleportDecision {
+        private static final AutoTeleportDecision NO_TELEPORT = new AutoTeleportDecision(false, false);
+
+        private final boolean needsTeleport;
+        private final boolean requiresObstacleCheck;
+
+        private AutoTeleportDecision(boolean needsTeleport, boolean requiresObstacleCheck) {
+            this.needsTeleport = needsTeleport;
+            this.requiresObstacleCheck = requiresObstacleCheck;
+        }
     }
 }

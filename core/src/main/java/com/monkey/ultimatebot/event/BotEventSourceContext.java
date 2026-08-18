@@ -3,7 +3,6 @@ package com.monkey.ultimatebot.event;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import java.util.concurrent.Callable;
 
-/** Propagates the origin of synchronous API operations without changing public manager signatures. */
 public final class BotEventSourceContext {
     private static final ThreadLocal<BotEventSource> CURRENT = new ThreadLocal<>();
 

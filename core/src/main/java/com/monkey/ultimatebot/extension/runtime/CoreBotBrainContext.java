@@ -3,8 +3,8 @@ package com.monkey.ultimatebot.extension.runtime;
 import com.monkey.ultimatebot.api.extension.brain.BotBrainContext;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.SplittableRandom;
+import java.util.UUID;
 
 public final class CoreBotBrainContext implements BotBrainContext {
     private final ITrainingBot bot;

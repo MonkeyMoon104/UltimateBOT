@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.combat.profile;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -15,8 +13,8 @@ public final class CombatModeConfiguration {
     private final String iconMaterial;
     private final Map<DifficultyTier, CombatTuning> profiles;
 
-    public CombatModeConfiguration(CombatMode mode, boolean enabled, String iconMaterial, Map<DifficultyTier, CombatTuning> profiles) {
-
+    public CombatModeConfiguration(
+            CombatMode mode, boolean enabled, String iconMaterial, Map<DifficultyTier, CombatTuning> profiles) {
 
         Objects.requireNonNull(mode, "mode");
         Objects.requireNonNull(iconMaterial, "iconMaterial");
@@ -36,12 +34,15 @@ public final class CombatModeConfiguration {
     public CombatMode mode() {
         return mode;
     }
+
     public boolean enabled() {
         return enabled;
     }
+
     public String iconMaterial() {
         return iconMaterial;
     }
+
     public Map<DifficultyTier, CombatTuning> profiles() {
         return profiles;
     }
@@ -63,7 +64,10 @@ public final class CombatModeConfiguration {
             return false;
         }
         CombatModeConfiguration other = (CombatModeConfiguration) obj;
-        return java.util.Objects.equals(mode, other.mode) && enabled == other.enabled && java.util.Objects.equals(iconMaterial, other.iconMaterial) && java.util.Objects.equals(profiles, other.profiles);
+        return java.util.Objects.equals(mode, other.mode)
+                && enabled == other.enabled
+                && java.util.Objects.equals(iconMaterial, other.iconMaterial)
+                && java.util.Objects.equals(profiles, other.profiles);
     }
 
     @Override
@@ -73,6 +77,7 @@ public final class CombatModeConfiguration {
 
     @Override
     public String toString() {
-        return "CombatModeConfiguration[mode=" + mode + ", enabled=" + enabled + ", iconMaterial=" + iconMaterial + ", profiles=" + profiles + "]";
+        return "CombatModeConfiguration[mode=" + mode + ", enabled=" + enabled + ", iconMaterial=" + iconMaterial
+                + ", profiles=" + profiles + "]";
     }
 }

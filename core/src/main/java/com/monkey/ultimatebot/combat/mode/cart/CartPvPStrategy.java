@@ -1,13 +1,12 @@
 package com.monkey.ultimatebot.combat.mode.cart;
 
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
-
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
 import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import org.bukkit.Material;
 import org.bukkit.entity.LivingEntity;
 
@@ -55,7 +54,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
         if (explosiveSequence.isActive()) {
             handleSequenceStatus(context, target, explosiveSequence.tick(context, target));
         }
-                switch (phase) {
+        switch (phase) {
             case MELEE:
                 melee(context, target);
                 break;
@@ -119,7 +118,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
     }
 
     private void drawIgnitionBow(CombatModeContext context, LivingEntity target) {
-                switch (bowController.drawIgnitionArrow(context, target, explosiveSequence, phaseTicks)) {
+        switch (bowController.drawIgnitionArrow(context, target, explosiveSequence, phaseTicks)) {
             case CHARGING:
                 return;
             case READY:
@@ -202,7 +201,7 @@ public final class CartPvPStrategy extends AbstractCombatModeStrategy {
 
     private void handleSequenceStatus(
             CombatModeContext context, LivingEntity target, CartExplosiveSequence.Status status) {
-                switch (status) {
+        switch (status) {
             case ACTIVE:
                 return;
             case NEEDS_IGNITION:

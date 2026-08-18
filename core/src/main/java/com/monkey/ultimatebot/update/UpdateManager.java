@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.update;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.compat.PluginMetaAccess;
-import com.monkey.ultimatebot.compat.UpdateNotifyAccess;
+import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
+import com.monkey.ultimatebot.access.update.UpdateNotifyAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.wrapper.WrapperTask;
 import java.io.IOException;
@@ -129,20 +129,20 @@ public final class UpdateManager implements Listener {
         for (Player player : players) {
             if (isAdmin(player)) {
                 UpdateNotifyAccess.sendUpdateAvailable(
-                player, state.currentVersion(), state.latestVersion(), state.downloadUrl());
+                        player, state.currentVersion(), state.latestVersion(), state.downloadUrl());
             }
         }
     }
 
     private PluginUpdateCheckResponse checkRemote() throws IOException {
-        return updateHttpClient.check(new PluginUpdateCheckRequest(
-                PRODUCT_CODE, PluginMetaAccess.version(plugin)));
+        return updateHttpClient.check(new PluginUpdateCheckRequest(PRODUCT_CODE, PluginMetaAccess.version(plugin)));
     }
 
     private UpdateState toState(PluginUpdateCheckResponse response) {
-        String url = response.downloadUrl() == null || response.downloadUrl().trim().isEmpty()
-                ? DEFAULT_DOWNLOAD_URL
-                : response.downloadUrl();
+        String url =
+                response.downloadUrl() == null || response.downloadUrl().trim().isEmpty()
+                        ? DEFAULT_DOWNLOAD_URL
+                        : response.downloadUrl();
 
         return new UpdateState(
                 response.updateAvailable(),

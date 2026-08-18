@@ -28,7 +28,7 @@ public class DifficultyPlaceholder implements IBotPlaceholder {
         DifficultyLevel difficulty = bot.getBotAI().getDifficulty();
         if (difficulty == null) return "○ Unknown Difficulty";
 
-                switch (difficulty) {
+        switch (difficulty) {
             case EASY:
                 return "● Easy";
             case NORMAL:

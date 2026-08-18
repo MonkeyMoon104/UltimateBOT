@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.Location;
@@ -27,12 +27,8 @@ public class CrystalPositionEvaluator {
             Map<BlockVector, Integer> crystalCountAtPosition,
             double optimalDamageRange,
             double minCrystalDistance) {
-        Location explosionPos =
-                new Location(
-                        world,
-                        crystalPos.getBlockX() + 0.5D,
-                        crystalPos.getBlockY() + 1.5D,
-                        crystalPos.getBlockZ() + 0.5D);
+        Location explosionPos = new Location(
+                world, crystalPos.getBlockX() + 0.5D, crystalPos.getBlockY() + 1.5D, crystalPos.getBlockZ() + 0.5D);
 
         double targetDamage = estimateDamage(explosionPos, target);
         double selfDamage = estimateDamage(explosionPos, bot);
@@ -78,22 +74,13 @@ public class CrystalPositionEvaluator {
         double rangeBonus = Math.max(0.0D, crystalAttackRange - distanceToBot) * 0.25D;
         double targetProximityBonus = Math.max(0.0D, 4.0D - distanceToTarget) * 0.6D;
         double ownershipBonus = myPlacedCrystals.contains(crystal) ? 1.5D : 0.0D;
-        double score =
-                (targetDamage * 3.0D)
-                        - (selfDamage * 2.8D)
-                        + rangeBonus
-                        + targetProximityBonus
-                        + ownershipBonus;
+        double score = (targetDamage * 3.0D) - (selfDamage * 2.8D) + rangeBonus + targetProximityBonus + ownershipBonus;
         if (targetDamage > target.getHealth()) {
             score += 3.5D;
         }
         return Math.max(0.0D, score);
     }
 
-    /**
-     * Paper 1.13 ray-trace exposure often underestimates (or zeros) damage and then CPvP never
-     * places/attacks. Use full-exposure falloff there only.
-     */
     private static double estimateDamage(Location explosionPos, Player entity) {
         if (MinecraftVersionAccess.is1_13()) {
             return estimateDamageFullExposure(explosionPos, entity, 6.0D);
@@ -101,8 +88,7 @@ public class CrystalPositionEvaluator {
         return ExplosionDamageEstimator.estimateCrystalDamage(explosionPos, entity);
     }
 
-    private static double estimateDamageFullExposure(
-            Location explosionLocation, Player entity, double explosionPower) {
+    private static double estimateDamageFullExposure(Location explosionLocation, Player entity, double explosionPower) {
         double maxRadius = explosionPower * 2.0D;
         double distance = explosionLocation.distance(entity.getLocation());
         if (distance > maxRadius) {

@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.common.model;
 
-/** Capabilities implemented by a combat mode. */
 public enum CombatCapability {
     MELEE(1),
     PROJECTILE(1 << 1),

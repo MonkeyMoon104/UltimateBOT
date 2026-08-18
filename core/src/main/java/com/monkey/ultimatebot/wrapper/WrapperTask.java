@@ -21,9 +21,11 @@ public final class WrapperTask {
     public String backend() {
         return backend;
     }
+
     public @Nullable Object handle() {
         return handle;
     }
+
     public @Nullable Runnable cancelAction() {
         return cancelAction;
     }
@@ -55,7 +57,8 @@ public final class WrapperTask {
     }
 
     private static void invokeCancel(Object taskHandle) {
-        if (taskHandle instanceof ScheduledTask) { ScheduledTask scheduledTask = (ScheduledTask) taskHandle;
+        if (taskHandle instanceof ScheduledTask) {
+            ScheduledTask scheduledTask = (ScheduledTask) taskHandle;
             scheduledTask.cancel();
             return;
         }
@@ -65,7 +68,7 @@ public final class WrapperTask {
             try {
                 cancel.setAccessible(true);
             } catch (SecurityException ignored) {
-                // best-effort on older JVMs
+
             }
             cancel.invoke(taskHandle);
         } catch (ReflectiveOperationException cancelError) {
@@ -82,7 +85,9 @@ public final class WrapperTask {
             return false;
         }
         WrapperTask other = (WrapperTask) obj;
-        return java.util.Objects.equals(backend, other.backend) && java.util.Objects.equals(handle, other.handle) && java.util.Objects.equals(cancelAction, other.cancelAction);
+        return java.util.Objects.equals(backend, other.backend)
+                && java.util.Objects.equals(handle, other.handle)
+                && java.util.Objects.equals(cancelAction, other.cancelAction);
     }
 
     @Override

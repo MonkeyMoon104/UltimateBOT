@@ -45,7 +45,7 @@ public final class AxeShieldPvPStrategy extends AbstractCombatModeStrategy {
         if (shieldRearmTicks > 0) {
             shieldRearmTicks--;
         }
-                switch (phase) {
+        switch (phase) {
             case GUARD:
                 guard(context, target);
                 break;

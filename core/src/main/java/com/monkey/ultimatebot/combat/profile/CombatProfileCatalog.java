@@ -1,9 +1,5 @@
 package com.monkey.ultimatebot.combat.profile;
 
-import java.util.stream.Collectors;
-
-
-import java.util.Collections;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
@@ -14,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class CombatProfileCatalog {
     private final Map<CombatMode, CombatModeConfiguration> configurations;
@@ -37,10 +34,9 @@ public final class CombatProfileCatalog {
         bindPlatformCapabilities(platformCapabilities);
     }
 
-    /** Updates the platform capability set used to filter {@link #enabledModes()}. */
     public void bindPlatformCapabilities(Set<PlatformCapability> platformCapabilities) {
-        this.platformCapabilities =
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(Objects.requireNonNull(platformCapabilities, "platformCapabilities"));
+        this.platformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                Objects.requireNonNull(platformCapabilities, "platformCapabilities"));
     }
 
     public Set<PlatformCapability> platformCapabilities() {
@@ -59,16 +55,10 @@ public final class CombatProfileCatalog {
         return configuration;
     }
 
-    /** Returns whether the loaded platform supports the built-in requirements for {@code mode}. */
     public boolean supports(CombatMode mode) {
         return Objects.requireNonNull(mode, "mode").supportedBy(platformCapabilities);
     }
 
-    /**
-     * Modes enabled in config and supported by the loaded platform.
-     *
-     * <p>GUI cycling, API listing filters, and {@code nextCombatMode} use this intersection.
-     */
     public List<CombatMode> enabledModes() {
         return configurations.values().stream()
                 .filter(CombatModeConfiguration::enabled)
@@ -78,9 +68,6 @@ public final class CombatProfileCatalog {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Modes enabled in config but unavailable because the platform lacks required capabilities.
-     */
     public List<CombatMode> platformDisabledModes() {
         return configurations.values().stream()
                 .filter(CombatModeConfiguration::enabled)

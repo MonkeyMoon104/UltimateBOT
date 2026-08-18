@@ -18,8 +18,14 @@ public final class BotLocation {
     private final float yaw;
     private final float pitch;
 
-    public BotLocation(@Nullable String worldName, @Nullable UUID worldUUID, double x, double y, double z, float yaw, float pitch) {
-
+    public BotLocation(
+            @Nullable String worldName,
+            @Nullable UUID worldUUID,
+            double x,
+            double y,
+            double z,
+            float yaw,
+            float pitch) {
 
         if ((worldName == null || worldName.trim().isEmpty()) && worldUUID == null) {
             throw new IllegalArgumentException("worldName or worldUUID is required");
@@ -36,21 +42,27 @@ public final class BotLocation {
     public @Nullable String worldName() {
         return worldName;
     }
+
     public @Nullable UUID worldUUID() {
         return worldUUID;
     }
+
     public double x() {
         return x;
     }
+
     public double y() {
         return y;
     }
+
     public double z() {
         return z;
     }
+
     public float yaw() {
         return yaw;
     }
+
     public float pitch() {
         return pitch;
     }
@@ -77,7 +89,13 @@ public final class BotLocation {
             return false;
         }
         BotLocation other = (BotLocation) obj;
-        return java.util.Objects.equals(worldName, other.worldName) && java.util.Objects.equals(worldUUID, other.worldUUID) && Double.compare(x, other.x) == 0 && Double.compare(y, other.y) == 0 && Double.compare(z, other.z) == 0 && Float.compare(yaw, other.yaw) == 0 && Float.compare(pitch, other.pitch) == 0;
+        return java.util.Objects.equals(worldName, other.worldName)
+                && java.util.Objects.equals(worldUUID, other.worldUUID)
+                && Double.compare(x, other.x) == 0
+                && Double.compare(y, other.y) == 0
+                && Double.compare(z, other.z) == 0
+                && Float.compare(yaw, other.yaw) == 0
+                && Float.compare(pitch, other.pitch) == 0;
     }
 
     @Override
@@ -87,6 +105,7 @@ public final class BotLocation {
 
     @Override
     public String toString() {
-        return "BotLocation[worldName=" + worldName + ", worldUUID=" + worldUUID + ", x=" + x + ", y=" + y + ", z=" + z + ", yaw=" + yaw + ", pitch=" + pitch + "]";
+        return "BotLocation[worldName=" + worldName + ", worldUUID=" + worldUUID + ", x=" + x + ", y=" + y + ", z=" + z
+                + ", yaw=" + yaw + ", pitch=" + pitch + "]";
     }
 }

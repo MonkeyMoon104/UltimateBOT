@@ -4,9 +4,6 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotType;
 import org.bukkit.entity.Player;
 
-/**
- * Isolated entry for InvUI GUI so Java 8 servers never class-load InvUI (bytecode major 55).
- */
 public final class NewBotGuiLauncher {
 
     private NewBotGuiLauncher() {}

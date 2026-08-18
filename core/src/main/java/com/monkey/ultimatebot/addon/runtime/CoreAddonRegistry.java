@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.addon.runtime;
 
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.api.addon.AddonRegistry;
 import com.monkey.ultimatebot.api.addon.AddonSnapshot;
 import java.util.List;
@@ -9,6 +7,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 public final class CoreAddonRegistry implements AddonRegistry {
     private final ConcurrentMap<String, AddonSnapshot> addons = new ConcurrentHashMap<>();

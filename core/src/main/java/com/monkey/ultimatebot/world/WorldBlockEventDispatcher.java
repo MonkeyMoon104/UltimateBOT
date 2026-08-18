@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.world;
 
-import com.monkey.ultimatebot.compat.BlockBreakAccess;
-import com.monkey.ultimatebot.compat.BlockPlaceAccess;
+import com.monkey.ultimatebot.access.block.BlockBreakAccess;
+import com.monkey.ultimatebot.access.block.BlockPlaceAccess;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -34,6 +34,7 @@ final class WorldBlockEventDispatcher {
         public boolean cancelled() {
             return cancelled;
         }
+
         public boolean dropItems() {
             return dropItems;
         }

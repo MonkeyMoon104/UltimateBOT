@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.integration.api;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.configuration.BotBlastProtection;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
@@ -11,7 +10,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
-/** Maps the public API settings model into the mutable runtime options model. */
 final class ApiBotOptionsFactory {
 
     private final UltimateBot plugin;
@@ -81,7 +79,7 @@ final class ApiBotOptionsFactory {
         options.setBlastProtection(blast.feet(), blast.legs(), blast.chest(), blast.head());
         options.setArmorRange(toCoreArmor(settings.minArmorType()), toCoreArmor(settings.maxArmorType()));
         options.setArmorType(toCoreArmor(settings.armorType()));
-        options.getArmor().putAll(EquipmentSlotAccess.mapKeys(settings.armorContents()));
+        options.getArmor().putAll(settings.armorContents());
         copyTrimSettings(options, settings);
         options.setEquipmentContents(settings.equipmentContents());
         options.setDifficultyRange(
@@ -96,19 +94,17 @@ final class ApiBotOptionsFactory {
     }
 
     private static void copyTrimSettings(BotOptions options, BotSettings settings) {
-        for (Map.Entry<EquipmentSlotKind, String> entry :
-                EquipmentSlotAccess.mapKeys(settings.armorTrimPatternKeys()).entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, String> entry : settings.armorTrimPatternKeys().entrySet()) {
             options.setTrimPatternKey(entry.getKey(), entry.getValue());
         }
-        for (Map.Entry<EquipmentSlotKind, String> entry :
-                EquipmentSlotAccess.mapKeys(settings.armorTrimMaterialKeys()).entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, String> entry : settings.armorTrimMaterialKeys().entrySet()) {
             options.setTrimMaterialKey(entry.getKey(), entry.getValue());
         }
     }
 
     static com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel toCoreDifficulty(DifficultyTier difficulty) {
         DifficultyTier resolved = difficulty == null ? DifficultyTier.EASY : difficulty;
-                switch (resolved) {
+        switch (resolved) {
             case EASY:
                 return com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel.EASY;
             case NORMAL:
@@ -125,7 +121,7 @@ final class ApiBotOptionsFactory {
 
     private static ArmorTier toCoreArmor(BotArmorTier armorType) {
         BotArmorTier resolved = armorType == null ? BotArmorTier.LEATHER : armorType;
-                switch (resolved) {
+        switch (resolved) {
             case LEATHER:
                 return ArmorTier.LEATHER;
             case IRON:

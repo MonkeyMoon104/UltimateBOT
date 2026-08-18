@@ -19,8 +19,8 @@ class PatheticPathPlannerTest {
             }
         }
 
-        List<BlockVector> path = new PatheticPathPlanner(environment)
-                .findPath(new BlockVector(0, 0, 0), new BlockVector(8, 0, 0));
+        List<BlockVector> path =
+                new PatheticPathPlanner(environment).findPath(new BlockVector(0, 0, 0), new BlockVector(8, 0, 0));
 
         assertThat(path).isNotEmpty();
         assertThat(path.get(0)).isEqualTo(new BlockVector(0, 0, 0));
@@ -35,8 +35,8 @@ class PatheticPathPlannerTest {
         environment.block(1, 0);
         environment.block(0, 1);
 
-        List<BlockVector> path = new PatheticPathPlanner(environment)
-                .findPath(new BlockVector(0, 0, 0), new BlockVector(3, 0, 3));
+        List<BlockVector> path =
+                new PatheticPathPlanner(environment).findPath(new BlockVector(0, 0, 0), new BlockVector(3, 0, 3));
 
         assertThat(path).isNotEmpty();
         assertThat(path).doesNotContain(new BlockVector(1, 0, 1));
@@ -54,8 +54,7 @@ class PatheticPathPlannerTest {
             }
         }
 
-        List<BlockVector> path =
-                new PatheticPathPlanner(environment).findPath(new BlockVector(0, 0, 0), target);
+        List<BlockVector> path = new PatheticPathPlanner(environment).findPath(new BlockVector(0, 0, 0), target);
 
         assertThat(path).isEmpty();
     }
@@ -89,7 +88,10 @@ class PatheticPathPlannerTest {
         BlockVector failedWaypoint = new BlockVector(2, 0, 0);
 
         List<BlockVector> path = new PatheticPathPlanner(environment)
-                .findPath(new BlockVector(0, 0, 0), new BlockVector(5, 0, 0), java.util.Collections.singleton(failedWaypoint));
+                .findPath(
+                        new BlockVector(0, 0, 0),
+                        new BlockVector(5, 0, 0),
+                        java.util.Collections.singleton(failedWaypoint));
 
         assertThat(path).isNotEmpty();
         assertThat(path).doesNotContain(failedWaypoint);

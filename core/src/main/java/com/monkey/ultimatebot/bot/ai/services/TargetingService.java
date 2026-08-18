@@ -1,18 +1,17 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.cache.TargetCacheStats;
 import com.monkey.ultimatebot.bot.ai.services.cache.UuidCache;
 import com.monkey.ultimatebot.bot.ai.services.cache.UuidCaches;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.entity.EntityInvulnerableAccess;
+import com.monkey.ultimatebot.access.player.GameModeAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
-import com.monkey.ultimatebot.compat.EntityInvulnerableAccess;
-import com.monkey.ultimatebot.compat.GameModeAccess;
-import com.monkey.ultimatebot.compat.WorldAccess;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,8 +67,10 @@ public class TargetingService {
                 && !cached.mob.isDead()
                 && cached.mob.getWorld() != null
                 && cached.mob.getWorld().equals(bot.asBukkitPlayer().getWorld())
-                && cached.mob.getLocation().distanceSquared(
-                        java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location"))
+                && cached.mob
+                                .getLocation()
+                                .distanceSquared(java.util.Objects.requireNonNull(
+                                        bot.asBukkitPlayer().getLocation(), "bot location"))
                         <= maxRange * maxRange) {
             return cached.mob;
         }
@@ -79,7 +80,8 @@ public class TargetingService {
             return null;
         }
 
-        org.bukkit.Location center = java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
+        org.bukkit.Location center =
+                java.util.Objects.requireNonNull(bot.asBukkitPlayer().getLocation(), "bot location");
         double closestDistanceSq = maxRange * maxRange;
         LivingEntity closest = null;
         for (org.bukkit.entity.Entity entity :

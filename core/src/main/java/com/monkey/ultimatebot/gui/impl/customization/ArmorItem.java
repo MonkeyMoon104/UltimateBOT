@@ -1,16 +1,14 @@
 package com.monkey.ultimatebot.gui.impl.customization;
 
-
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.bukkit.Material;

@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.attack.helper;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.ultimatebot.common.guard.GuardMetadata;
-import com.monkey.ultimatebot.compat.CombatSwordAccess;
+import com.monkey.ultimatebot.access.combat.CombatSwordAccess;
 import com.monkey.ultimatebot.nms.DamageKind;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
@@ -50,8 +50,7 @@ public class AttackExecutor implements IAttackExecutor {
             if (bukkitTarget != null) {
                 bukkitTarget.setMetadata(
                         BOT_FIRE_ASPECT_METADATA,
-                        new FixedMetadataValue(
-                                bot.getPlugin(), System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS));
+                        new FixedMetadataValue(bot.getPlugin(), System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS));
             }
             target.setFireTicks(Math.max(target.getFireTicks(), FIRE_ASPECT_SECONDS * 20));
         } catch (RuntimeException fireAspectError) {
@@ -118,17 +117,9 @@ public class AttackExecutor implements IAttackExecutor {
                                                     trainingBot.getPlugin(),
                                                     System.currentTimeMillis() + FIRE_ASPECT_METADATA_MS));
                                 }
-                                NMSBridgeManager.get()
-                                        .hurt(
-                                                target,
-                                                bot.asBukkitPlayer(),
-                                                LAVA_DAMAGE,
-                                                DamageKind.LAVA);
+                                NMSBridgeManager.get().hurt(target, bot.asBukkitPlayer(), LAVA_DAMAGE, DamageKind.LAVA);
                             } catch (RuntimeException lavaDamageError) {
-                                LOGGER.log(
-                                        Level.FINE,
-                                        "Could not apply delayed bot lava damage",
-                                        lavaDamageError);
+                                LOGGER.log(Level.FINE, "Could not apply delayed bot lava damage", lavaDamageError);
                             }
                         },
                         LAVA_DAMAGE_DELAY_TICKS);

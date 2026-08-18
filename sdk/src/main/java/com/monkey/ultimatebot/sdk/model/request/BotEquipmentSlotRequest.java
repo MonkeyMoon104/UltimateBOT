@@ -2,7 +2,6 @@ package com.monkey.ultimatebot.sdk.model.request;
 
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlotMode;
 import java.util.Objects;
-import org.jspecify.annotations.Nullable;
 
 /** Persistent remote equipment setting for one bot slot. */
 public final class BotEquipmentSlotRequest {
@@ -11,7 +10,6 @@ public final class BotEquipmentSlotRequest {
     private final int amount;
 
     public BotEquipmentSlotRequest(SdkBotEquipmentSlotMode mode, String material, int amount) {
-
 
         Objects.requireNonNull(mode, "mode");
         if (mode == SdkBotEquipmentSlotMode.ITEM) {
@@ -34,9 +32,11 @@ public final class BotEquipmentSlotRequest {
     public SdkBotEquipmentSlotMode mode() {
         return mode;
     }
+
     public String material() {
         return material;
     }
+
     public int amount() {
         return amount;
     }
@@ -67,7 +67,9 @@ public final class BotEquipmentSlotRequest {
             return false;
         }
         BotEquipmentSlotRequest other = (BotEquipmentSlotRequest) obj;
-        return java.util.Objects.equals(mode, other.mode) && java.util.Objects.equals(material, other.material) && amount == other.amount;
+        return java.util.Objects.equals(mode, other.mode)
+                && java.util.Objects.equals(material, other.material)
+                && amount == other.amount;
     }
 
     @Override

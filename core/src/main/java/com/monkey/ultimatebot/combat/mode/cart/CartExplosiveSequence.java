@@ -3,11 +3,11 @@ package com.monkey.ultimatebot.combat.mode.cart;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
-import com.monkey.ultimatebot.compat.EntityInvulnerableAccess;
-import com.monkey.ultimatebot.compat.ExplosiveMinecartAccess;
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
-import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.access.entity.EntityInvulnerableAccess;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
+import com.monkey.ultimatebot.access.explosive.ExplosiveMinecartAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
@@ -36,8 +36,7 @@ final class CartExplosiveSequence {
     boolean placeRail(CombatModeContext context, LivingEntity target) {
         Location targetLocation = Objects.requireNonNull(target.getLocation(), "target location");
         context.inventory().switchToSlot(RAIL_SLOT);
-        for (Location placement : CartPlacementPlanner.railCandidates(
-                targetLocation, target.getVelocity())) {
+        for (Location placement : CartPlacementPlanner.railCandidates(targetLocation, target.getVelocity())) {
             if (!placement
                     .clone()
                     .subtract(0.0D, 1.0D, 0.0D)
@@ -85,7 +84,6 @@ final class CartExplosiveSequence {
         return true;
     }
 
-    /** 1.17+: same Bukkit spawn as before. 1.16: NMS bridge only. */
     private static @Nullable ExplosiveMinecart spawnCart(Location spawn) {
         if (MinecraftVersionAccess.isAtLeast(1, 17)) {
             return spawn.getWorld().spawn(spawn, ExplosiveMinecart.class);

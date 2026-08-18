@@ -1,18 +1,17 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-import com.monkey.ultimatebot.compat.EntityBoundsAccess;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
-import com.monkey.ultimatebot.compat.EntityFluidAccess;
-import com.monkey.ultimatebot.nms.NMSBridgeManager;
-
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.combat.mode.water.UnderwaterMotionPlanner;
 import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.access.entity.EntityBoundsAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.entity.EntityFluidAccess;
+import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -67,7 +66,10 @@ public final class ModeMotionService {
     }
 
     public void strafe(LivingEntity target, double strength) {
-        Vector direction = entityLocation(target).toVector().subtract(botLocation().toVector()).normalize();
+        Vector direction = entityLocation(target)
+                .toVector()
+                .subtract(botLocation().toVector())
+                .normalize();
         double side = random.nextBoolean() ? 1.0D : -1.0D;
         movement.moveToPosition(botLocation()
                 .toVector()
@@ -147,7 +149,10 @@ public final class ModeMotionService {
             for (double zOffset : offsets) {
                 for (int height = 0; height < clearanceBlocks; height++) {
                     Location position = new Location(
-                            entity.getWorld(), EntityCoordsAccess.getX(entity) + xOffset, startY + height, EntityCoordsAccess.getZ(entity) + zOffset);
+                            entity.getWorld(),
+                            EntityCoordsAccess.getX(entity) + xOffset,
+                            startY + height,
+                            EntityCoordsAccess.getZ(entity) + zOffset);
                     if (position.getBlock().getType().isSolid()) {
                         return false;
                     }

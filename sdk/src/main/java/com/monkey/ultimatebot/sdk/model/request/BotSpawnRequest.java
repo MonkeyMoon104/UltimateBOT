@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
 import com.monkey.ultimatebot.common.model.BotArmorTier;
 import com.monkey.ultimatebot.common.model.BotMode;
@@ -12,6 +10,7 @@ import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlotMode;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -120,14 +119,67 @@ public final class BotSpawnRequest {
     private final BrainKey brain;
     private final CombatTuning combatTuning;
 
-    public BotSpawnRequest(BotMode mode, UUID ownerUUID, List<UUID> teamOwnerUUIDs, UUID botUUID, List<UUID> targetUUIDs, String botNameTemplate, String botSkin, boolean follow, boolean changeableFollow, boolean combat, boolean changeableCombat, boolean changeableBlast, BlastProtectionSettings blastProtection, boolean changeableArmor, boolean changeableTotem, boolean changeableDifficulty, boolean changeableCombatMode, BotArmorTier armor, BotArmorTier minArmor, BotArmorTier maxArmor, int totemCount, int minTotemCount, int maxTotemCount, DifficultyTier difficulty, DifficultyTier minDifficulty, DifficultyTier maxDifficulty, BotLocationRequest spawnLocation, boolean autoTarget, double autoTargetRange, boolean attackBots, BotTargetMode targetMode, boolean respectWorldGuardPvp, boolean stayAfterOwnerDeath, boolean idleWander, double idleWanderRadius, double idleReturnDistance, long idleReturnDelayMs, boolean crystalPvp, boolean explosions, boolean explosionBlockDamage, boolean enderPearls, boolean healing, boolean killMessageEnabled, String killMessage, Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots, CombatMode combatMode, BrainKey brain, CombatTuning combatTuning) {
-
+    public BotSpawnRequest(
+            BotMode mode,
+            UUID ownerUUID,
+            List<UUID> teamOwnerUUIDs,
+            UUID botUUID,
+            List<UUID> targetUUIDs,
+            String botNameTemplate,
+            String botSkin,
+            boolean follow,
+            boolean changeableFollow,
+            boolean combat,
+            boolean changeableCombat,
+            boolean changeableBlast,
+            BlastProtectionSettings blastProtection,
+            boolean changeableArmor,
+            boolean changeableTotem,
+            boolean changeableDifficulty,
+            boolean changeableCombatMode,
+            BotArmorTier armor,
+            BotArmorTier minArmor,
+            BotArmorTier maxArmor,
+            int totemCount,
+            int minTotemCount,
+            int maxTotemCount,
+            DifficultyTier difficulty,
+            DifficultyTier minDifficulty,
+            DifficultyTier maxDifficulty,
+            BotLocationRequest spawnLocation,
+            boolean autoTarget,
+            double autoTargetRange,
+            boolean attackBots,
+            BotTargetMode targetMode,
+            boolean respectWorldGuardPvp,
+            boolean stayAfterOwnerDeath,
+            boolean idleWander,
+            double idleWanderRadius,
+            double idleReturnDistance,
+            long idleReturnDelayMs,
+            boolean crystalPvp,
+            boolean explosions,
+            boolean explosionBlockDamage,
+            boolean enderPearls,
+            boolean healing,
+            boolean killMessageEnabled,
+            String killMessage,
+            Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots,
+            CombatMode combatMode,
+            BrainKey brain,
+            CombatTuning combatTuning) {
 
         Objects.requireNonNull(mode, "mode");
         Objects.requireNonNull(blastProtection, "blastProtection");
-        teamOwnerUUIDs = teamOwnerUUIDs == null ? Collections.emptyList() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
-        targetUUIDs = targetUUIDs == null ? Collections.emptyList() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
-        equipmentSlots = equipmentSlots == null ? Collections.emptyMap() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
+        teamOwnerUUIDs = teamOwnerUUIDs == null
+                ? Collections.emptyList()
+                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+        targetUUIDs = targetUUIDs == null
+                ? Collections.emptyList()
+                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+        equipmentSlots = equipmentSlots == null
+                ? Collections.emptyMap()
+                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
         Objects.requireNonNull(botNameTemplate, "botNameTemplate");
         Objects.requireNonNull(botSkin, "botSkin");
         Objects.requireNonNull(armor, "armor");
@@ -238,144 +290,191 @@ public final class BotSpawnRequest {
     public BotMode mode() {
         return mode;
     }
+
     public UUID ownerUUID() {
         return ownerUUID;
     }
+
     public List<UUID> teamOwnerUUIDs() {
         return teamOwnerUUIDs;
     }
+
     public UUID botUUID() {
         return botUUID;
     }
+
     public List<UUID> targetUUIDs() {
         return targetUUIDs;
     }
+
     public String botNameTemplate() {
         return botNameTemplate;
     }
+
     public String botSkin() {
         return botSkin;
     }
+
     public boolean follow() {
         return follow;
     }
+
     public boolean changeableFollow() {
         return changeableFollow;
     }
+
     public boolean combat() {
         return combat;
     }
+
     public boolean changeableCombat() {
         return changeableCombat;
     }
+
     public boolean changeableBlast() {
         return changeableBlast;
     }
+
     public BlastProtectionSettings blastProtection() {
         return blastProtection;
     }
+
     public boolean changeableArmor() {
         return changeableArmor;
     }
+
     public boolean changeableTotem() {
         return changeableTotem;
     }
+
     public boolean changeableDifficulty() {
         return changeableDifficulty;
     }
+
     public boolean changeableCombatMode() {
         return changeableCombatMode;
     }
+
     public BotArmorTier armor() {
         return armor;
     }
+
     public BotArmorTier minArmor() {
         return minArmor;
     }
+
     public BotArmorTier maxArmor() {
         return maxArmor;
     }
+
     public int totemCount() {
         return totemCount;
     }
+
     public int minTotemCount() {
         return minTotemCount;
     }
+
     public int maxTotemCount() {
         return maxTotemCount;
     }
+
     public DifficultyTier difficulty() {
         return difficulty;
     }
+
     public DifficultyTier minDifficulty() {
         return minDifficulty;
     }
+
     public DifficultyTier maxDifficulty() {
         return maxDifficulty;
     }
+
     public BotLocationRequest spawnLocation() {
         return spawnLocation;
     }
+
     public boolean autoTarget() {
         return autoTarget;
     }
+
     public double autoTargetRange() {
         return autoTargetRange;
     }
+
     public boolean attackBots() {
         return attackBots;
     }
+
     public BotTargetMode targetMode() {
         return targetMode;
     }
+
     public boolean respectWorldGuardPvp() {
         return respectWorldGuardPvp;
     }
+
     public boolean stayAfterOwnerDeath() {
         return stayAfterOwnerDeath;
     }
+
     public boolean idleWander() {
         return idleWander;
     }
+
     public double idleWanderRadius() {
         return idleWanderRadius;
     }
+
     public double idleReturnDistance() {
         return idleReturnDistance;
     }
+
     public long idleReturnDelayMs() {
         return idleReturnDelayMs;
     }
+
     public boolean crystalPvp() {
         return crystalPvp;
     }
+
     public boolean explosions() {
         return explosions;
     }
+
     public boolean explosionBlockDamage() {
         return explosionBlockDamage;
     }
+
     public boolean enderPearls() {
         return enderPearls;
     }
+
     public boolean healing() {
         return healing;
     }
+
     public boolean killMessageEnabled() {
         return killMessageEnabled;
     }
+
     public String killMessage() {
         return killMessage;
     }
+
     public Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots() {
         return equipmentSlots;
     }
+
     public CombatMode combatMode() {
         return combatMode;
     }
+
     public BrainKey brain() {
         return brain;
     }
+
     public CombatTuning combatTuning() {
         return combatTuning;
     }
@@ -466,7 +565,9 @@ public final class BotSpawnRequest {
         }
 
         public Builder teamOwnerUUIDs(@Nullable List<UUID> teamOwnerUUIDs) {
-            this.teamOwnerUUIDs = teamOwnerUUIDs == null ? Collections.emptyList() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+            this.teamOwnerUUIDs = teamOwnerUUIDs == null
+                    ? Collections.emptyList()
+                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
             return this;
         }
 
@@ -477,7 +578,9 @@ public final class BotSpawnRequest {
         }
 
         public Builder targetUUIDs(@Nullable List<UUID> targetUUIDs) {
-            this.targetUUIDs = targetUUIDs == null ? Collections.emptyList() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+            this.targetUUIDs = targetUUIDs == null
+                    ? Collections.emptyList()
+                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
             return this;
         }
 
@@ -691,7 +794,9 @@ public final class BotSpawnRequest {
         }
 
         public Builder equipmentSlots(@Nullable Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
-            this.equipmentSlots = equipmentSlots == null ? Collections.emptyMap() : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
+            this.equipmentSlots = equipmentSlots == null
+                    ? Collections.emptyMap()
+                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
             return this;
         }
 
@@ -802,16 +907,128 @@ public final class BotSpawnRequest {
             return false;
         }
         BotSpawnRequest other = (BotSpawnRequest) obj;
-        return java.util.Objects.equals(mode, other.mode) && java.util.Objects.equals(ownerUUID, other.ownerUUID) && java.util.Objects.equals(teamOwnerUUIDs, other.teamOwnerUUIDs) && java.util.Objects.equals(botUUID, other.botUUID) && java.util.Objects.equals(targetUUIDs, other.targetUUIDs) && java.util.Objects.equals(botNameTemplate, other.botNameTemplate) && java.util.Objects.equals(botSkin, other.botSkin) && follow == other.follow && changeableFollow == other.changeableFollow && combat == other.combat && changeableCombat == other.changeableCombat && changeableBlast == other.changeableBlast && java.util.Objects.equals(blastProtection, other.blastProtection) && changeableArmor == other.changeableArmor && changeableTotem == other.changeableTotem && changeableDifficulty == other.changeableDifficulty && changeableCombatMode == other.changeableCombatMode && java.util.Objects.equals(armor, other.armor) && java.util.Objects.equals(minArmor, other.minArmor) && java.util.Objects.equals(maxArmor, other.maxArmor) && totemCount == other.totemCount && minTotemCount == other.minTotemCount && maxTotemCount == other.maxTotemCount && java.util.Objects.equals(difficulty, other.difficulty) && java.util.Objects.equals(minDifficulty, other.minDifficulty) && java.util.Objects.equals(maxDifficulty, other.maxDifficulty) && java.util.Objects.equals(spawnLocation, other.spawnLocation) && autoTarget == other.autoTarget && Double.compare(autoTargetRange, other.autoTargetRange) == 0 && attackBots == other.attackBots && java.util.Objects.equals(targetMode, other.targetMode) && respectWorldGuardPvp == other.respectWorldGuardPvp && stayAfterOwnerDeath == other.stayAfterOwnerDeath && idleWander == other.idleWander && Double.compare(idleWanderRadius, other.idleWanderRadius) == 0 && Double.compare(idleReturnDistance, other.idleReturnDistance) == 0 && idleReturnDelayMs == other.idleReturnDelayMs && crystalPvp == other.crystalPvp && explosions == other.explosions && explosionBlockDamage == other.explosionBlockDamage && enderPearls == other.enderPearls && healing == other.healing && killMessageEnabled == other.killMessageEnabled && java.util.Objects.equals(killMessage, other.killMessage) && java.util.Objects.equals(equipmentSlots, other.equipmentSlots) && java.util.Objects.equals(combatMode, other.combatMode) && java.util.Objects.equals(brain, other.brain) && java.util.Objects.equals(combatTuning, other.combatTuning);
+        return java.util.Objects.equals(mode, other.mode)
+                && java.util.Objects.equals(ownerUUID, other.ownerUUID)
+                && java.util.Objects.equals(teamOwnerUUIDs, other.teamOwnerUUIDs)
+                && java.util.Objects.equals(botUUID, other.botUUID)
+                && java.util.Objects.equals(targetUUIDs, other.targetUUIDs)
+                && java.util.Objects.equals(botNameTemplate, other.botNameTemplate)
+                && java.util.Objects.equals(botSkin, other.botSkin)
+                && follow == other.follow
+                && changeableFollow == other.changeableFollow
+                && combat == other.combat
+                && changeableCombat == other.changeableCombat
+                && changeableBlast == other.changeableBlast
+                && java.util.Objects.equals(blastProtection, other.blastProtection)
+                && changeableArmor == other.changeableArmor
+                && changeableTotem == other.changeableTotem
+                && changeableDifficulty == other.changeableDifficulty
+                && changeableCombatMode == other.changeableCombatMode
+                && java.util.Objects.equals(armor, other.armor)
+                && java.util.Objects.equals(minArmor, other.minArmor)
+                && java.util.Objects.equals(maxArmor, other.maxArmor)
+                && totemCount == other.totemCount
+                && minTotemCount == other.minTotemCount
+                && maxTotemCount == other.maxTotemCount
+                && java.util.Objects.equals(difficulty, other.difficulty)
+                && java.util.Objects.equals(minDifficulty, other.minDifficulty)
+                && java.util.Objects.equals(maxDifficulty, other.maxDifficulty)
+                && java.util.Objects.equals(spawnLocation, other.spawnLocation)
+                && autoTarget == other.autoTarget
+                && Double.compare(autoTargetRange, other.autoTargetRange) == 0
+                && attackBots == other.attackBots
+                && java.util.Objects.equals(targetMode, other.targetMode)
+                && respectWorldGuardPvp == other.respectWorldGuardPvp
+                && stayAfterOwnerDeath == other.stayAfterOwnerDeath
+                && idleWander == other.idleWander
+                && Double.compare(idleWanderRadius, other.idleWanderRadius) == 0
+                && Double.compare(idleReturnDistance, other.idleReturnDistance) == 0
+                && idleReturnDelayMs == other.idleReturnDelayMs
+                && crystalPvp == other.crystalPvp
+                && explosions == other.explosions
+                && explosionBlockDamage == other.explosionBlockDamage
+                && enderPearls == other.enderPearls
+                && healing == other.healing
+                && killMessageEnabled == other.killMessageEnabled
+                && java.util.Objects.equals(killMessage, other.killMessage)
+                && java.util.Objects.equals(equipmentSlots, other.equipmentSlots)
+                && java.util.Objects.equals(combatMode, other.combatMode)
+                && java.util.Objects.equals(brain, other.brain)
+                && java.util.Objects.equals(combatTuning, other.combatTuning);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(mode, ownerUUID, teamOwnerUUIDs, botUUID, targetUUIDs, botNameTemplate, botSkin, follow, changeableFollow, combat, changeableCombat, changeableBlast, blastProtection, changeableArmor, changeableTotem, changeableDifficulty, changeableCombatMode, armor, minArmor, maxArmor, totemCount, minTotemCount, maxTotemCount, difficulty, minDifficulty, maxDifficulty, spawnLocation, autoTarget, autoTargetRange, attackBots, targetMode, respectWorldGuardPvp, stayAfterOwnerDeath, idleWander, idleWanderRadius, idleReturnDistance, idleReturnDelayMs, crystalPvp, explosions, explosionBlockDamage, enderPearls, healing, killMessageEnabled, killMessage, equipmentSlots, combatMode, brain, combatTuning);
+        return java.util.Objects.hash(
+                mode,
+                ownerUUID,
+                teamOwnerUUIDs,
+                botUUID,
+                targetUUIDs,
+                botNameTemplate,
+                botSkin,
+                follow,
+                changeableFollow,
+                combat,
+                changeableCombat,
+                changeableBlast,
+                blastProtection,
+                changeableArmor,
+                changeableTotem,
+                changeableDifficulty,
+                changeableCombatMode,
+                armor,
+                minArmor,
+                maxArmor,
+                totemCount,
+                minTotemCount,
+                maxTotemCount,
+                difficulty,
+                minDifficulty,
+                maxDifficulty,
+                spawnLocation,
+                autoTarget,
+                autoTargetRange,
+                attackBots,
+                targetMode,
+                respectWorldGuardPvp,
+                stayAfterOwnerDeath,
+                idleWander,
+                idleWanderRadius,
+                idleReturnDistance,
+                idleReturnDelayMs,
+                crystalPvp,
+                explosions,
+                explosionBlockDamage,
+                enderPearls,
+                healing,
+                killMessageEnabled,
+                killMessage,
+                equipmentSlots,
+                combatMode,
+                brain,
+                combatTuning);
     }
 
     @Override
     public String toString() {
-        return "BotSpawnRequest[mode=" + mode + ", ownerUUID=" + ownerUUID + ", teamOwnerUUIDs=" + teamOwnerUUIDs + ", botUUID=" + botUUID + ", targetUUIDs=" + targetUUIDs + ", botNameTemplate=" + botNameTemplate + ", botSkin=" + botSkin + ", follow=" + follow + ", changeableFollow=" + changeableFollow + ", combat=" + combat + ", changeableCombat=" + changeableCombat + ", changeableBlast=" + changeableBlast + ", blastProtection=" + blastProtection + ", changeableArmor=" + changeableArmor + ", changeableTotem=" + changeableTotem + ", changeableDifficulty=" + changeableDifficulty + ", changeableCombatMode=" + changeableCombatMode + ", armor=" + armor + ", minArmor=" + minArmor + ", maxArmor=" + maxArmor + ", totemCount=" + totemCount + ", minTotemCount=" + minTotemCount + ", maxTotemCount=" + maxTotemCount + ", difficulty=" + difficulty + ", minDifficulty=" + minDifficulty + ", maxDifficulty=" + maxDifficulty + ", spawnLocation=" + spawnLocation + ", autoTarget=" + autoTarget + ", autoTargetRange=" + autoTargetRange + ", attackBots=" + attackBots + ", targetMode=" + targetMode + ", respectWorldGuardPvp=" + respectWorldGuardPvp + ", stayAfterOwnerDeath=" + stayAfterOwnerDeath + ", idleWander=" + idleWander + ", idleWanderRadius=" + idleWanderRadius + ", idleReturnDistance=" + idleReturnDistance + ", idleReturnDelayMs=" + idleReturnDelayMs + ", crystalPvp=" + crystalPvp + ", explosions=" + explosions + ", explosionBlockDamage=" + explosionBlockDamage + ", enderPearls=" + enderPearls + ", healing=" + healing + ", killMessageEnabled=" + killMessageEnabled + ", killMessage=" + killMessage + ", equipmentSlots=" + equipmentSlots + ", combatMode=" + combatMode + ", brain=" + brain + ", combatTuning=" + combatTuning + "]";
+        return "BotSpawnRequest[mode=" + mode + ", ownerUUID=" + ownerUUID + ", teamOwnerUUIDs=" + teamOwnerUUIDs
+                + ", botUUID=" + botUUID + ", targetUUIDs=" + targetUUIDs + ", botNameTemplate=" + botNameTemplate
+                + ", botSkin=" + botSkin + ", follow=" + follow + ", changeableFollow=" + changeableFollow + ", combat="
+                + combat + ", changeableCombat=" + changeableCombat + ", changeableBlast=" + changeableBlast
+                + ", blastProtection=" + blastProtection + ", changeableArmor=" + changeableArmor + ", changeableTotem="
+                + changeableTotem + ", changeableDifficulty=" + changeableDifficulty + ", changeableCombatMode="
+                + changeableCombatMode + ", armor=" + armor + ", minArmor=" + minArmor + ", maxArmor=" + maxArmor
+                + ", totemCount=" + totemCount + ", minTotemCount=" + minTotemCount + ", maxTotemCount=" + maxTotemCount
+                + ", difficulty=" + difficulty + ", minDifficulty=" + minDifficulty + ", maxDifficulty=" + maxDifficulty
+                + ", spawnLocation=" + spawnLocation + ", autoTarget=" + autoTarget + ", autoTargetRange="
+                + autoTargetRange + ", attackBots=" + attackBots + ", targetMode=" + targetMode
+                + ", respectWorldGuardPvp=" + respectWorldGuardPvp + ", stayAfterOwnerDeath=" + stayAfterOwnerDeath
+                + ", idleWander=" + idleWander + ", idleWanderRadius=" + idleWanderRadius + ", idleReturnDistance="
+                + idleReturnDistance + ", idleReturnDelayMs=" + idleReturnDelayMs + ", crystalPvp=" + crystalPvp
+                + ", explosions=" + explosions + ", explosionBlockDamage=" + explosionBlockDamage + ", enderPearls="
+                + enderPearls + ", healing=" + healing + ", killMessageEnabled=" + killMessageEnabled + ", killMessage="
+                + killMessage + ", equipmentSlots=" + equipmentSlots + ", combatMode=" + combatMode + ", brain=" + brain
+                + ", combatTuning=" + combatTuning + "]";
     }
 }

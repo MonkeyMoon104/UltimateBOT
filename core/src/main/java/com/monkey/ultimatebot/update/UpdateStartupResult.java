@@ -14,9 +14,11 @@ public final class UpdateStartupResult {
     public boolean checkFailed() {
         return checkFailed;
     }
+
     public boolean updateAvailable() {
         return updateAvailable;
     }
+
     public String message() {
         return message;
     }
@@ -30,7 +32,9 @@ public final class UpdateStartupResult {
             return false;
         }
         UpdateStartupResult other = (UpdateStartupResult) obj;
-        return checkFailed == other.checkFailed && updateAvailable == other.updateAvailable && java.util.Objects.equals(message, other.message);
+        return checkFailed == other.checkFailed
+                && updateAvailable == other.updateAvailable
+                && java.util.Objects.equals(message, other.message);
     }
 
     @Override
@@ -40,6 +44,7 @@ public final class UpdateStartupResult {
 
     @Override
     public String toString() {
-        return "UpdateStartupResult[checkFailed=" + checkFailed + ", updateAvailable=" + updateAvailable + ", message=" + message + "]";
+        return "UpdateStartupResult[checkFailed=" + checkFailed + ", updateAvailable=" + updateAvailable + ", message="
+                + message + "]";
     }
 }

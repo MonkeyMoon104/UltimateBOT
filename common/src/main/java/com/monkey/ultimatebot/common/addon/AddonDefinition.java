@@ -2,7 +2,6 @@ package com.monkey.ultimatebot.common.addon;
 
 import java.util.Objects;
 
-/** Immutable coordinates used to download and load one optional addon. */
 public final class AddonDefinition {
     private final String id;
     private final String displayName;

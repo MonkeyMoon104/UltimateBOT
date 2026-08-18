@@ -1,9 +1,5 @@
 package com.monkey.ultimatebot.bot;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnEvent;
@@ -14,6 +10,9 @@ import com.monkey.ultimatebot.api.event.lifecycle.BotSpawnPrepareEvent;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.integration.api.BotSnapshotMapper;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
@@ -208,10 +207,10 @@ public class BotSpawner {
             }
         }
 
-        Location loc = Objects.requireNonNull(registryOwner.getLocation(), "registry owner location").clone();
+        Location loc = Objects.requireNonNull(registryOwner.getLocation(), "registry owner location")
+                .clone();
         World world = Objects.requireNonNull(loc.getWorld(), "registry owner world");
-        // Always spawn at the owner. Only nudge up if the feet block is a full solid (never use
-        // getHighestBlockAt — that put bots on roofs/trees far above the player).
+
         Block feet = loc.getBlock();
         if (isBlockingSpawnBlock(feet.getType())) {
             Block above = feet.getRelative(0, 1, 0);
@@ -226,7 +225,7 @@ public class BotSpawner {
         if (material == null || material == Material.AIR || !material.isSolid()) {
             return false;
         }
-        // Cobwebs / passable solids must not force a Y bump or roof teleport.
+
         String name = material.name();
         return !"COBWEB".equals(name)
                 && !"STRING".equals(name)

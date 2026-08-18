@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.gui.impl.action;
 
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;

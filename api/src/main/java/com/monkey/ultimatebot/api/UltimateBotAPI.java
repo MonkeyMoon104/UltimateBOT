@@ -5,7 +5,10 @@ import com.monkey.ultimatebot.api.event.bus.BotEventBus;
 import com.monkey.ultimatebot.api.extension.UltimateBotExtensionRegistry;
 import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.managers.IBotRegistry;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.PlatformInfo;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
@@ -161,5 +164,20 @@ public final class UltimateBotAPI {
     /** Returns the read-only status of jars managed by the addon engine. */
     public AddonRegistry getAddons() {
         return addons;
+    }
+
+    /** Returns the loaded Minecraft version and NMS feature flags for this server. */
+    public PlatformInfo getPlatform() {
+        return botManager.getPlatform();
+    }
+
+    /** Returns the NMS feature flags of the loaded server bridge. */
+    public Set<PlatformCapability> getPlatformCapabilities() {
+        return getPlatform().capabilities();
+    }
+
+    /** Returns whether the loaded NMS bridge exposes the given platform feature. */
+    public boolean supports(PlatformCapability capability) {
+        return botManager.supports(capability);
     }
 }

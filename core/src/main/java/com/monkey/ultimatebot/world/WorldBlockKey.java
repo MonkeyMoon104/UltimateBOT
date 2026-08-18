@@ -22,12 +22,15 @@ final class WorldBlockKey {
     public UUID worldUUID() {
         return worldUUID;
     }
+
     public int x() {
         return x;
     }
+
     public int y() {
         return y;
     }
+
     public int z() {
         return z;
     }

@@ -1,10 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IPathfinder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +61,8 @@ public final class PatheticPathfinder implements IPathfinder {
         BlockVector start = blockAt(startPos);
         BlockVector requestedGoal = blockAt(limitToLocalGoal(startPos, targetPos));
         removeExpiredAvoidances(lastPathCalculation);
-        Set<BlockVector> excluded = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(avoidedWaypoints.keySet());
+        Set<BlockVector> excluded =
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(avoidedWaypoints.keySet());
         BlockVector goal = goalResolver.resolve(start, requestedGoal, candidate -> !excluded.contains(candidate));
         if (goal == null) {
             clearPath();
@@ -272,8 +272,8 @@ public final class PatheticPathfinder implements IPathfinder {
     }
 
     private static BlockVector blockAt(Vector position) {
-        return new BlockVector(
-                (int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int) Math.floor(position.getZ()));
+        return new BlockVector((int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int)
+                Math.floor(position.getZ()));
     }
 
     private static Vector bottomCenterOf(BlockVector position) {

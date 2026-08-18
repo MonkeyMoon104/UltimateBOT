@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 
 public final class ModeKitAdapter {
     private ModeKitAdapter() {}

@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import org.bukkit.event.Cancellable;
 import org.jspecify.annotations.Nullable;
 
-/** Lightweight facade that initializes Micrometer and Prometheus only when explicitly enabled at startup. */
 public final class BotMetrics implements AutoCloseable {
     private static final AddonDefinition ADDON = new AddonDefinition(
             "metrics",

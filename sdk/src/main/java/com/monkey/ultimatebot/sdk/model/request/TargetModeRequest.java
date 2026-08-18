@@ -9,7 +9,6 @@ public final class TargetModeRequest {
 
     public TargetModeRequest(BotTargetMode targetMode) {
 
-
         Objects.requireNonNull(targetMode, "targetMode");
         this.targetMode = targetMode;
     }

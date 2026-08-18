@@ -9,7 +9,6 @@ public final class IdleWanderRequest {
 
     public IdleWanderRequest(boolean enabled, double radius, double returnDistance, long returnDelayMs) {
 
-
         if (!Double.isFinite(radius) || radius <= 0.0D) {
             throw new IllegalArgumentException("radius must be finite and greater than zero");
         }
@@ -28,12 +27,15 @@ public final class IdleWanderRequest {
     public boolean enabled() {
         return enabled;
     }
+
     public double radius() {
         return radius;
     }
+
     public double returnDistance() {
         return returnDistance;
     }
+
     public long returnDelayMs() {
         return returnDelayMs;
     }
@@ -47,7 +49,10 @@ public final class IdleWanderRequest {
             return false;
         }
         IdleWanderRequest other = (IdleWanderRequest) obj;
-        return enabled == other.enabled && Double.compare(radius, other.radius) == 0 && Double.compare(returnDistance, other.returnDistance) == 0 && returnDelayMs == other.returnDelayMs;
+        return enabled == other.enabled
+                && Double.compare(radius, other.radius) == 0
+                && Double.compare(returnDistance, other.returnDistance) == 0
+                && returnDelayMs == other.returnDelayMs;
     }
 
     @Override
@@ -57,6 +62,7 @@ public final class IdleWanderRequest {
 
     @Override
     public String toString() {
-        return "IdleWanderRequest[enabled=" + enabled + ", radius=" + radius + ", returnDistance=" + returnDistance + ", returnDelayMs=" + returnDelayMs + "]";
+        return "IdleWanderRequest[enabled=" + enabled + ", radius=" + radius + ", returnDistance=" + returnDistance
+                + ", returnDelayMs=" + returnDelayMs + "]";
     }
 }

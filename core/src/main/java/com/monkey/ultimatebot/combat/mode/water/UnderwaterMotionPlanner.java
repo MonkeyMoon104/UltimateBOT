@@ -11,9 +11,12 @@ public final class UnderwaterMotionPlanner {
 
     public static Vector pursue(Vector origin, Vector target, Vector currentVelocity, double speed) {
         double checkedSpeed = requirePositive(speed, "speed");
-        Vector delta = Objects.requireNonNull(target, "target").clone().subtract(Objects.requireNonNull(origin, "origin"));
+        Vector delta =
+                Objects.requireNonNull(target, "target").clone().subtract(Objects.requireNonNull(origin, "origin"));
         if (delta.lengthSquared() < 1.0E-6D) {
-            return Objects.requireNonNull(currentVelocity, "currentVelocity").clone().multiply(MOMENTUM_WEIGHT);
+            return Objects.requireNonNull(currentVelocity, "currentVelocity")
+                    .clone()
+                    .multiply(MOMENTUM_WEIGHT);
         }
         Vector desired = delta.normalize().multiply(checkedSpeed);
         return blendAndLimit(currentVelocity, desired, checkedSpeed);
@@ -26,7 +29,8 @@ public final class UnderwaterMotionPlanner {
             double radialSpeed,
             double strafeSpeed,
             double strafeDirection) {
-        Vector delta = Objects.requireNonNull(target, "target").clone().subtract(Objects.requireNonNull(origin, "origin"));
+        Vector delta =
+                Objects.requireNonNull(target, "target").clone().subtract(Objects.requireNonNull(origin, "origin"));
         Vector horizontal = new Vector(delta.getX(), 0.0D, delta.getZ());
         if (horizontal.lengthSquared() < 1.0E-6D) {
             horizontal = new Vector(1.0D, 0.0D, 0.0D);

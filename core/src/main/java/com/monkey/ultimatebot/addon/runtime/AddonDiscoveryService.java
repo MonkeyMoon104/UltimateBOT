@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.addon.runtime;
 
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import com.monkey.ultimatebot.api.addon.AddonSnapshot;
 import com.monkey.ultimatebot.api.addon.AddonState;
@@ -15,6 +13,7 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 final class AddonDiscoveryService {
@@ -77,7 +76,8 @@ final class AddonDiscoveryService {
         boolean removed;
         do {
             removed = false;
-            java.util.Iterator<java.util.Map.Entry<String, AddonDependencyResolver.DiscoveredAddon>> iterator = discovered.entrySet().iterator();
+            java.util.Iterator<java.util.Map.Entry<String, AddonDependencyResolver.DiscoveredAddon>> iterator =
+                    discovered.entrySet().iterator();
             while (iterator.hasNext()) {
                 AddonDependencyResolver.DiscoveredAddon candidate =
                         iterator.next().getValue();

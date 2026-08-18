@@ -13,7 +13,6 @@ public final class BrainDamage {
 
     public BrainDamage(double amount, EntityDamageEvent.DamageCause cause, @Nullable Entity source) {
 
-
         if (!Double.isFinite(amount) || amount < 0.0D) {
             throw new IllegalArgumentException("amount must be finite and non-negative");
         }
@@ -26,9 +25,11 @@ public final class BrainDamage {
     public double amount() {
         return amount;
     }
+
     public EntityDamageEvent.DamageCause cause() {
         return cause;
     }
+
     public @Nullable Entity source() {
         return source;
     }
@@ -46,7 +47,9 @@ public final class BrainDamage {
             return false;
         }
         BrainDamage other = (BrainDamage) obj;
-        return Double.compare(amount, other.amount) == 0 && java.util.Objects.equals(cause, other.cause) && java.util.Objects.equals(source, other.source);
+        return Double.compare(amount, other.amount) == 0
+                && java.util.Objects.equals(cause, other.cause)
+                && java.util.Objects.equals(source, other.source);
     }
 
     @Override

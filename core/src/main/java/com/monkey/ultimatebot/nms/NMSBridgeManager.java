@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.nms;
 
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import java.util.Locale;
 import java.util.Set;
@@ -39,12 +39,11 @@ public class NMSBridgeManager {
             warnIfRuntimeUnsupported(logger, version, instance);
         } catch (ClassNotFoundException e) {
             if (isPre117(version)) {
-                logger.warning(
-                        "[UltimateBot] NMS bridge "
-                                + className
-                                + " is not in this build yet; limited mode on Minecraft "
-                                + version
-                                + ".");
+                logger.warning("[UltimateBot] NMS bridge "
+                        + className
+                        + " is not in this build yet; limited mode on Minecraft "
+                        + version
+                        + ".");
                 instance = StubNMSBridge.forVersion(version);
                 UltimateBotLogging.logNmsInitSuccess(logger, instance);
                 warnIfRuntimeUnsupported(logger, version, instance);
@@ -78,7 +77,6 @@ public class NMSBridgeManager {
         return get().supports(capability);
     }
 
-    /** Like {@link #supports} but returns {@code false} when the bridge is not yet initialized. */
     public static boolean supportsOrFalse(PlatformCapability capability) {
         return instance != null && instance.supports(capability);
     }
@@ -98,10 +96,8 @@ public class NMSBridgeManager {
             return legacy;
         }
 
-                switch (normalized) {
+        switch (normalized) {
             case "1.17":
-                // Spigot maps differ from 1.17.1; CodeMC remapped-mojang + official 1.17 maps (no
-                // Paper 1.17.0 userdev bundle).
                 return "com.monkey.ultimatebot.nms.NMSBridge_v1_17";
             case "1.17.1":
                 return "com.monkey.ultimatebot.nms.NMSBridge_v1_17_1";
@@ -111,7 +107,6 @@ public class NMSBridgeManager {
             case "1.18.2":
                 return "com.monkey.ultimatebot.nms.NMSBridge_v1_18_2";
             case "1.19":
-                // Spigot intermediate names differ from 1.19.1/1.19.2 within the same Craft v1_19_R1.
                 return "com.monkey.ultimatebot.nms.NMSBridge_v1_19";
             case "1.19.1":
             case "1.19.2":
@@ -160,25 +155,19 @@ public class NMSBridgeManager {
 
     private static void warnIfRuntimeUnsupported(Logger logger, String version, INMSBridge bridge) {
         if (!bridge.isBotRuntimeSupported()) {
-            logger.warning(
-                    "[UltimateBot] Limited mode on Minecraft "
-                            + version
-                            + ": fake-player bots are not implemented for this revision yet."
-                            + " Plugin stays enabled.");
+            logger.warning("[UltimateBot] Limited mode on Minecraft "
+                    + version
+                    + ": fake-player bots are not implemented for this revision yet."
+                    + " Plugin stays enabled.");
         }
     }
 
-    /**
-     * Pre-1.17 bridges. Class names stay mapped so a later {@code NMS/v1_16_R3} (etc.) commit only
-     * needs settings + shadow wiring; missing classes fall back to {@link StubNMSBridge}.
-     */
     private static @Nullable String resolveLegacyBridge(String version) {
-        // 1.7.10 — Craft v1_7_R4 only (1.7.2–1.7.9 are different revisions).
+
         if ("1.7.10".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_7_R4";
         }
 
-        // 1.8.x
         if ("1.8".equals(version) || "1.8.0".equals(version) || "1.8.1".equals(version) || "1.8.2".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_8_R1";
         }
@@ -193,7 +182,6 @@ public class NMSBridgeManager {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_8_R3";
         }
 
-        // 1.9.x — R1 for 1.9–1.9.2, R2 for 1.9.3–1.9.4
         if ("1.9".equals(version) || "1.9.0".equals(version) || "1.9.1".equals(version) || "1.9.2".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_9_R1";
         }
@@ -201,22 +189,18 @@ public class NMSBridgeManager {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_9_R2";
         }
 
-        // 1.10.x
         if ("1.10".equals(version) || version.startsWith("1.10.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_10_R1";
         }
 
-        // 1.11.x
         if ("1.11".equals(version) || version.startsWith("1.11.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_11_R1";
         }
 
-        // 1.12.x
         if ("1.12".equals(version) || version.startsWith("1.12.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_12_R1";
         }
 
-        // 1.13.x — R1 for 1.13, R2 for 1.13.1–1.13.2
         if ("1.13".equals(version) || "1.13.0".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_13_R1";
         }
@@ -224,17 +208,14 @@ public class NMSBridgeManager {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_13_R2";
         }
 
-        // 1.14.x
         if ("1.14".equals(version) || version.startsWith("1.14.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_14_R1";
         }
 
-        // 1.15.x
         if ("1.15".equals(version) || version.startsWith("1.15.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_15_R1";
         }
 
-        // 1.16.x — R1 / R2 / R3
         if ("1.16".equals(version) || "1.16.0".equals(version) || "1.16.1".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_16_R1";
         }
@@ -251,7 +232,6 @@ public class NMSBridgeManager {
         return null;
     }
 
-    /** 1.8 through 1.16.x (inclusive). */
     private static boolean isPre117(String version) {
         if (version.startsWith("26.")) {
             return false;
@@ -262,8 +242,7 @@ public class NMSBridgeManager {
         }
         int secondDot = version.indexOf('.', firstDot + 1);
         String majorText = version.substring(0, firstDot);
-        String minorText =
-                secondDot < 0 ? version.substring(firstDot + 1) : version.substring(firstDot + 1, secondDot);
+        String minorText = secondDot < 0 ? version.substring(firstDot + 1) : version.substring(firstDot + 1, secondDot);
         try {
             int major = Integer.parseInt(majorText);
             int minor = Integer.parseInt(minorText);
@@ -283,7 +262,7 @@ public class NMSBridgeManager {
         if ("26.2".equals(version) || version.startsWith("26.2.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v26_2";
         }
-        // Unknown modern-looking version: prefer stub over hard crash so the plugin can enable.
+
         return StubNMSBridge.class.getName();
     }
 

@@ -77,8 +77,8 @@ snapshot and structured event payload. Unknown future event types remain readabl
 
 ## Supported operations
 
-- Health, active count, complete bot listing and lookup by owner or bot UUID.
-- Complete combat-mode catalog, capabilities and per-difficulty profiles.
+- Health, platform capabilities, active count, complete bot listing and lookup by owner or bot UUID.
+- Complete combat-mode catalog, capabilities, required platform flags and per-difficulty profiles. Unsupported modes for the remote server are omitted.
 - Spawn for `SINGLE`, `EVENT`, `ALLY` and `TEAM_ALLY` bots.
 - Removal by owner/bot UUID, creation source or all bots.
 - Runtime updates for totems, follow, combat, difficulty, armor and equipment slots.
@@ -87,3 +87,5 @@ snapshot and structured event payload. Unknown future event types remain readabl
 - Combat-mode selection, custom tuning and tuning reset.
 - Custom kill-message update and disable operations.
 - Reconnecting EventBus subscriptions.
+
+Call `client.platform()` (`GET /platform`) before spawning combat modes that need later Minecraft features. On 1.7.10 the catalog typically includes sword/UHC-style modes and omits crystal, totem, mace and offhand-dependent modes.

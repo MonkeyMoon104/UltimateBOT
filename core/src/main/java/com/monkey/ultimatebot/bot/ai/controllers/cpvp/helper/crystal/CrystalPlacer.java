@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.crystal;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -35,9 +35,16 @@ public class CrystalPlacer {
         try {
             ItemStack crystalStack = inventoryController.getItem(BotInventoryController.CRYSTAL_SLOT);
             if (!MaterialCatalog.is(crystalStack.getType(), "END_CRYSTAL")) return false;
-            Location hit = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 1.0D, pos.getBlockZ() + 0.5D);
+            Location hit = new Location(
+                    bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 1.0D, pos.getBlockZ() + 0.5D);
             boolean consumed = NMSBridgeManager.get()
-                    .useItemOnBlock(bot.asBukkitPlayer(), crystalStack, blockAt(pos), BlockFace.UP, hit, EquipmentSlotKind.HAND);
+                    .useItemOnBlock(
+                            bot.asBukkitPlayer(),
+                            crystalStack,
+                            blockAt(pos),
+                            BlockFace.UP,
+                            hit,
+                            EquipmentSlotKind.HAND);
 
             if (consumed) {
                 inventoryController.onItemUsed(BotInventoryController.CRYSTAL_SLOT);
@@ -52,12 +59,12 @@ public class CrystalPlacer {
 
     public boolean hasLineOfSight(BlockVector pos) {
         Location eye = bot.asBukkitPlayer().getEyeLocation();
-        Location target = new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+        Location target =
+                new Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
         Vector direction = target.toVector().subtract(eye.toVector());
         double distance = direction.length();
         if (distance < 1.0E-6D) return true;
-        return RayTraceAccess.clearOrHits(
-                bot.getWorld(), eye, direction, distance, blockAt(pos));
+        return RayTraceAccess.clearOrHits(bot.getWorld(), eye, direction, distance, blockAt(pos));
     }
 
     private Block blockAt(BlockVector pos) {

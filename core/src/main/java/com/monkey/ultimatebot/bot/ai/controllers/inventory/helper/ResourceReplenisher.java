@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Map;
 import org.bukkit.Material;

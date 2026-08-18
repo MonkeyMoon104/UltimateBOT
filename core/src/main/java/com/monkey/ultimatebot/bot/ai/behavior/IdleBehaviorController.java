@@ -1,13 +1,13 @@
 package com.monkey.ultimatebot.bot.ai.behavior;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import java.util.Objects;
 import java.util.Random;
 import org.bukkit.Bukkit;

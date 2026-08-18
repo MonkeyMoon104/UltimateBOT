@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.world.RayTraceAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
-import com.monkey.ultimatebot.compat.RayTraceAccess;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -33,9 +33,16 @@ public class ObsidianPlacer {
             BlockFace bestFace = findBestPlacementFace(pos);
             if (bestFace == null) return false;
             BlockVector adjacentPos = relative(pos, bestFace.getOppositeFace());
-            Location hit = centerOf(adjacentPos).add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
+            Location hit = centerOf(adjacentPos)
+                    .add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
             boolean consumed = NMSBridgeManager.get()
-                    .useItemOnBlock(bot.asBukkitPlayer(), obsidianStack, blockAt(adjacentPos), bestFace, hit, EquipmentSlotKind.HAND);
+                    .useItemOnBlock(
+                            bot.asBukkitPlayer(),
+                            obsidianStack,
+                            blockAt(adjacentPos),
+                            bestFace,
+                            hit,
+                            EquipmentSlotKind.HAND);
             if (consumed) {
                 inventoryController.onItemUsed(BotInventoryController.OBSIDIAN_SLOT);
                 return true;
@@ -48,7 +55,9 @@ public class ObsidianPlacer {
     }
 
     private @Nullable BlockFace findBestPlacementFace(BlockVector targetPos) {
-        for (BlockFace face : new BlockFace[] {BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST}) {
+        for (BlockFace face : new BlockFace[] {
+            BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST
+        }) {
             BlockVector adjacentPos = relative(targetPos, face.getOppositeFace());
             Block adjacent = blockAt(adjacentPos);
             if (adjacent.getType().isSolid() && bot.getLocation().distance(centerOf(adjacentPos)) <= 6.5D) {
@@ -64,8 +73,7 @@ public class ObsidianPlacer {
         Vector direction = target.toVector().subtract(eye.toVector());
         double distance = direction.length();
         if (distance < 1.0E-6D) return true;
-        return RayTraceAccess.clearOrHits(
-                bot.getWorld(), eye, direction, distance, blockAt(pos));
+        return RayTraceAccess.clearOrHits(bot.getWorld(), eye, direction, distance, blockAt(pos));
     }
 
     private Block blockAt(BlockVector pos) {

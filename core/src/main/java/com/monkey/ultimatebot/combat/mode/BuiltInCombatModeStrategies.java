@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.combat.mode;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.combat.mode.cart.CartPvPStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.strategy.AxeShieldPvPStrategy;
@@ -25,8 +23,7 @@ final class BuiltInCombatModeStrategies {
     private BuiltInCombatModeStrategies() {}
 
     static Map<CombatMode, CombatModeStrategy> create(Set<PlatformCapability> platformCapabilities) {
-        Set<PlatformCapability> capabilities =
-                Objects.requireNonNull(platformCapabilities, "platformCapabilities");
+        Set<PlatformCapability> capabilities = Objects.requireNonNull(platformCapabilities, "platformCapabilities");
         Map<CombatMode, CombatModeStrategy> strategies = new LinkedHashMap<>();
         registerIfSupported(strategies, capabilities, CombatMode.SWORD, SwordPvPStrategy::new);
         registerIfSupported(strategies, capabilities, CombatMode.UHC, UhcPvPStrategy::new);

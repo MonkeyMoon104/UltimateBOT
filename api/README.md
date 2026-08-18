@@ -67,6 +67,11 @@ Event contracts are organized by responsibility instead of sharing one flat pack
 
 ### Public Model Types
 - `BotMode`
+- `BotTargetMode`
+- `CombatMode` / `CombatModeDefinition`
+- `BrainKey` / `BrainDefinition`
+- `PlatformCapability` / `PlatformInfo`
+- `EquipmentSlotKind` / `BotEquipmentSlot`
 - `BotSpawnRequest`
 - `BotSettings`
 - `BotSkin`
@@ -157,10 +162,17 @@ the underlying action continues.
 ### Lookup and Parsing
 - `isBotSpawned(UUID ownerUUID)`
 - `getBot(UUID ownerUUID)`
+- `getBotByBotUUID(UUID botUUID)`
 - `getTeamAllyBot(UUID teamOwnerUUID)`
 - `findTeamAllyPrimaryOwner(UUID teamOwnerUUID)`
 - `parsePlayerReference(String playerReference)`
 - `parsePlayerReferences(Collection<String> playerReferences)`
+
+### Platform
+- `getPlatform()` returns the loaded Minecraft version and `PlatformCapability` flags
+- `supports(PlatformCapability)` for offhand, totem, crystal, mace, netherite, armor trims, and similar NMS features
+- `getCombatModes()` / `getCombatMode(...)` omit modes the current server cannot run (for example crystal on 1.7.10)
+- `getBrains()` / `getBrain(...)`
 
 ### Spawning
 - `spawn(BotSpawnRequest request)`
@@ -172,6 +184,14 @@ the underlying action continues.
 - `updateCombat(UUID ownerUUID, boolean combat)`
 - `updateBlastProtection(UUID ownerUUID, boolean blastProtection)`
 - `updateDifficulty(UUID ownerUUID, DifficultyTier difficulty)`
+- `updateCombatMode(UUID ownerUUID, CombatMode combatMode)`
+- `updateBrain(UUID ownerUUID, BrainKey brainKey)` / `resetBrain(UUID ownerUUID)`
+- `updateTargetMode(UUID ownerUUID, BotTargetMode targetMode)`
+- `updateArmor(...)` keyed by `EquipmentSlotKind` (use `HAND`, not Bukkit `MAIN_HAND`)
+- `updateEquipmentSlot(...)` for persistent slot policy
+- `updateIdleWander(...)`, `updateExplosions(...)`, `updateEnderPearls(...)`, `updateHealing(...)`
+
+Owner-keyed updates also have `*ByBotUUID` counterparts.
 
 ### Removal
 - `remove(UUID ownerUUID)`
@@ -435,7 +455,10 @@ The last point is an implementation-based recommendation: the current core spawn
 
 ## Compatibility
 - Compiles against Paper API 1.21.4
-- Intended to be consumed together with the runtime core that currently supports Paper 1.21.4 through 1.21.11
+- Intended to be consumed together with the runtime core, which currently supports Minecraft **1.7.10**, 1.8.x–1.16.5, 1.17+ through 1.21.x, and 26.x
+- Use `UltimateBotAPI.getPlatform()` / `IBotManager.getPlatform()` to discover which combat features the loaded NMS bridge actually has (`OFFHAND`, `TOTEM`, `END_CRYSTAL`, `MACE`, ...)
+- `BotSettings` armor and trim maps use `EquipmentSlotKind` instead of Bukkit `EquipmentSlot`, so spawn config does not hard-link 1.9+ slot constants
+- Custom combat modes can declare `requiredPlatformCapabilities(...)` on `CombatModeDescriptor` so they are omitted on servers that cannot run them
 - Java 21 should be treated as the project baseline because the repository is compiled with `--release 21`
 
 ## Summary

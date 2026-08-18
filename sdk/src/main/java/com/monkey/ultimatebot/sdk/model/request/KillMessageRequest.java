@@ -8,7 +8,6 @@ public final class KillMessageRequest {
 
     public KillMessageRequest(String message) {
 
-
         Objects.requireNonNull(message, "message");
         if (message.trim().isEmpty()) {
             throw new IllegalArgumentException("message cannot be blank");

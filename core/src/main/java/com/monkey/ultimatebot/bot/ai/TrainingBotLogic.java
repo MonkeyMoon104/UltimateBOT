@@ -132,7 +132,7 @@ public class TrainingBotLogic {
     }
 
     private boolean isFireOrLavaDamage(@Nullable EntityDamageEvent event) {
-        // Fake-player NMS often calls actuallyHurt before Bukkit sets lastDamageCause.
+
         if (event == null) {
             return false;
         }

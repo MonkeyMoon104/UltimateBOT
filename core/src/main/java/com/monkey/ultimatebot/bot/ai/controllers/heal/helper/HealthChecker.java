@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal.helper;
 
-import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
 
 public class HealthChecker implements IHealthChecker {
 

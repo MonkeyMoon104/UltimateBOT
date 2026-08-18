@@ -32,7 +32,8 @@ public final class PlaceholderApiSupport {
             Class<?> coordinatorClass =
                     Class.forName(PLACEHOLDER_COORDINATOR_CLASS, true, PlaceholderApiSupport.class.getClassLoader());
             Object instance = coordinatorClass.getConstructor(UltimateBot.class).newInstance(plugin);
-            if (instance instanceof PlaceholderRegistration) { PlaceholderRegistration registration = (PlaceholderRegistration) instance;
+            if (instance instanceof PlaceholderRegistration) {
+                PlaceholderRegistration registration = (PlaceholderRegistration) instance;
                 return registration;
             }
 

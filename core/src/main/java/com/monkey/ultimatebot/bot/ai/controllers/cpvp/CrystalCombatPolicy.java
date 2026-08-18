@@ -12,7 +12,7 @@ final class CrystalCombatPolicy {
     }
 
     int attackBurstAttempts() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
                 return 4;
             case HARD:
@@ -26,7 +26,7 @@ final class CrystalCombatPolicy {
     }
 
     int placementBurstAttempts() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
             case HARD:
                 return 3;
@@ -39,7 +39,7 @@ final class CrystalCombatPolicy {
     }
 
     int actionCyclesPerTick() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
             case HARD:
             case MEDIUM:
@@ -50,7 +50,7 @@ final class CrystalCombatPolicy {
     }
 
     long positionReuseDelayMs() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
                 return 300L;
             case HARD:
@@ -65,7 +65,7 @@ final class CrystalCombatPolicy {
     }
 
     double strongScoreOffset() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
                 return 0.9D;
             case HARD:
@@ -80,7 +80,7 @@ final class CrystalCombatPolicy {
     }
 
     int desiredStrongPositionCount() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
                 return 3;
             case HARD:
@@ -92,7 +92,7 @@ final class CrystalCombatPolicy {
     }
 
     double maxUsefulTargetDistance() {
-                switch (difficulty) {
+        switch (difficulty) {
             case GOD:
                 return 5.2D;
             case HARD:

@@ -4,6 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.protocol.BotProfileData;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
@@ -19,21 +20,10 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Placeholder bridge for Minecraft revisions without a real NMS module yet (e.g. 1.9–1.16.3, plain
- * 1.8 / 1.8.3). Fake-player NMS is not implemented; bot spawn / full GUI stay disabled.
- *
- * <p>Platform capabilities still reflect the server era so combat-mode catalogs can filter correctly
- * while {@link #isBotRuntimeSupported()} remains {@code false}.
- *
- * <p>Bookend runtimes {@code v1_8_R3} (1.8.4–1.8.8) and {@code v1_16_R3} (1.16.4–1.16.5) use real
- * bridges instead.
- */
 public final class StubNMSBridge implements INMSBridge {
 
     private static final String UNSUPPORTED =
@@ -41,7 +31,6 @@ public final class StubNMSBridge implements INMSBridge {
 
     private final Set<PlatformCapability> capabilities;
 
-    /** Empty capability stub (unknown / unmapped version). */
     public StubNMSBridge() {
         this(PlatformCapability.none());
     }
@@ -49,12 +38,9 @@ public final class StubNMSBridge implements INMSBridge {
     public StubNMSBridge(Set<PlatformCapability> capabilities) {
         Set<PlatformCapability> checked = Objects.requireNonNull(capabilities, "capabilities");
         this.capabilities =
-                checked.isEmpty()
-                        ? PlatformCapability.none()
-                        : Collections.unmodifiableSet(EnumSet.copyOf(checked));
+                checked.isEmpty() ? PlatformCapability.none() : Collections.unmodifiableSet(EnumSet.copyOf(checked));
     }
 
-    /** Stub bridge whose capabilities match the given Minecraft version string. */
     public static StubNMSBridge forVersion(String version) {
         return new StubNMSBridge(PlatformCapability.forMinecraftVersion(version));
     }
@@ -107,8 +93,7 @@ public final class StubNMSBridge implements INMSBridge {
     @Override
     public BotProfileData createProfileWithTexture(
             UUID botUUID, String botName, String textureValue, @Nullable String textureSignature) {
-        BotProfileData.Texture texture =
-                new BotProfileData.Texture("textures", textureValue, textureSignature);
+        BotProfileData.Texture texture = new BotProfileData.Texture("textures", textureValue, textureSignature);
         return new BotProfileData(botUUID, botName, Collections.singletonList(texture));
     }
 
@@ -136,12 +121,7 @@ public final class StubNMSBridge implements INMSBridge {
 
     @Override
     public boolean useItemOnBlock(
-            Player bot,
-            ItemStack stack,
-            Block clicked,
-            BlockFace face,
-            Location hitLocation,
-            EquipmentSlotKind hand) {
+            Player bot, ItemStack stack, Block clicked, BlockFace face, Location hitLocation, EquipmentSlotKind hand) {
         return false;
     }
 

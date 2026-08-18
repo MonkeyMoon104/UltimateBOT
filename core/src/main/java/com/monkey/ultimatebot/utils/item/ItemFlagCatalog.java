@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import org.bukkit.inventory.ItemFlag;
 
-/** Resolves item flags safely across Bukkit API naming/version differences. */
 public final class ItemFlagCatalog {
 
     private ItemFlagCatalog() {}
@@ -22,7 +21,7 @@ public final class ItemFlagCatalog {
             try {
                 resolved.add(ItemFlag.valueOf(name.trim()));
             } catch (IllegalArgumentException ignored) {
-                // Flag not present in this Bukkit version.
+
             }
         }
         return Collections.unmodifiableList(resolved);

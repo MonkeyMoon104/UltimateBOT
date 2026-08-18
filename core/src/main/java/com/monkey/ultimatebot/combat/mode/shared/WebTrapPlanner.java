@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.combat.mode.shared;
 
-
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -105,12 +103,15 @@ public final class WebTrapPlanner {
         public java.util.UUID worldUUID() {
             return worldUUID;
         }
+
         public int x() {
             return x;
         }
+
         public int y() {
             return y;
         }
+
         public int z() {
             return z;
         }
@@ -123,7 +124,6 @@ public final class WebTrapPlanner {
                     location.getBlockY(),
                     location.getBlockZ());
         }
-    
 
         @Override
         public boolean equals(Object obj) {

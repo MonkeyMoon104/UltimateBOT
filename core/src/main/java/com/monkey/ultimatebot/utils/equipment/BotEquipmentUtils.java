@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.utils.equipment;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EnchantmentAccess;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemMetaAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EnchantmentAccess;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemMetaAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.*;
 import org.bukkit.Material;
@@ -14,12 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.Nullable;
 
 public class BotEquipmentUtils {
-    /**
-     * Resolves enchantments without linking {@code NamespacedKey} or missing Bukkit enum fields.
-     *
-     * <p>{@code Enchantment#getByKey} / {@code NamespacedKey} crash 1.11 and earlier. Dual-path
-     * lookup uses legacy names ({@code PROTECTION_ENVIRONMENTAL}) then modern keys.
-     */
+
     public static @Nullable Enchantment resolveEnchantmentByKeyMinecraft(String key) {
         return EnchantmentAccess.byMinecraftKey(key);
     }
@@ -52,14 +47,13 @@ public class BotEquipmentUtils {
             if (protection != null) meta.removeEnchant(protection);
 
             if (hasBlastProtection) {
-                // Prefer blast protection, but safely fall back to normal protection (or no enchant).
+
                 Enchantment toApply = blastProtection != null ? blastProtection : protection;
                 if (toApply != null) meta.addEnchant(toApply, 4, false);
             } else {
                 if (protection != null) meta.addEnchant(protection, 4, false);
             }
 
-            // Prevent durability ticks from re-equipping armor (armor equip sound spam on hit).
             ItemMetaAccess.setUnbreakable(meta, true);
 
             item.setItemMeta(meta);
@@ -70,8 +64,7 @@ public class BotEquipmentUtils {
             ITrainingBot bot,
             Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap,
             Map<EquipmentSlotKind, Boolean> blastProtectionMap) {
-        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(
-                EquipmentSlotKind.class);
+        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(EquipmentSlotKind.class);
 
         for (java.util.Map.Entry<EquipmentSlotKind, org.bukkit.inventory.ItemStack> entry : armorMap.entrySet()) {
             EquipmentSlotKind slot = entry.getKey();
@@ -90,8 +83,7 @@ public class BotEquipmentUtils {
     }
 
     public static void sendCurrentEquipmentToViewer(ITrainingBot bot, org.bukkit.entity.Player viewer) {
-        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(
-                EquipmentSlotKind.class);
+        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> equipment = new EnumMap<>(EquipmentSlotKind.class);
 
         equipment.put(EquipmentSlotKind.HAND, bot.getItem(EquipmentSlotKind.HAND));
         EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
@@ -113,8 +105,7 @@ public class BotEquipmentUtils {
         ITrainingBot bot = botRegistry.getBot(playerUUID);
         if (bot == null || !bot.getUniqueId().equals(botUUID)) return null;
 
-        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armor =
-                new EnumMap<>(EquipmentSlotKind.class);
+        Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armor = new EnumMap<>(EquipmentSlotKind.class);
 
         for (EquipmentSlotKind slot : EquipmentConverter.getArmorSlots()) {
             armor.put(slot, bot.getItem(slot));

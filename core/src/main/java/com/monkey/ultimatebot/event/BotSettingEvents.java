@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.event;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -15,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
-/** Shared typed gate used by every runtime setting entry point. */
 public final class BotSettingEvents {
     private BotSettingEvents() {}
 

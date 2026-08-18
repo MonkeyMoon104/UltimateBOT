@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-/** Selects the furthest nearby waypoint that can be reached without leaving a verified clear segment. */
 final class PathWaypointSelector {
     private PathWaypointSelector() {}
 

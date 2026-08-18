@@ -28,7 +28,7 @@ public class StatusPlaceholder implements IBotPlaceholder {
         if (bot.getBotAI().getHealController().isHealing()) return "♥ Healing";
         if (bot.isCombat()) {
             BotAI.CombatState state = bot.getBotAI().getCurrentState();
-                        switch (state) {
+            switch (state) {
                 case AGGRESSIVE:
                     return "⚔ Aggressive";
                 case DEFENSIVE:

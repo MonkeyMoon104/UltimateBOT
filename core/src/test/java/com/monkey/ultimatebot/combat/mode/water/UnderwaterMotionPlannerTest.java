@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 class UnderwaterMotionPlannerTest {
     @Test
     void pursuitUsesTheFullThreeDimensionalDirection() {
-        Vector velocity = UnderwaterMotionPlanner.pursue(new Vector(), new Vector(3.0D, 4.0D, 0.0D), new Vector(), 0.4D);
+        Vector velocity =
+                UnderwaterMotionPlanner.pursue(new Vector(), new Vector(3.0D, 4.0D, 0.0D), new Vector(), 0.4D);
 
         assertThat(velocity.getX()).isPositive();
         assertThat(velocity.getY()).isPositive();
@@ -19,8 +20,8 @@ class UnderwaterMotionPlannerTest {
 
     @Test
     void orbitStrafesWhileCorrectingTowardTheTargetDepth() {
-        Vector velocity =
-                UnderwaterMotionPlanner.orbit(new Vector(), new Vector(4.0D, 2.0D, 0.0D), new Vector(), 0.0D, 0.18D, 1.0D);
+        Vector velocity = UnderwaterMotionPlanner.orbit(
+                new Vector(), new Vector(4.0D, 2.0D, 0.0D), new Vector(), 0.0D, 0.18D, 1.0D);
 
         assertThat(velocity.getX()).isZero();
         assertThat(velocity.getY()).isPositive();

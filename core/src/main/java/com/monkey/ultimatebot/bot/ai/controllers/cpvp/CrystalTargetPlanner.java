@@ -31,7 +31,9 @@ final class CrystalTargetPlanner {
 
     List<EnderCrystal> collectAttackCandidates(Player target, Set<EnderCrystal> botCrystals, CPVPConfig config) {
         Set<EnderCrystal> unique = new LinkedHashSet<>();
-        botCrystals.stream().filter(crystal -> !crystal.isDead() && crystal.isValid()).forEach(unique::add);
+        botCrystals.stream()
+                .filter(crystal -> !crystal.isDead() && crystal.isValid())
+                .forEach(unique::add);
         crystalManager.findNearbyCrystals(bot, world, config.getCrystalAttackRange()).stream()
                 .filter(crystal -> !crystal.isDead() && crystal.isValid())
                 .forEach(unique::add);
@@ -75,12 +77,13 @@ final class CrystalTargetPlanner {
         long now = System.currentTimeMillis();
         obsidianCache
                 .entrySet()
-                .removeIf(entry ->
-                        target.getLocation().distance(entry.getKey().toLocation(world)) > policy.maxUsefulTargetDistance()
-                                && now - entry.getValue() > 500L);
+                .removeIf(entry -> target.getLocation().distance(entry.getKey().toLocation(world))
+                                > policy.maxUsefulTargetDistance()
+                        && now - entry.getValue() > 500L);
     }
 
-    boolean isCoolingDown(BlockVector position, Map<BlockVector, Long> recentUsage, CrystalCombatPolicy policy, long now) {
+    boolean isCoolingDown(
+            BlockVector position, Map<BlockVector, Long> recentUsage, CrystalCombatPolicy policy, long now) {
         Long lastUsed = recentUsage.get(position);
         return lastUsed != null && now - lastUsed < policy.positionReuseDelayMs();
     }

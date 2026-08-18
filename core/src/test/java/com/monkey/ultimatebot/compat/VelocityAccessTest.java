@@ -1,7 +1,8 @@
-package com.monkey.ultimatebot.compat;
+package com.monkey.ultimatebot.access;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.monkey.ultimatebot.access.entity.VelocityAccess;
 import org.bukkit.util.Vector;
 import org.junit.jupiter.api.Test;
 

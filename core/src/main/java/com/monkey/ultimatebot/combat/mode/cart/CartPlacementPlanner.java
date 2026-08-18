@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.combat.mode.cart;
 
-
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -58,7 +56,6 @@ final class CartPlacementPlanner {
                     location.getBlockY(),
                     location.getBlockZ());
         }
-    
 
         @Override
         public boolean equals(Object obj) {

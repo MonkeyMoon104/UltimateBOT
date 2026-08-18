@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.heal;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.HealActionManager;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.HealExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.HealStrategy;
@@ -8,7 +9,6 @@ import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealExecutor
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.heal.helper.inter.IHealthChecker;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 
 public class BotHealController {
 

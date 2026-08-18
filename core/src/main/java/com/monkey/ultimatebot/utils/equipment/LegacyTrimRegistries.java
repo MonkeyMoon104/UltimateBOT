@@ -5,10 +5,6 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 
-/**
- * Trim registries via Bukkit static fields ({@code Registry.TRIM_*}), available since armor trims
- * landed on 1.20 — including Paper 1.20.4 where {@code RegistryAccess} does not exist.
- */
 final class LegacyTrimRegistries implements TrimRegistries {
 
     @Override

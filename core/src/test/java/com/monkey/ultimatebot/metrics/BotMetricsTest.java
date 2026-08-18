@@ -6,7 +6,6 @@ import com.monkey.ultimatebot.api.event.base.BotEvent;
 import com.monkey.ultimatebot.bot.BotRegistry;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import java.nio.file.Path;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.bukkit.event.HandlerList;

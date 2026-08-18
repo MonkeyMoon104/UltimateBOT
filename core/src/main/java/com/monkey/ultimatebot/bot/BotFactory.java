@@ -1,10 +1,8 @@
 package com.monkey.ultimatebot.bot;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.protocol.BotProfileData;
-import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;

@@ -3,7 +3,6 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
-/** Smooths horizontal direction changes while preserving deliberate A* steering. */
 final class PathSteering {
     private static final double SHARP_TURN_DOT_THRESHOLD = 0.35D;
     private static final double GENTLE_TURN_BLEND = 0.32D;
@@ -28,7 +27,8 @@ final class PathSteering {
         }
 
         double blend = previous.dot(desired) < SHARP_TURN_DOT_THRESHOLD ? SHARP_TURN_BLEND : GENTLE_TURN_BLEND;
-        Vector blended = previous.clone().multiply(1.0D - blend).add(desired.clone().multiply(blend));
+        Vector blended =
+                previous.clone().multiply(1.0D - blend).add(desired.clone().multiply(blend));
         direction = horizontalNormalized(blended);
         if (direction.lengthSquared() < MIN_DIRECTION_LENGTH_SQUARED) {
             direction = desired;

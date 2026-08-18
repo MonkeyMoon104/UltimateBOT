@@ -13,7 +13,6 @@ public final class BrainTick {
 
     public BrainTick(long sequence, boolean follow, boolean combat, @Nullable LivingEntity target) {
 
-
         if (sequence < 0L) {
             throw new IllegalArgumentException("sequence cannot be negative");
         }
@@ -26,12 +25,15 @@ public final class BrainTick {
     public long sequence() {
         return sequence;
     }
+
     public boolean follow() {
         return follow;
     }
+
     public boolean combat() {
         return combat;
     }
+
     public @Nullable LivingEntity target() {
         return target;
     }
@@ -49,7 +51,10 @@ public final class BrainTick {
             return false;
         }
         BrainTick other = (BrainTick) obj;
-        return sequence == other.sequence && follow == other.follow && combat == other.combat && java.util.Objects.equals(target, other.target);
+        return sequence == other.sequence
+                && follow == other.follow
+                && combat == other.combat
+                && java.util.Objects.equals(target, other.target);
     }
 
     @Override
@@ -59,6 +64,7 @@ public final class BrainTick {
 
     @Override
     public String toString() {
-        return "BrainTick[sequence=" + sequence + ", follow=" + follow + ", combat=" + combat + ", target=" + target + "]";
+        return "BrainTick[sequence=" + sequence + ", follow=" + follow + ", combat=" + combat + ", target=" + target
+                + "]";
     }
 }

@@ -4,8 +4,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
 import com.monkey.ultimatebot.combat.mode.shared.WebTrapPlanner;
-import com.monkey.ultimatebot.compat.ParticleAccess;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.world.ParticleAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashSet;
 import java.util.Objects;

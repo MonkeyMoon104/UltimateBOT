@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
-/** Single core dispatch point for Bukkit events and remote event observers. */
 public final class BotEventDispatcher {
     private final UltimateBot plugin;
     private final BotMetrics metrics;
@@ -36,8 +35,8 @@ public final class BotEventDispatcher {
     public <E extends BotEvent> E publish(E event) {
         plugin.getServer().getPluginManager().callEvent(event);
         metrics.recordEvent(event);
-        boolean cancelled = event instanceof org.bukkit.event.Cancellable
-                && ((org.bukkit.event.Cancellable) event).isCancelled();
+        boolean cancelled =
+                event instanceof org.bukkit.event.Cancellable && ((org.bukkit.event.Cancellable) event).isCancelled();
         if (!cancelled) {
             for (Consumer<BotEvent> observer : observers) {
                 try {

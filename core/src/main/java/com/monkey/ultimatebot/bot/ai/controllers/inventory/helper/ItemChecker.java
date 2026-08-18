@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemChecker;
-import com.monkey.ultimatebot.compat.CombatSwordAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.access.combat.CombatSwordAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Map;
 import org.bukkit.Material;
@@ -23,17 +23,20 @@ public class ItemChecker implements IItemChecker {
     @Override
     public boolean isHoldingSword(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
         return currentSlot == SWORD_SLOT
-                && CombatSwordAccess.isKitSword(getCurrentItem(currentSlot, hotbarSlots).getType());
+                && CombatSwordAccess.isKitSword(
+                        getCurrentItem(currentSlot, hotbarSlots).getType());
     }
 
     @Override
     public boolean isHoldingEnderpearl(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == ENDERPEARL_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.ENDER_PEARL;
+        return currentSlot == ENDERPEARL_SLOT
+                && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.ENDER_PEARL;
     }
 
     @Override
     public boolean isHoldingObsidian(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == OBSIDIAN_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.OBSIDIAN;
+        return currentSlot == OBSIDIAN_SLOT
+                && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.OBSIDIAN;
     }
 
     @Override
@@ -50,12 +53,14 @@ public class ItemChecker implements IItemChecker {
 
     @Override
     public boolean isHoldingGlow(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GLOW_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GLOWSTONE;
+        return currentSlot == GLOW_SLOT
+                && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GLOWSTONE;
     }
 
     @Override
     public boolean isHoldingGoldenApple(int currentSlot, Map<Integer, ItemStack> hotbarSlots) {
-        return currentSlot == GOLDEN_APPLE_SLOT && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GOLDEN_APPLE;
+        return currentSlot == GOLDEN_APPLE_SLOT
+                && getCurrentItem(currentSlot, hotbarSlots).getType() == Material.GOLDEN_APPLE;
     }
 
     @Override
@@ -64,9 +69,7 @@ public class ItemChecker implements IItemChecker {
         if (infiniteResources) {
             return true;
         }
-        return enderpearlStack != null
-                && !ItemStackAccess.isEmpty(enderpearlStack)
-                && enderpearlStack.getAmount() > 0;
+        return enderpearlStack != null && !ItemStackAccess.isEmpty(enderpearlStack) && enderpearlStack.getAmount() > 0;
     }
 
     @Override

@@ -27,6 +27,7 @@ class CombatModeDefinitionTest {
                 .hasSize(DifficultyTier.values().length)
                 .isUnmodifiable();
         assertThat(definition.profile(DifficultyTier.GOD).attackRange()).isEqualTo(4.0D);
+        assertThat(definition.requiredPlatformCapabilities()).isEmpty();
     }
 
     @Test

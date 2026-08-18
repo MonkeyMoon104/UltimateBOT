@@ -27,7 +27,6 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
 
-/** Protects only entities explicitly owned by UltimateBot or marked by this addon. */
 final class PaperGuardBackend implements GuardBackend, Listener {
     private final Plugin plugin;
     private final Predicate<UUID> managedBotPredicate;

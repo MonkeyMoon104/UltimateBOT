@@ -6,7 +6,8 @@ public final class WrapperCapabilities {
     private final boolean asyncScheduler;
     private final boolean entityScheduler;
 
-    public WrapperCapabilities(boolean foliaDetected, boolean globalRegionScheduler, boolean asyncScheduler, boolean entityScheduler) {
+    public WrapperCapabilities(
+            boolean foliaDetected, boolean globalRegionScheduler, boolean asyncScheduler, boolean entityScheduler) {
         this.foliaDetected = foliaDetected;
         this.globalRegionScheduler = globalRegionScheduler;
         this.asyncScheduler = asyncScheduler;
@@ -16,12 +17,15 @@ public final class WrapperCapabilities {
     public boolean foliaDetected() {
         return foliaDetected;
     }
+
     public boolean globalRegionScheduler() {
         return globalRegionScheduler;
     }
+
     public boolean asyncScheduler() {
         return asyncScheduler;
     }
+
     public boolean entityScheduler() {
         return entityScheduler;
     }
@@ -42,7 +46,10 @@ public final class WrapperCapabilities {
             return false;
         }
         WrapperCapabilities other = (WrapperCapabilities) obj;
-        return foliaDetected == other.foliaDetected && globalRegionScheduler == other.globalRegionScheduler && asyncScheduler == other.asyncScheduler && entityScheduler == other.entityScheduler;
+        return foliaDetected == other.foliaDetected
+                && globalRegionScheduler == other.globalRegionScheduler
+                && asyncScheduler == other.asyncScheduler
+                && entityScheduler == other.entityScheduler;
     }
 
     @Override
@@ -52,6 +59,7 @@ public final class WrapperCapabilities {
 
     @Override
     public String toString() {
-        return "WrapperCapabilities[foliaDetected=" + foliaDetected + ", globalRegionScheduler=" + globalRegionScheduler + ", asyncScheduler=" + asyncScheduler + ", entityScheduler=" + entityScheduler + "]";
+        return "WrapperCapabilities[foliaDetected=" + foliaDetected + ", globalRegionScheduler=" + globalRegionScheduler
+                + ", asyncScheduler=" + asyncScheduler + ", entityScheduler=" + entityScheduler + "]";
     }
 }

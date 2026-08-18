@@ -184,7 +184,9 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
                 return false;
             }
             OwnedMode other = (OwnedMode) obj;
-            return java.util.Objects.equals(ownerId, other.ownerId) && java.util.Objects.equals(provider, other.provider) && java.util.Objects.equals(linkedBrain, other.linkedBrain);
+            return java.util.Objects.equals(ownerId, other.ownerId)
+                    && java.util.Objects.equals(provider, other.provider)
+                    && java.util.Objects.equals(linkedBrain, other.linkedBrain);
         }
 
         @Override
@@ -224,7 +226,8 @@ public final class CoreExtensionRegistry implements UltimateBotExtensionRegistry
                 return false;
             }
             OwnedBrain other = (OwnedBrain) obj;
-            return java.util.Objects.equals(ownerId, other.ownerId) && java.util.Objects.equals(provider, other.provider);
+            return java.util.Objects.equals(ownerId, other.ownerId)
+                    && java.util.Objects.equals(provider, other.provider);
         }
 
         @Override

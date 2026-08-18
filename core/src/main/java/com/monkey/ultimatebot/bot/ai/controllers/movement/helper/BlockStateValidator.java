@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import com.monkey.ultimatebot.compat.WorldAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,12 +12,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 
-/**
- * Block walkability checks for pathfinding. Uses a single-threaded scratch map instead of Caffeine:
- * A* hits this thousands of times per search with mostly unique keys, so ConcurrentHashMap +
- * expireAfterWrite + afterWrite drains dominated the server thread (see Spark
- * LocalManualCache.get / BoundedLocalCache.computeIfAbsent).
- */
 public class BlockStateValidator implements IBlockStateValidator {
     private final World world;
     private final Map<Long, Boolean> standablePositionCache = new HashMap<>(4_096);
@@ -110,7 +104,6 @@ public class BlockStateValidator implements IBlockStateValidator {
 
     @Override
     public void forceCacheClean() {
-        // Scratch maps have no deferred cleanup; clear keeps memory bounded between searches.
         clearCache();
     }
 

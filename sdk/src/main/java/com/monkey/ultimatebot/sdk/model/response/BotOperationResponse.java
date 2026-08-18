@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.sdk.model.response;
 
-import org.jspecify.annotations.Nullable;
-
 /**
  * Standard response returned by remote API operations.
  *
@@ -26,12 +24,15 @@ public final class BotOperationResponse {
     public boolean success() {
         return success;
     }
+
     public String message() {
         return message;
     }
+
     public BotSnapshotResponse snapshot() {
         return snapshot;
     }
+
     public Integer removedCount() {
         return removedCount;
     }
@@ -76,7 +77,10 @@ public final class BotOperationResponse {
             return false;
         }
         BotOperationResponse other = (BotOperationResponse) obj;
-        return success == other.success && java.util.Objects.equals(message, other.message) && java.util.Objects.equals(snapshot, other.snapshot) && java.util.Objects.equals(removedCount, other.removedCount);
+        return success == other.success
+                && java.util.Objects.equals(message, other.message)
+                && java.util.Objects.equals(snapshot, other.snapshot)
+                && java.util.Objects.equals(removedCount, other.removedCount);
     }
 
     @Override
@@ -86,6 +90,7 @@ public final class BotOperationResponse {
 
     @Override
     public String toString() {
-        return "BotOperationResponse[success=" + success + ", message=" + message + ", snapshot=" + snapshot + ", removedCount=" + removedCount + "]";
+        return "BotOperationResponse[success=" + success + ", message=" + message + ", snapshot=" + snapshot
+                + ", removedCount=" + removedCount + "]";
     }
 }

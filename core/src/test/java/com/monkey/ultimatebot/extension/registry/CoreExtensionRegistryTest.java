@@ -17,9 +17,6 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
 import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
@@ -117,8 +114,12 @@ class CoreExtensionRegistryTest {
     }
 
     private static BotBrainProvider brainProvider(BrainKey key) {
-        BrainDescriptor descriptor =
-                new BrainDescriptor(key, "Example Brain", "Test brain", java.util.Collections.singleton(BrainCapability.FULL_CONTROL), false);
+        BrainDescriptor descriptor = new BrainDescriptor(
+                key,
+                "Example Brain",
+                "Test brain",
+                java.util.Collections.singleton(BrainCapability.FULL_CONTROL),
+                false);
         return new BotBrainProvider() {
             @Override
             public BrainDescriptor descriptor() {

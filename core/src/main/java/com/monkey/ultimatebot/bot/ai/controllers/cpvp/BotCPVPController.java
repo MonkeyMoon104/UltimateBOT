@@ -13,7 +13,7 @@ import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.CPVPConfig;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
-import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
+import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -101,7 +101,9 @@ public final class BotCPVPController {
         crystalManager.cleanupCrystalCounts(crystalCountAtPosition, world);
         crystalManager.cleanupObsidianCache(obsidianCache);
         queuedCrystalPlacements.removeIf(pos -> !isStillValidCrystalPlacement(pos));
-        crystalRecentUsage.entrySet().removeIf(entry -> currentTime() - entry.getValue() > combatPolicy.positionReuseDelayMs());
+        crystalRecentUsage
+                .entrySet()
+                .removeIf(entry -> currentTime() - entry.getValue() > combatPolicy.positionReuseDelayMs());
         crystalAttacker.updateBotPosition();
 
         long currentTime = System.currentTimeMillis();
@@ -131,7 +133,11 @@ public final class BotCPVPController {
         if (distance < config.getMinCrystalDistance() || distance > config.getMaxCrystalDistance()) return false;
         if (!hasObsidian()) return false;
         List<BlockVector> bestPositions = obsidianPositionFinder.findBestObsidianPositions(
-                target, Math.max(1, config.getMaxPositionsToCheck()), recentPlacements, config.getPositionCooldownMs(), config.getMaxCrystalDistance());
+                target,
+                Math.max(1, config.getMaxPositionsToCheck()),
+                recentPlacements,
+                config.getPositionCooldownMs(),
+                config.getMaxCrystalDistance());
         if (bestPositions.isEmpty()) return false;
         if (!inventoryController.isHoldingObsidian()) {
             inventoryController.switchToObs();
@@ -167,8 +173,12 @@ public final class BotCPVPController {
         for (EnderCrystal crystal : candidates) {
             if (attackCooldown > 0) break;
             double score = crystalPositionEvaluator.evaluateCrystalForAttack(
-                    crystal, target, myPlacedCrystals, config.getCrystalAttackRange(), config.getMinCrystalDistance(), config.getOptimalDamageRange());
-            // 1.13: if scoring still fails, hit any in-range crystal instead of circling forever.
+                    crystal,
+                    target,
+                    myPlacedCrystals,
+                    config.getCrystalAttackRange(),
+                    config.getMinCrystalDistance(),
+                    config.getOptimalDamageRange());
             if (score < config.getMinAttackScore()
                     && !(MinecraftVersionAccess.is1_13()
                             && crystalAttacker.canAttackCrystal(crystal, config.getCrystalAttackRange()))) {
@@ -186,7 +196,10 @@ public final class BotCPVPController {
     }
 
     private void handleAttackPreparation() {
-        if (!isPreparingAttack || pendingAttackCrystal == null || pendingAttackCrystal.isDead() || !pendingAttackCrystal.isValid()) {
+        if (!isPreparingAttack
+                || pendingAttackCrystal == null
+                || pendingAttackCrystal.isDead()
+                || !pendingAttackCrystal.isValid()) {
             isPreparingAttack = false;
             pendingAttackCrystal = null;
             attackPreparationTicks = 0;
@@ -241,26 +254,59 @@ public final class BotCPVPController {
     }
 
     public boolean canPlaceCrystal() {
-        return enabled && crystalPlaceCooldown <= 0 && inventoryController.hasItem(Material.END_CRYSTAL) && bot.isAlive();
+        return enabled
+                && crystalPlaceCooldown <= 0
+                && inventoryController.hasItem(Material.END_CRYSTAL)
+                && bot.isAlive();
     }
 
     public boolean hasObsidian() {
-        return inventoryController.hasItem(Material.OBSIDIAN) && inventoryController.getItemCount(Material.OBSIDIAN) > 0;
+        return inventoryController.hasItem(Material.OBSIDIAN)
+                && inventoryController.getItemCount(Material.OBSIDIAN) > 0;
     }
 
     public boolean shouldPlaceObsidian(Player target) {
         return bot.distanceTo(target) >= config.getMinCrystalDistance()
                 && bot.distanceTo(target) <= config.getMaxCrystalDistance()
-                && !obsidianPositionFinder.findBestObsidianPositions(target, 1, recentPlacements, config.getPositionCooldownMs(), config.getMaxCrystalDistance()).isEmpty();
+                && !obsidianPositionFinder
+                        .findBestObsidianPositions(
+                                target,
+                                1,
+                                recentPlacements,
+                                config.getPositionCooldownMs(),
+                                config.getMaxCrystalDistance())
+                        .isEmpty();
     }
 
-    public int getPlacedCrystalsCount() { return myPlacedCrystals.size(); }
-    public int getCachedObsidianCount() { return obsidianCache.size(); }
-    public int getTotalCrystalPlacements() { return crystalCountAtPosition.values().stream().mapToInt(Integer::intValue).sum(); }
-    public boolean isDoingCrystalAction() { return isPreparingObsidian || isPreparingCrystal || isPreparingAttack; }
-    public boolean isPreparingObsidianPlacement() { return isPreparingObsidian; }
-    public boolean isPreparingCrystalPlacement() { return isPreparingCrystal; }
-    public boolean isPreparingCrystalAttack() { return isPreparingAttack; }
+    public int getPlacedCrystalsCount() {
+        return myPlacedCrystals.size();
+    }
+
+    public int getCachedObsidianCount() {
+        return obsidianCache.size();
+    }
+
+    public int getTotalCrystalPlacements() {
+        return crystalCountAtPosition.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+    }
+
+    public boolean isDoingCrystalAction() {
+        return isPreparingObsidian || isPreparingCrystal || isPreparingAttack;
+    }
+
+    public boolean isPreparingObsidianPlacement() {
+        return isPreparingObsidian;
+    }
+
+    public boolean isPreparingCrystalPlacement() {
+        return isPreparingCrystal;
+    }
+
+    public boolean isPreparingCrystalAttack() {
+        return isPreparingAttack;
+    }
 
     public Optional<BlockVector> getBestObsidianForPearl(Player target) {
         if (!enabled) return Optional.empty();
@@ -272,8 +318,18 @@ public final class BotCPVPController {
     private void buildCrystalPlacementQueue(Player target, List<BlockVector> validObsidianPositions) {
         long now = currentTime();
         validObsidianPositions.sort((p1, p2) -> Double.compare(
-                crystalPositionEvaluator.calculateCrystalScore(p2, target, crystalCountAtPosition, config.getOptimalDamageRange(), config.getMinCrystalDistance()),
-                crystalPositionEvaluator.calculateCrystalScore(p1, target, crystalCountAtPosition, config.getOptimalDamageRange(), config.getMinCrystalDistance())));
+                crystalPositionEvaluator.calculateCrystalScore(
+                        p2,
+                        target,
+                        crystalCountAtPosition,
+                        config.getOptimalDamageRange(),
+                        config.getMinCrystalDistance()),
+                crystalPositionEvaluator.calculateCrystalScore(
+                        p1,
+                        target,
+                        crystalCountAtPosition,
+                        config.getOptimalDamageRange(),
+                        config.getMinCrystalDistance())));
         for (BlockVector pos : validObsidianPositions) {
             if (!targetPlanner.isCoolingDown(pos, crystalRecentUsage, combatPolicy, now)) {
                 queuedCrystalPlacements.addLast(pos);
@@ -283,7 +339,8 @@ public final class BotCPVPController {
     }
 
     private boolean isStillValidCrystalPlacement(BlockVector pos) {
-        Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()).getType();
+        Material type = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ())
+                .getType();
         if (type != Material.OBSIDIAN && type != Material.BEDROCK) {
             return false;
         }
@@ -312,9 +369,8 @@ public final class BotCPVPController {
             crystalPlaceCooldown = config.getCrystalPlaceCooldownTicks();
             crystalRecentUsage.put(pos, currentTime());
             crystalCountAtPosition.put(pos, crystalCountAtPosition.getOrDefault(pos, 0) + 1);
-            EnderCrystal placedCrystal =
-                    crystalManager.findCrystalAt(
-                            new BlockVector(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()), world);
+            EnderCrystal placedCrystal = crystalManager.findCrystalAt(
+                    new BlockVector(pos.getBlockX(), pos.getBlockY() + 1, pos.getBlockZ()), world);
             if (placedCrystal != null) myPlacedCrystals.add(placedCrystal);
         } else if (isStillValidCrystalPlacement(pos)) {
             crystalRecentUsage.put(pos, currentTime());
@@ -322,10 +378,8 @@ public final class BotCPVPController {
         }
     }
 
-    /** 1.13: no place-retry loop; claim existing crystal instead of re-clicking. */
     private void executeCrystalPlacementNowLegacy13(BlockVector pos) {
-        EnderCrystal existing =
-                crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
+        EnderCrystal existing = crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
         if (existing != null) {
             myPlacedCrystals.add(existing);
             crystalRecentUsage.put(pos, currentTime());
@@ -337,8 +391,7 @@ public final class BotCPVPController {
             crystalPlaceCooldown = config.getCrystalPlaceCooldownTicks();
             crystalRecentUsage.put(pos, currentTime());
             crystalCountAtPosition.put(pos, crystalCountAtPosition.getOrDefault(pos, 0) + 1);
-            EnderCrystal placedCrystal =
-                    crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
+            EnderCrystal placedCrystal = crystalManager.findCrystalAt(CrystalManager.crystalStandPos(pos), world);
             if (placedCrystal != null) myPlacedCrystals.add(placedCrystal);
             return;
         }
@@ -376,15 +429,22 @@ public final class BotCPVPController {
         this.crystalManager.setConfig(config);
     }
 
-    public DifficultyLevel getDifficulty() { return difficulty; }
-    public CPVPConfig getConfig() { return config; }
+    public DifficultyLevel getDifficulty() {
+        return difficulty;
+    }
+
+    public CPVPConfig getConfig() {
+        return config;
+    }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled && NMSBridgeManager.get().supports(PlatformCapability.END_CRYSTAL);
         if (!this.enabled) clearRuntimeState();
     }
 
-    public boolean isEnabled() { return enabled; }
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     private void resetPendingActions() {
         isPreparingObsidian = false;
@@ -414,7 +474,8 @@ public final class BotCPVPController {
     private boolean shouldForceNewObsidianPlacement(Player target) {
         return hasObsidian()
                 && canPlaceObsidian()
-                && targetPlanner.shouldForceObsidianPlacement(target, obsidianCache, crystalCountAtPosition, crystalRecentUsage, config, combatPolicy);
+                && targetPlanner.shouldForceObsidianPlacement(
+                        target, obsidianCache, crystalCountAtPosition, crystalRecentUsage, config, combatPolicy);
     }
 
     private long currentTime() {

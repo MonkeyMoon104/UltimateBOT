@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.sdk;
 
-
-import java.util.Collections;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.sdk.event.BotEventEnvelope;
 import com.monkey.ultimatebot.sdk.event.BotEventSubscription;
@@ -16,6 +14,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +45,8 @@ public final class UltimateBotEventBus implements AutoCloseable {
     public BotEventSubscription subscribe(Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Objects.requireNonNull(types, "types");
         Objects.requireNonNull(listener, "listener");
-        Subscription subscription = new Subscription(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types), null, null, listener);
+        Subscription subscription = new Subscription(
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types), null, null, listener);
         subscriptions.add(subscription);
         subscription.start();
         return subscription;
@@ -78,7 +78,8 @@ public final class UltimateBotEventBus implements AutoCloseable {
 
     @Override
     public void close() {
-        for (Subscription subscription : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(subscriptions)) subscription.close();
+        for (Subscription subscription : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(subscriptions))
+            subscription.close();
     }
 
     private final class Subscription implements BotEventSubscription {

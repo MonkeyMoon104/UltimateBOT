@@ -9,7 +9,6 @@ public final class BrainRequest {
 
     public BrainRequest(BrainKey brain) {
 
-
         Objects.requireNonNull(brain, "brain");
         this.brain = brain;
     }

@@ -18,12 +18,15 @@ public final class LicenseStartupResult {
     public boolean allowed() {
         return allowed;
     }
+
     public boolean graceMode() {
         return graceMode;
     }
+
     public @Nullable String reasonCode() {
         return reasonCode;
     }
+
     public String message() {
         return message;
     }
@@ -45,7 +48,10 @@ public final class LicenseStartupResult {
             return false;
         }
         LicenseStartupResult other = (LicenseStartupResult) obj;
-        return allowed == other.allowed && graceMode == other.graceMode && java.util.Objects.equals(reasonCode, other.reasonCode) && java.util.Objects.equals(message, other.message);
+        return allowed == other.allowed
+                && graceMode == other.graceMode
+                && java.util.Objects.equals(reasonCode, other.reasonCode)
+                && java.util.Objects.equals(message, other.message);
     }
 
     @Override
@@ -55,6 +61,7 @@ public final class LicenseStartupResult {
 
     @Override
     public String toString() {
-        return "LicenseStartupResult[allowed=" + allowed + ", graceMode=" + graceMode + ", reasonCode=" + reasonCode + ", message=" + message + "]";
+        return "LicenseStartupResult[allowed=" + allowed + ", graceMode=" + graceMode + ", reasonCode=" + reasonCode
+                + ", message=" + message + "]";
     }
 }

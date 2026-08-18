@@ -15,6 +15,7 @@ final class TrackedWorldEntity {
     public boolean explosionBlockDamageAllowed() {
         return explosionBlockDamageAllowed;
     }
+
     public @Nullable ScheduledTask expiryTask() {
         return expiryTask;
     }
@@ -34,7 +35,8 @@ final class TrackedWorldEntity {
             return false;
         }
         TrackedWorldEntity other = (TrackedWorldEntity) obj;
-        return explosionBlockDamageAllowed == other.explosionBlockDamageAllowed && java.util.Objects.equals(expiryTask, other.expiryTask);
+        return explosionBlockDamageAllowed == other.explosionBlockDamageAllowed
+                && java.util.Objects.equals(expiryTask, other.expiryTask);
     }
 
     @Override
@@ -44,6 +46,7 @@ final class TrackedWorldEntity {
 
     @Override
     public String toString() {
-        return "TrackedWorldEntity[explosionBlockDamageAllowed=" + explosionBlockDamageAllowed + ", expiryTask=" + expiryTask + "]";
+        return "TrackedWorldEntity[explosionBlockDamageAllowed=" + explosionBlockDamageAllowed + ", expiryTask="
+                + expiryTask + "]";
     }
 }

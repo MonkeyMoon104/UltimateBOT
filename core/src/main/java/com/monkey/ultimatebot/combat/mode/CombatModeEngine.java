@@ -61,8 +61,8 @@ public final class CombatModeEngine implements AutoCloseable {
                 context,
                 Objects.requireNonNull(control, "control"),
                 Objects.requireNonNull(nativeAccess, "nativeAccess"),
-                new SplittableRandom(
-                        bot.getUniqueId().getMostSignificantBits() ^ bot.getUniqueId().getLeastSignificantBits()));
+                new SplittableRandom(bot.getUniqueId().getMostSignificantBits()
+                        ^ bot.getUniqueId().getLeastSignificantBits()));
         this.strategies = BuiltInCombatModeStrategies.create(NMSBridgeManager.capabilities());
     }
 

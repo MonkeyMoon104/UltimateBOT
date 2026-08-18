@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
-/** Immutable Java-only runtime values exposed to an optional metrics backend. */
 public final class MetricsBackendContext {
     private final boolean prometheusEndpointEnabled;
     private final String pluginVersion;

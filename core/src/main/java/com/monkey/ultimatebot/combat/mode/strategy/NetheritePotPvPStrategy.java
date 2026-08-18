@@ -42,7 +42,7 @@ public final class NetheritePotPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-                switch (phase) {
+        switch (phase) {
             case PREBUFF:
                 prebuff(context);
                 break;

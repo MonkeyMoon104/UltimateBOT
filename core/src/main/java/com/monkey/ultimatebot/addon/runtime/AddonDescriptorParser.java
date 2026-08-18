@@ -1,14 +1,11 @@
 package com.monkey.ultimatebot.addon.runtime;
 
-import java.util.stream.Collectors;
-
-
-import java.util.Collections;
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -16,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.jspecify.annotations.Nullable;

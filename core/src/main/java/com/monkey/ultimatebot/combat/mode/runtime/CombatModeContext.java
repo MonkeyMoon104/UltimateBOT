@@ -10,7 +10,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.compat.BlockDamageAccess;
+import com.monkey.ultimatebot.access.block.BlockDamageAccess;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Objects;
 import java.util.SplittableRandom;
@@ -169,16 +169,13 @@ public final class CombatModeContext implements AutoCloseable {
                 entity, options.canExplosionDamageBlocks(), () -> inventory.consumeItem(inventorySlot));
     }
 
-    /** Tracks a combat entity without consuming inventory (caller already consumed / best-effort). */
     public boolean trackCombatEntity(Entity entity) {
-        return worldProtection.trackCombatEntity(
-                entity, options.canExplosionDamageBlocks(), () -> true);
+        return worldProtection.trackCombatEntity(entity, options.canExplosionDamageBlocks(), () -> true);
     }
 
     public boolean breakCombatBlock(Location location, int toolSlot) {
         inventory.switchToSlot(toolSlot);
-        boolean broken = worldProtection.breakCombatBlock(
-                location, bukkitBot, inventory.getItem(toolSlot));
+        boolean broken = worldProtection.breakCombatBlock(location, bukkitBot, inventory.getItem(toolSlot));
         if (broken) {
             actions.swingMainHand();
             invalidateMovementForWorldChange();

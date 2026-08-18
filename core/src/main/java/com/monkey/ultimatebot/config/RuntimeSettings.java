@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public final class RuntimeSettings {
     private static final CacheSettings DEFAULT_TARGET_CACHE = new CacheSettings(2_048, Duration.ofMillis(250));
-    // Pathfinding explores thousands of unique blocks per search; tiny Caffeine caches thrash hard.
+
     private static final CacheSettings DEFAULT_BLOCK_STATE_CACHE = new CacheSettings(16_384, Duration.ofSeconds(5));
     private static final WorldProtectionSettings DEFAULT_WORLD_PROTECTION =
             new WorldProtectionSettings(false, true, 0, 2_048, 0, 512, true);

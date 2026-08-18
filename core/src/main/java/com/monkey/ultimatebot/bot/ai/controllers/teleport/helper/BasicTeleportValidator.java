@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.bot.ai.controllers.teleport.helper;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.teleport.helper.inter.ITeleportValidator;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 

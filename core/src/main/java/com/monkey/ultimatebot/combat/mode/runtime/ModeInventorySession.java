@@ -1,11 +1,9 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -33,9 +31,9 @@ public final class ModeInventorySession implements AutoCloseable {
         Objects.requireNonNull(options, "options");
         capture();
         Map<Integer, ItemStack> hotbar = originalHotbar();
-        // Player equipment prefs first; mode kit last so Cart/UHC/etc. keep required items
-        // (rails, TNT minecarts, webs) instead of being overwritten by crystal/obsidian loadouts.
-        for (Map.Entry<Integer, ItemStack> entry : options.getEquipmentContents().entrySet()) {
+
+        for (Map.Entry<Integer, ItemStack> entry :
+                options.getEquipmentContents().entrySet()) {
             hotbar.put(entry.getKey(), entry.getValue().clone());
         }
         for (Map.Entry<Integer, ItemStack> entry : kit.slots().entrySet()) {
@@ -52,7 +50,8 @@ public final class ModeInventorySession implements AutoCloseable {
     }
 
     private void applyConfiguredArmor(BotOptions options, Map<EquipmentSlotKind, ItemStack> equipment) {
-        for (EquipmentSlotKind slot : java.util.Collections.unmodifiableList(java.util.Arrays.asList(EquipmentSlotKind.HEAD, EquipmentSlotKind.CHEST, EquipmentSlotKind.LEGS, EquipmentSlotKind.FEET))) {
+        for (EquipmentSlotKind slot : java.util.Collections.unmodifiableList(java.util.Arrays.asList(
+                EquipmentSlotKind.HEAD, EquipmentSlotKind.CHEST, EquipmentSlotKind.LEGS, EquipmentSlotKind.FEET))) {
             ItemStack configured = options.getArmor().get(slot);
             if (configured == null) {
                 continue;

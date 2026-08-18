@@ -1,10 +1,9 @@
 package com.monkey.ultimatebot.common.model;
 
-import java.util.Objects;
 import com.monkey.ultimatebot.common.util.TextValues;
+import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-/** Immutable built-in kill-message configuration. */
 public final class KillMessageSettings {
     private final boolean enabled;
     private final @Nullable String message;

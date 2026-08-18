@@ -1,9 +1,5 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
-import java.util.stream.Collectors;
-
-
-import java.util.Collections;
 import de.bsommerfeld.pathetic.api.pathing.INeighborStrategy;
 import de.bsommerfeld.pathetic.api.pathing.Pathfinder;
 import de.bsommerfeld.pathetic.api.pathing.configuration.PathfinderConfiguration;
@@ -17,13 +13,14 @@ import de.bsommerfeld.pathetic.api.wrapper.PathPosition;
 import de.bsommerfeld.pathetic.api.wrapper.PathVector;
 import de.bsommerfeld.pathetic.engine.factory.AStarPathfinderFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.bukkit.util.BlockVector;
 
-/** Pure path planning layer. Entity movement remains the responsibility of the bot controller. */
 public final class PatheticPathPlanner {
     private static final int MAX_ITERATIONS = 4_000;
     private static final int MAX_PATH_LENGTH = 96;

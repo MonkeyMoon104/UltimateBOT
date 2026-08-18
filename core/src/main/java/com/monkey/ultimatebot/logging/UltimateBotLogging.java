@@ -1,15 +1,14 @@
 package com.monkey.ultimatebot.logging;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.common.model.BotMode;
-import com.monkey.ultimatebot.compat.PluginMetaAccess;
-import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.nms.INMSBridge;
 import java.util.*;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -160,28 +159,14 @@ public final class UltimateBotLogging {
     }
 
     private static String format(String module, String accentColor, String message, String messageColor) {
-        return BOLD
-                + accentColor
-                + "["
-                + module
-                + "]"
-                + RESET
-                + " "
-                + messageColor
-                + consoleSafe(message)
-                + RESET;
+        return BOLD + accentColor + "[" + module + "]" + RESET + " " + messageColor + consoleSafe(message) + RESET;
     }
 
-    /**
-     * Legacy Windows/Spigot consoles use OEM code pages (e.g. CP437). Unicode en-dash {@code –}
-     * encodes as CP1252 {@code 0x96}, which those consoles render as {@code û}.
-     */
     private static String consoleSafe(String message) {
         if (message == null || message.isEmpty()) {
             return message;
         }
-        return message
-                .replace('\u2013', '-')
+        return message.replace('\u2013', '-')
                 .replace('\u2014', '-')
                 .replace('\u2011', '-')
                 .replace('\u2212', '-')
@@ -191,7 +176,7 @@ public final class UltimateBotLogging {
     }
 
     private static String moduleColor(String module) {
-                switch (module) {
+        switch (module) {
             case "Boot":
                 return GOLD;
             case "License":
@@ -292,7 +277,7 @@ public final class UltimateBotLogging {
             UltimateBotLogging.detail(
                     logger,
                     "Boot",
-                    "Minecraft -> " + com.monkey.ultimatebot.compat.MinecraftVersionAccess.minecraftVersion()
+                    "Minecraft -> " + com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess.minecraftVersion()
                             + " | Java -> "
                             + System.getProperty("java.version"));
             UltimateBotLogging.detail(logger, "Boot", "Worlds -> " + formatWorldSummary());
@@ -326,11 +311,13 @@ public final class UltimateBotLogging {
         }
 
         public void markCommands(List<String> registeredCommands) {
-            this.registeredCommands = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredCommands);
+            this.registeredCommands =
+                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredCommands);
         }
 
         public void markListeners(List<String> registeredListeners, List<String> disabledListeners) {
-            this.registeredListeners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredListeners);
+            this.registeredListeners =
+                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredListeners);
             this.disabledListeners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(disabledListeners);
         }
 
@@ -338,7 +325,8 @@ public final class UltimateBotLogging {
                 boolean placeholderPresent, boolean placeholderRegistered, List<String> placeholderKeys) {
             this.placeholderPresent = placeholderPresent;
             this.placeholderRegistered = placeholderRegistered;
-            this.registeredPlaceholders = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placeholderKeys);
+            this.registeredPlaceholders =
+                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placeholderKeys);
         }
 
         public void completePhase(String summary) {

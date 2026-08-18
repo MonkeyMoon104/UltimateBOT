@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Player;
@@ -159,8 +159,7 @@ public class BotManager {
         updater.updateArmor(ownerUUID, armorMap, blastProtectionMap);
     }
 
-    public void updateArmor(
-            UUID ownerUUID, Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap) {
+    public void updateArmor(UUID ownerUUID, Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap) {
         updater.updateArmor(ownerUUID, armorMap);
     }
 

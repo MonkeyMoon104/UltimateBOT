@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.combat.mode.trident;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import org.bukkit.Location;
@@ -45,7 +45,11 @@ final class TridentUtilityActions {
     }
 
     double riptideVerticalVelocity(CombatModeContext context, LivingEntity target) {
-        return Math.min(0.52D, Math.max(0.12D, (EntityCoordsAccess.getY(target) - context.motion().botY()) * 0.22D + 0.24D));
+        return Math.min(
+                0.52D,
+                Math.max(
+                        0.12D,
+                        (EntityCoordsAccess.getY(target) - context.motion().botY()) * 0.22D + 0.24D));
     }
 
     void restoreWater(CombatModeContext context) {
@@ -55,10 +59,6 @@ final class TridentUtilityActions {
         }
     }
 
-    /**
-     * Prefer the bot's feet block when it has solid support; otherwise search downward so water is
-     * never left floating in mid-air after a jump/riptide.
-     */
     private static @Nullable Location findSupportedWaterPlacement(Location origin) {
         Block start = origin.getBlock();
         for (int dy = 0; dy <= MAX_WATER_DROP_SEARCH; dy++) {

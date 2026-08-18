@@ -1,11 +1,10 @@
 package com.monkey.ultimatebot.world;
 
-
-import com.monkey.ultimatebot.compat.BlockBreakAccess;
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
-import com.monkey.ultimatebot.compat.BlockDataAccess;
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
+import com.monkey.ultimatebot.access.block.BlockBreakAccess;
+import com.monkey.ultimatebot.access.block.BlockDataAccess;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
@@ -24,6 +23,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
+
 public final class WorldProtectionService implements AutoCloseable {
     private static final @Nullable Method BLOCK_SET_TYPE_WITH_PHYSICS = resolveSetTypeWithPhysics();
 
@@ -273,7 +273,8 @@ public final class WorldProtectionService implements AutoCloseable {
             try {
                 withPhysics.invoke(block, material, Boolean.FALSE);
                 return;
-            } catch (ReflectiveOperationException ignored) {}
+            } catch (ReflectiveOperationException ignored) {
+            }
         }
         block.setType(material);
     }
@@ -300,7 +301,8 @@ public final class WorldProtectionService implements AutoCloseable {
     @Override
     public void close() {
         for (Map.Entry<WorldBlockKey, TrackedWorldBlock> entry :
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placements).entrySet()) {
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placements)
+                        .entrySet()) {
             TrackedWorldBlock placement = entry.getValue();
             placement.cancelExpiry();
             Block block = entry.getKey().block();
@@ -311,8 +313,9 @@ public final class WorldProtectionService implements AutoCloseable {
             }
         }
         placements.clear();
-        for (Map.Entry<UUID, TrackedWorldEntity> entry :
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(combatEntities).entrySet()) {
+        for (Map.Entry<UUID, TrackedWorldEntity> entry : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+                        combatEntities)
+                .entrySet()) {
             entry.getValue().cancelExpiry();
             Entity entity = EntityLookupAccess.get(entry.getKey());
             if (entity != null && WorldProtectionPolicy.shouldRemoveEntityOnShutdown(settings.antiDupe(), true)) {

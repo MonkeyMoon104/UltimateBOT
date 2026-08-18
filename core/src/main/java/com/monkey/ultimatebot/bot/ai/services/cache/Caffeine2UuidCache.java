@@ -6,10 +6,6 @@ import com.monkey.ultimatebot.config.RuntimeSettings;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Caffeine 2.x backend (Java 8). Shadow relocates {@code com.github.benmanes.caffeine} →
- * {@code com.monkey.ultimatebot.cafe2} only for this class.
- */
 public final class Caffeine2UuidCache<V> implements UuidCache<V> {
 
     private final Cache<UUID, V> cache;

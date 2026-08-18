@@ -1,8 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-
-import com.monkey.ultimatebot.compat.EntityLookupAccess;
-import java.util.Collections;
+import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;

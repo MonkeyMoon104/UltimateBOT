@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -11,7 +10,6 @@ import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
-import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

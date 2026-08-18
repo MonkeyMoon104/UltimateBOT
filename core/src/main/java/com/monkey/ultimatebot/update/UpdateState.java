@@ -7,7 +7,8 @@ public final class UpdateState {
     private final String downloadUrl;
     private final String message;
 
-    public UpdateState(boolean updateAvailable, String currentVersion, String latestVersion, String downloadUrl, String message) {
+    public UpdateState(
+            boolean updateAvailable, String currentVersion, String latestVersion, String downloadUrl, String message) {
         this.updateAvailable = updateAvailable;
         this.currentVersion = currentVersion;
         this.latestVersion = latestVersion;
@@ -18,15 +19,19 @@ public final class UpdateState {
     public boolean updateAvailable() {
         return updateAvailable;
     }
+
     public String currentVersion() {
         return currentVersion;
     }
+
     public String latestVersion() {
         return latestVersion;
     }
+
     public String downloadUrl() {
         return downloadUrl;
     }
+
     public String message() {
         return message;
     }
@@ -40,7 +45,11 @@ public final class UpdateState {
             return false;
         }
         UpdateState other = (UpdateState) obj;
-        return updateAvailable == other.updateAvailable && java.util.Objects.equals(currentVersion, other.currentVersion) && java.util.Objects.equals(latestVersion, other.latestVersion) && java.util.Objects.equals(downloadUrl, other.downloadUrl) && java.util.Objects.equals(message, other.message);
+        return updateAvailable == other.updateAvailable
+                && java.util.Objects.equals(currentVersion, other.currentVersion)
+                && java.util.Objects.equals(latestVersion, other.latestVersion)
+                && java.util.Objects.equals(downloadUrl, other.downloadUrl)
+                && java.util.Objects.equals(message, other.message);
     }
 
     @Override
@@ -50,6 +59,7 @@ public final class UpdateState {
 
     @Override
     public String toString() {
-        return "UpdateState[updateAvailable=" + updateAvailable + ", currentVersion=" + currentVersion + ", latestVersion=" + latestVersion + ", downloadUrl=" + downloadUrl + ", message=" + message + "]";
+        return "UpdateState[updateAvailable=" + updateAvailable + ", currentVersion=" + currentVersion
+                + ", latestVersion=" + latestVersion + ", downloadUrl=" + downloadUrl + ", message=" + message + "]";
     }
 }

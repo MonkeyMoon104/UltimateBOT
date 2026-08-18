@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.ItemMetaAccess;
+import com.monkey.ultimatebot.access.item.ItemMetaAccess;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;

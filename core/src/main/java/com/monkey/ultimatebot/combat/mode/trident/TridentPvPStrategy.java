@@ -45,7 +45,7 @@ public final class TridentPvPStrategy extends AbstractCombatModeStrategy {
     protected void execute(CombatModeContext context, LivingEntity target) {
         context.motion().aimAt(target);
         phaseTicks++;
-                switch (phase) {
+        switch (phase) {
             case SELECT_ATTACK:
                 selectAttack(context, target);
                 break;

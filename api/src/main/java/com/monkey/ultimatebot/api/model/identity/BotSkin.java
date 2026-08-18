@@ -45,8 +45,7 @@ public final class BotSkin {
                 break;
             case PLAYER_REFERENCE:
                 if (normalizedPlayerReference == null) {
-                    throw new IllegalArgumentException(
-                            "playerReference is required for PLAYER_REFERENCE skin source");
+                    throw new IllegalArgumentException("playerReference is required for PLAYER_REFERENCE skin source");
                 }
                 normalizedTextureValue = null;
                 normalizedTextureSignature = null;
@@ -54,8 +53,7 @@ public final class BotSkin {
                 break;
             case TEXTURE_VALUE:
                 if (normalizedTextureValue == null) {
-                    throw new IllegalArgumentException(
-                            "textureValue is required for TEXTURE_VALUE skin source");
+                    throw new IllegalArgumentException("textureValue is required for TEXTURE_VALUE skin source");
                 }
                 normalizedPlayerReference = null;
                 normalizedTextureUrl = null;

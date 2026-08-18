@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.bot.ai.controllers.movement.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IBlockStateValidator;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IMovementExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.helper.interf.IObstacleHandler;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -391,7 +391,7 @@ public class MovementExecutor implements IMovementExecutor {
     }
 
     private static BlockVector blockAt(Vector position) {
-        return new BlockVector(
-                (int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int) Math.floor(position.getZ()));
+        return new BlockVector((int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int)
+                Math.floor(position.getZ()));
     }
 }

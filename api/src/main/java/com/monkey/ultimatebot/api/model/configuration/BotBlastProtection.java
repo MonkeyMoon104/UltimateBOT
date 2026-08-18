@@ -24,12 +24,15 @@ public final class BotBlastProtection {
     public boolean feet() {
         return feet;
     }
+
     public boolean legs() {
         return legs;
     }
+
     public boolean chest() {
         return chest;
     }
+
     public boolean head() {
         return head;
     }

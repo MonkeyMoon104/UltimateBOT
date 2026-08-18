@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.controllers.attack.helper;
 
+import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackExecutor;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IAttackStrategy;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.ICooldownManager;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.helper.inter.IJumpAttackManager;
-import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.CombatCadenceAccess;
+import com.monkey.ultimatebot.access.combat.CombatCadenceAccess;
 import org.bukkit.entity.LivingEntity;
 
 public class AttackStrategy implements IAttackStrategy {

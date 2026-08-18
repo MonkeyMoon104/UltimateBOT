@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.commands;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.compat.WorldAccess;
+import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;

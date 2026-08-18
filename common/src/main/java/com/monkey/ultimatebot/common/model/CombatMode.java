@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -7,9 +8,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
 
-/** Stable namespaced identifier for built-in and addon-provided combat modes. */
 public final class CombatMode implements Comparable<CombatMode> {
     private static final Pattern PART_PATTERN = Pattern.compile("[a-z0-9][a-z0-9._-]{0,63}");
     private static final String BUILTIN_NAMESPACE = "ultimatebot";
@@ -25,8 +24,8 @@ public final class CombatMode implements Comparable<CombatMode> {
     public static final CombatMode SMP = builtin("smp");
     public static final CombatMode TRIDENT = builtin("trident");
 
-    private static final List<CombatMode> BUILTIN_MODES = Collections.unmodifiableList(Arrays.asList(
-            SWORD, UHC, CART, CRYSTAL, MACE, WATER, AXE_SHIELD, NETHERITE_POT, SMP, TRIDENT));
+    private static final List<CombatMode> BUILTIN_MODES = Collections.unmodifiableList(
+            Arrays.asList(SWORD, UHC, CART, CRYSTAL, MACE, WATER, AXE_SHIELD, NETHERITE_POT, SMP, TRIDENT));
 
     private final String namespace;
     private final String value;
@@ -36,12 +35,10 @@ public final class CombatMode implements Comparable<CombatMode> {
         this.value = validatePart(value, "value");
     }
 
-    /** Creates a validated namespaced combat-mode identifier. */
     public static CombatMode of(String namespace, String value) {
         return new CombatMode(namespace, value);
     }
 
-    /** Parses {@code namespace:value}; unqualified values use the UltimateBot namespace. */
     public static CombatMode parse(String input) {
         String checked = Objects.requireNonNull(input, "input").trim().toLowerCase(Locale.ROOT);
         if (checked.isEmpty()) {
@@ -53,12 +50,10 @@ public final class CombatMode implements Comparable<CombatMode> {
                 : of(checked.substring(0, separator), checked.substring(separator + 1));
     }
 
-    /** Resolves the legacy enum-like name of a built-in mode. */
     public static CombatMode valueOf(String name) {
         return parse(Objects.requireNonNull(name, "name").replace('_', '-'));
     }
 
-    /** Returns the built-in modes in their canonical GUI order. */
     public static CombatMode[] values() {
         return BUILTIN_MODES.toArray(new CombatMode[0]);
     }
@@ -71,48 +66,36 @@ public final class CombatMode implements Comparable<CombatMode> {
         return value;
     }
 
-    /** Returns whether this identifier belongs to UltimateBot itself. */
     public boolean builtIn() {
         return BUILTIN_NAMESPACE.equals(namespace) && BUILTIN_MODES.contains(this);
     }
 
-    /** Returns the canonical {@code namespace:value} representation. */
     public String key() {
         return namespace + ':' + value;
     }
 
-    /** Returns the built-in configuration name or the namespaced custom key. */
     public String name() {
         return builtIn() ? value.toUpperCase(Locale.ROOT).replace('-', '_') : key();
     }
 
-    /** Returns the default display name; registered descriptors may override it. */
     public String displayName() {
         return builtIn() ? BuiltInCombatModeCatalog.displayName(value) : humanize(value);
     }
 
-    /** Returns the default capabilities of a built-in mode. */
     public Set<CombatCapability> capabilities() {
         return builtIn() ? BuiltInCombatModeCatalog.capabilities(value) : ImmutableCollections.emptySet();
     }
 
-    /** Returns whether the built-in defaults include a capability. */
     public boolean supports(CombatCapability capability) {
         return capabilities().contains(Objects.requireNonNull(capability, "capability"));
     }
 
-    /**
-     * Returns platform features that must all be present for this built-in mode.
-     *
-     * <p>Custom (non-built-in) modes declare no built-in platform requirements.
-     */
     public Set<PlatformCapability> requiredPlatformCapabilities() {
         return builtIn()
                 ? BuiltInCombatModeCatalog.requiredPlatformCapabilities(value)
                 : ImmutableCollections.emptySet();
     }
 
-    /** Returns whether every required platform capability is present in {@code available}. */
     public boolean supportedBy(Set<PlatformCapability> available) {
         return Objects.requireNonNull(available, "available").containsAll(requiredPlatformCapabilities());
     }

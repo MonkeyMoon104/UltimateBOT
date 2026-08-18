@@ -109,7 +109,7 @@ public class PlayerCheckListener implements Listener {
 
     @EventHandler
     public void onDead(PlayerDeathEvent event) {
-        // Paper 1.16.5 has getEntity():Player only — getPlayer() was added later (NoSuchMethodError).
+
         Player player = event.getEntity();
         if (plugin.getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null) {
             event.getDrops().clear();
@@ -154,8 +154,7 @@ public class PlayerCheckListener implements Listener {
 
         if (wasBotSpawned && currentDeathMessage != null) {
             ITrainingBot bot = botManager.getBot(player.getUniqueId());
-            if (bot != null
-                    && currentDeathMessage.contains(bot.asBukkitPlayer().getName())) {
+            if (bot != null && currentDeathMessage.contains(bot.asBukkitPlayer().getName())) {
                 setBotDeathMessage(event, player, options);
             }
         }
@@ -163,7 +162,7 @@ public class PlayerCheckListener implements Listener {
 
     private void setBotDeathMessage(PlayerDeathEvent event, Player player, @Nullable BotOptions options) {
         if (options != null && !options.isKillMessageEnabled()) {
-            // String API works on Paper 1.16.5 (no Adventure plain serializer) and modern Paper.
+
             event.setDeathMessage(null);
             return;
         }
@@ -235,9 +234,7 @@ public class PlayerCheckListener implements Listener {
         for (Map.Entry<UUID, ITrainingBot> entry :
                 plugin.getBotRegistry().getAllBots().entrySet()) {
             ITrainingBot candidate = entry.getValue();
-            if (candidate != null
-                    && candidate.asBukkitPlayer() != null
-                    && botUUID.equals(candidate.getUniqueId())) {
+            if (candidate != null && candidate.asBukkitPlayer() != null && botUUID.equals(candidate.getUniqueId())) {
                 return toKillContext(entry.getKey(), candidate);
             }
         }

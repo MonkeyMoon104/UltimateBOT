@@ -57,7 +57,8 @@ public class CombatDataManager implements ICombatDataManager {
 
         Vector currentTargetPos = target.getLocation().toVector();
         if (lastTargetPosition != null && currentTime - lastPositionUpdate > 50) {
-            targetVelocity = currentTargetPos.clone()
+            targetVelocity = currentTargetPos
+                    .clone()
                     .subtract(lastTargetPosition)
                     .multiply(20.0 / (currentTime - lastPositionUpdate) * 1000);
         }

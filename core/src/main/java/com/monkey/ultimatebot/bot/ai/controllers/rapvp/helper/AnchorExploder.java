@@ -6,7 +6,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.BotExplosionContext;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.compat.RespawnAnchorAccess;
+import com.monkey.ultimatebot.access.world.RespawnAnchorAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,7 +36,8 @@ public class AnchorExploder {
                 return false;
             }
             inventory.switchToEmptySlot();
-            rotation.lookAt(new Vector(anchorPos.getBlockX() + 0.5D, anchorPos.getBlockY() + 0.5D, anchorPos.getBlockZ() + 0.5D));
+            rotation.lookAt(new Vector(
+                    anchorPos.getBlockX() + 0.5D, anchorPos.getBlockY() + 0.5D, anchorPos.getBlockZ() + 0.5D));
             return tryManualExplosion(anchorPos);
         } catch (Exception e) {
             UltimateBot.getInstance().getLogger().warning("Error while exploding anchor: " + e.getMessage());

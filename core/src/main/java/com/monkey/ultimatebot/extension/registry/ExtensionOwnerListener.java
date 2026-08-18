@@ -20,7 +20,7 @@ public final class ExtensionOwnerListener implements Listener {
     @EventHandler
     public void onPluginDisable(PluginDisableEvent event) {
         registry.unregisterOwner(event.getPlugin().getName());
-        // Startup can fail after this listener is registered but before runtime services exist.
+
         if (plugin.getBotRegistryOrNull() == null || plugin.getWrapperManagerOrNull() == null) {
             return;
         }

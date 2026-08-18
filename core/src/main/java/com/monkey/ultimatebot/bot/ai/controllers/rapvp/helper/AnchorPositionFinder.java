@@ -1,12 +1,12 @@
 package com.monkey.ultimatebot.bot.ai.controllers.rapvp.helper;
 
-import com.monkey.ultimatebot.compat.BlockPassableAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.bot.ai.controllers.combat.ExplosionDamageEstimator;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyProfileFactory;
 import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
+import com.monkey.ultimatebot.access.block.BlockPassableAccess;
+import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import java.util.Optional;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -44,7 +44,9 @@ public class AnchorPositionFinder {
                 for (int dy = downY; dy <= upY; dy++) {
                     BlockVector check = new BlockVector(
                             targetPos.getBlockX() + dx, targetPos.getBlockY() + dy, targetPos.getBlockZ() + dz);
-                    if (isBotBlock(check) || isBotBlock(new BlockVector(check.getBlockX(), check.getBlockY() + 1, check.getBlockZ()))) continue;
+                    if (isBotBlock(check)
+                            || isBotBlock(new BlockVector(check.getBlockX(), check.getBlockY() + 1, check.getBlockZ())))
+                        continue;
                     Block block = blockAt(check);
                     Block below = block.getRelative(0, -1, 0);
                     if (!isPassable(block) || !isSolid(below)) continue;
@@ -52,9 +54,12 @@ public class AnchorPositionFinder {
                     if (bot.getLocation().distanceSquared(anchorCenter) > maxDistanceSq) continue;
                     if (anchorCenter.distance(target.getLocation()) > 4.4D) continue;
                     double targetDamage = ExplosionDamageEstimator.estimateAnchorDamage(anchorCenter, target);
-                    double selfDamage = ExplosionDamageEstimator.estimateAnchorDamage(anchorCenter, bot.asBukkitPlayer());
+                    double selfDamage =
+                            ExplosionDamageEstimator.estimateAnchorDamage(anchorCenter, bot.asBukkitPlayer());
                     if (targetDamage < 1.0D || selfDamage >= bot.healthValue() - 1.0D) continue;
-                    double score = (targetDamage * 3.4D) - (selfDamage * 2.9D) - bot.getLocation().distance(anchorCenter) * 0.45D;
+                    double score = (targetDamage * 3.4D)
+                            - (selfDamage * 2.9D)
+                            - bot.getLocation().distance(anchorCenter) * 0.45D;
                     if (score > bestScore) {
                         bestScore = score;
                         best = check;
@@ -80,7 +85,8 @@ public class AnchorPositionFinder {
     }
 
     private org.bukkit.Location centerOf(BlockVector pos) {
-        return new org.bukkit.Location(bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
+        return new org.bukkit.Location(
+                bot.getWorld(), pos.getBlockX() + 0.5D, pos.getBlockY() + 0.5D, pos.getBlockZ() + 0.5D);
     }
 
     private static boolean isPassable(Block block) {

@@ -22,7 +22,8 @@ public class ArmorCycle {
         return getNextArmor(current, slot, ArmorTier.LEATHER, ArmorTier.maxAvailable());
     }
 
-    public static Material getNextArmor(Material current, EquipmentSlotKind slot, ArmorTier minTier, ArmorTier maxTier) {
+    public static Material getNextArmor(
+            Material current, EquipmentSlotKind slot, ArmorTier minTier, ArmorTier maxTier) {
         ArmorTier resolvedMin = clampMin(minTier, maxTier);
         ArmorTier resolvedMax = clampMax(maxTier);
 

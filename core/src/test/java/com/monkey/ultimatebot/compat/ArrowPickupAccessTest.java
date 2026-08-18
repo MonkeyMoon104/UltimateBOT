@@ -1,7 +1,8 @@
-package com.monkey.ultimatebot.compat;
+package com.monkey.ultimatebot.access;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import com.monkey.ultimatebot.access.entity.ArrowPickupAccess;
 import org.bukkit.entity.Arrow;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

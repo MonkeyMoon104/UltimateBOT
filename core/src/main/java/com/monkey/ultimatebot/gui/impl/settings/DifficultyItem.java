@@ -1,8 +1,5 @@
 package com.monkey.ultimatebot.gui.impl.settings;
 
-import java.util.stream.Collectors;
-
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -17,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -50,8 +48,7 @@ public class DifficultyItem extends AbstractItem {
 
         ItemBuilder builder = new ItemBuilder(difficultyMaterial);
         builder.setDisplayName(ChatColorUtils.translate(training.getLangString("gui.difficulty-button.name")));
-        builder.setItemFlags(
-                ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENCHANTS", "HIDE_ATTRIBUTES"));
+        builder.setItemFlags(ItemFlagCatalog.resolve("HIDE_ADDITIONAL_TOOLTIP", "HIDE_ENCHANTS", "HIDE_ATTRIBUTES"));
 
         java.util.List<String> loreLines = training.getLangStringList("gui.difficulty-button.lore");
         List<String> difficulties = options.getAllowedDifficulties().stream()
@@ -110,14 +107,15 @@ public class DifficultyItem extends AbstractItem {
         }
 
         UUID managedOwnerUUID = resolveManagedOwnerUUID(player);
-        java.util.Optional<com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel> proposed = BotSettingEvents.propose(
-                training,
-                managedOwnerUUID,
-                BotEventSource.GUI,
-                BotSettingKey.DIFFICULTY,
-                currentDifficulty,
-                newDifficulty,
-                DifficultyLevel.class);
+        java.util.Optional<com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel> proposed =
+                BotSettingEvents.propose(
+                        training,
+                        managedOwnerUUID,
+                        BotEventSource.GUI,
+                        BotSettingKey.DIFFICULTY,
+                        currentDifficulty,
+                        newDifficulty,
+                        DifficultyLevel.class);
         if (!proposed.isPresent()) return;
         newDifficulty = proposed.get();
         options.setDifficulty(newDifficulty);

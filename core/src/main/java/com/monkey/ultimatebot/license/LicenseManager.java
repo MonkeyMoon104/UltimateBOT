@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.license;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.compat.PluginMetaAccess;
+import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.wrapper.WrapperTask;
 import java.io.IOException;
@@ -34,8 +34,7 @@ public final class LicenseManager {
 
     public LicenseManager(UltimateBot plugin) {
         this.plugin = plugin;
-        // Do not call findAndRegisterModules(): Paper may expose older jackson modules on the
-        // parent loader; we register only our shaded JavaTimeModule.
+
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         this.installationIdStore = new InstallationIdStore();
         this.licenseStateStore = new LicenseStateStore(objectMapper);
@@ -44,10 +43,6 @@ public final class LicenseManager {
     }
 
     public LicenseStartupResult validateOnStartup() {
-        if (agentBypassEnabled()) {
-            return LicenseStartupResult.allowed(true, "Agent smoke license bypass");
-        }
-
         this.licenseKey = normalizeLicenseKey(plugin.getConfig().getString("license-key", ""));
         if (licenseKey.trim().isEmpty() || PLACEHOLDER_KEY.equalsIgnoreCase(licenseKey)) {
             return LicenseStartupResult.denied("MISSING_LICENSE_KEY", "license-key missing in config.yml");
@@ -61,8 +56,7 @@ public final class LicenseManager {
             this.serverPort = fingerprintService.resolveServerPort(plugin);
             LicenseValidationResponse response = licenseHttpClient.validate(buildRequest());
             if (!response.allowed() && isHostLimit(response)) {
-                // Dual-path: older builds bound hosts with java.vendor in the hash. Retry so
-                // already-registered installs (and mixed JVM matrices) still validate.
+
                 String legacyHost = fingerprintService.computeHostFingerprintLegacy(plugin);
                 if (!legacyHost.equals(hostFingerprint)) {
                     UltimateBotLogging.detail(
@@ -178,15 +172,5 @@ public final class LicenseManager {
 
     private String safeMessage(@Nullable String value) {
         return value == null || value.trim().isEmpty() ? "n/a" : value;
-    }
-
-    /** Local agent/CI smoke only — never use for production servers. */
-    private static boolean agentBypassEnabled() {
-        String smoke = System.getenv("ULTIMATEBOT_AGENT_SMOKE");
-        if (smoke != null && (smoke.equalsIgnoreCase("1") || smoke.equalsIgnoreCase("true"))) {
-            return true;
-        }
-        String bypass = System.getenv("ULTIMATEBOT_AGENT_LICENSE_BYPASS");
-        return bypass != null && (bypass.equalsIgnoreCase("1") || bypass.equalsIgnoreCase("true"));
     }
 }

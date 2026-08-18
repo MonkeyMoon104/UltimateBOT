@@ -13,10 +13,13 @@ class PlatformCapabilityEraSetsTest {
 
     @Test
     void through1_8AllowsSwordWaterButNotNetheriteOrMace() {
-        assertThat(CombatMode.SWORD.supportedBy(PlatformCapability.through1_8())).isTrue();
-        assertThat(CombatMode.WATER.supportedBy(PlatformCapability.through1_8())).isTrue();
+        assertThat(CombatMode.SWORD.supportedBy(PlatformCapability.through1_8()))
+                .isTrue();
+        assertThat(CombatMode.WATER.supportedBy(PlatformCapability.through1_8()))
+                .isTrue();
         assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_8())).isTrue();
-        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_8())).isFalse();
+        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_8()))
+                .isFalse();
         assertThat(CombatMode.MACE.supportedBy(PlatformCapability.through1_8())).isFalse();
         assertThat(PlatformCapability.through1_8())
                 .contains(PlatformCapability.TNT_MINECART)
@@ -30,9 +33,11 @@ class PlatformCapabilityEraSetsTest {
     @Test
     void through1_9AllowsUhcCrystalButNotTridentOrNetheriteModes() {
         assertThat(CombatMode.UHC.supportedBy(PlatformCapability.through1_9())).isTrue();
-        assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_9())).isFalse();
+        assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_9()))
+                .isFalse();
         assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_9())).isTrue();
-        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_9())).isTrue();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_9()))
+                .isTrue();
         assertThat(PlatformCapability.through1_9())
                 .contains(
                         PlatformCapability.OFFHAND,
@@ -53,12 +58,17 @@ class PlatformCapabilityEraSetsTest {
 
     @Test
     void through1_13AddsTrident() {
-        assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_13())).isTrue();
-        assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_13())).isTrue();
+        assertThat(CombatMode.TRIDENT.supportedBy(PlatformCapability.through1_13()))
+                .isTrue();
+        assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_13()))
+                .isTrue();
         assertThat(CombatMode.SMP.supportedBy(PlatformCapability.through1_13())).isTrue();
-        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_13())).isTrue();
-        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_13())).isTrue();
-        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_13())).isFalse();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_13()))
+                .isTrue();
+        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_13()))
+                .isTrue();
+        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_13()))
+                .isFalse();
         assertThat(PlatformCapability.through1_13())
                 .containsAll(PlatformCapability.through1_11())
                 .contains(PlatformCapability.TRIDENT, PlatformCapability.END_CRYSTAL)
@@ -67,27 +77,28 @@ class PlatformCapabilityEraSetsTest {
 
     @Test
     void through1_16UnlocksNetheriteEraModesButNotMace() {
-        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_16())).isTrue();
+        assertThat(CombatMode.NETHERITE_POT.supportedBy(PlatformCapability.through1_16()))
+                .isTrue();
         assertThat(CombatMode.SMP.supportedBy(PlatformCapability.through1_16())).isTrue();
-        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_16())).isTrue();
-        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_16())).isTrue();
-        assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_16())).isTrue();
-        assertThat(CombatMode.MACE.supportedBy(PlatformCapability.through1_16())).isFalse();
+        assertThat(CombatMode.CART.supportedBy(PlatformCapability.through1_16()))
+                .isTrue();
+        assertThat(CombatMode.CRYSTAL.supportedBy(PlatformCapability.through1_16()))
+                .isTrue();
+        assertThat(CombatMode.AXE_SHIELD.supportedBy(PlatformCapability.through1_16()))
+                .isTrue();
+        assertThat(CombatMode.MACE.supportedBy(PlatformCapability.through1_16()))
+                .isFalse();
         assertThat(PlatformCapability.through1_16())
                 .contains(
-                        PlatformCapability.NETHERITE,
-                        PlatformCapability.END_CRYSTAL,
-                        PlatformCapability.RESPAWN_ANCHOR)
-                .doesNotContain(
-                        PlatformCapability.MACE, PlatformCapability.WIND_CHARGE, PlatformCapability.ARMOR_TRIM);
+                        PlatformCapability.NETHERITE, PlatformCapability.END_CRYSTAL, PlatformCapability.RESPAWN_ANCHOR)
+                .doesNotContain(PlatformCapability.MACE, PlatformCapability.WIND_CHARGE, PlatformCapability.ARMOR_TRIM);
     }
 
     @Test
     void through1_19MatchesThrough1_16() {
         assertThat(PlatformCapability.through1_19()).isEqualTo(PlatformCapability.through1_16());
         assertThat(PlatformCapability.through1_19())
-                .doesNotContain(
-                        PlatformCapability.MACE, PlatformCapability.WIND_CHARGE, PlatformCapability.ARMOR_TRIM);
+                .doesNotContain(PlatformCapability.MACE, PlatformCapability.WIND_CHARGE, PlatformCapability.ARMOR_TRIM);
         assertThat(PlatformCapability.through1_19()).contains(PlatformCapability.NETHERITE, PlatformCapability.TOTEM);
     }
 
@@ -101,9 +112,9 @@ class PlatformCapabilityEraSetsTest {
     @Test
     void allSupportedContainsArmorTrimAndMace() {
         assertThat(PlatformCapability.allSupported())
-                .contains(
-                        PlatformCapability.ARMOR_TRIM, PlatformCapability.MACE, PlatformCapability.WIND_CHARGE);
-        assertThat(CombatMode.MACE.supportedBy(PlatformCapability.allSupported())).isTrue();
+                .contains(PlatformCapability.ARMOR_TRIM, PlatformCapability.MACE, PlatformCapability.WIND_CHARGE);
+        assertThat(CombatMode.MACE.supportedBy(PlatformCapability.allSupported()))
+                .isTrue();
     }
 
     @Test

@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.gui.impl.customization;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import org.bukkit.Material;
@@ -21,7 +21,8 @@ public class TrimMaterialSelectorItem extends AbstractItem {
     private final EquipmentSlotKind slot;
     private final ArmorItem armorItem;
 
-    public TrimMaterialSelectorItem(UltimateBot training, BotOptions options, EquipmentSlotKind slot, ArmorItem armorItem) {
+    public TrimMaterialSelectorItem(
+            UltimateBot training, BotOptions options, EquipmentSlotKind slot, ArmorItem armorItem) {
         this.training = training;
         this.options = options;
         this.slot = slot;

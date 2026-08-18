@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.common.model;
 
-/** Platform-independent categories of living entities a bot may target. */
 public enum BotTargetMode {
     PLAYERS(true, false),
     MOBS(false, true),

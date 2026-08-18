@@ -4,7 +4,6 @@ import java.util.Locale;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-/** Safe parsing helpers for enum values received across module boundaries. */
 public final class EnumValues {
     private EnumValues() {}
 

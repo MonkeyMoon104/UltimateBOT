@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +24,7 @@ public class BotUpdater {
         BotEquipmentUtils.updateBotArmor(ownerUUID, armorMap, blastProtectionMap, registry);
     }
 
-    public void updateArmor(
-            UUID ownerUUID, Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap) {
+    public void updateArmor(UUID ownerUUID, Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap) {
         updateArmor(ownerUUID, armorMap, new HashMap<>());
     }
 

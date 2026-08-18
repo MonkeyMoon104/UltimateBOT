@@ -10,7 +10,6 @@ public final class CombatModeTick {
 
     public CombatModeTick(long sequence, LivingEntity target) {
 
-
         if (sequence < 0L) {
             throw new IllegalArgumentException("sequence cannot be negative");
         }
@@ -22,6 +21,7 @@ public final class CombatModeTick {
     public long sequence() {
         return sequence;
     }
+
     public LivingEntity target() {
         return target;
     }

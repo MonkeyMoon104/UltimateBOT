@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.addon.runtime;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.api.addon.AddonDescriptor;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
@@ -118,7 +116,6 @@ final class AddonDependencyResolver {
 
         DiscoveredAddon(AddonDescriptor descriptor, Path jar) {
 
-
             Objects.requireNonNull(descriptor, "descriptor");
             Objects.requireNonNull(jar, "jar");
             this.descriptor = descriptor;
@@ -128,6 +125,7 @@ final class AddonDependencyResolver {
         public AddonDescriptor descriptor() {
             return descriptor;
         }
+
         public Path jar() {
             return jar;
         }

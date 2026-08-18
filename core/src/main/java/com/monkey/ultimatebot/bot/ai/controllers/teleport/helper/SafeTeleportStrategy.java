@@ -40,8 +40,8 @@ public class SafeTeleportStrategy implements ITeleportStrategy {
     }
 
     private static BlockVector blockAt(Vector position) {
-        return new BlockVector(
-                (int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int) Math.floor(position.getZ()));
+        return new BlockVector((int) Math.floor(position.getX()), (int) Math.floor(position.getY()), (int)
+                Math.floor(position.getZ()));
     }
 
     private static Vector centerOf(BlockVector position) {

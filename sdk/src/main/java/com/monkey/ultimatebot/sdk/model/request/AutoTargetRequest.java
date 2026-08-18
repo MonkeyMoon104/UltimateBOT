@@ -7,7 +7,6 @@ public final class AutoTargetRequest {
 
     public AutoTargetRequest(boolean enabled, double range) {
 
-
         if (!Double.isFinite(range) || range <= 0.0D) {
             throw new IllegalArgumentException("range must be finite and greater than zero");
         }
@@ -18,6 +17,7 @@ public final class AutoTargetRequest {
     public boolean enabled() {
         return enabled;
     }
+
     public double range() {
         return range;
     }

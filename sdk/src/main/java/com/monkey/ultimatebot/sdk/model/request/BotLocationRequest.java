@@ -1,7 +1,6 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
 import java.util.UUID;
-import org.jspecify.annotations.Nullable;
 
 /**
  * World position used when spawning a bot at an explicit location.
@@ -36,21 +35,27 @@ public final class BotLocationRequest {
     public String worldName() {
         return worldName;
     }
+
     public UUID worldUUID() {
         return worldUUID;
     }
+
     public double x() {
         return x;
     }
+
     public double y() {
         return y;
     }
+
     public double z() {
         return z;
     }
+
     public float yaw() {
         return yaw;
     }
+
     public float pitch() {
         return pitch;
     }
@@ -110,7 +115,13 @@ public final class BotLocationRequest {
             return false;
         }
         BotLocationRequest other = (BotLocationRequest) obj;
-        return java.util.Objects.equals(worldName, other.worldName) && java.util.Objects.equals(worldUUID, other.worldUUID) && Double.compare(x, other.x) == 0 && Double.compare(y, other.y) == 0 && Double.compare(z, other.z) == 0 && Float.compare(yaw, other.yaw) == 0 && Float.compare(pitch, other.pitch) == 0;
+        return java.util.Objects.equals(worldName, other.worldName)
+                && java.util.Objects.equals(worldUUID, other.worldUUID)
+                && Double.compare(x, other.x) == 0
+                && Double.compare(y, other.y) == 0
+                && Double.compare(z, other.z) == 0
+                && Float.compare(yaw, other.yaw) == 0
+                && Float.compare(pitch, other.pitch) == 0;
     }
 
     @Override
@@ -120,6 +131,7 @@ public final class BotLocationRequest {
 
     @Override
     public String toString() {
-        return "BotLocationRequest[worldName=" + worldName + ", worldUUID=" + worldUUID + ", x=" + x + ", y=" + y + ", z=" + z + ", yaw=" + yaw + ", pitch=" + pitch + "]";
+        return "BotLocationRequest[worldName=" + worldName + ", worldUUID=" + worldUUID + ", x=" + x + ", y=" + y
+                + ", z=" + z + ", yaw=" + yaw + ", pitch=" + pitch + "]";
     }
 }

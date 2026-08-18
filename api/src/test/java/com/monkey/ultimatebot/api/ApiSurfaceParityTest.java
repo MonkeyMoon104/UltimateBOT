@@ -7,7 +7,6 @@ import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.managers.IBotRegistry;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import java.lang.reflect.Method;
-import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,10 +40,15 @@ class ApiSurfaceParityTest {
         assertTrue(registryMethods.containsAll(
                 Set.of("getBot", "getBotByBotUUID", "getBotUUID", "getOwnerUUID", "getAllBotsByBotUUID")));
 
-        Set<String> snapshotComponents = Arrays.stream(BotSnapshot.class.getRecordComponents())
-                .map(RecordComponent::getName)
+        Set<String> managerMethods = Arrays.stream(IBotManager.class.getDeclaredMethods())
+                .map(Method::getName)
                 .collect(Collectors.toUnmodifiableSet());
-        assertTrue(snapshotComponents.containsAll(Set.of(
+        assertTrue(managerMethods.containsAll(Set.of("getPlatform", "supports", "getCombatModes", "getBrains")));
+
+        Set<String> snapshotMethods = Arrays.stream(BotSnapshot.class.getDeclaredMethods())
+                .map(Method::getName)
+                .collect(Collectors.toUnmodifiableSet());
+        assertTrue(snapshotMethods.containsAll(Set.of(
                 "botMode",
                 "botUUID",
                 "combatMode",

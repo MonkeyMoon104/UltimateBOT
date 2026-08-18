@@ -6,7 +6,7 @@ import com.monkey.ultimatebot.bot.ai.difficulty.configs.RAPVPConfig;
 public class DifficultyProfileFactory {
 
     public static RAPVPConfig buildRAPVPConfig(DifficultyLevel difficulty) {
-                switch (difficulty) {
+        switch (difficulty) {
             case EASY:
                 return new RAPVPConfig.Builder()
                         .maxDistance(4)
@@ -53,7 +53,7 @@ public class DifficultyProfileFactory {
     }
 
     public static CPVPConfig buildCPVPConfig(DifficultyLevel difficulty) {
-                switch (difficulty) {
+        switch (difficulty) {
             case EASY:
                 return new CPVPConfig.Builder()
                         .maxCrystalDistance(4.3)

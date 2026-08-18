@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.combat.mode.shared.ModeCombatPolicy;
-import com.monkey.ultimatebot.compat.ArrowPickupAccess;
-import com.monkey.ultimatebot.compat.EntityBoundsAccess;
-import com.monkey.ultimatebot.compat.PlayerSwingAccess;
+import com.monkey.ultimatebot.access.entity.ArrowPickupAccess;
+import com.monkey.ultimatebot.access.entity.EntityBoundsAccess;
+import com.monkey.ultimatebot.access.player.PlayerSwingAccess;
 import java.util.Objects;
 import java.util.SplittableRandom;
 import org.bukkit.Color;
@@ -71,9 +71,6 @@ public final class ModeProjectileService {
         tracker.track(shooter.launchProjectile(windChargeType(), new Vector(0.0D, -1.35D, 0.0D)));
     }
 
-    /**
-     * Resolves {@code WindCharge} by name so this class can load on servers that predate 1.21.
-     */
     @SuppressWarnings("unchecked")
     private static Class<? extends Projectile> windChargeType() {
         try {
@@ -90,7 +87,8 @@ public final class ModeProjectileService {
     public void throwSplashPotionDownward(Color color) {
         Objects.requireNonNull(color, "color");
         ItemStack item = new ItemStack(Material.SPLASH_POTION);
-        if (item.getItemMeta() instanceof PotionMeta) { PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+        if (item.getItemMeta() instanceof PotionMeta) {
+            PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
             potionMeta.setColor(color);
             item.setItemMeta(potionMeta);
         }

@@ -2,7 +2,6 @@ package com.monkey.ultimatebot.bot.ai.controllers.movement.pathfinding;
 
 import org.bukkit.util.BlockVector;
 
-/** Defines the movements a player-sized training bot can physically perform. */
 public interface BotTraversalEnvironment {
     int MAX_STEP_UP = 1;
     int MAX_SAFE_DROP = 3;

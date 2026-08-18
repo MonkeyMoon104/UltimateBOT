@@ -21,7 +21,6 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jspecify.annotations.Nullable;
 
-/** Bridges relevant Bukkit runtime actions to stable UltimateBot API events. */
 public final class BotRuntimeEventListener implements Listener {
     private final UltimateBot plugin;
     private final BotEventDispatcher dispatcher;

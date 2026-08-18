@@ -1,7 +1,5 @@
 package com.monkey.ultimatebot.api.model.configuration;
 
-
-import java.util.Collections;
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
@@ -11,11 +9,12 @@ import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -76,10 +75,10 @@ public final class BotSettings {
     private final boolean healing;
     private final boolean killMessageEnabled;
     private final @Nullable String killMessage;
-    private final Map<EquipmentSlot, ItemStack> armorContents;
+    private final Map<EquipmentSlotKind, ItemStack> armorContents;
     private final Map<Integer, ItemStack> equipmentContents;
-    private final Map<EquipmentSlot, String> armorTrimPatternKeys;
-    private final Map<EquipmentSlot, String> armorTrimMaterialKeys;
+    private final Map<EquipmentSlotKind, String> armorTrimPatternKeys;
+    private final Map<EquipmentSlotKind, String> armorTrimMaterialKeys;
 
     private BotSettings(Builder builder) {
         this.follow = builder.follow;
@@ -126,8 +125,10 @@ public final class BotSettings {
         this.killMessage = builder.killMessage;
         this.armorContents = copyItemMap(builder.armorContents);
         this.equipmentContents = copyItemMap(builder.equipmentContents);
-        this.armorTrimPatternKeys = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimPatternKeys);
-        this.armorTrimMaterialKeys = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimMaterialKeys);
+        this.armorTrimPatternKeys =
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimPatternKeys);
+        this.armorTrimMaterialKeys =
+                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimMaterialKeys);
     }
 
     /**
@@ -420,7 +421,7 @@ public final class BotSettings {
         return killMessage;
     }
 
-    public Map<EquipmentSlot, ItemStack> armorContents() {
+    public Map<EquipmentSlotKind, ItemStack> armorContents() {
         return copyItemMap(armorContents);
     }
 
@@ -428,11 +429,11 @@ public final class BotSettings {
         return copyItemMap(equipmentContents);
     }
 
-    public Map<EquipmentSlot, String> armorTrimPatternKeys() {
+    public Map<EquipmentSlotKind, String> armorTrimPatternKeys() {
         return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimPatternKeys);
     }
 
-    public Map<EquipmentSlot, String> armorTrimMaterialKeys() {
+    public Map<EquipmentSlotKind, String> armorTrimMaterialKeys() {
         return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimMaterialKeys);
     }
 
@@ -821,11 +822,12 @@ public final class BotSettings {
 
         BuildStep disableKillMessage();
 
-        BuildStep armorContents(Map<EquipmentSlot, ItemStack> armorContents);
+        BuildStep armorContents(Map<EquipmentSlotKind, ItemStack> armorContents);
 
         BuildStep equipmentContents(Map<Integer, ItemStack> equipmentContents);
 
-        BuildStep armorTrim(@Nullable EquipmentSlot slot, @Nullable String patternKey, @Nullable String materialKey);
+        BuildStep armorTrim(
+                @Nullable EquipmentSlotKind slot, @Nullable String patternKey, @Nullable String materialKey);
 
         /**
          * Builds immutable settings after validation.
@@ -897,10 +899,10 @@ public final class BotSettings {
         private boolean healing = true;
         private boolean killMessageEnabled = true;
         private @Nullable String killMessage;
-        private final Map<EquipmentSlot, ItemStack> armorContents = new EnumMap<>(EquipmentSlot.class);
+        private final Map<EquipmentSlotKind, ItemStack> armorContents = new EnumMap<>(EquipmentSlotKind.class);
         private final Map<Integer, ItemStack> equipmentContents = new HashMap<>();
-        private final Map<EquipmentSlot, String> armorTrimPatternKeys = new EnumMap<>(EquipmentSlot.class);
-        private final Map<EquipmentSlot, String> armorTrimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
+        private final Map<EquipmentSlotKind, String> armorTrimPatternKeys = new EnumMap<>(EquipmentSlotKind.class);
+        private final Map<EquipmentSlotKind, String> armorTrimMaterialKeys = new EnumMap<>(EquipmentSlotKind.class);
 
         private Builder() {}
 
@@ -1218,7 +1220,7 @@ public final class BotSettings {
         }
 
         @Override
-        public BuildStep armorContents(Map<EquipmentSlot, ItemStack> armorContents) {
+        public BuildStep armorContents(Map<EquipmentSlotKind, ItemStack> armorContents) {
             this.armorContents.clear();
             this.armorContents.putAll(copyItemMap(armorContents));
             return this;
@@ -1233,7 +1235,7 @@ public final class BotSettings {
 
         @Override
         public BuildStep armorTrim(
-                @Nullable EquipmentSlot slot, @Nullable String patternKey, @Nullable String materialKey) {
+                @Nullable EquipmentSlotKind slot, @Nullable String patternKey, @Nullable String materialKey) {
             if (slot != null) {
                 if (patternKey == null || patternKey.trim().isEmpty()) {
                     this.armorTrimPatternKeys.remove(slot);

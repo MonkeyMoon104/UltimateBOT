@@ -53,9 +53,8 @@ public class BotTabItem extends TabItem {
 
     private Material resolveTabMaterial(String materialName, boolean selected) {
         Material fallback = selected ? Material.GLOWSTONE_DUST : Material.GUNPOWDER;
-        // Armor trims are 1.20+; lang defaults use trim templates — use armor icon instead.
-        if (langTab == NewBotGUI.LANG_TAB_TEMPLATES
-                && !MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
+
+        if (langTab == NewBotGUI.LANG_TAB_TEMPLATES && !MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
             return MaterialCatalog.optional("IRON_CHESTPLATE", Material.IRON_CHESTPLATE);
         }
         return MaterialCatalog.optional(materialName, fallback);

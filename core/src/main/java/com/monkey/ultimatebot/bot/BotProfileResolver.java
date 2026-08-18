@@ -11,7 +11,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 
-/** Resolves the protocol-safe name and skin profile used by a spawned bot. */
 final class BotProfileResolver {
 
     BotProfileData resolve(FileConfiguration config, Player owner, Player target, UUID botUUID, BotOptions options) {
@@ -68,7 +67,7 @@ final class BotProfileResolver {
             return BotFactory.createProfile(owner, botUUID, botName);
         }
 
-                switch (source) {
+        switch (source) {
             case RANDOM:
                 return BotFactory.createRandomProfile(botUUID, botName);
             case OWNER:

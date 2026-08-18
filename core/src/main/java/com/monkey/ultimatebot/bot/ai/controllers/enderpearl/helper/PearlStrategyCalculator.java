@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPearlStrategyCalculator;
 import com.monkey.ultimatebot.bot.ai.controllers.enderpearl.helper.inter.IPositionCalculator;
-import com.monkey.ultimatebot.compat.AttributeAccess;
+import com.monkey.ultimatebot.access.entity.AttributeAccess;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -74,7 +74,7 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
         double distance = bot.getLocation().distance(target.getLocation());
         long currentTime = System.currentTimeMillis();
 
-                switch (strategy) {
+        switch (strategy) {
             case COMBO_ESCAPE:
                 return currentTime - lastEmergencyPearl > EMERGENCY_PEARL_COOLDOWN;
             case ESCAPE:
@@ -100,7 +100,7 @@ public class PearlStrategyCalculator implements IPearlStrategyCalculator {
     @Override
     public @Nullable Vector calculateTargetForStrategy(
             PearlStrategy strategy, Player bot, Player target, @Nullable Vector predictedTargetMovement) {
-                switch (strategy) {
+        switch (strategy) {
             case COMBO_ESCAPE:
             case ESCAPE:
                 return positionCalculator.calculateEmergencyEscape(bot, target);

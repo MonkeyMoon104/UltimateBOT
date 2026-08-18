@@ -9,7 +9,6 @@ public final class CombatModeRequest {
 
     public CombatModeRequest(CombatMode combatMode) {
 
-
         Objects.requireNonNull(combatMode, "combatMode");
         this.combatMode = combatMode;
     }

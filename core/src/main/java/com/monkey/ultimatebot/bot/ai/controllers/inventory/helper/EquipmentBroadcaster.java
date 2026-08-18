@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.EnumMap;
 import java.util.Map;

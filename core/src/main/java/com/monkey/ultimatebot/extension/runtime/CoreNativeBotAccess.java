@@ -2,22 +2,15 @@ package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.api.extension.nativeaccess.NativeBotAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
+import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.nms.INMSBridge;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Version-agnostic native access for custom brains / combat modes.
- *
- * <p>Must not hard-reference Mojang-mapped {@code net.minecraft.*} or unversioned
- * {@code org.bukkit.craftbukkit.*}: Paper &lt;1.20.5 uses Spigot mappings and versioned CraftBukkit
- * packages, and loading those symbols fails with {@code NoClassDefFoundError} on 1.17–1.20.4.
- * Handles are resolved reflectively via CraftEntity {@code getHandle()} so the same class works on
- * both Spigot-mapped and Mojang-mapped servers (including 1.21.x).
- */
 public final class CoreNativeBotAccess implements NativeBotAccess {
     private final String minecraftVersion;
     private final ITrainingBot bot;
@@ -45,6 +38,11 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
     @Override
     public String minecraftVersion() {
         return minecraftVersion;
+    }
+
+    @Override
+    public Set<PlatformCapability> capabilities() {
+        return bridge.capabilities();
     }
 
     @Override
@@ -119,7 +117,9 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
             return null;
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(
-                    "failed to invoke " + methodName + " on " + target.getClass().getName(), e);
+                    "failed to invoke " + methodName + " on "
+                            + target.getClass().getName(),
+                    e);
         }
     }
 
@@ -134,7 +134,8 @@ public final class CoreNativeBotAccess implements NativeBotAccess {
                 type = type.getSuperclass();
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException(
-                        "failed to read field " + fieldName + " on " + target.getClass().getName(),
+                        "failed to read field " + fieldName + " on "
+                                + target.getClass().getName(),
                         e);
             }
         }

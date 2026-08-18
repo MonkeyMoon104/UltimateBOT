@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.compat.RespawnAnchorAccess;
+import com.monkey.ultimatebot.access.world.RespawnAnchorAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import org.bukkit.Location;
@@ -34,8 +34,7 @@ public class AnchorCharger {
             if (!RespawnAnchorAccess.chargeToMaximum(block)) {
                 return false;
             }
-            NMSBridgeManager.get()
-                    .playSound(centerOf(anchorPos), "block.respawn_anchor.charge", "blocks", 1.0F, 1.0F);
+            NMSBridgeManager.get().playSound(centerOf(anchorPos), "block.respawn_anchor.charge", "blocks", 1.0F, 1.0F);
             rotation.lookAt(new Vector(anchorPos.getBlockX(), anchorPos.getBlockY(), anchorPos.getBlockZ()));
             bot.swingMainHand();
             inventory.onItemUsed(BotInventoryController.GLOW_SLOT);

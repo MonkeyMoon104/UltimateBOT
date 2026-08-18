@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import org.bukkit.Material;
@@ -63,12 +63,11 @@ public class TotemInventoryManager implements ITotemInventoryManager {
         EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         boolean changed = false;
         if (offHand != null) {
-            changed =
-                    updateSlot(
-                            offHand,
-                            count >= 1
-                                    ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
-                                    : ItemStackAccess.empty());
+            changed = updateSlot(
+                    offHand,
+                    count >= 1
+                            ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
+                            : ItemStackAccess.empty());
         }
         changed |= updateSlot(
                 EquipmentSlotKind.HAND,

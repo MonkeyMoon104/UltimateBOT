@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.EquipmentBroadcaster;
@@ -17,8 +16,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemState
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStrategyHandler;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
 import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import java.util.Objects;
 import org.bukkit.inventory.ItemStack;
 
@@ -59,22 +58,22 @@ public class BotTotemController {
         TotemState totemState = stateAnalyzer.getTotemState(totemCount);
         TotemEquipmentState equipmentState = stateAnalyzer.analyzeCurrentEquipment(offhand, mainhand);
 
-                switch (totemState) {
+        switch (totemState) {
             case UNLIMITED:
                 strategyHandler.handleUnlimitedTotems(equipmentState, isCombat);
-                                notificationManager.resetWarning();
+                notificationManager.resetWarning();
                 break;
             case NONE:
                 strategyHandler.handleNoTotems(equipmentState);
-                                handleNoTotemsWarning(bot);
+                handleNoTotemsWarning(bot);
                 break;
             case ONE:
                 strategyHandler.handleOneTotem(equipmentState, isCombat);
-                                notificationManager.resetWarning();
+                notificationManager.resetWarning();
                 break;
             case MULTIPLE:
                 strategyHandler.handleMultipleTotems(totemCount, equipmentState, isCombat);
-                                notificationManager.resetWarning();
+                notificationManager.resetWarning();
                 break;
         }
     }

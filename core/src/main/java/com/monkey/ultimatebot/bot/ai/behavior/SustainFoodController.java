@@ -83,7 +83,8 @@ public final class SustainFoodController {
             return;
         }
         if (!foodSlotActive) {
-            inventoryController.setItem(BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Material.COOKED_BEEF, 64));
+            inventoryController.setItem(
+                    BotInventoryController.GOLDEN_APPLE_SLOT, new ItemStack(Material.COOKED_BEEF, 64));
             foodSlotActive = true;
         }
     }
@@ -91,7 +92,8 @@ public final class SustainFoodController {
     private void applyFood() {
         if (bot.asBukkitPlayer().getFoodLevel() < 20) {
             bot.asBukkitPlayer().setFoodLevel(Math.min(20, bot.asBukkitPlayer().getFoodLevel() + 8));
-            bot.asBukkitPlayer().setSaturation(Math.min(20.0F, bot.asBukkitPlayer().getSaturation() + 0.8F));
+            bot.asBukkitPlayer()
+                    .setSaturation(Math.min(20.0F, bot.asBukkitPlayer().getSaturation() + 0.8F));
         }
         inventoryController.releaseUsingItem();
     }

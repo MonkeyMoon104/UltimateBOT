@@ -8,8 +8,8 @@ import com.monkey.ultimatebot.common.model.DifficultyTier;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 final class CoreCombatModeRuntime implements CombatModeRuntime {
     private final CombatModeContext context;

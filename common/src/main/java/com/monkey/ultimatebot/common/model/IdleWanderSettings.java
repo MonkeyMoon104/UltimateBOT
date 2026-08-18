@@ -1,6 +1,5 @@
 package com.monkey.ultimatebot.common.model;
 
-/** Immutable idle wandering and return-to-spawn configuration. */
 public final class IdleWanderSettings {
     private final boolean enabled;
     private final double radius;

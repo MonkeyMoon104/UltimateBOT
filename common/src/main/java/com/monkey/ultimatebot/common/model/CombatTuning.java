@@ -2,7 +2,6 @@ package com.monkey.ultimatebot.common.model;
 
 import java.util.Objects;
 
-/** Immutable performance and behavior tuning shared by all combat modes. */
 public final class CombatTuning {
     private final double attackRange;
     private final int attackCooldownTicks;
@@ -68,7 +67,6 @@ public final class CombatTuning {
         return new Builder();
     }
 
-    /** Creates a builder initialized with every value from this tuning. */
     public Builder toBuilder() {
         return builder()
                 .attackRange(attackRange)

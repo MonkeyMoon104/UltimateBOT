@@ -13,7 +13,6 @@ public enum ArmorTier {
     DIAMOND,
     NETHERITE;
 
-    /** Highest tier available on this platform (clamps when netherite is unsupported / missing). */
     public static ArmorTier maxAvailable() {
         if (com.monkey.ultimatebot.nms.NMSBridgeManager.isInitialized()
                 && !com.monkey.ultimatebot.nms.NMSBridgeManager.supports(PlatformCapability.NETHERITE)) {
@@ -57,7 +56,7 @@ public enum ArmorTier {
         if (slot == null) {
             return "";
         }
-                switch (slot) {
+        switch (slot) {
             case HEAD:
                 return "_HELMET";
             case CHEST:

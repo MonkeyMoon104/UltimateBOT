@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.world;
 
-import com.monkey.ultimatebot.compat.BlockBreakAccess;
+import com.monkey.ultimatebot.access.block.BlockBreakAccess;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;

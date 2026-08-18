@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.gui.impl.action;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.compat.EntityCoordsAccess;
+import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
@@ -51,7 +51,12 @@ public class TeleportItem extends AbstractItem {
             return;
         }
 
-        NMSBridgeManager.get().moveBot(bot.asBukkitPlayer(), EntityCoordsAccess.getX(player), EntityCoordsAccess.getY(player), EntityCoordsAccess.getZ(player));
+        NMSBridgeManager.get()
+                .moveBot(
+                        bot.asBukkitPlayer(),
+                        EntityCoordsAccess.getX(player),
+                        EntityCoordsAccess.getY(player),
+                        EntityCoordsAccess.getZ(player));
     }
 
     private UUID resolveBotOwnerUUID(Player player) {

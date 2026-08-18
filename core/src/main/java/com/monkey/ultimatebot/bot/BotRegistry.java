@@ -33,9 +33,7 @@ public class BotRegistry {
         }
         for (Map.Entry<UUID, ITrainingBot> entry : spawnedBots.entrySet()) {
             ITrainingBot bot = entry.getValue();
-            if (bot != null
-                    && bot.asBukkitPlayer() != null
-                    && botUUID.equals(bot.getUniqueId())) {
+            if (bot != null && bot.asBukkitPlayer() != null && botUUID.equals(bot.getUniqueId())) {
                 return entry.getKey();
             }
         }
@@ -52,9 +50,7 @@ public class BotRegistry {
     }
 
     public void removeBotByUUID(UUID botUUID) {
-        spawnedBots
-                .entrySet()
-                .removeIf(entry -> entry.getValue().getUniqueId().equals(botUUID));
+        spawnedBots.entrySet().removeIf(entry -> entry.getValue().getUniqueId().equals(botUUID));
     }
 
     public Map<UUID, ITrainingBot> getAllBots() {

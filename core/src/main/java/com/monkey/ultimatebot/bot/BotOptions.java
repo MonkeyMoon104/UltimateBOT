@@ -1,8 +1,5 @@
 package com.monkey.ultimatebot.bot;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import java.util.stream.Collectors;
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
@@ -15,13 +12,15 @@ import com.monkey.ultimatebot.common.model.BrainKey;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.*;
+import java.util.stream.Collectors;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -101,7 +100,7 @@ public final class BotOptions {
     }
 
     public void setBotType(BotType botType) {
-        this.botType = botType == null ? BotType.SINGLE : botType;
+        this.botType = BotOptionDefaults.botType(botType);
         this.totems = clampTotemCount(this.totems);
     }
 
@@ -193,7 +192,7 @@ public final class BotOptions {
     }
 
     public void setBotSkin(@Nullable BotSkin botSkin) {
-        this.botSkin = botSkin == null ? BotSkin.owner() : botSkin;
+        this.botSkin = BotOptionDefaults.botSkin(botSkin);
     }
 
     public @Nullable BotLocation getSpawnLocation() {
@@ -217,7 +216,7 @@ public final class BotOptions {
     }
 
     public void setAutoTargetRange(double autoTargetRange) {
-        this.autoTargetRange = autoTargetRange <= 0.0D ? 16.0D : autoTargetRange;
+        this.autoTargetRange = BotOptionDefaults.positiveOrDefault(autoTargetRange, 16.0D);
     }
 
     public boolean isAttackBots() {
@@ -233,7 +232,7 @@ public final class BotOptions {
     }
 
     public void setTargetMode(BotTargetMode targetMode) {
-        this.targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;
+        this.targetMode = BotOptionDefaults.targetMode(targetMode);
     }
 
     public boolean isRespectWorldGuardPvp() {
@@ -265,7 +264,7 @@ public final class BotOptions {
     }
 
     public void setIdleWanderRadius(double idleWanderRadius) {
-        this.idleWanderRadius = idleWanderRadius <= 0.0D ? 10.0D : idleWanderRadius;
+        this.idleWanderRadius = BotOptionDefaults.positiveOrDefault(idleWanderRadius, 10.0D);
     }
 
     public double getIdleReturnDistance() {
@@ -273,7 +272,7 @@ public final class BotOptions {
     }
 
     public void setIdleReturnDistance(double idleReturnDistance) {
-        this.idleReturnDistance = idleReturnDistance <= 0.0D ? 24.0D : idleReturnDistance;
+        this.idleReturnDistance = BotOptionDefaults.positiveOrDefault(idleReturnDistance, 24.0D);
     }
 
     public long getIdleReturnDelayMs() {
@@ -345,7 +344,7 @@ public final class BotOptions {
     }
 
     public void setCustomKillMessage(@Nullable String customKillMessage) {
-        this.customKillMessage = customKillMessage == null || customKillMessage.trim().isEmpty() ? null : customKillMessage;
+        this.customKillMessage = BotOptionDefaults.customKillMessage(customKillMessage);
     }
 
     public Map<Integer, ItemStack> getEquipmentContents() {
@@ -548,7 +547,8 @@ public final class BotOptions {
     }
 
     public void setDifficulty(DifficultyLevel difficulty) {
-        this.difficulty = clampDifficulty(difficulty == null ? DifficultyLevel.EASY : difficulty);
+        DifficultyLevel candidate = BotOptionDefaults.difficulty(difficulty);
+        this.difficulty = BotOptionPolicy.clampDifficulty(candidate, minDifficulty, maxDifficulty);
     }
 
     public DifficultyLevel getMinDifficulty() {
@@ -560,10 +560,10 @@ public final class BotOptions {
     }
 
     public void setDifficultyRange(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
-        validateDifficultyRange(minDifficulty, maxDifficulty);
+        BotOptionValidators.validateDifficultyRange(minDifficulty, maxDifficulty);
         this.minDifficulty = minDifficulty;
         this.maxDifficulty = maxDifficulty;
-        this.difficulty = clampDifficulty(this.difficulty);
+        this.difficulty = BotOptionPolicy.clampDifficulty(this.difficulty, this.minDifficulty, this.maxDifficulty);
     }
 
     public boolean isDifficultyAllowed(DifficultyLevel difficulty) {
@@ -613,16 +613,9 @@ public final class BotOptions {
     }
 
     public void setArmorRange(ArmorTier minArmorTier, ArmorTier maxArmorTier) {
-        ArmorTier platformMax = ArmorTier.maxAvailable();
-        ArmorTier resolvedMax =
-                maxArmorTier != null && maxArmorTier.compareTo(platformMax) > 0 ? platformMax : maxArmorTier;
-        ArmorTier resolvedMin = minArmorTier;
-        if (resolvedMin != null && resolvedMax != null && resolvedMin.compareTo(resolvedMax) > 0) {
-            resolvedMin = ArmorTier.LEATHER;
-        }
-        validateArmorRange(resolvedMin, resolvedMax);
-        this.minArmorTier = resolvedMin;
-        this.maxArmorTier = resolvedMax;
+        BotOptionPolicy.ArmorRange range = BotOptionPolicy.normalizeArmorRange(minArmorTier, maxArmorTier);
+        this.minArmorTier = range.min();
+        this.maxArmorTier = range.max();
         clampCurrentArmor();
     }
 
@@ -637,18 +630,7 @@ public final class BotOptions {
     }
 
     public ArmorTier clampArmorTier(ArmorTier armorTier) {
-        ArmorTier platformMax = ArmorTier.maxAvailable();
-        ArmorTier resolvedMax = maxArmorTier.compareTo(platformMax) > 0 ? platformMax : maxArmorTier;
-        if (armorTier == null) {
-            return minArmorTier.compareTo(resolvedMax) > 0 ? resolvedMax : minArmorTier;
-        }
-        if (armorTier.compareTo(minArmorTier) < 0) {
-            return minArmorTier;
-        }
-        if (armorTier.compareTo(resolvedMax) > 0) {
-            return resolvedMax;
-        }
-        return armorTier;
+        return BotOptionPolicy.clampArmorTier(armorTier, minArmorTier, maxArmorTier);
     }
 
     public void setArmorType(ArmorTier armorTier) {
@@ -761,7 +743,7 @@ public final class BotOptions {
     }
 
     public void setCreationSource(BotCreationSource creationSource) {
-        this.creationSource = creationSource == null ? BotCreationSource.CORE : creationSource;
+        this.creationSource = BotOptionDefaults.creationSource(creationSource);
     }
 
     public int getMinTotemCount() {
@@ -777,28 +759,14 @@ public final class BotOptions {
     }
 
     public void setTotemRange(int minTotemCount, int maxTotemCount) {
-        validateTotemRange(minTotemCount, maxTotemCount);
+        BotOptionValidators.validateTotemRange(minTotemCount, maxTotemCount);
         this.minTotemCount = minTotemCount;
         this.maxTotemCountOverride = maxTotemCount;
         this.totems = clampTotemCount(this.totems);
     }
 
     public int clampTotemCount(int candidate) {
-        int min = minTotemCount;
-        int max = getMaxTotemCount();
-
-        int value = candidate;
-        if (value < min) {
-            value = min;
-        }
-        if (value > max) {
-            value = max;
-        }
-        if (value == -1 && min > -1) {
-            value = min;
-        }
-
-        return value;
+        return BotOptionPolicy.clampTotemCount(candidate, minTotemCount, getMaxTotemCount());
     }
 
     public int clampCurrentTotemCount() {
@@ -899,10 +867,10 @@ public final class BotOptions {
     public void setBlastProtection(
             int bootsBlastEnabled, int leggingsBlastEnabled, int chestplateBlastEnabled, int helmetBlastEnabled) {
         setBlastProtection(
-                parseBlastBinary(bootsBlastEnabled, "boots"),
-                parseBlastBinary(leggingsBlastEnabled, "leggings"),
-                parseBlastBinary(chestplateBlastEnabled, "chestplate"),
-                parseBlastBinary(helmetBlastEnabled, "helmet"));
+                BotOptionValidators.parseBlastBinary(bootsBlastEnabled, "boots"),
+                BotOptionValidators.parseBlastBinary(leggingsBlastEnabled, "leggings"),
+                BotOptionValidators.parseBlastBinary(chestplateBlastEnabled, "chestplate"),
+                BotOptionValidators.parseBlastBinary(helmetBlastEnabled, "helmet"));
     }
 
     private int getCoreMaxTotemCount() {
@@ -911,58 +879,9 @@ public final class BotOptions {
         return isEventBot() ? eventMax : normalMax;
     }
 
-    private static void validateTotemRange(int minTotemCount, int maxTotemCount) {
-        if (minTotemCount < -1) {
-            throw new IllegalArgumentException("min totem count cannot be less than -1");
-        }
-        if (maxTotemCount < 0) {
-            throw new IllegalArgumentException("max totem count cannot be less than 0");
-        }
-        if (minTotemCount > maxTotemCount) {
-            throw new IllegalArgumentException("min totem count cannot be greater than max totem count");
-        }
-    }
-
-    private static void validateDifficultyRange(DifficultyLevel minDifficulty, DifficultyLevel maxDifficulty) {
-        if (minDifficulty == null || maxDifficulty == null) {
-            throw new IllegalArgumentException("difficulty bounds cannot be null");
-        }
-        if (minDifficulty.compareTo(maxDifficulty) > 0) {
-            throw new IllegalArgumentException("min difficulty cannot be greater than max difficulty");
-        }
-    }
-
-    private static void validateArmorRange(ArmorTier minArmorTier, ArmorTier maxArmorTier) {
-        if (minArmorTier == null || maxArmorTier == null) {
-            throw new IllegalArgumentException("armor bounds cannot be null");
-        }
-        if (minArmorTier.compareTo(maxArmorTier) > 0) {
-            throw new IllegalArgumentException("min armor cannot be greater than max armor");
-        }
-    }
-
-    private static boolean parseBlastBinary(int value, String fieldName) {
-        if (value == 0) {
-            return false;
-        }
-        if (value == 1) {
-            return true;
-        }
-        throw new IllegalArgumentException(fieldName + " blast value must be 0 or 1");
-    }
-
-    private DifficultyLevel clampDifficulty(DifficultyLevel candidate) {
-        if (candidate.compareTo(minDifficulty) < 0) {
-            return minDifficulty;
-        }
-        if (candidate.compareTo(maxDifficulty) > 0) {
-            return maxDifficulty;
-        }
-        return candidate;
-    }
-
     @Override
     public String toString() {
-        return "BotOptions[ownerUUID=" + ownerUUID + ", combatMode=" + combatMode + ", follow=" + follow + ", combat=" + combat + "]";
+        return "BotOptions[ownerUUID=" + ownerUUID + ", combatMode=" + combatMode + ", follow=" + follow + ", combat="
+                + combat + "]";
     }
 }

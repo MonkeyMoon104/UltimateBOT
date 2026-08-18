@@ -1,16 +1,16 @@
 package com.monkey.ultimatebot.bot.ai;
 
-import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
-import com.monkey.ultimatebot.compat.ItemStackAccess;
-
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
-import com.monkey.ultimatebot.compat.AttributeAccess;
-import com.monkey.ultimatebot.compat.PlayerAttackCooldownAccess;
-import com.monkey.ultimatebot.compat.PlayerHandRaisedAccess;
-import com.monkey.ultimatebot.compat.PlayerSwingAccess;
-import com.monkey.ultimatebot.compat.VelocityAccess;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.access.entity.AttributeAccess;
+import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
+import com.monkey.ultimatebot.access.item.ItemStackAccess;
+import com.monkey.ultimatebot.access.player.PlayerAttackCooldownAccess;
+import com.monkey.ultimatebot.access.player.PlayerHandRaisedAccess;
+import com.monkey.ultimatebot.access.player.PlayerSwingAccess;
+import com.monkey.ultimatebot.access.entity.VelocityAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Objects;
 import java.util.UUID;
@@ -20,18 +20,10 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Version-neutral bot handle used by core AI. Native {@code net.minecraft} types stay inside NMS
- * modules; core talks only through this facade and {@link com.monkey.ultimatebot.nms.INMSBridge}.
- *
- * <p>Most accessors default to the Bukkit {@link Player} view. Version modules only need to supply
- * {@link #asBukkitPlayer()} plus the small set of AI state / lifecycle hooks.
- */
 public interface ITrainingBot {
 
     boolean isCombat();
@@ -56,13 +48,10 @@ public interface ITrainingBot {
 
     UltimateBot getPlugin();
 
-    /** Bukkit view of this fake player (Craft adapter owned by the active NMS module). */
     Player asBukkitPlayer();
 
-    /** Called after the bridge has applied native damage and produced a Bukkit damage event. */
     void onDamaged(EntityDamageEvent event);
 
-    /** Called after the native entity has died. */
     void onDeath(@Nullable LivingEntity killer);
 
     default UUID getUniqueId() {
@@ -120,15 +109,15 @@ public interface ITrainingBot {
     }
 
     default void setRotation(float yaw, float pitch) {
-        com.monkey.ultimatebot.compat.PlayerRotationAccess.set(asBukkitPlayer(), yaw, pitch);
+        com.monkey.ultimatebot.access.player.PlayerRotationAccess.set(asBukkitPlayer(), yaw, pitch);
     }
 
     default Vector getLookDirection() {
         return getLocation().getDirection();
     }
 
-    default com.monkey.ultimatebot.compat.EntityBoundsAccess.Box bukkitBoundingBox() {
-        return com.monkey.ultimatebot.compat.EntityBoundsAccess.of(asBukkitPlayer());
+    default com.monkey.ultimatebot.access.entity.EntityBoundsAccess.Box bukkitBoundingBox() {
+        return com.monkey.ultimatebot.access.entity.EntityBoundsAccess.of(asBukkitPlayer());
     }
 
     default boolean isAlive() {
@@ -139,12 +128,10 @@ public interface ITrainingBot {
         return !asBukkitPlayer().isValid();
     }
 
-    /** Bukkit health accessor — named to avoid clashing with NMS {@code LivingEntity#getHealth()}. */
     default double healthValue() {
         return asBukkitPlayer().getHealth();
     }
 
-    /** Bukkit max-health accessor — named to avoid clashing with NMS {@code LivingEntity#getMaxHealth()}. */
     default double maxHealthValue() {
         return AttributeAccess.maxHealthValue(asBukkitPlayer());
     }
@@ -161,22 +148,18 @@ public interface ITrainingBot {
         return asBukkitPlayer().hasLineOfSight(entity);
     }
 
-    /**
-     * Forces a full attack-strength charge. Implemented by NMS {@code TrainingBot} subclasses
-     * (they can touch the protected ticker; do not put helpers under {@code net.minecraft.*}).
-     */
     default void prepareFullAttackStrength() {}
 
     default void attackEntity(Entity target) {
         Entity checked = Objects.requireNonNull(target, "target");
         prepareFullAttackStrength();
-        com.monkey.ultimatebot.compat.AttackStrengthAccess.chargeFull(asBukkitPlayer());
+        com.monkey.ultimatebot.access.combat.AttackStrengthAccess.chargeFull(asBukkitPlayer());
         if (checked instanceof LivingEntity) {
             LivingEntity living = (LivingEntity) checked;
             NMSBridgeManager.get().attackTarget(this, living);
             return;
         }
-        // Pre-1.15: Bukkit Player#attack is missing; 1.13 bridges override attackEntity.
+
         NMSBridgeManager.get().attackEntity(this, checked);
     }
 

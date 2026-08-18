@@ -6,7 +6,6 @@ public final class BotCountResponse {
 
     public BotCountResponse(int count) {
 
-
         if (count < 0) {
             throw new IllegalArgumentException("count cannot be negative");
         }
