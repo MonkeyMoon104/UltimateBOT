@@ -1,11 +1,10 @@
 import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
+    id("ultimatebot.java-library")
     alias(libs.plugins.api.publish)
     alias(libs.plugins.revapi)
 }
-
-group = "com.monkey.ultimatebot"
 
 dependencies {
     api(project(":common"))
@@ -15,10 +14,6 @@ dependencies {
     testImplementation(libs.archunit.junit5)
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 revapi {

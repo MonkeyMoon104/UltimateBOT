@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         maven("https://repo.papermc.io/repository/maven-public/")
@@ -59,4 +60,4 @@ include("NMS:v1_21_11")
 include("NMS:v26_1")
 include("NMS:v26_2")
 
-include("buildLogic")
+include("dist")

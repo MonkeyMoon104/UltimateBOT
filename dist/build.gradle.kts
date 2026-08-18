@@ -58,11 +58,7 @@ fun normalizeClassMajor(bytes: ByteArray, maxClassMajor: Int): ByteArray {
     return bytes
 }
 
-fun shouldEmitJava8Major(entryName: String): Boolean {
-    // Disabled until common/core actually compile with --release 8. Rewriting majors alone
-    // would lie about bytecode and break verification on Java 8 JVMs.
-    return false
-}
+fun shouldEmitJava8Major(entryName: String): Boolean = false
 
 buildscript {
     repositories {
@@ -74,7 +70,13 @@ buildscript {
 }
 
 plugins {
+    id("ultimatebot.java")
     alias(libs.plugins.shadow)
+}
+
+ultimatebotJava {
+    injectReleaseArg.set(false)
+    release.set(17)
 }
 
 val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -84,8 +86,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-// buildLogic shades NMS v26 (toolchain 25). Request JVM 25 so those variants resolve.
-// common/core emit Java 8; NMS adapters keep higher majors and load only on modern JVMs.
 configurations.matching { it.isCanBeResolved }.configureEach {
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
 }
@@ -100,8 +100,7 @@ tasks.withType<ShadowJar>().configureEach {
 val invuiV2_1Shade = configurations.create("invuiV2_1Shade") {
     isCanBeConsumed = false
     isCanBeResolved = true
-    // InvUI 2.x variants require a high consumer JVM attribute; shaded classes are
-    // still normalized to Java 17 major (61) in shadowJar for Paper 1.17.1 Commodore.
+
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
 }
 
@@ -305,7 +304,7 @@ dependencies {
     add(invuiV2_2Shade.name, libsCatalog.findLibrary("invui-v2-2").get())
     add(caffeineLegacyShade.name, libsCatalog.findLibrary("caffeine-legacy").get())
     add(caffeineModernShade.name, libsCatalog.findLibrary("caffeine-modern").get())
-    // Paper before the plugin.yml Library Loader (1.16.4 and earlier) cannot download at runtime.
+
     implementation(libs.lamp.bukkit)
     implementation(libs.pathetic.engine)
     implementation(libs.configurate.yaml)
@@ -339,7 +338,7 @@ val relocateCaffeineLegacyTask = tasks.register<ShadowJar>("relocateCaffeineLega
     archiveFileName.set("caffeine-legacy-relocated.jar")
     destinationDirectory.set(layout.buildDirectory.dir("tmp/shadow"))
     configurations = listOf(caffeineLegacyShade)
-    // Equal-length rename so backend .class constant pools can be patched in-place.
+
     relocate("com.github.benmanes.caffeine", "com.monkey.ultimatebot.cafe2")
 }
 
@@ -419,12 +418,11 @@ tasks.named<ShadowJar>("shadowJar") {
             InvuiRetarget("com/monkey/ultimatebot/gui/v26_1/", "com/monkey/ultimatebot/libs/invui/a1/", "com/monkey/ultimatebot/libs/inventoryaccess/a1/"),
             InvuiRetarget("com/monkey/ultimatebot/gui/v26_2/", "com/monkey/ultimatebot/libs/invui/a2/", "com/monkey/ultimatebot/libs/inventoryaccess/a2/"),
         )
-        // Do not rewrite class majors globally: common/core emit Java 8 via --release 8;
-        // NMS modules and shaded InvUI keep their native majors and load only on capable JVMs.
+
         val maxClassMajor = 52
         val caffeine2Prefix = "com/monkey/ultimatebot/bot/ai/services/cache/Caffeine2UuidCache"
         val caffeine3Prefix = "com/monkey/ultimatebot/bot/ai/services/cache/Caffeine3UuidCache"
-        // Must stay equal-length with com/github/benmanes/caffeine (and dotted form).
+
         val caffeineOwnerSlash = "com/github/benmanes/caffeine"
         val caffeineOwnerDot = "com.github.benmanes.caffeine"
         val caffeine2Slash = "com/monkey/ultimatebot/cafe2"
@@ -450,14 +448,11 @@ tasks.named<ShadowJar>("shadowJar") {
                             data = retargetBinaryStrings(data, caffeineOwnerSlash, caffeine3Slash)
                             data = retargetBinaryStrings(data, caffeineOwnerDot, caffeine3Dot)
                         }
-                        // Only clamp accidental high majors in shared core packages — never touch
-                        // versioned NMS adapters or third-party libs (InvUI, etc.).
+
                         if (shouldEmitJava8Major(entry.name)) {
                             data = normalizeClassMajor(data, maxClassMajor)
                         }
-                        // Paper 1.20.5–1.21.x PluginRemapper (ASM) cannot parse Java 25 (major 69)
-                        // classfiles. Clamp headers to Java 21 so remap succeeds; those classes are
-                        // only executed on 26.x / Java 25+ runtimes.
+
                         data = normalizeClassMajor(data, 65)
                     }
 

@@ -1,10 +1,3 @@
-import io.papermc.paperweight.tasks.JavaLauncherTask
-import net.ltgt.gradle.errorprone.CheckSeverity
-import net.ltgt.gradle.errorprone.errorprone
-import org.gradle.api.tasks.testing.Test
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
-
 fun File.normalizePublishedHtml() {
     walkTopDown().filter { it.isFile && it.extension == "html" }.forEach { html ->
         val original = html.readText(Charsets.UTF_8)
@@ -46,10 +39,8 @@ fun Project.publishDeveloperPortal(
 }
 
 plugins {
-    java
-    alias(libs.plugins.paperweight.userdev) apply false
+    base
     alias(libs.plugins.shadow) apply false
-    alias(libs.plugins.errorprone) apply false
     alias(libs.plugins.spotless)
     alias(libs.plugins.revapi) apply false
 }
@@ -77,187 +68,10 @@ spotless {
     }
 }
 
-subprojects {
-    apply(plugin = "java")
-    apply(plugin = "net.ltgt.errorprone")
-    apply(plugin = "com.diffplug.spotless")
-
-    group = "com.monkey.ultimatebot"
-    version = resolvedProjectVersion
-
-    repositories {
-        mavenCentral()
-        maven("https://repo.monkeymoon104.it/releases")
-        maven("https://repo.papermc.io/repository/maven-public/")
-        maven("https://repo.xenondevs.xyz/releases")
-        maven("https://repo.spongepowered.org/maven")
-        maven("https://maven.enginehub.org/repo/")
-        maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-        maven("https://repo.codemc.io/repository/maven-releases/")
-        maven("https://nexus.sirblobman.xyz/public/")
-        maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    }
-
-    extensions.configure<JavaPluginExtension> {
-        // Compile with JDK 21+ so Paper 1.21+/26 APIs resolve; emit Java 8 for common/core
-        // (MC 1.8 floor / Java 8 JVMs). NMS modules keep a higher --release and load only on
-        // matching modern servers.
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
-        }
-    }
-
-    tasks.withType<JavaCompile>().configureEach {
-        options.encoding = "UTF-8"
-        // Do not set options.release at configuration time: Gradle would stamp TargetJvmVersion
-        // on compileClasspath and reject Paper APIs that require 21+.
-        // Inject --release in doFirst so dependency resolution stays on the toolchain JVM.
-        options.release.unset()
-        options.compilerArgs.addAll(
-                // -Xlint:-classfile: deps may reference ElementType.MODULE (Java 9+); --release 8
-            // cannot resolve that enum constant and would fail under -Werror.
-            listOf(
-                "-parameters",
-                "-Xlint:all",
-                "-Xlint:-processing",
-                "-Xlint:-options",
-                "-Xlint:-classfile",
-                "-Xlint:-deprecation",
-                "-Werror"))
-        options.errorprone {
-            allSuggestionsAsWarnings.set(false)
-            check("NullAway", CheckSeverity.ERROR)
-            check("RequireExplicitNullMarking", CheckSeverity.OFF)
-            // Java 8 emission: keep checks that assume newer language features off.
-            check("PatternMatchingInstanceof", CheckSeverity.OFF)
-            check("StatementSwitchToExpressionSwitch", CheckSeverity.OFF)
-            // Record→class desugar left class-level @param tags; method @params stay documented in source.
-            check("InvalidParam", CheckSeverity.OFF)
-            option("NullAway:OnlyNullMarked", "true")
-            option("NullAway:JSpecifyMode", "true")
-        }
-        doFirst {
-            val path = project.path
-            if (path == ":NMS:v26_1" || path == ":NMS:v26_2") {
-                return@doFirst
-            }
-            val releaseTarget =
-                when {
-                    // Legacy Spigot NMS (v1_*_R*): emit Java 8 so Class.forName works on Java 8 JVMs.
-                    path.matches(Regex(""":NMS:v1_\d+_R\d+""")) -> "8"
-                    // Paper 1.17 / 1.17.1 run on Java 16.
-                    path == ":NMS:v1_17" || path == ":NMS:v1_17_1" -> "16"
-                    path.startsWith(":NMS:") -> "17"
-                    // Phase 1: shared modules (api/common/core/sdk/addons) emit Java 8 for the MC 1.8 floor.
-                    else -> "8"
-                }
-            val args = options.compilerArgs
-            val cleaned = ArrayList<String>(args.size)
-            var skipNext = false
-            for (arg in args) {
-                if (skipNext) {
-                    skipNext = false
-                    continue
-                }
-                if (arg == "--release") {
-                    skipNext = true
-                    continue
-                }
-                cleaned.add(arg)
-            }
-            args.clear()
-            args.addAll(listOf("--release", releaseTarget))
-            args.addAll(cleaned)
-            // jspecify @NullMarked @Target includes ElementType.MODULE; --release 8 cannot resolve it.
-            // -Xlint:-classfile / -Xlint:none do not suppress that diagnostic; -nowarn does, while
-            // Error Prone / NullAway still report real issues (NullAway remains ERROR).
-            if (releaseTarget == "8") {
-                args.removeAll(listOf("-Werror"))
-                args.add("-Xlint:-classfile")
-                args.add("-nowarn")
-            }
-        }
-    }
-
-    // it.monkeymoon104.api-publish forces options.release 21 at config time; clear it so
-    // compileClasspath TargetJvmVersion stays on the toolchain (21+). v26 sets its own release.
-    afterEvaluate {
-        if (path == ":NMS:v26_1" || path == ":NMS:v26_2") {
-            return@afterEvaluate
-        }
-        tasks.withType<JavaCompile>().configureEach {
-            options.release.unset()
-        }
-    }
-
-    tasks.withType<Test>().configureEach {
-        jvmArgs("--enable-native-access=ALL-UNNAMED", "-Xshare:off")
-    }
-
-    dependencies {
-        add("errorprone", rootProject.libs.errorprone.core)
-        add("errorprone", rootProject.libs.nullaway)
-    }
-
-    extensions.configure<com.diffplug.gradle.spotless.SpotlessExtension> {
-        java {
-            target("src/**/*.java")
-            palantirJavaFormat()
-            formatAnnotations()
-            removeUnusedImports()
-            trimTrailingWhitespace()
-            endWithNewline()
-        }
-
-        kotlinGradle {
-            target("*.gradle.kts", "**/*.gradle.kts")
-            ktlint().editorConfigOverride(mapOf("ktlint_standard_property-naming" to "disabled"))
-            trimTrailingWhitespace()
-            endWithNewline()
-        }
-
-        format("resources") {
-            target("src/**/*.yml", "src/**/*.yaml", "src/**/*.json")
-            trimTrailingWhitespace()
-            endWithNewline()
-        }
-    }
-
-    plugins.withId("io.papermc.paperweight.userdev") {
-        val toolchains = extensions.getByType<JavaToolchainService>()
-        // Pre-1.19.3 paperweight setup needs JDK 17 for reproducible decomp/patching.
-        val targetVersion =
-            when (project.path) {
-                ":NMS:v26_1", ":NMS:v26_2" -> 25
-                ":NMS:v1_17_1", ":NMS:v1_18_1", ":NMS:v1_18_2", ":NMS:v1_19", ":NMS:v1_19_2" -> 17
-                else -> 21
-            }
-
-        tasks.withType<JavaLauncherTask>().configureEach {
-            launcher.set(
-                toolchains.launcherFor {
-                    languageVersion.set(JavaLanguageVersion.of(targetVersion))
-                },
-            )
-        }
-    }
-
-    val modulePath = path
-
-    tasks.register("moduleBuildStep") {
-        group = "verification"
-        description = "Builds $modulePath and prints a module success marker."
-        dependsOn(tasks.named("build"))
-        doLast {
-            logger.lifecycle("SUCCESS $modulePath")
-        }
-    }
-}
-
 tasks.register("moduleBuildSteps") {
     group = "verification"
     description = "Runs each module build as a visible success step."
-    dependsOn(subprojects.map { it.tasks.named("moduleBuildStep") })
+    dependsOn(subprojects.map { "${it.path}:moduleBuildStep" })
     doLast {
         logger.lifecycle("SUCCESS all modules")
     }

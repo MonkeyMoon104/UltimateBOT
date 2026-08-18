@@ -3,6 +3,7 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
+    id("ultimatebot.java-library")
     alias(libs.plugins.shadow)
     alias(libs.plugins.api.publish)
 }
@@ -19,24 +20,21 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 tasks.named<Jar>("jar") {
     enabled = false
 }
 
-val metricsJar = tasks.named<ShadowJar>("shadowJar") {
-    archiveFileName.set("UltimateBot-Metrics.jar")
-    archiveClassifier.set("")
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    filesMatching(listOf("META-INF/services/**", "META-INF/*.kotlin_module")) {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+val metricsJar =
+    tasks.named<ShadowJar>("shadowJar") {
+        archiveFileName.set("UltimateBot-Metrics.jar")
+        archiveClassifier.set("")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        filesMatching(listOf("META-INF/services/**", "META-INF/*.kotlin_module")) {
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+        mergeServiceFiles()
+        minimize()
     }
-    mergeServiceFiles()
-    minimize()
-}
 
 tasks.named("assemble") {
     dependsOn(metricsJar)

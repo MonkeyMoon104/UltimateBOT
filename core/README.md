@@ -12,7 +12,7 @@ It contains:
 - the shared NMS-facing abstractions used by the version bridges
 - the combat AI stack that drives the training bots
 
-This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `buildLogic` module, which shadows `core` together with the version-specific bridges under `NMS/`.
+This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `dist` module, which shadows `core` together with the version-specific bridges under `NMS/`.
 
 Platform-independent contracts shared by runtime modules live in `common`. That module contains only Java and JSpecify types and is protected by an architecture test that rejects Bukkit, Paper, Mojang and NMS dependencies.
 
@@ -32,7 +32,7 @@ Platform-independent contracts shared by runtime modules live in `common`. That 
 ## Runtime Stack
 - Java 21
 - Paper 1.21.4 through 1.21.11
-- Final packaged jar: `buildLogic/build/libs/UltimateBot.jar`
+- Final packaged jar: `dist/build/libs/UltimateBot.jar`
 - External packet dependencies: none
 - Optional integrations: PlaceholderAPI, LuckPerms and WorldGuard
 - Optional observability runtime: downloaded automatically to `plugins/UltimateBot/addon/UltimateBot-Metrics.jar`
@@ -307,11 +307,11 @@ Useful tasks:
 
 ```bash
 ./gradlew :core:build
-./gradlew :buildLogic:shadowJar
+./gradlew :dist:shadowJar
 ```
 
 Expected production artifact:
-- `buildLogic/build/libs/UltimateBot.jar`
+- `dist/build/libs/UltimateBot.jar`
 
 Optional addon artifacts:
 - `addons/metrics/build/libs/UltimateBot-Metrics.jar`

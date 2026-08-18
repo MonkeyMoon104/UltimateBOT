@@ -1,27 +1,18 @@
-import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
-import org.gradle.api.artifacts.VersionCatalogsExtension
-import org.gradle.api.tasks.testing.Test
 import org.gradle.language.jvm.tasks.ProcessResources
 
 plugins {
-    alias(libs.plugins.paperweight.userdev)
+    id("ultimatebot.paperweight")
 }
 
-paperweight {
-    reobfArtifactConfiguration = ReobfArtifactConfiguration.REOBF_PRODUCTION
+ultimatebotPaperweight {
+    catalog("paper-bundle-1_21_4")
 }
-
-val libsCatalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 
 dependencies {
     implementation(project(":api"))
     implementation(project(":common"))
-    paperweight.paperDevBundle(libsCatalog.findVersion("paper-bundle-1_21_4").get().requiredVersion)
 
-    // Must be shaded+relocated; Paper libraries keep org.bstats and bStats refuses that package.
     implementation(libs.bstats.bukkit)
-    // Shade+relocate: Paper 1.21.x ships jackson-databind 2.13 on the server classpath,
-    // which collides with plugin.yml library jackson 2.22 (jsr310 NoSuchFieldError).
     implementation(libs.jackson.databind)
     implementation(libs.jackson.datatype.jsr310)
     compileOnly(libs.caffeine.legacy)
@@ -42,14 +33,8 @@ dependencies {
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
-tasks.named<Test>("test") {
-    useJUnitPlatform()
-}
-
 tasks.named<ProcessResources>("processResources") {
-    val props = mapOf(
-        "version" to version,
-    )
+    val props = mapOf("version" to version)
     inputs.properties(props)
     filteringCharset = "UTF-8"
     filesMatching("plugin.yml") {

@@ -1,7 +1,7 @@
 import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
-    `java-library`
+    id("ultimatebot.java-library")
     alias(libs.plugins.api.publish)
 }
 
@@ -13,10 +13,6 @@ dependencies {
     testImplementation(libs.assertj.core)
     testRuntimeOnly(libs.paper.api)
     testRuntimeOnly(libs.junit.platform.launcher)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }
 
 tasks.jar {

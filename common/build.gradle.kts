@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("ultimatebot.java-library")
     alias(libs.plugins.api.publish)
 }
 
@@ -9,8 +9,4 @@ dependencies {
     testImplementation(libs.assertj.core)
     testImplementation(libs.archunit.junit5)
     testRuntimeOnly(libs.junit.platform.launcher)
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

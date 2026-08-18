@@ -1,10 +1,15 @@
 import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.tasks.testing.Test
 
 plugins {
-    `java-library`
+    id("ultimatebot.java-library")
     alias(libs.plugins.api.publish)
     alias(libs.plugins.revapi)
+}
+
+ultimatebotJava {
+    release.set(21)
+    nullAway.set(false)
+    werror.set(false)
 }
 
 dependencies {
@@ -18,10 +23,6 @@ dependencies {
     testImplementation(libs.archunit.junit5)
     testImplementation(libs.awaitility)
     testRuntimeOnly(libs.junit.platform.launcher)
-}
-
-tasks.named<Test>("test") {
-    useJUnitPlatform()
 }
 
 revapi {

@@ -47,7 +47,7 @@ ultimatebot.version=1.1.0
 
 ```powershell
 git status --short
-.\gradlew.bat :buildLogic:shadowJar
+.\gradlew.bat :dist:shadowJar
 ```
 
 La build deve passare prima di creare tag e docs.
@@ -139,7 +139,7 @@ git push origin ultimatebot
 
 ```powershell
 # prima modifica ultimatebot.version in gradle.properties
-.\gradlew.bat :buildLogic:shadowJar
+.\gradlew.bat :dist:shadowJar
 git add .
 git commit -m "feat(api): <descrizione>"
 git push origin ultimatebot
