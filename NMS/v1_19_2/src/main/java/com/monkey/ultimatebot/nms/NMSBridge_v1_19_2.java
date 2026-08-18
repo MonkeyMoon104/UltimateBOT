@@ -455,18 +455,16 @@ public class NMSBridge_v1_19_2 implements INMSBridge {
         try {
             java.lang.reflect.Method method = minecart.getClass().getMethod("setFuseTicks", int.class);
             method.invoke(minecart, ticks);
-            return;
         } catch (ReflectiveOperationException | LinkageError ignored) {
-
-        }
-        if (ticks < 0) {
-            return;
-        }
-        org.bukkit.Location location = minecart.getLocation();
-        org.bukkit.World world = location.getWorld();
-        minecart.remove();
-        if (world != null) {
-            world.createExplosion(location, 4.0F, false, true);
+            if (ticks < 0) {
+                return;
+            }
+            org.bukkit.Location location = minecart.getLocation();
+            org.bukkit.World world = location.getWorld();
+            minecart.remove();
+            if (world != null) {
+                world.createExplosion(location, 4.0F, false, true);
+            }
         }
     }
 
