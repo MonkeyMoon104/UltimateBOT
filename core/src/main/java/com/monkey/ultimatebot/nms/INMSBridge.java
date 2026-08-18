@@ -172,11 +172,25 @@ public interface INMSBridge {
                         .invoke(null, player, plugin, botType);
                 return;
             } catch (ReflectiveOperationException | LinkageError error) {
+                Throwable root = error;
+                if (error instanceof java.lang.reflect.InvocationTargetException) {
+                    Throwable target = ((java.lang.reflect.InvocationTargetException) error).getTargetException();
+                    if (target != null) {
+                        root = target;
+                    }
+                }
+                while (root.getCause() != null && root.getCause() != root) {
+                    root = root.getCause();
+                }
+                String detail = root.getMessage();
+                if (detail == null || detail.isEmpty()) {
+                    detail = root.toString();
+                }
                 plugin.getLogger()
                         .warning("InvUI GUI unavailable ("
-                                + error.getClass().getSimpleName()
+                                + root.getClass().getSimpleName()
                                 + ": "
-                                + error.getMessage()
+                                + detail
                                 + "); falling back to legacy kit GUI.");
             }
         }

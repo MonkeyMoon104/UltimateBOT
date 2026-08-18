@@ -454,6 +454,9 @@ tasks.named<ShadowJar>("shadowJar") {
                         }
 
                         data = normalizeClassMajor(data, 65)
+                        if (entry.name.startsWith("com/monkey/ultimatebot/libs/inventoryaccess/v1/r9/")) {
+                            data = normalizeClassMajor(data, 60)
+                        }
                     }
 
                     zos.write(data)
