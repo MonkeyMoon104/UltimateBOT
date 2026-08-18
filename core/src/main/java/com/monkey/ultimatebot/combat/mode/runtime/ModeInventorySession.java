@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public final class ModeInventorySession implements AutoCloseable {
@@ -20,7 +20,7 @@ public final class ModeInventorySession implements AutoCloseable {
 
     private final BotInventoryController inventory;
     private final ItemStack[] originalItems = new ItemStack[HOTBAR_SIZE];
-    private final Map<EquipmentSlot, ItemStack> originalEquipment = new EnumMap<>(EquipmentSlot.class);
+    private final Map<EquipmentSlotKind, ItemStack> originalEquipment = new EnumMap<>(EquipmentSlotKind.class);
     private int originalSelectedSlot;
     private boolean captured;
 
@@ -43,16 +43,16 @@ public final class ModeInventorySession implements AutoCloseable {
         }
         inventory.applyBukkitHotbarLoadout(hotbar, BotInventoryController.SWORD_SLOT);
 
-        Map<EquipmentSlot, ItemStack> equipment = new EnumMap<>(originalEquipment);
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : kit.equipment().entrySet()) {
+        Map<EquipmentSlotKind, ItemStack> equipment = new EnumMap<>(originalEquipment);
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : kit.equipment().entrySet()) {
             equipment.put(entry.getKey(), entry.getValue());
         }
         applyConfiguredArmor(options, equipment);
         inventory.applyBukkitEquipmentLoadout(equipment);
     }
 
-    private void applyConfiguredArmor(BotOptions options, Map<EquipmentSlot, ItemStack> equipment) {
-        for (EquipmentSlot slot : java.util.Collections.unmodifiableList(java.util.Arrays.asList(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET))) {
+    private void applyConfiguredArmor(BotOptions options, Map<EquipmentSlotKind, ItemStack> equipment) {
+        for (EquipmentSlotKind slot : java.util.Collections.unmodifiableList(java.util.Arrays.asList(EquipmentSlotKind.HEAD, EquipmentSlotKind.CHEST, EquipmentSlotKind.LEGS, EquipmentSlotKind.FEET))) {
             ItemStack configured = options.getArmor().get(slot);
             if (configured == null) {
                 continue;
@@ -71,7 +71,7 @@ public final class ModeInventorySession implements AutoCloseable {
             originalItems[slot] = inventory.getItem(slot).clone();
         }
         originalSelectedSlot = inventory.getCurrentSlot();
-        for (EquipmentSlot slot : managedEquipmentSlots()) {
+        for (EquipmentSlotKind slot : managedEquipmentSlots()) {
             originalEquipment.put(slot, inventory.getEquipment(slot).clone());
         }
         captured = true;
@@ -84,15 +84,15 @@ public final class ModeInventorySession implements AutoCloseable {
         inventory.applyBukkitEquipmentLoadout(originalEquipment);
     }
 
-    private static EquipmentSlot[] managedEquipmentSlots() {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+    private static EquipmentSlotKind[] managedEquipmentSlots() {
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         if (offHand == null) {
-            return new EquipmentSlot[] {
-                EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+            return new EquipmentSlotKind[] {
+                EquipmentSlotKind.HEAD, EquipmentSlotKind.CHEST, EquipmentSlotKind.LEGS, EquipmentSlotKind.FEET
             };
         }
-        return new EquipmentSlot[] {
-            offHand, EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET
+        return new EquipmentSlotKind[] {
+            offHand, EquipmentSlotKind.HEAD, EquipmentSlotKind.CHEST, EquipmentSlotKind.LEGS, EquipmentSlotKind.FEET
         };
     }
 

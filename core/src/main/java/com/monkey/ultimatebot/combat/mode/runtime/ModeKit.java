@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,18 +9,17 @@ import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public final class ModeKit {
     private final Map<Integer, ItemStack> slots;
-    private final Map<EquipmentSlot, ItemStack> equipment;
+    private final Map<EquipmentSlotKind, ItemStack> equipment;
 
-    private ModeKit(Map<Integer, ItemStack> slots, Map<EquipmentSlot, ItemStack> equipment) {
+    private ModeKit(Map<Integer, ItemStack> slots, Map<EquipmentSlotKind, ItemStack> equipment) {
         Map<Integer, ItemStack> copy = new HashMap<>();
         slots.forEach((slot, item) -> copy.put(slot, item.clone()));
         this.slots = Collections.unmodifiableMap(copy);
-        Map<EquipmentSlot, ItemStack> equipmentCopy = new java.util.EnumMap<>(EquipmentSlot.class);
+        Map<EquipmentSlotKind, ItemStack> equipmentCopy = new java.util.EnumMap<>(EquipmentSlotKind.class);
         equipment.forEach((slot, item) -> equipmentCopy.put(slot, item.clone()));
         this.equipment = Collections.unmodifiableMap(equipmentCopy);
     }
@@ -34,15 +34,15 @@ public final class ModeKit {
         return copy;
     }
 
-    public Map<EquipmentSlot, ItemStack> equipment() {
-        Map<EquipmentSlot, ItemStack> copy = new java.util.EnumMap<>(EquipmentSlot.class);
+    public Map<EquipmentSlotKind, ItemStack> equipment() {
+        Map<EquipmentSlotKind, ItemStack> copy = new java.util.EnumMap<>(EquipmentSlotKind.class);
         equipment.forEach((slot, item) -> copy.put(slot, item.clone()));
         return copy;
     }
 
     public static final class Builder {
         private final Map<Integer, ItemStack> slots = new HashMap<>();
-        private final Map<EquipmentSlot, ItemStack> equipment = new java.util.EnumMap<>(EquipmentSlot.class);
+        private final Map<EquipmentSlotKind, ItemStack> equipment = new java.util.EnumMap<>(EquipmentSlotKind.class);
 
         public Builder slot(int slot, Material item) {
             return slot(slot, item, 1);
@@ -71,12 +71,12 @@ public final class ModeKit {
             return slot(slot, MaterialCatalog.optional(materialName, fallback), count);
         }
 
-        public Builder equipment(EquipmentSlot slot, String materialName, Material fallback) {
+        public Builder equipment(EquipmentSlotKind slot, String materialName, Material fallback) {
             return equipment(slot, MaterialCatalog.optional(materialName, fallback));
         }
 
         public Builder offHand(Material item) {
-            EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+            EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
             if (offHand == null) {
                 return this;
             }
@@ -84,7 +84,7 @@ public final class ModeKit {
         }
 
         public Builder offHand(String materialName, Material fallback) {
-            EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+            EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
             if (offHand == null) {
                 return this;
             }
@@ -103,18 +103,18 @@ public final class ModeKit {
             return this;
         }
 
-        public Builder equipment(EquipmentSlot slot, Material item) {
-            EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
-            if (checkedSlot == EquipmentSlot.HAND) {
+        public Builder equipment(EquipmentSlotKind slot, Material item) {
+            EquipmentSlotKind checkedSlot = Objects.requireNonNull(slot, "slot");
+            if (checkedSlot == EquipmentSlotKind.HAND) {
                 throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
             }
             equipment.put(checkedSlot, new ItemStack(Objects.requireNonNull(item, "item")));
             return this;
         }
 
-        public Builder equipment(EquipmentSlot slot, ItemStack item) {
-            EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
-            if (checkedSlot == EquipmentSlot.HAND) {
+        public Builder equipment(EquipmentSlotKind slot, ItemStack item) {
+            EquipmentSlotKind checkedSlot = Objects.requireNonNull(slot, "slot");
+            if (checkedSlot == EquipmentSlotKind.HAND) {
                 throw new IllegalArgumentException("Unsupported mode equipment slot: " + checkedSlot);
             }
             ItemStack checkedItem = Objects.requireNonNull(item, "item");

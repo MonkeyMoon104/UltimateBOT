@@ -6,6 +6,7 @@ import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
 import com.monkey.ultimatebot.gui.LegacyBotGui;
 import com.monkey.ultimatebot.protocol.BotProfileData;
@@ -20,7 +21,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -114,7 +114,7 @@ public interface INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            EquipmentSlot hand);
+            EquipmentSlotKind hand);
 
     void throwEnderpearl(Player bot, Vector targetPos);
 
@@ -128,9 +128,9 @@ public interface INMSBridge {
 
     void sendSpawnAndMeta(Player viewer, ITrainingBot bot);
 
-    void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment);
+    void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment);
 
-    void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment);
+    void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment);
 
     void broadcastMetadata(ITrainingBot bot);
 
@@ -157,13 +157,13 @@ public interface INMSBridge {
      * <p>Must not go through {@code CraftInventoryPlayer}: {@code BotCraftPlayer} is not a
      * {@code CraftPlayer} and Bukkit inventory setters cast to that type.
      */
-    ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot);
+    ItemStack getBotItem(ITrainingBot bot, EquipmentSlotKind slot);
 
-    void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack);
+    void setBotItem(ITrainingBot bot, EquipmentSlotKind slot, @Nullable ItemStack stack);
 
     void clearBotInventory(ITrainingBot bot);
 
-    void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand);
+    void beginUsingBotItem(ITrainingBot bot, EquipmentSlotKind hand);
 
     void stopUsingBotItem(ITrainingBot bot);
 

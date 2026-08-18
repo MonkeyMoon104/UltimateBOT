@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.lifecycle.BotDespawnReason;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
@@ -7,7 +8,6 @@ import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -30,8 +30,8 @@ public class BotManager {
     public boolean spawn(
             Player viewer,
             Player target,
-            Map<EquipmentSlot, ItemStack> armorMap,
-            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            Map<EquipmentSlotKind, ItemStack> armorMap,
+            Map<EquipmentSlotKind, Boolean> blastProtectionMap,
             boolean follow,
             int totem,
             BotOptions botOptions) {
@@ -40,8 +40,8 @@ public class BotManager {
 
     public boolean spawn(
             Player viewer,
-            Map<EquipmentSlot, ItemStack> armorMap,
-            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            Map<EquipmentSlotKind, ItemStack> armorMap,
+            Map<EquipmentSlotKind, Boolean> blastProtectionMap,
             boolean follow,
             int totem,
             BotOptions botOptions) {
@@ -154,13 +154,13 @@ public class BotManager {
 
     public void updateArmor(
             UUID ownerUUID,
-            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+            Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap,
+            Map<EquipmentSlotKind, Boolean> blastProtectionMap) {
         updater.updateArmor(ownerUUID, armorMap, blastProtectionMap);
     }
 
     public void updateArmor(
-            UUID ownerUUID, Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap) {
+            UUID ownerUUID, Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap) {
         updater.updateArmor(ownerUUID, armorMap);
     }
 

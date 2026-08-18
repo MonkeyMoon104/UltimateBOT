@@ -21,7 +21,6 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
@@ -53,12 +52,6 @@ public class TargetingService {
         return targetCache.estimatedSize();
     }
 
-    /**
-     * Closest hostile/neutral living non-player near the bot.
-     *
-     * <p>Uses {@link LivingEntity} instead of {@code org.bukkit.entity.Mob} — that interface does not
-     * exist before 1.13/1.14 and hard links crash 1.12 with {@code NoClassDefFoundError}.
-     */
     public @Nullable LivingEntity findClosestMob(@Nullable ITrainingBot bot, double maxRange) {
         if (bot == null || bot.asBukkitPlayer() == null || maxRange <= 0.0D) {
             return null;
@@ -91,7 +84,7 @@ public class TargetingService {
         LivingEntity closest = null;
         for (org.bukkit.entity.Entity entity :
                 WorldAccess.nearbyEntities(world, center, maxRange, maxRange, maxRange, null)) {
-            if (!(entity instanceof LivingEntity) || entity instanceof Player || entity instanceof ArmorStand) {
+            if (!(entity instanceof LivingEntity) || entity instanceof Player || isArmorStandEntity(entity)) {
                 continue;
             }
             LivingEntity mob = (LivingEntity) entity;
@@ -106,6 +99,11 @@ public class TargetingService {
         }
         mobTargetCache.put(botUUID, new MobCache(closest, maxRange, now));
         return closest;
+    }
+
+    private static boolean isArmorStandEntity(org.bukkit.entity.Entity entity) {
+        org.bukkit.entity.EntityType type = entity.getType();
+        return type != null && "ARMOR_STAND".equals(type.name());
     }
 
     private static final class MobCache {

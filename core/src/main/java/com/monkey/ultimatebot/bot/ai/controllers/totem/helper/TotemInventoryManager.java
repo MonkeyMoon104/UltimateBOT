@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
@@ -8,7 +9,6 @@ import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Objects;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class TotemInventoryManager implements ITotemInventoryManager {
@@ -28,7 +28,7 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     }
 
     @Override
-    public void equipTotem(EquipmentSlot slot) {
+    public void equipTotem(EquipmentSlotKind slot) {
         if (slot == null) {
             return;
         }
@@ -38,7 +38,7 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     }
 
     @Override
-    public void removeTotem(EquipmentSlot slot) {
+    public void removeTotem(EquipmentSlotKind slot) {
         if (slot == null) {
             return;
         }
@@ -49,9 +49,9 @@ public class TotemInventoryManager implements ITotemInventoryManager {
 
     @Override
     public int getEquippedTotemCount() {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         ItemStack offhand = offHand == null ? ItemStackAccess.empty() : bot.getItem(offHand);
-        ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
+        ItemStack mainhand = bot.getItem(EquipmentSlotKind.HAND);
 
         return (hasTotemInSlot(offhand) ? 1 : 0) + (hasTotemInSlot(mainhand) ? 1 : 0);
     }
@@ -60,7 +60,7 @@ public class TotemInventoryManager implements ITotemInventoryManager {
     public void forceEquipTotems(int count) {
         count = Math.max(0, Math.min(2, count));
 
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         boolean changed = false;
         if (offHand != null) {
             changed =
@@ -71,7 +71,7 @@ public class TotemInventoryManager implements ITotemInventoryManager {
                                     : ItemStackAccess.empty());
         }
         changed |= updateSlot(
-                EquipmentSlot.HAND,
+                EquipmentSlotKind.HAND,
                 count >= 2
                         ? MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE)
                         : ItemStackAccess.empty());
@@ -80,8 +80,8 @@ public class TotemInventoryManager implements ITotemInventoryManager {
         }
     }
 
-    private boolean updateSlot(EquipmentSlot slot, ItemStack item) {
-        EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+    private boolean updateSlot(EquipmentSlotKind slot, ItemStack item) {
+        EquipmentSlotKind checkedSlot = Objects.requireNonNull(slot, "slot");
         ItemStack checkedItem = Objects.requireNonNull(item, "item");
         ItemStack current = bot.getItem(checkedSlot);
         if (current.isSimilar(checkedItem) && current.getAmount() == checkedItem.getAmount()) {

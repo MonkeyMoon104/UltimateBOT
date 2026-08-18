@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.utils.armor;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.junit.jupiter.api.Test;
 
 class ArmorCycleTest {
@@ -12,7 +12,7 @@ class ArmorCycleTest {
     void cyclingWithinDiamondSkipsNetherite() {
         Material next =
                 ArmorCycle.getNextArmor(
-                        Material.DIAMOND_HELMET, EquipmentSlot.HEAD, ArmorTier.LEATHER, ArmorTier.DIAMOND);
+                        Material.DIAMOND_HELMET, EquipmentSlotKind.HEAD, ArmorTier.LEATHER, ArmorTier.DIAMOND);
         assertThat(next).isEqualTo(Material.LEATHER_HELMET);
         assertThat(next).isNotEqualTo(Material.AIR);
     }
@@ -21,7 +21,7 @@ class ArmorCycleTest {
     void cyclingFromDiamondWithNetheriteMaxUsesPlatformCap() {
         Material next =
                 ArmorCycle.getNextArmor(
-                        Material.DIAMOND_HELMET, EquipmentSlot.HEAD, ArmorTier.LEATHER, ArmorTier.NETHERITE);
+                        Material.DIAMOND_HELMET, EquipmentSlotKind.HEAD, ArmorTier.LEATHER, ArmorTier.NETHERITE);
         if (Material.matchMaterial("NETHERITE_HELMET") == null) {
             assertThat(next).isEqualTo(Material.LEATHER_HELMET);
         } else {
@@ -34,7 +34,7 @@ class ArmorCycleTest {
     void clampDropsTiersAbovePlatformMax() {
         Material clamped =
                 ArmorCycle.clampArmor(
-                        Material.DIAMOND_HELMET, EquipmentSlot.HEAD, ArmorTier.LEATHER, ArmorTier.NETHERITE);
+                        Material.DIAMOND_HELMET, EquipmentSlotKind.HEAD, ArmorTier.LEATHER, ArmorTier.NETHERITE);
         assertThat(clamped).isNotEqualTo(Material.AIR);
         if (Material.matchMaterial("NETHERITE_HELMET") == null) {
             assertThat(clamped).isEqualTo(Material.DIAMOND_HELMET);

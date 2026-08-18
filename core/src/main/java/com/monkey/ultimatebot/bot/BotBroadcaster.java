@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.MinecraftVersionAccess;
@@ -15,8 +16,8 @@ public class BotBroadcaster {
 
     public static void broadcastSpawn(
             ITrainingBot bot,
-            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armorMap,
-            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtectionMap) {
+            Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armorMap,
+            Map<EquipmentSlotKind, Boolean> blastProtectionMap) {
         for (Player online : Bukkit.getOnlinePlayers()) {
             showBotToViewer(online, bot);
         }

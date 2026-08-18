@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
@@ -40,7 +41,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -69,7 +69,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private static final int SLOT_TAB_OWNERS = 18;
     private static final int SLOT_TAB_TARGETS = 36;
 
-    // Kit tab — absolute slots matching NewBotGUI TabGui + KitTab structure.
     private static final int SLOT_DIFFICULTY = 11;
     private static final int SLOT_TOTEM = 22;
     private static final int SLOT_SPAWN = 30;
@@ -79,13 +78,11 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private static final int SLOT_COMBAT_MODE = 40;
     private static final int SLOT_TARGET_MODE = 41;
 
-    // Armor tab — vertical column matching TemplatesTab (no-trim).
     private static final int SLOT_ARMOR_HEAD = 22;
     private static final int SLOT_ARMOR_CHEST = 31;
     private static final int SLOT_ARMOR_LEGS = 40;
     private static final int SLOT_ARMOR_FEET = 49;
 
-    // Combat settings tab — matching CombatSettingsTab.
     private static final int SLOT_COMBAT_MODE_C = 11;
     private static final int SLOT_DIFFICULTY_C = 12;
     private static final int SLOT_RESET_TUNING = 15;
@@ -101,6 +98,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private int activeTab = TAB_KIT;
     private boolean closing;
     private boolean listenerRegistered;
+    private final LegacyBotGuiListener eventListener;
 
     public LegacyBotGui(Player player, UltimateBot plugin, BotType botType) {
         this.player = player;
@@ -110,6 +108,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         this.options.setBotType(this.botType);
         this.options.clampCurrentTotemCount();
         this.inventory = Bukkit.createInventory(this, SIZE, title());
+        this.eventListener = new LegacyBotGuiListener(this);
     }
 
     @Override
@@ -120,7 +119,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     public void open() {
         render();
         if (!listenerRegistered) {
-            Bukkit.getPluginManager().registerEvents(this, plugin);
+            Bukkit.getPluginManager().registerEvents(eventListener, plugin);
             listenerRegistered = true;
         }
         player.openInventory(inventory);
@@ -146,7 +145,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private void fillChrome() {
         ItemStack border = namedItem(borderStack(), " ", Collections.<String>emptyList());
         inventory.clear();
-        // Match NewBotGUI TabGui chrome: border everywhere except content `x` cells.
         int[] content = contentSlots();
         boolean[] isContent = new boolean[SIZE];
         for (int slot : content) {
@@ -206,11 +204,10 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         for (int slot : contentSlots()) {
             inventory.setItem(slot, border);
         }
-        inventory.setItem(SLOT_ARMOR_HEAD, armorPieceItem(EquipmentSlot.HEAD));
-        inventory.setItem(SLOT_ARMOR_CHEST, armorPieceItem(EquipmentSlot.CHEST));
-        inventory.setItem(SLOT_ARMOR_LEGS, armorPieceItem(EquipmentSlot.LEGS));
-        inventory.setItem(SLOT_ARMOR_FEET, armorPieceItem(EquipmentSlot.FEET));
-        // Trim UI is 1.19.4+ (ARMOR_TRIM) — intentionally omitted here.
+        inventory.setItem(SLOT_ARMOR_HEAD, armorPieceItem(EquipmentSlotKind.HEAD));
+        inventory.setItem(SLOT_ARMOR_CHEST, armorPieceItem(EquipmentSlotKind.CHEST));
+        inventory.setItem(SLOT_ARMOR_LEGS, armorPieceItem(EquipmentSlotKind.LEGS));
+        inventory.setItem(SLOT_ARMOR_FEET, armorPieceItem(EquipmentSlotKind.FEET));
     }
 
     private void renderOwners() {
@@ -268,9 +265,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         }
     }
 
-    /**
-     * Content `x` cells from NewBotGUI TabGui structure (cols 1–8 under the tab chrome).
-     */
     private static int[] contentSlots() {
         return new int[] {
             10, 11, 12, 13, 14, 15, 16, 17,
@@ -355,15 +349,15 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private void handleArmorClick(int slot, ClickType click) {
-        EquipmentSlot piece = null;
+        EquipmentSlotKind piece = null;
         if (slot == SLOT_ARMOR_HEAD) {
-            piece = EquipmentSlot.HEAD;
+            piece = EquipmentSlotKind.HEAD;
         } else if (slot == SLOT_ARMOR_CHEST) {
-            piece = EquipmentSlot.CHEST;
+            piece = EquipmentSlotKind.CHEST;
         } else if (slot == SLOT_ARMOR_LEGS) {
-            piece = EquipmentSlot.LEGS;
+            piece = EquipmentSlotKind.LEGS;
         } else if (slot == SLOT_ARMOR_FEET) {
-            piece = EquipmentSlot.FEET;
+            piece = EquipmentSlotKind.FEET;
         }
         if (piece == null) {
             return;
@@ -600,7 +594,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         render();
     }
 
-    private void cycleArmor(EquipmentSlot slot) {
+    private void cycleArmor(EquipmentSlotKind slot) {
         if (!options.isChangeableArmor()) {
             player.sendMessage(ChatColorUtils.translate(plugin.getLangString(
                     "messages.armor-locked", "&cArmor is locked: it cannot be modified for this bot.")));
@@ -618,7 +612,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         render();
     }
 
-    private void toggleBlast(EquipmentSlot slot) {
+    private void toggleBlast(EquipmentSlotKind slot) {
         if (!options.isChangeableBlast()) {
             player.sendMessage(ChatColorUtils.translate(plugin.getLangString(
                     "messages.blast-locked",
@@ -744,7 +738,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     }
 
     private ItemStack totemItem() {
-        // Spigot 1.12.2: TOTEM (not TOTEM_OF_UNDYING); GOLDEN_APPLE only pre-1.11 fallback.
         ItemStack icon = MaterialCatalog.stack("TOTEM_OF_UNDYING", Material.GOLDEN_APPLE);
         String unlimited = plugin.getLangString("gui.totem-button.unlimited-text", "Unlimited");
         String count = options.getTotems() == -1 ? unlimited : String.valueOf(options.getTotems());
@@ -791,7 +784,7 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         return namedItem(mat, plugin.getLangString("gui.teleport-button.name", "&bTeleport bot"), lore);
     }
 
-    private ItemStack armorPieceItem(EquipmentSlot slot) {
+    private ItemStack armorPieceItem(EquipmentSlotKind slot) {
         ItemStack piece = options.getArmor().get(slot);
         Material mat = piece == null ? Material.IRON_CHESTPLATE : piece.getType();
         boolean blast = options.getBlast().getOrDefault(slot, Boolean.FALSE).booleanValue();
@@ -827,7 +820,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private ItemStack headItem(UUID uuid, String colorPrefix, String role) {
         OfflinePlayer offline = Bukkit.getOfflinePlayer(uuid);
         String name = offline.getName() != null ? offline.getName() : uuid.toString();
-        // Spigot 1.12.2: SKULL_ITEM + durability 3 = player head (not skeleton = 0).
         ItemStack skull = MaterialCatalog.stack("PLAYER_HEAD", Material.STONE);
         ItemMeta meta = skull.getItemMeta();
         if (meta != null) {
@@ -847,12 +839,9 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
         try {
             meta.setOwningPlayer(offline);
         } catch (NoSuchMethodError | AbstractMethodError ignored) {
-            // Pre-1.12 SkullMeta: setOwner(String).
             try {
                 SkullMeta.class.getMethod("setOwner", String.class).invoke(meta, name);
-            } catch (ReflectiveOperationException ignoredAgain) {
-                // Leave default skull texture.
-            }
+            } catch (ReflectiveOperationException ignoredAgain) {}
         }
     }
 
@@ -924,7 +913,6 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
     private ItemStack borderStack() {
         String configured =
                 plugin.getLangString("gui.tab-border.material", "BLACK_STAINED_GLASS_PANE");
-        // Spigot 1.12.2: STAINED_GLASS_PANE + data 15 = black (data 0 = white).
         return MaterialCatalog.stack(configured, Material.STONE);
     }
 
@@ -1104,8 +1092,31 @@ public final class LegacyBotGui implements InventoryHolder, Listener {
 
     private void unregisterListener() {
         if (listenerRegistered) {
-            HandlerList.unregisterAll(this);
+            HandlerList.unregisterAll(eventListener);
             listenerRegistered = false;
+        }
+    }
+
+    private static final class LegacyBotGuiListener implements Listener {
+        private final LegacyBotGui gui;
+
+        private LegacyBotGuiListener(LegacyBotGui gui) {
+            this.gui = gui;
+        }
+
+        @EventHandler
+        public void onClick(InventoryClickEvent event) {
+            gui.onClick(event);
+        }
+
+        @EventHandler
+        public void onDrag(InventoryDragEvent event) {
+            gui.onDrag(event);
+        }
+
+        @EventHandler
+        public void onClose(InventoryCloseEvent event) {
+            gui.onClose(event);
         }
     }
 }

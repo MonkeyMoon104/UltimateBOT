@@ -126,6 +126,9 @@ public final class MinecraftVersionAccess {
         int major = Integer.parseInt(matcher.group(1));
         int minor = Integer.parseInt(matcher.group(2));
         // Common CraftBukkit revision → release mapping for pre-1.17 stubs.
+        if (major == 1 && minor == 7) {
+            return "1.7.10";
+        }
         if (major == 1 && minor == 8) {
             return "1.8.8";
         }

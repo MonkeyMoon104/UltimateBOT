@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.cpvp.helper.obsidian;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
@@ -10,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -35,7 +35,7 @@ public class ObsidianPlacer {
             BlockVector adjacentPos = relative(pos, bestFace.getOppositeFace());
             Location hit = centerOf(adjacentPos).add(bestFace.getModX() * 0.5D, bestFace.getModY() * 0.5D, bestFace.getModZ() * 0.5D);
             boolean consumed = NMSBridgeManager.get()
-                    .useItemOnBlock(bot.asBukkitPlayer(), obsidianStack, blockAt(adjacentPos), bestFace, hit, EquipmentSlot.HAND);
+                    .useItemOnBlock(bot.asBukkitPlayer(), obsidianStack, blockAt(adjacentPos), bestFace, hit, EquipmentSlotKind.HAND);
             if (consumed) {
                 inventoryController.onItemUsed(BotInventoryController.OBSIDIAN_SLOT);
                 return true;

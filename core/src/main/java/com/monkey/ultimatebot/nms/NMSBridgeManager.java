@@ -13,7 +13,7 @@ public class NMSBridgeManager {
 
     private static @Nullable INMSBridge instance;
     private static final String SUPPORTED_VERSIONS =
-            "1.8.x-1.16.5 (legacy NMS), 1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x";
+            "1.7.10, 1.8.x-1.16.5 (legacy NMS), 1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x";
 
     public static void init() {
         init(java.util.logging.Logger.getLogger("UltimateBot"));
@@ -173,6 +173,11 @@ public class NMSBridgeManager {
      * needs settings + shadow wiring; missing classes fall back to {@link StubNMSBridge}.
      */
     private static @Nullable String resolveLegacyBridge(String version) {
+        // 1.7.10 — Craft v1_7_R4 only (1.7.2–1.7.9 are different revisions).
+        if ("1.7.10".equals(version)) {
+            return "com.monkey.ultimatebot.nms.NMSBridge_v1_7_R4";
+        }
+
         // 1.8.x
         if ("1.8".equals(version) || "1.8.0".equals(version) || "1.8.1".equals(version) || "1.8.2".equals(version)) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v1_8_R1";

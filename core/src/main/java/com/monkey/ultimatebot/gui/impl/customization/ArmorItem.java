@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.gui.impl.customization;
 
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
@@ -16,7 +17,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
@@ -26,11 +26,11 @@ import xyz.xenondevs.invui.item.impl.AbstractItem;
 public class ArmorItem extends AbstractItem {
 
     private final UltimateBot training;
-    private final EquipmentSlot slot;
+    private final EquipmentSlotKind slot;
     private final BotOptions options;
     private ItemStack piece;
 
-    public ArmorItem(UltimateBot training, EquipmentSlot slot, ItemStack piece, BotOptions options) {
+    public ArmorItem(UltimateBot training, EquipmentSlotKind slot, ItemStack piece, BotOptions options) {
         this.training = training;
         this.slot = slot;
         this.piece = piece;

@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.utils.armor;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.jspecify.annotations.Nullable;
 
 public enum ArmorTier {
@@ -22,7 +22,7 @@ public enum ArmorTier {
         return MaterialCatalog.available("NETHERITE_HELMET") ? NETHERITE : DIAMOND;
     }
 
-    public Material toMaterial(EquipmentSlot slot) {
+    public Material toMaterial(EquipmentSlotKind slot) {
         String suffix = suffixFor(slot);
         if (suffix.isEmpty()) {
             return Material.AIR;
@@ -30,7 +30,7 @@ public enum ArmorTier {
         return MaterialCatalog.optional(name() + suffix, Material.AIR);
     }
 
-    public static @Nullable ArmorTier fromMaterial(@Nullable Material material, @Nullable EquipmentSlot slot) {
+    public static @Nullable ArmorTier fromMaterial(@Nullable Material material, @Nullable EquipmentSlotKind slot) {
         if (material == null) {
             return null;
         }
@@ -53,7 +53,7 @@ public enum ArmorTier {
         }
     }
 
-    private static String suffixFor(@Nullable EquipmentSlot slot) {
+    private static String suffixFor(@Nullable EquipmentSlotKind slot) {
         if (slot == null) {
             return "";
         }

@@ -42,7 +42,7 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -253,7 +253,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            EquipmentSlot hand) {
+            EquipmentSlotKind hand) {
         return false;
     }
 
@@ -311,10 +311,10 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
     }
 
     @Override
-    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         EntityPlayer handle = ((CraftPlayer) viewer).getHandle();
         int entityId = nativeBot(bot).getId();
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : equipment.entrySet()) {
             Integer slot = toEquipmentIndex(entry.getKey());
             if (slot == null) {
                 continue;
@@ -326,7 +326,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
     }
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         for (Player online : Bukkit.getOnlinePlayers()) {
             sendEquipment(online, bot, equipment);
         }
@@ -343,7 +343,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
     }
 
     @Override
-    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot) {
+    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlotKind slot) {
         Integer index = toEquipmentIndex(slot);
         if (index == null) {
             return new ItemStack(Material.AIR);
@@ -353,7 +353,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack) {
+    public void setBotItem(ITrainingBot bot, EquipmentSlotKind slot, @Nullable ItemStack stack) {
         ItemStack resolved = stack == null ? new ItemStack(Material.AIR) : stack;
         net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(resolved);
         EntityPlayer nativeBot = nativeBot(bot);
@@ -384,7 +384,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
     }
 
     @Override
-    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand) {}
+    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlotKind hand) {}
 
     @Override
     public void stopUsingBotItem(ITrainingBot bot) {}
@@ -503,7 +503,7 @@ public final class NMSBridge_v1_8_R3 implements INMSBridge {
         return ((CraftPlayer) player).getHandle();
     }
 
-    private static @Nullable Integer toEquipmentIndex(EquipmentSlot slot) {
+    private static @Nullable Integer toEquipmentIndex(EquipmentSlotKind slot) {
         String name = slot.name();
         if ("OFF_HAND".equals(name)) {
             return null;

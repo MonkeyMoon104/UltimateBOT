@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.stream.Collectors;
 
 import com.monkey.ultimatebot.UltimateBot;
@@ -21,15 +22,14 @@ import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.*;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 public final class BotOptions {
 
     private final UltimateBot training;
-    private final Map<EquipmentSlot, ItemStack> armor;
-    private final Map<EquipmentSlot, Boolean> blast = new HashMap<>();
+    private final Map<EquipmentSlotKind, ItemStack> armor;
+    private final Map<EquipmentSlotKind, Boolean> blast = new HashMap<>();
     private int totems;
     private boolean follow = false;
     private boolean combat = false;
@@ -59,8 +59,8 @@ public final class BotOptions {
     private DifficultyLevel maxDifficulty = DifficultyLevel.GOD;
     private ArmorTier minArmorTier = ArmorTier.LEATHER;
     private ArmorTier maxArmorTier = ArmorTier.maxAvailable();
-    private final Map<EquipmentSlot, String> trimPatternKeys = new EnumMap<>(EquipmentSlot.class);
-    private final Map<EquipmentSlot, String> trimMaterialKeys = new EnumMap<>(EquipmentSlot.class);
+    private final Map<EquipmentSlotKind, String> trimPatternKeys = new EnumMap<>(EquipmentSlotKind.class);
+    private final Map<EquipmentSlotKind, String> trimMaterialKeys = new EnumMap<>(EquipmentSlotKind.class);
     private @Nullable BotLocation spawnLocation;
     private boolean autoTarget = false;
     private double autoTargetRange = 16.0D;
@@ -83,7 +83,7 @@ public final class BotOptions {
     private final Map<BotEquipmentSlot, BotEquipmentSlotSetting> equipmentSlotSettings =
             new EnumMap<>(BotEquipmentSlot.class);
 
-    public BotOptions(UltimateBot training, Map<EquipmentSlot, ItemStack> armor) {
+    public BotOptions(UltimateBot training, Map<EquipmentSlotKind, ItemStack> armor) {
         this.training = Objects.requireNonNull(training, "training");
         this.armor = Objects.requireNonNull(armor, "armor");
         this.totems = training.getConfig().getInt("bot.default-totem-count", -1);
@@ -653,7 +653,7 @@ public final class BotOptions {
 
     public void setArmorType(ArmorTier armorTier) {
         ArmorTier clampedTier = clampArmorTier(armorTier);
-        for (EquipmentSlot slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
+        for (EquipmentSlotKind slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             ItemStack currentPiece = armor.get(slot);
             ItemStack updated = currentPiece == null
                     ? new ItemStack(clampedTier.toMaterial(slot))
@@ -664,7 +664,7 @@ public final class BotOptions {
     }
 
     public void clampCurrentArmor() {
-        for (EquipmentSlot slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
+        for (EquipmentSlotKind slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             ItemStack currentPiece = armor.get(slot);
             ItemStack updated = currentPiece == null
                     ? new ItemStack(minArmorTier.toMaterial(slot))
@@ -810,19 +810,19 @@ public final class BotOptions {
         return minTotemCount <= -1;
     }
 
-    public Map<EquipmentSlot, ItemStack> getArmor() {
+    public Map<EquipmentSlotKind, ItemStack> getArmor() {
         return armor;
     }
 
-    public Map<EquipmentSlot, Boolean> getBlast() {
+    public Map<EquipmentSlotKind, Boolean> getBlast() {
         return blast;
     }
 
-    public @Nullable String getTrimPatternKey(EquipmentSlot slot) {
+    public @Nullable String getTrimPatternKey(EquipmentSlotKind slot) {
         return trimPatternKeys.get(slot);
     }
 
-    public void setTrimPatternKey(EquipmentSlot slot, @Nullable String trimPatternKey) {
+    public void setTrimPatternKey(EquipmentSlotKind slot, @Nullable String trimPatternKey) {
         if (slot == null) {
             return;
         }
@@ -830,11 +830,11 @@ public final class BotOptions {
         applyTrimSelection(slot);
     }
 
-    public @Nullable String getTrimMaterialKey(EquipmentSlot slot) {
+    public @Nullable String getTrimMaterialKey(EquipmentSlotKind slot) {
         return trimMaterialKeys.get(slot);
     }
 
-    public void setTrimMaterialKey(EquipmentSlot slot, @Nullable String trimMaterialKey) {
+    public void setTrimMaterialKey(EquipmentSlotKind slot, @Nullable String trimMaterialKey) {
         if (slot == null) {
             return;
         }
@@ -842,7 +842,7 @@ public final class BotOptions {
         applyTrimSelection(slot);
     }
 
-    public boolean hasCompleteTrimSelection(EquipmentSlot slot) {
+    public boolean hasCompleteTrimSelection(EquipmentSlotKind slot) {
         if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
             return false;
         }
@@ -853,12 +853,12 @@ public final class BotOptions {
         if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
             return;
         }
-        for (EquipmentSlot slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
+        for (EquipmentSlotKind slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             applyTrimSelection(slot);
         }
     }
 
-    private void applyTrimSelection(EquipmentSlot slot) {
+    private void applyTrimSelection(EquipmentSlotKind slot) {
         if (!MaterialCatalog.feature(PlatformCapability.ARMOR_TRIM)) {
             return;
         }
@@ -873,7 +873,7 @@ public final class BotOptions {
     }
 
     public boolean isBlastProtection() {
-        for (EquipmentSlot slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
+        for (EquipmentSlotKind slot : com.monkey.ultimatebot.utils.equipment.EquipmentConverter.getArmorSlots()) {
             if (!blast.getOrDefault(slot, false)) {
                 return false;
             }
@@ -890,10 +890,10 @@ public final class BotOptions {
             boolean leggingsBlastEnabled,
             boolean chestplateBlastEnabled,
             boolean helmetBlastEnabled) {
-        blast.put(EquipmentSlot.FEET, bootsBlastEnabled);
-        blast.put(EquipmentSlot.LEGS, leggingsBlastEnabled);
-        blast.put(EquipmentSlot.CHEST, chestplateBlastEnabled);
-        blast.put(EquipmentSlot.HEAD, helmetBlastEnabled);
+        blast.put(EquipmentSlotKind.FEET, bootsBlastEnabled);
+        blast.put(EquipmentSlotKind.LEGS, leggingsBlastEnabled);
+        blast.put(EquipmentSlotKind.CHEST, chestplateBlastEnabled);
+        blast.put(EquipmentSlotKind.HEAD, helmetBlastEnabled);
     }
 
     public void setBlastProtection(

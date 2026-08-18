@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.integration.api;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.compat.EntityLookupAccess;
 
@@ -483,10 +484,10 @@ public final class CoreBotManagerAdapter implements IBotManager {
             return false;
         }
         BlastProtectionSettings current = new BlastProtectionSettings(
-                options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.FEET, false),
-                options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.LEGS, false),
-                options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.CHEST, false),
-                options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.HEAD, false));
+                options.getBlast().getOrDefault(EquipmentSlotKind.FEET, false),
+                options.getBlast().getOrDefault(EquipmentSlotKind.LEGS, false),
+                options.getBlast().getOrDefault(EquipmentSlotKind.CHEST, false),
+                options.getBlast().getOrDefault(EquipmentSlotKind.HEAD, false));
         Optional<BlastProtectionSettings> proposed = proposedChange(
                 managedOwner, BotSettingKey.BLAST_PROTECTION, current, blastProtection, BlastProtectionSettings.class);
         if (!proposed.isPresent()) {
@@ -684,8 +685,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
     @Override
     public boolean updateArmor(
             UUID ownerUUID,
-            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor,
-            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtection) {
+            Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armor,
+            Map<EquipmentSlotKind, Boolean> blastProtection) {
         UUID managedOwner = resolveManagedOwner(ownerUUID);
         BotOptions options = getLiveOptions(managedOwner);
         if (options == null || !options.isChangeableArmor()) {
@@ -736,8 +737,8 @@ public final class CoreBotManagerAdapter implements IBotManager {
     @Override
     public boolean updateArmorByBotUUID(
             UUID botUUID,
-            Map<org.bukkit.inventory.EquipmentSlot, org.bukkit.inventory.ItemStack> armor,
-            Map<org.bukkit.inventory.EquipmentSlot, Boolean> blastProtection) {
+            Map<EquipmentSlotKind, org.bukkit.inventory.ItemStack> armor,
+            Map<EquipmentSlotKind, Boolean> blastProtection) {
         UUID ownerUUID = resolveOwnerByBotUUID(botUUID);
         return ownerUUID != null && updateArmor(ownerUUID, armor, blastProtection);
     }
@@ -1403,11 +1404,11 @@ public final class CoreBotManagerAdapter implements IBotManager {
     }
 
     private static com.monkey.ultimatebot.utils.armor.ArmorTier currentArmorTier(BotOptions options) {
-        org.bukkit.inventory.ItemStack chestplate = options.getArmor().get(org.bukkit.inventory.EquipmentSlot.CHEST);
+        org.bukkit.inventory.ItemStack chestplate = options.getArmor().get(EquipmentSlotKind.CHEST);
         com.monkey.ultimatebot.utils.armor.ArmorTier current = chestplate == null
                 ? null
                 : com.monkey.ultimatebot.utils.armor.ArmorTier.fromMaterial(
-                        chestplate.getType(), org.bukkit.inventory.EquipmentSlot.CHEST);
+                        chestplate.getType(), EquipmentSlotKind.CHEST);
         return current == null ? options.getMinArmorTier() : current;
     }
 

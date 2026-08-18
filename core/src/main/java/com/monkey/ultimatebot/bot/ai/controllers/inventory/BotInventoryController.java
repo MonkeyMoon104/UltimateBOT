@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.EquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.ItemChecker;
@@ -15,7 +16,6 @@ import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import java.util.Objects;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class BotInventoryController {
@@ -115,16 +115,16 @@ public class BotInventoryController {
         return getItem(slot);
     }
 
-    public ItemStack getEquipment(EquipmentSlot slot) {
+    public ItemStack getEquipment(EquipmentSlotKind slot) {
         return bot.getItem(java.util.Objects.requireNonNull(slot, "slot"));
     }
 
-    public ItemStack getBukkitEquipment(EquipmentSlot slot) {
+    public ItemStack getBukkitEquipment(EquipmentSlotKind slot) {
         return getEquipment(slot);
     }
 
-    public void setEquipment(EquipmentSlot slot, ItemStack item) {
-        EquipmentSlot checkedSlot = Objects.requireNonNull(slot, "slot");
+    public void setEquipment(EquipmentSlotKind slot, ItemStack item) {
+        EquipmentSlotKind checkedSlot = Objects.requireNonNull(slot, "slot");
         ItemStack checkedItem = Objects.requireNonNull(item, "item");
         ItemStack current = bot.getItem(checkedSlot);
         if (current.isSimilar(checkedItem) && current.getAmount() == checkedItem.getAmount()) {
@@ -138,11 +138,11 @@ public class BotInventoryController {
         slotManager.applyLoadout(Objects.requireNonNull(loadout, "loadout"), selectedSlot);
     }
 
-    public void applyEquipmentLoadout(Map<EquipmentSlot, ItemStack> loadout) {
-        Map<EquipmentSlot, ItemStack> checkedLoadout = Objects.requireNonNull(loadout, "loadout");
+    public void applyEquipmentLoadout(Map<EquipmentSlotKind, ItemStack> loadout) {
+        Map<EquipmentSlotKind, ItemStack> checkedLoadout = Objects.requireNonNull(loadout, "loadout");
         boolean changed = false;
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : checkedLoadout.entrySet()) {
-            EquipmentSlot slot = Objects.requireNonNull(entry.getKey(), "equipment slot");
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : checkedLoadout.entrySet()) {
+            EquipmentSlotKind slot = Objects.requireNonNull(entry.getKey(), "equipment slot");
             ItemStack item = Objects.requireNonNull(entry.getValue(), "equipment item");
             ItemStack current = bot.getItem(slot);
             if (!current.isSimilar(item) || current.getAmount() != item.getAmount()) {
@@ -159,12 +159,12 @@ public class BotInventoryController {
         applyHotbarLoadout(loadout, selectedSlot);
     }
 
-    public void applyBukkitEquipmentLoadout(Map<EquipmentSlot, ItemStack> loadout) {
+    public void applyBukkitEquipmentLoadout(Map<EquipmentSlotKind, ItemStack> loadout) {
         applyEquipmentLoadout(loadout);
     }
 
-    public void startUsingItem(EquipmentSlot hand) {
-        EquipmentSlot checkedHand = Objects.requireNonNull(hand, "hand");
+    public void startUsingItem(EquipmentSlotKind hand) {
+        EquipmentSlotKind checkedHand = Objects.requireNonNull(hand, "hand");
         ItemStack heldItem = bot.getItem(checkedHand);
         if (bot.isUsingItem() && bot.activeItemStack().isSimilar(heldItem)) {
             return;
@@ -177,11 +177,11 @@ public class BotInventoryController {
     }
 
     public void startUsingMainHand() {
-        startUsingItem(EquipmentSlot.HAND);
+        startUsingItem(EquipmentSlotKind.HAND);
     }
 
     public void startUsingOffHand() {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         if (offHand != null) {
             startUsingItem(offHand);
         }

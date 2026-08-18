@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.attack.BotAttackController;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
@@ -20,7 +21,6 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.util.Vector;
 
 public final class ModeCombatActions {
@@ -56,7 +56,7 @@ public final class ModeCombatActions {
     }
 
     public void defendWithOffhand() {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         if (offHand != null) {
             inventory.startUsingItem(offHand);
         }
@@ -67,7 +67,7 @@ public final class ModeCombatActions {
     }
 
     public void useMainhandItem() {
-        inventory.startUsingItem(EquipmentSlot.HAND);
+        inventory.startUsingItem(EquipmentSlotKind.HAND);
     }
 
     public boolean isIncomingAttackLikely(LivingEntity target) {

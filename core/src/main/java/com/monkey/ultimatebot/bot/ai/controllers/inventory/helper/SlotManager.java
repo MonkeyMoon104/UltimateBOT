@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IResourceReplenisher;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public final class SlotManager implements ISlotManager {
@@ -69,15 +69,15 @@ public final class SlotManager implements ISlotManager {
         resourceReplenisher.replenishItem(hotbarSlots, slot);
         ItemStack item = hotbarSlots.get(slot);
         if (currentSlot == slot) {
-            ItemStack hand = bot.getItem(EquipmentSlot.HAND);
+            ItemStack hand = bot.getItem(EquipmentSlotKind.HAND);
             if (hand.getType() != item.getType() || hand.getAmount() != item.getAmount()) {
-                bot.setItem(EquipmentSlot.HAND, item);
+                bot.setItem(EquipmentSlotKind.HAND, item);
             }
             return;
         }
 
         currentSlot = slot;
-        bot.setItem(EquipmentSlot.HAND, item);
+        bot.setItem(EquipmentSlotKind.HAND, item);
         equipmentBroadcaster.broadcastHandChange(bot);
     }
 
@@ -91,7 +91,7 @@ public final class SlotManager implements ISlotManager {
             hotbarSlots.put(slot, item.clone());
 
             if (slot == currentSlot) {
-                bot.setItem(EquipmentSlot.HAND, item);
+                bot.setItem(EquipmentSlotKind.HAND, item);
                 equipmentBroadcaster.broadcastHandChange(bot);
             }
         }
@@ -111,12 +111,12 @@ public final class SlotManager implements ISlotManager {
 
         ItemStack selectedItem =
                 java.util.Objects.requireNonNull(hotbarSlots.get(selectedSlot), "selected hotbar item");
-        ItemStack currentMainHand = bot.getItem(EquipmentSlot.HAND);
+        ItemStack currentMainHand = bot.getItem(EquipmentSlotKind.HAND);
         boolean visualChange = !currentMainHand.isSimilar(selectedItem)
                 || currentMainHand.getAmount() != selectedItem.getAmount();
         currentSlot = selectedSlot;
         if (visualChange) {
-            bot.setItem(EquipmentSlot.HAND, selectedItem);
+            bot.setItem(EquipmentSlotKind.HAND, selectedItem);
             equipmentBroadcaster.broadcastEquipmentChange(bot);
         }
     }

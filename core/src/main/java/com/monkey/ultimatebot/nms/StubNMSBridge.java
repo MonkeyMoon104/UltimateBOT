@@ -19,7 +19,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -141,7 +141,7 @@ public final class StubNMSBridge implements INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            EquipmentSlot hand) {
+            EquipmentSlotKind hand) {
         return false;
     }
 
@@ -155,27 +155,27 @@ public final class StubNMSBridge implements INMSBridge {
     public void sendSpawnAndMeta(Player viewer, ITrainingBot bot) {}
 
     @Override
-    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {}
+    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {}
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {}
+    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {}
 
     @Override
     public void broadcastMetadata(ITrainingBot bot) {}
 
     @Override
-    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot) {
+    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlotKind slot) {
         return new ItemStack(org.bukkit.Material.AIR);
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack) {}
+    public void setBotItem(ITrainingBot bot, EquipmentSlotKind slot, @Nullable ItemStack stack) {}
 
     @Override
     public void clearBotInventory(ITrainingBot bot) {}
 
     @Override
-    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand) {}
+    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlotKind hand) {}
 
     @Override
     public void stopUsingBotItem(ITrainingBot bot) {}

@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.compat.EntityLookupAccess;
 
@@ -30,7 +31,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -48,8 +48,8 @@ public class BotSpawner {
     public boolean spawn(
             Player viewer,
             Player target,
-            Map<EquipmentSlot, ItemStack> armorMap,
-            Map<EquipmentSlot, Boolean> blastProtectionMap,
+            Map<EquipmentSlotKind, ItemStack> armorMap,
+            Map<EquipmentSlotKind, Boolean> blastProtectionMap,
             boolean follow,
             int totem,
             BotOptions botOptions) {

@@ -108,6 +108,7 @@ class PlatformCapabilityEraSetsTest {
 
     @Test
     void forMinecraftVersionMapsEras() {
+        assertThat(PlatformCapability.forMinecraftVersion("1.7.10")).isEqualTo(PlatformCapability.through1_8());
         assertThat(PlatformCapability.forMinecraftVersion("1.8.8")).isEqualTo(PlatformCapability.through1_8());
         assertThat(PlatformCapability.forMinecraftVersion("1.9.4")).isEqualTo(PlatformCapability.through1_9());
         assertThat(PlatformCapability.forMinecraftVersion("1.11.2")).isEqualTo(PlatformCapability.through1_11());

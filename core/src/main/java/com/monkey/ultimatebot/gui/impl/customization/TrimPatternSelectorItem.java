@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.gui.impl.customization;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
@@ -8,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.item.ItemProvider;
 import xyz.xenondevs.invui.item.builder.ItemBuilder;
@@ -18,10 +18,10 @@ public class TrimPatternSelectorItem extends AbstractItem {
 
     private final UltimateBot training;
     private final BotOptions options;
-    private final EquipmentSlot slot;
+    private final EquipmentSlotKind slot;
     private final ArmorItem armorItem;
 
-    public TrimPatternSelectorItem(UltimateBot training, BotOptions options, EquipmentSlot slot, ArmorItem armorItem) {
+    public TrimPatternSelectorItem(UltimateBot training, BotOptions options, EquipmentSlotKind slot, ArmorItem armorItem) {
         this.training = training;
         this.options = options;
         this.slot = slot;

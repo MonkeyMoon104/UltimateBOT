@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.gui.tab;
 
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Collections;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.impl.customization.ArmorItem;
@@ -9,7 +10,6 @@ import com.monkey.ultimatebot.gui.impl.customization.TrimPatternSelectorItem;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.invui.gui.Gui;
 import xyz.xenondevs.invui.item.impl.SimpleItem;
@@ -32,13 +32,13 @@ public class TemplatesTab {
     public Gui build(Material borderMaterial, String borderName) {
         BotOptions options = context.getOptions();
         ArmorItem helmetItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.HEAD, requireArmor(options, EquipmentSlot.HEAD), options);
+                context.getTraining(), EquipmentSlotKind.HEAD, requireArmor(options, EquipmentSlotKind.HEAD), options);
         ArmorItem chestItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.CHEST, requireArmor(options, EquipmentSlot.CHEST), options);
+                context.getTraining(), EquipmentSlotKind.CHEST, requireArmor(options, EquipmentSlotKind.CHEST), options);
         ArmorItem legsItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.LEGS, requireArmor(options, EquipmentSlot.LEGS), options);
+                context.getTraining(), EquipmentSlotKind.LEGS, requireArmor(options, EquipmentSlotKind.LEGS), options);
         ArmorItem bootsItem = new ArmorItem(
-                context.getTraining(), EquipmentSlot.FEET, requireArmor(options, EquipmentSlot.FEET), options);
+                context.getTraining(), EquipmentSlotKind.FEET, requireArmor(options, EquipmentSlotKind.FEET), options);
         armorItems = Collections.unmodifiableList(java.util.Arrays.asList(helmetItem, chestItem, legsItem, bootsItem));
 
         if (!armorTrim) {
@@ -65,25 +65,25 @@ public class TemplatesTab {
                 .addIngredient('.', new SimpleItem(new ItemStack(Material.AIR)))
                 .addIngredient(
                         'h',
-                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlot.HEAD, helmetItem))
+                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.HEAD, helmetItem))
                 .addIngredient(
                         'j',
-                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlot.HEAD, helmetItem))
+                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.HEAD, helmetItem))
                 .addIngredient(
                         'c',
-                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlot.CHEST, chestItem))
+                        new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.CHEST, chestItem))
                 .addIngredient(
                         'k',
-                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlot.CHEST, chestItem))
+                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.CHEST, chestItem))
                 .addIngredient(
-                        'l', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlot.LEGS, legsItem))
+                        'l', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
                 .addIngredient(
-                        'm', new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlot.LEGS, legsItem))
+                        'm', new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.LEGS, legsItem))
                 .addIngredient(
-                        'n', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlot.FEET, bootsItem))
+                        'n', new TrimPatternSelectorItem(context.getTraining(), options, EquipmentSlotKind.FEET, bootsItem))
                 .addIngredient(
                         'p',
-                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlot.FEET, bootsItem))
+                        new TrimMaterialSelectorItem(context.getTraining(), options, EquipmentSlotKind.FEET, bootsItem))
                 .addIngredient('a', helmetItem)
                 .addIngredient('d', chestItem)
                 .addIngredient('e', legsItem)
@@ -95,7 +95,7 @@ public class TemplatesTab {
         armorItems.forEach(ArmorItem::notifyWindows);
     }
 
-    private static ItemStack requireArmor(BotOptions options, EquipmentSlot slot) {
+    private static ItemStack requireArmor(BotOptions options, EquipmentSlotKind slot) {
         return Objects.requireNonNull(options.getArmor().get(slot), () -> "Missing armor item for " + slot);
     }
 }

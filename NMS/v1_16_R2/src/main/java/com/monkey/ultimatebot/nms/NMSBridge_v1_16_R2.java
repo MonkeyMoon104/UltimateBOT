@@ -59,7 +59,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -275,7 +275,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            EquipmentSlot hand) {
+            EquipmentSlotKind hand) {
         EntityPlayer nativeBot = nativePlayer(bot);
         nativeBot.abilities.mayBuild = true;
         EnumHand enumHand = toHand(hand);
@@ -392,7 +392,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     @Override
-    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         List<Pair<EnumItemSlot, net.minecraft.server.v1_16_R2.ItemStack>> converted = toNmsEquipment(equipment);
         if (converted.isEmpty()) {
             return;
@@ -404,7 +404,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         List<Pair<EnumItemSlot, net.minecraft.server.v1_16_R2.ItemStack>> converted = toNmsEquipment(equipment);
         if (converted.isEmpty()) {
             return;
@@ -446,7 +446,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     @Override
-    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot) {
+    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlotKind slot) {
         EnumItemSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return new ItemStack(Material.AIR);
@@ -455,7 +455,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack) {
+    public void setBotItem(ITrainingBot bot, EquipmentSlotKind slot, @Nullable ItemStack stack) {
         EnumItemSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return;
@@ -480,7 +480,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     @Override
-    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand) {
+    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlotKind hand) {
         nativeBot(bot).c(toHand(hand));
     }
 
@@ -640,7 +640,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
         return ((CraftPlayer) player).getHandle();
     }
 
-    private static EnumHand toHand(EquipmentSlot hand) {
+    private static EnumHand toHand(EquipmentSlotKind hand) {
         return "OFF_HAND".equals(hand.name()) ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
     }
 
@@ -663,7 +663,7 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
         }
     }
 
-    private static @Nullable EnumItemSlot toNmsSlot(EquipmentSlot slot) {
+    private static @Nullable EnumItemSlot toNmsSlot(EquipmentSlotKind slot) {
         String name = slot.name();
         if ("HAND".equals(name)) {
             return EnumItemSlot.MAINHAND;
@@ -687,10 +687,10 @@ public final class NMSBridge_v1_16_R2 implements INMSBridge {
     }
 
     private static List<Pair<EnumItemSlot, net.minecraft.server.v1_16_R2.ItemStack>> toNmsEquipment(
-            Map<EquipmentSlot, ItemStack> equipment) {
+            Map<EquipmentSlotKind, ItemStack> equipment) {
         List<Pair<EnumItemSlot, net.minecraft.server.v1_16_R2.ItemStack>> converted =
                 new ArrayList<Pair<EnumItemSlot, net.minecraft.server.v1_16_R2.ItemStack>>();
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : equipment.entrySet()) {
             EnumItemSlot slot = toNmsSlot(entry.getKey());
             if (slot != null) {
                 converted.add(Pair.of(slot, CraftItemStack.asNMSCopy(entry.getValue())));

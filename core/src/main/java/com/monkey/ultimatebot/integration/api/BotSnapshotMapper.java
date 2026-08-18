@@ -1,6 +1,7 @@
 package com.monkey.ultimatebot.integration.api;
 
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Collections;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
@@ -119,17 +120,17 @@ public final class BotSnapshotMapper {
                 minArmor = BotArmorTier.valueOf(options.getMinArmorTier().name());
                 maxArmor = BotArmorTier.valueOf(options.getMaxArmorTier().name());
                 org.bukkit.inventory.ItemStack chestplate =
-                        options.getArmor().get(org.bukkit.inventory.EquipmentSlot.CHEST);
+                        options.getArmor().get(EquipmentSlotKind.CHEST);
                 com.monkey.ultimatebot.utils.armor.ArmorTier currentArmor = chestplate == null
                         ? null
                         : com.monkey.ultimatebot.utils.armor.ArmorTier.fromMaterial(
-                                chestplate.getType(), org.bukkit.inventory.EquipmentSlot.CHEST);
+                                chestplate.getType(), EquipmentSlotKind.CHEST);
                 armor = currentArmor == null ? minArmor : BotArmorTier.valueOf(currentArmor.name());
                 blastProtection = new BlastProtectionSettings(
-                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.FEET, false),
-                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.LEGS, false),
-                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.CHEST, false),
-                        options.getBlast().getOrDefault(org.bukkit.inventory.EquipmentSlot.HEAD, false));
+                        options.getBlast().getOrDefault(EquipmentSlotKind.FEET, false),
+                        options.getBlast().getOrDefault(EquipmentSlotKind.LEGS, false),
+                        options.getBlast().getOrDefault(EquipmentSlotKind.CHEST, false),
+                        options.getBlast().getOrDefault(EquipmentSlotKind.HEAD, false));
                 changeableFollow = options.isChangeableFollow();
                 changeableCombat = options.isChangeableCombat();
                 changeableBlast = options.isChangeableBlast();

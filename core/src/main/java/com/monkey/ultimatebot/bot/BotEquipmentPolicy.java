@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 
 import com.monkey.ultimatebot.common.util.ImmutableCollections;
@@ -13,7 +14,6 @@ import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -24,7 +24,7 @@ public final class BotEquipmentPolicy {
     public static boolean enforce(ITrainingBot bot, BotOptions options) {
         Objects.requireNonNull(bot, "bot");
         Objects.requireNonNull(options, "options");
-        Map<EquipmentSlot, ItemStack> changes = new EnumMap<>(EquipmentSlot.class);
+        Map<EquipmentSlotKind, ItemStack> changes = new EnumMap<>(EquipmentSlotKind.class);
 
         for (Map.Entry<BotEquipmentSlot, BotEquipmentSlotSetting> entry :
                 options.getEquipmentSlotSettings().entrySet()) {
@@ -33,7 +33,7 @@ public final class BotEquipmentPolicy {
                 continue;
             }
 
-            EquipmentSlot bukkitSlot = toBukkitSlot(entry.getKey());
+            EquipmentSlotKind bukkitSlot = toBukkitSlot(entry.getKey());
             if (bukkitSlot == null) {
                 continue;
             }
@@ -69,7 +69,7 @@ public final class BotEquipmentPolicy {
             case CHEST:
             case LEGS:
             case FEET:
-                EquipmentSlot bukkitSlot = toBukkitSlot(slot);
+                EquipmentSlotKind bukkitSlot = toBukkitSlot(slot);
                 if (bukkitSlot == null) {
                     break;
                 }
@@ -90,27 +90,27 @@ public final class BotEquipmentPolicy {
         throw new IllegalStateException("Unexpected switch value");
     }
 
-    private static void broadcast(ITrainingBot bot, Map<EquipmentSlot, ItemStack> changes) {
+    private static void broadcast(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> changes) {
         if (changes.isEmpty()) {
             return;
         }
         NMSBridgeManager.get().broadcastEquipment(bot, changes);
     }
 
-    private static @Nullable EquipmentSlot toBukkitSlot(BotEquipmentSlot slot) {
+    private static @Nullable EquipmentSlotKind toBukkitSlot(BotEquipmentSlot slot) {
                 switch (slot) {
             case MAIN_HAND:
-                return EquipmentSlot.HAND;
+                return EquipmentSlotKind.HAND;
             case OFF_HAND:
                 return EquipmentSlotAccess.offHand();
             case HEAD:
-                return EquipmentSlot.HEAD;
+                return EquipmentSlotKind.HEAD;
             case CHEST:
-                return EquipmentSlot.CHEST;
+                return EquipmentSlotKind.CHEST;
             case LEGS:
-                return EquipmentSlot.LEGS;
+                return EquipmentSlotKind.LEGS;
             case FEET:
-                return EquipmentSlot.FEET;
+                return EquipmentSlotKind.FEET;
             default:
                 throw new IllegalStateException("Unexpected equipment slot: " + slot);
         }

@@ -20,7 +20,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -220,29 +220,29 @@ public interface ITrainingBot {
         asBukkitPlayer().setFireTicks(ticks);
     }
 
-    default ItemStack getItem(EquipmentSlot slot) {
+    default ItemStack getItem(EquipmentSlotKind slot) {
         return NMSBridgeManager.get().getBotItem(this, Objects.requireNonNull(slot, "slot"));
     }
 
-    default void setItem(EquipmentSlot slot, @Nullable ItemStack stack) {
+    default void setItem(EquipmentSlotKind slot, @Nullable ItemStack stack) {
         NMSBridgeManager.get().setBotItem(this, Objects.requireNonNull(slot, "slot"), stack);
     }
 
     default ItemStack getItemInMainHand() {
-        return getItem(EquipmentSlot.HAND);
+        return getItem(EquipmentSlotKind.HAND);
     }
 
     default ItemStack getItemInOffHand() {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         return offHand == null ? ItemStackAccess.empty() : getItem(offHand);
     }
 
     default void setItemInMainHand(@Nullable ItemStack stack) {
-        setItem(EquipmentSlot.HAND, stack);
+        setItem(EquipmentSlotKind.HAND, stack);
     }
 
     default void setItemInOffHand(@Nullable ItemStack stack) {
-        EquipmentSlot offHand = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHand = EquipmentSlotAccess.offHand();
         if (offHand != null) {
             setItem(offHand, stack);
         }
@@ -256,7 +256,7 @@ public interface ITrainingBot {
         return isUsingItem() ? getItemInMainHand() : ItemStackAccess.empty();
     }
 
-    default void beginUsingItem(EquipmentSlot hand) {
+    default void beginUsingItem(EquipmentSlotKind hand) {
         NMSBridgeManager.get().beginUsingBotItem(this, Objects.requireNonNull(hand, "hand"));
     }
 

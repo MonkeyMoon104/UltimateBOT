@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class TotemTrackerService {
@@ -21,9 +21,9 @@ public class TotemTrackerService {
     }
 
     public void onTick() {
-        EquipmentSlot offHandSlot = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHandSlot = EquipmentSlotAccess.offHand();
         ItemStack offhand = offHandSlot == null ? ItemStackAccess.empty() : bot.getItem(offHandSlot);
-        ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
+        ItemStack mainhand = bot.getItem(EquipmentSlotKind.HAND);
 
         boolean hasOffhandTotem = isTotem(offhand);
         boolean hasMainhandTotem = isTotem(mainhand);

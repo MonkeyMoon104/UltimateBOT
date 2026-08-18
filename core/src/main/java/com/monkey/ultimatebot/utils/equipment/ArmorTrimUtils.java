@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.utils.equipment;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.common.model.PlatformCapability;
 import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
@@ -11,7 +12,6 @@ import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -80,11 +80,11 @@ public final class ArmorTrimUtils {
     }
 
     public static void applyTrimSelection(
-            Map<EquipmentSlot, ItemStack> armorMap, @Nullable String patternKey, @Nullable String materialKey) {
+            Map<EquipmentSlotKind, ItemStack> armorMap, @Nullable String patternKey, @Nullable String materialKey) {
         if (!trimsEnabled()) {
             return;
         }
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : armorMap.entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : armorMap.entrySet()) {
             ItemStack piece = entry.getValue();
             if (piece == null) {
                 continue;

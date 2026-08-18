@@ -64,7 +64,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
@@ -169,7 +169,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
         EntityPlayer nativeBot = nativeBot(bot);
         PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(nativeBot.getId());
         Location botLoc = bot.asBukkitPlayer().getLocation();
-        Map<EquipmentSlot, ItemStack> equipment = currentEquipment(bot);
+        Map<EquipmentSlotKind, ItemStack> equipment = currentEquipment(bot);
         UltimateBot plugin = bot.getPlugin();
         double maxDistSq = 64.0D * 64.0D;
         for (Player online : Bukkit.getOnlinePlayers()) {
@@ -205,12 +205,12 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
         }
     }
 
-    private Map<EquipmentSlot, ItemStack> currentEquipment(ITrainingBot bot) {
-        Map<EquipmentSlot, ItemStack> equipment =
-                new java.util.EnumMap<EquipmentSlot, ItemStack>(EquipmentSlot.class);
-        EquipmentSlot[] slots = EquipmentSlot.values();
+    private Map<EquipmentSlotKind, ItemStack> currentEquipment(ITrainingBot bot) {
+        Map<EquipmentSlotKind, ItemStack> equipment =
+                new java.util.EnumMap<EquipmentSlotKind, ItemStack>(EquipmentSlotKind.class);
+        EquipmentSlotKind[] slots = EquipmentSlotKind.values();
         for (int i = 0; i < slots.length; i++) {
-            EquipmentSlot slot = slots[i];
+            EquipmentSlotKind slot = slots[i];
             if (toNmsSlot(slot) == null) {
                 continue;
             }
@@ -351,7 +351,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            EquipmentSlot hand) {
+            EquipmentSlotKind hand) {
         EntityPlayer nativeBot = nativePlayer(bot);
         nativeBot.abilities.mayBuild = true;
         EnumHand enumHand = toHand(hand);
@@ -518,10 +518,10 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
     }
 
     @Override
-    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void sendEquipment(Player viewer, ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         EntityPlayer handle = ((CraftPlayer) viewer).getHandle();
         int entityId = nativeBot(bot).getId();
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : equipment.entrySet()) {
+        for (Map.Entry<EquipmentSlotKind, ItemStack> entry : equipment.entrySet()) {
             EnumItemSlot slot = toNmsSlot(entry.getKey());
             if (slot == null) {
                 continue;
@@ -533,7 +533,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
     }
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlot, ItemStack> equipment) {
+    public void broadcastEquipment(ITrainingBot bot, Map<EquipmentSlotKind, ItemStack> equipment) {
         for (Player online : Bukkit.getOnlinePlayers()) {
             sendEquipment(online, bot, equipment);
         }
@@ -563,7 +563,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
     }
 
     @Override
-    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlot slot) {
+    public ItemStack getBotItem(ITrainingBot bot, EquipmentSlotKind slot) {
         EnumItemSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return new ItemStack(Material.AIR);
@@ -572,7 +572,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, EquipmentSlot slot, @Nullable ItemStack stack) {
+    public void setBotItem(ITrainingBot bot, EquipmentSlotKind slot, @Nullable ItemStack stack) {
         EnumItemSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return;
@@ -596,7 +596,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
     }
 
     @Override
-    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlot hand) {
+    public void beginUsingBotItem(ITrainingBot bot, EquipmentSlotKind hand) {
         nativeBot(bot).c(toHand(hand));
     }
 
@@ -751,7 +751,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
         return ((CraftPlayer) player).getHandle();
     }
 
-    private static EnumHand toHand(EquipmentSlot hand) {
+    private static EnumHand toHand(EquipmentSlotKind hand) {
         return "OFF_HAND".equals(hand.name()) ? EnumHand.OFF_HAND : EnumHand.MAIN_HAND;
     }
 
@@ -774,7 +774,7 @@ public final class NMSBridge_v1_14_R1 implements INMSBridge {
         }
     }
 
-    private static @Nullable EnumItemSlot toNmsSlot(EquipmentSlot slot) {
+    private static @Nullable EnumItemSlot toNmsSlot(EquipmentSlotKind slot) {
         String name = slot.name();
         if ("HAND".equals(name)) {
             return EnumItemSlot.MAINHAND;

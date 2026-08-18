@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.utils.armor;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.EnumMap;
@@ -8,7 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
@@ -18,11 +18,11 @@ public class ArmorCycle {
     private static final List<ArmorTier> ORDERED_TIERS =
             java.util.Collections.unmodifiableList(java.util.Arrays.asList(ArmorTier.values()));
 
-    public static Material getNextArmor(Material current, EquipmentSlot slot) {
+    public static Material getNextArmor(Material current, EquipmentSlotKind slot) {
         return getNextArmor(current, slot, ArmorTier.LEATHER, ArmorTier.maxAvailable());
     }
 
-    public static Material getNextArmor(Material current, EquipmentSlot slot, ArmorTier minTier, ArmorTier maxTier) {
+    public static Material getNextArmor(Material current, EquipmentSlotKind slot, ArmorTier minTier, ArmorTier maxTier) {
         ArmorTier resolvedMin = clampMin(minTier, maxTier);
         ArmorTier resolvedMax = clampMax(maxTier);
 
@@ -50,7 +50,7 @@ public class ArmorCycle {
         return resolvedMin.toMaterial(slot);
     }
 
-    public static Material clampArmor(Material current, EquipmentSlot slot, ArmorTier minTier, ArmorTier maxTier) {
+    public static Material clampArmor(Material current, EquipmentSlotKind slot, ArmorTier minTier, ArmorTier maxTier) {
         ArmorTier resolvedMin = clampMin(minTier, maxTier);
         ArmorTier resolvedMax = clampMax(maxTier);
 
@@ -75,24 +75,24 @@ public class ArmorCycle {
         return material == Material.AIR ? resolvedMax.toMaterial(slot) : material;
     }
 
-    public static Map<EquipmentSlot, ItemStack> getDefaultArmorFromConfig(FileConfiguration config, Plugin plugin) {
-        Map<EquipmentSlot, ItemStack> defaultArmor = new EnumMap<>(EquipmentSlot.class);
+    public static Map<EquipmentSlotKind, ItemStack> getDefaultArmorFromConfig(FileConfiguration config, Plugin plugin) {
+        Map<EquipmentSlotKind, ItemStack> defaultArmor = new EnumMap<>(EquipmentSlotKind.class);
 
         ItemStack helmet = new ItemStack(getMaterialFromConfig(config, "helmet", plugin));
         BotEquipmentUtils.applyArmorEnchants(helmet, false);
-        defaultArmor.put(EquipmentSlot.HEAD, helmet);
+        defaultArmor.put(EquipmentSlotKind.HEAD, helmet);
 
         ItemStack chestplate = new ItemStack(getMaterialFromConfig(config, "chestplate", plugin));
         BotEquipmentUtils.applyArmorEnchants(chestplate, false);
-        defaultArmor.put(EquipmentSlot.CHEST, chestplate);
+        defaultArmor.put(EquipmentSlotKind.CHEST, chestplate);
 
         ItemStack leggings = new ItemStack(getMaterialFromConfig(config, "leggings", plugin));
         BotEquipmentUtils.applyArmorEnchants(leggings, false);
-        defaultArmor.put(EquipmentSlot.LEGS, leggings);
+        defaultArmor.put(EquipmentSlotKind.LEGS, leggings);
 
         ItemStack boots = new ItemStack(getMaterialFromConfig(config, "boots", plugin));
         BotEquipmentUtils.applyArmorEnchants(boots, false);
-        defaultArmor.put(EquipmentSlot.FEET, boots);
+        defaultArmor.put(EquipmentSlotKind.FEET, boots);
 
         return defaultArmor;
     }
@@ -118,7 +118,7 @@ public class ArmorCycle {
                 break;
         }
 
-        EquipmentSlot slot = slotForKey(key);
+        EquipmentSlotKind slot = slotForKey(key);
         ArmorTier requested = parseTierName(matName);
         if (requested != null) {
             if (requested.compareTo(ArmorTier.maxAvailable()) > 0) {
@@ -157,18 +157,18 @@ public class ArmorCycle {
         return resolvedMin.compareTo(resolvedMax) > 0 ? ArmorTier.LEATHER : resolvedMin;
     }
 
-    private static EquipmentSlot slotForKey(String key) {
+    private static EquipmentSlotKind slotForKey(String key) {
         switch (key) {
             case "helmet":
-                return EquipmentSlot.HEAD;
+                return EquipmentSlotKind.HEAD;
             case "chestplate":
-                return EquipmentSlot.CHEST;
+                return EquipmentSlotKind.CHEST;
             case "leggings":
-                return EquipmentSlot.LEGS;
+                return EquipmentSlotKind.LEGS;
             case "boots":
-                return EquipmentSlot.FEET;
+                return EquipmentSlotKind.FEET;
             default:
-                return EquipmentSlot.HEAD;
+                return EquipmentSlotKind.HEAD;
         }
     }
 

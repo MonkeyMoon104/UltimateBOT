@@ -9,6 +9,7 @@ import com.monkey.ultimatebot.compat.MaterialAirAccess;
 import com.monkey.ultimatebot.config.RuntimeSettings.WorldProtectionSettings;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -24,6 +25,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
 public final class WorldProtectionService implements AutoCloseable {
+    private static final @Nullable Method BLOCK_SET_TYPE_WITH_PHYSICS = resolveSetTypeWithPhysics();
+
     private final Plugin plugin;
     private final Map<WorldBlockKey, TrackedWorldBlock> placements = new ConcurrentHashMap<>();
     private final Map<UUID, TrackedWorldEntity> combatEntities = new ConcurrentHashMap<>();
@@ -75,7 +78,7 @@ public final class WorldProtectionService implements AutoCloseable {
         WorldBlockKey key = WorldBlockKey.from(block);
         Object originalSnapshot = BlockDataAccess.capture(block);
         BlockState replacedState = block.getState();
-        block.setType(material, false);
+        setBlockTypeNoPhysics(block, material);
         if (!placementAllowed(block, replacedState, placementItem, placer)) {
             BlockDataAccess.restore(block, originalSnapshot, false);
             return false;
@@ -119,7 +122,7 @@ public final class WorldProtectionService implements AutoCloseable {
         } else if (result.dropItems()) {
             BlockBreakAccess.breakNaturally(block, tool, true);
         } else {
-            block.setType(Material.AIR, false);
+            setBlockTypeNoPhysics(block, Material.AIR);
         }
         forget(block);
         return true;
@@ -179,8 +182,6 @@ public final class WorldProtectionService implements AutoCloseable {
         if (!settings.respectProtectionPlugins()) {
             return true;
         }
-        // Fake-player bots are not in the PlayerList; protection plugins often cancel their
-        // BlockPlaceEvent. Combat rails/webs still need to place for Cart/UHC modes.
         if (plugin instanceof com.monkey.ultimatebot.UltimateBot) {
             com.monkey.ultimatebot.UltimateBot ultimateBot = (com.monkey.ultimatebot.UltimateBot) plugin;
             if (ultimateBot.getBotRegistry().getOwnerUUIDByBotUUID(placer.getUniqueId()) != null) {
@@ -263,6 +264,25 @@ public final class WorldProtectionService implements AutoCloseable {
         TrackedWorldEntity tracked = combatEntities.remove(entityId);
         if (tracked != null) {
             tracked.cancelExpiry();
+        }
+    }
+
+    private static void setBlockTypeNoPhysics(Block block, Material material) {
+        Method withPhysics = BLOCK_SET_TYPE_WITH_PHYSICS;
+        if (withPhysics != null) {
+            try {
+                withPhysics.invoke(block, material, Boolean.FALSE);
+                return;
+            } catch (ReflectiveOperationException ignored) {}
+        }
+        block.setType(material);
+    }
+
+    private static @Nullable Method resolveSetTypeWithPhysics() {
+        try {
+            return Block.class.getMethod("setType", Material.class, boolean.class);
+        } catch (NoSuchMethodException ignored) {
+            return null;
         }
     }
 

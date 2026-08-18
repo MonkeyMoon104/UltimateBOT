@@ -1,14 +1,14 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf;
 
-import org.bukkit.inventory.EquipmentSlot;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 
 public interface ITotemInventoryManager {
     boolean hasTotemInSlot(ItemStack itemStack);
 
-    void equipTotem(EquipmentSlot slot);
+    void equipTotem(EquipmentSlotKind slot);
 
-    void removeTotem(EquipmentSlot slot);
+    void removeTotem(EquipmentSlotKind slot);
 
     int getEquippedTotemCount();
 

@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.inventory.helper;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IEquipmentBroadcaster;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.IItemManager;
@@ -8,7 +9,6 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.inter.ISlotMan
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Map;
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class ItemManager implements IItemManager {
@@ -60,9 +60,9 @@ public class ItemManager implements IItemManager {
         if (stack == null || ItemStackAccess.isEmpty(stack)) {
             return;
         }
-        ItemStack hand = bot.getItem(EquipmentSlot.HAND);
+        ItemStack hand = bot.getItem(EquipmentSlotKind.HAND);
         if (hand.getType() != stack.getType()) {
-            bot.setItem(EquipmentSlot.HAND, stack);
+            bot.setItem(EquipmentSlotKind.HAND, stack);
         }
     }
 }

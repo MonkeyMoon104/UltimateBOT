@@ -276,7 +276,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
             Block clicked,
             BlockFace face,
             Location hitLocation,
-            org.bukkit.inventory.EquipmentSlot hand) {
+            com.monkey.ultimatebot.common.model.EquipmentSlotKind hand) {
         Player nativeBot = nativePlayer(bot);
         net.minecraft.world.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
         BlockPos pos = BlockPos.containing(clicked.getX(), clicked.getY(), clicked.getZ());
@@ -332,7 +332,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     @Override
-    public void sendEquipment(org.bukkit.entity.Player viewer, ITrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+    public void sendEquipment(org.bukkit.entity.Player viewer, ITrainingBot bot, Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
         List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
         if (!converted.isEmpty()) {
             ((CraftPlayer) viewer).getHandle().connection.send(new ClientboundSetEquipmentPacket(nativeBot(bot).getId(), converted));
@@ -340,7 +340,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     @Override
-    public void broadcastEquipment(ITrainingBot bot, Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+    public void broadcastEquipment(ITrainingBot bot, Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
         List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> converted = toNmsEquipment(equipment);
         if (converted.isEmpty()) {
             return;
@@ -360,7 +360,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     @Override
-    public ItemStack getBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot slot) {
+    public ItemStack getBotItem(ITrainingBot bot, com.monkey.ultimatebot.common.model.EquipmentSlotKind slot) {
         net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return ItemStackAccess.empty();
@@ -369,7 +369,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     @Override
-    public void setBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot slot, org.bukkit.inventory.@org.jspecify.annotations.Nullable ItemStack stack) {
+    public void setBotItem(ITrainingBot bot, com.monkey.ultimatebot.common.model.EquipmentSlotKind slot, org.bukkit.inventory.@org.jspecify.annotations.Nullable ItemStack stack) {
         net.minecraft.world.entity.EquipmentSlot nmsSlot = toNmsSlot(slot);
         if (nmsSlot == null) {
             return;
@@ -383,7 +383,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     @Override
-    public void beginUsingBotItem(ITrainingBot bot, org.bukkit.inventory.EquipmentSlot hand) {
+    public void beginUsingBotItem(ITrainingBot bot, com.monkey.ultimatebot.common.model.EquipmentSlotKind hand) {
         nativeBot(bot).startUsingItem(toInteractionHand(hand));
     }
 
@@ -491,8 +491,8 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
         throw new IllegalArgumentException("Unsupported player implementation: " + player.getClass().getName());
     }
 
-    private static InteractionHand toInteractionHand(org.bukkit.inventory.EquipmentSlot hand) {
-        return hand == org.bukkit.inventory.EquipmentSlot.OFF_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
+    private static InteractionHand toInteractionHand(com.monkey.ultimatebot.common.model.EquipmentSlotKind hand) {
+        return hand == com.monkey.ultimatebot.common.model.EquipmentSlotKind.OFF_HAND ? InteractionHand.OFF_HAND : InteractionHand.MAIN_HAND;
     }
 
     private static Direction toDirection(BlockFace face) {
@@ -507,7 +507,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
         };
     }
 
-    private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable EquipmentSlot toNmsSlot(org.bukkit.inventory.EquipmentSlot slot) {
+    private static net.minecraft.world.entity.@org.jspecify.annotations.Nullable EquipmentSlot toNmsSlot(com.monkey.ultimatebot.common.model.EquipmentSlotKind slot) {
         return switch (slot) {
             case HAND -> net.minecraft.world.entity.EquipmentSlot.MAINHAND;
             case OFF_HAND -> net.minecraft.world.entity.EquipmentSlot.OFFHAND;
@@ -520,7 +520,7 @@ public class NMSBridge_v1_21_11 implements INMSBridge {
     }
 
     private static List<Pair<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack>> toNmsEquipment(
-            Map<org.bukkit.inventory.EquipmentSlot, ItemStack> equipment) {
+            Map<com.monkey.ultimatebot.common.model.EquipmentSlotKind, ItemStack> equipment) {
         return equipment.entrySet().stream()
                 .map(entry -> {
                     net.minecraft.world.entity.EquipmentSlot slot = toNmsSlot(entry.getKey());

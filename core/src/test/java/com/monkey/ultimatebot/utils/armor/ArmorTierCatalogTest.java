@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.utils.armor;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.bukkit.Material;
-import org.bukkit.inventory.EquipmentSlot;
 import org.junit.jupiter.api.Test;
 
 class ArmorTierCatalogTest {
@@ -18,7 +18,7 @@ class ArmorTierCatalogTest {
 
     @Test
     void toMaterialResolvesViaCatalog() {
-        Material helmet = ArmorTier.DIAMOND.toMaterial(EquipmentSlot.HEAD);
+        Material helmet = ArmorTier.DIAMOND.toMaterial(EquipmentSlotKind.HEAD);
         assertThat(helmet).isEqualTo(Material.DIAMOND_HELMET);
     }
 }

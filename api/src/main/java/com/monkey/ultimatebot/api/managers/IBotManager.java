@@ -17,13 +17,13 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.common.model.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.CombatTuning;
 import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -238,7 +238,7 @@ public interface IBotManager {
     boolean resetCombatTuningByBotUUID(UUID botUUID);
 
     boolean updateArmor(
-            UUID ownerUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
+            UUID ownerUUID, Map<EquipmentSlotKind, ItemStack> armor, Map<EquipmentSlotKind, Boolean> blastProtection);
 
     /** Replaces all standard armor pieces with one validated armor tier. */
     boolean updateArmorType(UUID ownerUUID, BotArmorTier armorType);
@@ -248,7 +248,7 @@ public interface IBotManager {
 
     /** Replaces armor contents using the runtime bot UUID. */
     boolean updateArmorByBotUUID(
-            UUID botUUID, Map<EquipmentSlot, ItemStack> armor, Map<EquipmentSlot, Boolean> blastProtection);
+            UUID botUUID, Map<EquipmentSlotKind, ItemStack> armor, Map<EquipmentSlotKind, Boolean> blastProtection);
 
     boolean updateEquipment(UUID ownerUUID, Map<Integer, ItemStack> equipment);
 

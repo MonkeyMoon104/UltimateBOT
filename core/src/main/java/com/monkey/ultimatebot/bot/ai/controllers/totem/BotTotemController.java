@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem;
 
+import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.helper.EquipmentBroadcaster;
@@ -19,7 +20,6 @@ import com.monkey.ultimatebot.common.model.CombatMode;
 import com.monkey.ultimatebot.compat.EquipmentSlotAccess;
 import com.monkey.ultimatebot.compat.ItemStackAccess;
 import java.util.Objects;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class BotTotemController {
@@ -46,12 +46,12 @@ public class BotTotemController {
             return;
         }
 
-        EquipmentSlot offHandSlot = EquipmentSlotAccess.offHand();
+        EquipmentSlotKind offHandSlot = EquipmentSlotAccess.offHand();
         if (offHandSlot == null) {
             return;
         }
         ItemStack offhand = bot.getItem(offHandSlot);
-        ItemStack mainhand = bot.getItem(EquipmentSlot.HAND);
+        ItemStack mainhand = bot.getItem(EquipmentSlotKind.HAND);
 
         int totemCount = bot.getTotemCount();
         boolean isCombat = bot.isCombat();
