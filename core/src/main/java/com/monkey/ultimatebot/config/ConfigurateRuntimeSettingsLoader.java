@@ -48,13 +48,13 @@ public final class ConfigurateRuntimeSettingsLoader {
 
     private RuntimeSettings.WorldProtectionSettings readWorldProtection(
             ConfigurationNode node, RuntimeSettings.WorldProtectionSettings defaults, ConfigLoadReport report) {
-        report.incrementKeysRead(); // combat-block-lifetime-seconds
-        report.incrementKeysRead(); // max-active-combat-blocks
-        report.incrementKeysRead(); // combat-entity-lifetime-seconds
-        report.incrementKeysRead(); // max-active-combat-entities
-        report.incrementKeysRead(); // allow-bot-explosion-block-damage
-        report.incrementKeysRead(); // anti-dupe
-        report.incrementKeysRead(); // respect-protection-plugins
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        report.incrementKeysRead();
         int lifetimeSeconds = nonNegativeOrDefault(
                 node.node("combat-block-lifetime-seconds").getInt(defaults.combatBlockLifetimeSeconds()),
                 defaults.combatBlockLifetimeSeconds(),
@@ -91,8 +91,8 @@ public final class ConfigurateRuntimeSettingsLoader {
 
     private RuntimeSettings.CacheSettings readCache(
             ConfigurationNode node, RuntimeSettings.CacheSettings defaults, String cacheName, ConfigLoadReport report) {
-        report.incrementKeysRead(); // maximum-size
-        report.incrementKeysRead(); // expire-after-write-ms
+        report.incrementKeysRead();
+        report.incrementKeysRead();
         long maximumSize = positiveOrDefault(
                 node.node("maximum-size").getLong(defaults.maximumSize()),
                 defaults.maximumSize(),
