@@ -30,7 +30,6 @@ import com.monkey.ultimatebot.listener.BotExplosionListener;
 import com.monkey.ultimatebot.listener.BotRuntimeEventListener;
 import com.monkey.ultimatebot.listener.PlayerCheckListener;
 import com.monkey.ultimatebot.listener.PlayerTagListener;
-import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import com.monkey.ultimatebot.metrics.BotMetrics;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import com.monkey.ultimatebot.placeholders.PlaceholderApiSupport;
@@ -48,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SimplePie;
@@ -94,13 +92,13 @@ public final class UltimateBot extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.wrapperManager = new WrapperManager(this);
-        UltimateBotLogging.StartupSession startup = UltimateBotLogging.beginBootstrap(this);
+        com.monkey.ultimatebot.logging.BootLogger boot = new com.monkey.ultimatebot.logging.BootLogger(this);
 
         try {
-            new BootstrapCoordinator(startup).run();
+            new BootstrapCoordinator(boot).run();
 
         } catch (Throwable error) {
-            startup.fail(error);
+            boot.fail(error);
             new ShutdownCoordinator().run();
             throw error;
         }
@@ -254,28 +252,6 @@ public final class UltimateBot extends JavaPlugin {
         registeredListeners.add(label);
     }
 
-    private void registerOptionalListener(
-            UltimateBotLogging.StartupSession startup,
-            List<String> registeredListeners,
-            List<String> disabledListeners,
-            String label,
-            Supplier<Boolean> availabilityCheck,
-            String unavailableReason,
-            Supplier<? extends Listener> listenerSupplier) {
-        if (!availabilityCheck.get()) {
-            disabledListeners.add(label + " -> " + unavailableReason);
-            startup.warn("Listener " + label, "disabled -> " + unavailableReason);
-            return;
-        }
-
-        try {
-            registerListener(registeredListeners, label, listenerSupplier.get());
-        } catch (Throwable error) {
-            String reason = "registration failed: " + formatListenerError(error);
-            disabledListeners.add(label + " -> " + reason);
-            startup.warn("Listener " + label, "disabled -> " + reason);
-        }
-    }
 
     private boolean isCombatLogXListenerAvailable() {
         return getServer().getPluginManager().getPlugin("CombatLogX") != null
@@ -387,10 +363,10 @@ public final class UltimateBot extends JavaPlugin {
     }
 
     private final class BootstrapCoordinator {
-        private final UltimateBotLogging.StartupSession startup;
+        private final com.monkey.ultimatebot.logging.BootLogger boot;
 
-        private BootstrapCoordinator(UltimateBotLogging.StartupSession startup) {
-            this.startup = startup;
+        private BootstrapCoordinator(com.monkey.ultimatebot.logging.BootLogger boot) {
+            this.boot = boot;
         }
 
         private void run() {
@@ -403,12 +379,11 @@ public final class UltimateBot extends JavaPlugin {
             registerCommandsAndListeners(api);
             initializePlaceholders();
             finalizeStartup(api);
-            startup.completeBootstrap();
-            UltimateBotLogging.schedulePostEnableDiagnostics(UltimateBot.this, startup);
+            boot.complete();
         }
 
         private void configureFilesAndLanguage() {
-            startup.beginPhase(1, "Boot", "Configuration");
+            boot.beginPhase(1, "Config", "Configuration");
             saveDefaultConfig();
             if (!getDataFolder().toPath().resolve("combat-modes.yml").toFile().isFile()) {
                 saveResource("combat-modes.yml", false);
@@ -419,84 +394,80 @@ public final class UltimateBot extends JavaPlugin {
             combatProfileLoader = new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
             combatProfileCatalog = combatProfileLoader.load();
             reloadLanguageConfiguration();
-            startup.ready("Config", "default file verified");
-            startup.detail("Path", getDataFolder().toPath().resolve("config.yml").toString());
-            startup.detail(
-                    "Language",
-                    Objects.requireNonNull(languageManager, "languageManager is not initialized")
+
+            com.monkey.ultimatebot.config.ConfigLoadReport report = runtimeSettingsLoader.lastReport();
+            boot.config("Keys read: " + report.keysRead() + " | invalid: " + report.invalidCount());
+            for (com.monkey.ultimatebot.config.ConfigLoadReport.InvalidKey key : report.invalidKeys()) {
+                boot.config("\"" + key.path() + "\" = " + key.invalidValue() + " -> default " + key.defaultValue());
+            }
+            boot.config("Language -> "
+                    + Objects.requireNonNull(languageManager, "languageManager is not initialized")
                             .getActiveLanguageFileName());
-            startup.detail(
-                    "Profile",
-                    getConfig().getString("bot.name", "CrystalBot")
-                            + " | default totems=" + getConfig().getInt("bot.default-totem-count")
-                            + ", normal max=" + getConfig().getInt("bot.max-totem-normal")
-                            + ", event max=" + getConfig().getInt("bot.max-totem-event"));
-            startup.completePhase("config ready");
+            boot.completePhase("config ready");
         }
 
         private void validateLicense() {
-            startup.beginPhase(2, "License", "Validation");
+            boot.beginPhase(2, "Boot", "License Validation");
             licenseManager = new LicenseManager(UltimateBot.this);
             LicenseStartupResult licenseResult = licenseManager.validateOnStartup();
             if (!licenseResult.allowed()) {
-                startup.warn("License", licenseResult.reasonCode() + " -> " + licenseResult.message());
+                boot.warn("License " + licenseResult.reasonCode() + " -> " + licenseResult.message());
                 throw new IllegalStateException("License validation failed: " + licenseResult.reasonCode());
             }
             if (licenseResult.graceMode()) {
-                startup.warn("License", licenseResult.message());
+                boot.warn("License -> " + licenseResult.message());
             } else {
-                startup.ready("License", licenseResult.message());
+                boot.boot("License -> " + licenseResult.message());
             }
-            startup.completePhase("license ready");
+            boot.completePhase("license ready");
         }
 
         private void checkUpdates() {
-            startup.beginPhase(3, "Update", "Availability");
+            boot.beginPhase(3, "Boot", "Update Check");
             updateManager = new UpdateManager(UltimateBot.this);
             UpdateStartupResult updateResult = updateManager.checkOnStartup();
-            if (updateResult.checkFailed()) {
-                startup.warn("Update", updateResult.message());
-            } else if (updateResult.updateAvailable()) {
-                startup.warn("Update", updateResult.message());
+            if (updateResult.checkFailed() || updateResult.updateAvailable()) {
+                boot.warn("Update -> " + updateResult.message());
             } else {
-                startup.ready("Update", updateResult.message());
+                boot.boot("Update -> " + updateResult.message());
             }
-            startup.completePhase("update check completed");
+            boot.completePhase("update check completed");
         }
 
         private void initializeNmsCompatibility() {
-            startup.beginPhase(4, "NMS", "Compatibility");
+            boot.beginPhase(4, "NMS", "Compatibility");
             NMSBridgeManager.init(getLogger());
             Objects.requireNonNull(combatProfileCatalog, "combatProfileCatalog is not initialized")
                     .bindPlatformCapabilities(NMSBridgeManager.capabilities());
+
+            new com.monkey.ultimatebot.logging.NmsBootScanner(boot).scan();
+
             if (!NMSBridgeManager.isBotRuntimeSupported()) {
-                startup.warn(
-                        "NMS",
-                        "Limited mode: fake-player bots are not implemented for this Minecraft revision yet."
-                                + " Plugin remains enabled.");
+                boot.warn("NMS -> Limited mode: fake-player bots not implemented for this revision");
             }
             List<CombatMode> platformDisabled = combatProfileCatalog.platformDisabledModes();
             if (!platformDisabled.isEmpty()) {
-                startup.detail(
-                        "Platform-disabled modes",
-                        platformDisabled.stream().map(CombatMode::name).collect(Collectors.joining(", ")));
-            } else {
-                startup.detail("Platform-disabled modes", "none");
+                boot.nms("Platform-disabled modes -> "
+                        + platformDisabled.stream().map(CombatMode::name).collect(Collectors.joining(", ")));
             }
-            startup.markNmsBridge(
-                    NMSBridgeManager.get().getClass().getSimpleName(), NMSBridgeManager.getSupportedVersions());
-            startup.detail("Catalog", UltimateBotLogging.catalogSummary());
-            startup.detail("Controllers", UltimateBotLogging.controllerSummary());
-            startup.completePhase("server compatibility resolved");
+            boot.completePhase("server compatibility resolved");
         }
 
         private void initializeRuntimeCore() {
-            startup.beginPhase(5, "Core", "Runtime");
+            boot.beginPhase(5, "Module", "Runtime Services");
+            long t0 = System.currentTimeMillis();
+
             targetingService = new TargetingService(runtimeSettings.targetCache());
+            boot.module("TargetingService", System.currentTimeMillis() - t0);
+
+            t0 = System.currentTimeMillis();
             playerOptions = new PlayerOptions();
             botRegistry = new BotRegistry();
             extensionRegistry = new CoreExtensionRegistry();
             addonRegistry = new CoreAddonRegistry();
+            boot.module("BotRegistry", System.currentTimeMillis() - t0);
+
+            t0 = System.currentTimeMillis();
             botMetrics = new BotMetrics(
                     getConfig().getBoolean("addons.metrics.enabled", false),
                     getConfig().getBoolean("addons.metrics.prometheus-endpoint-enabled", false),
@@ -507,36 +478,26 @@ public final class UltimateBot extends JavaPlugin {
                     getDataFolder().toPath(),
                     getClassLoader(),
                     getLogger());
+            boot.module("BotMetrics", System.currentTimeMillis() - t0);
+
+            t0 = System.currentTimeMillis();
             botEventDispatcher = new BotEventDispatcher(UltimateBot.this, botMetrics);
             worldGuardPvpService = new WorldGuardPvpService(UltimateBot.this);
             worldProtectionService = new WorldProtectionService(UltimateBot.this, runtimeSettings.worldProtection());
             botManager = new BotManager(UltimateBot.this);
-            startup.ready("Runtime", "services created");
-            startup.detail(
-                    "Services",
-                    "TargetingService, PlayerOptions, BotRegistry, BotManager, BotMetrics, WrapperManager, WorldGuardPvpService, WorldProtectionService");
-            startup.detail("Caches", "bots=" + botRegistry.size() + " | playerOptions=" + playerOptions.size());
-            startup.detail(
-                    "World protection",
-                    "allowBotExplosionBlockDamage="
-                            + runtimeSettings.worldProtection().allowBotExplosionBlockDamage()
-                            + " | antiDupe=" + runtimeSettings.worldProtection().antiDupe()
-                            + " | combatBlockLimit="
-                            + runtimeSettings.worldProtection().maxActiveCombatBlocks()
-                            + " | combatEntityLimit="
-                            + runtimeSettings.worldProtection().maxActiveCombatEntities());
-            startup.detail(
-                    "Observability",
-                    botMetrics.isEnabled()
-                            ? "Micrometer enabled | prometheus=" + botMetrics.isPrometheusEndpointEnabled()
-                            : "disabled");
-            WrapperManager wrappers = Objects.requireNonNull(wrapperManager, "wrapperManager is not initialized");
-            startup.detail("Wrappers", wrappers.describeActiveWrapper());
-            startup.completePhase("runtime core created");
+            boot.module("BotManager", System.currentTimeMillis() - t0);
+
+            if (worldGuardPvpService.isAvailable()) {
+                boot.boot("WorldGuard -> found, PvP region check enabled");
+            } else {
+                boot.warn("WorldGuard -> not found, PvP region check disabled");
+            }
+
+            boot.completePhase("runtime core created");
         }
 
         private UltimateBotAPI wireApi() {
-            startup.beginPhase(6, "API", "Wiring");
+            boot.beginPhase(6, "Boot", "API Wiring");
             BotManager manager = Objects.requireNonNull(botManager, "botManager is not initialized");
             BotRegistry registry = Objects.requireNonNull(botRegistry, "botRegistry is not initialized");
             PlayerOptions options = Objects.requireNonNull(playerOptions, "playerOptions is not initialized");
@@ -549,15 +510,13 @@ public final class UltimateBot extends JavaPlugin {
                     new CoreBotRegistryAdapter(registry),
                     extensions,
                     addons);
-            startup.ready("API", "adapters wired");
-            startup.detail("Manager", UltimateBotLogging.apiManagerSummary());
-            startup.detail("Registry", UltimateBotLogging.apiRegistrySummary());
-            startup.completePhase("public API prepared");
+            boot.boot("API -> adapters wired");
+            boot.completePhase("public API prepared");
             return api;
         }
 
         private void registerCommandsAndListeners(UltimateBotAPI api) {
-            startup.beginPhase(7, "Hooks", "Commands and Listeners");
+            boot.beginPhase(7, "Module", "Commands and Listeners");
             List<String> registeredCommands = Collections.unmodifiableList(java.util.Arrays.asList(
                     "bot", "botevent", "botally", "botteamally", "ultimatebotreload"));
             BukkitLampConfig<BukkitCommandActor> lampConfig = lampConfigForPlatform();
@@ -570,7 +529,6 @@ public final class UltimateBot extends JavaPlugin {
                             new BotAllyCommand(UltimateBot.this),
                             new BotTeamAllyCommand(UltimateBot.this),
                             new ReloadCommand(UltimateBot.this));
-            startup.markCommands(registeredCommands);
 
             List<String> registeredListeners = new ArrayList<>();
             List<String> disabledListeners = new ArrayList<>();
@@ -580,9 +538,15 @@ public final class UltimateBot extends JavaPlugin {
             BotRegistry registry = Objects.requireNonNull(botRegistry, "botRegistry is not initialized");
             WorldProtectionService protectionService =
                     Objects.requireNonNull(worldProtectionService, "worldProtectionService is not initialized");
+
+            long t0 = System.currentTimeMillis();
             addonEngine = new UltimateBotAddonEngine(UltimateBot.this, api, extensions, addons);
             int externalAddons = addonEngine.loadAll();
-            startup.detail("External addons", Integer.toString(externalAddons));
+            boot.module("AddonEngine", System.currentTimeMillis() - t0);
+            if (externalAddons > 0) {
+                boot.boot("External addons -> " + externalAddons + " loaded");
+            }
+
             registerListener(
                     registeredListeners, "extension lifecycle", new ExtensionOwnerListener(UltimateBot.this, extensions));
             if (getConfig().getBoolean("addons.guard.enabled", true)) {
@@ -600,76 +564,72 @@ public final class UltimateBot extends JavaPlugin {
                     registeredListeners, "world protection", new WorldProtectionListener(protectionService));
             registerListener(registeredListeners, "bot runtime events", new BotRuntimeEventListener(UltimateBot.this));
             registerListener(registeredListeners, "required", new PlayerCheckListener(UltimateBot.this));
-            registerOptionalListener(
-                    startup,
-                    registeredListeners,
-                    disabledListeners,
-                    "optional integration",
-                    UltimateBot.this::isCombatLogXListenerAvailable,
-                    "CombatLogX dependency unavailable",
-                    () -> new PlayerTagListener(UltimateBot.this));
-            startup.markListeners(registeredListeners, disabledListeners);
-            startup.ready("Hooks", "registrations completed");
-            startup.detail("Commands", joinOrNone(registeredCommands));
-            startup.detail("Listeners", startup.listenerStateCountSummary());
-            if (!disabledListeners.isEmpty()) {
-                startup.detail("Listener fallback", joinOrNone(disabledListeners));
+
+            boolean combatLogXAvailable = isCombatLogXListenerAvailable();
+            if (combatLogXAvailable) {
+                try {
+                    registerListener(registeredListeners, "optional integration",
+                            new PlayerTagListener(UltimateBot.this));
+                    boot.boot("CombatLogX -> found, tag listener registered");
+                } catch (Throwable error) {
+                    disabledListeners.add("optional integration -> " + formatListenerError(error));
+                    boot.warn("CombatLogX -> registration failed: " + formatListenerError(error));
+                }
+            } else {
+                disabledListeners.add("optional integration -> CombatLogX dependency unavailable");
+                boot.warn("CombatLogX -> not found, tag listener disabled");
             }
-            startup.completePhase("hooks registered");
+
+            boot.boot("Commands -> " + registeredCommands.size()
+                    + " | Listeners -> active=" + registeredListeners.size()
+                    + " disabled=" + disabledListeners.size());
+            boot.completePhase("hooks registered");
         }
 
         private void initializePlaceholders() {
-            startup.beginPhase(8, "PAPI", "Placeholder Integration");
+            boot.beginPhase(8, "Boot", "Placeholder Integration");
             if (PlaceholderApiSupport.isAvailable()) {
                 placeholderCoordinator = PlaceholderApiSupport.createRegistration(UltimateBot.this);
                 if (placeholderCoordinator != null) {
-                    boolean placeholderRegistered = placeholderCoordinator.register();
-                    List<String> placeholderKeys = placeholderCoordinator.getRegisteredPlaceholderKeys();
-                    startup.markPlaceholders(true, placeholderRegistered, placeholderKeys);
-                    startup.detail("Namespace", placeholderCoordinator.getIdentifier());
-                    startup.detail("Placeholders", placeholderKeys.size() + " -> " + joinOrNone(placeholderKeys));
-                    if (placeholderRegistered) {
-                        startup.ready("PlaceholderAPI", "hook attached");
+                    boolean registered = placeholderCoordinator.register();
+                    List<String> keys = placeholderCoordinator.getRegisteredPlaceholderKeys();
+                    if (registered) {
+                        boot.boot("PlaceholderAPI -> found, " + keys.size() + " placeholders registered");
                     } else {
-                        startup.warn("PlaceholderAPI", "hook failed");
+                        boot.warn("PlaceholderAPI -> found, hook registration failed");
                     }
                 } else {
-                    startup.markPlaceholders(true, false, Collections.emptyList());
-                    startup.warn("PlaceholderAPI", "hook initialization failed");
+                    boot.warn("PlaceholderAPI -> found, hook initialization failed");
                 }
             } else {
-                startup.markPlaceholders(false, false, Collections.emptyList());
-                startup.warn("PlaceholderAPI", "not found");
+                boot.warn("PlaceholderAPI -> not found, placeholders disabled");
             }
-            startup.completePhase("placeholder phase completed");
+            boot.completePhase("placeholder phase completed");
         }
 
         private void finalizeStartup(UltimateBotAPI api) {
-            startup.beginPhase(9, "Boot", "Finalize");
+            boot.beginPhase(9, "Boot", "Finalize");
             UltimateBotAPI.register(api);
-            UltimateBotLogging.logApiRegistered(getLogger(), api);
             getServer().getPluginManager().callEvent(new UltimateBotReadyEvent(api));
-            startup.ready("Event", UltimateBotReadyEvent.class.getSimpleName() + " fired");
+            boot.boot("UltimateBotReadyEvent fired");
             remoteApiServer = new RemoteApiServer(UltimateBot.this, api);
             remoteApiServer.start();
 
             try {
                 Metrics metrics = new Metrics(UltimateBot.this, BSTATS_PLUGIN_ID);
                 metrics.addCustomChart(new SimplePie("plugin_version", () -> PluginMetaAccess.version(UltimateBot.this)));
-                startup.ready("bStats", "metrics enabled");
+                boot.boot("bStats -> metrics enabled");
             } catch (Throwable metricsError) {
-                startup.warn("bStats", "metrics init failed -> " + formatListenerError(metricsError));
+                boot.warn("bStats -> metrics init failed: " + formatListenerError(metricsError));
             }
 
             if (licenseManager != null) {
                 licenseManager.startHeartbeat();
-                startup.ready("License", "heartbeat started");
             }
             if (updateManager != null) {
                 updateManager.startRuntime();
-                startup.ready("Update", "runtime notifications enabled");
             }
-            startup.completePhase("enable sequence completed");
+            boot.completePhase("enable sequence completed");
         }
     }
 

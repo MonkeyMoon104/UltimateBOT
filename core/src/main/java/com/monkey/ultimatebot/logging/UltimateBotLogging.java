@@ -20,15 +20,17 @@ public final class UltimateBotLogging {
 
     private static final String RESET = "\u001B[0m";
     private static final String BOLD = "\u001B[1m";
-    private static final String SILVER = "\u001B[38;5;250m";
-    private static final String WHITE = "\u001B[97m";
-    private static final String GOLD = "\u001B[38;5;214m";
-    private static final String CYAN = "\u001B[96m";
-    private static final String BLUE = "\u001B[94m";
-    private static final String GREEN = "\u001B[92m";
-    private static final String YELLOW = "\u001B[93m";
-    private static final String RED = "\u001B[91m";
-    private static final String MAGENTA = "\u001B[95m";
+    private static final String SILVER = "\u001B[38;5;248m";
+    private static final String WHITE = "\u001B[38;5;255m";
+    private static final String CYAN = "\u001B[38;5;45m";
+    private static final String BLUE = "\u001B[38;5;39m";
+    private static final String PURPLE = "\u001B[38;5;129m";
+    private static final String GREEN = "\u001B[38;5;46m";
+    private static final String YELLOW = "\u001B[38;5;226m";
+    private static final String ORANGE = "\u001B[38;5;208m";
+    private static final String RED = "\u001B[38;5;196m";
+    private static final String PINK = "\u001B[38;5;200m";
+    private static final int SECTION_WIDTH = 72;
 
     private static final int STARTUP_PHASES = 9;
     private static final long WARMUP_REPORT_DELAY_TICKS = 20L;
@@ -38,6 +40,11 @@ public final class UltimateBotLogging {
 
     private UltimateBotLogging() {}
 
+    public static BootLogger beginBoot(UltimateBot plugin) {
+        return new BootLogger(plugin);
+    }
+
+    @Deprecated
     public static StartupSession beginBootstrap(UltimateBot plugin) {
         return new StartupSession(plugin);
     }
@@ -83,7 +90,7 @@ public final class UltimateBotLogging {
             Logger logger, String minecraftVersion, String className, String supportedVersions) {
         info(logger, "NMS", "Minecraft -> " + minecraftVersion);
         detail(logger, "NMS", "Bridge -> " + className.substring(className.lastIndexOf('.') + 1));
-        detail(logger, "NMS", "Supported -> " + supportedVersions);
+        detail(logger, "NMS", "Profile -> legacy + modern");
     }
 
     public static void logNmsUnsupportedVersion(Logger logger, String minecraftVersion, String supportedVersions) {
@@ -117,21 +124,55 @@ public final class UltimateBotLogging {
     public static void info(Logger logger, String module, String message) {
         emit(logger, Level.INFO, module, WHITE, message);
     }
+    static void infoWithAccent(Logger logger, String module, String accentModule, String message) {
+        emit(logger, Level.INFO, module, accentModule, WHITE, message);
+    }
 
     public static void detail(Logger logger, String module, String message) {
-        emit(logger, Level.INFO, module, SILVER, "> " + message);
+        emit(logger, Level.INFO, module, SILVER, "-> " + message);
+    }
+    static void detailWithAccent(Logger logger, String module, String accentModule, String message) {
+        emit(logger, Level.INFO, module, accentModule, SILVER, "-> " + message);
     }
 
     public static void success(Logger logger, String module, String message) {
         emit(logger, Level.INFO, module, GREEN, "+ " + message);
     }
+    static void successWithAccent(Logger logger, String module, String accentModule, String message) {
+        emit(logger, Level.INFO, module, accentModule, GREEN, "+ " + message);
+    }
 
     public static void warn(Logger logger, String module, String message) {
-        emit(logger, Level.WARNING, module, YELLOW, "! " + message);
+        emit(logger, Level.WARNING, module, ORANGE, "! " + message);
+    }
+    static void warnWithAccent(Logger logger, String module, String accentModule, String message) {
+        emit(logger, Level.WARNING, module, accentModule, ORANGE, "! " + message);
     }
 
     public static void error(Logger logger, String module, String message, Throwable error) {
         logger.log(Level.SEVERE, format(module, RED, "x " + message, RED), error);
+    }
+    static void errorWithAccent(Logger logger, String module, String accentModule, String message, Throwable error) {
+        logger.log(Level.SEVERE, format(module, moduleColor(accentModule), "x " + message, RED), error);
+    }
+
+    static void bootBanner(Logger logger, String module, String... lines) {
+        String accent = moduleColor(module);
+        String top = repeatChar('=', SECTION_WIDTH);
+        logger.info(BOLD + accent + top + RESET);
+        for (String line : lines) {
+            logger.info(format(module, accent, fit(line, SECTION_WIDTH), WHITE));
+        }
+        logger.info(BOLD + accent + top + RESET);
+    }
+
+    static void sectionDivider(Logger logger, String module, String title) {
+        String accent = moduleColor(module);
+        String top = repeatChar('-', SECTION_WIDTH);
+        String row = fit(title, SECTION_WIDTH);
+        logger.info(BOLD + accent + top + RESET);
+        logger.info(format(module, accent, row, WHITE));
+        logger.info(BOLD + accent + top + RESET);
     }
 
     private static void banner(Logger logger, String module, String messageColor, String... lines) {
@@ -144,7 +185,7 @@ public final class UltimateBotLogging {
     }
 
     private static void separator(Logger logger, String color, char symbol) {
-        logger.info(BOLD + color + repeatChar(String.valueOf(symbol).charAt(0), 58) + RESET);
+        logger.info(BOLD + color + repeatChar(String.valueOf(symbol).charAt(0), SECTION_WIDTH) + RESET);
     }
 
     private static void emit(Logger logger, Level level, String module, String messageColor, String message) {
@@ -158,8 +199,34 @@ public final class UltimateBotLogging {
         }
     }
 
+    private static void emit(
+            Logger logger, Level level, String module, String accentModule, String messageColor, String message) {
+        String line = format(module, moduleColor(accentModule), message, messageColor);
+        if (Level.INFO.equals(level)) {
+            logger.info(line);
+        } else if (Level.WARNING.equals(level)) {
+            logger.warning(line);
+        } else {
+            logger.log(level, line);
+        }
+    }
+
     private static String format(String module, String accentColor, String message, String messageColor) {
-        return BOLD + accentColor + "[" + module + "]" + RESET + " " + messageColor + consoleSafe(message) + RESET;
+        return BOLD + accentColor + "[" + module.toUpperCase(Locale.ROOT) + "]" + RESET
+                + " " + messageColor + consoleSafe(message) + RESET;
+    }
+
+    private static String fit(String text, int max) {
+        if (text == null) {
+            return "";
+        }
+        if (text.length() <= max) {
+            return text;
+        }
+        if (max <= 3) {
+            return text.substring(0, Math.max(0, max));
+        }
+        return text.substring(0, max - 3) + "...";
     }
 
     private static String consoleSafe(String message) {
@@ -175,24 +242,50 @@ public final class UltimateBotLogging {
                 .replace('\u2026', '.');
     }
 
+    static String formatLine(String module, String message) {
+        return format(module, moduleColor(module), message, WHITE);
+    }
+
     private static String moduleColor(String module) {
         switch (module) {
             case "Boot":
-                return GOLD;
+                return CYAN;
             case "License":
                 return YELLOW;
             case "Update":
-                return CYAN;
-            case "NMS":
                 return BLUE;
+            case "NMS":
+                return PURPLE;
             case "Core":
+                return BLUE;
+            case "Config":
+                return GREEN;
+            case "Module":
                 return CYAN;
             case "API":
-                return GREEN;
+                return BLUE;
             case "Hooks":
-                return MAGENTA;
+                return PINK;
             case "PAPI":
-                return YELLOW;
+                return ORANGE;
+            case "Phase01":
+                return "\u001B[38;5;46m";
+            case "Phase02":
+                return "\u001B[38;5;226m";
+            case "Phase03":
+                return "\u001B[38;5;39m";
+            case "Phase04":
+                return "\u001B[38;5;129m";
+            case "Phase05":
+                return "\u001B[38;5;51m";
+            case "Phase06":
+                return "\u001B[38;5;208m";
+            case "Phase07":
+                return "\u001B[38;5;200m";
+            case "Phase08":
+                return "\u001B[38;5;118m";
+            case "Phase09":
+                return "\u001B[38;5;196m";
             default:
                 return WHITE;
         }

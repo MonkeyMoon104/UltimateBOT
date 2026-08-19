@@ -16,6 +16,8 @@
 
 -keep class com.monkey.ultimatebot.nms.INMSBridge { *; }
 -keep class com.monkey.ultimatebot.nms.NMSBridgeManager { *; }
+-keep class com.monkey.ultimatebot.bot.ai.services.cache.Caffeine2UuidCache { *; }
+-keep class com.monkey.ultimatebot.bot.ai.services.cache.Caffeine3UuidCache { *; }
 
 -keepclassmembernames class com.monkey.ultimatebot.bot.BotOptions { *; }
 -keepclassmembernames class com.monkey.ultimatebot.bot.BotType { *; }
