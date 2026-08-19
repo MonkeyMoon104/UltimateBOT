@@ -27,10 +27,6 @@ commands:
     description: Reload configuration or remove bots/maps
     usage: /ultimatebotreload <config|bot|maps|all>
     permission: ultimatebot.admin.use
-  ubagent:
-    description: Agent/CI smoke tests (console)
-    usage: /ubagent smoke
-    permission: ultimatebot.admin.use
 
 permissions:
   ultimatebot.admin.use:
