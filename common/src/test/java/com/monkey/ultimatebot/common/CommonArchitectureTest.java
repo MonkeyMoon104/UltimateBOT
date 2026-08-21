@@ -28,6 +28,13 @@ class CommonArchitectureTest {
             .resideInAPackage("..common..")
             .should()
             .dependOnClassesThat()
-            .resideOutsideOfPackages("java..", "org.jspecify..", "com.monkey.ultimatebot.common..")
-            .because("common production code may only use the JDK and JSpecify");
+            .resideOutsideOfPackages(
+                    "java..",
+                    "javax..",
+                    "org.jspecify..",
+                    "com.monkey.ultimatebot.common..",
+                    "me.lucko.jarrelocator..",
+                    "org.objectweb.asm..",
+                    "sun.misc..")
+            .because("common production code may only use the JDK, JSpecify, jar-relocator (+ ASM), and Unsafe for classpath injection");
 }
