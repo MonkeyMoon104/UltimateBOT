@@ -1,60 +1,14 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.artifacts.ResolvedArtifact
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.file.DuplicatesStrategy
-import java.io.File
-import java.io.FileOutputStream
 import java.net.URLClassLoader
-import java.nio.file.AtomicMoveNotSupportedException
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
 import java.util.HexFormat
 import java.util.function.IntSupplier
 import java.util.function.LongSupplier
-import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
-
-data class InvuiRetarget(val prefix: String, val invui: String, val inventoryaccess: String)
-
-fun retargetInvuiV2References(bytes: ByteArray, invuiTarget: String, inventoryAccessTarget: String): ByteArray {
-    val binary = bytes.toString(Charsets.ISO_8859_1)
-        .replace("com/monkey/ultimatebot/libs/invui/v1/", invuiTarget)
-        .replace("com/monkey/ultimatebot/libs/inventoryaccess/v1/", inventoryAccessTarget)
-    return binary.toByteArray(Charsets.ISO_8859_1)
-}
-
-fun retargetBinaryStrings(bytes: ByteArray, from: String, to: String): ByteArray {
-    if (from.length != to.length) {
-        error("Binary string retarget requires equal UTF-8/Latin-1 lengths: '$from' (${from.length}) vs '$to' (${to.length})")
-    }
-    val binary = bytes.toString(Charsets.ISO_8859_1).replace(from, to)
-    return binary.toByteArray(Charsets.ISO_8859_1)
-}
-
-fun normalizeClassMajor(bytes: ByteArray, maxClassMajor: Int): ByteArray {
-    if (bytes.size < 8) {
-        return bytes
-    }
-
-    if ((bytes[0].toInt() and 0xFF) != 0xCA ||
-        (bytes[1].toInt() and 0xFF) != 0xFE ||
-        (bytes[2].toInt() and 0xFF) != 0xBA ||
-        (bytes[3].toInt() and 0xFF) != 0xBE
-    ) {
-        return bytes
-    }
-
-    val major = ((bytes[6].toInt() and 0xFF) shl 8) or (bytes[7].toInt() and 0xFF)
-    if (major > maxClassMajor) {
-        bytes[6] = ((maxClassMajor shr 8) and 0xFF).toByte()
-        bytes[7] = (maxClassMajor and 0xFF).toByte()
-    }
-    return bytes
-}
-
-fun shouldEmitJava8Major(entryName: String): Boolean = false
 
 plugins {
     id("ultimatebot.java")
@@ -84,28 +38,22 @@ tasks.withType<ShadowJar>().configureEach {
     }
 }
 
-val invuiV2_1Shade = configurations.create("invuiV2_1Shade") {
+fun libConfiguration(name: String) = configurations.create(name) {
     isCanBeConsumed = false
     isCanBeResolved = true
-
     attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
 }
 
-val invuiV2_2Shade = configurations.create("invuiV2_2Shade") {
-    isCanBeResolved = true
-    isCanBeConsumed = false
-    attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 25)
-}
-
-val caffeineLegacyShade = configurations.create("caffeineLegacyShade") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
-
-val caffeineModernShade = configurations.create("caffeineModernShade") {
-    isCanBeConsumed = false
-    isCanBeResolved = true
-}
+val libJackson = libConfiguration("libJackson")
+val libLamp = libConfiguration("libLamp")
+val libConfigurate = libConfiguration("libConfigurate")
+val libPathetic = libConfiguration("libPathetic")
+val libBstats = libConfiguration("libBstats")
+val libCaffeineLegacy = libConfiguration("libCaffeineLegacy")
+val libCaffeineModern = libConfiguration("libCaffeineModern")
+val libInvuiV1 = libConfiguration("libInvuiV1")
+val libInvuiV2_1 = libConfiguration("libInvuiV2_1")
+val libInvuiV2_2 = libConfiguration("libInvuiV2_2")
 
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar")
 val pluginJarFile = layout.buildDirectory.file("libs/UltimateBot.jar")
@@ -117,7 +65,104 @@ val metricsAddonJarTask = project(":addons:metrics").tasks.named<ShadowJar>("sha
 val guardAddonJarTask = project(":addons:guard").tasks.named<Jar>("jar")
 val metricsAddonDescriptorFile = layout.buildDirectory.file("generated/addons/metrics.properties")
 val guardAddonDescriptorFile = layout.buildDirectory.file("generated/addons/guard.properties")
+val libraryDescriptorDir = layout.buildDirectory.dir("generated/libs")
 val releaseVersion = providers.environmentVariable("RELEASE_VERSION").orElse(project.version.toString())
+
+data class LibrarySpec(
+    val id: String,
+    val track: String,
+    val keyClass: String,
+    val configuration: Configuration,
+)
+
+fun mavenArtifactPath(artifact: ResolvedArtifact): String {
+    val module = artifact.moduleVersion.id
+    val groupPath = module.group.replace('.', '/')
+    val classifier = artifact.classifier
+    val fileName = if (classifier.isNullOrBlank()) {
+        "${module.name}-${module.version}.jar"
+    } else {
+        "${module.name}-${module.version}-$classifier.jar"
+    }
+    return "$groupPath/${module.name}/${module.version}/$fileName"
+}
+
+fun repositoryBasesFor(group: String): List<String> {
+    val ordered = linkedSetOf<String>()
+    when {
+        group.startsWith("xyz.xenondevs") -> ordered += "https://repo.xenondevs.xyz/releases"
+        group.startsWith("org.spongepowered") -> ordered += "https://repo.spongepowered.org/maven"
+        group.startsWith("io.papermc") -> ordered += "https://repo.papermc.io/repository/maven-public/"
+        group.startsWith("com.github.sirblobman") || group.startsWith("com.sirblobman") ->
+            ordered += "https://nexus.sirblobman.xyz/public/"
+        group.startsWith("me.clip") ->
+            ordered += "https://repo.extendedclip.com/content/repositories/placeholderapi/"
+        group.startsWith("com.sk89q") -> ordered += "https://maven.enginehub.org/repo/"
+    }
+
+    val preferredMirror = System.getenv("ULTIMATEBOT_LIBS_MIRROR")
+        ?.trim()
+        ?.takeIf { it.isNotEmpty() }
+        ?: "https://repo.monkeymoon104.it/releases"
+    ordered += preferredMirror.trimEnd('/')
+
+    ordered += "https://maven-central.storage-download.googleapis.com/maven2"
+    ordered += "https://repo.maven.apache.org/maven2"
+    ordered += "https://repo1.maven.org/maven2"
+    ordered += "https://repo.papermc.io/repository/maven-public/"
+    ordered += "https://repo.codemc.io/repository/maven-releases/"
+    ordered += "https://repo.spongepowered.org/maven"
+    ordered += "https://repo.xenondevs.xyz/releases"
+    return ordered.toList()
+}
+
+fun mavenDownloadUrls(artifact: ResolvedArtifact): List<String> {
+    val path = mavenArtifactPath(artifact)
+    return repositoryBasesFor(artifact.moduleVersion.id.group).map { base ->
+        val normalized = base.trimEnd('/')
+        "$normalized/$path"
+    }
+}
+
+fun sha256Hex(file: java.io.File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buffer = ByteArray(16_384)
+        while (true) {
+            val read = input.read(buffer)
+            if (read < 0) break
+            if (read > 0) digest.update(buffer, 0, read)
+        }
+    }
+    return HexFormat.of().formatHex(digest.digest())
+}
+
+fun writeLibraryDescriptor(spec: LibrarySpec, outputDir: java.io.File) {
+    val artifacts = spec.configuration.resolvedConfiguration.resolvedArtifacts
+        .filter { it.type == "jar" || it.extension == "jar" }
+        .filterNot { it.name.endsWith("-sources") || it.name.endsWith("-javadoc") }
+        .filter { it.file.isFile && it.file.length() > 0L }
+        .sortedBy { it.file.name }
+    check(artifacts.isNotEmpty()) { "Library ${spec.id} resolved zero jars" }
+
+    val builder = StringBuilder()
+    builder.append("track=").append(spec.track).append('\n')
+    builder.append("key-class=").append(spec.keyClass).append('\n')
+    builder.append("jar-count=").append(artifacts.size).append('\n')
+    artifacts.forEachIndexed { index, artifact ->
+        val file = artifact.file
+        val urls = mavenDownloadUrls(artifact)
+        builder.append("jar.").append(index).append(".file=").append(file.name).append('\n')
+        builder.append("jar.").append(index).append(".url-count=").append(urls.size).append('\n')
+        urls.forEachIndexed { urlIndex, url ->
+            builder.append("jar.").append(index).append(".url.").append(urlIndex).append('=').append(url).append('\n')
+        }
+        builder.append("jar.").append(index).append(".sha256=").append(sha256Hex(file)).append('\n')
+        builder.append("jar.").append(index).append(".size=").append(file.length()).append('\n')
+    }
+    outputDir.mkdirs()
+    outputDir.resolve("${spec.id}.properties").writeText(builder.toString())
+}
 
 val generateMetricsAddonDescriptorTask = tasks.register("generateMetricsAddonDescriptor") {
     dependsOn(metricsAddonJarTask)
@@ -127,15 +172,6 @@ val generateMetricsAddonDescriptorTask = tasks.register("generateMetricsAddonDes
 
     doLast {
         val addonJar = metricsAddonJarTask.get().archiveFile.get().asFile
-        val digest = MessageDigest.getInstance("SHA-256")
-        addonJar.inputStream().use { input ->
-            val buffer = ByteArray(16_384)
-            while (true) {
-                val read = input.read(buffer)
-                if (read < 0) break
-                if (read > 0) digest.update(buffer, 0, read)
-            }
-        }
         val version = releaseVersion.get()
         val descriptor = metricsAddonDescriptorFile.get().asFile
         descriptor.parentFile.mkdirs()
@@ -143,7 +179,7 @@ val generateMetricsAddonDescriptorTask = tasks.register("generateMetricsAddonDes
             """
             version=$version
             url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-metrics/$version/ultimatebot-metrics-$version.jar
-            sha256=${HexFormat.of().formatHex(digest.digest())}
+            sha256=${sha256Hex(addonJar)}
             size=${addonJar.length()}
             factory-class=com.monkey.ultimatebot.metrics.addon.MicrometerMetricsBackendFactory
             """.trimIndent() + "\n",
@@ -159,15 +195,6 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
 
     doLast {
         val addonJar = guardAddonJarTask.get().archiveFile.get().asFile
-        val digest = MessageDigest.getInstance("SHA-256")
-        addonJar.inputStream().use { input ->
-            val buffer = ByteArray(16_384)
-            while (true) {
-                val read = input.read(buffer)
-                if (read < 0) break
-                if (read > 0) digest.update(buffer, 0, read)
-            }
-        }
         val version = releaseVersion.get()
         val descriptor = guardAddonDescriptorFile.get().asFile
         descriptor.parentFile.mkdirs()
@@ -175,11 +202,57 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
             """
             version=$version
             url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-guard/$version/ultimatebot-guard-$version.jar
-            sha256=${HexFormat.of().formatHex(digest.digest())}
+            sha256=${sha256Hex(addonJar)}
             size=${addonJar.length()}
             factory-class=com.monkey.ultimatebot.guard.addon.UltimateBotGuardBackendFactory
             """.trimIndent() + "\n",
         )
+    }
+}
+
+val generateLibraryDescriptorsTask = tasks.register("generateLibraryDescriptors") {
+    inputs.files(
+        libJackson, libLamp, libConfigurate, libPathetic, libBstats,
+        libCaffeineLegacy, libCaffeineModern, libInvuiV1, libInvuiV2_1, libInvuiV2_2,
+    )
+    outputs.dir(libraryDescriptorDir)
+
+    doLast {
+        val out = libraryDescriptorDir.get().asFile
+        out.mkdirs()
+        val specs = listOf(
+            LibrarySpec("jackson", "modern", "com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper", libJackson),
+            LibrarySpec("lamp", "modern", "com.monkey.ultimatebot.libs.lamp.bukkit.BukkitLamp", libLamp),
+            LibrarySpec(
+                "configurate",
+                "modern",
+                "com.monkey.ultimatebot.libs.configurate.yaml.YamlConfigurationLoader",
+                libConfigurate,
+            ),
+            LibrarySpec(
+                "pathetic",
+                "modern",
+                "com.monkey.ultimatebot.libs.pathetic.api.pathing.Pathfinder",
+                libPathetic,
+            ),
+            LibrarySpec("bstats", "modern", "com.monkey.ultimatebot.libs.bstats.bukkit.Metrics", libBstats),
+            LibrarySpec(
+                "caffeine-legacy",
+                "legacy",
+                "com.monkey.ultimatebot.libs.caffeine.cache.Caffeine",
+                libCaffeineLegacy,
+            ),
+            LibrarySpec(
+                "caffeine-modern",
+                "modern",
+                "com.monkey.ultimatebot.libs.caffeine.cache.Caffeine",
+                libCaffeineModern,
+            ),
+            LibrarySpec("invui-v1", "legacy", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV1),
+            LibrarySpec("invui-v2-1", "modern", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV2_1),
+            LibrarySpec("invui-v2-2", "modern", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV2_2),
+        )
+        specs.forEach { writeLibraryDescriptor(it, out) }
     }
 }
 
@@ -262,187 +335,45 @@ dependencies {
     implementation(project(path = ":NMS:v26_2", configuration = "runtimeElements")) {
         isTransitive = false
     }
-    add(invuiV2_1Shade.name, libsCatalog.findLibrary("invui-v2-1").get())
-    add(invuiV2_2Shade.name, libsCatalog.findLibrary("invui-v2-2").get())
-    add(caffeineLegacyShade.name, libsCatalog.findLibrary("caffeine-legacy").get())
-    add(caffeineModernShade.name, libsCatalog.findLibrary("caffeine-modern").get())
 
-    implementation(libs.lamp.bukkit)
-    implementation(libs.pathetic.engine)
-    implementation(libs.configurate.yaml)
-}
-
-val relocateInvuiV2_1Task = tasks.register<ShadowJar>("relocateInvuiV2_1") {
-    archiveFileName.set("invui-v2_1-relocated.jar")
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadow"))
-    configurations = listOf(invuiV2_1Shade)
-    mergeServiceFiles()
-    exclude("colors.bin")
-    exclude("xyz/xenondevs/invui/util/ColorPalette.class")
-    exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a1")
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a1")
-}
-
-val relocateInvuiV2_2Task = tasks.register<ShadowJar>("relocateInvuiV2_2") {
-    archiveFileName.set("invui-v2_2-relocated.jar")
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadow"))
-    configurations = listOf(invuiV2_2Shade)
-    mergeServiceFiles()
-    exclude("colors.bin")
-    exclude("xyz/xenondevs/invui/util/ColorPalette.class")
-    exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a2")
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a2")
-}
-
-val relocateCaffeineLegacyTask = tasks.register<ShadowJar>("relocateCaffeineLegacy") {
-    archiveFileName.set("caffeine-legacy-relocated.jar")
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadow"))
-    configurations = listOf(caffeineLegacyShade)
-
-    relocate("com.github.benmanes.caffeine", "com.monkey.ultimatebot.cafe2")
-}
-
-val relocateCaffeineModernTask = tasks.register<ShadowJar>("relocateCaffeineModern") {
-    archiveFileName.set("caffeine-modern-relocated.jar")
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/shadow"))
-    configurations = listOf(caffeineModernShade)
-    relocate("com.github.benmanes.caffeine", "com.monkey.ultimatebot.cafe3")
+    add(libJackson.name, libsCatalog.findLibrary("jackson-databind").get())
+    add(libJackson.name, libsCatalog.findLibrary("jackson-datatype-jsr310").get())
+    add(libLamp.name, libsCatalog.findLibrary("lamp-bukkit").get())
+    add(libConfigurate.name, libsCatalog.findLibrary("configurate-yaml").get())
+    add(libPathetic.name, libsCatalog.findLibrary("pathetic-engine").get())
+    add(libBstats.name, libsCatalog.findLibrary("bstats-bukkit").get())
+    add(libCaffeineLegacy.name, libsCatalog.findLibrary("caffeine-legacy").get())
+    add(libCaffeineModern.name, libsCatalog.findLibrary("caffeine-modern").get())
+    add(libInvuiV1.name, libsCatalog.findLibrary("invui-v1").get())
+    add(libInvuiV2_1.name, libsCatalog.findLibrary("invui-v2-1").get())
+    add(libInvuiV2_2.name, libsCatalog.findLibrary("invui-v2-2").get())
 }
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(
-        relocateInvuiV2_1Task,
-        relocateInvuiV2_2Task,
-        relocateCaffeineLegacyTask,
-        relocateCaffeineModernTask,
         generateMetricsAddonDescriptorTask,
         generateGuardAddonDescriptorTask,
+        generateLibraryDescriptorsTask,
     )
     archiveFileName.set("UltimateBot.jar")
     mergeServiceFiles()
-    exclude("colors.bin")
-    exclude("xyz/xenondevs/invui/util/ColorPalette.class")
-    exclude("xyz/xenondevs/invui/window/CartographyWindow*.class")
-    exclude("com/monkey/ultimatebot/libs/invui/a1/util/ColorPalette.class")
-    exclude("com/monkey/ultimatebot/libs/invui/a1/window/CartographyWindow*.class")
-    exclude("com/monkey/ultimatebot/libs/invui/a2/util/ColorPalette.class")
-    exclude("com/monkey/ultimatebot/libs/invui/a2/window/CartographyWindow*.class")
-    from({
-        zipTree(relocateInvuiV2_1Task.get().archiveFile.get().asFile)
-    })
-    from({
-        zipTree(relocateInvuiV2_2Task.get().archiveFile.get().asFile)
-    })
-    from({
-        zipTree(relocateCaffeineLegacyTask.get().archiveFile.get().asFile)
-    })
-    from({
-        zipTree(relocateCaffeineModernTask.get().archiveFile.get().asFile)
-    })
+    // Only jar-relocator + ASM stay in the thin jar (needed in onLoad before other libs).
+    relocate("me.lucko.jarrelocator", "com.monkey.ultimatebot.libs.relocator")
+    relocate("org.objectweb.asm", "com.monkey.ultimatebot.libs.asm")
     from(metricsAddonDescriptorFile) {
         into("META-INF/ultimatebot/addons")
     }
     from(guardAddonDescriptorFile) {
         into("META-INF/ultimatebot/addons")
     }
-    relocate("org.bstats", "com.monkey.ultimatebot.libs.bstats")
-    relocate("com.fasterxml.jackson", "com.monkey.ultimatebot.libs.jackson")
-    relocate("revxrsal.commands", "com.monkey.ultimatebot.libs.lamp")
-    relocate("de.bsommerfeld.pathetic", "com.monkey.ultimatebot.libs.pathetic")
-    relocate("org.spongepowered.configurate", "com.monkey.ultimatebot.libs.configurate")
-    relocate("io.leangen.geantyref", "com.monkey.ultimatebot.libs.geantyref")
-    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.v1") {
-        exclude("com/monkey/ultimatebot/gui/v26_1/**")
-        exclude("com/monkey/ultimatebot/gui/v26_2/**")
-    }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.v1") {
-        exclude("com/monkey/ultimatebot/gui/v26_1/**")
-        exclude("com/monkey/ultimatebot/gui/v26_2/**")
-    }
-    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a1") {
-        include("com/monkey/ultimatebot/gui/v26_1/**")
-    }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a1") {
-        include("com/monkey/ultimatebot/gui/v26_1/**")
-    }
-    relocate("xyz.xenondevs.invui", "com.monkey.ultimatebot.libs.invui.a2") {
-        include("com/monkey/ultimatebot/gui/v26_2/**")
-    }
-    relocate("xyz.xenondevs.inventoryaccess", "com.monkey.ultimatebot.libs.inventoryaccess.a2") {
-        include("com/monkey/ultimatebot/gui/v26_2/**")
-    }
-    doLast {
-        val jarFile = archiveFile.get().asFile
-        val patchedJar = File(jarFile.parentFile, "${jarFile.name}.patched")
-        val v26Retargets = listOf(
-            InvuiRetarget("com/monkey/ultimatebot/gui/v26_1/", "com/monkey/ultimatebot/libs/invui/a1/", "com/monkey/ultimatebot/libs/inventoryaccess/a1/"),
-            InvuiRetarget("com/monkey/ultimatebot/gui/v26_2/", "com/monkey/ultimatebot/libs/invui/a2/", "com/monkey/ultimatebot/libs/inventoryaccess/a2/"),
-        )
-
-        val maxClassMajor = 52
-        val caffeine2Prefix = "com/monkey/ultimatebot/bot/ai/services/cache/Caffeine2UuidCache"
-        val caffeine3Prefix = "com/monkey/ultimatebot/bot/ai/services/cache/Caffeine3UuidCache"
-
-        val caffeineOwnerSlash = "com/github/benmanes/caffeine"
-        val caffeineOwnerDot = "com.github.benmanes.caffeine"
-        val caffeine2Slash = "com/monkey/ultimatebot/cafe2"
-        val caffeine2Dot = "com.monkey.ultimatebot.cafe2"
-        val caffeine3Slash = "com/monkey/ultimatebot/cafe3"
-        val caffeine3Dot = "com.monkey.ultimatebot.cafe3"
-        ZipFile(jarFile).use { zip ->
-            ZipOutputStream(FileOutputStream(patchedJar)).use { zos ->
-                zip.entries().asSequence().forEach { entry ->
-                    val newEntry = ZipEntry(entry.name)
-                    newEntry.time = entry.time
-                    zos.putNextEntry(newEntry)
-                    var data = zip.getInputStream(entry).use { it.readBytes() }
-
-                    if (!entry.isDirectory && entry.name.endsWith(".class")) {
-                        v26Retargets.firstOrNull { entry.name.startsWith(it.prefix) }?.let { retargetRule ->
-                            data = retargetInvuiV2References(data, retargetRule.invui, retargetRule.inventoryaccess)
-                        }
-                        if (entry.name.startsWith(caffeine2Prefix)) {
-                            data = retargetBinaryStrings(data, caffeineOwnerSlash, caffeine2Slash)
-                            data = retargetBinaryStrings(data, caffeineOwnerDot, caffeine2Dot)
-                        } else if (entry.name.startsWith(caffeine3Prefix)) {
-                            data = retargetBinaryStrings(data, caffeineOwnerSlash, caffeine3Slash)
-                            data = retargetBinaryStrings(data, caffeineOwnerDot, caffeine3Dot)
-                        }
-
-                        if (shouldEmitJava8Major(entry.name)) {
-                            data = normalizeClassMajor(data, maxClassMajor)
-                        }
-
-                        data = normalizeClassMajor(data, 65)
-                        if (entry.name.startsWith("com/monkey/ultimatebot/libs/inventoryaccess/v1/r9/")) {
-                            data = normalizeClassMajor(data, 60)
-                        }
-                    }
-
-                    zos.write(data)
-                    zos.closeEntry()
-                }
-            }
-        }
-
-        try {
-            Files.move(
-                patchedJar.toPath(),
-                jarFile.toPath(),
-                StandardCopyOption.REPLACE_EXISTING,
-                StandardCopyOption.ATOMIC_MOVE,
-            )
-        } catch (_: AtomicMoveNotSupportedException) {
-            Files.move(patchedJar.toPath(), jarFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-        }
+    from(libraryDescriptorDir) {
+        into("META-INF/ultimatebot/libs")
     }
 }
 
 val verifyPluginJarTask = tasks.register("verifyPluginJar") {
     group = "verification"
-    description = "Smoke-tests reflective dependencies and optional addons against UltimateBot.jar."
+    description = "Smoke-tests reflective dependencies, library descriptors, and optional addons against UltimateBot.jar."
     dependsOn(shadowJarTask, metricsAddonJarTask, guardAddonJarTask)
 
     doLast {
@@ -451,7 +382,63 @@ val verifyPluginJarTask = tasks.register("verifyPluginJar") {
             "Plugin jar not found: ${pluginJar.absolutePath}"
         }
 
+        ZipFile(pluginJar).use { zip ->
+            val requiredDescriptors = listOf(
+                "META-INF/ultimatebot/libs/jackson.properties",
+                "META-INF/ultimatebot/libs/lamp.properties",
+                "META-INF/ultimatebot/libs/configurate.properties",
+                "META-INF/ultimatebot/libs/pathetic.properties",
+                "META-INF/ultimatebot/libs/bstats.properties",
+                "META-INF/ultimatebot/libs/caffeine-legacy.properties",
+                "META-INF/ultimatebot/libs/caffeine-modern.properties",
+                "META-INF/ultimatebot/libs/invui-v1.properties",
+                "META-INF/ultimatebot/libs/invui-v2-1.properties",
+                "META-INF/ultimatebot/libs/invui-v2-2.properties",
+            )
+            requiredDescriptors.forEach { path ->
+                check(zip.getEntry(path) != null) { "Missing library descriptor in jar: $path" }
+            }
+            val jacksonDescriptor = zip.getEntry("META-INF/ultimatebot/libs/jackson.properties")
+            check(jacksonDescriptor != null)
+            zip.getInputStream(jacksonDescriptor).bufferedReader().use { reader ->
+                val text = reader.readText()
+                check(text.contains("key-class=com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper")) {
+                    "jackson descriptor must use relocated key-class"
+                }
+            }
+            val hasRelocator = zip.entries().asSequence().any {
+                it.name.startsWith("com/monkey/ultimatebot/libs/relocator/")
+            }
+            check(hasRelocator) { "Plugin jar must shade jar-relocator under libs.relocator" }
+            val relocatedLeak = zip.entries().asSequence()
+                .map { it.name }
+                .filter { name ->
+                    name.startsWith("com/monkey/ultimatebot/cafe2/") ||
+                        name.startsWith("com/monkey/ultimatebot/cafe3/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/invui/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/jackson/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/lamp/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/configurate/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/pathetic/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/bstats/") ||
+                        name.startsWith("com/monkey/ultimatebot/libs/caffeine/") ||
+                        name.startsWith("me/lucko/jarrelocator/") ||
+                        name.startsWith("com/github/benmanes/caffeine/") ||
+                        name.startsWith("xyz/xenondevs/invui/") ||
+                        name.startsWith("com/fasterxml/jackson/") ||
+                        name.startsWith("revxrsal/commands/")
+                }
+                .take(5)
+                .toList()
+            check(relocatedLeak.isEmpty()) {
+                "Plugin jar still contains shaded/third-party library classes, e.g. $relocatedLeak"
+            }
+        }
+
         URLClassLoader(arrayOf(pluginJar.toURI().toURL()), ClassLoader.getPlatformClassLoader()).use { loader ->
+            loader.loadClass("com.monkey.ultimatebot.common.lib.LibraryLoader")
+            loader.loadClass("com.monkey.ultimatebot.lib.RuntimeLibraryBootstrap")
+
             val addonJar = metricsAddonJarTask.get().archiveFile.get().asFile
             URLClassLoader(arrayOf(addonJar.toURI().toURL()), loader).use { addonLoader ->
                 val backendInterface = loader.loadClass("com.monkey.ultimatebot.common.metrics.MetricsBackend")
