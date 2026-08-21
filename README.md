@@ -143,6 +143,7 @@ Treat `remote-api.token` as a secret. Prefer binding the remote API to `127.0.0.
 
 - JDK suitable for the Gradle toolchain used by this repository
 - Git
+- Network access on first plugin start (runtime libraries are downloaded into `plugins/UltimateBot/libs/`)
 
 ### Build the plugin jar
 
@@ -161,6 +162,28 @@ Output:
 ```text
 dist/build/libs/UltimateBot.jar
 ```
+
+### Runtime libraries
+
+Third-party libraries (Jackson, Lamp, Configurate, Pathetic, bStats, Caffeine, InvUI) are **not** shaded into the main jar. On `onLoad`, UltimateBot:
+
+1. reuses relocated classes already on the classpath when possible;
+2. otherwise **installs from local cache** under `plugins/UltimateBot/libs/{legacy|modern}/` (relocated jars, or original jars that get relocated without network);
+3. only if locals are missing, downloads from the configured HTTPS repositories (vendor repo first, then Central mirrors / other public repos), verifies SHA-256, caches the original, relocates, then injects.
+
+Force offline install-only with `-Dultimatebot.libs.offline=true` (no remote fetch; requires jars already present under `libs/`).
+
+Download order: vendor repo when known (e.g. xenondevs for InvUI), then your mirror (`https://repo.monkeymoon104.it/releases`, override at build with `ULTIMATEBOT_LIBS_MIRROR`), then Central mirrors / other public repos. HTTP timeouts are short (5s connect / 10s read) so a dead host fails over quickly.
+
+Only `jar-relocator` (+ ASM) stay shaded in `UltimateBot.jar` (needed before other libs load). Descriptors embed **multiple HTTPS candidate URLs** per jar, plus size and SHA-256 of the original artifact, under `META-INF/ultimatebot/libs/` (key-class names are relocated). Runtime tries URLs in order until download + integrity check succeed.
+
+| Original package | Relocated under |
+| --- | --- |
+| `com.fasterxml.jackson` | `com.monkey.ultimatebot.libs.jackson` |
+| `revxrsal.commands` | `com.monkey.ultimatebot.libs.lamp` |
+| `org.spongepowered.configurate` | `com.monkey.ultimatebot.libs.configurate` |
+| `xyz.xenondevs.invui` | `com.monkey.ultimatebot.libs.invui` |
+| … | `com.monkey.ultimatebot.libs.<lib>` |
 
 ### Module notes
 
