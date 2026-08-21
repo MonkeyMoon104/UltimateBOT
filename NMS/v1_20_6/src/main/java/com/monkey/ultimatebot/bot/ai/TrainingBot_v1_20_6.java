@@ -65,8 +65,12 @@ public final class TrainingBot_v1_20_6 extends Player implements ITrainingBot {
 
     @Override
     public void die(DamageSource cause) {
+        if (this.dead || this.isRemoved()) {
+            return;
+        }
         this.getInventory().clearContent();
-        super.die(cause);
+        this.dead = true;
+        this.setHealth(0.0F);
         logic.onDeath(bukkitKiller(cause));
     }
 

@@ -205,10 +205,14 @@ public final class TrainingBot_v1_7_R4 extends EntityPlayer {
 
     @Override
     public void die(DamageSource cause) {
+        if (this.dead) {
+            return;
+        }
         cancelTickTask();
         this.inventory.items = new net.minecraft.server.v1_7_R4.ItemStack[36];
         this.inventory.armor = new net.minecraft.server.v1_7_R4.ItemStack[4];
-        super.die(cause);
+        this.dead = true;
+        this.setHealth(0.0F);
         handle.onNativeDeath(bukkitKiller(cause));
     }
 

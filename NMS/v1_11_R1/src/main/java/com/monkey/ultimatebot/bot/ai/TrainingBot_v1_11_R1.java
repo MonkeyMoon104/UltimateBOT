@@ -166,8 +166,12 @@ public final class TrainingBot_v1_11_R1 extends EntityPlayer {
 
     @Override
     public void die(DamageSource cause) {
+        if (this.dead) {
+            return;
+        }
         this.inventory.clear();
-        super.die(cause);
+        this.dead = true;
+        this.setHealth(0.0F);
         handle.onNativeDeath(bukkitKiller(cause));
     }
 

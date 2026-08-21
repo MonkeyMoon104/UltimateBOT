@@ -56,7 +56,9 @@ public class BotAttackController {
     }
 
     private boolean allowAttack(LivingEntity target, BotAttackType type) {
-        if (target == null) return false;
+        if (target == null || !target.isValid() || target.isDead()) {
+            return false;
+        }
         UltimateBot plugin = bot.getPlugin();
         java.util.UUID ownerUUID = plugin.getBotRegistry().getOwnerUUIDByBotUUID(bot.getUniqueId());
         if (ownerUUID == null) {

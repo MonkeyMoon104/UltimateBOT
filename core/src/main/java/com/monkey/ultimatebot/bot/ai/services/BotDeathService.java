@@ -14,6 +14,7 @@ import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.PlayerOptions;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
@@ -40,6 +41,9 @@ public class BotDeathService {
     }
 
     public void handleDeath(@Nullable LivingEntity killer) {
+        // Skipping NMS Player.die() avoids double DEATHS/PLAYER_KILLS; award the kill here once.
+        awardPlayerKillStatistic(killer);
+
         BotOptions options =
                 bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;
         boolean isEventBot = options != null && options.getBotType() == BotType.EVENT;
@@ -107,6 +111,24 @@ public class BotDeathService {
                             BotEventSource.SYSTEM,
                             BotDespawnReason.BOT_DEATH));
             plugin.getBotEventDispatcher().forget(bukkitBot.getUniqueId());
+        }
+    }
+
+    private void awardPlayerKillStatistic(@Nullable LivingEntity killer) {
+        if (!(killer instanceof Player)) {
+            return;
+        }
+        Player player = (Player) killer;
+        if (!player.isOnline()) {
+            return;
+        }
+        if (plugin.getBotRegistry().getOwnerUUIDByBotUUID(player.getUniqueId()) != null) {
+            return;
+        }
+        try {
+            player.incrementStatistic(Statistic.PLAYER_KILLS);
+        } catch (IllegalArgumentException ignored) {
+            // Statistic may be unavailable on some server builds.
         }
     }
 
