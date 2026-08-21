@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot.ai.controllers.totem.helper;
 
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemInventoryManager;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStrategyHandler;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 
 public class TotemStrategyHandler implements ITotemStrategyHandler {

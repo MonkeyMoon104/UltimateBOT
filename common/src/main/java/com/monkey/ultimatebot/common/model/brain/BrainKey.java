@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.brain;
 
 import java.util.Locale;
 import java.util.Objects;

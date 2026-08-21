@@ -3,8 +3,8 @@ package com.monkey.ultimatebot.config;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.logging.Logger;

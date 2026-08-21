@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.api.extension.brain;
 
-import com.monkey.ultimatebot.common.model.BrainCapability;
-import com.monkey.ultimatebot.common.model.BrainKey;
+import com.monkey.ultimatebot.common.model.brain.BrainCapability;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
 import java.util.Objects;
 import java.util.Set;
 

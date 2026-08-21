@@ -9,7 +9,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rapvp.BotRAPVPController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
-import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import com.monkey.ultimatebot.access.block.BlockDamageAccess;
 import com.monkey.ultimatebot.world.WorldProtectionService;
 import java.util.Objects;

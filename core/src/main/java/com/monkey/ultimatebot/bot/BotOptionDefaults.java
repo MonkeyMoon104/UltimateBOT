@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.bot;
 
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.bot.ai.difficulty.DifficultyLevel;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
 import org.jspecify.annotations.Nullable;
 
 final class BotOptionDefaults {

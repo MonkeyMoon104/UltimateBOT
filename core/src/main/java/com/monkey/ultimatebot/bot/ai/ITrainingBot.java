@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.bot.ai;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.ai.controllers.brain.BotBrainController;
 import com.monkey.ultimatebot.bot.ai.services.TotemTrackerService;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.entity.AttributeAccess;
 import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import com.monkey.ultimatebot.access.item.ItemStackAccess;

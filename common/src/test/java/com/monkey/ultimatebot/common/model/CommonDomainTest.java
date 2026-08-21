@@ -1,5 +1,10 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.common.model.combat.CombatCapability;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

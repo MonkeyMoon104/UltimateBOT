@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.platform;
 
 import java.util.Collections;
 import java.util.EnumSet;

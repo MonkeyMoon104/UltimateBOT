@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.combat.profile;
 
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;

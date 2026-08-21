@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.api.extension.combat;
 
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatCapability;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatCapability;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;

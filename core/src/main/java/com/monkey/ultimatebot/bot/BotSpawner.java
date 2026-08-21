@@ -10,7 +10,7 @@ import com.monkey.ultimatebot.api.event.lifecycle.BotSpawnPrepareEvent;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
 import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;

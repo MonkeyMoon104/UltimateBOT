@@ -1,4 +1,6 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.platform;
+
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

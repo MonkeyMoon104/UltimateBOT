@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.brain;
 
 import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.Objects;

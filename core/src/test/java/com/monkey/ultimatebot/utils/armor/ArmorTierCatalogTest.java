@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.utils.armor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import org.bukkit.Material;
 import org.junit.jupiter.api.Test;
 

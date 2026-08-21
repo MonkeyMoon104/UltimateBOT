@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.combat.mode.runtime;
 
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryController;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.Arrays;

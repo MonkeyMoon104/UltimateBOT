@@ -1,5 +1,8 @@
 package com.monkey.ultimatebot.common.model;
 
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

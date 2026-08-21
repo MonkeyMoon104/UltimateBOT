@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.combat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

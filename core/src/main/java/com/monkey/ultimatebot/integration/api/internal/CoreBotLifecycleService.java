@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.integration.api.internal;
 import com.monkey.ultimatebot.bot.BotManager;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotRegistry;
-import com.monkey.ultimatebot.common.model.BotSource;
+import com.monkey.ultimatebot.common.model.bot.BotSource;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.Map;
 import java.util.UUID;

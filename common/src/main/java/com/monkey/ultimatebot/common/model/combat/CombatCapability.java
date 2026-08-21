@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.combat;
 
 public enum CombatCapability {
     MELEE(1),

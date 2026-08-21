@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.combat.mode.shared;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import org.junit.jupiter.api.Test;
 

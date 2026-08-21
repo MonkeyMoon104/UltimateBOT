@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.api.extension;
 
 import com.monkey.ultimatebot.api.extension.brain.BotBrainProvider;
 import com.monkey.ultimatebot.api.extension.combat.CombatModeProvider;
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import java.util.List;
 import java.util.Optional;
 import org.bukkit.plugin.Plugin;

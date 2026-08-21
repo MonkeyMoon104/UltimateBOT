@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.utils.material;
 
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.Collections;
 import java.util.HashMap;

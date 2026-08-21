@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.services;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.item.ItemMetaAccess;
 import com.monkey.ultimatebot.access.item.ItemMetaDamageAccess;
 import com.monkey.ultimatebot.access.item.ItemStackAccess;

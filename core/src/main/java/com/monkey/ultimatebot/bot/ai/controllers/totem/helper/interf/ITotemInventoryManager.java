@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import org.bukkit.inventory.ItemStack;
 
 public interface ITotemInventoryManager {

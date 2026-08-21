@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.logging;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.nms.INMSBridge;

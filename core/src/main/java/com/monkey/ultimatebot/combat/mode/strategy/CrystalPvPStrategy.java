@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.bot.ai.controllers.inventory.BotInventoryControlle
 import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.access.entity.EntityLookupAccess;
 import com.monkey.ultimatebot.nms.NMSBridgeManager;
 import java.util.UUID;

@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.api.extension.nativeaccess;
 
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import java.util.Optional;
 import java.util.Set;
 

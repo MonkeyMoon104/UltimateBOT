@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot;
 
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import java.util.HashMap;
 import java.util.Map;

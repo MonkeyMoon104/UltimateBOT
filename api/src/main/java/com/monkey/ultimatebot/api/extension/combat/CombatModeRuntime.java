@@ -2,8 +2,8 @@ package com.monkey.ultimatebot.api.extension.combat;
 
 import com.monkey.ultimatebot.api.extension.control.BotControl;
 import com.monkey.ultimatebot.api.extension.nativeaccess.NativeBotAccess;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import java.util.SplittableRandom;
 import org.bukkit.entity.Player;
 

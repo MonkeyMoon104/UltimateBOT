@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.controllers.movement.BotMovementController;
 import com.monkey.ultimatebot.bot.ai.controllers.rotation.BotRotationController;
 import com.monkey.ultimatebot.combat.mode.water.UnderwaterMotionPlanner;
-import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import com.monkey.ultimatebot.access.entity.EntityBoundsAccess;
 import com.monkey.ultimatebot.access.entity.EntityCoordsAccess;
 import com.monkey.ultimatebot.access.entity.EntityFluidAccess;

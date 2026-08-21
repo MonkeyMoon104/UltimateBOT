@@ -1,10 +1,10 @@
 package com.monkey.ultimatebot.remote.internal;
 
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
-import com.monkey.ultimatebot.common.model.AddonInfo;
-import com.monkey.ultimatebot.common.model.BotSource;
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.bot.AddonInfo;
+import com.monkey.ultimatebot.common.model.bot.BotSource;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.common.util.EnumValues;
 import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import com.monkey.ultimatebot.metrics.BotMetrics;
@@ -75,7 +75,7 @@ public final class RequestHandlers {
 
     public void handleBrain(HttpExchange exchange, String relativePath) throws IOException {
         String requestedBrain = relativePath.substring("/brains/".length());
-        Optional<com.monkey.ultimatebot.common.model.BrainDefinition> definition;
+        Optional<com.monkey.ultimatebot.common.model.brain.BrainDefinition> definition;
         try {
             definition = context.api().getBotManager().getBrain(BrainKey.parse(requestedBrain));
         } catch (IllegalArgumentException exception) {
@@ -91,7 +91,7 @@ public final class RequestHandlers {
     public void handleCombatMode(HttpExchange exchange, String relativePath) throws IOException {
         String requestedMode = relativePath.substring("/combat-modes/".length());
         CombatMode combatMode = parseCombatMode(requestedMode);
-        Optional<com.monkey.ultimatebot.common.model.CombatModeDefinition> definition = combatMode == null
+        Optional<com.monkey.ultimatebot.common.model.combat.CombatModeDefinition> definition = combatMode == null
                 ? Optional.empty()
                 : context.api().getBotManager().getCombatMode(combatMode);
         if (!definition.isPresent()) {

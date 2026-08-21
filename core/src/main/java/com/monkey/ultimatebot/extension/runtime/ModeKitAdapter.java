@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.combat.mode.runtime.ModeKit;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import com.monkey.ultimatebot.access.item.ItemStackAccess;
 

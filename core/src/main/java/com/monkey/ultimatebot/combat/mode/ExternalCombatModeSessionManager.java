@@ -6,7 +6,7 @@ import com.monkey.ultimatebot.api.extension.combat.CombatModeSession;
 import com.monkey.ultimatebot.api.extension.combat.CombatModeTick;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.extension.runtime.CoreBotControl;
 import com.monkey.ultimatebot.extension.runtime.CoreNativeBotAccess;
 import com.monkey.ultimatebot.extension.runtime.ModeKitAdapter;

@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.combat.mode.trident;
 import com.monkey.ultimatebot.combat.mode.runtime.AbstractCombatModeStrategy;
 import com.monkey.ultimatebot.combat.mode.runtime.CombatModeContext;
 import com.monkey.ultimatebot.combat.mode.shared.CobwebCombatAwareness;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import org.bukkit.entity.LivingEntity;
 
 public final class TridentPvPStrategy extends AbstractCombatModeStrategy {

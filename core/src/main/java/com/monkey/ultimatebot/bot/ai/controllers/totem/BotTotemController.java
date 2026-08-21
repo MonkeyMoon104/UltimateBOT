@@ -15,8 +15,8 @@ import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemNotif
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStateAnalyzer;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemStrategyHandler;
 import com.monkey.ultimatebot.bot.ai.controllers.totem.helper.interf.ITotemUsageTracker;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.access.item.EquipmentSlotAccess;
 import java.util.Objects;
 import org.bukkit.inventory.ItemStack;

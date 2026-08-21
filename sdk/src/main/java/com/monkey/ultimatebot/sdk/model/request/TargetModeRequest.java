@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
 import java.util.Objects;
 
 /** Request body used to change the categories attacked by a running bot. */

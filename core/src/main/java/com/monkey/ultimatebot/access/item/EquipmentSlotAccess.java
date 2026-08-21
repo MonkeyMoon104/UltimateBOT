@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.access.item;
 
 import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;

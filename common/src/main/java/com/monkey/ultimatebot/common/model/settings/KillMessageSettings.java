@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.settings;
 
 import com.monkey.ultimatebot.common.util.TextValues;
 import java.util.Objects;

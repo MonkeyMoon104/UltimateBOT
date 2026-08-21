@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.bot;
 
 public enum BotTargetMode {
     PLAYERS(true, false),

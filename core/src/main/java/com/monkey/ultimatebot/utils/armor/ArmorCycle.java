@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.utils.armor;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.equipment.BotEquipmentUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.EnumMap;

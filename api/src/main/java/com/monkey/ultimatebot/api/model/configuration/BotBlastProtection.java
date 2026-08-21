@@ -96,12 +96,12 @@ public final class BotBlastProtection {
     }
 
     /** Converts this Bukkit API model to the platform-independent representation. */
-    public com.monkey.ultimatebot.common.model.BlastProtectionSettings toCommon() {
-        return new com.monkey.ultimatebot.common.model.BlastProtectionSettings(feet, legs, chest, head);
+    public com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings toCommon() {
+        return new com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings(feet, legs, chest, head);
     }
 
     /** Creates the Bukkit API model from the platform-independent representation. */
-    public static BotBlastProtection fromCommon(com.monkey.ultimatebot.common.model.BlastProtectionSettings settings) {
+    public static BotBlastProtection fromCommon(com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings settings) {
         java.util.Objects.requireNonNull(settings, "settings");
         return new BotBlastProtection(settings.boots(), settings.leggings(), settings.chestplate(), settings.helmet());
     }

@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import java.util.Objects;
 
 /** Runtime request for a bot difficulty. */

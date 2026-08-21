@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.sdk;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.monkey.ultimatebot.common.model.BotArmorTier;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import org.junit.jupiter.api.Test;
 

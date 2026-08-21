@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.gui.combat;
 
-import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.Locale;
 import java.util.Objects;

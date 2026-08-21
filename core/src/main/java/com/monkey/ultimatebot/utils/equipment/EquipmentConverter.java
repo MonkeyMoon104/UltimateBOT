@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.utils.equipment;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 
 public class EquipmentConverter {
 

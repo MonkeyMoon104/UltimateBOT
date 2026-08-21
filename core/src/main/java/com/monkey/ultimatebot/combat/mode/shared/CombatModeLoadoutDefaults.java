@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.combat.mode.shared;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.utils.armor.ArmorTier;
 import java.util.Objects;
 

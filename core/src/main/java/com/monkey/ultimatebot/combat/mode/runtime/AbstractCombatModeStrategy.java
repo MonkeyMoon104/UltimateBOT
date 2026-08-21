@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import java.util.Objects;
 import org.bukkit.entity.LivingEntity;
 

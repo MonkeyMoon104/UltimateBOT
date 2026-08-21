@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.extension.runtime;
 
 import com.monkey.ultimatebot.api.extension.nativeaccess.NativeBotAccess;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.nms.INMSBridge;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

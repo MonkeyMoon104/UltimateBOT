@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.gui.legacy;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.gui.LegacyBotGui;
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
 import java.util.UUID;

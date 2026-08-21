@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.utils.armor;
 
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.jspecify.annotations.Nullable;

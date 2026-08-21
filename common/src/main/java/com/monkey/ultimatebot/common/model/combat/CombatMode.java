@@ -1,4 +1,6 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.combat;
+
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 
 import com.monkey.ultimatebot.common.util.ImmutableCollections;
 import java.util.Arrays;

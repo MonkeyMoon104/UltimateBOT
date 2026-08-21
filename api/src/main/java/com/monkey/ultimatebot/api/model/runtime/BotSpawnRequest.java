@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.common.model.BotMode;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
 import java.util.*;
 import org.jspecify.annotations.Nullable;
 

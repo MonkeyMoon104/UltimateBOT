@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.brain;
 
 public enum BrainCapability {
     TARGETING,

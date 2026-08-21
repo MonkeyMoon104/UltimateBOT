@@ -1,14 +1,14 @@
 package com.monkey.ultimatebot.sdk.model.response;
 
-import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.BotArmorTier;
-import com.monkey.ultimatebot.common.model.BotMode;
-import com.monkey.ultimatebot.common.model.BotSource;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.common.model.bot.BotSource;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.common.util.TextValues;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotLocationRequest;

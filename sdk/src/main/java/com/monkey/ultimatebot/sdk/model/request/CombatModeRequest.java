@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import java.util.Objects;
 
 /** Remote request for changing the active combat mode. */

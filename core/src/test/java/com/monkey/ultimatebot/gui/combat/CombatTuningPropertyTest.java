@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.gui.combat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import org.junit.jupiter.api.Test;
 
 class CombatTuningPropertyTest {

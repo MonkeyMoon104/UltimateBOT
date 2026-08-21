@@ -1,4 +1,4 @@
-package com.monkey.ultimatebot.common.model;
+package com.monkey.ultimatebot.common.model.settings;
 
 public final class IdleWanderSettings {
     private final boolean enabled;
