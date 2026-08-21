@@ -2,6 +2,9 @@
 
 Advanced, standalone **PvP training bots** for Minecraft servers.
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/MonkeyMoon104/UltimateBOT?style=flat&logo=github&label=Star)](https://github.com/MonkeyMoon104/UltimateBOT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 UltimateBot spawns NMS-backed fake players with combat AI, GUI configuration, optional integrations, and a public API for third-party plugins. It is designed for Paper (and Folia-compatible) environments across a wide Minecraft version range.
 
 ---
@@ -22,6 +25,7 @@ UltimateBot spawns NMS-backed fake players with combat AI, GUI configuration, op
 - [Disclaimer and limitation of liability](#disclaimer-and-limitation-of-liability)
 - [Security and NMS notice](#security-and-nms-notice)
 - [Contributing](#contributing)
+- [Support](#support)
 - [Authors](#authors)
 - [License](#license)
 
@@ -314,6 +318,15 @@ Before opening a pull request:
 4. Do not include secrets, personal license keys, or proprietary server jars in the repository.
 
 For API/SDK details, follow the module READMEs and existing examples.
+
+---
+
+## Support
+
+If UltimateBot helps your server or project, the simplest way to support it is to
+[★ star the repository on GitHub](https://github.com/MonkeyMoon104/UltimateBOT).
+
+Stars help others discover the project and encourage continued maintenance — no account setup beyond GitHub, and it takes a second.
 
 ---
 
