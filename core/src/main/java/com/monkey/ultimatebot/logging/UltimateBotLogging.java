@@ -32,7 +32,7 @@ public final class UltimateBotLogging {
     private static final String PINK = "\u001B[38;5;200m";
     private static final int SECTION_WIDTH = 72;
 
-    private static final int STARTUP_PHASES = 9;
+    private static final int STARTUP_PHASES = 8;
     private static final long WARMUP_REPORT_DELAY_TICKS = 20L;
     private static final long STABLE_REPORT_DELAY_TICKS = 60L;
 
@@ -250,8 +250,6 @@ public final class UltimateBotLogging {
         switch (module) {
             case "Boot":
                 return CYAN;
-            case "License":
-                return YELLOW;
             case "Update":
                 return BLUE;
             case "NMS":

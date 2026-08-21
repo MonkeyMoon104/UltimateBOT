@@ -24,8 +24,6 @@ import com.monkey.ultimatebot.integration.api.CoreBotManagerAdapter;
 import com.monkey.ultimatebot.integration.api.CoreBotRegistryAdapter;
 import com.monkey.ultimatebot.integration.worldguard.WorldGuardPvpService;
 import com.monkey.ultimatebot.lang.LanguageManager;
-import com.monkey.ultimatebot.license.LicenseManager;
-import com.monkey.ultimatebot.license.LicenseStartupResult;
 import com.monkey.ultimatebot.listener.BotExplosionListener;
 import com.monkey.ultimatebot.listener.BotRuntimeEventListener;
 import com.monkey.ultimatebot.listener.PlayerCheckListener;
@@ -69,7 +67,6 @@ public final class UltimateBot extends JavaPlugin {
     private @Nullable BotManager botManager;
     private @Nullable PlaceholderRegistration placeholderCoordinator;
     private @Nullable TargetingService targetingService;
-    private @Nullable LicenseManager licenseManager;
     private @Nullable UpdateManager updateManager;
     private @Nullable LanguageManager languageManager;
     private @Nullable WrapperManager wrapperManager;
@@ -307,11 +304,6 @@ public final class UltimateBot extends JavaPlugin {
             updateManager = null;
         }
 
-        if (licenseManager != null) {
-            licenseManager.shutdown();
-            licenseManager = null;
-        }
-
         if (placeholderCoordinator != null) {
             placeholderCoordinator.unregister();
             placeholderCoordinator = null;
@@ -371,7 +363,6 @@ public final class UltimateBot extends JavaPlugin {
 
         private void run() {
             configureFilesAndLanguage();
-            validateLicense();
             checkUpdates();
             initializeNmsCompatibility();
             initializeRuntimeCore();
@@ -406,24 +397,8 @@ public final class UltimateBot extends JavaPlugin {
             boot.completePhase("config ready");
         }
 
-        private void validateLicense() {
-            boot.beginPhase(2, "Boot", "License Validation");
-            licenseManager = new LicenseManager(UltimateBot.this);
-            LicenseStartupResult licenseResult = licenseManager.validateOnStartup();
-            if (!licenseResult.allowed()) {
-                boot.warn("License " + licenseResult.reasonCode() + " -> " + licenseResult.message());
-                throw new IllegalStateException("License validation failed: " + licenseResult.reasonCode());
-            }
-            if (licenseResult.graceMode()) {
-                boot.warn("License -> " + licenseResult.message());
-            } else {
-                boot.boot("License -> " + licenseResult.message());
-            }
-            boot.completePhase("license ready");
-        }
-
         private void checkUpdates() {
-            boot.beginPhase(3, "Boot", "Update Check");
+            boot.beginPhase(2, "Boot", "Update Check");
             updateManager = new UpdateManager(UltimateBot.this);
             UpdateStartupResult updateResult = updateManager.checkOnStartup();
             if (updateResult.checkFailed() || updateResult.updateAvailable()) {
@@ -435,7 +410,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private void initializeNmsCompatibility() {
-            boot.beginPhase(4, "NMS", "Compatibility");
+            boot.beginPhase(3, "NMS", "Compatibility");
             NMSBridgeManager.init(getLogger());
             Objects.requireNonNull(combatProfileCatalog, "combatProfileCatalog is not initialized")
                     .bindPlatformCapabilities(NMSBridgeManager.capabilities());
@@ -454,7 +429,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private void initializeRuntimeCore() {
-            boot.beginPhase(5, "Module", "Runtime Services");
+            boot.beginPhase(4, "Module", "Runtime Services");
             long t0 = System.currentTimeMillis();
 
             targetingService = new TargetingService(runtimeSettings.targetCache());
@@ -497,7 +472,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private UltimateBotAPI wireApi() {
-            boot.beginPhase(6, "Boot", "API Wiring");
+            boot.beginPhase(5, "Boot", "API Wiring");
             BotManager manager = Objects.requireNonNull(botManager, "botManager is not initialized");
             BotRegistry registry = Objects.requireNonNull(botRegistry, "botRegistry is not initialized");
             PlayerOptions options = Objects.requireNonNull(playerOptions, "playerOptions is not initialized");
@@ -516,7 +491,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private void registerCommandsAndListeners(UltimateBotAPI api) {
-            boot.beginPhase(7, "Module", "Commands and Listeners");
+            boot.beginPhase(6, "Module", "Commands and Listeners");
             List<String> registeredCommands = Collections.unmodifiableList(java.util.Arrays.asList(
                     "bot", "botevent", "botally", "botteamally", "ultimatebotreload"));
             BukkitLampConfig<BukkitCommandActor> lampConfig = lampConfigForPlatform();
@@ -587,7 +562,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private void initializePlaceholders() {
-            boot.beginPhase(8, "Boot", "Placeholder Integration");
+            boot.beginPhase(7, "Boot", "Placeholder Integration");
             if (PlaceholderApiSupport.isAvailable()) {
                 placeholderCoordinator = PlaceholderApiSupport.createRegistration(UltimateBot.this);
                 if (placeholderCoordinator != null) {
@@ -608,7 +583,7 @@ public final class UltimateBot extends JavaPlugin {
         }
 
         private void finalizeStartup(UltimateBotAPI api) {
-            boot.beginPhase(9, "Boot", "Finalize");
+            boot.beginPhase(8, "Boot", "Finalize");
             UltimateBotAPI.register(api);
             getServer().getPluginManager().callEvent(new UltimateBotReadyEvent(api));
             boot.boot("UltimateBotReadyEvent fired");
@@ -623,9 +598,6 @@ public final class UltimateBot extends JavaPlugin {
                 boot.warn("bStats -> metrics init failed: " + formatListenerError(metricsError));
             }
 
-            if (licenseManager != null) {
-                licenseManager.startHeartbeat();
-            }
             if (updateManager != null) {
                 updateManager.startRuntime();
             }

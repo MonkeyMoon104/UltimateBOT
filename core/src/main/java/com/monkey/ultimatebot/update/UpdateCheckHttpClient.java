@@ -19,13 +19,7 @@ public final class UpdateCheckHttpClient {
 
         String baseUrl = System.getProperty(
                 "ultimatebot.update.base-url",
-                System.getenv()
-                        .getOrDefault(
-                                "ULTIMATEBOT_UPDATE_BASE_URL",
-                                System.getProperty(
-                                        "ultimatebot.license.base-url",
-                                        System.getenv()
-                                                .getOrDefault("ULTIMATEBOT_LICENSE_BASE_URL", DEFAULT_BASE_URL))));
+                System.getenv().getOrDefault("ULTIMATEBOT_UPDATE_BASE_URL", DEFAULT_BASE_URL));
         this.checkUri = URI.create(baseUrl + "/api/v1/plugin/updates/check");
     }
 
