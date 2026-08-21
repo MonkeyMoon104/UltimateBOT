@@ -2,10 +2,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
-import proguard.gradle.ProGuardTask
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLClassLoader
@@ -60,15 +56,6 @@ fun normalizeClassMajor(bytes: ByteArray, maxClassMajor: Int): ByteArray {
 
 fun shouldEmitJava8Major(entryName: String): Boolean = false
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.proguard.gradle)
-    }
-}
-
 plugins {
     id("ultimatebot.java")
     alias(libs.plugins.shadow)
@@ -121,15 +108,7 @@ val caffeineModernShade = configurations.create("caffeineModernShade") {
 }
 
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar")
-val obfuscatedJarFile = layout.buildDirectory.file("libs/UltimateBot.jar")
-val legacyObfuscatedJarFile = layout.buildDirectory.file("libs/UltimateBot-obf.jar")
-val proguardMappingFile = layout.buildDirectory.file("reports/proguard/mapping.txt")
-val javaToolchainService = extensions.getByType<JavaToolchainService>()
-val proguardJdkHome = javaToolchainService.launcherFor {
-    languageVersion.set(JavaLanguageVersion.of(21))
-}.get().metadata.installationPath.asFile
-val javaBaseJmod = File(proguardJdkHome, "jmods/java.base.jmod")
-val javaLoggingJmod = File(proguardJdkHome, "jmods/java.logging.jmod")
+val pluginJarFile = layout.buildDirectory.file("libs/UltimateBot.jar")
 
 evaluationDependsOn(":addons:metrics")
 evaluationDependsOn(":addons:guard")
@@ -202,23 +181,6 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
             """.trimIndent() + "\n",
         )
     }
-}
-
-fun externalClasspathFor(dependencyProject: Project): FileCollection {
-    val sourceSets = dependencyProject.extensions.getByType<SourceSetContainer>()
-    return sourceSets.named("main").get().compileClasspath.filter { candidate ->
-        candidate.exists() && !candidate.toPath().startsWith(rootDir.toPath())
-    }
-}
-
-val proguardLibraries = files(
-    javaBaseJmod,
-    javaLoggingJmod,
-    externalClasspathFor(project(":core")),
-)
-
-if (!javaBaseJmod.exists() || !javaLoggingJmod.exists()) {
-    throw GradleException("ProGuard requires a Java 21 JDK with jmods. Resolved toolchain: $proguardJdkHome")
 }
 
 dependencies {
@@ -358,7 +320,7 @@ tasks.named<ShadowJar>("shadowJar") {
         generateMetricsAddonDescriptorTask,
         generateGuardAddonDescriptorTask,
     )
-    archiveFileName.set("UltimateBot-unobfuscated.jar")
+    archiveFileName.set("UltimateBot.jar")
     mergeServiceFiles()
     exclude("colors.bin")
     exclude("xyz/xenondevs/invui/util/ColorPalette.class")
@@ -478,31 +440,15 @@ tasks.named<ShadowJar>("shadowJar") {
     }
 }
 
-val obfuscatePluginJarTask = tasks.register<ProGuardTask>("obfuscatePluginJar") {
-    dependsOn(shadowJarTask)
-
-    doFirst {
-        delete(legacyObfuscatedJarFile.get().asFile)
-    }
-
-    injars(shadowJarTask.get().archiveFile.get().asFile)
-    outjars(obfuscatedJarFile.get().asFile)
-
-    configuration(file("$projectDir/proguard.pro"))
-    libraryjars(proguardLibraries)
-    printmapping(proguardMappingFile.get().asFile)
-}
-
-val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") {
+val verifyPluginJarTask = tasks.register("verifyPluginJar") {
     group = "verification"
-    description = "Smoke-tests reflective dependencies and optional addons."
-    dependsOn(metricsAddonJarTask, guardAddonJarTask)
-    mustRunAfter(obfuscatePluginJarTask)
+    description = "Smoke-tests reflective dependencies and optional addons against UltimateBot.jar."
+    dependsOn(shadowJarTask, metricsAddonJarTask, guardAddonJarTask)
 
     doLast {
-        val pluginJar = obfuscatedJarFile.get().asFile
+        val pluginJar = pluginJarFile.get().asFile
         check(pluginJar.isFile) {
-            "Obfuscated plugin jar not found: ${pluginJar.absolutePath}"
+            "Plugin jar not found: ${pluginJar.absolutePath}"
         }
 
         URLClassLoader(arrayOf(pluginJar.toURI().toURL()), ClassLoader.getPlatformClassLoader()).use { loader ->
@@ -533,7 +479,7 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
                     )
                 val factoryClass = addonLoader.loadClass("com.monkey.ultimatebot.metrics.addon.MicrometerMetricsBackendFactory")
                 check(factoryInterface.isAssignableFrom(factoryClass)) {
-                    "Metrics addon factory does not implement the SPI from the obfuscated main jar"
+                    "Metrics addon factory does not implement the SPI from the main jar"
                 }
                 val factory = factoryClass.getConstructor().newInstance()
                 val backend = factoryInterface.getMethod("create", contextClass).invoke(factory, context)
@@ -561,7 +507,7 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
                 val guardFactoryClass =
                     guardLoader.loadClass("com.monkey.ultimatebot.guard.addon.UltimateBotGuardBackendFactory")
                 check(guardFactoryInterface.isAssignableFrom(guardFactoryClass)) {
-                    "Guard addon factory does not implement the SPI from the obfuscated main jar"
+                    "Guard addon factory does not implement the SPI from the main jar"
                 }
             }
         }
@@ -569,11 +515,7 @@ val verifyObfuscatedPluginJarTask = tasks.register("verifyObfuscatedPluginJar") 
 }
 
 shadowJarTask.configure {
-    finalizedBy(obfuscatePluginJarTask)
-}
-
-obfuscatePluginJarTask.configure {
-    finalizedBy(verifyObfuscatedPluginJarTask)
+    finalizedBy(verifyPluginJarTask)
 }
 
 tasks.named("build") {
