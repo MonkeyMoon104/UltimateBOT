@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
@@ -18,10 +18,10 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.item.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
 
 public final class CombatModeItem extends AbstractItem {
     private final UltimateBot plugin;

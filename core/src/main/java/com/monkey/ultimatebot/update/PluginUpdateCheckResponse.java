@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.update;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.monkey.ultimatebot.libs.jackson.annotation.JsonIgnoreProperties;
+import com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

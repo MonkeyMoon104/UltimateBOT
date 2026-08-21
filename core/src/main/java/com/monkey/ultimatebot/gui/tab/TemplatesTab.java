@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.gui.impl.customization.ArmorItem;
 import com.monkey.ultimatebot.gui.impl.customization.TrimMaterialSelectorItem;
 import com.monkey.ultimatebot.gui.impl.customization.TrimPatternSelectorItem;
@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.item.impl.SimpleItem;
 
 public class TemplatesTab {
 

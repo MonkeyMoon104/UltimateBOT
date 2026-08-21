@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.update;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.access.update.UpdateNotifyAccess;

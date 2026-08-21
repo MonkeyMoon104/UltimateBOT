@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.monkey.ultimatebot.common.model.BotArmorTier;
-import com.monkey.ultimatebot.common.model.BotMode;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import java.lang.reflect.Method;
 import java.util.Arrays;

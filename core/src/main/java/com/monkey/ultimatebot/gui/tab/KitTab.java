@@ -12,8 +12,8 @@ import com.monkey.ultimatebot.gui.impl.settings.TotemItem;
 import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.impl.SimpleItem;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.item.impl.SimpleItem;
 
 public class KitTab {
 

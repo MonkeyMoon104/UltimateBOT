@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.config;
 
 import com.monkey.ultimatebot.combat.profile.CombatModeConfiguration;
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import com.monkey.ultimatebot.libs.configurate.ConfigurateException;
+import com.monkey.ultimatebot.libs.configurate.ConfigurationNode;
+import com.monkey.ultimatebot.libs.configurate.yaml.YamlConfigurationLoader;
 
 public final class CombatProfileLoader {
     private final Path configurationPath;

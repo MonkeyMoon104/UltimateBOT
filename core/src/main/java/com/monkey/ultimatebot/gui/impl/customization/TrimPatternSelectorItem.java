@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.gui.impl.customization;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
 import org.bukkit.Material;
@@ -10,9 +10,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.item.builder.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.impl.AbstractItem;
 
 public class TrimPatternSelectorItem extends AbstractItem {
 

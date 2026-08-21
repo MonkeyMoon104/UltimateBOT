@@ -7,8 +7,8 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.Item;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
 
 public class BotGuiTabContext {
 

@@ -12,7 +12,7 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
 import com.monkey.ultimatebot.commands.*;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
@@ -46,17 +46,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
+import com.monkey.ultimatebot.libs.bstats.bukkit.Metrics;
+import com.monkey.ultimatebot.libs.bstats.charts.SimplePie;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.Nullable;
-import revxrsal.commands.bukkit.BukkitLamp;
-import revxrsal.commands.bukkit.BukkitLampConfig;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.bukkit.BukkitLamp;
+import com.monkey.ultimatebot.libs.lamp.bukkit.BukkitLampConfig;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
 
 public final class UltimateBot extends JavaPlugin {
 
@@ -76,18 +76,35 @@ public final class UltimateBot extends JavaPlugin {
     private @Nullable RemoteApiServer remoteApiServer;
     private @Nullable BotEventDispatcher botEventDispatcher;
     private @Nullable BotMetrics botMetrics;
-    private @Nullable ConfigurateRuntimeSettingsLoader runtimeSettingsLoader;
-    private @Nullable CombatProfileLoader combatProfileLoader;
+    private @Nullable Object runtimeSettingsLoader;
+    private @Nullable Object combatProfileLoader;
     private RuntimeSettings runtimeSettings = RuntimeSettings.defaults();
     private @Nullable CombatProfileCatalog combatProfileCatalog;
     private @Nullable CoreExtensionRegistry extensionRegistry;
     private @Nullable CoreAddonRegistry addonRegistry;
     private @Nullable UltimateBotAddonEngine addonEngine;
     private static @Nullable UltimateBot instance;
+    private boolean librariesReady;
+
+    @Override
+    public void onLoad() {
+        try {
+            com.monkey.ultimatebot.lib.RuntimeLibraryBootstrap.install(this);
+            librariesReady = true;
+        } catch (Throwable error) {
+            librariesReady = false;
+            getLogger().log(java.util.logging.Level.SEVERE, "[Libs] Failed to install runtime libraries", error);
+        }
+    }
 
     @Override
     public void onEnable() {
         instance = this;
+        if (!librariesReady) {
+            getLogger().severe("[Libs] Runtime libraries were not installed; disabling UltimateBot");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         this.wrapperManager = new WrapperManager(this);
         com.monkey.ultimatebot.logging.BootLogger boot = new com.monkey.ultimatebot.logging.BootLogger(this);
 
@@ -188,25 +205,35 @@ public final class UltimateBot extends JavaPlugin {
 
     public void reloadPluginConfiguration() {
         reloadConfig();
-        if (runtimeSettingsLoader == null) {
-            runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
-                    getDataFolder().toPath().resolve("config.yml"), getLogger());
-        }
-        runtimeSettings = runtimeSettingsLoader.load();
+        ConfigurateRuntimeSettingsLoader settingsLoader = settingsLoader();
+        runtimeSettings = settingsLoader.load();
         if (worldProtectionService != null) {
             worldProtectionService.reconfigure(runtimeSettings.worldProtection());
         }
-        if (combatProfileLoader == null) {
-            combatProfileLoader =
-                    new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
-        }
-        combatProfileCatalog = combatProfileLoader.load();
+        CombatProfileLoader profileLoader = profileLoader();
+        combatProfileCatalog = profileLoader.load();
         combatProfileCatalog.bindPlatformCapabilities(NMSBridgeManager.capabilities());
         if (targetingService != null) {
             targetingService.reconfigure(runtimeSettings.targetCache());
         }
         reloadLanguageConfiguration();
         applyRuntimeBotConfiguration();
+    }
+
+    private ConfigurateRuntimeSettingsLoader settingsLoader() {
+        if (runtimeSettingsLoader == null) {
+            runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
+                    getDataFolder().toPath().resolve("config.yml"), getLogger());
+        }
+        return (ConfigurateRuntimeSettingsLoader) runtimeSettingsLoader;
+    }
+
+    private CombatProfileLoader profileLoader() {
+        if (combatProfileLoader == null) {
+            combatProfileLoader =
+                    new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
+        }
+        return (CombatProfileLoader) combatProfileLoader;
     }
 
     public void reloadLanguageConfiguration() {
@@ -379,14 +406,13 @@ public final class UltimateBot extends JavaPlugin {
             if (!getDataFolder().toPath().resolve("combat-modes.yml").toFile().isFile()) {
                 saveResource("combat-modes.yml", false);
             }
-            runtimeSettingsLoader = new ConfigurateRuntimeSettingsLoader(
-                    getDataFolder().toPath().resolve("config.yml"), getLogger());
-            runtimeSettings = runtimeSettingsLoader.load();
-            combatProfileLoader = new CombatProfileLoader(getDataFolder().toPath().resolve("combat-modes.yml"), getLogger());
-            combatProfileCatalog = combatProfileLoader.load();
+            ConfigurateRuntimeSettingsLoader settingsLoader = settingsLoader();
+            runtimeSettings = settingsLoader.load();
+            CombatProfileLoader profileLoader = profileLoader();
+            combatProfileCatalog = profileLoader.load();
             reloadLanguageConfiguration();
 
-            com.monkey.ultimatebot.config.ConfigLoadReport report = runtimeSettingsLoader.lastReport();
+            com.monkey.ultimatebot.config.ConfigLoadReport report = settingsLoader.lastReport();
             boot.config("Keys read: " + report.keysRead() + " | invalid: " + report.invalidCount());
             for (com.monkey.ultimatebot.config.ConfigLoadReport.InvalidKey key : report.invalidKeys()) {
                 boot.config("\"" + key.path() + "\" = " + key.invalidValue() + " -> default " + key.defaultValue());

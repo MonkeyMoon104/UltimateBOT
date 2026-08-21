@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
-import com.monkey.ultimatebot.common.model.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
@@ -16,9 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.item.builder.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.impl.AbstractItem;
 
 public final class CombatModeItem extends AbstractItem {
     private final UltimateBot plugin;
@@ -61,7 +61,7 @@ public final class CombatModeItem extends AbstractItem {
         }
         CombatMode currentMode = options.getCombatMode();
         CombatMode nextMode = options.nextCombatMode(player, clickType.isLeftClick());
-        java.util.Optional<com.monkey.ultimatebot.common.model.CombatMode> proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.common.model.combat.CombatMode> proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
                 BotEventSource.GUI,

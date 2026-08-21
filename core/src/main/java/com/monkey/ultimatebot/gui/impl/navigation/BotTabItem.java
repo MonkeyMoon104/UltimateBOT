@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.impl.navigation;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.gui.NewBotGUI;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
@@ -10,10 +10,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.gui.TabGui;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.controlitem.TabItem;
+import com.monkey.ultimatebot.libs.invui.gui.TabGui;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.item.builder.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.impl.controlitem.TabItem;
 
 public class BotTabItem extends TabItem {
 

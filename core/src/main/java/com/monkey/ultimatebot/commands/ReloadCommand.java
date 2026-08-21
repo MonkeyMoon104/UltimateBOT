@@ -3,11 +3,11 @@ package com.monkey.ultimatebot.commands;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.Locale;
-import revxrsal.commands.annotation.Command;
-import revxrsal.commands.annotation.Optional;
-import revxrsal.commands.annotation.Suggest;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
-import revxrsal.commands.bukkit.annotation.CommandPermission;
+import com.monkey.ultimatebot.libs.lamp.annotation.Command;
+import com.monkey.ultimatebot.libs.lamp.annotation.Optional;
+import com.monkey.ultimatebot.libs.lamp.annotation.Suggest;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.bukkit.annotation.CommandPermission;
 
 public class ReloadCommand {
 

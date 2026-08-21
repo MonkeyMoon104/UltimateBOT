@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.update;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.common.net.CompatHttp;
 import java.io.IOException;
 import java.net.URI;

@@ -3,9 +3,9 @@ package com.monkey.ultimatebot.commands;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import org.jetbrains.annotations.NotNull;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
-import revxrsal.commands.bukkit.exception.BukkitExceptionHandler;
-import revxrsal.commands.exception.NoPermissionException;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.bukkit.exception.BukkitExceptionHandler;
+import com.monkey.ultimatebot.libs.lamp.exception.NoPermissionException;
 
 public final class UltimateBotExceptionHandler extends BukkitExceptionHandler {
 

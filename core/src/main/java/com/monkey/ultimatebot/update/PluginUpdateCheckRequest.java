@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.update;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty;
 import java.util.Objects;
 
 public final class PluginUpdateCheckRequest {

@@ -17,12 +17,12 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionDefault;
 import org.jspecify.annotations.Nullable;
-import revxrsal.commands.annotation.Command;
-import revxrsal.commands.annotation.Sized;
-import revxrsal.commands.annotation.Subcommand;
-import revxrsal.commands.annotation.SuggestWith;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
-import revxrsal.commands.bukkit.annotation.CommandPermission;
+import com.monkey.ultimatebot.libs.lamp.annotation.Command;
+import com.monkey.ultimatebot.libs.lamp.annotation.Sized;
+import com.monkey.ultimatebot.libs.lamp.annotation.Subcommand;
+import com.monkey.ultimatebot.libs.lamp.annotation.SuggestWith;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.bukkit.annotation.CommandPermission;
 
 public class BotTeamAllyCommand {
 

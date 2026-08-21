@@ -2,17 +2,17 @@ package com.monkey.ultimatebot.gui.v26_1.impl.settings;
 
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.item.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
 
 public class TargetModeItem extends AbstractItem {
     private final UltimateBot plugin;

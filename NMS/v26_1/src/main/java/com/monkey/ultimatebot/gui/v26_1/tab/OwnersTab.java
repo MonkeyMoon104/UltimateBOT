@@ -14,11 +14,11 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.gui.Markers;
-import xyz.xenondevs.invui.gui.ScrollGui;
-import xyz.xenondevs.invui.item.*;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.gui.Markers;
+import com.monkey.ultimatebot.libs.invui.gui.ScrollGui;
+import com.monkey.ultimatebot.libs.invui.item.*;
 
 public class OwnersTab {
 

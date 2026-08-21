@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
-import com.monkey.ultimatebot.common.model.PlatformCapability;
+import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.gui.NewBotGUI;
 import com.monkey.ultimatebot.gui.v26_1.impl.navigation.BotTabItem;
 import com.monkey.ultimatebot.gui.v26_1.tab.BotGuiTabContext;
@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.gui.Markers;
-import xyz.xenondevs.invui.gui.TabGui;
-import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.window.Window;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.gui.Markers;
+import com.monkey.ultimatebot.libs.invui.gui.TabGui;
+import com.monkey.ultimatebot.libs.invui.item.Item;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.window.Window;
 
 public class NewBotGUI_v26_1 {
 

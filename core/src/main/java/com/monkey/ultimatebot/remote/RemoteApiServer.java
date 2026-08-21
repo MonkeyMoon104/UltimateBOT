@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.remote;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.monkey.ultimatebot.libs.jackson.databind.DeserializationFeature;
+import com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.libs.jackson.datatype.jsr310.JavaTimeModule;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
@@ -15,14 +15,14 @@ import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
-import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.BotArmorTier;
-import com.monkey.ultimatebot.common.model.BotMode;
-import com.monkey.ultimatebot.common.model.BotTargetMode;
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
-import com.monkey.ultimatebot.common.model.DifficultyTier;
+import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.common.util.EnumValues;
 import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
@@ -826,16 +826,16 @@ public final class RemoteApiServer implements RemoteApiContext {
     }
 
     public static final class RemoteOperationResponse {
-        @com.fasterxml.jackson.annotation.JsonProperty
+        @com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty
         private final boolean success;
 
-        @com.fasterxml.jackson.annotation.JsonProperty
+        @com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty
         private final String message;
 
-        @com.fasterxml.jackson.annotation.JsonProperty
+        @com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty
         private final @Nullable BotSnapshot snapshot;
 
-        @com.fasterxml.jackson.annotation.JsonProperty
+        @com.monkey.ultimatebot.libs.jackson.annotation.JsonProperty
         private final @Nullable Integer removedCount;
 
         private RemoteOperationResponse(

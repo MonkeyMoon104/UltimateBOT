@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.item.builder.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.impl.AbstractItem;
 
 public final class ResetCombatTuningItem extends AbstractItem {
     private final BotOptions options;

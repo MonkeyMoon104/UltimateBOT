@@ -4,8 +4,8 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.gui.v26_2.impl.settings.DifficultyItem;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.item.Item;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.item.Item;
 
 public class DifficultyTab {
 

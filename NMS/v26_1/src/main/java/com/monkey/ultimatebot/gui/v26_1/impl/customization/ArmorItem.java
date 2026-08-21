@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.gui.v26_1.impl.customization;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.common.model.EquipmentSlotKind;
+import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.armor.ArmorCycle;
 import com.monkey.ultimatebot.utils.equipment.ArmorTrimUtils;
@@ -15,10 +15,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.item.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
 
 public class ArmorItem extends AbstractItem {
 

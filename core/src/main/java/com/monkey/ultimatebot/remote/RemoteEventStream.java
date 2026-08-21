@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.remote;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.action.BotHealEvent;
 import com.monkey.ultimatebot.api.event.action.BotTeleportEvent;

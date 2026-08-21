@@ -5,10 +5,10 @@ import com.monkey.ultimatebot.utils.ChatColorUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.item.AbstractItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.item.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
 
 public class TrimBackgroundItem extends AbstractItem {
 

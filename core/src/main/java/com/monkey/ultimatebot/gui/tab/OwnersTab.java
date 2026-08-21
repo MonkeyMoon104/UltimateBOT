@@ -19,16 +19,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
-import xyz.xenondevs.invui.animation.impl.SplitSequentialAnimation;
-import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.gui.ScrollGui;
-import xyz.xenondevs.invui.gui.SlotElement;
-import xyz.xenondevs.invui.gui.structure.Markers;
-import xyz.xenondevs.invui.item.Item;
-import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
-import xyz.xenondevs.invui.item.impl.controlitem.ScrollItem;
+import com.monkey.ultimatebot.libs.invui.animation.impl.SplitSequentialAnimation;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.gui.ScrollGui;
+import com.monkey.ultimatebot.libs.invui.gui.SlotElement;
+import com.monkey.ultimatebot.libs.invui.gui.structure.Markers;
+import com.monkey.ultimatebot.libs.invui.item.Item;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.item.builder.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.impl.AbstractItem;
+import com.monkey.ultimatebot.libs.invui.item.impl.controlitem.ScrollItem;
 
 public class OwnersTab {
 

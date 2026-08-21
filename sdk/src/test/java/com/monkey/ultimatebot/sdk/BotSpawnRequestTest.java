@@ -4,11 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.monkey.ultimatebot.common.model.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.BotMode;
-import com.monkey.ultimatebot.common.model.BrainKey;
-import com.monkey.ultimatebot.common.model.CombatMode;
-import com.monkey.ultimatebot.common.model.CombatTuning;
+import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;

@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.remote.internal;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.libs.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;

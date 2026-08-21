@@ -8,9 +8,9 @@ import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.List;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import revxrsal.commands.annotation.Command;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
-import revxrsal.commands.bukkit.annotation.CommandPermission;
+import com.monkey.ultimatebot.libs.lamp.annotation.Command;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.bukkit.annotation.CommandPermission;
 
 public class BotEventCommand {
 

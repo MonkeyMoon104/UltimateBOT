@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import revxrsal.commands.autocomplete.SuggestionProvider;
-import revxrsal.commands.bukkit.actor.BukkitCommandActor;
-import revxrsal.commands.node.ExecutionContext;
+import com.monkey.ultimatebot.libs.lamp.autocomplete.SuggestionProvider;
+import com.monkey.ultimatebot.libs.lamp.bukkit.actor.BukkitCommandActor;
+import com.monkey.ultimatebot.libs.lamp.node.ExecutionContext;
 
 public final class OnlinePlayerNameSuggestions implements SuggestionProvider<BukkitCommandActor> {
 

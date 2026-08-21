@@ -6,11 +6,11 @@ import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import xyz.xenondevs.invui.Click;
-import xyz.xenondevs.invui.gui.TabGui;
-import xyz.xenondevs.invui.item.AbstractTabGuiBoundItem;
-import xyz.xenondevs.invui.item.ItemBuilder;
-import xyz.xenondevs.invui.item.ItemProvider;
+import com.monkey.ultimatebot.libs.invui.Click;
+import com.monkey.ultimatebot.libs.invui.gui.TabGui;
+import com.monkey.ultimatebot.libs.invui.item.AbstractTabGuiBoundItem;
+import com.monkey.ultimatebot.libs.invui.item.ItemBuilder;
+import com.monkey.ultimatebot.libs.invui.item.ItemProvider;
 
 public class BotTabItem extends AbstractTabGuiBoundItem {
 

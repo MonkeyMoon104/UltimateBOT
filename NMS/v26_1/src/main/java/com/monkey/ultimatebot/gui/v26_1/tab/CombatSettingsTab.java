@@ -9,7 +9,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import org.bukkit.Material;
-import xyz.xenondevs.invui.gui.Gui;
+import com.monkey.ultimatebot.libs.invui.gui.Gui;
 
 public final class CombatSettingsTab {
     private final BotGuiTabContext context;

@@ -5,9 +5,9 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+import com.monkey.ultimatebot.libs.configurate.ConfigurateException;
+import com.monkey.ultimatebot.libs.configurate.ConfigurationNode;
+import com.monkey.ultimatebot.libs.configurate.yaml.YamlConfigurationLoader;
 
 public final class ConfigurateRuntimeSettingsLoader {
 

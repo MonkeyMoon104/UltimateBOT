@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.bot.ai.services.cache;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.monkey.ultimatebot.libs.caffeine.cache.Cache;
+import com.monkey.ultimatebot.libs.caffeine.cache.Caffeine;
 import com.monkey.ultimatebot.config.RuntimeSettings;
 import java.util.UUID;
 import org.jspecify.annotations.Nullable;
@@ -48,7 +48,7 @@ public final class Caffeine2UuidCache<V> implements UuidCache<V> {
 
     @Override
     public TargetCacheStats stats() {
-        com.github.benmanes.caffeine.cache.stats.CacheStats stats = cache.stats();
+        com.monkey.ultimatebot.libs.caffeine.cache.stats.CacheStats stats = cache.stats();
         return new TargetCacheStats(stats.hitCount(), stats.missCount(), stats.evictionCount());
     }
 
