@@ -185,6 +185,10 @@ Only `jar-relocator` (+ ASM) stay shaded in `UltimateBot.jar` (needed before oth
 | `xyz.xenondevs.invui` | `com.monkey.ultimatebot.libs.invui` |
 | … | `com.monkey.ultimatebot.libs.<lib>` |
 
+### Maintaining the Maven libs mirror
+
+Mirror sync tasks (`bumpLibsToServer`, `verifyLibsMirror`) live in a **local, gitignored** build-logic script (`ultimatebot.libs-mirror.gradle.kts`) and are applied by `:dist` only when that file is present. Credentials stay in `~/.gradle/gradle.properties`; nothing from that workflow is committed.
+
 ### Module notes
 
 | Module | Role |

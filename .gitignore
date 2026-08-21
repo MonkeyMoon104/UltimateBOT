@@ -9,8 +9,9 @@ build/
 !**/src/test/**/build/
 
 .idea/*
-gradle/*
-!gradle/libs.versions.toml
+
+# Local/maintainer-only Maven mirror sync (credentials live in ~/.gradle; keep out of git)
+build-logic/src/main/kotlin/ultimatebot.libs-mirror.gradle.kts
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

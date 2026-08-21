@@ -15,6 +15,13 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+// Maintainer-only: ultimatebot.libs-mirror.gradle.kts is gitignored and may be absent on clones.
+val libsMirrorPluginScript =
+    rootProject.file("build-logic/src/main/kotlin/ultimatebot.libs-mirror.gradle.kts")
+if (libsMirrorPluginScript.isFile) {
+    apply(plugin = "ultimatebot.libs-mirror")
+}
+
 ultimatebotJava {
     injectReleaseArg.set(false)
     release.set(17)
