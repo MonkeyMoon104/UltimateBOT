@@ -7,8 +7,10 @@ import com.monkey.ultimatebot.api.managers.IBotManager;
 import com.monkey.ultimatebot.api.managers.IBotRegistry;
 import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.common.model.platform.PlatformInfo;
+import com.monkey.ultimatebot.common.model.settings.ServerConfiguration;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.bukkit.plugin.Plugin;
 import org.jspecify.annotations.Nullable;
@@ -40,6 +42,7 @@ public final class UltimateBotAPI {
     private final BotEventBus eventBus;
     private final UltimateBotExtensionRegistry extensions;
     private final AddonRegistry addons;
+    private final Supplier<ServerConfiguration> serverConfiguration;
 
     /**
      * Creates a new API container.
@@ -53,18 +56,21 @@ public final class UltimateBotAPI {
      * @param botRegistry bot registry service implementation
      * @param extensions dynamic combat-mode and brain registry
      * @param addons read-only hosted-addon registry
+     * @param serverConfiguration supplier for current server-wide plugin settings
      */
     public UltimateBotAPI(
             Plugin plugin,
             IBotManager botManager,
             IBotRegistry botRegistry,
             UltimateBotExtensionRegistry extensions,
-            AddonRegistry addons) {
+            AddonRegistry addons,
+            Supplier<ServerConfiguration> serverConfiguration) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.botManager = Objects.requireNonNull(botManager, "botManager");
         this.botRegistry = Objects.requireNonNull(botRegistry, "botRegistry");
         this.extensions = Objects.requireNonNull(extensions, "extensions");
         this.addons = Objects.requireNonNull(addons, "addons");
+        this.serverConfiguration = Objects.requireNonNull(serverConfiguration, "serverConfiguration");
         this.eventBus = new BotEventBus();
     }
 
@@ -164,6 +170,11 @@ public final class UltimateBotAPI {
     /** Returns the read-only status of jars managed by the addon engine. */
     public AddonRegistry getAddons() {
         return addons;
+    }
+
+    /** Returns the current server-wide UltimateBot configuration snapshot. */
+    public ServerConfiguration getServerConfiguration() {
+        return serverConfiguration.get();
     }
 
     /** Returns the loaded Minecraft version and NMS feature flags for this server. */

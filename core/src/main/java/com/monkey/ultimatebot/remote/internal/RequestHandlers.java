@@ -32,6 +32,10 @@ public final class RequestHandlers {
         responseWriter.writeJson(exchange, 200, context.api().getBotManager().getPlatform());
     }
 
+    public void handleSettings(HttpExchange exchange) throws IOException {
+        responseWriter.writeJson(exchange, 200, context.api().getServerConfiguration());
+    }
+
     public void handleMetrics(HttpExchange exchange) throws IOException {
         BotMetrics metrics = context.plugin().getBotMetrics();
         if (!metrics.isPrometheusEndpointEnabled()) {

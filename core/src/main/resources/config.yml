@@ -1,3 +1,5 @@
+config-version: 1
+
 lang-file: "EN.yml"
 
 updates:
@@ -50,6 +52,11 @@ protection-world:
   max-active-combat-entities: 512
   # Fires normal placement events so WorldGuard and other protection plugins can deny bot blocks.
   respect-protection-plugins: true
+
+# Vanilla Minecraft statistics applied during bot fights (PLAYER_KILLS / DEATHS).
+vanilla-statistics:
+  kills: true
+  deaths: true
 
 bot:
   name: "UltimateBot"

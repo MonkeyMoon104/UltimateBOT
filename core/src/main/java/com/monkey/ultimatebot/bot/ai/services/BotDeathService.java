@@ -42,7 +42,9 @@ public class BotDeathService {
 
     public void handleDeath(@Nullable LivingEntity killer) {
         // Skipping NMS Player.die() avoids double DEATHS/PLAYER_KILLS; award the kill here once.
-        awardPlayerKillStatistic(killer);
+        if (plugin.getRuntimeSettings().vanillaStatistics().trackKills()) {
+            awardPlayerKillStatistic(killer);
+        }
 
         BotOptions options =
                 bot.getBrainController() != null ? bot.getBrainController().getBotOptions() : null;

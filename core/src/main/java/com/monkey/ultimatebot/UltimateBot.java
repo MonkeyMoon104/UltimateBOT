@@ -14,9 +14,11 @@ import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
 import com.monkey.ultimatebot.commands.*;
 import com.monkey.ultimatebot.common.model.combat.CombatMode;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
+import com.monkey.ultimatebot.config.BoostedYamlPluginConfiguration;
 import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
 import com.monkey.ultimatebot.config.RuntimeSettings;
+import com.monkey.ultimatebot.common.model.settings.ServerConfiguration;
 import com.monkey.ultimatebot.event.BotEventDispatcher;
 import com.monkey.ultimatebot.extension.registry.CoreExtensionRegistry;
 import com.monkey.ultimatebot.extension.registry.ExtensionOwnerListener;
@@ -203,7 +205,16 @@ public final class UltimateBot extends JavaPlugin {
         }
     }
 
+    public ServerConfiguration getServerConfiguration() {
+        return new ServerConfiguration(runtimeSettings.vanillaStatistics(), runtimeSettings.configVersion());
+    }
+
     public void reloadPluginConfiguration() {
+        try {
+            BoostedYamlPluginConfiguration.updateAndSave(this, getLogger());
+        } catch (java.io.IOException error) {
+            throw new IllegalStateException("Failed to update config.yml during reload", error);
+        }
         reloadConfig();
         ConfigurateRuntimeSettingsLoader settingsLoader = settingsLoader();
         runtimeSettings = settingsLoader.load();
@@ -402,7 +413,14 @@ public final class UltimateBot extends JavaPlugin {
 
         private void configureFilesAndLanguage() {
             boot.beginPhase(1, "Config", "Configuration");
-            saveDefaultConfig();
+            try {
+                int configVersion =
+                        BoostedYamlPluginConfiguration.updateAndSave(UltimateBot.this, UltimateBot.this.getLogger());
+                boot.config("config.yml -> BoostedYAML updated (config-version=" + configVersion + ")");
+            } catch (java.io.IOException error) {
+                throw new IllegalStateException("Failed to prepare config.yml", error);
+            }
+            reloadConfig();
             if (!getDataFolder().toPath().resolve("combat-modes.yml").toFile().isFile()) {
                 saveResource("combat-modes.yml", false);
             }
@@ -510,7 +528,8 @@ public final class UltimateBot extends JavaPlugin {
                     new CoreBotManagerAdapter(UltimateBot.this, manager, registry, options),
                     new CoreBotRegistryAdapter(registry),
                     extensions,
-                    addons);
+                    addons,
+                    UltimateBot.this::getServerConfiguration);
             boot.boot("API -> adapters wired");
             boot.completePhase("public API prepared");
             return api;

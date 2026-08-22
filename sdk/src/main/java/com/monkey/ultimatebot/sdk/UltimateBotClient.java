@@ -15,6 +15,7 @@ import com.monkey.ultimatebot.common.model.combat.CombatModeDefinition;
 import com.monkey.ultimatebot.common.model.combat.CombatTuning;
 import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.common.model.platform.PlatformInfo;
+import com.monkey.ultimatebot.common.model.settings.ServerConfiguration;
 import com.monkey.ultimatebot.sdk.model.request.ArmorRequest;
 import com.monkey.ultimatebot.sdk.model.request.AutoTargetRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
@@ -88,6 +89,11 @@ public final class UltimateBotClient implements AutoCloseable {
     /** Returns the loaded Minecraft version and NMS feature flags for the remote server. */
     public PlatformInfo platform() {
         return send("GET", "/platform", null, PlatformInfo.class);
+    }
+
+    /** Returns the current server-wide UltimateBot configuration snapshot. */
+    public ServerConfiguration serverConfiguration() {
+        return send("GET", "/settings", null, ServerConfiguration.class);
     }
 
     /** Returns the reconnecting remote event bus. */

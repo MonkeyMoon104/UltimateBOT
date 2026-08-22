@@ -265,6 +265,7 @@ val generateLibraryDescriptorsTask = tasks.register("generateLibraryDescriptors"
 
 dependencies {
     implementation(project(":core"))
+    implementation(libs.boosted.yaml)
     implementation(project(path = ":NMS:v1_7_R4", configuration = "runtimeElements")) {
         isTransitive = false
     }

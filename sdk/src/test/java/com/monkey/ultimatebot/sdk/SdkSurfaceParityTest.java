@@ -31,6 +31,7 @@ class SdkSurfaceParityTest {
                         "listBots",
                         "activeBotCount",
                         "platform",
+                        "serverConfiguration",
                         "listCombatModes",
                         "getCombatMode",
                         "listBrains",

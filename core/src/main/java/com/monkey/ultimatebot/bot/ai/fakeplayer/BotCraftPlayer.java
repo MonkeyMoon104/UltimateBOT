@@ -1383,7 +1383,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    public void sendPluginMessage(@NotNull Plugin source, @NotNull String channel, byte @NotNull [] message) {}
+    public void sendPluginMessage(@NotNull Plugin source, @NotNull String channel, @NotNull byte[] message) {}
 
     @Override
     public @NotNull Set<String> getListeningPluginChannels() {

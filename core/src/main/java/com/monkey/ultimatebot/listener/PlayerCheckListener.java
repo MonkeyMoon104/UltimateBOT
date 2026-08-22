@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.Statistic;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -157,6 +159,29 @@ public class PlayerCheckListener implements Listener {
             if (bot != null && currentDeathMessage.contains(bot.asBukkitPlayer().getName())) {
                 setBotDeathMessage(event, player, options);
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerDeathStatistics(PlayerDeathEvent event) {
+        if (plugin.getRuntimeSettings().vanillaStatistics().trackDeaths()) {
+            return;
+        }
+        Player victim = event.getEntity();
+        Player killer = victim.getKiller();
+        if (killer == null) {
+            return;
+        }
+        if (plugin.getBotRegistry().getOwnerUUIDByBotUUID(killer.getUniqueId()) == null) {
+            return;
+        }
+        try {
+            int deaths = victim.getStatistic(Statistic.DEATHS);
+            if (deaths > 0) {
+                victim.setStatistic(Statistic.DEATHS, deaths - 1);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // Statistic may be unavailable on some server builds.
         }
     }
 

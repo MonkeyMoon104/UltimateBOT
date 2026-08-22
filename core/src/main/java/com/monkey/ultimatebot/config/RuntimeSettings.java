@@ -1,5 +1,6 @@
 package com.monkey.ultimatebot.config;
 
+import com.monkey.ultimatebot.common.model.settings.VanillaStatisticsSettings;
 import java.time.Duration;
 import java.util.Objects;
 
@@ -13,16 +14,32 @@ public final class RuntimeSettings {
     private final CacheSettings targetCache;
     private final CacheSettings blockStateCache;
     private final WorldProtectionSettings worldProtection;
+    private final VanillaStatisticsSettings vanillaStatistics;
+    private final int configVersion;
 
     public RuntimeSettings(
-            CacheSettings targetCache, CacheSettings blockStateCache, WorldProtectionSettings worldProtection) {
+            CacheSettings targetCache,
+            CacheSettings blockStateCache,
+            WorldProtectionSettings worldProtection,
+            VanillaStatisticsSettings vanillaStatistics,
+            int configVersion) {
         this.targetCache = Objects.requireNonNull(targetCache, "targetCache");
         this.blockStateCache = Objects.requireNonNull(blockStateCache, "blockStateCache");
         this.worldProtection = Objects.requireNonNull(worldProtection, "worldProtection");
+        this.vanillaStatistics = Objects.requireNonNull(vanillaStatistics, "vanillaStatistics");
+        if (configVersion < 0) {
+            throw new IllegalArgumentException("configVersion cannot be negative");
+        }
+        this.configVersion = configVersion;
     }
 
     public static RuntimeSettings defaults() {
-        return new RuntimeSettings(DEFAULT_TARGET_CACHE, DEFAULT_BLOCK_STATE_CACHE, DEFAULT_WORLD_PROTECTION);
+        return new RuntimeSettings(
+                DEFAULT_TARGET_CACHE,
+                DEFAULT_BLOCK_STATE_CACHE,
+                DEFAULT_WORLD_PROTECTION,
+                VanillaStatisticsSettings.defaults(),
+                1);
     }
 
     public CacheSettings targetCache() {
@@ -37,6 +54,14 @@ public final class RuntimeSettings {
         return worldProtection;
     }
 
+    public VanillaStatisticsSettings vanillaStatistics() {
+        return vanillaStatistics;
+    }
+
+    public int configVersion() {
+        return configVersion;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -48,12 +73,14 @@ public final class RuntimeSettings {
         RuntimeSettings other = (RuntimeSettings) obj;
         return targetCache.equals(other.targetCache)
                 && blockStateCache.equals(other.blockStateCache)
-                && worldProtection.equals(other.worldProtection);
+                && worldProtection.equals(other.worldProtection)
+                && vanillaStatistics.equals(other.vanillaStatistics)
+                && configVersion == other.configVersion;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetCache, blockStateCache, worldProtection);
+        return Objects.hash(targetCache, blockStateCache, worldProtection, vanillaStatistics, configVersion);
     }
 
     @Override
@@ -64,6 +91,10 @@ public final class RuntimeSettings {
                 + blockStateCache
                 + ", worldProtection="
                 + worldProtection
+                + ", vanillaStatistics="
+                + vanillaStatistics
+                + ", configVersion="
+                + configVersion
                 + "]";
     }
 

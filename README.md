@@ -126,7 +126,7 @@ Exact server revision support depends on the matching NMS bridge included in the
 
 Primary files are created in `plugins/UltimateBot/`:
 
-- `config.yml` — language, updates, remote API, addons, caches, world protection, bot defaults
+- `config.yml` — language, updates, remote API, addons, caches, world protection, bot defaults (auto-updated via BoostedYAML using `config-version`)
 - `combat-modes.yml` — combat profile definitions
 - Language files (for example `EN.yml`)
 
@@ -136,6 +136,8 @@ Important defaults include:
 - explosion / combat-block protection limits
 - remote API bind address and token (keep private)
 - optional metrics and guard addon enablement
+- `config-version` (managed by BoostedYAML; new keys merge in on startup/reload)
+- `vanilla-statistics.kills` / `vanilla-statistics.deaths` (default `true`; set both to `false` in practice worlds to avoid K/D farming)
 
 Treat `remote-api.token` as a secret. Prefer binding the remote API to `127.0.0.1` unless it is protected by network controls.
 

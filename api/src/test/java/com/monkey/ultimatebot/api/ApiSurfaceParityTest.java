@@ -45,6 +45,11 @@ class ApiSurfaceParityTest {
                 .collect(Collectors.toUnmodifiableSet());
         assertTrue(managerMethods.containsAll(Set.of("getPlatform", "supports", "getCombatModes", "getBrains")));
 
+        Set<String> apiMethods = Arrays.stream(UltimateBotAPI.class.getDeclaredMethods())
+                .map(Method::getName)
+                .collect(Collectors.toUnmodifiableSet());
+        assertTrue(apiMethods.contains("getServerConfiguration"));
+
         Set<String> snapshotMethods = Arrays.stream(BotSnapshot.class.getDeclaredMethods())
                 .map(Method::getName)
                 .collect(Collectors.toUnmodifiableSet());

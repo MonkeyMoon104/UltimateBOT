@@ -19,6 +19,10 @@ public final class Router {
             handlers.handlePlatform(exchange);
             return true;
         }
+        if ("GET".equals(method) && "/settings".equals(relativePath)) {
+            handlers.handleSettings(exchange);
+            return true;
+        }
         if ("GET".equals(method) && "/metrics".equals(relativePath)) {
             handlers.handleMetrics(exchange);
             return true;

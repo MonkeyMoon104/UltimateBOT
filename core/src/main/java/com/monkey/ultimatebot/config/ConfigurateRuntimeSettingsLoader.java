@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.monkey.ultimatebot.common.model.settings.VanillaStatisticsSettings;
 import com.monkey.ultimatebot.libs.configurate.ConfigurateException;
 import com.monkey.ultimatebot.libs.configurate.ConfigurationNode;
 import com.monkey.ultimatebot.libs.configurate.yaml.YamlConfigurationLoader;
@@ -39,11 +40,28 @@ public final class ConfigurateRuntimeSettingsLoader {
                             root.node("performance", "caches", "block-state"),
                             defaults.blockStateCache(),
                             "block-state", report),
-                    readWorldProtection(root.node("protection-world"), defaults.worldProtection(), report));
+                    readWorldProtection(root.node("protection-world"), defaults.worldProtection(), report),
+                    readVanillaStatistics(root.node("vanilla-statistics"), defaults.vanillaStatistics(), report),
+                    readConfigVersion(root, defaults.configVersion(), report));
         } catch (RuntimeException | ConfigurateException exception) {
             logger.log(Level.WARNING, "Could not load typed runtime settings; defaults will be used", exception);
             return defaults;
         }
+    }
+
+    private VanillaStatisticsSettings readVanillaStatistics(
+            ConfigurationNode node, VanillaStatisticsSettings defaults, ConfigLoadReport report) {
+        report.incrementKeysRead();
+        report.incrementKeysRead();
+        boolean trackKills = node.node("kills").getBoolean(defaults.trackKills());
+        boolean trackDeaths = node.node("deaths").getBoolean(defaults.trackDeaths());
+        return new VanillaStatisticsSettings(trackKills, trackDeaths);
+    }
+
+    private int readConfigVersion(ConfigurationNode root, int defaults, ConfigLoadReport report) {
+        report.incrementKeysRead();
+        int version = root.node(BoostedYamlPluginConfiguration.VERSION_ROUTE).getInt(defaults);
+        return version >= 0 ? version : defaults;
     }
 
     private RuntimeSettings.WorldProtectionSettings readWorldProtection(

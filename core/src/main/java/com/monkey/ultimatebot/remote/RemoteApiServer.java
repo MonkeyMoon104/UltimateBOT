@@ -774,6 +774,7 @@ public final class RemoteApiServer implements RemoteApiContext {
         switch (relativePath) {
             case "/health":
             case "/platform":
+            case "/settings":
             case "/metrics":
             case "/events":
             case "/bots":

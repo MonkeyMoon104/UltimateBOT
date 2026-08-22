@@ -31,6 +31,7 @@ fun relocateLib(taskName: String, configuration: Configuration, archiveName: Str
         destinationDirectory.set(layout.buildDirectory.dir("relocated-compile"))
         configurations = listOf(configuration)
         mergeServiceFiles()
+        exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
         relocate("com.fasterxml.jackson", "com.monkey.ultimatebot.libs.jackson")
         relocate("revxrsal.commands", "com.monkey.ultimatebot.libs.lamp")
         relocate("org.spongepowered.configurate", "com.monkey.ultimatebot.libs.configurate")
@@ -68,6 +69,8 @@ dependencies {
     add(compileLibCaffeine.name, libs.caffeine.legacy)
     add(compileLibInvui.name, libs.invui.v1)
 
+    implementation(libs.boosted.yaml)
+
     compileOnly(files(relocateJacksonCompile.map { it.archiveFile }))
     compileOnly(files(relocateLampCompile.map { it.archiveFile }))
     compileOnly(files(relocateConfigurateCompile.map { it.archiveFile }))
@@ -85,7 +88,12 @@ dependencies {
     testImplementation(libs.mockbukkit)
     testImplementation(libs.assertj.core)
     testImplementation(libs.archunit.junit5)
+    testImplementation(files(relocateConfigurateCompile.map { it.archiveFile }))
     testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.named("compileTestJava").configure {
+    dependsOn(relocateConfigurateCompile)
 }
 
 tasks.named("compileJava").configure {
