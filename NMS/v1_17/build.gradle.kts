@@ -14,7 +14,7 @@ val obfServer: Configuration = configurations.create("obfServer")
 dependencies {
     compileOnly("org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:remapped-mojang")
     compileOnly("io.papermc.paper:paper-api:1.17-R0.1-SNAPSHOT")
-    compileOnly("com.google.errorprone:error_prone_annotations:2.11.0")
+    compileOnly("com.google.errorprone:error_prone_annotations:2.50.0")
 
     mojangServer("org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:remapped-mojang")
     obfServer("org.spigotmc:spigot:1.17-R0.1-SNAPSHOT:remapped-obf")
@@ -22,7 +22,7 @@ dependencies {
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-mojang@txt")
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-spigot@csrg")
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-spigot-fields@csrg")
-    specialSource("net.md-5:SpecialSource:1.11.4")
+    specialSource("net.md-5:SpecialSource:1.11.6")
 }
 
 tasks.withType<JavaCompile>().configureEach {

@@ -8,5 +8,5 @@ ultimatebotPaperweight {
 }
 
 dependencies {
-    compileOnly("com.google.errorprone:error_prone_annotations:2.11.0")
+    compileOnly("com.google.errorprone:error_prone_annotations:2.50.0")
 }

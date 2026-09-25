@@ -26,6 +26,11 @@ updates:
           - "org.awaitility*"
           - "com.tngtech.archunit*"
           - "org.mockbukkit*"
+    ignore:
+      # Dual catalog aliases share one Maven coordinate; a major bump would rewrite
+      # caffeine-legacy (must stay on 2.x for Java 8). Apply major Caffeine upgrades manually.
+      - dependency-name: "com.github.ben-manes.caffeine:caffeine"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
