@@ -1,0 +1,38 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "gradle"
+    groups:
+      gradle-plugins:
+        patterns:
+          - "io.papermc.paperweight*"
+          - "com.gradleup.shadow"
+          - "net.ltgt.errorprone*"
+          - "com.diffplug.spotless"
+          - "org.revapi*"
+          - "it.monkeymoon104.api-publish"
+      test-libs:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+          - "org.assertj*"
+          - "org.awaitility*"
+          - "com.tngtech.archunit*"
+          - "org.mockbukkit*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
