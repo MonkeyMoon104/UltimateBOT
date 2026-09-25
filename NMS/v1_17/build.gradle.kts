@@ -22,7 +22,7 @@ dependencies {
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-mojang@txt")
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-spigot@csrg")
     maps("org.spigotmc:minecraft-server:1.17-R0.1-SNAPSHOT:maps-spigot-fields@csrg")
-    specialSource("net.md-5:SpecialSource:1.11.4")
+    specialSource("net.md-5:SpecialSource:1.11.6")
 }
 
 tasks.withType<JavaCompile>().configureEach {
