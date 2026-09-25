@@ -7,6 +7,7 @@ jackson = "2.22.1"
 invui-v1 = "1.49"
 invui-v2-1 = "2.1.1"
 invui-v2-2 = "2.2.0"
+invui-v2-5 = "2.5.0"
 placeholderapi = "2.12.3"
 worldguard = "7.0.17"
 sirblobman-core = "2.9-SNAPSHOT"
@@ -58,6 +59,7 @@ paper-bundle-1_21_10 = "1.21.10-R0.1-SNAPSHOT"
 paper-bundle-1_21_11 = "1.21.11-R0.1-SNAPSHOT"
 paper-bundle-26_1 = "26.1.2.build.+"
 paper-bundle-26_2 = "26.2.build.+"
+paper-bundle-26_3 = "26.3.build.+"
 
 [libraries]
 bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
@@ -66,6 +68,7 @@ jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-dat
 invui-v1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v1" }
 invui-v2-1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-1" }
 invui-v2-2 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-2" }
+invui-v2-5 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-5" }
 placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
 sirblobman-core = { module = "com.github.sirblobman.api:core", version.ref = "sirblobman-core" }

@@ -61,6 +61,7 @@ val libCaffeineModern = libConfiguration("libCaffeineModern")
 val libInvuiV1 = libConfiguration("libInvuiV1")
 val libInvuiV2_1 = libConfiguration("libInvuiV2_1")
 val libInvuiV2_2 = libConfiguration("libInvuiV2_2")
+val libInvuiV2_5 = libConfiguration("libInvuiV2_5")
 
 val shadowJarTask = tasks.named<ShadowJar>("shadowJar")
 val pluginJarFile = layout.buildDirectory.file("libs/UltimateBot.jar")
@@ -220,7 +221,7 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
 val generateLibraryDescriptorsTask = tasks.register("generateLibraryDescriptors") {
     inputs.files(
         libJackson, libLamp, libConfigurate, libPathetic, libBstats,
-        libCaffeineLegacy, libCaffeineModern, libInvuiV1, libInvuiV2_1, libInvuiV2_2,
+        libCaffeineLegacy, libCaffeineModern, libInvuiV1, libInvuiV2_1, libInvuiV2_2, libInvuiV2_5,
     )
     outputs.dir(libraryDescriptorDir)
 
@@ -258,6 +259,7 @@ val generateLibraryDescriptorsTask = tasks.register("generateLibraryDescriptors"
             LibrarySpec("invui-v1", "legacy", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV1),
             LibrarySpec("invui-v2-1", "modern", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV2_1),
             LibrarySpec("invui-v2-2", "modern", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV2_2),
+            LibrarySpec("invui-v2-5", "modern", "com.monkey.ultimatebot.libs.invui.gui.Gui", libInvuiV2_5),
         )
         specs.forEach { writeLibraryDescriptor(it, out) }
     }
@@ -343,6 +345,9 @@ dependencies {
     implementation(project(path = ":NMS:v26_2", configuration = "runtimeElements")) {
         isTransitive = false
     }
+    implementation(project(path = ":NMS:v26_3", configuration = "runtimeElements")) {
+        isTransitive = false
+    }
 
     add(libJackson.name, libsCatalog.findLibrary("jackson-databind").get())
     add(libJackson.name, libsCatalog.findLibrary("jackson-datatype-jsr310").get())
@@ -355,6 +360,7 @@ dependencies {
     add(libInvuiV1.name, libsCatalog.findLibrary("invui-v1").get())
     add(libInvuiV2_1.name, libsCatalog.findLibrary("invui-v2-1").get())
     add(libInvuiV2_2.name, libsCatalog.findLibrary("invui-v2-2").get())
+    add(libInvuiV2_5.name, libsCatalog.findLibrary("invui-v2-5").get())
 }
 
 tasks.named<ShadowJar>("shadowJar") {
@@ -402,6 +408,7 @@ val verifyPluginJarTask = tasks.register("verifyPluginJar") {
                 "META-INF/ultimatebot/libs/invui-v1.properties",
                 "META-INF/ultimatebot/libs/invui-v2-1.properties",
                 "META-INF/ultimatebot/libs/invui-v2-2.properties",
+                "META-INF/ultimatebot/libs/invui-v2-5.properties",
             )
             requiredDescriptors.forEach { path ->
                 check(zip.getEntry(path) != null) { "Missing library descriptor in jar: $path" }

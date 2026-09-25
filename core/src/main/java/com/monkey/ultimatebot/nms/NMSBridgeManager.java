@@ -13,7 +13,7 @@ public class NMSBridgeManager {
 
     private static @Nullable INMSBridge instance;
     private static final String SUPPORTED_VERSIONS =
-            "1.7.10, 1.8.x-1.16.5 (legacy NMS), 1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x";
+            "1.7.10, 1.8.x-1.16.5 (legacy NMS), 1.17+, 1.18.x, 1.19.x, 1.20.x, 1.21.x, 26.1.x, 26.2.x, 26.3.x";
 
     public static void init() {
         init(java.util.logging.Logger.getLogger("UltimateBot"));
@@ -261,6 +261,9 @@ public class NMSBridgeManager {
         }
         if ("26.2".equals(version) || version.startsWith("26.2.")) {
             return "com.monkey.ultimatebot.nms.NMSBridge_v26_2";
+        }
+        if ("26.3".equals(version) || version.startsWith("26.3.")) {
+            return "com.monkey.ultimatebot.nms.NMSBridge_v26_3";
         }
 
         return StubNMSBridge.class.getName();

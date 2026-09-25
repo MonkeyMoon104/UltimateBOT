@@ -72,7 +72,7 @@ UltimateBot ships dedicated NMS modules for a large Minecraft span, including le
 | Legacy | 1.7.10 (`v1_7_R4`), 1.8.x, 1.9–1.12 |
 | Transitional | 1.13–1.16.x |
 | Modern | 1.17–1.21.x |
-| Newest tracked | `v26_1`, `v26_2` |
+| Newest tracked | `v26_1`, `v26_2`, `v26_3` |
 
 Exact server revision support depends on the matching NMS bridge included in the built jar. Always use a build that contains the bridge for your server version.
 

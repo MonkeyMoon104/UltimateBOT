@@ -42,7 +42,9 @@ public final class RuntimeLibraryBootstrap {
         }
 
         String minecraft = MinecraftVersionAccess.minecraftVersion().toLowerCase(Locale.ROOT);
-        if (minecraft.startsWith("26.2")) {
+        if (minecraft.startsWith("26.3")) {
+            requests.add(request("invui-v2-5", "InvUI 2.5", LibraryTrack.MODERN));
+        } else if (minecraft.startsWith("26.2")) {
             requests.add(request("invui-v2-2", "InvUI 2.2", LibraryTrack.MODERN));
         } else if (minecraft.startsWith("26.")) {
             requests.add(request("invui-v2-1", "InvUI 2.1", LibraryTrack.MODERN));
