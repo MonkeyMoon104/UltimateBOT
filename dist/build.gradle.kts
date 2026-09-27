@@ -15,7 +15,7 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
-// Maintainer-only: ultimatebot.libs-mirror.gradle.kts is gitignored and may be absent on clones.
+// Optional maintainer mirror sync: ultimatebot.libs-mirror publishes to Reposilite /libs/ultimatebot.
 val libsMirrorPluginScript =
     rootProject.file("build-logic/src/main/kotlin/ultimatebot.libs-mirror.gradle.kts")
 if (libsMirrorPluginScript.isFile) {
@@ -111,7 +111,7 @@ fun repositoryBasesFor(group: String): List<String> {
     val preferredMirror = System.getenv("ULTIMATEBOT_LIBS_MIRROR")
         ?.trim()
         ?.takeIf { it.isNotEmpty() }
-        ?: "https://repo.monkeymoon104.it/releases"
+        ?: "https://repo.monkeymoon104.it/libs/ultimatebot"
     ordered += preferredMirror.trimEnd('/')
 
     ordered += "https://maven-central.storage-download.googleapis.com/maven2"

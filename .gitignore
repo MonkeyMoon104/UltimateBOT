@@ -10,8 +10,8 @@ build/
 
 .idea/*
 
-# Local/maintainer-only Maven mirror sync (credentials live in ~/.gradle; keep out of git)
-build-logic/src/main/kotlin/ultimatebot.libs-mirror.gradle.kts
+# Local mirror sync credentials stay in ~/.gradle/gradle.properties (monkeyrepo.user / monkeyrepo.secret).
+# The publish script itself is tracked: build-logic/.../ultimatebot.libs-mirror.gradle.kts
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
