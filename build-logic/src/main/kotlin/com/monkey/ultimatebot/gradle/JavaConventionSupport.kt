@@ -38,7 +38,6 @@ fun Project.configureUltimateBotJava(javaExt: UltimateBotJavaExtension) {
             check("InvalidParam", CheckSeverity.OFF)
             option("NullAway:OnlyNullMarked", "true")
             option("NullAway:JSpecifyMode", "true")
-            option("NullAway:JSpecifyExperimental", "true")
         }
         doFirst {
             if (!javaExt.injectReleaseArg.get()) {
