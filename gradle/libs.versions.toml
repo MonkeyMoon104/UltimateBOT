@@ -1,7 +1,6 @@
 [versions]
 paperweight = "2.0.0-beta.21"
 shadow = "9.6.1"
-api-publish = "1.0.1"
 bstats = "3.2.1"
 jackson = "2.22.3"
 invui-v1 = "1.49"
@@ -105,7 +104,6 @@ paperweight-userdev-gradle = { module = "io.papermc.paperweight.userdev:io.paper
 [plugins]
 paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
-api-publish = { id = "it.monkeymoon104.api-publish", version.ref = "api-publish" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 revapi = { id = "org.revapi.revapi-gradle-plugin", version.ref = "revapi-plugin" }

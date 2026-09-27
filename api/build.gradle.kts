@@ -2,7 +2,7 @@ import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     id("ultimatebot.java-library")
-    alias(libs.plugins.api.publish)
+    id("ultimatebot.publish")
     alias(libs.plugins.revapi)
 }
 

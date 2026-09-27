@@ -5,7 +5,7 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     id("ultimatebot.java-library")
     alias(libs.plugins.shadow)
-    alias(libs.plugins.api.publish)
+    id("ultimatebot.publish")
 }
 
 val releaseVersion = providers.environmentVariable("RELEASE_VERSION").orElse(project.version.toString())

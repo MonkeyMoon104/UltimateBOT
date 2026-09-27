@@ -17,7 +17,6 @@ updates:
           - "net.ltgt.errorprone*"
           - "com.diffplug.spotless"
           - "org.revapi*"
-          - "it.monkeymoon104.api-publish"
       test-libs:
         patterns:
           - "org.junit*"

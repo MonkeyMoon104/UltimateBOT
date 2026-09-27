@@ -1,6 +1,6 @@
 plugins {
     id("ultimatebot.java-library")
-    alias(libs.plugins.api.publish)
+    id("ultimatebot.publish")
 }
 
 dependencies {
