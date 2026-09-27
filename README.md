@@ -69,9 +69,9 @@ UltimateBot ships dedicated NMS modules for a large Minecraft span, including le
 
 | Era | Examples |
 | --- | --- |
-| Legacy | 1.7.10 (`v1_7_R4`), 1.8.x, 1.9–1.12 |
-| Transitional | 1.13–1.16.x |
-| Modern | 1.17–1.21.x |
+| Legacy | 1.7.10 (`v1_7_R4`), 1.8.x, 1.9â€“1.12 |
+| Transitional | 1.13â€“1.16.x |
+| Modern | 1.17â€“1.21.x |
 | Newest tracked | `v26_1`, `v26_2`, `v26_3` |
 
 Exact server revision support depends on the matching NMS bridge included in the built jar. Always use a build that contains the bridge for your server version.
@@ -126,8 +126,8 @@ Exact server revision support depends on the matching NMS bridge included in the
 
 Primary files are created in `plugins/UltimateBot/`:
 
-- `config.yml` — language, updates, remote API, addons, caches, world protection, bot defaults (auto-updated via BoostedYAML using `config-version`)
-- `combat-modes.yml` — combat profile definitions
+- `config.yml` â€” language, updates, remote API, addons, caches, world protection, bot defaults (auto-updated via BoostedYAML using `config-version`)
+- `combat-modes.yml` â€” combat profile definitions
 - Language files (for example `EN.yml`)
 
 Important defaults include:
@@ -179,7 +179,7 @@ Third-party libraries (Jackson, Lamp, Configurate, Pathetic, bStats, Caffeine, I
 
 Force offline install-only with `-Dultimatebot.libs.offline=true` (no remote fetch; requires jars already present under `libs/`).
 
-Download order: vendor repo when known (e.g. xenondevs for InvUI), then your mirror (`https://repo.monkeymoon104.it/releases`, override at build with `ULTIMATEBOT_LIBS_MIRROR`), then Central mirrors / other public repos. HTTP timeouts are short (5s connect / 10s read) so a dead host fails over quickly.
+Download order: vendor repo when known (e.g. xenondevs for InvUI), then the UltimateBot libs mirror (`https://repo.monkeymoon104.it/libs/ultimatebot`, override at build with `ULTIMATEBOT_LIBS_MIRROR`), then Central mirrors / other public repos. HTTP timeouts are short (5s connect / 10s read) so a dead host fails over quickly.
 
 Only `jar-relocator` (+ ASM) stay shaded in `UltimateBot.jar` (needed before other libs load). Descriptors embed **multiple HTTPS candidate URLs** per jar, plus size and SHA-256 of the original artifact, under `META-INF/ultimatebot/libs/` (key-class names are relocated). Runtime tries URLs in order until download + integrity check succeed.
 
@@ -189,26 +189,33 @@ Only `jar-relocator` (+ ASM) stay shaded in `UltimateBot.jar` (needed before oth
 | `revxrsal.commands` | `com.monkey.ultimatebot.libs.lamp` |
 | `org.spongepowered.configurate` | `com.monkey.ultimatebot.libs.configurate` |
 | `xyz.xenondevs.invui` | `com.monkey.ultimatebot.libs.invui` |
-| … | `com.monkey.ultimatebot.libs.<lib>` |
+| â€¦ | `com.monkey.ultimatebot.libs.<lib>` |
 
 ### Maintaining the Maven libs mirror
 
-Mirror sync tasks (`bumpLibsToServer`, `verifyLibsMirror`) live in a **local, gitignored** build-logic script (`ultimatebot.libs-mirror.gradle.kts`) and are applied by `:dist` only when that file is present. Credentials stay in `~/.gradle/gradle.properties`; nothing from that workflow is committed.
+Runtime third-party jars are published to Reposilite at `https://repo.monkeymoon104.it/libs/ultimatebot/` (Maven layout under the UltimateBot project prefix).
+
+```powershell
+.\gradlew.bat :dist:publishLibsMirror
+.\gradlew.bat :dist:verifyLibsMirror
+```
+
+Uses the same `monkeyrepo.user` / `monkeyrepo.secret` as `:api:publish`. Optional: `-Pultimatebot.libs.mirror.dryRun=true`, or override the public base with `ultimatebot.libs.mirror.publicBaseUrl` / env `ULTIMATEBOT_LIBS_MIRROR`.
 
 ### Module notes
 
 | Module | Role |
 | --- | --- |
-| `api` | Public integration contracts for other plugins |
-| `sdk` | Remote HTTP client (no Bukkit dependency) |
-| `common` | Shared Java-only domain contracts |
+| `api` | Public integration contracts and domain models |
+| `sdk` | Remote HTTP client (depends on `api` only) |
+| `common` | Internal runtime (lib loader, addon SPI; not published) |
 | `core` | Plugin runtime, GUI, AI orchestration, bootstrap |
 | `NMS/*` | Version-specific fake-player bridges |
 | `addons/*` | Optional metrics/guard runtimes |
 | `dist` | Final shaded distribution jar |
 | `examples/` | Sample addon integrations |
 
-Deeper module documentation lives in each module’s own `README.md` where present.
+Deeper module documentation lives in each moduleâ€™s own `README.md` where present.
 
 ---
 
@@ -216,16 +223,16 @@ Deeper module documentation lives in each module’s own `README.md` where prese
 
 ```text
 UltimateBot/
-├── api/                 Public plugin API
-├── sdk/                 Remote client SDK
-├── common/              Shared contracts (no Bukkit/NMS)
-├── core/                Main plugin implementation
-├── NMS/                 Per-version NMS bridges
-├── addons/              Optional addons (metrics, guard)
-├── dist/                Shaded UltimateBot.jar assembly
-├── examples/            Example integrations
-├── docs/                Generated/reference docs
-└── build-logic/         Shared Gradle conventions
+â”œâ”€â”€ api/                 Public plugin API + domain models
+â”œâ”€â”€ sdk/                 Remote client SDK
+â”œâ”€â”€ common/              Internal runtime (not published)
+â”œâ”€â”€ core/                Main plugin implementation
+â”œâ”€â”€ NMS/                 Per-version NMS bridges
+â”œâ”€â”€ addons/              Optional addons (metrics, guard)
+â”œâ”€â”€ dist/                Shaded UltimateBot.jar assembly
+â”œâ”€â”€ examples/            Example integrations
+â”œâ”€â”€ docs/                Generated/reference docs
+â””â”€â”€ build-logic/         Shared Gradle conventions
 ```
 
 ---
@@ -265,7 +272,7 @@ Addon jars are managed by the main plugin when enabled in `config.yml` and gener
 
 ## Disclaimer and limitation of liability
 
-**UltimateBot is provided “AS IS”, without warranty of any kind**, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
+**UltimateBot is provided â€œAS ISâ€, without warranty of any kind**, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
 
 ### No responsibility for modified builds
 
@@ -326,15 +333,15 @@ For API/SDK details, follow the module READMEs and existing examples.
 ## Support
 
 If UltimateBot helps your server or project, the simplest way to support it is to
-[★ star the repository on GitHub](https://github.com/MonkeyMoon104/UltimateBOT).
+[â˜… star the repository on GitHub](https://github.com/MonkeyMoon104/UltimateBOT).
 
-Stars help others discover the project and encourage continued maintenance — no account setup beyond GitHub, and it takes a second.
+Stars help others discover the project and encourage continued maintenance â€” no account setup beyond GitHub, and it takes a second.
 
 ---
 
 ## Authors
 
-- **MonkeyMoon104** — primary author
+- **MonkeyMoon104** â€” primary author
 
 ---
 
@@ -349,5 +356,5 @@ Redistribution of modified NMS-bearing builds does not transfer any warranty or 
 ---
 
 <p align="center">
-  <sub>UltimateBot — PvP training bots powered by multi-version NMS fake players.</sub>
+  <sub>UltimateBot â€” PvP training bots powered by multi-version NMS fake players.</sub>
 </p>
