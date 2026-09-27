@@ -26,7 +26,8 @@ Non mettere versioni hardcoded in `plugin.yml`, nei `build.gradle.kts` dei modul
 La release API e la pubblicazione docs sono due cose diverse:
 
 - `ultimatebot.version=X.Y.Z` decide la versione reale generata da Gradle.
-- Il tag `vX.Y.Z` deve combaciare con `ultimatebot.version` e pubblica common, API, SDK e addons su MonkeyRepo (Reposilite) tramite GitHub Actions.
+- La pubblicazione su MonkeyRepo (Reposilite) si fa in locale con Gradle: `.\gradlew.bat publish`.
+- Il tag `vX.Y.Z` e solo un marker git (opzionale) e deve combaciare con `ultimatebot.version`.
 - Il submodule `docs` pubblica le Javadocs su GitHub Pages.
 
 Publish locale (stesso sistema di KTPlus):
@@ -123,16 +124,22 @@ git commit -m "docs(api): point to 1.1.0 javadocs"
 git push origin ultimatebot
 ```
 
-### 7. Crea e pusha il tag finale
+### 7. Pubblica su MonkeyRepo
 
-Il tag deve essere creato sul commit finale, dopo il puntatore `docs`:
+Con le credenziali in `~/.gradle/gradle.properties` (`monkeyrepo.user` / `monkeyrepo.secret`):
+
+```powershell
+.\gradlew.bat publish
+```
+
+### 8. Tag git (opzionale)
 
 ```powershell
 git tag v1.1.0
 git push origin v1.1.0
 ```
 
-Il push del tag `v*` avvia `.github/workflows/release.yml`, che pubblica l'API tramite GitHub Actions.
+Il tag non avvia alcun workflow: e solo un riferimento alla release.
 
 ## Aggiornare solo le docs
 
@@ -169,6 +176,8 @@ git -C docs push origin master
 git add docs
 git commit -m "docs(api): point to X.Y.Z javadocs"
 git push origin ultimatebot
+
+.\gradlew.bat publish
 git tag vX.Y.Z
 git push origin vX.Y.Z
 ```
