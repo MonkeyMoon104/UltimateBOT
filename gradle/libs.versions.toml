@@ -10,7 +10,6 @@ invui-v2-5 = "2.5.0"
 placeholderapi = "2.12.3"
 worldguard = "7.0.17"
 sirblobman-core = "2.9-SNAPSHOT"
-combatlogx-api = "11.6-SNAPSHOT"
 paper-api = "1.21.4-R0.1-SNAPSHOT"
 junit = "6.1.3"
 junit-platform = "6.1.3"
@@ -24,7 +23,7 @@ pathetic = "5.5.2"
 configurate = "4.2.0"
 boosted-yaml = "1.3.7"
 lamp = "4.0.0-rc.18"
-mockito = "5.23.0"
+mockito = "5.24.0"
 mockbukkit = "4.116.3"
 assertj = "3.27.7"
 errorprone = "2.50.0"
@@ -64,6 +63,7 @@ paper-bundle-26_3 = "26.3.build.+"
 bstats-bukkit = { module = "org.bstats:bstats-bukkit", version.ref = "bstats" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jackson-module-parameter-names = { module = "com.fasterxml.jackson.module:jackson-module-parameter-names", version.ref = "jackson" }
 invui-v1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v1" }
 invui-v2-1 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-1" }
 invui-v2-2 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-2" }
@@ -71,7 +71,6 @@ invui-v2-5 = { module = "xyz.xenondevs.invui:invui", version.ref = "invui-v2-5" 
 placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
 worldguard-bukkit = { module = "com.sk89q.worldguard:worldguard-bukkit", version.ref = "worldguard" }
 sirblobman-core = { module = "com.github.sirblobman.api:core", version.ref = "sirblobman-core" }
-combatlogx-api = { module = "com.github.sirblobman.combatlogx:api", version.ref = "combatlogx-api" }
 paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit-platform" }
