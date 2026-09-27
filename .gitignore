@@ -51,3 +51,8 @@ bin/
 /.idea/
 /mcbot-api/README-PUBLISH.md
 !/mcbot-api/README-PUBLISH.md
+
+# Kotlin daemon / compiler caches
+.kotlin/
+**/.kotlin/
+

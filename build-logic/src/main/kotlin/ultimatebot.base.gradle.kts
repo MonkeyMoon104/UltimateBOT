@@ -17,7 +17,6 @@ repositories {
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://nexus.sirblobman.xyz/public/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://repo.monkeymoon104.it/releases")
 }
 
 extensions.configure<SpotlessExtension> {

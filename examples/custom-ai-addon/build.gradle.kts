@@ -7,7 +7,7 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
-    maven("https://repo.monkeymoon104.it/releases")
+    maven("https://repo.monkeymoon104.it/release")
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 

@@ -1,6 +1,7 @@
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.authentication.http.BasicAuthentication
 import org.gradle.external.javadoc.StandardJavadocDocletOptions
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
@@ -37,13 +38,33 @@ publishing {
             pom {
                 name.set(project.name)
                 description.set(project.description ?: project.name)
+                url.set("https://github.com/MonkeyMoon104/UltimateBOT")
+                developers {
+                    developer {
+                        id.set("monkeymoon104")
+                        name.set("MonkeyMoon104")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/MonkeyMoon104/UltimateBOT")
+                    connection.set("scm:git:https://github.com/MonkeyMoon104/UltimateBOT.git")
+                    developerConnection.set("scm:git:ssh://git@github.com/MonkeyMoon104/UltimateBOT.git")
+                }
             }
         }
     }
+
     repositories {
         maven {
-            name = "localReleaseRepo"
-            url = uri(rootProject.layout.buildDirectory.dir("repo/releases"))
+            name = "MonkeyRepo"
+            url = uri("https://repo.monkeymoon104.it/release")
+            credentials {
+                username = providers.gradleProperty("monkeyrepo.user").orNull
+                password = providers.gradleProperty("monkeyrepo.secret").orNull
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
         }
     }
 }

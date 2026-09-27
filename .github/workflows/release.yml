@@ -22,25 +22,11 @@ jobs:
       - name: Extract version
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_ENV"
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 92.112.127.240 >> ~/.ssh/known_hosts
-
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build local Maven repo
+      - name: Publish to MonkeyRepo
+        env:
+          ORG_GRADLE_PROJECT_monkeyrepo.user: ${{ secrets.MONKEYREPO_USER }}
+          ORG_GRADLE_PROJECT_monkeyrepo.secret: ${{ secrets.MONKEYREPO_SECRET }}
         run: ./gradlew publish --no-daemon
-
-      - name: Upload repo to staging
-        run: |
-          rsync -av -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes" \
-            build/repo/releases/ root@92.112.127.240:/opt/maven-staging/
-
-      - name: Finalize deploy
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=yes \
-            root@92.112.127.240 "/usr/local/bin/maven-deploy.sh"

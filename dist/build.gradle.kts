@@ -186,7 +186,7 @@ val generateMetricsAddonDescriptorTask = tasks.register("generateMetricsAddonDes
         descriptor.writeText(
             """
             version=$version
-            url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-metrics/$version/ultimatebot-metrics-$version.jar
+            url=https://repo.monkeymoon104.it/release/com/monkey/ultimatebot/ultimatebot-metrics/$version/ultimatebot-metrics-$version.jar
             sha256=${sha256Hex(addonJar)}
             size=${addonJar.length()}
             factory-class=com.monkey.ultimatebot.metrics.addon.MicrometerMetricsBackendFactory
@@ -209,7 +209,7 @@ val generateGuardAddonDescriptorTask = tasks.register("generateGuardAddonDescrip
         descriptor.writeText(
             """
             version=$version
-            url=https://repo.monkeymoon104.it/releases/com/monkey/ultimatebot/ultimatebot-guard/$version/ultimatebot-guard-$version.jar
+            url=https://repo.monkeymoon104.it/release/com/monkey/ultimatebot/ultimatebot-guard/$version/ultimatebot-guard-$version.jar
             sha256=${sha256Hex(addonJar)}
             size=${addonJar.length()}
             factory-class=com.monkey.ultimatebot.guard.addon.UltimateBotGuardBackendFactory

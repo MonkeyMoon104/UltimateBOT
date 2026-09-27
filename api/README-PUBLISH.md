@@ -26,8 +26,25 @@ Non mettere versioni hardcoded in `plugin.yml`, nei `build.gradle.kts` dei modul
 La release API e la pubblicazione docs sono due cose diverse:
 
 - `ultimatebot.version=X.Y.Z` decide la versione reale generata da Gradle.
-- Il tag `vX.Y.Z` deve combaciare con `ultimatebot.version` e pubblica common, API e SDK tramite GitHub Actions.
+- Il tag `vX.Y.Z` deve combaciare con `ultimatebot.version` e pubblica common, API, SDK e addons su MonkeyRepo (Reposilite) tramite GitHub Actions.
 - Il submodule `docs` pubblica le Javadocs su GitHub Pages.
+
+Publish locale (stesso sistema di KTPlus):
+
+```powershell
+# in ~/.gradle/gradle.properties
+# monkeyrepo.user=...
+# monkeyrepo.secret=...
+
+.\gradlew.bat publish
+# oppure solo alcuni moduli, es. :api:publish :sdk:publish :addons:metrics:publish
+```
+
+Repository Maven pubblico per i consumatori:
+
+```text
+https://repo.monkeymoon104.it/release
+```
 
 Le Javadocs vanno rigenerate dopo aver cambiato `ultimatebot.version`, cosi il titolo mostra subito la versione corretta.
 

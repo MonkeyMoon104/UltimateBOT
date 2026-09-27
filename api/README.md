@@ -92,9 +92,14 @@ dependencies {
 }
 ```
 
-If your environment publishes the artifact externally, the effective coordinates are expected to follow this module group and version:
+If your environment publishes the artifact externally, the effective coordinates are expected to follow this module group and version.
+Consumers resolve from MonkeyRepo:
 
 ```gradle
+repositories {
+    maven("https://repo.monkeymoon104.it/release")
+}
+
 dependencies {
     compileOnly "com.monkey.ultimatebot:api:<version>"
 }
