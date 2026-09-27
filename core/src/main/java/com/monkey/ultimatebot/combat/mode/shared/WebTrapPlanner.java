@@ -70,7 +70,7 @@ public final class WebTrapPlanner {
             Location candidateBlock = blockLocation(candidate);
             unique.putIfAbsent(Position.from(candidateBlock), candidateBlock);
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(unique.values());
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(unique.values());
     }
 
     private static Location blockLocation(Location location) {

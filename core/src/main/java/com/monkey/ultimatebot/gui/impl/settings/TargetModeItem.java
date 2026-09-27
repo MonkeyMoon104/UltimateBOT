@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
 import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
@@ -48,7 +48,7 @@ public class TargetModeItem extends AbstractItem {
         BotTargetMode next = options.getTargetMode().next();
         java.util.UUID ownerUUID = plugin.getBotManager().findTeamAllyPrimaryOwner(player.getUniqueId());
         if (ownerUUID == null) ownerUUID = player.getUniqueId();
-        java.util.Optional<com.monkey.ultimatebot.common.model.bot.BotTargetMode> proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.api.model.bot.BotTargetMode> proposed = BotSettingEvents.propose(
                 plugin,
                 ownerUUID,
                 BotEventSource.GUI,

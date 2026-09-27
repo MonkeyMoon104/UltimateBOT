@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.nms;
 
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.logging.UltimateBotLogging;
 import java.util.Locale;

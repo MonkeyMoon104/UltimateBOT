@@ -48,7 +48,7 @@ public final class ModeBlockTracker implements AutoCloseable {
 
     @Override
     public void close() {
-        for (BlockKey key : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(blocks)) {
+        for (BlockKey key : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(blocks)) {
             Block block = key.block();
             if (block != null) {
                 BlockDataAccess.broadcastCurrent(block.getLocation());

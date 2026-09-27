@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.combat.mode.runtime;
 
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
 import org.bukkit.entity.LivingEntity;
 
 public interface CombatModeStrategy {

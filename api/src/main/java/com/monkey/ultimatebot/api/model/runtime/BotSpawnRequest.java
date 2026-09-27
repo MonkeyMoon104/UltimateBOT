@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlot;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotMode;
 import com.monkey.ultimatebot.api.model.configuration.BotEquipmentSlotSetting;
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
 import java.util.*;
 import org.jspecify.annotations.Nullable;
 
@@ -28,9 +28,9 @@ public final class BotSpawnRequest {
         this.mode = builder.mode;
         this.botUUID = builder.botUUID;
         this.ownerUUID = builder.ownerUUID;
-        this.targetUUIDs = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.targetUUIDs);
-        this.teamOwnerUUIDs = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.teamOwnerUUIDs);
-        this.equipmentSlots = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.equipmentSlots);
+        this.targetUUIDs = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(builder.targetUUIDs);
+        this.teamOwnerUUIDs = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(builder.teamOwnerUUIDs);
+        this.equipmentSlots = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(builder.equipmentSlots);
         this.settings = Objects.requireNonNull(builder.settings, "settings");
     }
 

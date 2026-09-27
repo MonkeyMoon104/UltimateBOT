@@ -32,7 +32,7 @@ final class CartPlacementPlanner {
                 }
             }
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(candidates.values());
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(candidates.values());
     }
 
     private static final class Position {

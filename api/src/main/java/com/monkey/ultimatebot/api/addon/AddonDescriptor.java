@@ -32,13 +32,13 @@ public final class AddonDescriptor {
         version = requireText(version, "version");
         apiVersion = requireText(apiVersion, "apiVersion");
         mainClass = requireText(mainClass, "mainClass");
-        authors = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        authors = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(authors, "authors"));
-        dependencies = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        dependencies = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(dependencies, "dependencies"));
-        softDependencies = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        softDependencies = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(softDependencies, "softDependencies"));
-        nativeProviders = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        nativeProviders = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(nativeProviders, "nativeProviders"));
         this.id = id;
         this.name = name;

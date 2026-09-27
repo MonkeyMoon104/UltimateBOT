@@ -15,23 +15,23 @@ import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
 import com.monkey.ultimatebot.bot.*;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
-import com.monkey.ultimatebot.common.model.settings.AutoTargetSettings;
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotSource;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainDefinition;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatModeDefinition;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
-import com.monkey.ultimatebot.common.model.settings.IdleWanderSettings;
-import com.monkey.ultimatebot.common.model.settings.KillMessageSettings;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
-import com.monkey.ultimatebot.common.model.platform.PlatformInfo;
+import com.monkey.ultimatebot.api.model.settings.AutoTargetSettings;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotSource;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainDefinition;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatModeDefinition;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.bot.EquipmentSlotKind;
+import com.monkey.ultimatebot.api.model.settings.IdleWanderSettings;
+import com.monkey.ultimatebot.api.model.settings.KillMessageSettings;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.platform.PlatformInfo;
 import com.monkey.ultimatebot.access.item.ItemStackAccess;
 import com.monkey.ultimatebot.access.runtime.MinecraftVersionAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
@@ -109,7 +109,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
                 .filter(provider -> available.containsAll(provider.descriptor().requiredPlatformCapabilities()))
                 .map(provider -> combatModeDefinition(provider.descriptor()))
                 .forEach(definitions::add);
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(definitions);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(definitions);
     }
 
     @Override
@@ -908,7 +908,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || targetUUIDs == null) {
             return false;
         }
-        Set<UUID> requestedTargets = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+        Set<UUID> requestedTargets = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(targetUUIDs);
         Optional<Set<UUID>> proposed = BotSettingEvents.proposeUuidSet(
                 plugin,
                 managedOwner,
@@ -936,7 +936,7 @@ public final class CoreBotManagerAdapter implements IBotManager {
         if (options == null || options.getBotType() != BotType.TEAM_ALLY || teamOwnerUUIDs == null) {
             return false;
         }
-        Set<UUID> requestedOwners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+        Set<UUID> requestedOwners = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
         if (requestedOwners.isEmpty()) {
             return false;
         }

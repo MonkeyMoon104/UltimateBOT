@@ -11,6 +11,7 @@ repositories {
 
 val catalog = extensions.getByType<VersionCatalogsExtension>().named("libs")
 dependencies {
+    compileOnly(project(":api"))
     compileOnly(project(":core"))
     compileOnly(project(":common"))
     compileOnly(catalog.findLibrary("jspecify").get())

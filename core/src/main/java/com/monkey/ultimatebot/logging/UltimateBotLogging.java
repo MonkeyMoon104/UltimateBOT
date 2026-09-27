@@ -3,7 +3,7 @@ package com.monkey.ultimatebot.logging;
 import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.UltimateBotAPI;
 import com.monkey.ultimatebot.bot.BotType;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.access.world.WorldAccess;
 import com.monkey.ultimatebot.nms.INMSBridge;
@@ -403,13 +403,13 @@ public final class UltimateBotLogging {
 
         public void markCommands(List<String> registeredCommands) {
             this.registeredCommands =
-                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredCommands);
+                    com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(registeredCommands);
         }
 
         public void markListeners(List<String> registeredListeners, List<String> disabledListeners) {
             this.registeredListeners =
-                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(registeredListeners);
-            this.disabledListeners = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(disabledListeners);
+                    com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(registeredListeners);
+            this.disabledListeners = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(disabledListeners);
         }
 
         public void markPlaceholders(
@@ -417,7 +417,7 @@ public final class UltimateBotLogging {
             this.placeholderPresent = placeholderPresent;
             this.placeholderRegistered = placeholderRegistered;
             this.registeredPlaceholders =
-                    com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placeholderKeys);
+                    com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(placeholderKeys);
         }
 
         public void completePhase(String summary) {

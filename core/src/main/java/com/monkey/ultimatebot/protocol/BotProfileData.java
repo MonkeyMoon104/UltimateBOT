@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.protocol;
 
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
+import com.monkey.ultimatebot.api.util.ImmutableCollections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;

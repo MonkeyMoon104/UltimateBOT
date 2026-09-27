@@ -1,21 +1,21 @@
 package com.monkey.ultimatebot.sdk;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.monkey.ultimatebot.common.model.bot.AddonInfo;
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotSource;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainDefinition;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatModeDefinition;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.platform.PlatformInfo;
-import com.monkey.ultimatebot.common.model.settings.ServerConfiguration;
+import com.monkey.ultimatebot.api.model.bot.AddonInfo;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.sdk.internal.SdkObjectMappers;
+import com.monkey.ultimatebot.api.model.bot.BotSource;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainDefinition;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatModeDefinition;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.platform.PlatformInfo;
+import com.monkey.ultimatebot.api.model.settings.ServerConfiguration;
 import com.monkey.ultimatebot.sdk.model.request.ArmorRequest;
 import com.monkey.ultimatebot.sdk.model.request.AutoTargetRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
@@ -68,9 +68,7 @@ public final class UltimateBotClient implements AutoCloseable {
         this.baseUri = normalizeBaseUri(builder.baseUri);
         this.token = Objects.requireNonNull(builder.token, "token");
         this.objectMapper = builder.objectMapper == null
-                ? new ObjectMapper()
-                        .findAndRegisterModules()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                ? SdkObjectMappers.createDefault()
                 : builder.objectMapper;
         this.httpClient = builder.httpClient == null
                 ? HttpClient.newBuilder().connectTimeout(builder.timeout).build()

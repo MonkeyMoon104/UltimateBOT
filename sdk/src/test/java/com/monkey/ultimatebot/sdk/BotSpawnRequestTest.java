@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.sdk.internal.SdkObjectMappers;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
@@ -16,6 +17,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class BotSpawnRequestTest {
+
+    private final ObjectMapper mapper = SdkObjectMappers.createDefault();
 
     @Test
     void serializesCustomUuidAndExplicitEmptySlots() throws Exception {
@@ -27,7 +30,7 @@ class BotSpawnRequestTest {
                 .equipmentItem(SdkBotEquipmentSlot.HEAD, "diamond_helmet", 1)
                 .build();
 
-        String json = new ObjectMapper().writeValueAsString(request);
+        String json = mapper.writeValueAsString(request);
 
         assertThat(json).contains(botUUID.toString());
         assertThat(json).contains("\"MAIN_HAND\":{\"mode\":\"EMPTY\"");
@@ -59,7 +62,7 @@ class BotSpawnRequestTest {
                 .combatTuning(CombatTuning.builder().attackRange(3.8D).build())
                 .build();
 
-        String json = new ObjectMapper().writeValueAsString(request);
+        String json = mapper.writeValueAsString(request);
 
         assertThat(json).contains("\"combatMode\":{\"namespace\":\"ultimatebot\",\"value\":\"water\"}");
         assertThat(json).contains("\"brain\":{\"namespace\":\"example\",\"value\":\"expert\"}");
@@ -82,7 +85,7 @@ class BotSpawnRequestTest {
                 .changeableCombatMode(false)
                 .build();
 
-        String json = new ObjectMapper().writeValueAsString(request);
+        String json = mapper.writeValueAsString(request);
 
         assertThat(json).contains("\"mode\":\"TEAM_ALLY\"");
         assertThat(json).contains(ownerUUID.toString());

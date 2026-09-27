@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.v26_3.impl.settings;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import java.util.Objects;

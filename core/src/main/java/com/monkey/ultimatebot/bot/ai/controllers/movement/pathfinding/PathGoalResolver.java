@@ -56,7 +56,7 @@ final class PathGoalResolver {
             }
         }
         offsets.sort(Comparator.comparingDouble(GoalOffset::cost).thenComparingInt(offset -> Math.abs(offset.y())));
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(offsets);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(offsets);
     }
 
     private static final class GoalOffset {

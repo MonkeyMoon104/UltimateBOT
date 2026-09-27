@@ -20,6 +20,9 @@ class SdkArchitectureTest {
             .should()
             .dependOnClassesThat()
             .resideInAnyPackage(
-                    "org.bukkit..", "net.minecraft..", "com.monkey.ultimatebot.api..", "com.monkey.ultimatebot.bot..")
-            .because("the remote SDK must work in applications without Bukkit, NMS or the in-server API");
+                    "org.bukkit..",
+                    "net.minecraft..",
+                    "com.monkey.ultimatebot.common..",
+                    "com.monkey.ultimatebot.bot..")
+            .because("the remote SDK must work without Bukkit, NMS, common runtime, or core bot packages");
 }

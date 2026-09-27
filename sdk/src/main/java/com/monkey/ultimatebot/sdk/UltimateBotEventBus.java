@@ -46,7 +46,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
         Objects.requireNonNull(types, "types");
         Objects.requireNonNull(listener, "listener");
         Subscription subscription = new Subscription(
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types), null, null, listener);
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(types), null, null, listener);
         subscriptions.add(subscription);
         subscription.start();
         return subscription;
@@ -55,7 +55,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
     public BotEventSubscription subscribeForOwner(
             UUID ownerUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Subscription subscription = new Subscription(
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types),
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(types),
                 Objects.requireNonNull(ownerUUID, "ownerUUID"),
                 null,
                 Objects.requireNonNull(listener, "listener"));
@@ -67,7 +67,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
     public BotEventSubscription subscribeForBot(
             UUID botUUID, Set<SdkBotEventType> types, Consumer<BotEventEnvelope> listener) {
         Subscription subscription = new Subscription(
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(types),
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(types),
                 null,
                 Objects.requireNonNull(botUUID, "botUUID"),
                 Objects.requireNonNull(listener, "listener"));
@@ -78,7 +78,7 @@ public final class UltimateBotEventBus implements AutoCloseable {
 
     @Override
     public void close() {
-        for (Subscription subscription : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(subscriptions))
+        for (Subscription subscription : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(subscriptions))
             subscription.close();
     }
 

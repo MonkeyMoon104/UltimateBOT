@@ -15,15 +15,15 @@ import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotOperationResult;
 import com.monkey.ultimatebot.api.model.runtime.BotSnapshot;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.util.EnumValues;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.util.EnumValues;
 import com.monkey.ultimatebot.access.item.MaterialAirAccess;
 import com.monkey.ultimatebot.event.BotEventSourceContext;
 import com.monkey.ultimatebot.metrics.BotMetrics;
@@ -375,7 +375,7 @@ public final class RemoteApiServer implements RemoteApiContext {
             UuidSetPayload payload = readJson(exchange, UuidSetPayload.class);
             Set<UUID> uuids = payload == null || payload.uuids == null
                     ? Collections.emptySet()
-                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(payload.uuids);
+                    : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(payload.uuids);
             boolean teamOwners = "team-owners".equals(parts[2]);
             boolean updated = runSync(() -> teamOwners
                     ? ownerUUID != null
@@ -624,7 +624,7 @@ public final class RemoteApiServer implements RemoteApiContext {
                 settings.put(slot, setting);
             }
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(settings);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(settings);
     }
 
     private @Nullable BotEquipmentSlotSetting toEquipmentSetting(@Nullable EquipmentSlotPayload payload) {

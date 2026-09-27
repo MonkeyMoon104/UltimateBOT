@@ -11,11 +11,11 @@ import com.monkey.ultimatebot.api.extension.brain.BrainDescriptor;
 import com.monkey.ultimatebot.api.extension.combat.CombatModeDescriptor;
 import com.monkey.ultimatebot.api.extension.combat.CombatModeProvider;
 import com.monkey.ultimatebot.api.extension.combat.ModeKit;
-import com.monkey.ultimatebot.common.model.brain.BrainCapability;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.brain.BrainCapability;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
 import java.util.EnumMap;
 import org.bukkit.Material;
 import org.bukkit.plugin.Plugin;
@@ -96,7 +96,7 @@ class CoreExtensionRegistryTest {
                 "",
                 100,
                 java.util.Collections.emptySet(),
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profiles),
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(profiles),
                 ModeKit.empty(),
                 brain);
         return new CombatModeProvider() {

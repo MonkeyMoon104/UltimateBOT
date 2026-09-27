@@ -62,7 +62,7 @@ public final class PatheticPathfinder implements IPathfinder {
         BlockVector requestedGoal = blockAt(limitToLocalGoal(startPos, targetPos));
         removeExpiredAvoidances(lastPathCalculation);
         Set<BlockVector> excluded =
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(avoidedWaypoints.keySet());
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(avoidedWaypoints.keySet());
         BlockVector goal = goalResolver.resolve(start, requestedGoal, candidate -> !excluded.contains(candidate));
         if (goal == null) {
             clearPath();
@@ -80,7 +80,7 @@ public final class PatheticPathfinder implements IPathfinder {
             movementPath.add(bottomCenterOf(point));
         }
 
-        currentPath = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(movementPath);
+        currentPath = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(movementPath);
         pathIndex = currentPath.size() > 1 ? 1 : 0;
         resetWaypointProgress();
         return hasActivePath();

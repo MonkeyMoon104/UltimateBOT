@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 public final class InventoryDelegate {
     public PlayerGiveResult give(Collection<ItemStack> items) {
-        Collection<ItemStack> leftovers = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(items);
+        Collection<ItemStack> leftovers = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(items);
         return new PlayerGiveResult() {
             @Override
             public Collection<ItemStack> leftovers() {

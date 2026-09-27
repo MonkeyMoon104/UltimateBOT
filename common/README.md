@@ -1,14 +1,16 @@
 # UltimateBot Common
 
-`common` is the platform-independent foundation shared by the plugin runtime, public API, remote SDK and optional addons.
+`common` is an **internal** runtime module. It is not published to MonkeyRepo.
+
+Third-party plugins and remote clients must depend on `api` (and optionally `sdk`), never on `common`.
 
 It owns:
 
-- canonical bot domain values under `common.model.*` (`bot`, `combat`, `brain`, `platform`, `settings`)
 - runtime library download / relocate / inject under `common.lib.*`
-- dependency-free value utilities under `common.util`
-- cross-module service-provider contracts under feature packages such as `common.metrics`
+- hosted addon loader internals under `common.addon`
+- cross-module service-provider contracts such as `common.metrics` and `common.guard`
+- networking helpers under `common.net`
 
-Production code in this module may depend only on the Java standard library, JSpecify, and (for the library loader) jar-relocator. Bukkit, Paper, Mojang, NMS and other implementation-specific libraries are forbidden and enforced by `CommonArchitectureTest`.
+Public domain models live in `api` (`com.monkey.ultimatebot.api.model.*` and `api.util`). This module depends on `api` for those types.
 
-Published API and SDK types may retain compatibility façades in their original packages, but shared behavior and canonical values belong here.
+Production code here may use the Java standard library, JSpecify, jar-relocator/ASM (library loader), and the `api` module. Bukkit, Paper, Mojang and NMS remain forbidden and are enforced by `CommonArchitectureTest`.

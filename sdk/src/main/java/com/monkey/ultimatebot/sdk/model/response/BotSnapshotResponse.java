@@ -1,15 +1,15 @@
 package com.monkey.ultimatebot.sdk.model.response;
 
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotSource;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.util.TextValues;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotSource;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.util.TextValues;
 import com.monkey.ultimatebot.sdk.model.request.BotEquipmentSlotRequest;
 import com.monkey.ultimatebot.sdk.model.request.BotLocationRequest;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
@@ -186,10 +186,10 @@ public final class BotSnapshotResponse {
         combatTuning = combatTuning == null ? CombatTuning.builder().build() : combatTuning;
         targetUUIDs = targetUUIDs == null
                 ? Collections.emptySet()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(targetUUIDs);
         teamOwnerUUIDs = teamOwnerUUIDs == null
                 ? Collections.emptySet()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
         source = source == null ? BotSource.CORE : source;
         targetMode = targetMode == null ? BotTargetMode.PLAYERS : targetMode;
         botNameTemplate = TextValues.orElseIfBlank(botNameTemplate, "UltimateBot");
@@ -200,7 +200,7 @@ public final class BotSnapshotResponse {
         blastProtection = blastProtection == null ? BlastProtectionSettings.all(false) : blastProtection;
         equipmentSlots = equipmentSlots == null
                 ? Collections.emptyMap()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(equipmentSlots);
         this.ownerUUID = ownerUUID;
         this.botUUID = botUUID;
         this.botMode = botMode;

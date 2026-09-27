@@ -4,7 +4,7 @@ import com.monkey.ultimatebot.UltimateBot;
 import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.gui.combat.CombatTuningProperty;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
@@ -50,7 +50,7 @@ public final class CombatTuningItem extends AbstractItem {
         }
         CombatTuning currentTuning = options.getCombatTuning();
         CombatTuning nextTuning = property.adjust(currentTuning, clickType.isLeftClick(), clickType.isShiftClick());
-        java.util.Optional<com.monkey.ultimatebot.common.model.combat.CombatTuning> proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.api.model.combat.CombatTuning> proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
                 BotEventSource.GUI,

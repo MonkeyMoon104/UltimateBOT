@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.api.extension.brain;
 
-import com.monkey.ultimatebot.common.model.brain.BrainCapability;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.brain.BrainCapability;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
 import java.util.Objects;
 import java.util.Set;
 
@@ -23,7 +23,7 @@ public final class BrainDescriptor {
         Objects.requireNonNull(key, "key");
         displayName = requireText(displayName, "displayName");
         description = Objects.requireNonNull(description, "description").trim();
-        capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        capabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(capabilities, "capabilities"));
         if (capabilities.isEmpty()) {
             throw new IllegalArgumentException("capabilities cannot be empty");

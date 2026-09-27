@@ -12,13 +12,13 @@ import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.bot.ai.services.TargetingService;
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
 import com.monkey.ultimatebot.commands.*;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
 import com.monkey.ultimatebot.access.runtime.PluginMetaAccess;
 import com.monkey.ultimatebot.config.BoostedYamlPluginConfiguration;
 import com.monkey.ultimatebot.config.CombatProfileLoader;
 import com.monkey.ultimatebot.config.ConfigurateRuntimeSettingsLoader;
 import com.monkey.ultimatebot.config.RuntimeSettings;
-import com.monkey.ultimatebot.common.model.settings.ServerConfiguration;
+import com.monkey.ultimatebot.api.model.settings.ServerConfiguration;
 import com.monkey.ultimatebot.event.BotEventDispatcher;
 import com.monkey.ultimatebot.extension.registry.CoreExtensionRegistry;
 import com.monkey.ultimatebot.extension.registry.ExtensionOwnerListener;
@@ -588,8 +588,9 @@ public final class UltimateBot extends JavaPlugin {
             boolean combatLogXAvailable = isCombatLogXListenerAvailable();
             if (combatLogXAvailable) {
                 try {
-                    registerListener(registeredListeners, "optional integration",
-                            new PlayerTagListener(UltimateBot.this));
+                    PlayerTagListener tagListener = PlayerTagListener.create(UltimateBot.this);
+                    tagListener.register(UltimateBot.this);
+                    registeredListeners.add("optional integration");
                     boot.boot("CombatLogX -> found, tag listener registered");
                 } catch (Throwable error) {
                     disabledListeners.add("optional integration -> " + formatListenerError(error));

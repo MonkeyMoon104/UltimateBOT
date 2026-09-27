@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.impl.navigation;
 
 import com.monkey.ultimatebot.UltimateBot;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.gui.NewBotGUI;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;

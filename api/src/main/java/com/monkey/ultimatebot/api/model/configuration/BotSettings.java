@@ -3,13 +3,13 @@ package com.monkey.ultimatebot.api.model.configuration;
 import com.monkey.ultimatebot.api.model.identity.BotSkin;
 import com.monkey.ultimatebot.api.model.runtime.BotLocation;
 import com.monkey.ultimatebot.api.model.runtime.BotSpawnRequest;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.bot.EquipmentSlotKind;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -126,9 +126,9 @@ public final class BotSettings {
         this.armorContents = copyItemMap(builder.armorContents);
         this.equipmentContents = copyItemMap(builder.equipmentContents);
         this.armorTrimPatternKeys =
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimPatternKeys);
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(builder.armorTrimPatternKeys);
         this.armorTrimMaterialKeys =
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(builder.armorTrimMaterialKeys);
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(builder.armorTrimMaterialKeys);
     }
 
     /**
@@ -430,11 +430,11 @@ public final class BotSettings {
     }
 
     public Map<EquipmentSlotKind, String> armorTrimPatternKeys() {
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimPatternKeys);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(armorTrimPatternKeys);
     }
 
     public Map<EquipmentSlotKind, String> armorTrimMaterialKeys() {
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(armorTrimMaterialKeys);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(armorTrimMaterialKeys);
     }
 
     /**
@@ -1352,6 +1352,6 @@ public final class BotSettings {
                 copy.put(entry.getKey(), entry.getValue().clone());
             }
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(copy);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(copy);
     }
 }

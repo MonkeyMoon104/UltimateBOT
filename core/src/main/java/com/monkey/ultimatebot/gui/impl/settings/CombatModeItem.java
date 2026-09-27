@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.api.event.base.BotEventSource;
 import com.monkey.ultimatebot.api.event.state.BotSettingKey;
 import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
 import com.monkey.ultimatebot.event.BotSettingEvents;
 import com.monkey.ultimatebot.utils.ChatColorUtils;
 import com.monkey.ultimatebot.utils.item.ItemFlagCatalog;
@@ -61,7 +61,7 @@ public final class CombatModeItem extends AbstractItem {
         }
         CombatMode currentMode = options.getCombatMode();
         CombatMode nextMode = options.nextCombatMode(player, clickType.isLeftClick());
-        java.util.Optional<com.monkey.ultimatebot.common.model.combat.CombatMode> proposed = BotSettingEvents.propose(
+        java.util.Optional<com.monkey.ultimatebot.api.model.combat.CombatMode> proposed = BotSettingEvents.propose(
                 plugin,
                 player.getUniqueId(),
                 BotEventSource.GUI,

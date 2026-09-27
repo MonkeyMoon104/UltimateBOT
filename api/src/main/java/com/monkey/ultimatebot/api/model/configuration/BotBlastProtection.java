@@ -1,7 +1,13 @@
 package com.monkey.ultimatebot.api.model.configuration;
 
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import java.util.Objects;
+
 /**
  * Per-armor-piece blast protection profile.
+ *
+ * <p>This is the Bukkit-facing alias of {@link BlastProtectionSettings} with slot naming
+ * ({@code feet}/{@code legs}/{@code chest}/{@code head}) used by GUI and plugin APIs.</p>
  *
  * @param feet {@code true} to enable blast protection on boots
  * @param legs {@code true} to enable blast protection on leggings
@@ -95,14 +101,14 @@ public final class BotBlastProtection {
         return feet && legs && chest && head;
     }
 
-    /** Converts this Bukkit API model to the platform-independent representation. */
-    public com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings toCommon() {
-        return new com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings(feet, legs, chest, head);
+    /** Converts this profile to the shared settings representation. */
+    public BlastProtectionSettings toSettings() {
+        return new BlastProtectionSettings(feet, legs, chest, head);
     }
 
-    /** Creates the Bukkit API model from the platform-independent representation. */
-    public static BotBlastProtection fromCommon(com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings settings) {
-        java.util.Objects.requireNonNull(settings, "settings");
+    /** Creates a profile from the shared settings representation. */
+    public static BotBlastProtection fromSettings(BlastProtectionSettings settings) {
+        Objects.requireNonNull(settings, "settings");
         return new BotBlastProtection(settings.boots(), settings.leggings(), settings.chestplate(), settings.helmet());
     }
 
@@ -130,7 +136,7 @@ public final class BotBlastProtection {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(feet, legs, chest, head);
+        return Objects.hash(feet, legs, chest, head);
     }
 
     @Override

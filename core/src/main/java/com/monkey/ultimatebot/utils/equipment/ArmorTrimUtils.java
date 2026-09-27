@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.utils.equipment;
 
-import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
-import com.monkey.ultimatebot.common.util.ImmutableCollections;
+import com.monkey.ultimatebot.api.model.bot.EquipmentSlotKind;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.util.ImmutableCollections;
 import com.monkey.ultimatebot.utils.material.MaterialCatalog;
 import java.util.ArrayList;
 import java.util.Collections;

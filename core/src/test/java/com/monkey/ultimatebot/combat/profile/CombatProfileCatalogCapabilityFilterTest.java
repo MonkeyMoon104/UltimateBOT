@@ -2,10 +2,10 @@ package com.monkey.ultimatebot.combat.profile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
@@ -33,7 +33,7 @@ class CombatProfileCatalogCapabilityFilterTest {
             profiles.put(difficulty, CombatTuning.builder().build());
         }
         Map<DifficultyTier, CombatTuning> profileMap =
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profiles);
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(profiles);
         for (CombatMode mode : CombatMode.values()) {
             configurations.put(mode, new CombatModeConfiguration(mode, true, "IRON_SWORD", profileMap));
         }

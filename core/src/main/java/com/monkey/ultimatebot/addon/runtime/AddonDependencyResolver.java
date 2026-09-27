@@ -28,7 +28,7 @@ final class AddonDependencyResolver {
             Map.Entry<String, String> first = missing.entrySet().iterator().next();
             throw new AddonLoadException("addon " + first.getKey() + " requires missing addon " + first.getValue());
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(ordered);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(ordered);
     }
 
     static Set<String> cyclicAddons(Map<String, DiscoveredAddon> addons) {
@@ -38,7 +38,7 @@ final class AddonDependencyResolver {
         for (String addonId : addons.keySet()) {
             detectCycles(addonId, addons, states, path, cyclic);
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(cyclic);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(cyclic);
     }
 
     private static void detectCycles(

@@ -23,6 +23,15 @@ class ApiArchitectureTest {
             .because("version-specific NMS types must not leak through the public API");
 
     @ArchTest
+    static final ArchRule PUBLIC_API_MUST_NOT_DEPEND_ON_COMMON = noClasses()
+            .that()
+            .resideInAPackage("..api..")
+            .should()
+            .dependOnClassesThat()
+            .resideInAPackage("com.monkey.ultimatebot.common..")
+            .because("the published API contract must be self-contained without common runtime types");
+
+    @ArchTest
     static final ArchRule MODELS_MUST_NOT_DEPEND_ON_EVENTS = noClasses()
             .that()
             .resideInAPackage("..api.model..")

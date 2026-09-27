@@ -33,8 +33,10 @@ class CommonArchitectureTest {
                     "javax..",
                     "org.jspecify..",
                     "com.monkey.ultimatebot.common..",
+                    "com.monkey.ultimatebot.api..",
                     "me.lucko.jarrelocator..",
                     "org.objectweb.asm..",
                     "sun.misc..")
-            .because("common production code may only use the JDK, JSpecify, jar-relocator (+ ASM), and Unsafe for classpath injection");
+            .because(
+                    "common production code may only use the JDK, JSpecify, api contracts, jar-relocator (+ ASM), and Unsafe for classpath injection");
 }

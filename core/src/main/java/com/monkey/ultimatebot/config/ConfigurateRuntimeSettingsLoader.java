@@ -5,7 +5,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.monkey.ultimatebot.common.model.settings.VanillaStatisticsSettings;
+import com.monkey.ultimatebot.api.model.settings.VanillaStatisticsSettings;
 import com.monkey.ultimatebot.libs.configurate.ConfigurateException;
 import com.monkey.ultimatebot.libs.configurate.ConfigurationNode;
 import com.monkey.ultimatebot.libs.configurate.yaml.YamlConfigurationLoader;

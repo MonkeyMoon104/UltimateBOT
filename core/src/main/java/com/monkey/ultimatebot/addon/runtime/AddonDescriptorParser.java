@@ -98,7 +98,7 @@ final class AddonDescriptorParser {
         if ("dependencies".equals(key) || "soft-dependencies".equals(key)) {
             return values.stream().map(item -> item.toLowerCase(Locale.ROOT)).collect(Collectors.toList());
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(values);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(values);
     }
 
     private static String required(Properties properties, String key) throws AddonLoadException {

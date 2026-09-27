@@ -32,7 +32,8 @@ It exposes:
 
 This module intentionally contains no GUI logic, no runtime AI implementation and no NMS code. It is the boundary that third-party plugins should depend on.
 
-Canonical Java-only domain behavior is supplied transitively by `common`. The API keeps its established public type names for binary compatibility and maps them to the shared contracts.
+Canonical domain models live in this module under `api.model.*` (`bot`, `brain`, `combat`, `platform`, `settings`)
+together with minimal helpers in `api.util`. The runtime `common` module is internal and is not published.
 
 Public packages are null-marked with JSpecify. Parameters and return values are non-null
 unless explicitly annotated with `@Nullable`; invalid required arguments fail fast at the

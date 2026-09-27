@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.api.model.identity;
 
-import com.monkey.ultimatebot.common.util.TextValues;
+import com.monkey.ultimatebot.api.util.TextValues;
 import java.net.URI;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;

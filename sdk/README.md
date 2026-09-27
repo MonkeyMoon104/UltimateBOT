@@ -3,9 +3,9 @@
 The SDK is the Java-only remote client for UltimateBot. Use it with `implementation` when an integration must not
 depend on Bukkit/Paper class loading or the in-server `api` singleton.
 
-It receives the dependency-free `common` contracts transitively and uses their canonical enums directly for bot
+It depends on the public `api` module for domain models (`api.model.*`) and uses those contracts directly for bot
 modes, combat modes, difficulty, armor, targets and creation sources. Public contracts include JSpecify nullability
-annotations.
+annotations. The SDK does **not** depend on the internal `common` module.
 
 ## Gradle
 

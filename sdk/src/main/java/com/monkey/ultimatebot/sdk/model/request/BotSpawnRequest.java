@@ -1,13 +1,13 @@
 package com.monkey.ultimatebot.sdk.model.request;
 
-import com.monkey.ultimatebot.common.model.settings.BlastProtectionSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.settings.BlastProtectionSettings;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlot;
 import com.monkey.ultimatebot.sdk.model.type.SdkBotEquipmentSlotMode;
 import java.util.Collections;
@@ -173,13 +173,13 @@ public final class BotSpawnRequest {
         Objects.requireNonNull(blastProtection, "blastProtection");
         teamOwnerUUIDs = teamOwnerUUIDs == null
                 ? Collections.emptyList()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
         targetUUIDs = targetUUIDs == null
                 ? Collections.emptyList()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(targetUUIDs);
         equipmentSlots = equipmentSlots == null
                 ? Collections.emptyMap()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(equipmentSlots);
         Objects.requireNonNull(botNameTemplate, "botNameTemplate");
         Objects.requireNonNull(botSkin, "botSkin");
         Objects.requireNonNull(armor, "armor");
@@ -567,7 +567,7 @@ public final class BotSpawnRequest {
         public Builder teamOwnerUUIDs(@Nullable List<UUID> teamOwnerUUIDs) {
             this.teamOwnerUUIDs = teamOwnerUUIDs == null
                     ? Collections.emptyList()
-                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
+                    : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(teamOwnerUUIDs);
             return this;
         }
 
@@ -580,7 +580,7 @@ public final class BotSpawnRequest {
         public Builder targetUUIDs(@Nullable List<UUID> targetUUIDs) {
             this.targetUUIDs = targetUUIDs == null
                     ? Collections.emptyList()
-                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(targetUUIDs);
+                    : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(targetUUIDs);
             return this;
         }
 
@@ -796,7 +796,7 @@ public final class BotSpawnRequest {
         public Builder equipmentSlots(@Nullable Map<SdkBotEquipmentSlot, BotEquipmentSlotRequest> equipmentSlots) {
             this.equipmentSlots = equipmentSlots == null
                     ? Collections.emptyMap()
-                    : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(equipmentSlots);
+                    : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(equipmentSlots);
             return this;
         }
 
@@ -810,7 +810,7 @@ public final class BotSpawnRequest {
             } else {
                 updated.put(Objects.requireNonNull(slot, "slot"), requiredSetting);
             }
-            this.equipmentSlots = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(updated);
+            this.equipmentSlots = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(updated);
             return this;
         }
 

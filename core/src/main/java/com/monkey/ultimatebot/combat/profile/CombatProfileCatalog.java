@@ -1,9 +1,9 @@
 package com.monkey.ultimatebot.combat.profile;
 
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,12 +30,12 @@ public final class CombatProfileCatalog {
                 throw new IllegalArgumentException("Missing combat mode configuration for " + mode);
             }
         }
-        this.configurations = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(copy);
+        this.configurations = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(copy);
         bindPlatformCapabilities(platformCapabilities);
     }
 
     public void bindPlatformCapabilities(Set<PlatformCapability> platformCapabilities) {
-        this.platformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        this.platformCapabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(platformCapabilities, "platformCapabilities"));
     }
 

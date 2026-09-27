@@ -3,10 +3,10 @@ package com.monkey.ultimatebot.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.monkey.ultimatebot.api.model.configuration.BotSettings;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
 import org.junit.jupiter.api.Test;
 
 class CommonModelCompatibilityTest {

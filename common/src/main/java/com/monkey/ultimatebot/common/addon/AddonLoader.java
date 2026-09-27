@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.common.addon;
 
-import com.monkey.ultimatebot.common.util.TextValues;
+import com.monkey.ultimatebot.api.util.TextValues;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

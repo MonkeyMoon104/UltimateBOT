@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.monkey.ultimatebot.sdk.internal.SdkObjectMappers;
 import com.monkey.ultimatebot.sdk.event.BotEventEnvelope;
 import com.monkey.ultimatebot.sdk.event.SdkBotEventType;
 import com.sun.net.httpserver.HttpServer;
@@ -22,7 +23,7 @@ class UltimateBotEventBusTest {
 
     @Test
     void receivesFilteredSseEnvelope() throws Exception {
-        ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+        ObjectMapper mapper = SdkObjectMappers.createDefault();
         UUID ownerUUID = UUID.randomUUID();
         UUID botUUID = UUID.randomUUID();
         BotEventEnvelope envelope = new BotEventEnvelope(

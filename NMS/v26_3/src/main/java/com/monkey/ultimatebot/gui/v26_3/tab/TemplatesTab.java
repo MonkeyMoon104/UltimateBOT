@@ -1,7 +1,7 @@
 package com.monkey.ultimatebot.gui.v26_3.tab;
 
 import com.monkey.ultimatebot.bot.BotOptions;
-import com.monkey.ultimatebot.common.model.bot.EquipmentSlotKind;
+import com.monkey.ultimatebot.api.model.bot.EquipmentSlotKind;
 import com.monkey.ultimatebot.gui.v26_3.impl.customization.ArmorItem;
 import com.monkey.ultimatebot.gui.v26_3.impl.customization.TrimMaterialSelectorItem;
 import com.monkey.ultimatebot.gui.v26_3.impl.customization.TrimPatternSelectorItem;

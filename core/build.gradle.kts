@@ -82,7 +82,6 @@ dependencies {
     compileOnly(libs.placeholderapi)
     compileOnly(libs.worldguard.bukkit)
     compileOnly(libs.sirblobman.core)
-    compileOnly(libs.combatlogx.api)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockbukkit)

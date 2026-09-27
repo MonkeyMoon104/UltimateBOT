@@ -2,10 +2,12 @@
 
 Questa e l'unica guida da seguire per:
 
-- aggiornare `common`, `api` e `sdk`
-- pubblicare una nuova versione API/SDK
+- aggiornare `api` e `sdk` (e gli addon pubblicati)
+- pubblicare una nuova versione API/SDK/addons su MonkeyRepo
 - aggiornare le Javadocs su GitHub Pages
 - evitare il problema della pagina docs che mostra ancora la versione vecchia
+
+Il modulo `common` e solo runtime interno: **non** si pubblica e non fa parte del contratto pubblico.
 
 Non mantenere procedure duplicate in altri file: se cambia il flow, aggiorna solo questo file.
 

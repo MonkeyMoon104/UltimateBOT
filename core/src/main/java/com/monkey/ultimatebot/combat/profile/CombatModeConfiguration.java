@@ -1,8 +1,8 @@
 package com.monkey.ultimatebot.combat.profile;
 
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public final class CombatModeConfiguration {
         Objects.requireNonNull(mode, "mode");
         Objects.requireNonNull(iconMaterial, "iconMaterial");
         Objects.requireNonNull(profiles, "profiles");
-        profiles = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(new EnumMap<>(profiles));
+        profiles = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(new EnumMap<>(profiles));
         for (DifficultyTier difficulty : DifficultyTier.values()) {
             if (!profiles.containsKey(difficulty)) {
                 throw new IllegalArgumentException("Missing " + mode + " profile for " + difficulty);

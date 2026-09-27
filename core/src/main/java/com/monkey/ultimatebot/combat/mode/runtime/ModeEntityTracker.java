@@ -40,7 +40,7 @@ public final class ModeEntityTracker implements AutoCloseable {
 
     @Override
     public void close() {
-        for (UUID entityId : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(entityIds)) {
+        for (UUID entityId : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(entityIds)) {
             remove(entityId);
         }
         entityIds.clear();

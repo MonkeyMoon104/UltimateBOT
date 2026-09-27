@@ -12,7 +12,7 @@ public final class UuidSetRequest {
 
         uuids = uuids == null
                 ? Collections.emptySet()
-                : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(uuids);
+                : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(uuids);
         this.uuids = uuids;
     }
 

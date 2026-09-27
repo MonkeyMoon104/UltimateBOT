@@ -14,7 +14,7 @@ It contains:
 
 This module is the implementation layer, not the final multi-version distribution by itself. The production jar is assembled by the `dist` module, which shadows `core` together with the version-specific bridges under `NMS/`.
 
-Platform-independent contracts shared by runtime modules live in `common`. That module contains only Java and JSpecify types and is protected by an architecture test that rejects Bukkit, Paper, Mojang and NMS dependencies.
+Public domain models and utilities live in `api`. The internal `common` module holds runtime library loading, addon SPI and other non-published helpers; it depends on `api` and must not be used by third-party plugins.
 
 ## Key Capabilities
 - Four runtime bot modes: `SINGLE`, `EVENT`, `ALLY`, `TEAM_ALLY`
@@ -295,13 +295,13 @@ The core cleans runtime state aggressively to avoid stale entities and stale own
 
 ## Build and Packaging
 This repository is a multi-module build:
-- `api` exposes the public contract
+- `api` exposes the public contract and domain models
 - `core` contains the runtime implementation
-- `common` contains the platform-independent contracts and shared Java utilities
+- `common` is internal runtime support (library loader, addon SPI; not published)
 - `addons:metrics` produces the optional shaded Micrometer/Prometheus runtime
 - `addons:guard` produces the lightweight Paper compatibility guard
 - `NMS:*` provide version-specific NMS bridges
-- `plugin` assembles the final distributable jar
+- `dist` assembles the final distributable jar
 
 Useful tasks:
 

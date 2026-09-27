@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.common.lib;
 
-import com.monkey.ultimatebot.common.util.TextValues;
+import com.monkey.ultimatebot.api.util.TextValues;
 import java.util.Locale;
 
 public enum LibraryTrack {

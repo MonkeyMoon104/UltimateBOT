@@ -11,8 +11,8 @@ import com.monkey.ultimatebot.combat.mode.strategy.SwordPvPStrategy;
 import com.monkey.ultimatebot.combat.mode.trident.TridentPvPStrategy;
 import com.monkey.ultimatebot.combat.mode.uhc.UhcPvPStrategy;
 import com.monkey.ultimatebot.combat.mode.water.WaterPvPStrategy;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +38,7 @@ final class BuiltInCombatModeStrategies {
         if (!strategies.containsKey(CombatMode.SWORD)) {
             throw new IllegalStateException("Sword PvP strategy is required on every platform");
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(strategies);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(strategies);
     }
 
     private static void registerIfSupported(

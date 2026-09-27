@@ -67,7 +67,7 @@ final class TridentSpongeWebController {
         }
         direction.normalize();
         Vector side = new Vector(-direction.getZ(), 0.0D, direction.getX());
-        for (Location candidate : com.monkey.ultimatebot.common.util.ImmutableCollections.listOf(
+        for (Location candidate : com.monkey.ultimatebot.api.util.ImmutableCollections.listOf(
                 base.clone().add(side),
                 base.clone().subtract(side),
                 base.clone().add(direction),

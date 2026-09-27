@@ -301,7 +301,7 @@ public final class WorldProtectionService implements AutoCloseable {
     @Override
     public void close() {
         for (Map.Entry<WorldBlockKey, TrackedWorldBlock> entry :
-                com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(placements)
+                com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(placements)
                         .entrySet()) {
             TrackedWorldBlock placement = entry.getValue();
             placement.cancelExpiry();
@@ -313,7 +313,7 @@ public final class WorldProtectionService implements AutoCloseable {
             }
         }
         placements.clear();
-        for (Map.Entry<UUID, TrackedWorldEntity> entry : com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        for (Map.Entry<UUID, TrackedWorldEntity> entry : com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                         combatEntities)
                 .entrySet()) {
             entry.getValue().cancelExpiry();

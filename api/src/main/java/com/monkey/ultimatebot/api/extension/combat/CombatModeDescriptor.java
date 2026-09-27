@@ -1,11 +1,11 @@
 package com.monkey.ultimatebot.api.extension.combat;
 
-import com.monkey.ultimatebot.common.model.brain.BrainKey;
-import com.monkey.ultimatebot.common.model.combat.CombatCapability;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.brain.BrainKey;
+import com.monkey.ultimatebot.api.model.combat.CombatCapability;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -70,19 +70,19 @@ public final class CombatModeDescriptor {
 
         Objects.requireNonNull(mode, "mode");
         displayName = requireText(displayName, "displayName");
-        description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        description = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(description, "description"));
         Objects.requireNonNull(icon, "icon");
         permission = Objects.requireNonNull(permission, "permission").trim();
-        capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        capabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(capabilities, "capabilities"));
         EnumMap<DifficultyTier, CombatTuning> profileCopy = new EnumMap<>(Objects.requireNonNull(profiles, "profiles"));
         for (DifficultyTier difficulty : DifficultyTier.values()) {
             Objects.requireNonNull(profileCopy.get(difficulty), "profiles[" + difficulty + "]");
         }
-        profiles = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(profileCopy);
+        profiles = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(profileCopy);
         Objects.requireNonNull(kit, "kit");
-        requiredPlatformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+        requiredPlatformCapabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                 Objects.requireNonNull(requiredPlatformCapabilities, "requiredPlatformCapabilities"));
         this.mode = mode;
         this.displayName = displayName;
@@ -186,7 +186,7 @@ public final class CombatModeDescriptor {
         }
 
         public Builder description(List<String> description) {
-            this.description = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+            this.description = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                     Objects.requireNonNull(description, "description"));
             return this;
         }
@@ -202,7 +202,7 @@ public final class CombatModeDescriptor {
         }
 
         public Builder capabilities(Set<CombatCapability> capabilities) {
-            this.capabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+            this.capabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                     Objects.requireNonNull(capabilities, "capabilities"));
             return this;
         }
@@ -228,7 +228,7 @@ public final class CombatModeDescriptor {
         }
 
         public Builder requiredPlatformCapabilities(Set<PlatformCapability> requiredPlatformCapabilities) {
-            this.requiredPlatformCapabilities = com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(
+            this.requiredPlatformCapabilities = com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(
                     Objects.requireNonNull(requiredPlatformCapabilities, "requiredPlatformCapabilities"));
             return this;
         }

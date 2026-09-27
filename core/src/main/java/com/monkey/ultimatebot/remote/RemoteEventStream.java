@@ -240,7 +240,7 @@ final class RemoteEventStream implements AutoCloseable {
         if (value == null || value.trim().isEmpty()) return Collections.emptySet();
         Set<String> result = new HashSet<>();
         for (String type : value.split(",", -1)) result.add(type.trim().toUpperCase(Locale.ROOT));
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(result);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(result);
     }
 
     private static Map<String, String> parseFilters(@Nullable String query) {

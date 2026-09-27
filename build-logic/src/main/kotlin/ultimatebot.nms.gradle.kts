@@ -8,6 +8,7 @@ plugins {
 the<UltimateBotJavaExtension>().release.set(17)
 
 dependencies {
+    compileOnly(project(":api"))
     compileOnly(project(":core"))
     compileOnly(project(":common"))
 }

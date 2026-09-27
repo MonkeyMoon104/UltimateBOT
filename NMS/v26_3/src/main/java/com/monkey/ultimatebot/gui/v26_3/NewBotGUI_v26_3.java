@@ -5,7 +5,7 @@ import com.monkey.ultimatebot.bot.BotOptions;
 import com.monkey.ultimatebot.bot.BotType;
 import com.monkey.ultimatebot.bot.ai.ITrainingBot;
 import com.monkey.ultimatebot.combat.mode.shared.CombatModeLoadoutDefaults;
-import com.monkey.ultimatebot.common.model.platform.PlatformCapability;
+import com.monkey.ultimatebot.api.model.platform.PlatformCapability;
 import com.monkey.ultimatebot.gui.NewBotGUI;
 import com.monkey.ultimatebot.gui.v26_3.impl.navigation.BotTabItem;
 import com.monkey.ultimatebot.gui.v26_3.tab.BotGuiTabContext;

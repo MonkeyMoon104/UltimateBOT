@@ -48,7 +48,7 @@ public final class BotSettingEvents {
             Set<UUID> oldValue,
             Set<UUID> newValue) {
         if (Objects.equals(oldValue, newValue)) {
-            return Optional.of(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(newValue));
+            return Optional.of(com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(newValue));
         }
         ITrainingBot bot = plugin.getBotRegistry().getBot(ownerUUID);
         BotSnapshot snapshot = plugin.getBotEventDispatcher().snapshot(ownerUUID, bot);
@@ -61,8 +61,8 @@ public final class BotSettingEvents {
                         snapshot,
                         source,
                         key,
-                        com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(oldValue),
-                        com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(newValue)));
+                        com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(oldValue),
+                        com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(newValue)));
         if (event.isCancelled() || !(event.getNewValue() instanceof Set<?>)) {
             return Optional.empty();
         }
@@ -73,7 +73,7 @@ public final class BotSettingEvents {
             }
             validatedValues.add((UUID) proposedValue);
         }
-        return Optional.of(com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(validatedValues));
+        return Optional.of(com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(validatedValues));
     }
 
     public static <T> NullableProposal<T> proposeNullable(

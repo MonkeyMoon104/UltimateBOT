@@ -4,11 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.monkey.ultimatebot.common.model.bot.BotArmorTier;
-import com.monkey.ultimatebot.common.model.bot.BotMode;
-import com.monkey.ultimatebot.common.model.bot.BotTargetMode;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.bot.BotArmorTier;
+import com.monkey.ultimatebot.api.model.bot.BotMode;
+import com.monkey.ultimatebot.api.model.bot.BotTargetMode;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.sdk.internal.SdkObjectMappers;
 import com.monkey.ultimatebot.sdk.model.request.BotSpawnRequest;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -76,7 +77,7 @@ class SdkSurfaceParityTest {
     @Test
     void spawnContractSupportsEveryBotAndCombatModeWithCanonicalTypes() throws Exception {
         UUID owner = UUID.fromString("4ed787a3-1f40-45a7-bb8f-13f987420003");
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = SdkObjectMappers.createDefault();
 
         for (CombatMode combatMode : CombatMode.values()) {
             BotSpawnRequest request = BotSpawnRequest.ownedBy(owner)

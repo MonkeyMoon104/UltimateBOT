@@ -13,9 +13,10 @@ ultimatebotJava {
 }
 
 dependencies {
-    api(project(":common"))
+    api(project(":api"))
     api(libs.jackson.databind)
     api(libs.jackson.datatype.jsr310)
+    api(libs.jackson.module.parameter.names)
     api(libs.jspecify)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.mockito.core)

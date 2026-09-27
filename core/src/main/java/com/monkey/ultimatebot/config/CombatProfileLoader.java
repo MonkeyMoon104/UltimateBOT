@@ -2,9 +2,9 @@ package com.monkey.ultimatebot.config;
 
 import com.monkey.ultimatebot.combat.profile.CombatModeConfiguration;
 import com.monkey.ultimatebot.combat.profile.CombatProfileCatalog;
-import com.monkey.ultimatebot.common.model.combat.CombatMode;
-import com.monkey.ultimatebot.common.model.combat.CombatTuning;
-import com.monkey.ultimatebot.common.model.combat.DifficultyTier;
+import com.monkey.ultimatebot.api.model.combat.CombatMode;
+import com.monkey.ultimatebot.api.model.combat.CombatTuning;
+import com.monkey.ultimatebot.api.model.combat.DifficultyTier;
 import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;

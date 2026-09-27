@@ -1,6 +1,6 @@
 package com.monkey.ultimatebot.config;
 
-import com.monkey.ultimatebot.common.model.settings.VanillaStatisticsSettings;
+import com.monkey.ultimatebot.api.model.settings.VanillaStatisticsSettings;
 import java.time.Duration;
 import java.util.Objects;
 

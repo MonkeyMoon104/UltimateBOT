@@ -1,9 +1,9 @@
 plugins {
     id("ultimatebot.java-library")
-    id("ultimatebot.publish")
 }
 
 dependencies {
+    implementation(project(":api"))
     api(libs.jspecify)
     implementation(libs.jar.relocator)
     implementation(libs.asm)

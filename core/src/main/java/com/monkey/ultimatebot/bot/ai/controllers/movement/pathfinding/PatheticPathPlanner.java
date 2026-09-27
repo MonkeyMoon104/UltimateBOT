@@ -122,7 +122,7 @@ public final class PatheticPathPlanner {
                 }
             }
         }
-        return com.monkey.ultimatebot.common.util.ImmutableCollections.copyOf(offsets);
+        return com.monkey.ultimatebot.api.util.ImmutableCollections.copyOf(offsets);
     }
 
     private static PathPosition toPathPosition(BlockVector position) {

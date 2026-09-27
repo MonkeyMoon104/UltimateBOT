@@ -2,7 +2,7 @@ package com.monkey.ultimatebot.common.lib.model;
 
 import com.monkey.ultimatebot.common.lib.LibraryTrack;
 import com.monkey.ultimatebot.common.lib.download.ArtifactDigests;
-import com.monkey.ultimatebot.common.util.TextValues;
+import com.monkey.ultimatebot.api.util.TextValues;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;

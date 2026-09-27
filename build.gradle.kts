@@ -125,7 +125,7 @@ tasks.register<Sync>("publishApiDocs") {
 
 tasks.register<Sync>("publishCommonDocs") {
     group = "documentation"
-    description = "Generates shared public-contract Javadocs and copies them to docs/common/."
+    description = "Optional internal Javadocs for common (not part of the public docs portal)."
 
     dependsOn(":common:javadoc")
     from(project(":common").layout.buildDirectory.dir("docs/javadoc"))
@@ -163,8 +163,8 @@ tasks.register<Sync>("publishSdkDocs") {
 
 tasks.register("publishAllDocs") {
     group = "documentation"
-    description = "Generates and copies every public Javadoc site."
-    dependsOn("publishApiDocs", "publishCommonDocs", "publishSdkDocs")
+    description = "Generates and copies public Javadoc sites (api + sdk)."
+    dependsOn("publishApiDocs", "publishSdkDocs")
 }
 
 if (layout.projectDirectory
