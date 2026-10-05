@@ -33,6 +33,7 @@ fun Project.configureUltimateBotJava(javaExt: UltimateBotJavaExtension) {
         options.errorprone {
             allSuggestionsAsWarnings.set(false)
             check("RequireExplicitNullMarking", CheckSeverity.OFF)
+            check("JSpecifyUnrecognizedAnnotationLocation", CheckSeverity.ERROR)
             check("PatternMatchingInstanceof", CheckSeverity.OFF)
             check("StatementSwitchToExpressionSwitch", CheckSeverity.OFF)
             check("InvalidParam", CheckSeverity.OFF)

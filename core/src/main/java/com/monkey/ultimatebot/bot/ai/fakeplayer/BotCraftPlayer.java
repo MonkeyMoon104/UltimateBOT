@@ -532,7 +532,7 @@ public final class BotCraftPlayer extends CraftHumanEntity implements org.bukkit
     }
 
     @Override
-    @SuppressWarnings("NullablePrimitiveArray")
+    @SuppressWarnings("JSpecifyUnrecognizedAnnotationLocation")
     public void addResourcePack(UUID id, String url, @Nullable byte[] hash, @Nullable String prompt, boolean force) {}
 
     @Override
