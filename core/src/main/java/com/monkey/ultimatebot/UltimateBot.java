@@ -541,6 +541,7 @@ public final class UltimateBot extends JavaPlugin {
                     "bot", "botevent", "botally", "botteamally", "ultimatebotreload"));
             BukkitLampConfig<BukkitCommandActor> lampConfig = lampConfigForPlatform();
             BukkitLamp.builder(lampConfig)
+                    .dispatcherSettings(settings -> settings.rejectTrailingInput(true))
                     .exceptionHandler(new UltimateBotExceptionHandler(UltimateBot.this))
                     .build()
                     .register(
